@@ -22,11 +22,9 @@ ${DC_WORKBENCH_SELECTOR_XP}=    xpath=//ul[@aria-label="Notebook select"]/li
 *** Keywords ***
 Create S3 Data Connection
     [Documentation]    Creates a S3 Data Connection from DS Project details page
-    ...    If 'aws_s3_ca_bundle' or 'S3.AWS_CA_BUNDLE' is defined then the underlying secret is patched
     [Arguments]    ${project_title}    ${dc_name}    ${aws_access_key}    ${aws_secret_access}
     ...            ${aws_s3_endpoint}=${S3.AWS_DEFAULT_ENDPOINT}    ${aws_region}=${S3.AWS_DEFAULT_REGION}
     ...            ${connected_workbench}=${NONE}    ${press_cancel}=${FALSE}    ${aws_bucket_name}=${NONE}
-    ...            ${aws_s3_ca_bundle}=${NONE}
     Open Data Science Project Details Page       project_title=${project_title}    tab_id=data-connections
     Wait Until Element Is Visible     ${DC_ADD_BTN_1_XP}    timeout=30s
     Click Button                      ${DC_ADD_BTN_1_XP}
@@ -35,29 +33,6 @@ Create S3 Data Connection
     ...            connected_workbench=${connected_workbench}    press_cancel=${press_cancel}
     ...            aws_bucket_name=${aws_bucket_name}
     Wait Until Project Is Open    project_title=${project_title}
-    # Check if there is any CA Bundle
-    # I did not find a better way to check if multi-line string is empty or "NONE"
-    ${length}=    Get Length    "${aws_s3_ca_bundle}"
-    IF    ${length} <= 6
-        ${aws_s3_ca_bundle}=    Get Variable Value    ${S3.AWS_CA_BUNDLE}    ${NONE}
-        ${length}=    Get Length    "${aws_s3_ca_bundle}"
-    END
-    IF    ${length} > 6
-        Patch S3 Data Connection With CA Bundle
-        ...    project_title=${project_title}    dc_name=${dc_name}    aws_s3_ca_bundle=${aws_s3_ca_bundle}
-    END
-
-Patch S3 Data Connection With CA Bundle
-    [Documentation]    Patch the underlying secret of S3 Data Connection With CA Bundle
-    [Arguments]    ${project_title}    ${dc_name}    ${aws_s3_ca_bundle}
-    ${dc_namespace}=    Get Openshift Namespace From Data Science Project    ${project_title}
-    ${rc}    ${cert}=    Run And Return Rc And Output
-    ...    echo -n "${aws_s3_ca_bundle}" | base64 -w0    # robocop: disable
-    Should Be Equal As Strings    ${rc}    0
-    ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc patch secret aws-connection-${dc_name} -n ${dc_namespace} -p '[{"op": "replace", "path": "/data/AWS_CA_BUNDLE", "value" : "${cert}"}]' --type json    # robocop: disable
-    Should Be Equal As Strings    ${rc}    0
-    Log To Console    "${out}"
 
 Edit S3 Data Connection
     [Documentation]    Edits a S3 Data Connection from DS Project details page
@@ -162,7 +137,6 @@ Recreate S3 Data Connection
     [Arguments]    ${project_title}    ${dc_name}    ${aws_access_key}    ${aws_secret_access}
     ...            ${aws_s3_endpoint}=${S3.AWS_DEFAULT_ENDPOINT}    ${aws_region}=${S3.AWS_DEFAULT_REGION}
     ...            ${connected_workbench}=${NONE}    ${press_cancel}=${FALSE}    ${aws_bucket_name}=${NONE}
-    ...            ${aws_s3_ca_bundle}=${NONE}
     Open Data Science Project Details Page       project_title=${project_title}    tab_id=data-connections
     ${is_exist}=  Run Keyword And Return Status
     ...    Wait Until Page Contains Element    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/*/div[text()="${dc_name}"]]
@@ -177,6 +151,6 @@ Recreate S3 Data Connection
         Create S3 Data Connection    project_title=${project_title}    dc_name=${dc_name}
         ...    aws_access_key=${aws_access_key}    aws_secret_access=${aws_secret_access}
         ...    aws_bucket_name=${aws_bucket_name}    aws_region=${aws_region}    press_cancel=${press_cancel}
-        ...    aws_s3_endpoint=${aws_s3_endpoint}    aws_s3_ca_bundle=${aws_s3_ca_bundle}
+        ...    aws_s3_endpoint=${aws_s3_endpoint}
         ...    connected_workbench=${connected_workbench}
     END

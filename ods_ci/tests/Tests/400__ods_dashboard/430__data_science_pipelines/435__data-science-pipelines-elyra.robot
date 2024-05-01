@@ -101,6 +101,12 @@ Verify Pipelines Integration With Elyra Running Hello World Pipeline Test     # 
     Wait Until Page Contains Element    xpath=//a[.="Run Details."]    timeout=30s
     ${pipeline_run_name} =    Get Pipeline Run Name
     Switch To Pipeline Execution Page
+    # We need to navigate to the page because the project name hold a state
+    # In a fresh cluster, if not state found, it will select the first one
+    # In this case, the first could not be the project created
+    Menu.Navigate To Page    Data Science Pipelines    Runs
+    Select Pipeline Project By Name    ${PRJ_TITLE}
+    Log    ${pipeline_run_name}
     Verify Pipeline Run Is Completed    ${pipeline_run_name}    timeout=5m
     [Teardown]    Verify Pipelines Integration With Elyra Teardown    ${img}
 
@@ -121,4 +127,10 @@ Verify Hello World Pipeline Elements
     Page Should Contain Element    xpath=${SVG_CANVAS}${SVG_INTERACTABLE}${SVG_PIPELINE_NODES}${SVG_SINGLE_NODE}//span[.="Part 2 - Data Analysis.ipynb"]  # robocop: disable
     Page Should Contain Element    xpath=${SVG_CANVAS}${SVG_INTERACTABLE}${SVG_PIPELINE_NODES}${SVG_SINGLE_NODE}//span[.="Part 3 - Time Series Forecasting.ipynb"]  # robocop: disable
 
-
+Select Pipeline Project By Name
+    [Documentation]    Select the project by project name
+    [Arguments]    ${project_name}
+    ${project_menu}=    Set Variable    xpath://div[@data-testid="project-selector-dropdown"]
+    Wait until Element is Visible    ${project_menu}   timeout=20
+    Click Element    ${project_menu}
+    Click Element    xpath://a[@role="menuitem" and text()="${project_name}"]

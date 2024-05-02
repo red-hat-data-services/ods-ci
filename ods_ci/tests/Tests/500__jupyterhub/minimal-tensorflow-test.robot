@@ -16,7 +16,8 @@ Test Tags       JupyterHub
 
 *** Variables ***
 ${NOTEBOOK_IMAGE} =         tensorflow
-${EXPECTED_CUDA_VERSION} =  12.2
+${EXPECTED_CUDA_VERSION} =  12.1
+${EXPECTED_CUDA_VERSION_N_1} =  11.8
 
 
 *** Test Cases ***
@@ -85,7 +86,7 @@ Verify Previous Tensorflow Notebook Image With GPU
     ...       ODS-2130
     [Setup]    N-1 Tensorflow Setup
     Spawn Notebook With Arguments    image=${NOTEBOOK_IMAGE}    size=Small    gpus=1    version=previous
-    Verify Installed CUDA Version    ${EXPECTED_CUDA_VERSION}
+    Verify Installed CUDA Version    ${EXPECTED_CUDA_VERSION_N_1}
     Verify Tensorflow Can See GPU
     Run Repo And Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/tensorflow/GPU-no-warnings.ipynb
     [Teardown]    End Web Test

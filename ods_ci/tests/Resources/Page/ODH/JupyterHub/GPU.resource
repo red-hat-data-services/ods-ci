@@ -8,7 +8,7 @@ Library     OperatingSystem
 Verify Installed CUDA Version
     [Documentation]  Checks the installed CUDA version
     [Arguments]  ${expected_version}
-    Run Cell And Check Output    !nvidia-smi | grep "CUDA Version:" | awk '{split($0,a); print a[9]}'
+    Run Cell And Check Output    !nvcc --version | grep "release" | sed "s/.*release \\\\(.*\\\\),.*/\\\\1/"
     ...    ${expected_version}
 
 Verify CUDA Is Not Installed

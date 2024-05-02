@@ -15,7 +15,8 @@ Test Tags       JupyterHub
 
 *** Variables ***
 ${NOTEBOOK_IMAGE} =         pytorch
-${EXPECTED_CUDA_VERSION} =  12.2
+${EXPECTED_CUDA_VERSION} =  12.1
+${EXPECTED_CUDA_VERSION_N_1} =  11.8
 
 
 *** Test Cases ***
@@ -87,7 +88,7 @@ Verify Previous PyTorch Notebook Image With GPU
     ...       ODS-2129
     [Setup]    N-1 PyTorch Setup
     Spawn Notebook With Arguments    image=${NOTEBOOK_IMAGE}    size=Small    gpus=1    version=previous
-    Verify Installed CUDA Version    ${EXPECTED_CUDA_VERSION}
+    Verify Installed CUDA Version    ${EXPECTED_CUDA_VERSION_N_1}
     Verify PyTorch Can See GPU
     Run Repo And Clean    https://github.com/lugi0/notebook-benchmarks    notebook-benchmarks/pytorch/fgsm_tutorial.ipynb
     [Teardown]    End Web Test

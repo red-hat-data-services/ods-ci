@@ -11,7 +11,6 @@ Resource         ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/
 Resource         ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Storages.resource
 Resource         ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Resource         ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Pipelines.resource
-Resource         ../../../Resources/Page/Operators/OpenShiftPipelines.resource
 Library          Screenshot
 Library          DebugLibrary
 Library          JupyterLibrary
@@ -33,6 +32,7 @@ ${PV_SIZE} =    2
 ${ENVS_LIST} =    ${NONE}
 ${DC_NAME} =    elyra-s3
 @{IMAGE_LIST}    PyTorch    TensorFlow    TrustyAI
+${PIPELINE_PATH} =    ods-ci-notebooks-main/notebooks/500__jupyterhub/pipelines/v1/elyra/run-pipelines-on-data-science-pipelines/hello-generic-world.pipeline  # robocop: disable
 
 
 *** Test Cases ***
@@ -48,8 +48,7 @@ Verify Pipeline Is Displayed Correctly In Standard Data Science Workbench
     ...                 envs=${ENVS_LIST}
     Start Workbench     workbench_title=elyra-sds    timeout=300s
     Launch And Access Workbench    workbench_title=elyra-sds
-    Clone Git Repository And Open    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main
-    ...    ods-ci-notebooks-main/notebooks/500__jupyterhub/elyra/run-pipelines-on-data-science-pipelines/hello-generic-world.pipeline  # robocop: disable
+    Clone Git Repository And Open    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main    ${PIPELINE_PATH}
     Verify Hello World Pipeline Elements
 
 Verify Pipeline Can Be Submitted And Runs Correctly From Standard Data Science Workbench
@@ -88,7 +87,6 @@ Elyra Pipelines Suite Setup
     [Documentation]    Suite Setup
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
-    Install Red Hat OpenShift Pipelines
 
 Elyra Pipelines SDS Setup
     [Documentation]    Suite Setup, creates DS Project and opens it
@@ -145,8 +143,7 @@ Run Elyra Hello World Pipeline Test  # robocop: disable
     ...                 envs=${ENVS_LIST}
     Start Workbench     workbench_title=elyra_${img}    timeout=300s
     Launch And Access Workbench    workbench_title=elyra_${img}
-    Clone Git Repository And Open    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main
-    ...    ods-ci-notebooks-main/notebooks/500__jupyterhub/elyra/run-pipelines-on-data-science-pipelines/hello-generic-world.pipeline  # robocop: disable
+    Clone Git Repository And Open    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main    ${PIPELINE_PATH}
     Verify Hello World Pipeline Elements
     Set Runtime Image In All Nodes    runtime_image=Datascience with Python 3.9 (UBI9)
     Run Pipeline    pipeline_name=${img} Pipeline

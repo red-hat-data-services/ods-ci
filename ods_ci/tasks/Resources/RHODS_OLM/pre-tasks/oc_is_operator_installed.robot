@@ -24,15 +24,23 @@ Is RHODS Installed
           FAIL    Provided test environment and install type combination is not supported
       END
   ELSE IF  "${cluster_type}" == "managed"
+      Set Global Variable    ${SUB_NAME}               addon-managed-odh
+      Set Global Variable    ${CATALOG_NAME}           addon-managed-odh-catalog
+      #For managed cluster
+      IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
+           Set Global Variable    ${OPERATOR_NAMESPACE}    openshift-marketplace
+           Set Global Variable    ${SUB_NAME}    rhoai-operator-dev
+           Set Global Variable    ${CATALOG_NAME}    rhoai-catalog-dev
+      END
       ${result}=  Run Keyword And Return Status
       ...  Run Keywords
       ...  Check A RHODS Family Operator Is Installed  namespace=${OPERATOR_NAMESPACE}
-      ...                                              subscription=addon-managed-odh  AND
+      ...                                              subscription=${SUB_NAME}  AND
       ...  Oc Get  kind=Namespace  field_selector=metadata.name=${MONITORING_NAMESPACE}  AND
       ...  Oc Get  kind=Namespace  field_selector=metadata.name=${APPLICATIONS_NAMESPACE}  AND
       ...  Oc Get  kind=Namespace  field_selector=metadata.name=${OPERATOR_NAMESPACE}  AND
       ...  Oc Get  kind=CatalogSource  namespace=${OPERATOR_NAMESPACE}
-      ...          field_selector=metadata.name=addon-managed-odh-catalog
+      ...          field_selector=metadata.name=${CATALOG_NAME}
   ELSE
       FAIL    Provided test environment and install type ${INSTALL_TYPE} ${UPDATE_CHANNEL} ${cluster_type} combination
       ...     is not supported

@@ -64,13 +64,19 @@ Uninstall RHODS In Self Managed Cluster For Operatorhub
 
 Uninstall RHODS V2
     [Documentation]    Keyword to uninstall the version 2 of the RHODS operator in Self-Managed
+    Log To Console    message=Deleting DSC CR From Cluster
+    ${return_code}    ${output}    Run And Return Rc And Output
+    ...    oc get DataScienceCluster --all-namespaces -o custom-columns=:metadata.name --ignore-not-found | xargs -I {} oc patch DataScienceCluster {} --type=merge -p '{"metadata": {"finalizers":null}}' || true  #robocop:disable
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete datasciencecluster --all --ignore-not-found
     Should Be Equal As Integers  ${return_code}   0   msg=Error deleting DataScienceCluster CR
+    Log To Console    message=Deleting DSCi CR From Cluster
+    ${return_code}    ${output}    Run And Return Rc And Output
+    ...   oc get DSCInitialization --all-namespaces -o custom-columns=:metadata.name --ignore-not-found | xargs -I {} oc patch DSCInitialization {} --type=merge -p '{"metadata": {"finalizers":null}}' || true  #robocop:disable
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete dscinitialization --all --ignore-not-found
     Should Be Equal As Integers  ${return_code}   0   msg=Error deleting DSCInitialization CR
-
+    Log To Console    message=Deleting Operator Subscription From Cluster
     ${return_code}    ${subscription_name}    Run And Return Rc And Output
     ...    oc get subscription -n ${OPERATOR_NAMESPACE} --no-headers | awk '{print $1}'
     IF  "${return_code}" == "0" and "${subscription_name}" != "${EMPTY}"
@@ -85,18 +91,24 @@ Uninstall RHODS V2
         ...    oc delete subscription ${subscription_name} -n ${OPERATOR_NAMESPACE} --ignore-not-found
         Should Be Equal As Integers  ${return_code}   0   msg=Error deleting RHODS subscription
     END
+    Log To Console    message=Deleting Operator CSV From Cluster
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete clusterserviceversion opendatahub-operator.1.18.0 -n openshift-operators --ignore-not-found
+    Log To Console    message=Deleting Operator Catalog From Cluster
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete CatalogSource rhoai-catalog-dev -n openshift-marketplace --ignore-not-found  # robocop: disable
     ${return_code}    ${output}    Run And Return Rc And Output
         ...    oc delete CatalogSource addon-managed-odh-catalog -n openshift-marketplace --ignore-not-found  # robocop: disable
+    Log To Console    message=Deleting Operator Group From Cluster
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete operatorgroup --all -n ${OPERATOR_NAMESPACE} --ignore-not-found
     Should Be Equal As Integers  ${return_code}   0   msg=Error deleting operatorgroup
+    Log To Console    message=Deleting Operator and it's associate namepsace
     ${return_code}    ${output}    Run And Return Rc And Output    oc delete ns -l opendatahub.io/generated-namespace --ignore-not-found
     Verify Project Does Not Exists  ${APPLICATIONS_NAMESPACE}
     Verify Project Does Not Exists  ${MONITORING_NAMESPACE}
     Verify Project Does Not Exists  ${NOTEBOOKS_NAMESPACE}
-    ${return_code}    ${output}    Run And Return Rc And Output   oc delete namespace ${OPERATOR_NAMESPACE} --ignore-not-found
-    Verify Project Does Not Exists  ${OPERATOR_NAMESPACE}
+    IF  "${OPERATOR_NAMESPACE}" != "openshift-marketplace"
+        ${return_code}    ${output}    Run And Return Rc And Output   oc delete namespace ${OPERATOR_NAMESPACE} --ignore-not-found
+        Verify Project Does Not Exists  ${OPERATOR_NAMESPACE}
+    END

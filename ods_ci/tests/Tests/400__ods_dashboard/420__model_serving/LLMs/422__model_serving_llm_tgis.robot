@@ -628,7 +628,6 @@ Verify User Can Query A Model Using HTTP Calls
 
 Verify User Can Serve And Query A Model With Token
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
-    ...                 with token using Kserve and TGIS runtime
     ...                With Token using Kserve and Caikit+TGIS runtime
     [Tags]    RHOAIENG-6306
     ...       Tier1

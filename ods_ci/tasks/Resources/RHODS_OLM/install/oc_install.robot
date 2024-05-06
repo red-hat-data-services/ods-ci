@@ -77,7 +77,7 @@ Verify RHODS Installation
   IF  "${UPDATE_CHANNEL}" == "odh-nightlies" or "${cluster_type}" != "managed"
     IF  "${PRODUCT}" == "ODH"
         Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
-        Wait For DSCInitialization CustomResource To Be Ready    timeout=20
+        Wait For DSCInitialization CustomResource To Be Ready    timeout=30
     END
     Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
   END

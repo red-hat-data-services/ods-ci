@@ -791,3 +791,9 @@ Create Role Binding For Authorino
     ${rc}    ${out}=    Run And Return Rc And Output
     ...     oc apply -f ${LLM_RESOURCES_DIRPATH}/rb.filled.yaml
     Should Be Equal As Integers    ${rc}    ${0}
+
+Create Inference Access Token
+    [Arguments]  ${test_namespace}  ${bucket_sa_name}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc create token -n ${test_namespace} ${bucket_sa_name}
+    Should Be Equal As Strings    ${rc}    0
+    [Return]    ${out}

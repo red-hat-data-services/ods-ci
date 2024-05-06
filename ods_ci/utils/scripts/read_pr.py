@@ -1,4 +1,5 @@
 import glob
+import subprocess
 
 
 class ReadPR:
@@ -160,8 +161,6 @@ class ReadPR:
             raise ValueError(f"cannot find the path starting with b/ -> {file_path}")
 
     def get_diff(self, target="git diff upstream/master"):
-        import subprocess
-
         output = subprocess.getoutput(target)
         return output.split("\n")
 

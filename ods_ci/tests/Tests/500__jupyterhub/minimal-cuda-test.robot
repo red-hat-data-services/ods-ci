@@ -13,7 +13,8 @@ Test Tags       JupyterHub
 
 *** Variables ***
 ${NOTEBOOK_IMAGE} =         minimal-gpu
-${EXPECTED_CUDA_VERSION} =  12.2
+${EXPECTED_CUDA_VERSION} =  12.1
+${EXPECTED_CUDA_VERSION_N_1} =  11.8
 
 
 *** Test Cases ***
@@ -61,7 +62,7 @@ Verify Previous CUDA Notebook Image With GPU
     ...       ODS-2128
     [Setup]    N-1 CUDA Setup
     Spawn Notebook With Arguments    image=${NOTEBOOK_IMAGE}    size=Small    gpus=1    version=previous
-    Verify Installed CUDA Version    ${EXPECTED_CUDA_VERSION}
+    Verify Installed CUDA Version    ${EXPECTED_CUDA_VERSION_N_1}
     Verify PyTorch Can See GPU    install=True
     Verify Tensorflow Can See GPU    install=True
     ${nvcc_version} =  Run Cell And Get Output    input=!nvcc --version

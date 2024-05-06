@@ -16,7 +16,7 @@ ${WORKBENCH_IMAGE_MENU_BTN_XP}=           xpath=//*[@data-testid="workbench-imag
 ${WORKBENCH_IMAGE_ITEM_BTN_XP}=           xpath=//div[@id="workbench-image-stream-selection"]//li//div
 ${WORKBENCH_SIZE_MENU_BTN_XP}=           xpath=//section[@id="deployment-size"]//button  # Removing the attribute in case it changes like it did for the image dropdown
 ${WORKBENCH_SIZE_SIDE_MENU_BTN}=           xpath=//nav[@aria-label="Jump to section"]//span[text()="Deployment size"]
-${WORKBENCH_ACCELERATOR_DROPDOWN_XPATH}=    xpath=//label[@for='modal-notebook-accelerator']/ancestor::div[@class='pf-c-form__group']/descendant::button
+${WORKBENCH_ACCELERATOR_DROPDOWN_XPATH}=    xpath=//label[@for='modal-notebook-accelerator']/ancestor::div[ contains(@class, '-form__group')]/descendant::button
 ${WORKBENCH_ACCELERATOR_INPUT_XPATH}=    xpath=//input[@aria-label='Number of accelerators']
 ${WORKBENCH_ACCELERATOR_LESS_BUTTON_XPATH}=    xpath=${WORKBENCH_ACCELERATOR_INPUT_XPATH}/preceding-sibling::button
 ${WORKBENCH_ACCELERATOR_PLUS_BUTTON_XPATH}=    xpath=${WORKBENCH_ACCELERATOR_INPUT_XPATH}/following-sibling::button
@@ -338,7 +338,7 @@ Access To Workbench
         Wait Until Page Contains Element  xpath://div[@class="monaco-dialog-box"]  timeout=60s
         Wait Until Page Contains  Do you trust the authors of the files in this folder?
     ELSE IF  "${expected_ide}"=="JupyterLab"
-        Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
+        Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=90s
         Maybe Close Popup
     ELSE
         Fail    msg=Unknown IDE typy given: '${expected_ide}'. Please check and fix or implement.
@@ -517,7 +517,7 @@ Select Workbench Number Of GPUs
     Wait Until Page Contains Element    ${WORKBENCH_ACCELERATOR_DROPDOWN_XPATH}
     Click Element    ${WORKBENCH_ACCELERATOR_DROPDOWN_XPATH}
     IF  "${gpus}" == "0"
-        Click Element    xpath=//a[text()='None']
+        Click Element    xpath=//span[text()='None']
     ELSE
         # Select Accelerator Technology
         Wait Until Page Contains Element    xpath=//div[@class and text()=${gpu_type}]

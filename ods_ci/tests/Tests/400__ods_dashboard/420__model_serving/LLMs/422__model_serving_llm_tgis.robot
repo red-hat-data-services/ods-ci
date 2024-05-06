@@ -27,8 +27,8 @@ ${USE_GPU}=    ${FALSE}
 *** Test Cases ***
 Verify User Can Serve And Query A Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
-    ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    Tier1    ODS-2341
+    ...                using Kserve and TGIS runtime
+    [Tags]    Sanity    Tier1    ODS-2341
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${TEST_NS}-cli
     ${test_namespace}=    Set Variable     ${TEST_NS}-cli
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -40,8 +40,8 @@ Verify User Can Serve And Query A Model
     ...    limits_dict=${GPU_LIMITS}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=${test_namespace}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}
     ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
@@ -84,10 +84,10 @@ Verify User Can Deploy Multiple Models In The Same Namespace
     ...    limits_dict=${GPU_LIMITS}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
-    ...    namespace=${test_namespace}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
-    ...    namespace=${test_namespace}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
+    ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
+    ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}
     ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
     IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     ...    process_alias=llm-one
@@ -135,10 +135,10 @@ Verify User Can Deploy Multiple Models In Different Namespaces
     ...    limits_dict=${GPU_LIMITS}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=singlemodel-multi2
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
-    ...    namespace=singlemodel-multi1
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
-    ...    namespace=singlemodel-multi2
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
+    ...    namespace=singlemodel-multi1    runtime=${TGIS_RUNTIME_NAME}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
+    ...    namespace=singlemodel-multi2    runtime=${TGIS_RUNTIME_NAME}
     ${pod_name}=  Get Pod Name    namespace=singlemodel-multi1    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
     IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     ...    process_alias=llm-one
@@ -249,8 +249,8 @@ Verify User Can Change The Minimum Number Of Replicas For A Model
     ...    limits_dict=${GPU_LIMITS}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${test_namespace}    exp_replicas=1
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}    exp_replicas=${1}
     ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
     IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}    n_times=3
@@ -288,15 +288,15 @@ Verify User Can Autoscale Using Concurrency
     ...    limits_dict=${GPU_LIMITS}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=${test_namespace}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}    n_times=10
     ...    namespace=${test_namespace}    validate_response=${FALSE}    background=${TRUE}
     Wait For Pods Number    number=1    comparison=GREATER THAN
     ...    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=${test_namespace}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
@@ -306,29 +306,30 @@ Verify User Can Validate Scale To Zero
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=autoscale-zero
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${flan_model_name}
+    ${test_namespace}=    Set Variable    autoscale-zero
     Compile Inference Service YAML    isvc_name=${flan_model_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     ...    model_format=pytorch    serving_runtime=${TGIS_RUNTIME_NAME}
     ...    limits_dict=${GPU_LIMITS}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
-    ...    namespace=autoscale-zero
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=autoscale-zero
+    ...    namespace=${test_namespace}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}    n_times=1
-    ...    namespace=autoscale-zero
+    ...    namespace=${test_namespace}
     Set Minimum Replicas Number    n_replicas=0    model_name=${flan_model_name}
-    ...    namespace=autoscale-zero
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=autoscale-zero
+    ...    namespace=${test_namespace}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}    exp_replicas=${2}
     Wait For Pods To Be Terminated    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=autoscale-zero
+    ...    namespace=${test_namespace}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}    n_times=1
-    ...    namespace=autoscale-zero
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=autoscale-zero
+    ...    namespace=${test_namespace}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}
     Wait For Pods To Be Terminated    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=autoscale-zero
+    ...    namespace=${test_namespace}
     [Teardown]   Clean Up Test Project    test_ns=autoscale-zero
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
@@ -348,8 +349,8 @@ Verify User Can Set Requests And Limits For A Model
     ...    model_format=pytorch    serving_runtime=${TGIS_RUNTIME_NAME}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=${test_namespace}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}
     ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     ${rev_id}=    Get Current Revision ID    model_name=${flan_model_name}
@@ -366,8 +367,8 @@ Verify User Can Set Requests And Limits For A Model
     ...    requests=${new_requests}    limits=${NONE}
     Wait For Pods To Be Terminated    label_selector=${label_selector}
     ...    namespace=${test_namespace}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=${test_namespace}    exp_replicas=1
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}
     Container Hardware Resources Should Match Expected    container_name=kserve-container
     ...    pod_label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    exp_requests=${new_requests}    exp_limits=${NONE}
@@ -394,8 +395,8 @@ Verify Model Can Be Served And Query On A GPU Node
     ...    model_format=pytorch    serving_runtime=${TGIS_RUNTIME_NAME}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${test_namespace}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}
     Container Hardware Resources Should Match Expected    container_name=kserve-container
     ...    pod_label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    exp_requests=${requests}    exp_limits=${limits}
@@ -430,8 +431,8 @@ Verify Non Admin Can Serve And Query A Model
     ...    limits_dict=${GPU_LIMITS}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=${test_namespace}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}
     ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_model_name}   namespace=${test_namespace}
     ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][0][query_text]"}'
     ${header}=    Set Variable    'mm-model-id: ${flan_model_name}'
@@ -463,8 +464,8 @@ Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector
     ...    limits_dict=${GPU_LIMITS}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=${test_namespace}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}
     ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
@@ -493,8 +494,8 @@ Verify User Can Serve And Query Flan-t5 Large
     ...    limits_dict=${GPU_LIMITS}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=${test_namespace}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}
     ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
@@ -526,8 +527,8 @@ Verify Runtime Upgrade Does Not Affect Deployed Models
     ...    limits_dict=${GPU_LIMITS}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=${test_namespace}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}
     ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
@@ -539,8 +540,8 @@ Verify Runtime Upgrade Does Not Affect Deployed Models
     ...    new_image_url=quay.io/modh/text-generation-inference:fast
     ...    namespace=${test_namespace}
     Sleep    5s    reason=Sleep, in case the runtime upgrade takes some time to start performing actions on the pods...
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=${test_namespace}    exp_replicas=1
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}
     ${created_at_after}    ${caikitsha_after}=    Get Model Pods Creation Date And Image URL    model_name=${flan_model_name}
     ...    namespace=${test_namespace}    container=kserve-container
     Should Be Equal    ${created_at}    ${created_at_after}
@@ -571,8 +572,8 @@ Verify User Can Access Model Metrics From UWM
     ...    limits_dict=${GPU_LIMITS}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=${test_namespace}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}
     Wait Until Keyword Succeeds    30 times    4s
     ...    Metrics Should Exist In UserWorkloadMonitoring
     ...    thanos_url=${thanos_url}    thanos_token=${token}
@@ -612,8 +613,8 @@ Verify User Can Query A Model Using HTTP Calls
     ...    model_format=pytorch    serving_runtime=${TGIS_RUNTIME_NAME}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${test_namespace}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}
     Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}    protocol=http
     ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}    query_idx=${0}
@@ -722,5 +723,5 @@ Wait For New Replica Set To Be Ready
         ...    namespace=${namespace}    timeout=360s
     END
     Wait Until Keyword Succeeds    5 times    5s
-    ...    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${namespace}    exp_replicas=${new_exp_replicas}
+    ...    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}    exp_replicas=${new_exp_replicas}

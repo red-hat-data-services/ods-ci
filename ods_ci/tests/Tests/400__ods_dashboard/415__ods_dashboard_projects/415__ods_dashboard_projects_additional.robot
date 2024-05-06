@@ -89,7 +89,8 @@ Verify User Can Add GPUs To Workbench
     ...    prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE_GPU}   deployment_size=Small
     ...    storage=Persistent  pv_existent=${FALSE}    pv_name=${PV_NAME_GPU}
     ...    pv_description=${EMPTY}  pv_size=${PV_SIZE}
-    Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE_GPU}
+    Run Keyword And Continue On Failure
+    ...    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE_GPU}    timeout=180s
     Edit GPU Number    workbench_title=${WORKBENCH_TITLE_GPU}    gpus=1
     Wait Until Project Is Open    project_title=${PRJ_TITLE}
     Run Keyword And Continue On Failure    Wait Until Workbench Is Restarting    workbench_title=${WORKBENCH_TITLE_GPU}

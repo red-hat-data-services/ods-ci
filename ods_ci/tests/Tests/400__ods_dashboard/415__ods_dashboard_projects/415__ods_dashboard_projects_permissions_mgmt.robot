@@ -248,7 +248,7 @@ ${username} Should Have Edit Access To ${project_title}
     Open Data Science Projects Home Page
     Reload Page If Project ${project_title} Is Not Listed
     Wait Until Project Is Listed    project_title=${project_title}
-    Open Data Science Project Details Page    ${project_title}    tab_id=permissions
+    Open Data Science Project Details Page    ${project_title}
     Permissions Tab Should Not Be Accessible
     # add checks on subsections
 

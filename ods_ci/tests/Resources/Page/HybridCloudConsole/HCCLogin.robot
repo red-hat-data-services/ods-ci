@@ -40,14 +40,14 @@ Maybe Agree RH Terms and Conditions
   END
 
 Maybe Accept Cookie Policy
-  ${cookie_required}=  Run Keyword And Return Status  Page Should Contain  We use cookies on this site
+  ${cookie_required}=  Run Keyword And Return Status  Wait Until Page Contains Element
+  ...    xpath=//iframe[@title='TrustArc Cookie Consent Manager']  timeout=10
   IF    ${cookie_required} == True
     Select Frame    xpath=//iframe[@title='TrustArc Cookie Consent Manager']
     Wait Until Page Contains Element    xpath=//a[contains(@class, 'required')]  timeout=10
     Click Link    xpath=//a[contains(@class, 'required')]
-    Wait Until Page Contains Element    xpath=//a[contains(@class, 'close')]  timeout=10
-    Click Link    xpath=//a[contains(@class, 'close')]
-    Wait Until Page Does Not Contain    xpath=//iframe[@title='TrustArc Cookie Consent Manager']
+    Wait Until Page Does Not Contain Element    xpath=//iframe[@title='TrustArc Cookie Consent Manager']
+    Wait Until Page Does Not Contain    We use cookies on this site
     Unselect Frame
     Capture Page Screenshot  cookieaccepted.png
   END

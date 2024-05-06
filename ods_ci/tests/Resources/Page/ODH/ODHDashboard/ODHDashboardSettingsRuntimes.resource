@@ -99,6 +99,6 @@ Select Model Serving Platform
 Select Runtime API Protocol
     [Documentation]    Selects which API protocol for the runtime
     [Arguments]    ${protocol}=gRPC
-    Click Element    xpath://div[@data-testid="custom-serving-api-protocol-selection"]//button
-    Wait Until Page Contains Element    xpath://a[text()="${protocol}"]
-    Click Link    ${protocol}
+    Click Element    xpath://button[@data-testid="custom-serving-api-protocol-selection"]
+    Wait Until Page Contains Element    xpath://li[@data-testid="dropdown-item ${protocol}"]
+    Click Element    xpath://li[@data-testid="dropdown-item ${protocol}"]

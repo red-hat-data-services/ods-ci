@@ -21,9 +21,9 @@ ${KFNBC_CONTAINER_SIZE_DROPDOWN_XPATH} =  //label[@for="modal-notebook-container
 ${KFNBC_ACCELERATOR_HEADER_XPATH} =    //span[text()='Accelerator']
 ${KFNBC_ACCELERATOR_DROPDOWN_XPATH} =    //label[@for='modal-notebook-accelerator']/ancestor::div[@class='pf-v5-c-form__group']/descendant::button
 ${KFNBC_ACCELERATOR_INPUT_XPATH} =    //input[@aria-label='Number of accelerators']
-${KFNBC_ACCELERATOR_LESS_BUTTON_XPATH} =    ${KFNBC_ACCELERATOR_INPUT_XPATH}/preceding-sibling::button
-${KFNBC_ACCELERATOR_PLUS_BUTTON_XPATH} =    ${KFNBC_ACCELERATOR_INPUT_XPATH}/following-sibling::button
-${KFNBC_MAX_ACCELERATOR_WARNING_XPATH} =    //div[@aria-label='Warning Alert']//h4[contains(text(), 'accelerator detected')]
+${KFNBC_ACCELERATOR_LESS_BUTTON_XPATH} =    ${KFNBC_ACCELERATOR_INPUT_XPATH}/parent::*/parent::*/preceding-sibling::*//button
+${KFNBC_ACCELERATOR_PLUS_BUTTON_XPATH} =    ${KFNBC_ACCELERATOR_INPUT_XPATH}/parent::*/parent::*/following-sibling::*//button
+${KFNBC_MAX_ACCELERATOR_WARNING_XPATH} =    //div[contains(@class, 'pf-m-warning')]//h4[contains(text(), 'accelerator detected')]
 ${KFNBC_MODAL_HEADER_XPATH} =    //div[@aria-label="Starting server modal"]
 ${KFNBC_MODAL_CANCEL_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Cancel"]
 ${KFNBC_MODAL_CLOSE_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Close"]

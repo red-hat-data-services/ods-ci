@@ -159,7 +159,7 @@ class ReadPR:
         else:
             raise ValueError(f"cannot find the path starting with b/ -> {file_path}")
 
-    def get_diff(self, target="git diff upstream/master"):
+    def get_diff(self, target="git diff upstream/main"):
         import subprocess
 
         output = subprocess.getoutput(target)

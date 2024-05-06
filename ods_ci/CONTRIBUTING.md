@@ -17,7 +17,7 @@ When contributing to this repository, please first discuss the change you wish t
    ```git checkout -b add-test-ods-542-alerts```
 
 - Develop your feature and create a git commit:
-  - Before committing the code, verify that it is formatted following the _ODS-CI Robot Framework Style Guide_ (see [how](https://github.com/red-hat-data-services/ods-ci/blob/master/docs/check-code-style.md)
+  - Before committing the code, verify that it is formatted following the _ODS-CI Robot Framework Style Guide_ (see [how](https://github.com/red-hat-data-services/ods-ci/blob/main/ods_ci/docs/check-code-style.md)
 )
   - Add your changes to the commit
     ```
@@ -38,13 +38,13 @@ Separate parts of works should be either in a separate PRs or in a separate comm
 
 - Send a PR to ods-ci using GitHub's web interface
 
-- If the PR can't be merged, rebase your branch to master:
+- If the PR can't be merged, rebase your branch against `main`:
   ```
   git remote add upstream https://github.com/red-hat-data-services/ods-ci
-  git fetch upstream
+  git fetch upstream main
   git checkout add-test-ods-542-alerts
-  git rebase upstream/master
-  git push -f
+  git rebase upstream/main
+  git push origin add-test-ods-542-alerts --force
   ```
 
 - Test your PR executing the changed code and other relevant parts which make sense to assure your changes work as expected.

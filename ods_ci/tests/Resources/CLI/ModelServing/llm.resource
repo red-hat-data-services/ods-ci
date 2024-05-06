@@ -797,7 +797,7 @@ Create Inference Access Token
     ${rc}    ${out}=    Run And Return Rc And Output    oc create token -n ${test_namespace} ${bucket_sa_name}
     Should Be Equal As Strings    ${rc}    0
     [Return]    ${out}
-=======
+
 Wait For Model KServe Deployment To Be Ready
     [Documentation]    Waits for the Pod to be Ready (i.e., Running status) and checks that
     ...                the deployment has the expected pods and containers

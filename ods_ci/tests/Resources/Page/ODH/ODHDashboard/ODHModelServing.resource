@@ -73,7 +73,6 @@ Serve Model
         SeleniumLibrary.Click Button    ${DEPLOY_MODEL_BTN}
     END
     SeleniumLibrary.Wait Until Page Contains Element    //div[@role="dialog"]
-    Select Project    ${project_name}
     Set Model Name    ${model_name}
     Select Model Server    ${model_server}
     IF    "${serving_runtime}" != "${NONE}"    Set Model Server Runtime    ${serving_runtime}

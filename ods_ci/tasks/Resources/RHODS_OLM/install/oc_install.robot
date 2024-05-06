@@ -8,6 +8,7 @@ Resource   ../../../../tests/Resources/Page/OCPDashboard/UserManagement/Groups.r
 
 *** Variables ***
 ${DSC_NAME} =    default-dsc
+${DSCI_NAME} =    default-dsci
 @{COMPONENT_LIST} =    dashboard    datasciencepipelines    kserve    modelmeshserving    workbenches    codeflare    ray    trustyai    kueue  # robocop: disable
 ${SERVERLESS_OP_NAME}=     serverless-operator
 ${SERVERLESS_SUB_NAME}=    serverless-operator
@@ -25,67 +26,65 @@ Install RHODS
   [Arguments]  ${cluster_type}     ${image_url}
   Install Kserve Dependencies
   Clone OLM Install Repo
-  ${csv_display_name} =    Set Variable    ${RHODS_CSV_DISPLAY}
+  IF  "${PRODUCT}" == "ODH"
+      ${csv_display_name} =    Set Variable    ${ODH_CSV_DISPLAY}
+  ELSE
+      ${csv_display_name} =    Set Variable    ${RHODS_CSV_DISPLAY}
+  END
   IF  "${cluster_type}" == "selfmanaged"
       IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "CLi"
-            IF  "${UPDATE_CHANNEL}" != "odh-nightlies"
-                 Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
-            ELSE
-                 ${csv_display_name} =    Set Variable    ${ODH_CSV_DISPLAY}
-                 Create Catalog Source For Operator
-                 Oc Apply    kind=List    src=tasks/Resources/Files/odh_nightly_sub.yml
-            END
+             Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
       ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "OperatorHub"
           ${file_path} =    Set Variable    tasks/Resources/RHODS_OLM/install/
           Copy File    source=${file_path}cs_template.yaml    destination=${file_path}cs_apply.yaml
+          IF  "${PRODUCT}" == "ODH"
+              Run    sed -i 's/<CATALOG_SOURCE>/community-operators/' ${file_path}cs_apply.yaml
+          ELSE
+              Run    sed -i 's/<CATALOG_SOURCE>/redhat-operators/' ${file_path}cs_apply.yaml
+          END
+          Run    sed -i 's/<OPERATOR_NAME>/${OPERATOR_NAME}/' ${file_path}cs_apply.yaml
+          Run    sed -i 's/<OPERATOR_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}cs_apply.yaml
           Run    sed -i 's/<UPDATE_CHANNEL>/${UPDATE_CHANNEL}/' ${file_path}cs_apply.yaml
           Oc Apply   kind=List   src=${file_path}cs_apply.yaml
           Remove File    ${file_path}cs_apply.yml
       ELSE
-           FAIL    Provided test envrioment and install type is not supported
+           FAIL    Provided test environment and install type is not supported
       END
   ELSE IF  "${cluster_type}" == "managed"
-      IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "CLi"
-           IF  "${UPDATE_CHANNEL}" != "odh-nightlies"
-                Install RHODS In Managed Cluster Using CLI  ${cluster_type}     ${image_url}
-           ELSE
-                ${csv_display_name} =    Set Variable    ${ODH_CSV_DISPLAY}
-                Create Catalog Source For Operator
-                Oc Apply    kind=List    src=tasks/Resources/Files/odh_nightly_sub.yml
-           END
+      IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "CLi" and "${UPDATE_CHANNEL}" == "odh-nightlies"
+          # odh-nightly is not build for Managed, it is only possible for Self-Managed
+          Set Global Variable    ${OPERATOR_NAMESPACE}    openshift-marketplace
+          Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
+      ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "CLi"
+          Install RHODS In Managed Cluster Using CLI  ${cluster_type}     ${image_url}
       ELSE
-          FAIL    Provided test envrioment is not supported
+          FAIL    Provided test environment is not supported
       END
   END
-  Wait Until Csv Is Ready    ${csv_display_name}
+  Wait Until Csv Is Ready    display_name=${csv_display_name}    operators_namespace=${OPERATOR_NAMESPACE}
 
 Verify RHODS Installation
-  # Needs to be removed ASAP
-  IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
-    Set Global Variable    ${APPLICATIONS_NAMESPACE}    opendatahub
-    Set Global Variable    ${MONITORING_NAMESPACE}    opendatahub
-    Set Global Variable    ${OPERATOR_NAMESPACE}    openshift-operators
-    Set Global Variable    ${NOTEBOOKS_NAMESPACE}    opendatahub
-  END
   Set Global Variable    ${DASHBOARD_APP_NAME}    ${PRODUCT.lower()}-dashboard
   Log  Verifying RHODS installation  console=yes
   Log To Console    Waiting for all RHODS resources to be up and running
-  IF  "${UPDATE_CHANNEL}" != "odh-nightlies"
-       Wait For Pods Numbers  1
-       ...                   namespace=${OPERATOR_NAMESPACE}
-       ...                   label_selector=name=rhods-operator
-       ...                   timeout=2000
-       Wait For Pods Status  namespace=${OPERATOR_NAMESPACE}  timeout=1200
-       Log  Verified redhat-ods-operator  console=yes
-  END
+  Wait For Pods Numbers  1
+  ...                   namespace=${OPERATOR_NAMESPACE}
+  ...                   label_selector=name=${OPERATOR_NAME}
+  ...                   timeout=2000
+  Wait For Pods Status  namespace=${OPERATOR_NAMESPACE}  timeout=1200
+  Log  Verified ${OPERATOR_NAMESPACE}  console=yes
 
   IF  "${UPDATE_CHANNEL}" == "odh-nightlies" or "${cluster_type}" != "managed"
-      Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
+    IF  "${PRODUCT}" == "ODH"
+        Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
+        Wait For DSCInitialization CustomResource To Be Ready    timeout=20
+    END
+    Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
   END
   ${dashboard} =    Is Component Enabled    dashboard    ${DSC_NAME}
   IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${dashboard}" == "true"
     # Needs to be removed ASAP
-    IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
+    IF  "${PRODUCT}" == "ODH"
         Log To Console    "Waiting for 2 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app=odh-dashboard"
         Wait For Pods Numbers  2
         ...                   namespace=${APPLICATIONS_NAMESPACE}
@@ -143,6 +142,12 @@ Verify RHODS Installation
   END
   ${kserve} =    Is Component Enabled    kserve    ${DSC_NAME}
   IF    "${kserve}" == "true"
+    Log To Console    "Waiting for 3 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app=odh-model-controller"
+    Wait For Pods Numbers   3
+    ...                   namespace=${APPLICATIONS_NAMESPACE}
+    ...                   label_selector=app=odh-model-controller
+    ...                   timeout=400
+    Log To Console    "Waiting for 1 pods in ${APPLICATIONS_NAMESPACE}, label_selector=control-plane=kserve-controller-manager"
     Wait For Pods Numbers   1
        ...                   namespace=${APPLICATIONS_NAMESPACE}
        ...                   label_selector=control-plane=kserve-controller-manager
@@ -151,7 +156,7 @@ Verify RHODS Installation
 
   IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${dashboard}" == "true" or "${workbenches}" == "true" or "${modelmeshserving}" == "true" or "${datasciencepipelines}" == "true"  # robocop: disable
     Log To Console    "Waiting for pod status in ${APPLICATIONS_NAMESPACE}"
-    Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=60
+    Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=200
     Log  Verified Applications NS: ${APPLICATIONS_NAMESPACE}  console=yes
   END
 
@@ -182,13 +187,13 @@ Clone OLM Install Repo
 Install RHODS In Self Managed Cluster Using CLI
   [Documentation]   Install rhods on self managed cluster using cli
   [Arguments]     ${cluster_type}     ${image_url}
-  ${return_code}    Run and Watch Command    cd ${EXECDIR}/${OLM_DIR} && ./setup.sh -t operator -u ${UPDATE_CHANNEL} -i ${image_url}    timeout=20 min
+  ${return_code}    Run and Watch Command    cd ${EXECDIR}/${OLM_DIR} && ./setup.sh -t operator -u ${UPDATE_CHANNEL} -i ${image_url} -n ${OPERATOR_NAME} -p ${OPERATOR_NAMESPACE}   timeout=20 min
   Should Be Equal As Integers   ${return_code}   0   msg=Error detected while installing RHODS
 
 Install RHODS In Managed Cluster Using CLI
   [Documentation]   Install rhods on managed managed cluster using cli
   [Arguments]     ${cluster_type}     ${image_url}
-  ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${OLM_DIR} && ./setup.sh -t addon -u ${UPDATE_CHANNEL} -i ${image_url}  #robocop:disable
+  ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${OLM_DIR} && ./setup.sh -t addon -u ${UPDATE_CHANNEL} -i ${image_url} -n ${OPERATOR_NAME} -p ${OPERATOR_NAMESPACE} -a ${APPLICATIONS_NAMESPACE} -m ${MONITORING_NAMESPACE}  #robocop:disable
   Log To Console    ${output}
   Should Be Equal As Integers   ${return_code}   0  msg=Error detected while installing RHODS
 
@@ -207,6 +212,53 @@ Wait For Pods Numbers
   END
   IF    '${status}' == 'False'
         Run Keyword And Continue On Failure    FAIL    Timeout- ${output} pods found with the label selector ${label_selector} in ${namespace} namespace
+  END
+
+Apply DSCInitialization CustomResource
+    [Documentation]
+    [Arguments]        ${dsci_name}=${DSCI_NAME}
+    ${return_code}    ${output} =    Run And Return Rc And Output    oc get DSCInitialization --output json | jq -j '.items | length'
+    Log To Console    output : ${output}, return_code : ${return_code}
+    IF  ${output} != 0
+        Log to Console    Skip creation of DSCInitialization
+        RETURN
+    END
+    ${file_path} =    Set Variable    tasks/Resources/Files/
+    Log to Console    Requested Configuration:
+    Create DSCInitialization CustomResource Using Test Variables
+    ${yml} =    Get File    ${file_path}dsci_apply.yml
+    Log To Console    Applying DSCI yaml
+    Log To Console    ${yml}
+    ${return_code}    ${output} =    Run And Return Rc And Output    oc apply -f ${file_path}dsci_apply.yml
+    Log To Console    ${output}
+    Should Be Equal As Integers  ${return_code}  0  msg=Error detected while applying DSCI CR
+    Remove File    ${file_path}dsci_apply.yml
+
+Create DSCInitialization CustomResource Using Test Variables
+    [Documentation]
+    [Arguments]    ${dsci_name}=${DSCI_NAME}
+    ${file_path} =    Set Variable    tasks/Resources/Files/
+    Copy File    source=${file_path}dsci_template.yml    destination=${file_path}dsci_apply.yml
+    Run    sed -i 's/<dsci_name>/${dsci_name}/' ${file_path}dsci_apply.yml
+    Run    sed -i 's/<application_namespace>/${APPLICATIONS_NAMESPACE}/' ${file_path}dsci_apply.yml
+    Run    sed -i 's/<monitoring_namespace>/${MONITORING_NAMESPACE}/' ${file_path}dsci_apply.yml
+
+Wait For DSCInitialization CustomResource To Be Ready
+  [Documentation]   Wait for DSCInitialization CustomResource To Be Ready
+  [Arguments]     ${timeout}
+  Log To Console    Waiting for DSCInitialization CustomResource To Be Ready
+  ${status}   Set Variable   False
+  FOR    ${counter}    IN RANGE   ${timeout}
+         ${return_code}    ${output}    Run And Return Rc And Output   oc get DSCInitialization --no-headers -o custom-columns=":status.phase"
+         IF    '${output}' == 'Ready'
+               ${status}  Set Variable  True
+               Log To Console  DSCInitialization CustomResource is Ready
+               Exit For Loop
+         END
+         Sleep    1 sec
+  END
+  IF    '${status}' == 'False'
+        Run Keyword And Continue On Failure    FAIL    Timeout- DSCInitialization CustomResource is not Ready
   END
 
 Apply DataScienceCluster CustomResource
@@ -281,15 +333,6 @@ Is Component Enabled
               RETURN    true
          END
     END
-
-Create Catalog Source For Operator
-    [Documentation]    Create Catalog source for odh nightly build
-    [Arguments]    ${file_path}=tasks/Resources/Files/
-    ${return_code}    ${output} =    Run And Return Rc And Output    sed -i "s,image: .*,image: ${image_url},g" ${file_path}/odh_catalogsource.yml
-    Should Be Equal As Integers  ${return_code}  0  msg=Error detected while making changes to file
-    ${return_code}    ${output} =    Run And Return Rc And Output   oc apply -f ${file_path}/odh_catalogsource.yml
-    Should Be Equal As Integers  ${return_code}  0  msg=Error detected while apply the catalog
-    Wait for Catalog To Be Ready
 
 Wait for Catalog To Be Ready
     [Documentation]    Verify catalog is Ready OR NOT

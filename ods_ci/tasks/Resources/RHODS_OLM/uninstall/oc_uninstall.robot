@@ -13,16 +13,19 @@ Trigger RHODS Uninstall
 Verify RHODS Uninstallation
   IF  "${cluster_type}" == "managed"
         Run Keyword And Expect Error  *Not Found*
-        ...  Oc Get  kind=CatalogSource  namespace=openshift-marketplace
-        ...       field_selector=metadata.name=addon-managed-odh-catalog
+        ...  Oc Get  kind=CatalogSource  namespace=${OPERATOR_NAMESPACE}
+        ...       field_selector=metadata.name=${CATALOG_NAME}
   ELSE IF  "${cluster_type}" == "selfmanaged"
         Run Keyword And Expect Error  *Not Found*
         ...  Oc Get  kind=CatalogSource  namespace=openshift-marketplace
-        ...       field_selector=metadata.name=self-managed-rhods
+        ...       field_selector=metadata.name=rhoai-catalog-dev
   END
-  Verify Project Does Not Exists  redhat-ods-monitoring
-  Verify Project Does Not Exists  redhat-ods-applications
-  Verify Project Does Not Exists  redhat-ods-operator
+  Verify Project Does Not Exists  ${MONITORING_NAMESPACE}
+  Verify Project Does Not Exists  ${APPLICATIONS_NAMESPACE}
+  IF  "${OPERATOR_NAMESPACE}" != "openshift-marketplace"
+       Verify Project Does Not Exists  ${OPERATOR_NAMESPACE}
+  END
+
 
 Verify Project Does Not Exists
   [Arguments]  ${project}

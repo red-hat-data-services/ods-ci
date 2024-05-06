@@ -53,51 +53,62 @@ Uninstall RHODS In Self Managed Cluster Using CLI
 
 Uninstall RHODS In Self Managed Cluster For Operatorhub
   [Documentation]   Uninstall rhods on self-managed cluster for operatorhub installtion
-  ${return_code}    ${output}    Run And Return Rc And Output   oc create configmap delete-self-managed-odh -n redhat-ods-operator
+  ${return_code}    ${output}    Run And Return Rc And Output   oc create configmap delete-self-managed-odh -n ${OPERATOR_NAMESPACE}
   Should Be Equal As Integers  ${return_code}   0   msg=Error creation deletion configmap
-  ${return_code}    ${output}    Run And Return Rc And Output   oc label configmap/delete-self-managed-odh api.openshift.com/addon-managed-odh-delete=true -n redhat-ods-operator
+  ${return_code}    ${output}    Run And Return Rc And Output   oc label configmap/delete-self-managed-odh api.openshift.com/addon-managed-odh-delete=true -n ${OPERATOR_NAMESPACE}
   Should Be Equal As Integers  ${return_code}   0   msg=Error observed while adding label to configmap
-  Verify Project Does Not Exists  redhat-ods-applications
-  Verify Project Does Not Exists  redhat-ods-monitoring
-  Verify Project Does Not Exists  rhods-notebooks
-  ${return_code}    ${output}    Run And Return Rc And Output   oc delete namespace redhat-ods-operator
+  Verify Project Does Not Exists  ${APPLICATIONS_NAMESPACE}
+  Verify Project Does Not Exists  ${MONITORING_NAMESPACE}
+  Verify Project Does Not Exists  ${NOTEBOOKS_NAMESPACE}
+  ${return_code}    ${output}    Run And Return Rc And Output   oc delete namespace ${OPERATOR_NAMESPACE}
 
 Uninstall RHODS V2
     [Documentation]    Keyword to uninstall the version 2 of the RHODS operator in Self-Managed
+    Log To Console    message=Deleting DSC CR From Cluster
+    ${return_code}    ${output}    Run And Return Rc And Output
+    ...    oc get DataScienceCluster --all-namespaces -o custom-columns=:metadata.name --ignore-not-found | xargs -I {} oc patch DataScienceCluster {} --type=merge -p '{"metadata": {"finalizers":null}}' || true  #robocop:disable
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete datasciencecluster --all --ignore-not-found
     Should Be Equal As Integers  ${return_code}   0   msg=Error deleting DataScienceCluster CR
+    Log To Console    message=Deleting DSCi CR From Cluster
+    ${return_code}    ${output}    Run And Return Rc And Output
+    ...   oc get DSCInitialization --all-namespaces -o custom-columns=:metadata.name --ignore-not-found | xargs -I {} oc patch DSCInitialization {} --type=merge -p '{"metadata": {"finalizers":null}}' || true  #robocop:disable
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete dscinitialization --all --ignore-not-found
     Should Be Equal As Integers  ${return_code}   0   msg=Error deleting DSCInitialization CR
-
+    Log To Console    message=Deleting Operator Subscription From Cluster
     ${return_code}    ${subscription_name}    Run And Return Rc And Output
-    ...    oc get subscription -n redhat-ods-operator --no-headers | awk '{print $1}'
+    ...    oc get subscription -n ${OPERATOR_NAMESPACE} --no-headers | awk '{print $1}'
     IF  "${return_code}" == "0" and "${subscription_name}" != "${EMPTY}"
         ${return_code}    ${csv_name}    Run And Return Rc And Output
-        ...    oc get subscription ${subscription_name} -n redhat-ods-operator -ojson | jq '.status.currentCSV' | tr -d '"'
+        ...    oc get subscription ${subscription_name} -n ${OPERATOR_NAMESPACE} -ojson | jq '.status.currentCSV' | tr -d '"'
         IF  "${return_code}" == "0" and "${csv_name}" != "${EMPTY}"
           ${return_code}    ${output}    Run And Return Rc And Output
-          ...    oc delete clusterserviceversion ${csv_name} -n redhat-ods-operator --ignore-not-found
+          ...    oc delete clusterserviceversion ${csv_name} -n ${OPERATOR_NAMESPACE} --ignore-not-found
           Should Be Equal As Integers  ${return_code}   0   msg=Error deleting RHODS CSV ${csv_name}
         END
         ${return_code}    ${output}    Run And Return Rc And Output
-        ...    oc delete subscription ${subscription_name} -n redhat-ods-operator --ignore-not-found
+        ...    oc delete subscription ${subscription_name} -n ${OPERATOR_NAMESPACE} --ignore-not-found
         Should Be Equal As Integers  ${return_code}   0   msg=Error deleting RHODS subscription
     END
+    Log To Console    message=Deleting Operator CSV From Cluster
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete clusterserviceversion opendatahub-operator.1.18.0 -n openshift-operators --ignore-not-found
+    Log To Console    message=Deleting Operator Catalog From Cluster
     ${return_code}    ${output}    Run And Return Rc And Output
-    ...    oc delete subscription rhods-odh-nightly-operator -n openshift-operators --ignore-not-found # robocop: disable
+    ...    oc delete CatalogSource rhoai-catalog-dev -n openshift-marketplace --ignore-not-found  # robocop: disable
     ${return_code}    ${output}    Run And Return Rc And Output
-    ...    oc delete CatalogSource odh-catalog-dev -n openshift-marketplace --ignore-not-found  # robocop: disable
+        ...    oc delete CatalogSource addon-managed-odh-catalog -n openshift-marketplace --ignore-not-found  # robocop: disable
+    Log To Console    message=Deleting Operator Group From Cluster
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete operatorgroup --all -n ${OPERATOR_NAMESPACE} --ignore-not-found
     Should Be Equal As Integers  ${return_code}   0   msg=Error deleting operatorgroup
+    Log To Console    message=Deleting Operator and it's associate namepsace
     ${return_code}    ${output}    Run And Return Rc And Output    oc delete ns -l opendatahub.io/generated-namespace --ignore-not-found
-    Verify Project Does Not Exists  redhat-ods-applications
-    Verify Project Does Not Exists  redhat-ods-monitoring
-    Verify Project Does Not Exists  rhods-notebooks
-    Verify Project Does Not Exists  opendatahub
-    ${return_code}    ${output}    Run And Return Rc And Output   oc delete namespace redhat-ods-operator --ignore-not-found
-    Verify Project Does Not Exists  redhat-ods-operator
+    Verify Project Does Not Exists  ${APPLICATIONS_NAMESPACE}
+    Verify Project Does Not Exists  ${MONITORING_NAMESPACE}
+    Verify Project Does Not Exists  ${NOTEBOOKS_NAMESPACE}
+    IF  "${OPERATOR_NAMESPACE}" != "openshift-marketplace"
+        ${return_code}    ${output}    Run And Return Rc And Output   oc delete namespace ${OPERATOR_NAMESPACE} --ignore-not-found
+        Verify Project Does Not Exists  ${OPERATOR_NAMESPACE}
+    END

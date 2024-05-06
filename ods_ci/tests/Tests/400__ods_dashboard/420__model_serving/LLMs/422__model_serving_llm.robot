@@ -43,6 +43,7 @@ ${FLAN_LARGE_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${FLAN_LARGE_MODEL_S3_DIR
 ${BLOOM_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${BLOOM_MODEL_S3_DIR}/
 ${SCRIPT_TARGET_OPERATOR}=    rhods    # rhods or brew
 ${SCRIPT_BREW_TAG}=    ${EMPTY}    # ^[0-9]+$
+${CAIKIT_TGIS_RUNTIME_NAME}=    caikit-tgis-runtime
 
 
 *** Test Cases ***
@@ -65,8 +66,8 @@ Verify User Can Serve And Query A Model
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=${test_namespace}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Query Model Multiple Times    model_name=${flan_model_name}
     ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}
@@ -94,10 +95,10 @@ Verify User Can Deploy Multiple Models In The Same Namespace
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
-    ...    namespace=${test_namespace}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
-    ...    namespace=${test_namespace}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Query Model Multiple Times    model_name=${model_one_name}
     ...    n_times=5    namespace=${test_namespace}
     Query Model Multiple Times    model_name=${model_two_name}
@@ -129,10 +130,10 @@ Verify User Can Deploy Multiple Models In Different Namespaces
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=singlemodel-multi2
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
-    ...    namespace=singlemodel-multi1
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
-    ...    namespace=singlemodel-multi2
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
+    ...    namespace=singlemodel-multi1    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
+    ...    namespace=singlemodel-multi2    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Query Model Multiple Times    model_name=${model_one_name}    n_times=2
     ...    namespace=singlemodel-multi1
     Query Model Multiple Times    model_name=${model_two_name}    n_times=2
@@ -170,7 +171,7 @@ Verify Model Upgrade Using Canaray Rollout
     ...    n_queries=${0}
     Traffic Should Be Redirected Based On Canary Percentage    exp_percentage=${canary_percentage}
     ...    isvc_name=${isvc_name}    model_name=${model_name}    namespace=${test_namespace}
-    ...    runtime=caikit-tgis-runtime
+    ...    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Log To Console    Remove Canary Tarffic For Model Upgrade
     Compile Deploy And Query LLM model    isvc_name=${isvc_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
@@ -179,7 +180,7 @@ Verify Model Upgrade Using Canaray Rollout
     ...    namespace=${test_namespace}
     Traffic Should Be Redirected Based On Canary Percentage    exp_percentage=${100}
     ...    isvc_name=${isvc_name}    model_name=${model_name}    namespace=${test_namespace}
-    ...    runtime=caikit-tgis-runtime
+    ...    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${isvcs_names}    wait_prj_deletion=${FALSE}
 
@@ -218,24 +219,24 @@ Verify User Can Change The Minimum Number Of Replicas For A Model
     ...    min_replicas=1
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${test_namespace}    exp_replicas=1
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}    exp_replicas=${1}
     Query Model Multiple Times    model_name=${model_name}    n_times=3
     ...    namespace=${test_namespace}
     ${rev_id}=    Set Minimum Replicas Number    n_replicas=3    model_name=${model_name}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${rev_id}
     ...    namespace=${test_namespace}    timeout=360s
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${test_namespace}    exp_replicas=3
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}    exp_replicas=${3}
     Query Model Multiple Times    model_name=${model_name}    n_times=3
     ...    namespace=${test_namespace}
     ${rev_id}=    Set Minimum Replicas Number    n_replicas=1    model_name=${model_name}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${rev_id}
     ...    namespace=${test_namespace}    timeout=360s
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${test_namespace}    exp_replicas=1
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}    exp_replicas=${1}
     Query Model Multiple Times    model_name=${model_name}    n_times=3
     ...    namespace=${test_namespace}
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
@@ -254,15 +255,15 @@ Verify User Can Autoscale Using Concurrency
     ...    auto_scale=True
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=${test_namespace}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Query Model Multiple Times    model_name=${flan_model_name}    n_times=10
     ...    namespace=${test_namespace}    validate_response=${FALSE}    background=${TRUE}
     Wait For Pods Number    number=1    comparison=GREATER THAN
     ...    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=${test_namespace}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
@@ -272,14 +273,15 @@ Verify User Can Validate Scale To Zero
     [Setup]    Set Project And Runtime    namespace=autoscale-zero
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${flan_model_name}
+    ${test_namespace}=    Set Variable    autoscale-zero
     Compile Inference Service YAML    isvc_name=${flan_model_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
-    ...    namespace=autoscale-zero
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=autoscale-zero
-    ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_model_name}   namespace=autoscale-zero
+    ...    namespace=${test_namespace}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
+    ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_model_name}   namespace=${test_namespace}
     ${body}=    Set Variable    '{"text": "At what temperature does liquid Nitrogen boil?"}'
     ${header}=    Set Variable    'mm-model-id: ${flan_model_name}'
     Query Model With GRPCURL   host=${host}    port=443
@@ -287,20 +289,20 @@ Verify User Can Validate Scale To Zero
     ...    json_body=${body}    json_header=${header}
     ...    insecure=${TRUE}
     Set Minimum Replicas Number    n_replicas=0    model_name=${flan_model_name}
-    ...    namespace=autoscale-zero
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=autoscale-zero
+    ...    namespace=${test_namespace}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}    exp_replicas=${2}
     Wait For Pods To Be Terminated    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=autoscale-zero
+    ...    namespace=${test_namespace}
     Query Model With GRPCURL   host=${host}    port=443
     ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
     ...    json_body=${body}    json_header=${header}
     ...    insecure=${TRUE}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=autoscale-zero
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Wait For Pods To Be Terminated    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=autoscale-zero
-    [Teardown]   Clean Up Test Project    test_ns=autoscale-zero
+    ...    namespace=${test_namespace}
+    [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
 Verify User Can Set Requests And Limits For A Model
@@ -318,8 +320,8 @@ Verify User Can Set Requests And Limits For A Model
     ...    requests_dict=${requests}    limits_dict=${limits}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=${test_namespace}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     ${rev_id}=    Get Current Revision ID    model_name=${flan_model_name}
     ...    namespace=${test_namespace}
     Query Model Multiple Times    model_name=${flan_model_name}    n_times=1
@@ -332,8 +334,8 @@ Verify User Can Set Requests And Limits For A Model
     ...    requests=${new_requests}    limits=${NONE}
     Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${rev_id}
     ...    namespace=${test_namespace}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=${test_namespace}    exp_replicas=1
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Container Hardware Resources Should Match Expected    container_name=kserve-container
     ...    pod_label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    exp_requests=${new_requests}    exp_limits=${NONE}
@@ -356,8 +358,8 @@ Verify Model Can Be Served And Query On A GPU Node
     ...    requests_dict=${requests}    limits_dict=${limits}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${test_namespace}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Container Hardware Resources Should Match Expected    container_name=kserve-container
     ...    pod_label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    exp_requests=${requests}    exp_limits=${limits}
@@ -382,10 +384,11 @@ Verify Non Admin Can Serve And Query A Model
     Compile Inference Service YAML    isvc_name=${flan_model_name}
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
+    ...    kserve_mode=${DSC_KSERVE_MODE}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=${test_namespace}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_model_name}   namespace=${test_namespace}
     ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][0][query_text]"}'
     ${header}=    Set Variable    'mm-model-id: ${flan_model_name}'
@@ -397,7 +400,7 @@ Verify Non Admin Can Serve And Query A Model
     ...    namespace=${test_namespace}
     [Teardown]  Run Keywords   Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}   AND
     ...        Clean Up Test Project    test_ns=${test_namespace}   isvc_names=${models_names}
-    ...        wait_prj_deletion=${FALSE}
+    ...        wait_prj_deletion=${FALSE}    kserve_mode=${DSC_KSERVE_MODE}
 
 Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector
     [Documentation]    Deploys and queries flan-t5-large-grammar-synthesis model
@@ -411,8 +414,8 @@ Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector
     ...    model_storage_uri=${FLAN_GRAMMAR_STORAGE_URI}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=${test_namespace}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Query Model Multiple Times    model_name=${flan_model_name}
     ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}    query_idx=1
@@ -434,8 +437,8 @@ Verify User Can Serve And Query Flan-t5 Large
     ...    model_storage_uri=${FLAN_LARGE_STORAGE_URI}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=${test_namespace}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Query Model Multiple Times    model_name=${flan_model_name}
     ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}    query_idx=${0}
@@ -461,18 +464,18 @@ Verify Runtime Upgrade Does Not Affect Deployed Models
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=${test_namespace}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Query Model Multiple Times    model_name=${flan_model_name}
     ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}
     ${created_at}    ${caikitsha}=    Get Model Pods Creation Date And Image URL    model_name=${flan_model_name}
     ...    namespace=${test_namespace}    container=transformer-container
     Upgrade Runtime Image    new_image_url=quay.io/opendatahub/caikit-tgis-serving:stable
-    ...    namespace=${test_namespace}    container=transformer-container    runtime=caikit-tgis-runtime
+    ...    namespace=${test_namespace}    container=transformer-container    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Sleep    5s    reason=Sleep, in case the runtime upgrade takes some time to start performing actions on the pods...
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=${test_namespace}    exp_replicas=1
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     ${created_at_after}    ${caikitsha_after}=    Get Model Pods Creation Date And Image URL    model_name=${flan_model_name}
     ...    namespace=${test_namespace}    container=transformer-container
     Should Be Equal    ${created_at}    ${created_at_after}
@@ -498,8 +501,8 @@ Verify User Can Access Model Metrics From UWM
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-    ...    namespace=${test_namespace}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Wait Until Keyword Succeeds    30 times    4s
     ...    TGI Caikit And Istio Metrics Should Exist    thanos_url=${thanos_url}    thanos_token=${token}
     Query Model Multiple Times    model_name=${flan_model_name}
@@ -536,8 +539,8 @@ Verify User Can Query A Model Using HTTP Calls
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${test_namespace}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Query Model Multiple Times    model_name=${model_name}    protocol=http
     ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}    query_idx=${0}
@@ -569,6 +572,13 @@ Install Model Serving Stack Dependencies
         END
     END
     Load Expected Responses
+    ${dsc_kserve_mode}=    Get KServe Default Deployment Mode From DSC
+    Set Suite Variable    ${DSC_KSERVE_MODE}    ${dsc_kserve_mode}
+    IF    "${dsc_kserve_mode}" == "RawDeployment"
+        Set Suite Variable    ${IS_KSERVE_RAW}    ${TRUE}
+    ELSE
+        Set Suite Variable    ${IS_KSERVE_RAW}    ${FALSE}
+    END
 
 Install Service Mesh Stack
     [Documentation]    Installs the operators needed for Service Mesh operator purposes

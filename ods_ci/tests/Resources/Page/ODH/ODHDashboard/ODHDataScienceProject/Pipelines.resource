@@ -24,7 +24,6 @@ Create Pipeline Server    # robocop: off=too-many-calls-in-keyword
     ...                It assumes the Data Connection is aleady created
     ...                and you wants to use defaul DB configurations [TEMPORARY]
     [Arguments]    ${dc_name}    ${project_title}
-    ...            ${aws_s3_ca_bundle}=${NONE}
     # Every 2 mins the frontend updates its cache and the client polls every 30seconds.
     # So the longest you’d have to wait is 2.5 mins. Set 3 min just to make sure
     Projects.Move To Tab    Pipelines
@@ -39,29 +38,6 @@ Create Pipeline Server    # robocop: off=too-many-calls-in-keyword
     Wait Until Generic Modal Disappears
     Wait Until Project Is Open    project_title=${project_title}
     ...    timeout-pre-spinner=5s    timeout-spinner=60s
-    ${is_ca_empty}=    Is String Empty    ${aws_s3_ca_bundle}
-    IF    ${is_ca_empty}
-        ${aws_s3_ca_bundle}=    Get Variable Value    ${S3.AWS_CA_BUNDLE}    ${NONE}
-    END
-    ${is_ca_empty}=    Is String Empty    ${aws_s3_ca_bundle}
-    IF    not ${is_ca_empty}
-        Patch Pipeline Server With CA Bundle
-        ...    project_title=${project_title}    aws_s3_ca_bundle=${aws_s3_ca_bundle}
-    END
-
-Patch Pipeline Server With CA Bundle
-    [Documentation]    Patch the underlying dspa resource with CA Bundle
-    ...                The CA Bundle can be obtained from S3.AWS_CA_BUNDLE in test-variables.yml
-    [Arguments]    ${project_title}    ${aws_s3_ca_bundle}
-    ${dc_namespace}=    Get Openshift Namespace From Data Science Project    ${project_title}
-    ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc create configmap custom-ca-bundle -n ${dc_namespace} --from-literal=ca-bundle.crt='${aws_s3_ca_bundle}'    # robocop: disable
-    Should Be Equal As Integers    ${rc}    0
-    Log    "${out}"
-    ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc patch dspa pipelines-definition -n ${dc_namespace} -p '[{"op":"add","path":"/spec/apiServer/cABundle","value":{"configMapKey":"ca-bundle.crt","configMapName":"custom-ca-bundle"}}]' --type json     # robocop: disable
-    Should Be Equal As Integers    ${rc}    0
-    Log    "${out}"
 
 Select Data Connection
     [Documentation]    Selects an existing data connection from the dropdown
@@ -386,8 +362,8 @@ Verify Successful Pipeline Run Via Pipelines Runs UI
     ...                View: Data Science Pipelines -> Runs, Triggered tab
     [Arguments]    ${pipeline_name}
     Menu.Navigate To Page    Data Science Pipelines    Runs
-    Wait Until Page Contains Element    xpath://span[text()='Triggered']
-    Click Element    //span[text()='Triggered']
+    Wait Until Page Contains Element    xpath://span[text()='Triggered']   timeout=10s
+    Click Element    //span[text()='Active']
     Wait Until Pipeline Run Is Started    pipeline_name=${pipeline_name}
     ...    timeout=10s
     Wait Until Pipeline Run Is Finished    pipeline_name=${pipeline_name}

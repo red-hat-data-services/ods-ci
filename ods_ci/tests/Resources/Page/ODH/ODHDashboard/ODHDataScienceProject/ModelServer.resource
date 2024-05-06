@@ -145,7 +145,6 @@ Verify Displayed GPU Count
     IF    ${expanded}==False
         Click Element    xpath://button[@aria-expanded="false"]/span[.="${server_name}"]
     END
-    Click Element    ${SERVING_MODEL_SERVERS_SIDE_MENU}
     Sleep  5s      reason=Sometimes the number of current Accelerators take a few seconds to update
     ${current_accs}=  Get Text  xpath://span[text()="${server_name}"]/../../../following-sibling::tr//td[@data-label]/div/dl/div[4]/dd/div
     Should Match  ${current_accs}  ${no_gpus}
@@ -204,17 +203,30 @@ Click Minus Button
     Click Element    ${REPLICAS_MIN_BTN_XP}
 
 Query Model With GRPCURL
-    [Arguments]    ${host}    ${port}    ${endpoint}    ${json_body}
-    ...            ${json_header}=${NONE}    ${insecure}=${FALSE}    ${plaintext}=${FALSE}
-    ...            ${background}=${NONE}    ${skip_res_json}=${FALSE}    &{args}
+    [Arguments]    ${host}
+    ...            ${port}
+    ...            ${endpoint}
+    ...            ${json_body}
+    ...            ${json_header}=${NONE}
+    ...            ${insecure}=${FALSE}
+    ...            ${plaintext}=${FALSE}
+    ...            ${background}=${NONE}
+    ...            ${skip_res_json}=${FALSE}
+    ...            ${cert}=${False}
+    ...            &{args}
     ${cmd}=    Set Variable    grpcurl -d ${json_body}
     IF    $json_header != None
         ${cmd}=    Catenate    ${cmd}    -H ${json_header}
     END
-    IF    ${insecure} == ${TRUE}
+    IF    ${insecure}
         ${cmd}=    Catenate    ${cmd}    -insecure
+    ELSE  # -insecure and -cacert are incompatible with each other. Assuming we want either option always on.
+        IF    ${cert}==${False}
+            Log    The call will fail because you have not provided a valid CA bundle file
+        END
+        ${cmd}=    Catenate    ${cmd}    -cacert ${cert}
     END
-    IF    ${plaintext} == ${TRUE}
+    IF    ${plaintext}
         ${cmd}=    Catenate    ${cmd}    -plaintext
     END
     # IF    "${proto_filepath}" != "${NONE}"
@@ -265,3 +277,4 @@ Switch Model Serving Project
     Click Element  //main[contains(@id, 'dashboard-page-main')]//button[contains(@id, 'dropdown-toggle')]
     Wait Until Element Is Visible     //ul//a[contains(., '${project_name}')]
     Click Element     //ul//a[contains(., '${project_name}')]
+    ODHDashboard.Maybe Wait For Dashboard Loading Spinner Page

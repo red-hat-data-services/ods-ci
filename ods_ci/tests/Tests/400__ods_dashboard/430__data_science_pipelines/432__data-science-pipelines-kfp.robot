@@ -16,6 +16,7 @@ Suite Teardown      RHOSi Teardown
 
 *** Variables ***
 ${PROJECT_NAME}=    pipelineskfp1
+${KUEUE_RESOURCES_SETUP_FILEPATH}=    ods_ci/tests/Resources/Page/DistributedWorkloads/kueue_resources_setup.sh
 
 
 *** Test Cases ***
@@ -60,6 +61,7 @@ Verify Ods Users Can Create And Run A Data Science Pipeline With Ray Using The k
     ...    method_name=ray_integration
     ...    status_check_timeout=440
     ...    pipeline_params={'openshift_server': 'value', 'openshift_token': 'value'}
+    ...    ray=${TRUE}
     [Teardown]    Remove Pipeline Project    ${PROJECT_NAME}
 
 
@@ -69,15 +71,19 @@ End To End Pipeline Workflow Using Kfp
     [Documentation]    Create, run and double check the pipeline result using Kfp python package. In the end,
     ...    clean the pipeline resources.
     [Arguments]    ${username}    ${password}    ${project}    ${python_file}    ${method_name}
-    ...    ${pipeline_params}    ${status_check_timeout}=160
+    ...    ${pipeline_params}    ${status_check_timeout}=160    ${ray}=${FALSE}
     Remove Pipeline Project    ${project}
     New Project    ${project}
     Install DataSciencePipelinesApplication CR    ${project}
     ${status}    Login And Wait Dsp Route    ${username}    ${password}    ${project}
     Should Be True    ${status} == 200    Could not login to the Data Science Pipelines Rest API OR DSP routing is not working
+    # we remove and add a new project for sanity. LocalQueue is  per namespace
+    IF    ${ray} == ${TRUE}
+        Setup Kueue Resources    ${project}    cluster-queue-user    resource-flavor-user    local-queue-user
+    END
     ${run_id}    Create Run From Pipeline Func    ${username}    ${password}    ${project}
     ...    ${python_file}    ${method_name}    pipeline_params=${pipeline_params}
-    ${run_status}    Check Run Status    ${run_id}
+    ${run_status}    Check Run Status    ${run_id}    timeout=500
     Should Be Equal As Strings    ${run_status}    SUCCEEDED    Pipeline run doesn't have a status that means success. Check the logs
     Remove Pipeline Project    ${project}
 
@@ -85,4 +91,15 @@ Data Science Pipelines Suite Setup
     [Documentation]    Data Science Pipelines Suite Setup
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
+
+Setup Kueue Resources
+    [Documentation]    Setup the kueue resources for the project
+    [Arguments]    ${project_name}    ${cluster_queue_name}    ${resource_flavor_name}    ${local_queue_name}
+    ${result} =    Run Process    sh ${KUEUE_RESOURCES_SETUP_FILEPATH} ${cluster_queue_name} ${resource_flavor_name} ${local_queue_name} ${project_name} "2" "8"
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Failed to setup kueue resources
+    END
 

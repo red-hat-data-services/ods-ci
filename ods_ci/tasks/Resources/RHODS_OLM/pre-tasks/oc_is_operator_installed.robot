@@ -2,59 +2,45 @@
 Is RHODS Installed
   Log   Checking if RHODS is installed with "${clusterType}" "${UPDATE_CHANNEL}" "${INSTALL_TYPE}"      console=yes
   IF  "${cluster_type}" == "selfmanaged"
-      IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
+      IF  "${INSTALL_TYPE}" == "CLi"
           ${result}=  Run Keyword And Return Status
           ...  Run Keywords
-          ...  Check A RHODS Family Operator Is Installed  namespace=openshift-operators
-          ...                                              subscription=rhods-odh-nightly-operator  AND
-          ...  Oc Get  kind=Namespace  field_selector=metadata.name=opendatahub  AND
+          ...  Check A RHODS Family Operator Is Installed  namespace=${OPERATOR_NAMESPACE}
+          ...                                              subscription=rhoai-operator-dev  AND
+          ...  Oc Get  kind=Namespace  field_selector=metadata.name=${MONITORING_NAMESPACE}  AND
+          ...  Oc Get  kind=Namespace  field_selector=metadata.name=${APPLICATIONS_NAMESPACE}  AND
+          ...  Oc Get  kind=Namespace  field_selector=metadata.name=${OPERATOR_NAMESPACE}  AND
           ...  Oc Get  kind=CatalogSource  namespace=openshift-marketplace
-          ...          field_selector=metadata.name=redhat-operators
+          ...          field_selector=metadata.name=rhoai-catalog-dev
+      ELSE IF  "${INSTALL_TYPE}" == "OperatorHub"
+          ${result}=  Run Keyword And Return Status
+          ...  Run Keywords
+          ...  Check A RHODS Family Operator Is Installed  namespace=${OPERATOR_NAMESPACE}
+          ...                                              subscription=${OPERATOR_NAME}  AND
+          ...  Oc Get  kind=Namespace  field_selector=metadata.name=${MONITORING_NAMESPACE}  AND
+          ...  Oc Get  kind=Namespace  field_selector=metadata.name=${APPLICATIONS_NAMESPACE}  AND
+          ...  Oc Get  kind=Namespace  field_selector=metadata.name=${OPERATOR_NAMESPACE}
       ELSE
-          IF  "${INSTALL_TYPE}" == "CLi"
-              ${result}=  Run Keyword And Return Status
-              ...  Run Keywords
-              ...  Check A RHODS Family Operator Is Installed  namespace=redhat-ods-operator
-              ...                                              subscription=rhoai-operator-dev  AND
-              ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-ods-monitoring  AND
-              ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-ods-applications  AND
-              ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-ods-operator  AND
-              ...  Oc Get  kind=CatalogSource  namespace=openshift-marketplace
-              ...          field_selector=metadata.name=rhoai-catalog-dev
-          ELSE IF  "${INSTALL_TYPE}" == "OperatorHub"
-              ${result}=  Run Keyword And Return Status
-              ...  Run Keywords
-              ...  Check A RHODS Family Operator Is Installed  namespace=redhat-ods-operator
-              ...                                              subscription=rhoai-operator  AND
-              ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-ods-monitoring  AND
-              ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-ods-applications  AND
-              ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-ods-operator  AND
-              ...  Oc Get  kind=CatalogSource  namespace=openshift-marketplace
-              ...          field_selector=metadata.name=redhat-operators
-          ELSE
-              FAIL    Provided test environment and install type combination is not supported
-          END
+          FAIL    Provided test environment and install type combination is not supported
       END
   ELSE IF  "${cluster_type}" == "managed"
+      Set Global Variable    ${SUB_NAME}               addon-managed-odh
+      Set Global Variable    ${CATALOG_NAME}           addon-managed-odh-catalog
+      #For managed cluster
       IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
-          ${result}=  Run Keyword And Return Status
-          ...  Run Keywords
-          ...  Check A RHODS Family Operator Is Installed  namespace=openshift-operators
-          ...                                              subscription=rhods-odh-nightly-operator  AND
-          ...  Oc Get  kind=Namespace  field_selector=metadata.name=opendatahub  AND
-          ...  Oc Get  kind=CatalogSource  namespace=openshift-marketplace
-          ...          field_selector=metadata.name=redhat-operators
-      ELSE
-          ${result}=  Run Keyword And Return Status
-          ...  Run Keywords
-          ...  Check A RHODS Family Operator Is Installed  namespace=redhat-ods-operator
-          ...                                              subscription=addon-managed-odh  AND
-          ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-ods-monitoring  AND
-          ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-ods-applications  AND
-          ...  Oc Get  kind=Namespace  field_selector=metadata.name=redhat-ods-operator  AND
-          ...  Oc Get  kind=CatalogSource  namespace=redhat-ods-operator
-          ...          field_selector=metadata.name=addon-managed-odh-catalog
+           Set Global Variable    ${OPERATOR_NAMESPACE}    openshift-marketplace
+           Set Global Variable    ${SUB_NAME}    rhoai-operator-dev
+           Set Global Variable    ${CATALOG_NAME}    rhoai-catalog-dev
       END
+      ${result}=  Run Keyword And Return Status
+      ...  Run Keywords
+      ...  Check A RHODS Family Operator Is Installed  namespace=${OPERATOR_NAMESPACE}
+      ...                                              subscription=${SUB_NAME}  AND
+      ...  Oc Get  kind=Namespace  field_selector=metadata.name=${MONITORING_NAMESPACE}  AND
+      ...  Oc Get  kind=Namespace  field_selector=metadata.name=${APPLICATIONS_NAMESPACE}  AND
+      ...  Oc Get  kind=Namespace  field_selector=metadata.name=${OPERATOR_NAMESPACE}  AND
+      ...  Oc Get  kind=CatalogSource  namespace=${OPERATOR_NAMESPACE}
+      ...          field_selector=metadata.name=${CATALOG_NAME}
   ELSE
       FAIL    Provided test environment and install type ${INSTALL_TYPE} ${UPDATE_CHANNEL} ${cluster_type} combination
       ...     is not supported

@@ -21,7 +21,7 @@ ${RAY_LABEL_SELECTOR}           app.kubernetes.io/name=kuberay
 ${RAY_DEPLOYMENT_NAME}          kuberay-operator
 ${IS_PRESENT}        0
 ${IS_NOT_PRESENT}    1
-&{SAVED_MANATEMENT_STATES}
+&{SAVED_MANAGEMENT_STATES}
 ...  RAY=${EMPTY}
 ...  KUEUE=${EMPTY}
 ...  CODEFLARE=${EMPTY}
@@ -35,7 +35,7 @@ Validate Kueue Managed State
 
     Set DSC Component Managed State And Wait For Completion   kueue    ${KUEUE_DEPLOYMENT_NAME}    ${KUEUE_LABEL_SELECTOR}
 
-    [Teardown]     Restore DSC Component State    kueue    ${KUEUE_DEPLOYMENT_NAME}    ${KUEUE_LABEL_SELECTOR}    ${SAVED_MANATEMENT_STATES.RAY}
+    [Teardown]     Restore DSC Component State    kueue    ${KUEUE_DEPLOYMENT_NAME}    ${KUEUE_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.KUEUE}
 
 Validate Kueue Removed State
     [Documentation]    Validate that Kueue management state Removed does remove relevant resources.
@@ -43,16 +43,16 @@ Validate Kueue Removed State
 
     Set DSC Component Removed State And Wait For Completion   kueue    ${KUEUE_DEPLOYMENT_NAME}    ${KUEUE_LABEL_SELECTOR}
 
-    [Teardown]     Restore DSC Component State    kueue    ${KUEUE_DEPLOYMENT_NAME}    ${KUEUE_LABEL_SELECTOR}    ${SAVED_MANATEMENT_STATES.RAY}
+    [Teardown]     Restore DSC Component State    kueue    ${KUEUE_DEPLOYMENT_NAME}    ${KUEUE_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.KUEUE}
 
  Validate Codeflare Managed State
     [Documentation]    Validate that the DSC by default sets component 'Codeflare' to sate Managed,
-    ...    check that kueue deployment and pod are created
+    ...    check that Codeflare deployment and pod are created
     [Tags]    Operator    Tier1    RHOAIENG-5435    codeflare-managed
 
     Set DSC Component Managed State And Wait For Completion   codeflare    ${CODEFLARE_DEPLOYMENT_NAME}    ${CODEFLARE_LABEL_SELECTOR}
 
-    [Teardown]     Restore DSC Component State    codeflare    ${CODEFLARE_DEPLOYMENT_NAME}    ${CODEFLARE_LABEL_SELECTOR}    ${SAVED_MANATEMENT_STATES.CODEFLARE}
+    [Teardown]     Restore DSC Component State    codeflare    ${CODEFLARE_DEPLOYMENT_NAME}    ${CODEFLARE_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.CODEFLARE}
 
 Validate Codeflare Removed State
     [Documentation]    Validate that Codeflare management state Removed does remove relevant resources.
@@ -60,7 +60,7 @@ Validate Codeflare Removed State
 
     Set DSC Component Removed State And Wait For Completion   codeflare    ${CODEFLARE_DEPLOYMENT_NAME}    ${CODEFLARE_LABEL_SELECTOR}
 
-    [Teardown]     Restore DSC Component State    codeflare    ${CODEFLARE_DEPLOYMENT_NAME}    ${CODEFLARE_LABEL_SELECTOR}    ${SAVED_MANATEMENT_STATES.CODEFLARE}
+    [Teardown]     Restore DSC Component State    codeflare    ${CODEFLARE_DEPLOYMENT_NAME}    ${CODEFLARE_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.CODEFLARE}
 
 Validate Ray Managed State
     [Documentation]    Validate that the DSC by default sets component 'Ray' to sate Managed,
@@ -69,7 +69,7 @@ Validate Ray Managed State
 
     Set DSC Component Managed State And Wait For Completion   ray    ${RAY_DEPLOYMENT_NAME}    ${RAY_LABEL_SELECTOR}
 
-    [Teardown]     Restore DSC Component State    ray    ${RAY_DEPLOYMENT_NAME}    ${RAY_LABEL_SELECTOR}    ${SAVED_MANATEMENT_STATES.RAY}
+    [Teardown]     Restore DSC Component State    ray    ${RAY_DEPLOYMENT_NAME}    ${RAY_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.RAY}
 
 Validate Ray Removed State
     [Documentation]    Validate that Ray management state Removed does remove relevant resources.
@@ -77,7 +77,7 @@ Validate Ray Removed State
 
     Set DSC Component Removed State And Wait For Completion   ray    ${RAY_DEPLOYMENT_NAME}    ${RAY_LABEL_SELECTOR}
 
-    [Teardown]     Restore DSC Component State    ray    ${RAY_DEPLOYMENT_NAME}    ${RAY_LABEL_SELECTOR}    ${SAVED_MANATEMENT_STATES.RAY}
+    [Teardown]     Restore DSC Component State    ray    ${RAY_DEPLOYMENT_NAME}    ${RAY_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.RAY}
 
 
 *** Keywords ***
@@ -85,10 +85,10 @@ Suite Setup
     [Documentation]    Suite Setup
     RHOSi Setup
     Wait For DSC Conditions Reconciled    ${OPERATOR_NS}     ${DSC_NAME}
-    ${SAVED_MANATEMENT_STATES.RAY}=     Get DSC Component State    ${DSC_NAME}    ray    ${OPERATOR_NS}
-    ${SAVED_MANATEMENT_STATES.KUEUE}=     Get DSC Component State    ${DSC_NAME}    kueue    ${OPERATOR_NS}
-    ${SAVED_MANATEMENT_STATES.CODEFLARE}=     Get DSC Component State    ${DSC_NAME}    codeflare    ${OPERATOR_NS}
-    Set Suite Variable    ${SAVED_MANATEMENT_STATES}
+    ${SAVED_MANAGEMENT_STATES.RAY}=     Get DSC Component State    ${DSC_NAME}    ray    ${OPERATOR_NS}
+    ${SAVED_MANAGEMENT_STATES.KUEUE}=     Get DSC Component State    ${DSC_NAME}    kueue    ${OPERATOR_NS}
+    ${SAVED_MANAGEMENT_STATES.CODEFLARE}=     Get DSC Component State    ${DSC_NAME}    codeflare    ${OPERATOR_NS}
+    Set Suite Variable    ${SAVED_MANAGEMENT_STATES}
 
 Suite Teardown
     [Documentation]    Suite Teardown

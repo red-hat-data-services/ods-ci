@@ -1,3 +1,11 @@
+import ast
+import decimal
+import numbers
+import random
+import re
+from pathlib import Path
+
+import requests
 from robot.libraries.BuiltIn import BuiltIn
 from robotlibcore import keyword
 from semver import VersionInfo
@@ -149,11 +157,6 @@ class Helpers:
     @keyword
     def inference_comparison(self, expected, received, threshold=0.00001):
         try:
-            import ast
-            import decimal
-            import numbers
-            import re
-
             model_name = re.compile(r"^[\S]+(__isvc-)?[\w\d]+$")
 
             # Cast from string to python type
@@ -220,11 +223,6 @@ class Helpers:
         shape={"B": 1, "C": 3, "H": 512, "W": 512},
         no_requests=100,
     ):
-        import random
-        from pathlib import Path
-
-        import requests
-
         for _ in range(no_requests):
             data_img = [
                 random.randrange(value_range[0], value_range[1]) for _ in range(shape["C"] * shape["H"] * shape["W"])
@@ -278,8 +276,6 @@ class Helpers:
         resource list as well as the runtime list are both processed this way, this should
         not cause an issue.
         """
-        import re
-
         regex = re.compile(r"-\b(?:[a-z]+\d|\d+[a-z])[a-z0-9]*\b|-\b[a-z0-9]{5}$\b")
         out = []
         with open(filename_in, "r") as f:

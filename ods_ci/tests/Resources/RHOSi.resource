@@ -40,6 +40,7 @@ Resource            Common.robot
 ...                         Set Thanos Credentials Variables
 ...                         Generate Minio Random Credentials
 ...                         Get Minio Credentials
+...                         Create Inference Access Token
 
 
 *** Keywords ***

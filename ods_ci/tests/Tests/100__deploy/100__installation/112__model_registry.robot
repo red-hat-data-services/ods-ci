@@ -5,6 +5,7 @@ Resource            ../../../Resources/Page/ODH/JupyterHub/HighAvailability.robo
 Resource            ../../../Resources/OCP.resource
 Suite Setup         Registry Suite Setup
 Suite Teardown      Teardown
+Test Tags           ExcludeOnRHOAI
 
 
 *** Variables ***
@@ -15,7 +16,9 @@ ${MODEL_REGISTRY_NS}=    ${APPLICATIONS_NAMESPACE}
 Verify Model Registry Operator Installation
     [Documentation]    Verifies that the Model Registry operator has been
     ...    deployed in the ${APPLICATIONS_NAMESPACE} namespace in ODS
-    [Tags]    OpenDataHub    robot:recursive-continue-on-failure
+    [Tags]    Smoke
+    ...       Tier1
+    ...       OpenDataHub    robot:recursive-continue-on-failure
     Wait Until Keyword Succeeds  1 min  10 sec  Verify Model Registry Operator Deployment
     Wait Until Keyword Succeeds    10 times  5s    Verify Model Registry ReplicaSets Info
     Wait Until Keyword Succeeds    10 times  5s    Verify Model Registry Container Names

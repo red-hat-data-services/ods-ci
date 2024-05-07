@@ -51,16 +51,16 @@ Fill In Run Creation Form    # robocop: disable
     [Arguments]    ${name}    ${pipeline_name}=${NONE}    ${from_actions}=${TRUE}    ${run_type}=Immediate
     ...            ${trigger_type}=Periodic    ${start_date}=${NONE}    ${start_time}=${NONE}
     ...            ${end_date}=${NONE}    ${end_time}=${NONE}    ${cron_expr}=${NONE}&{model_param}
+    Element Should Be Disabled    ${PIPELINE_RUN_CREATE_BTN_XP}
     Input Text    ${PIPELINE_RUN_NAME_INPUT_XP}    ${name}
     Input Text    ${PIPELINE_RUN_DESC_INPUT_XP}    ${name}
-    Run Keyword And Warn On Failure    Element Should Be Disabled    ${PIPELINE_RUN_CREATE_BTN_XP}
 
 #    TODO: by fix it to select latest version of ${pipeline_name}
 #    IF    "${pipeline_name}" != "${NONE}"
 #        Select Pipeline For The Run    pipeline_name=${pipeline_name}
 #    END
 
-    Element Should Be Enabled    ${PIPELINE_RUN_CREATE_BTN_XP}
+    Wait Until Element Is Enabled    ${PIPELINE_RUN_CREATE_BTN_XP}  timeout=10
     # select run_type
     # set options based on run_type
     # change model param if required

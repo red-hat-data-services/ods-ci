@@ -145,7 +145,6 @@ Verify Displayed GPU Count
     IF    ${expanded}==False
         Click Element    xpath://button[@aria-expanded="false"]/span[.="${server_name}"]
     END
-    Click Element    ${SERVING_MODEL_SERVERS_SIDE_MENU}
     Sleep  5s      reason=Sometimes the number of current Accelerators take a few seconds to update
     ${current_accs}=  Get Text  xpath://span[text()="${server_name}"]/../../../following-sibling::tr//td[@data-label]/div/dl/div[4]/dd/div
     Should Match  ${current_accs}  ${no_gpus}

@@ -52,6 +52,7 @@ ${GROUPS_CONFIG_CM}=    groups-config
 ${RHODS_GROUPS_CONFIG_CM}=    rhods-groups-config
 ${RHODS_LOGO_XPATH}=    //img[@alt="${ODH_DASHBOARD_PROJECT_NAME} Logo"]
 @{ISV_TO_REMOVE_SELF_MANAGED}=      Create List     starburst   nvidia    rhoam
+@{HOME_HEADERS}=    Projects    Train, serve, monitor, and manage AI/ML models    Get oriented with learning resources    Enable your team
 
 
 *** Keywords ***
@@ -116,6 +117,17 @@ Wait For Dashboard Page Title
     # Sometimes the h1 text is inside a child element, thus get it with textContent attribute
     ${title}=    Get Element Attribute    ${page_title_element}    textContent
     Should Be Equal    ${title}    ${page_title}
+
+Wait For RHOAI Home Page To Load
+    [Documentation]    Wait until the visible title (h1) of the current Dashboard page is '${page_title}'
+    [Arguments]  ${timeout}=10s
+    FOR    ${index}    ${page_title}    IN ENUMERATE    @{HOME_HEADERS}
+        ${page_title_element}=    Set Variable    (//h1)[${index}+1]
+        Wait Until Element is Visible    ${page_title_element}    timeout=${timeout}
+        ${title}=    Get Element Attribute    ${page_title_element}    textContent
+        Should Be Equal    ${title}    ${page_title}
+    END
+
 
 Wait Until RHODS Dashboard ${dashboard_app} Is Visible
   # Ideally the timeout would be an arg but Robot does not allow "normal" and "embedded" arguments

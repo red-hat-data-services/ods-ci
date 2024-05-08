@@ -431,12 +431,12 @@ Launch Notebook And Stop It    # robocop: disable
     Set Library Search Order    SeleniumLibrary
     Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
-    Wait For RHODS Dashboard To Load
+    Wait For RHOAI Home Page To Load
     Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =    Is Service Account Authorization Required
     IF    ${authorization_required}    Authorize Jupyterhub Service Account
-    Wait Until Page Contains    Start a notebook server
+    Wait Until Page Contains    Start a notebook server    30
     Fix Spawner Status
     Spawn Notebook With Arguments    image=minimal-notebook
     End Web Test

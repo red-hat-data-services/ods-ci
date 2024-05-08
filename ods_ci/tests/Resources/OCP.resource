@@ -220,7 +220,7 @@ Verify Pod Logs Do Not Contain
     [Documentation]    Checks there are no errors on Pod Logs
     [Arguments]    ${pod_name}    ${pod_namespace}    ${regex_pattern}    ${container}
     ${pod_logs}=    Oc Get Pod Logs  name=${pod_name}  namespace=${pod_namespace}  container=${container}
-    ${match_list} 	 Get Regexp Matches   ${pod_logs}     ${regex_pattern}
+    ${match_list}    Get Regexp Matches   ${pod_logs}     ${regex_pattern}
     ${entry_msg}      Remove Duplicates      ${match_list}
     ${length}         Get Length   ${entry_msg}
     IF   ${length} != ${0}    FAIL    Pod ${pod_name} logs should not contain regexp ${regex_pattern}. Matching log entry: ${entry_msg}
@@ -250,3 +250,11 @@ Delete Namespace From Openshift
         ${rc}   ${output}=    Run And Return Rc And Output    oc delete project ${namespace}
         Should Be Equal    "${rc}"    "0"   msg=${output}
     END
+
+Check If Pod Does Not Exist
+    [Documentation]    Check if pod does not exist using pod label-selector
+    [Arguments]        ${label_selector}    ${namespace}
+
+    ${rc}   ${output}=    Run And Return Rc And Output
+    ...    oc get pod -l {label_selector} -n ${namespace}
+    Should Be Equal    "${rc}"    "1"    msg=${output}

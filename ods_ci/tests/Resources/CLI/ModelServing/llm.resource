@@ -13,8 +13,10 @@ ${INFERENCESERVICE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/serving_runtimes/base/
 ${INFERENCESERVICE_FILLED_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/serving_runtimes/isvc_filled.yaml
 ${DEFAULT_BUCKET_SECRET_NAME}=    models-bucket-secret
 ${DEFAULT_BUCKET_SA_NAME}=        models-bucket-sa
+${DEFAULT_BUCKET_PREFIX}=         models-bucket
 ${BUCKET_SECRET_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/bucket_secret.yaml
 ${BUCKET_SA_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/bucket_sa.yaml
+${ROLE_BINDING_FILEPATH}=   ${LLM_RESOURCES_DIRPATH}/rolebinding_view.yaml
 ${USE_BUCKET_HTTPS}=    "1"
 ${MODELS_BUCKET}=    ${S3.BUCKET_3}
 ${SERVICEMESH_CR_NS}=    istio-system
@@ -315,6 +317,7 @@ Query Model Multiple Times
     ...            ${port}=443
     ...            ${body_params}=&{EMPTY}
     ...            ${cert}=${False}
+    ...            ${token}=${None}
     ...            &{args}
     IF    "${inference_type}" == "streaming"
         ${streamed_response}=    Set Variable    ${TRUE}
@@ -339,6 +342,9 @@ Query Model Multiple Times
     ${body}    ${header}    ${extra_args}=    llm.Prepare Payload    runtime=${runtime}    protocol=${protocol}
     ...    inference_type=${inference_type}    model_name=${model_name}    body_params=${body_params}
     ...    query_text=${EXP_RESPONSES}[queries][${query_idx}][query_text]
+    IF    "${token}" != "${None}"
+        ${header}=    Set Variable  "Authorization: Bearer ${token}" -H ${header}
+    END
     ${runtime_details}=    Set Variable    ${RUNTIME_FORMATS}[${runtime}][endpoints][${inference_type}][${protocol}]
     ${endpoint}=    Set Variable    ${runtime_details}[endpoint]
     Set To Dictionary    ${args}    &{extra_args}
@@ -774,6 +780,23 @@ Start Port-forwarding
     ...    alias=${process_alias}    stderr=STDOUT    shell=yes
     Process Should Be Running    ${process}
     sleep  7s
+
+Create Role Binding For Authorino
+    [Arguments]    ${name}    ${namespace}
+    Set Test Variable    ${name}
+    Set Test Variable    ${namespace}
+    Set Test Variable    ${nameview}    ${name}-view
+    Set Test Variable    ${namesa}    ${name}-sa
+    Create File From Template    ${ROLE_BINDING_FILEPATH}   ${LLM_RESOURCES_DIRPATH}/rb.filled.yaml
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...     oc apply -f ${LLM_RESOURCES_DIRPATH}/rb.filled.yaml
+    Should Be Equal As Integers    ${rc}    ${0}
+
+Create Inference Access Token
+    [Arguments]  ${test_namespace}  ${bucket_sa_name}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc create token -n ${test_namespace} ${bucket_sa_name}
+    Should Be Equal As Strings    ${rc}    0
+    [Return]    ${out}
 
 Wait For Model KServe Deployment To Be Ready
     [Documentation]    Waits for the Pod to be Ready (i.e., Running status) and checks that

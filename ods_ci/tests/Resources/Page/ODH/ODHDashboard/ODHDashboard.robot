@@ -80,6 +80,7 @@ Login To RHODS Dashboard
    IF  ${login-required}  Login To Openshift  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
    ${authorize_service_account}=  Is rhods-dashboard Service Account Authorization Required
    IF  ${authorize_service_account}  Authorize rhods-dashboard service account
+   Navigate To Page    Applications    Enabled
 
 Logout From RHODS Dashboard
     [Documentation]  Logs out from the current user in the RHODS dashboard

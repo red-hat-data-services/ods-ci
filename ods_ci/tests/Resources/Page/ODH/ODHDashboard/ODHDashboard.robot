@@ -62,8 +62,7 @@ Launch Dashboard
   Open Browser  ${dashboard_url}  browser=${browser}  options=${browser_options}
   ...    alias=${browser_alias}
   Login To RHODS Dashboard  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
-  Wait For RHODS Dashboard To Load    expected_page=${expected_page}
-  ...    wait_for_cards=${wait_for_cards}
+  Wait For RHOAI Home Page To Load
 
 Authorize rhods-dashboard service account
   Wait Until Page Contains  Authorize Access

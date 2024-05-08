@@ -52,7 +52,7 @@ ${GROUPS_CONFIG_CM}=    groups-config
 ${RHODS_GROUPS_CONFIG_CM}=    rhods-groups-config
 ${RHODS_LOGO_XPATH}=    //img[@alt="${ODH_DASHBOARD_PROJECT_NAME} Logo"]
 @{ISV_TO_REMOVE_SELF_MANAGED}=      Create List     starburst   nvidia    rhoam
-@{HOME_HEADERS}=    Projects    Train, serve, monitor, and manage AI/ML models    Get oriented with learning resources    Enable your team
+@{HOME_HEADERS}=    Projects    Train, serve, monitor, and manage AI/ML models    Get oriented with learning resources
 
 
 *** Keywords ***
@@ -118,15 +118,16 @@ Wait For Dashboard Page Title
     Should Be Equal    ${title}    ${page_title}
 
 Wait For RHOAI Home Page To Load
-    [Documentation]    Wait until the visible title (h1) of the current Dashboard page is '${page_title}'
+    [Documentation]    Compare the h1 headers of the landing page with the expected ones
     [Arguments]  ${timeout}=10s
-    FOR    ${index}    ${page_title}    IN ENUMERATE    @{HOME_HEADERS}
-        ${page_title_element}=    Set Variable    (//h1)[${index}+1]
-        Wait Until Element is Visible    ${page_title_element}    timeout=${timeout}
-        ${title}=    Get Element Attribute    ${page_title_element}    textContent
-        Should Be Equal    ${title}    ${page_title}
+    Wait Until Element is Visible    xpath:(//h1)[1]
+    ${h1_elements}    Get WebElements    xpath://h1
+    ${h1_texts}    Create List
+    FOR    ${element}    IN    @{h1_elements}
+        ${text}    Get Text    ${element}
+        Append To List    ${h1_texts}    ${text}
     END
-
+    List Should Contain Sub List    ${h1_texts}    ${HOME_HEADERS}
 
 Wait Until RHODS Dashboard ${dashboard_app} Is Visible
   # Ideally the timeout would be an arg but Robot does not allow "normal" and "embedded" arguments

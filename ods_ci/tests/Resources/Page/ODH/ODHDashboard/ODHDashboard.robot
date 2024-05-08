@@ -33,7 +33,7 @@ ${IMAGE_XP_OLD}=  ${HEADER_XP}/img[contains(@class, 'odh-card__header-brand')]
 ${APPS_DICT_PATH_LATEST}=   ods_ci/tests/Resources/Files/AppsInfoDictionary_latest.json
 ${SIDEBAR_TEXT_CONTAINER_XP}=  //div[contains(@class,'odh-markdown-view')]
 ${SUCCESS_MSG_XP}=  //div[@class='pf-v5-c-alert pf-m-success']
-${PAGE_TITLE_XP}=  //*[@data-testid="app-page-title"]
+${PAGE_TITLE_XP}=  //*[@data-testid="home-page"]
 ${CLUSTER_SETTINGS_XP}=  //*[@data-testid="app-page-title" and text()="Cluster settings"]
 ${PVC_SIZE_INPUT_XP}=           xpath=//*[@data-testid="pvc-size-input"]
 ${USAGE_DATA_COLLECTION_XP}=    //*[@id="usage-data-checkbox"]
@@ -99,23 +99,26 @@ Logout From RHODS Dashboard
     Wait Until Page Contains  Log in with OpenShift
 
 Wait For RHODS Dashboard To Load
-    [Arguments]  ${dashboard_title}="${ODH_DASHBOARD_PROJECT_NAME}"    ${wait_for_cards}=${TRUE}
-    ...          ${expected_page}=Enabled
-    Wait For Condition    return document.title == ${dashboard_title}    timeout=15s
-    Wait Until Page Contains Element    xpath:${RHODS_LOGO_XPATH}    timeout=20s
-    IF    "${expected_page}" != "${NONE}"    Wait For Dashboard Page Title    ${expected_page}    timeout=75s
+    [Documentation]    This is a generic function used everywhere.
+    ...    Due that it is normally called after the login or after clicking in a menu item.
+    [Arguments]  ${dashboard_title}=${ODH_DASHBOARD_PROJECT_NAME}    ${wait_for_cards}=${TRUE}
+    ...          ${expected_page}=Home
+    Log    ${dashboard_title}
+    Log    ${wait_for_cards}
+    Log    ${expected_page}
+    # page
+    IF    "${expected_page}" == "Home"
+        Wait Until Page Contains Element    //section[@data-testid="landing-page-projects"]    timeout=10s
+    ELSE
+        Wait Until Page Contains Element    //main[@id="dashboard-page-main"]    timeout=10s
+        Wait Until Element Is Visible    //h1[text() = "${expected_page}"]
+    END
+    # cards
     IF    ${wait_for_cards} == ${TRUE}
         Wait Until Keyword Succeeds    3 times   5 seconds    Wait Until Cards Are Loaded
     END
-
-Wait For Dashboard Page Title
-    [Documentation]    Wait until the visible title (h1) of the current Dashboard page is '${page_title}'
-    [Arguments]  ${page_title}    ${timeout}=10s
-    ${page_title_element}=    Set Variable    //*[@data-testid="app-page-title"]
-    Wait Until Element is Visible    ${page_title_element}    timeout=${timeout}
-    # Sometimes the h1 text is inside a child element, thus get it with textContent attribute
-    ${title}=    Get Element Attribute    ${page_title_element}    textContent
-    Should Be Equal    ${title}    ${page_title}
+    # title
+    Wait For Condition    return document.title == "${dashboard_title}"    timeout=15s
 
 Wait Until RHODS Dashboard ${dashboard_app} Is Visible
   # Ideally the timeout would be an arg but Robot does not allow "normal" and "embedded" arguments

@@ -32,7 +32,6 @@ Create S3 Data Connection
     ...            ${S3_DC_ADD_BTN}    aws_s3_endpoint=${aws_s3_endpoint}    aws_region=${aws_region}
     ...            connected_workbench=${connected_workbench}    press_cancel=${press_cancel}
     ...            aws_bucket_name=${aws_bucket_name}
-    Wait Until Project Is Open    project_title=${project_title}
 
 Edit S3 Data Connection
     [Documentation]    Edits a S3 Data Connection from DS Project details page
@@ -118,7 +117,7 @@ Fill Data Connection Form
         Click Button    ${action_btn}
     END
     Wait Until Generic Modal Disappears
-    Wait Until Project Is Open    project_title=${project_title}
+    Wait Until Element Is Visible    //table[@data-testid="data-connection-table"]
 
 Get Data Connection Form Values
     [Arguments]    ${dc_name}

@@ -36,8 +36,7 @@ Create Pipeline Server    # robocop: off=too-many-calls-in-keyword
     Element Should Be Enabled    ${PIPELINES_SERVER_CONFIG_BTN_XP}
     Click Element    ${PIPELINES_SERVER_CONFIG_BTN_XP}
     Wait Until Generic Modal Disappears
-    Wait Until Project Is Open    project_title=${project_title}
-    ...    timeout-pre-spinner=5s    timeout-spinner=60s
+    Wait Until Page Contains Element    xpath=//h3[text()="Start by importing a pipeline"]    timeout=120s
 
 Select Data Connection
     [Documentation]    Selects an existing data connection from the dropdown
@@ -71,7 +70,6 @@ Import Pipeline
         Click Button    ${PIPELINES_IMPORT_BTN_FORM_XP}
     END
     Wait Until Generic Modal Disappears
-    Wait Until Project Is Open    project_title=${project_title}
 
 Create Pipeline Run
     [Documentation]    Create a pipeline run from DS Project details page.
@@ -84,16 +82,13 @@ Create Pipeline Run
     ...            ${end_time}=${NONE}    ${cron_expr}=${NONE}    ${press_cancel}=${FALSE}    &{model_param}
     Projects.Move To Tab    Pipelines
     Pipelines.Click Action From Pipeline Actions Menu    pipeline_name=${pipeline_name}    action=Create run
-    Wait For RHODS Dashboard To Load    expected_page=Create run
-    ...    wait_for_cards=${FALSE}
+    Wait Until Page Contains Element    xpath://input[@id="run-name"]
     Fill In Run Creation Form    name=${name}    pipeline_name=${pipeline_name}
     ...    run_type=${run_type}    trigger_type=Periodic    start_date=${start_date}
     ...    start_time=${start_time}    end_date=${end_date}    end_time=${end_time}
     ...    cron_expr=${cron_expr}    &{model_param}
     IF    ${press_cancel}
         Click Button    ${GENERIC_CANCEL_BTN_XP}
-        Wait For RHODS Dashboard To Load    expected_page=Pipelines
-        ...    wait_for_cards=${FALSE}
         ${workflow_name}=    Set Variable    ${NONE}
     ELSE
         Click Element    ${CREATE_RUN_BTN_XP}

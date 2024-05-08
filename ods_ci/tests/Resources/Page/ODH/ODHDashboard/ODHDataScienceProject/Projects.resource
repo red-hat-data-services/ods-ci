@@ -22,9 +22,15 @@ Open Data Science Projects Home Page
     [Documentation]    Open "Data Science Projects" page from the sidebar
     Wait Until Page Contains    Data Science Projects
     Click Link      Data Science Projects
-    Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
-    Wait Until Page Contains    View your existing projects or create new projects.    timeout=30
-    Maybe Wait For Dashboard Loading Spinner Page
+    Wait Until Page Contains Element    xpath://*[@data-testid="app-page-title"]    timeout=10s
+    Wait Until Page Contains Element    xpath://button[@id="project-scope-selection"]    timeout=10s
+    Click Element    xpath://button[@id="project-scope-selection"]
+    Click Element    //li[button[span[text()='Data science projects']]]
+    ${contains_data}=   Run Keyword And Return Status    Wait Until Page Contains Element    xpath://*[@data-testid="project-view-table"]    timeout=10s
+    Log    ${contains_data}
+    IF    ${contains_data} == ${FALSE}
+        Wait Until Element Is Visible    //h2[text()="No data science projects yet."]
+    END
 
 Is Data Science Projects Page Open
     [Documentation]    Checks if Data Science Projects home page is open. Returns TRUE or FALSE
@@ -42,6 +48,7 @@ Open Data Science Project Details Page
         IF    ${is_open} == ${FALSE}
             Open Data Science Projects Home Page
         END
+        Wait Until Element Is Visible    //table[@data-testid="project-view-table"]
         Click Link    ${project_title}
         Wait Until Project Is Open    project_title=${project_title}
     END
@@ -83,8 +90,7 @@ Project Should Not Exist In Openshift
 
 Is Data Science Project Details Page Open
     [Arguments]     ${project_title}
-    ${page_open}=   Run Keyword And Return Status
-    ...    Wait For Dashboard Page Title    ${project_title}
+    ${page_open}=   Run Keyword And Return Status    Wait For Dashboard Page Title    ${project_title}
     RETURN    ${page_open}
 
 Wait Until Project Is Open

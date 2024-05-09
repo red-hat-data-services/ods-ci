@@ -104,7 +104,7 @@ Wait For RHODS Dashboard To Load
     Wait For Condition    return document.title == ${dashboard_title}    timeout=15s
     Wait Until Page Contains Element    xpath:${RHODS_LOGO_XPATH}    timeout=20s
     IF    "${expected_page}" != "${NONE}"
-        # Detect if we are ein the new (2.10) landing page instead in "Enable"
+        # Detect if we are in the new landing page instead in "Enable"
         ${first_header}=    Set Variable    (//h1)[1]
         Wait Until Element Is Visible    xpath:${first_header}
         ${h1_text}    Get Text    xpath:${first_header}

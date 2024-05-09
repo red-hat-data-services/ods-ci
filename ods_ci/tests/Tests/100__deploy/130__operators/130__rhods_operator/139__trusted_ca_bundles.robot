@@ -110,6 +110,7 @@ Check ConfigMap Contains CA Bundle Key
 Set Custom CA Bundle Value In DSCI
     [Documentation]    Set Custom CA Bundle value in DSCI
     [Arguments]    ${DSCI}    ${custom_ca_bundle_value}    ${namespace}
+    ${custom_ca_bundle_value}=    Multiline To Oneline String    ${custom_ca_bundle_value}    \\n
     ${rc}   ${output}=    Run And Return Rc And Output
     ...    oc patch DSCInitialization/${DSCI} -n ${namespace} -p '{"spec":{"trustedCABundle":{"customCABundle":"${custom_ca_bundle_value}"}}}' --type merge
     Should Be Equal    "${rc}"    "0"   msg=${output}

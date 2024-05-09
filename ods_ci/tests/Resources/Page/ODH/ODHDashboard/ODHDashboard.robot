@@ -62,7 +62,7 @@ Launch Dashboard
   Open Browser  ${dashboard_url}  browser=${browser}  options=${browser_options}
   ...    alias=${browser_alias}
   Login To RHODS Dashboard  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
-  Wait For RHOAI Home Page To Load
+  Wait For RHODS Dashboard To Load expected_page=${expected_page}
 
 Authorize rhods-dashboard service account
   Wait Until Page Contains  Authorize Access
@@ -103,7 +103,17 @@ Wait For RHODS Dashboard To Load
     ...          ${expected_page}=Enabled
     Wait For Condition    return document.title == ${dashboard_title}    timeout=15s
     Wait Until Page Contains Element    xpath:${RHODS_LOGO_XPATH}    timeout=20s
-    IF    "${expected_page}" != "${NONE}"    Wait For Dashboard Page Title    ${expected_page}    timeout=75s
+    IF    "${expected_page}" != "${NONE}"
+        # Detect if we are ein the new (2.10) landing page instead in "Enable"
+        ${first_header}=    Set Variable    (//h1)[1]
+        Wait Until Element is Visible    xpath:${first_header}
+        ${h1_text}    Get Text    xpath:${first_header}
+        IF    "${expected_page}" == "Enabled" and "${h1_text}" == "${HOME_HEADERS}[0]"
+            Wait For RHOAI Home Page To Load
+        ELSE
+            Wait For Dashboard Page Title    ${expected_page}    timeout=75s
+        END
+    END
     IF    ${wait_for_cards} == ${TRUE}
         Wait Until Keyword Succeeds    3 times   5 seconds    Wait Until Cards Are Loaded
     END

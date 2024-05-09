@@ -310,3 +310,13 @@ class Helpers:
             SyntaxError: EOL while scanning string literal (<string>, line 1)
         """
         return string is None or string == ""
+
+    @keyword
+    def multiline_to_oneline_string(self, multiline_string, delimeter=" "):
+        """
+        Converts a mutliline string into a oneline string with a provided delimeter.
+        Robot Framework doesn't properly handle multi-line strings and throws
+            Evaluating expression '"...".replace('', '\n')' failed:
+            SyntaxError: unterminated string literal (detected at line 1) (<string>, line 1)
+        """
+        return multiline_string.replace("\n", delimeter)

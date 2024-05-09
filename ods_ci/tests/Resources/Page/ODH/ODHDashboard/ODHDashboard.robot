@@ -106,7 +106,7 @@ Wait For RHODS Dashboard To Load
     IF    "${expected_page}" != "${NONE}"
         # Detect if we are ein the new (2.10) landing page instead in "Enable"
         ${first_header}=    Set Variable    (//h1)[1]
-        Wait Until Element is Visible    xpath:${first_header}
+        Wait Until Element Is Visible    xpath:${first_header}
         ${h1_text}    Get Text    xpath:${first_header}
         IF    "${expected_page}" == "Enabled" and "${h1_text}" == "${HOME_HEADERS}[0]"
             Wait For RHOAI Home Page To Load
@@ -129,7 +129,6 @@ Wait For Dashboard Page Title
 
 Wait For RHOAI Home Page To Load
     [Documentation]    Compare the h1 headers of the landing page with the expected ones
-    [Arguments]  ${timeout}=10s
     Wait Until Element is Visible    xpath:(//h1)[1]
     ${h1_elements}    Get WebElements    xpath://h1
     ${h1_texts}    Create List

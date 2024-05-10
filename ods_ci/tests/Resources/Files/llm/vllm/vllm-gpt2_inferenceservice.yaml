@@ -1,0 +1,14 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata: 
+  name: vllm-gpt2-openai
+  namespace: vllm-gpt2
+  labels:
+    modelmesh-enabled: "true"
+spec: 
+  predictor: 
+    model: 
+      runtime: kserve-vllm
+      modelFormat: 
+        name: vLLM
+      storageUri: pvc://vlmm-gpt2-claim/

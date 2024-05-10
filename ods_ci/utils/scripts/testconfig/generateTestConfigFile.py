@@ -233,6 +233,14 @@ def generate_test_config_file(
     if config_data.get("PIP_CA_BUNDLE"):
         data["PIP_CA_BUNDLE"] = config_data["PIP_CA_BUNDLE"]
 
+    # Git mirror details (optional)
+    if config_data.get("GIT_HTTP_URL"):
+        data["GIT_HTTP_URL"] = config_data["GIT_HTTP_URL"]
+    if config_data.get("GIT_HTTPS_URL"):
+        data["GIT_HTTPS_URL"] = config_data["GIT_HTTPS_URL"]
+    if config_data.get("GIT_HTTPS_CA_BUNDLE"):
+        data["GIT_HTTPS_CA_BUNDLE"] = config_data["GIT_HTTPS_CA_BUNDLE"]
+
     if components:
         print("Setting components")
         print(components)

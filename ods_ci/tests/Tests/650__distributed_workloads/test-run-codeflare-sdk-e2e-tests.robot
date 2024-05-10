@@ -11,6 +11,7 @@ Resource          ../../Resources/RHOSi.resource
 *** Variables ***
 ${CODEFLARE-SDK_DIR}                codeflare-sdk
 ${CODEFLARE-SDK_REPO_URL}           %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
+${CODEFLARE-SDK-API_URL}            %{CODEFLARE-SDK-API_URL=https://api.github.com/repos/project-codeflare/codeflare-sdk/releases/latest}
 ${VIRTUAL_ENV_NAME}                 venv3.9
 
 
@@ -26,11 +27,17 @@ Run TestRayClusterSDKOauth test
 *** Keywords ***
 Prepare Codeflare-sdk E2E Test Suite
     [Documentation]    Prepare codeflare-sdk E2E Test Suite
-    ${result} =    Run Process    git clone ${CODEFLARE-SDK_REPO_URL} ${CODEFLARE-SDK_DIR}
+    ${latest_tag} =    Run Process   curl -s "${CODEFLARE-SDK-API_URL}" | grep '"tag_name":' | cut -d '"' -f 4
+    ...    shell=True    stderr=STDOUT
+    Log To Console  codeflare-sdk latest tag is : ${latest_tag.stdout}
+    IF    ${latest_tag.rc} != 0
+        FAIL    Unable to fetch codeflare-sdk latest tag
+    END
+    ${result} =    Run Process    git clone -b ${latest_tag.stdout} ${CODEFLARE-SDK_REPO_URL} ${CODEFLARE-SDK_DIR}
     ...    shell=true    stderr=STDOUT
     Log To Console    ${result.stdout}
     IF    ${result.rc} != 0
-        FAIL    Unable to clone codeflare-sdk repo ${CODEFLARE-SDK_REPO_URL}
+        FAIL    Unable to clone ${CODEFLARE-SDK_DIR} repo ${CODEFLARE-SDK_REPO_URL}:${latest_tag.stdout}
     END
 
     ${result} =    Run Process  virtualenv -p python3.9 ${VIRTUAL_ENV_NAME}
@@ -56,6 +63,13 @@ Teardown Codeflare-sdk E2E Test Suite
     ...    shell=true    stderr=STDOUT
     IF    ${result.rc} != 0
         FAIL   Unable to switch python environment 3.11
+    END
+
+    ${result} =    Run Process  rm -rf ${CODEFLARE-SDK_DIR}
+    ...    shell=true    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL   Unable to cleanup directory ${CODEFLARE-SDK_DIR}
     END
 
     RHOSi Teardown

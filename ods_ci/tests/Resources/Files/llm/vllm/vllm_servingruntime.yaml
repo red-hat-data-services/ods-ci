@@ -10,8 +10,6 @@ spec:
     serving.knative.openshift.io/enablePassthrough: "true"
     opendatahub.io/dashboard: "true"
     openshift.io/display-name: "vLLLM Openai entry point"
-    serving.kserve.io/enable-prometheus-scraping: "false"
-    serving.kserve.io/enable-metric-aggregation: "true"
     prometheus.io/port: '8080'
     prometheus.io/path: "/metrics/"
   multiModel: false

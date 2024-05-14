@@ -3,7 +3,7 @@ import os
 import shutil
 import sys
 
-from python_terraform import *
+from python_terraform import IsFlagged, IsNotFlagged, Terraform
 
 dir_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(dir_path + "/../../")

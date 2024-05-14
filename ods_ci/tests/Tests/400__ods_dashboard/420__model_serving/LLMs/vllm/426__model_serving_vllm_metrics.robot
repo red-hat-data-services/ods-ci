@@ -53,23 +53,19 @@ Verify User Can Deploy A Model With Vllm Via CLI
     Wait For Pods To Succeed    label_selector=gpt-download-pod=true    namespace=${TEST_NS}
     ${rc}    ${out}=    Run And Return Rc And Output    oc apply -f ${SR_FILEPATH}
     Should Be Equal As Integers    ${rc}    ${0}
-    ${rc}    ${out}=    Run And Return Rc And Output    oc apply -f ${IS_FILEPATH}
-    Should Be Equal As Integers    ${rc}    ${0}
+    Deploy Model Via CLI    ${IS_FILEPATH}    ${TEST_NS}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=vllm-gpt2-openai
     ...    namespace=${TEST_NS}
-    ${pod_name}=  Get Pod Name    namespace=${TEST_NS}
-    ...    label_selector=serving.kserve.io/inferenceservice=vllm-gpt2-openai
-    Start Port-forwarding    namespace=${TEST_NS}    pod_name=${pod_name}    local_port=8080   remote_port=8080
-    ${rc}    ${out}=    Run And Return Rc And Output
-    ...    curl -ks ${INFERENCE_URL} -H "Content-Type: application/json" -d ${INFERENCE_INPUT} | jq .
-    Should Be Equal As Integers    ${rc}    ${0}
-    Log    ${out}
+    Query Model Multiple Times    model_name=gpt2    isvc_name=vllm-gpt2-openai    runtime=vllm    protocol=http
+    ...    inference_type=chat-completions    n_times=3    query_idx=8
+    ...    namespace=${TEST_NS}    string_check_only=${TRUE}
 
 Verify Vllm Metrics Are Present
     [Documentation]    Confirm vLLM metrics are exposed in OpenShift metrics
     [Tags]    Tier1    Sanity    Resources-GPU    ODS-XXX
+    ${host} =    llm.Get KServe Inference Host Via CLI    isvc_name=vllm-gpt2-openai    namespace=${TEST_NS}
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    curl -ks ${METRICS_URL}
+    ...    curl -ks ${host}/metrics/
     Should Be Equal As Integers    ${rc}    ${0}
     Log    ${out}
     ${thanos_url}=    Get OpenShift Thanos URL
@@ -86,11 +82,13 @@ Suite Setup
     IF    ${is_self_managed}
         Configure User Workload Monitoring
         Enable User Workload Monitoring
+        #TODO: Find reliable signal for UWM being ready
+        #Sleep    10m
     END
+    Load Expected Responses
 
 Suite Teardown
     Set Default Storage Class In GCP    default=standard-csi
-    Terminate Process    llm-query-process    kill=true
     ${rc}=    Run And Return Rc    oc delete inferenceservice -n ${TEST_NS} --all
     Should Be Equal As Integers    ${rc}    ${0}
     ${rc}=    Run And Return Rc    oc delete servingruntime -n ${TEST_NS} --all

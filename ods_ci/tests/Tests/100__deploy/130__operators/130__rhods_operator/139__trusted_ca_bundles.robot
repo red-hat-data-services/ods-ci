@@ -15,6 +15,7 @@ ${TRUSTED_CA_BUNDLE_CONFIGMAP}    odh-trusted-ca-bundle
 ${CUSTOM_CA_BUNDLE}    test-example-custom-ca-bundle
 ${IS_PRESENT}    0
 ${IS_NOT_PRESENT}    1
+${SAVED_CUSTOM_CA_BUNDLE}    ${EMPTY}
 
 
 *** Test Cases ***
@@ -38,7 +39,7 @@ Validate Trusted CA Bundles State Managed
     Wait Until Keyword Succeeds    2 min    0 sec
     ...    Is CA Bundle Value Present    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    ${CUSTOM_CA_BUNDLE}    ${TEST_NS}    ${IS_PRESENT}
 
-    [Teardown]     Restore DSCI Trusted CA Bundle Settings
+    [Teardown]     Restore DSCI Trusted CA Bundle Settings    ${SAVED_CUSTOM_CA_BUNDLE}
 
 Validate Trusted CA Bundles State Unmanaged
     [Documentation]  The purpose of this test case is to validate Trusted CA Bundles when in state Unmanaged
@@ -53,7 +54,7 @@ Validate Trusted CA Bundles State Unmanaged
     Wait Until Keyword Succeeds    1 min    0 sec
     ...    Is CA Bundle Value Present    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    random-ca-bundle-value    ${TEST_NS}    ${IS_PRESENT}
 
-    [Teardown]     Restore DSCI Trusted CA Bundle Settings
+    [Teardown]     Restore DSCI Trusted CA Bundle Settings    ${SAVED_CUSTOM_CA_BUNDLE}
 
 Validate Trusted CA Bundles State Removed
     [Documentation]  The purpose of this test case is to validate Trusted CA Bundles when in state Removed
@@ -66,7 +67,7 @@ Validate Trusted CA Bundles State Removed
     Wait Until Keyword Succeeds    3 min    0 sec
     ...    Is Resource Present     ConfigMap    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    ${TEST_NS}    ${IS_NOT_PRESENT}
 
-    [Teardown]     Restore DSCI Trusted CA Bundle Settings
+    [Teardown]     Restore DSCI Trusted CA Bundle Settings    ${SAVED_CUSTOM_CA_BUNDLE}
 
 
 *** Keywords ***
@@ -76,6 +77,8 @@ Suite Setup
     Wait Until Operator Ready    ${RHOAI_OPERATOR_DEPLOYMENT_NAME}    ${OPERATOR_NS}
     Wait For DSCI Ready State    ${DSCI_NAME}    ${OPERATOR_NS}
     Create Namespace In Openshift    ${TEST_NS}
+    ${SAVED_CUSTOM_CA_BUNDLE}=    Get Custom CA Bundle Value In DSCI    ${DSCI_NAME}    ${OPERATOR_NAMESPACE}
+    Set Suite Variable    ${SAVED_CUSTOM_CA_BUNDLE}
 
 Suite Teardown
     [Documentation]    Suite Teardown
@@ -84,8 +87,10 @@ Suite Teardown
 
 Restore DSCI Trusted CA Bundle Settings
     [Documentation]    Restore DSCI Trusted CA Bundle settings to original tate
-    Set Custom CA Bundle Value In DSCI    ${DSCI_NAME}   ''    ${OPERATOR_NS}
+    [Arguments]    ${custom_ca_value}
+
     Set Trusted CA Bundle Management State    ${DSCI_NAME}    Managed    ${OPERATOR_NS}
+    Set Custom CA Bundle Value In DSCI    ${DSCI_NAME}    ${custom_ca_value}    ${OPERATOR_NS}
 
 Wait Until Operator Ready
     [Documentation]    Checks if operator is available/ready
@@ -161,3 +166,12 @@ Set Trusted CA Bundle Management State
     ${rc}   ${output}=    Run And Return Rc And Output
     ...    oc patch DSCInitialization/${DSCI} -n ${namespace} -p '{"spec":{"trustedCABundle":{"managementState":"${management_state}"}}}' --type merge
     Should Be Equal    "${rc}"    "0"   msg=${output}
+
+Get Custom CA Bundle Value In DSCI
+    [Documentation]    Get DSCI Custdom CA Bundle Value
+    [Arguments]    ${dsci}    ${namespace}
+    ${rc}   ${value}=    Run And Return Rc And Output
+    ...    oc get DSCInitialization/${dsci} -n ${namespace} -o 'jsonpath={.spec.trustedCABundle.customCABundle}'
+    Should Be Equal    "${rc}"    "0"   msg=${value}
+
+    RETURN    ${value}

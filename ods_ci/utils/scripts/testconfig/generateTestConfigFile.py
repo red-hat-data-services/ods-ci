@@ -101,6 +101,14 @@ def parse_args():
         dest="components",
         help="Comma-separated list of components and their states (component1:state1,component2:state2,...)",
     )
+    parser.add_argument(
+        "--custom_manifests",
+        type=str,
+        dest="custom_manifests",
+        help="Comma-separated list of custom_manifests("
+             "component1:repo_org:repo_name:branch_name:context_dir:source_path,"
+             "component2:repo_org:repo_name:branch_name:context_dir:source_path,...)",
+    )
 
     return parser.parse_args()
 
@@ -117,6 +125,27 @@ def change_component_state(components):
 
     print(component_states)
     return component_states
+
+
+def initialize_custom_manifest(custom_manifests):
+    # Parse and convert the custom manifest argument into a dictionary
+    manifest_details = {}
+    custom_manifest_list = custom_manifests.split(",")
+
+    for custom_manifest in custom_manifest_list:
+        comp, repo_org, repo_name, branch_name, context_dir, source_path = custom_manifest.split(":")
+        comp_manifest = {
+            "uri": f"https://github.com/{repo_org}/{repo_name}/tarball/{branch_name}",
+            "contextDir": context_dir,
+            "sourcePath": source_path if len(source_path) > 0 else ""
+        }
+
+        if comp not in manifest_details:
+            manifest_details[comp] = {"manifests": []}
+
+        manifest_details[comp]["manifests"].append(comp_manifest)
+
+    return manifest_details
 
 
 def get_prometheus_token(project):
@@ -156,6 +185,7 @@ def generate_test_config_file(
     set_prometheus_config,
     set_dashboard_url,
     components=None,
+    custom_manifests=None,
 ):
     """
     Generates test config file dynamically by
@@ -246,6 +276,11 @@ def generate_test_config_file(
         print(components)
         data["COMPONENTS"] = change_component_state(components)
 
+    if custom_manifests:
+        print("Setting custom_manifest")
+        print(custom_manifests)
+        data["CUSTOM_MANIFESTS"] = initialize_custom_manifest(custom_manifests)
+
     # Login to test cluster using oc command
     oc_login(
         data["OCP_CONSOLE_URL"],
@@ -301,6 +336,7 @@ def main():
         args.set_prometheus_config,
         args.set_dashboard_url,
         components=args.components,
+        custom_manifests=args.custom_manifests,
     )
     print("Done generating config file")
 

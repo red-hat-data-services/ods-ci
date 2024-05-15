@@ -176,9 +176,13 @@ Metrics Should Exist In UserWorkloadMonitoring
         Log    ${index}: ${metric_search_text}
         ${metrics_names}=    Get Thanos Metrics List    thanos_url=${thanos_url}    thanos_token=${thanos_token}
         ...    search_text=${metric_search_text}
-        Should Not Be Empty    ${metrics_names}
-        ${metrics_names}=    Split To Lines    ${metrics_names}
-        Append To List    ${metrics}    @{metrics_names}
+        ${found} =    Run Keyword And Return Status    Should Not Be Empty    ${metrics_names}
+        IF  ${found}
+            ${metrics_names}=    Split To Lines    ${metrics_names}
+            Append To List    ${metrics}    @{metrics_names}
+        ELSE
+            Run Keyword And Continue On Failure    Fail    msg=${metric_search_text} not found
+        END
     END
     RETURN    ${metrics}
 

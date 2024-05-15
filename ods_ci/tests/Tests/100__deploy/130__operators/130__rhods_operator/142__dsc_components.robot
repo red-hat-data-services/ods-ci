@@ -32,7 +32,7 @@ ${IS_NOT_PRESENT}    1
 
 *** Test Cases ***
 Validate Kueue Managed State
-    [Documentation]    Validate that the DSC by default sets component 'kueue' to state Managed,
+    [Documentation]    Validate that the DSC Kueue component Managed state creates the expected resources,
     ...    check that kueue deployment and pod are created
     [Tags]    Operator    Tier1    RHOAIENG-5435    kueue-managed
 
@@ -49,7 +49,7 @@ Validate Kueue Removed State
     [Teardown]     Restore DSC Component State    kueue    ${KUEUE_DEPLOYMENT_NAME}    ${KUEUE_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.KUEUE}
 
  Validate Codeflare Managed State
-    [Documentation]    Validate that the DSC by default sets component 'Codeflare' to state Managed,
+    [Documentation]    Validate that the DSC Codeflare component Managed state creates the expected resources,
     ...    check that Codeflare deployment and pod are created
     [Tags]    Operator    Tier1    RHOAIENG-5435    codeflare-managed
 
@@ -66,7 +66,7 @@ Validate Codeflare Removed State
     [Teardown]     Restore DSC Component State    codeflare    ${CODEFLARE_DEPLOYMENT_NAME}    ${CODEFLARE_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.CODEFLARE}
 
 Validate Ray Managed State
-    [Documentation]    Validate that the DSC by default sets component 'Ray' to state Managed,
+    [Documentation]    Validate that the DSC Ray component Managed state creates the expected resources,
     ...    check that Ray deployment and pod are created
     [Tags]    Operator    Tier1    RHOAIENG-5435    ray-managed
 
@@ -83,7 +83,7 @@ Validate Ray Removed State
     [Teardown]     Restore DSC Component State    ray    ${RAY_DEPLOYMENT_NAME}    ${RAY_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.RAY}
 
 Validate Training Operator Managed State
-    [Documentation]    Validate that the DSC by default sets component 'Training Operator' to sate Managed,
+    [Documentation]    Validate that the DSC Training Operator component Managed state creates the expected resources,
     ...    check that Training deployment and pod are created
     [Tags]    Operator    Tier1    RHOAIENG-6627    training-managed
 

@@ -38,6 +38,9 @@ Login Verify Logout
     [Arguments]  ${username}  ${password}  ${auth}
     Logout From RHODS Dashboard
     Login To RHODS Dashboard  ${username}  ${password}  ${auth}
+    # We need to Launch Jupyter app again, because there is a redirect to the `enabled` page in the
+    # Login To RHODS Dashboard keyword now as a workaround.
+    Launch Jupyter From RHODS Dashboard Link
     User Is Allowed
     Page Should Contain  ${username}
     Capture Page Screenshot  special-user-login-{index}.png

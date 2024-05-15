@@ -52,7 +52,7 @@ class OpenstackTerraformProvisioner:
             },
         )
         tf.init()
-        ret, out, err = tf.apply(
+        ret, _, err = tf.apply(
             no_color=IsFlagged,
             input=False,
             refresh=False,
@@ -77,7 +77,7 @@ class OpenstackTerraformProvisioner:
             },
         )
         tf.init()
-        ret, out, err = tf.destroy(
+        ret, _, err = tf.destroy(
             capture_output="yes",
             no_color=IsNotFlagged,
             force=IsNotFlagged,

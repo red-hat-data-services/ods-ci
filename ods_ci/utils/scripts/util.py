@@ -26,7 +26,7 @@ def clone_config_repo(**kwargs):
             shutil.rmtree(kwargs["repo_dir"])
         os.makedirs(kwargs["repo_dir"])
         print("git repo dir '%s' created successfully" % kwargs["repo_dir"])
-    except OSError as error:
+    except OSError:
         print("git repo dir '%s' can not be created." % kwargs["repo_dir"])
         return False
 
@@ -49,7 +49,7 @@ def read_yaml(filename):
     try:
         with open(filename, "r") as fh:
             return yaml.safe_load(fh)
-    except OSError as error:
+    except OSError:
         return None
 
 

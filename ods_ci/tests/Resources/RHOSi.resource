@@ -93,7 +93,6 @@ Assign Vars According To Product
         Set Suite Variable    ${OPERATOR_DEPLOYMENT_NAME}    rhods-operator
         Set Suite Variable    ${OPERATOR_LABEL_SELECTOR}    name=rhods-operator
         Set Suite Variable    ${AUTHORINO_CR_NS}    redhat-ods-applications-auth-provider
-
     ELSE IF    "${PRODUCT}" == "ODH"
         Set Suite Variable    ${OPERATOR_APPNAME}  Open Data Hub Operator
         Set Suite Variable    ${OPERATOR_NAME}    Open Data Hub Operator

@@ -4,8 +4,9 @@ import numbers
 import random
 import re
 from pathlib import Path
-from fuzzywuzzy import fuzz
+
 import requests
+from fuzzywuzzy import fuzz
 from robot.libraries.BuiltIn import BuiltIn
 from robotlibcore import keyword
 from semver import VersionInfo

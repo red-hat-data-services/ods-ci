@@ -207,7 +207,7 @@ Model Response Should Match The Expectation
         ${cleaned_response_text}=    Strip String    ${cleaned_response_text}
         ${cleaned_exp_response_text}=    Strip String    ${cleaned_exp_response_text}
         ${predcited_ratio}=  Get Strings Matching Ratio   ${cleaned_response_text}    ${cleaned_exp_response_text}
-        Run Keyword And Continue On Failure    Staring Matching Based On Ratio  ${MATCHING_RATIO}   ${predcited_ratio}
+        Run Keyword And Continue On Failure    Compare GreaterOrEqual Based On Number  ${MATCHING_RATIO}   ${predcited_ratio}
     ELSE
         # temporarily disabling these lines - will be finalized in later stage due to a different format
         # of streamed reponse when using http protocol instead of grpc
@@ -227,7 +227,7 @@ Model Response Should Match The Expectation
         ...    [-]?\\d.\\d+[e]?[-]?\\d+    <logprob_removed>
         ${cleaned_exp_response_text}=    Replace String Using Regexp    ${cleaned_exp_response_text}    \\s+    ${EMPTY}
         ${predcited_ratio}=  Get Strings Matching Ratio   ${cleaned_response_text}    ${cleaned_exp_response_text}
-        Run Keyword And Continue On Failure    Staring Matching Based On Ratio  ${MATCHING_RATIO}   ${predcited_ratio}
+        Run Keyword And Continue On Failure    Compare GreaterOrEqual Based On Number  ${MATCHING_RATIO}   ${predcited_ratio}
     END
 
 Model Response Should Be
@@ -242,10 +242,10 @@ Model Response Should Be
     END
     ${cleaned_exp_response_text}=    Replace String Using Regexp    ${exp_response}    \\s+    ${SPACE}    # robocop: disable
     ${predcited_ratio}=  Get Strings Matching Ratio   ${cleaned_response_text}    ${cleaned_exp_response_text}
-    Run Keyword And Continue On Failure    Staring Matching Based On Ratio  ${MATCHING_RATIO}   ${predcited_ratio}
+    Run Keyword And Continue On Failure    Compare GreaterOrEqual Based On Number  ${MATCHING_RATIO}   ${predcited_ratio}
 
-Staring Matching Based On Ratio
-    [Documentation]    Match the ratio model response from expecetd response
+Compare GreaterOrEqual Based On Number
+    [Documentation]    Match the ratio of model response from expecetd response
     [Arguments]     ${MATCHING_RATIO}   ${predcited_ratio}
     IF    ${MATCHING_RATIO} <= ${predcited_ratio}
           Log       Model response is matching with expecetd response by ratio more than 60

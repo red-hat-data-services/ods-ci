@@ -234,7 +234,8 @@ Verify User Can Access Model Metrics From UWM Using The UI  # robocop: disable
     ...                PARTIALLY DONE: it is checking number of requests, number of successful requests
     ...                and model pod cpu usage. Waiting for a complete list of expected metrics and
     ...                derived metrics.
-    [Tags]    Smoke    Tier1    ODS-2555
+    ...                ProductBug: RHOAIENG-3236
+    [Tags]    Smoke    Tier1    ODS-2555    ProductBug
     [Setup]    Set Up Project   namespace=singlemodel-metrics    enable_metrics=${TRUE}
     ${test_namespace}=    Set Variable     singlemodel-metrics
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit

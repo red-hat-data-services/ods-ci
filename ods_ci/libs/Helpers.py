@@ -4,7 +4,7 @@ import numbers
 import random
 import re
 from pathlib import Path
-
+from fuzzywuzzy import fuzz
 import requests
 from robot.libraries.BuiltIn import BuiltIn
 from robotlibcore import keyword
@@ -312,3 +312,9 @@ class Helpers:
             SyntaxError: unterminated string literal (detected at line 1) (<string>, line 1)
         """
         return multiline_string.replace("\n", delimeter)
+    @keyword
+    def get_strings_matching_ratio(self, string1, string2):
+        """
+        Calculate simple string matching ratio based on Levenshtein distance
+        """
+        return fuzz.ratio(string1, string2)

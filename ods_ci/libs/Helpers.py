@@ -312,6 +312,7 @@ class Helpers:
             SyntaxError: unterminated string literal (detected at line 1) (<string>, line 1)
         """
         return multiline_string.replace("\n", delimeter)
+
     @keyword
     def get_strings_matching_ratio(self, string1, string2):
         """

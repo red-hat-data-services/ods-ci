@@ -34,6 +34,7 @@ pyyaml = "^6.0.1"
 junitparser = "3.1.2"
 python-terraform = "0.10.1"
 fuzzywuzzy = "^0.18.0"
+python-levenshtein = "^0.25.1"
 
 [tool.poetry.group.dev.dependencies]
 robotframework-lsp = ">=1.11.0"

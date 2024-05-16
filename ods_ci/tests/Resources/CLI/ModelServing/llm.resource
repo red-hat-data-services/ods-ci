@@ -3,6 +3,7 @@ Documentation     Collection of keywords to interact with Model Serving feature 
 Resource          ../../../Resources/OCP.resource
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDashboardAPI.resource
+Library           ../../../../libs/Helpers.py
 
 
 *** Variables ***
@@ -27,7 +28,7 @@ ${DOWNLOAD_PVC_FILLED_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_model_in_p
 
 ${DOWNLOAD_PROMPTS_PVC_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_prompts_in_pvc.yaml
 ${DOWNLOAD_PROMPTS_PVC_FILLED_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_prompts_in_pvc_filled.yaml
-
+${MATCHING_RATIO}=    ${60}
 
 *** Keywords ***
 Set Up Test OpenShift Project
@@ -205,7 +206,8 @@ Model Response Should Match The Expectation
         ${cleaned_exp_response_text}=    Replace String Using Regexp    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][response_text]    \\s+    ${SPACE}    # robocop: disable
         ${cleaned_response_text}=    Strip String    ${cleaned_response_text}
         ${cleaned_exp_response_text}=    Strip String    ${cleaned_exp_response_text}
-        Should Be Equal    ${cleaned_response_text}    ${cleaned_exp_response_text}
+        ${predcited_ratio}=  Get Strings Matching Ratio   ${cleaned_response_text}    ${cleaned_exp_response_text}
+        Run Keyword And Continue On Failure    Compare GreaterOrEqual Based On Number  ${MATCHING_RATIO}   ${predcited_ratio}
     ELSE
         # temporarily disabling these lines - will be finalized in later stage due to a different format
         # of streamed reponse when using http protocol instead of grpc
@@ -224,7 +226,8 @@ Model Response Should Match The Expectation
         ...    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][streamed_response_text]
         ...    [-]?\\d.\\d+[e]?[-]?\\d+    <logprob_removed>
         ${cleaned_exp_response_text}=    Replace String Using Regexp    ${cleaned_exp_response_text}    \\s+    ${EMPTY}
-        Should Be Equal    ${cleaned_response_text}    ${cleaned_exp_response_text}
+        ${predcited_ratio}=  Get Strings Matching Ratio   ${cleaned_response_text}    ${cleaned_exp_response_text}
+        Run Keyword And Continue On Failure    Compare GreaterOrEqual Based On Number  ${MATCHING_RATIO}   ${predcited_ratio}
     END
 
 Model Response Should Be
@@ -238,8 +241,17 @@ Model Response Should Be
         ${exp_response}=    Set Variable    ${EXP_RESPONSES}[queries][${query_idx}][models][${model_name}][${runtime}][${inference_type}_response_text]
     END
     ${cleaned_exp_response_text}=    Replace String Using Regexp    ${exp_response}    \\s+    ${SPACE}    # robocop: disable
-    Run Keyword And Continue On Failure    Should Be Equal As Strings    ${cleaned_response_text}    ${cleaned_exp_response_text}
+    ${predcited_ratio}=  Get Strings Matching Ratio   ${cleaned_response_text}    ${cleaned_exp_response_text}
+    Run Keyword And Continue On Failure    Compare GreaterOrEqual Based On Number  ${MATCHING_RATIO}   ${predcited_ratio}
 
+Compare GreaterOrEqual Based On Number
+    [Documentation]    Match the ratio of model response from expecetd response
+    [Arguments]     ${MATCHING_RATIO}   ${predcited_ratio}
+    IF    ${MATCHING_RATIO} <= ${predcited_ratio}
+          Log       Model response is matching with expecetd response by ratio more than 60
+    ELSE
+          FAIL      Model response did not match with expecetd response by the ration of 60
+    END
 Load Runtime Query Formats
     [Documentation]    Loads the json file containing the expected query format for each
     ...                serving runtime

@@ -33,6 +33,8 @@ kfp = "==2.7.0"
 pyyaml = "^6.0.1"
 junitparser = "3.1.2"
 python-terraform = "0.10.1"
+fuzzywuzzy = "^0.18.0"
+python-levenshtein = "^0.25.1"
 
 [tool.poetry.group.dev.dependencies]
 robotframework-lsp = ">=1.11.0"
@@ -124,8 +126,6 @@ ignore = [
  # TODO
   "B006", # Do not use mutable data structures for argument defaults
   "COM812", # Trailing comma missing
-  "F841", # Local variable `response` is assigned to but never used
-  "FA100", # Missing `from __future__ import annotations`, but uses `typing.Optional`
   "INP001", # File `ods_ci/tests/Resources/Page/ODH/JupyterHub/jupyter-helper.py` is part of an implicit namespace package. Add an `__init__.py`.
   "N806", # Variable `outputText` in function should be lowercase
   "N813", # Camelcase `ElementTree` imported as lowercase `et`
@@ -146,8 +146,6 @@ ignore = [
   "UP034", # Avoid extraneous parentheses
  # TODO(jdanek)
   "E402", # Module level import not at top of file
-  "E721", # Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks
-  "F403", # `from python_terraform import *` used; unable to detect undefined names
   "F405", # `IsNotFlagged` may be undefined, or defined from star imports
   "RET507", # Unnecessary `else` after `continue` statement
   "RET508", # Unnecessary `elif` after `break` statement

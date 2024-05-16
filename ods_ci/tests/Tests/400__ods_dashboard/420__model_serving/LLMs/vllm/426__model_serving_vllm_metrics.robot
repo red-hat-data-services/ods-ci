@@ -19,9 +19,6 @@ ${VLLM_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files/llm/vllm
 ${DL_POD_FILEPATH}=           ${VLLM_RESOURCES_DIRPATH}/download_model.yaml
 ${SR_FILEPATH}=               ${VLLM_RESOURCES_DIRPATH}/vllm_servingruntime.yaml
 ${IS_FILEPATH}=               ${VLLM_RESOURCES_DIRPATH}/vllm-gpt2_inferenceservice.yaml
-${INFERENCE_INPUT}=           @${VLLM_RESOURCES_DIRPATH}/query.json
-${INFERENCE_URL}=             http://localhost:8080/v1/chat/completions
-${METRICS_URL}=               http://localhost:8080/metrics/
 ${TEST_NS}=                   vllm-gpt2
 @{SEARCH_METRICS}=            vllm:cache_config_info
 ...                           vllm:num_requests_running
@@ -47,7 +44,7 @@ ${TEST_NS}=                   vllm-gpt2
 *** Test Cases ***
 Verify User Can Deploy A Model With Vllm Via CLI
     [Documentation]    Deploy a model (gpt2) using the vllm runtime and confirm that it's running
-    [Tags]    Tier1    Sanity    Resources-GPU    ODS-XXX
+    [Tags]    Tier1    Sanity    Resources-GPU    RHOAIENG-6264
     ${rc}    ${out}=    Run And Return Rc And Output    oc apply -f ${DL_POD_FILEPATH}
     Should Be Equal As Integers    ${rc}    ${0}
     Wait For Pods To Succeed    label_selector=gpt-download-pod=true    namespace=${TEST_NS}
@@ -62,7 +59,7 @@ Verify User Can Deploy A Model With Vllm Via CLI
 
 Verify Vllm Metrics Are Present
     [Documentation]    Confirm vLLM metrics are exposed in OpenShift metrics
-    [Tags]    Tier1    Sanity    Resources-GPU    ODS-XXX
+    [Tags]    Tier1    Sanity    Resources-GPU    RHOAIENG-6264
     ${host} =    llm.Get KServe Inference Host Via CLI    isvc_name=vllm-gpt2-openai    namespace=${TEST_NS}
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    curl -ks ${host}/metrics/

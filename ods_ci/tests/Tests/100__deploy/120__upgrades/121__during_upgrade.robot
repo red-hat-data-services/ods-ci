@@ -35,7 +35,9 @@ Upgrade RHODS
     Should Be Equal As Integers    ${return_code}     0   msg=Error while upgrading RHODS
     Sleep  30s      reason=wait for thirty seconds until old CSV is removed and new one is ready
     ${is_version_gt} =    Is RHODS Version Greater Than    ${initial_version}
-    Run Keyword If    ${is_version_gt}    Fail    RHODS version was not greater than initial version ${initial_version}
+    IF    ${is_version_gt} == False
+        Fail    RHODS version was not greater than initial version ${initial_version}
+    END
     OpenShiftLibrary.Wait For Pods Status  namespace=${OPERATOR_NAMESPACE}  timeout=300
 
 TensorFlow Image Test
@@ -91,7 +93,7 @@ Is RHODS Version Greater Than
     [Documentation]    Returns True if:
     ...    - RHODS version is greater or equal than ${initial_version}
     [Arguments]  ${initial_version}
-    ${ver} =  Get RHODS version
+    ${ver} =  Get RHODS Version
     ${ver} =  Fetch From Left  ${ver}  -
-    ${comparison} =      GT    ${initial_version}    ${ver}
+    ${comparison} =      GT    ${ver}    ${initial_version}
     RETURN  ${comparison}

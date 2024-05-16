@@ -7,10 +7,8 @@ def extract_test_data(element):
     tests = []
     for child in element:
         if child.tag == "test":
-            # tests.append(child.attrib["name"])
             test_tags = []
             for tag in child.findall("./tag"):
-                print("RobotFramework tags: ", tag.text)
                 test_tags.append(tag.text)
             tests.append({"name": child.attrib["name"], "tags": test_tags})
         else:
@@ -29,8 +27,7 @@ def extract_new_test_cases(rf_xml):
     root = tree.getroot()
     print("tags: ",root.tag)
     tests = []
-    for child in root:
-        tests += extract_test_data(child)
+    tests += extract_test_data(root[0])
     print(tests)
 
 extract_new_test_cases("ods_ci/utils/scripts/fetch_new_tests/output.xml")

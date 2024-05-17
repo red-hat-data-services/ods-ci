@@ -7,7 +7,7 @@ def extract_test_data(element):
     tests = []
     for child in element:
         if child.tag == "test":
-            test_tags = []
+            # test_tags = []
             # for tag in child.findall("./tag"):
             #     test_tags.append(tag.text)
             # tests.append({"name": child.attrib["name"], "tags": test_tags})
@@ -59,7 +59,7 @@ def execute_dryrun_from_ref(ref):
 def generate_rf_argument_file(tests, output_filepath):
     content = ""
     for  testname in tests:
-        content += '--test "{}"'.format(testname)+"\n"
+        content += '--test "{}"\n'.format(testname)
     try:
         with open(output_filepath, "w") as argfile:
             argfile.write(content)
@@ -67,26 +67,21 @@ def generate_rf_argument_file(tests, output_filepath):
         print("Failed to generate argument file")
         print(err)
 
-def extract_new_test_cases(test_repo, ref_1, ref_2, output_argument_file):
-    print(test_repo)
-    print(ref_1)
-    print(ref_2)
-    print(output_argument_file)
-    # TO DO: create argument file for RF
+def extract_new_test_cases(test_repo, ref_1, ref_2, output_argument_file):   
     get_repository(test_repo)
-
+    print("\n---| Executing dryrun from newer branch/commit |---")
     xml_path_ref1 = execute_dryrun_from_ref(ref_1)
+    print("\n---| Executing dryrun from older branch/commit |---")
     xml_path_ref2 = execute_dryrun_from_ref(ref_2)
-    print("\n---| Parsing tests from newer branch |---")
+    print("\n---| Parsing tests from newer branch/commit |---")
     tests_1 = parse_and_extract(xml_path_ref1)
     print("Done. Found {num} test cases".format(num=len(tests_1)))
-    print("\n---| Parsing tests from older branch |---")
+    print("\n---| Parsing tests from older branch/commit |---")
     tests_2 = parse_and_extract(xml_path_ref2)
     print("Done. Found {num} test cases".format(num=len(tests_2)))
     print("\n---| Computing differences |----")
     new_tests = list(set(tests_1) - set(tests_2))
     print("Done. Found {num} new tests in newer repo".format(num=len(new_tests)))
-    print(new_tests)
     if  output_argument_file is not None:
         print("\n---| Generating RobotFramework arguments file |----")
         generate_rf_argument_file(new_tests, output_argument_file)

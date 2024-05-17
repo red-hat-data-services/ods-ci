@@ -2,8 +2,8 @@
 Documentation     Smoke tests for DistributedWorkloads
 Library           Process
 Resource          ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
-Suite Setup       Prepare Codeflare E2E Test Suite
-Suite Teardown    Teardown Codeflare E2E Test Suite
+# Suite Setup       Prepare Codeflare E2E Test Suite
+# Suite Teardown    Teardown Codeflare E2E Test Suite
 
 
 *** Test Cases ***
@@ -11,6 +11,7 @@ Ray smoke test
     [Documentation]    Check that Kuberay deployment and service are up and running
     [Tags]    Smoke
     ...       DistributedWorkloads
+    ...       ODS-2648
     Log To Console    Waiting for kuberay-operator to be available
     ${result} =    Run Process    oc wait --for\=condition\=Available --timeout\=60s -n ${APPLICATIONS_NAMESPACE} deployment/kuberay-operator
     ...    shell=true    stderr=STDOUT
@@ -31,6 +32,7 @@ Codeflare smoke test
     [Documentation]    Check that Codeflare deployment and its monitoring service are up and running
     [Tags]    Smoke
     ...       DistributedWorkloads
+    ...       ODS-2675
     Log To Console    Waiting for codeflare-operator-manager to be available
     ${result} =    Run Process    oc wait --for\=condition\=Available --timeout\=60s -n ${APPLICATIONS_NAMESPACE} deployment/codeflare-operator-manager
     ...    shell=true    stderr=STDOUT
@@ -50,7 +52,7 @@ Kueue smoke test
     [Documentation]    Check that Kueue deployment and its service are up and running
     [Tags]    Smoke
     ...       DistributedWorkloads
-    ...       qqq
+    ...       ODS-2676
     Log To Console    Waiting for kueue-controller-manager to be available
     ${result} =    Run Process    oc wait --for\=condition\=Available --timeout\=300s -n ${APPLICATIONS_NAMESPACE} deployment/kueue-controller-manager
     ...    shell=true    stderr=STDOUT
@@ -70,6 +72,7 @@ Training operator smoke test
     [Documentation]    Check that Training operator deployment is up and running
     [Tags]    Smoke
     ...       DistributedWorkloads
+    Skip    "Skip until https://issues.redhat.com/browse/RHOAIENG-5442 is completed"
     Log To Console    Waiting for kubeflow-training-operator to be available
     ${result} =    Run Process    oc wait --for\=condition\=Available --timeout\=300s -n ${APPLICATIONS_NAMESPACE} deployment/kubeflow-training-operator
     ...    shell=true    stderr=STDOUT

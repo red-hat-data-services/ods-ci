@@ -171,7 +171,6 @@ def get_dashboard_url():
     """
     Get dashboard url for the open data science.
     """
-    host_jsonpath = "{.spec.host}"
     cmd = "oc get route -A -o json  | jq '.items[].spec.host' | grep 'dashboard'"
 
     dashboard_url = execute_command(cmd)

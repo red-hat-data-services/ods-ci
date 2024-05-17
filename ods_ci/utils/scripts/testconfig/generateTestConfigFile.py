@@ -106,8 +106,8 @@ def parse_args():
         type=str,
         dest="custom_manifests",
         help="Comma-separated list of custom_manifests("
-             "component1:repo_org:repo_name:branch_name:context_dir:source_path,"
-             "component2:repo_org:repo_name:branch_name:context_dir:source_path,...)",
+        "component1:repo_org:repo_name:branch_name:context_dir:source_path,"
+        "component2:repo_org:repo_name:branch_name:context_dir:source_path,...)",
     )
 
     return parser.parse_args()
@@ -137,7 +137,7 @@ def initialize_custom_manifest(custom_manifests):
         comp_manifest = {
             "uri": f"https://github.com/{repo_org}/{repo_name}/tarball/{branch_name}",
             "contextDir": context_dir,
-            "sourcePath": source_path if len(source_path) > 0 else ""
+            "sourcePath": source_path if len(source_path) > 0 else "",
         }
 
         if comp not in manifest_details:

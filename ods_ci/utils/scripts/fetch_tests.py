@@ -1,38 +1,17 @@
 import argparse
 import os
-from xml.etree import ElementTree
 
+from robot.model import SuiteVisitor
+from robot.running import TestSuiteBuilder
 from util import execute_command
 
 
-def extract_test_data(element):
-    """
-    Recursive function to navigate the XML tree and fetch <test> tags and related metadata.
-    """
-    tests = []
-    for child in element:
-        if child.tag == "test":
-            # for future developments: fetch RobotFramework Tags attribute for each <test>
-            # test_tags = []
-            # for tag in child.findall("./tag"):
-            #     test_tags.append(tag.text)
-            # tests.append({"name": child.attrib["name"], "tags": test_tags})
-            tests.append(child.attrib["name"])
-        else:
-            tests += extract_test_data(child)
-    return tests
+class TestCasesFinder(SuiteVisitor):
+    def __init__(self):
+        self.tests = []
 
-
-def parse_and_extract(xml_filepath):
-    """
-    Read an XML file and run the test extraction
-    """
-    tree = ElementTree.parse(xml_filepath)
-    root = tree.getroot()
-    tests = []
-    tests += extract_test_data(root[0])
-    # print(tests)
-    return tests
+    def visit_test(self, test):
+        self.tests.append(test)
 
 
 def get_repository(test_repo):
@@ -57,33 +36,41 @@ def get_repository(test_repo):
     return repo_local_path
 
 
-def execute_dryrun_from_ref(repo_local_path, ref):
+def checkout_repository(ref):
     """
-    Navigate to the $test_repo directory, checkouts the target branch/commit ($ref) and runs
-    the RobotFramework dryrun in order to generate the $xml_filename file.
+    Checkouts the repository at current directory to the given branch/commit ($ref)
+    """
+    ret = execute_command("git checkout {}".format(ref))
+    if "error" in ret.lower():
+        # actual error gets printed during "execute_command"
+        raise Exception("Failed to checkout to the given branch/commit {}".format(ref))
+    ret = execute_command("git checkout")
+    print(ret)
+
+
+def extract_test_cases_from_ref(repo_local_path, ref):
+    """
+    Navigate to the $test_repo directory, checkouts the target branch/commit ($ref) and extracts
+    the test case titles leveraging RobotFramework TestSuiteBuilder() and TestCasesFinder() classes
     """
     curr_dir = os.getcwd()
     try:
         os.chdir(repo_local_path)
-        ret = execute_command("git checkout {}".format(ref))
-        if "error" in ret.lower():
-            # actual error gets printed during "execute_command"
-            raise Exception("Failed to checkout to the given branch/commit {}".format(ref))
-        ret = execute_command("git checkout")
-        print(ret)
-        xml_filename = "{curr_dir}/ods_ci/fetch-new-tests/output-{ref}.xml".format(curr_dir=curr_dir, ref=ref)
-        ret = execute_command(
-            "robot -o {xml_filename} --dryrun ods_ci/tests/Tests".format(xml_filename=xml_filename),
-            print_stdout=False,
-        )
-        print("Dry run (tail) output: ", ret[-500:])
-        # print("Dry run (tail) output: ", ret[-500:-300])
+        checkout_repository(ref)
+        builder = TestSuiteBuilder()
+        testsuite = builder.build("ods_ci/tests/")
+        finder = TestCasesFinder()
+        tests = []
+        testsuite.visit(finder)
+        for test in finder.tests:
+            # print (f'"{test.tags}"') # for future reference in order to fetch test tags
+            tests.append(test.name)
     except Exception as err:
         print(err)
         os.chdir(curr_dir)
         raise
     os.chdir(curr_dir)
-    return xml_filename
+    return tests
 
 
 def generate_rf_argument_file(tests, output_filepath):
@@ -93,7 +80,7 @@ def generate_rf_argument_file(tests, output_filepath):
     """
     content = ""
     for testname in tests:
-        content += '--test "{}"\n'.format(testname)
+        content += '--test "{}"\n'.format(testname.strip())
     try:
         with open(output_filepath, "w") as argfile:
             argfile.write(content)
@@ -107,15 +94,11 @@ def extract_new_test_cases(test_repo, ref_1, ref_2, output_argument_file):
     Wrapping function for all the new tests extraction stages.
     """
     repo_local_path = get_repository(test_repo)
-    print("\n---| Executing dryrun from {} branch/commit |---".format(ref_1))
-    xml_path_ref1 = execute_dryrun_from_ref(repo_local_path, ref_1)
-    print("\n---| Executing dryrun from {} branch/commit |---".format(ref_2))
-    xml_path_ref2 = execute_dryrun_from_ref(repo_local_path, ref_2)
-    print("\n---| Parsing tests from {} branch/commit |---".format(ref_1))
-    tests_1 = parse_and_extract(xml_path_ref1)
-    print("Done. Found {num} test cases".format(num=len(tests_1)))
-    print("\n---| Parsing tests from {} branch/commit |---".format(ref_2))
-    tests_2 = parse_and_extract(xml_path_ref2)
+    print("\n---| Extracting test cases from {} branch/commit |---".format(ref_1))
+    tests_1 = extract_test_cases_from_ref(repo_local_path, ref_1)
+    print("\nDone. Found {num} test cases".format(num=len(tests_1)))
+    print("\n---| Extracting test cases from {} branch/commit |---".format(ref_2))
+    tests_2 = extract_test_cases_from_ref(repo_local_path, ref_2)
     print("Done. Found {num} test cases".format(num=len(tests_2)))
     print("\n---| Computing differences |----")
     new_tests = list(set(tests_1) - set(tests_2))

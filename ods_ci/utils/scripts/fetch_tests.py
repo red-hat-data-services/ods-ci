@@ -1,7 +1,8 @@
 import argparse
-from util import execute_command
-import xml.etree.ElementTree as ET
 import os
+from xml.etree import ElementTree
+
+from util import execute_command
 
 
 def extract_test_data(element):
@@ -26,7 +27,7 @@ def parse_and_extract(xml_filepath):
     """
     Read an XML file and run the test extraction
     """
-    tree = ET.parse(xml_filepath)
+    tree = ElementTree.parse(xml_filepath)
     root = tree.getroot()
     tests = []
     tests += extract_test_data(root[0])
@@ -48,12 +49,11 @@ def get_repository(test_repo):
         if "error" in ret.lower():
             # actual error gets printed during "execute_command"
             raise Exception("Failed to clone the given repository")
+    elif not os.path.exists(test_repo):
+        raise FileNotFoundError("local path {} was not found".format(test_repo))
     else:
-        if not os.path.exists(test_repo):
-            raise FileNotFoundError("local path {} was not found".format(test_repo))
-        else:
-            print("Using local repo ", test_repo)
-            repo_local_path = test_repo
+        print("Using local repo ", test_repo)
+        repo_local_path = test_repo
     return repo_local_path
 
 

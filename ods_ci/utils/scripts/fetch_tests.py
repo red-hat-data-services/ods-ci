@@ -48,7 +48,7 @@ def execute_dryrun_from_ref(ref):
         ret = execute_command("git checkout")
         print(ret)
         xml_filename = "{curr_dir}/output-{ref}.xml".format(curr_dir=curr_dir,ref=ref)
-        execute_command("robot -o {xml_filename} --dryrun ods_ci/tests/Tests".format(xml_filename=xml_filename))
+        execute_command("robot -o {xml_filename} --dryrun ods_ci/tests/Tests".format(xml_filename=xml_filename), print_stdout=False)
     except Exception as err:
         print(err)
         os.chdir(curr_dir)
@@ -56,6 +56,16 @@ def execute_dryrun_from_ref(ref):
     os.chdir(curr_dir)
     return xml_filename
 
+def generate_rf_argument_file(tests, output_filepath):
+    content = ""
+    for  testname in tests:
+        content += '--test "{}"'.format(testname)+"\n"
+    try:
+        with open(output_filepath, "w") as argfile:
+            argfile.write(content)
+    except Exception as err:
+        print("Failed to generate argument file")
+        print(err)
 
 def extract_new_test_cases(test_repo, ref_1, ref_2, output_argument_file):
     print(test_repo)
@@ -73,12 +83,14 @@ def extract_new_test_cases(test_repo, ref_1, ref_2, output_argument_file):
     print("\n---| Parsing tests from older branch |---")
     tests_2 = parse_and_extract(xml_path_ref2)
     print("Done. Found {num} test cases".format(num=len(tests_2)))
-
     print("\n---| Computing differences |----")
     new_tests = list(set(tests_1) - set(tests_2))
     print("Done. Found {num} new tests in newer repo".format(num=len(new_tests)))
     print(new_tests)
-
+    if  output_argument_file is not None:
+        print("\n---| Generating RobotFramework arguments file |----")
+        generate_rf_argument_file(new_tests, output_argument_file)
+        print("Done.")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -90,7 +102,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-A",
         "--output-argument-file",
-        help="generate argument file for RobotFramework to include test cases",
+        help="generate argument file for RobotFramework to include test cases. It expects to receive a file path",
         action="store",
         dest="output_argument_file",
         default=None,

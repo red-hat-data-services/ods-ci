@@ -3,10 +3,11 @@ from util import execute_command
 import xml.etree.ElementTree as ET
 import os
 
+
 def extract_test_data(element):
-    '''
+    """
     Recursive function to navigate the XML tree and fetch <test> tags and related metadata.
-    '''
+    """
     tests = []
     for child in element:
         if child.tag == "test":
@@ -20,50 +21,60 @@ def extract_test_data(element):
             tests += extract_test_data(child)
     return tests
 
+
 def parse_and_extract(xml_filepath):
-    '''
+    """
     Read an XML file and run the test extraction
-    '''
+    """
     tree = ET.parse(xml_filepath)
     root = tree.getroot()
     tests = []
     tests += extract_test_data(root[0])
     # print(tests)
-    return  tests
+    return tests
+
 
 def get_repository(test_repo):
-    '''
+    """
     If $test_repo is a remote repo, the function clones it in "ods-ci-temp" directory.
     If $test_repo is a local path, the function checks the path exists.
-    '''
+    """
+    repo_local_path = "./ods-ci-temp"
     if "http" in test_repo or "git@" in test_repo:
-        print("Cloning repo ",test_repo)
-        ret = execute_command("git clone {} ods-ci-temp".format(test_repo))
+        print("Cloning repo ", test_repo)
+        ret = execute_command(
+            "git clone {test_repo} {output_dir}".format(test_repo=test_repo, output_dir=repo_local_path)
+        )
         if "error" in ret.lower():
             # actual error gets printed during "execute_command"
             raise Exception("Failed to clone the given repository")
-    else:        
+    else:
         if not os.path.exists(test_repo):
             raise FileNotFoundError("local path {} was not found".format(test_repo))
         else:
-            print("Using local repo ",test_repo)
+            print("Using local repo ", test_repo)
+            repo_local_path = test_repo
+    return repo_local_path
 
-def execute_dryrun_from_ref(ref):
-    '''
+
+def execute_dryrun_from_ref(repo_local_path, ref):
+    """
     Navigate to the $test_repo directory, checkouts the target branch/commit ($ref) and runs
     the RobotFramework dryrun in order to generate the $xml_filename file.
-    '''
+    """
     curr_dir = os.getcwd()
     try:
-        os.chdir('ods-ci-temp')
+        os.chdir(repo_local_path)
         ret = execute_command("git checkout {}".format(ref))
         if "error" in ret.lower():
             # actual error gets printed during "execute_command"
             raise Exception("Failed to checkout to the given branch/commit {}".format(ref))
         ret = execute_command("git checkout")
         print(ret)
-        xml_filename = "{curr_dir}/output-{ref}.xml".format(curr_dir=curr_dir,ref=ref)
-        execute_command("robot -o {xml_filename} --dryrun ods_ci/tests/Tests".format(xml_filename=xml_filename), print_stdout=False)
+        xml_filename = "{curr_dir}/output-{ref}.xml".format(curr_dir=curr_dir, ref=ref)
+        execute_command(
+            "robot -o {xml_filename} --dryrun ods_ci/tests/Tests".format(xml_filename=xml_filename), print_stdout=False
+        )
     except Exception as err:
         print(err)
         os.chdir(curr_dir)
@@ -71,13 +82,14 @@ def execute_dryrun_from_ref(ref):
     os.chdir(curr_dir)
     return xml_filename
 
+
 def generate_rf_argument_file(tests, output_filepath):
-    '''
+    """
     Writes the RobotFramework argument file containing the test selection args
     to include the extracted new tests in previous stage of this script.
-    '''
+    """
     content = ""
-    for  testname in tests:
+    for testname in tests:
         content += '--test "{}"\n'.format(testname)
     try:
         with open(output_filepath, "w") as argfile:
@@ -86,15 +98,16 @@ def generate_rf_argument_file(tests, output_filepath):
         print("Failed to generate argument file")
         print(err)
 
+
 def extract_new_test_cases(test_repo, ref_1, ref_2, output_argument_file):
-    '''
+    """
     Wrapping function for all the new tests extraction stages.
-    '''
-    get_repository(test_repo)
+    """
+    repo_local_path = get_repository(test_repo)
     print("\n---| Executing dryrun from newer branch/commit |---")
-    xml_path_ref1 = execute_dryrun_from_ref(ref_1)
+    xml_path_ref1 = execute_dryrun_from_ref(repo_local_path, ref_1)
     print("\n---| Executing dryrun from older branch/commit |---")
-    xml_path_ref2 = execute_dryrun_from_ref(ref_2)
+    xml_path_ref2 = execute_dryrun_from_ref(repo_local_path, ref_2)
     print("\n---| Parsing tests from newer branch/commit |---")
     tests_1 = parse_and_extract(xml_path_ref1)
     print("Done. Found {num} test cases".format(num=len(tests_1)))
@@ -104,7 +117,7 @@ def extract_new_test_cases(test_repo, ref_1, ref_2, output_argument_file):
     print("\n---| Computing differences |----")
     new_tests = list(set(tests_1) - set(tests_2))
     print("Done. Found {num} new tests in newer repo".format(num=len(new_tests)))
-    if  output_argument_file is not None:
+    if output_argument_file is not None:
         print("\n---| Generating RobotFramework arguments file |----")
         generate_rf_argument_file(new_tests, output_argument_file)
         print("Done.")

@@ -107,14 +107,14 @@ def extract_new_test_cases(test_repo, ref_1, ref_2, output_argument_file):
     Wrapping function for all the new tests extraction stages.
     """
     repo_local_path = get_repository(test_repo)
-    print("\n---| Executing dryrun from newer branch/commit |---")
+    print("\n---| Executing dryrun from {} branch/commit |---".format(ref_1))
     xml_path_ref1 = execute_dryrun_from_ref(repo_local_path, ref_1)
-    print("\n---| Executing dryrun from older branch/commit |---")
+    print("\n---| Executing dryrun from {} branch/commit |---".format(ref_2))
     xml_path_ref2 = execute_dryrun_from_ref(repo_local_path, ref_2)
-    print("\n---| Parsing tests from newer branch/commit |---")
+    print("\n---| Parsing tests from {} branch/commit |---".format(ref_1))
     tests_1 = parse_and_extract(xml_path_ref1)
     print("Done. Found {num} test cases".format(num=len(tests_1)))
-    print("\n---| Parsing tests from older branch/commit |---")
+    print("\n---| Parsing tests from {} branch/commit |---".format(ref_2))
     tests_2 = parse_and_extract(xml_path_ref2)
     print("Done. Found {num} test cases".format(num=len(tests_2)))
     print("\n---| Computing differences |----")
@@ -123,7 +123,11 @@ def extract_new_test_cases(test_repo, ref_1, ref_2, output_argument_file):
         print("[WARN] Done. No new tests found in {ref_1} with respect to {ref_2}!".format(ref_1=ref_1, ref_2=ref_2))
         print("Skip argument file creation")
     else:
-        print("Done. Found {num} new tests in newer repo".format(num=len(new_tests)))
+        print(
+            "Done. Found {num} new tests in {ref_1} which were not present in {ref_2}".format(
+                num=len(new_tests), ref_1=ref_1, ref_2=ref_2
+            )
+        )
         if output_argument_file is not None:
             print("\n---| Generating RobotFramework arguments file |----")
             generate_rf_argument_file(new_tests, output_argument_file)

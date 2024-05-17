@@ -3,7 +3,7 @@
     {
       "namespaceSelector": {
         "matchLabels": {
-          "kubernetes.io/metadata.name": "redhat-ods-applications"
+          "kubernetes.io/metadata.name": "SELECTOR_LABEL_VALUE"
         }
       }
     }

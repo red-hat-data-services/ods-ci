@@ -4,9 +4,13 @@ import xml.etree.ElementTree as ET
 import os
 
 def extract_test_data(element):
+    '''
+    Recursive function to navigate the XML tree and fetch <test> tags and related metadata.
+    '''
     tests = []
     for child in element:
         if child.tag == "test":
+            # for future developments: fetch RobotFramework Tags attribute for each <test>
             # test_tags = []
             # for tag in child.findall("./tag"):
             #     test_tags.append(tag.text)
@@ -17,6 +21,9 @@ def extract_test_data(element):
     return tests
 
 def parse_and_extract(xml_filepath):
+    '''
+    Read an XML file and run the test extraction
+    '''
     tree = ET.parse(xml_filepath)
     root = tree.getroot()
     tests = []
@@ -25,6 +32,10 @@ def parse_and_extract(xml_filepath):
     return  tests
 
 def get_repository(test_repo):
+    '''
+    If $test_repo is a remote repo, the function clones it in "ods-ci-temp" directory.
+    If $test_repo is a local path, the function checks the path exists.
+    '''
     if "http" in test_repo or "git@" in test_repo:
         print("Cloning repo ",test_repo)
         ret = execute_command("git clone {} ods-ci-temp".format(test_repo))
@@ -38,6 +49,10 @@ def get_repository(test_repo):
             print("Using local repo ",test_repo)
 
 def execute_dryrun_from_ref(ref):
+    '''
+    Navigate to the $test_repo directory, checkouts the target branch/commit ($ref) and runs
+    the RobotFramework dryrun in order to generate the $xml_filename file.
+    '''
     curr_dir = os.getcwd()
     try:
         os.chdir('ods-ci-temp')
@@ -57,6 +72,10 @@ def execute_dryrun_from_ref(ref):
     return xml_filename
 
 def generate_rf_argument_file(tests, output_filepath):
+    '''
+    Writes the RobotFramework argument file containing the test selection args
+    to include the extracted new tests in previous stage of this script.
+    '''
     content = ""
     for  testname in tests:
         content += '--test "{}"\n'.format(testname)
@@ -67,7 +86,10 @@ def generate_rf_argument_file(tests, output_filepath):
         print("Failed to generate argument file")
         print(err)
 
-def extract_new_test_cases(test_repo, ref_1, ref_2, output_argument_file):   
+def extract_new_test_cases(test_repo, ref_1, ref_2, output_argument_file):
+    '''
+    Wrapping function for all the new tests extraction stages.
+    '''
     get_repository(test_repo)
     print("\n---| Executing dryrun from newer branch/commit |---")
     xml_path_ref1 = execute_dryrun_from_ref(ref_1)
@@ -86,6 +108,7 @@ def extract_new_test_cases(test_repo, ref_1, ref_2, output_argument_file):
         print("\n---| Generating RobotFramework arguments file |----")
         generate_rf_argument_file(new_tests, output_argument_file)
         print("Done.")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(

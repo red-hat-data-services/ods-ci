@@ -50,6 +50,10 @@ Verify User Can Deploy A Model With Vllm Via CLI
     Wait For Pods To Succeed    label_selector=gpt-download-pod=true    namespace=${TEST_NS}
     ${rc}    ${out}=    Run And Return Rc And Output    oc apply -f ${SR_FILEPATH}
     Should Be Equal As Integers    ${rc}    ${0}
+    #TODO: Switch to common keyword for model DL and SR deploy
+    #Set Project And Runtime    runtime=vllm     namespace=${TEST_NS}
+    #...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=gpt2
+    #...    storage_size=10Gi
     Deploy Model Via CLI    ${IS_FILEPATH}    ${TEST_NS}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=vllm-gpt2-openai
     ...    namespace=${TEST_NS}
@@ -60,6 +64,7 @@ Verify User Can Deploy A Model With Vllm Via CLI
 Verify Vllm Metrics Are Present
     [Documentation]    Confirm vLLM metrics are exposed in OpenShift metrics
     [Tags]    Tier1    Sanity    Resources-GPU    RHOAIENG-6264
+    ...       Depends On Test    Verify User Can Deploy A Model With Vllm Via CLI
     ${host} =    llm.Get KServe Inference Host Via CLI    isvc_name=vllm-gpt2-openai    namespace=${TEST_NS}
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    curl -ks ${host}/metrics/
@@ -95,20 +100,3 @@ Suite Teardown
     ${rc}=    Run And Return Rc    oc delete namespace ${TEST_NS}
     Should Be Equal As Integers    ${rc}    ${0}
     RHOSi Teardown
-
-Set Default Storage Class In GCP
-    [Documentation]    If the storage class exists we can assume we are in GCP. We force ssd-csi to be the default class
-    ...    for the duration of this test suite.
-    [Arguments]    ${default}
-    ${rc}=    Run And Return Rc    oc get storageclass ${default}
-    IF    ${rc} == ${0}
-        IF    "${default}" == "ssd-csi"
-            Run    oc patch storageclass standard-csi -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'  #robocop: disable
-            Run    oc patch storageclass ssd-csi -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'  #robocop: disable
-        ELSE
-            Run    oc patch storageclass ssd-csi -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'  #robocop: disable
-            Run    oc patch storageclass standard-csi -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'  #robocop: disable
-        END
-    ELSE
-        Log    Proceeding with default storage class because we're not in GCP
-    END

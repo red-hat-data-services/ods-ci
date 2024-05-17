@@ -373,17 +373,19 @@ Install Kserve Dependencies
     Set Suite Variable   ${FILES_RESOURCES_DIRPATH}    tests/Resources/Files
     Set Suite Variable   ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
     Set Suite Variable   ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
-    ${is_installed} =   Check If Operator Is Installed Via CLI   ${AUTHORINO_OP_NAME}
-    IF    not ${is_installed}
-          Install ISV Operator From OperatorHub Via CLI    operator_name=${AUTHORINO_OP_NAME}
-          ...    subscription_name=${AUTHORINO_SUB_NAME}
-          ...    channel=${AUTHORINO_CHANNEL_NAME}
-          ...    catalog_source_name=redhat-operators
-          Wait Until Operator Subscription Last Condition Is
-          ...    type=CatalogSourcesUnhealthy    status=False
-          ...    reason=AllCatalogSourcesHealthy    subcription_name=${AUTHORINO_SUB_NAME}
-    ELSE
-          Log To Console    message=Authorino Operator is already installed
+    IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
+         ${is_installed} =   Check If Operator Is Installed Via CLI   ${AUTHORINO_OP_NAME}
+         IF    not ${is_installed}
+              Install ISV Operator From OperatorHub Via CLI    operator_name=${AUTHORINO_OP_NAME}
+              ...    subscription_name=${AUTHORINO_SUB_NAME}
+              ...    channel=${AUTHORINO_CHANNEL_NAME}
+              ...    catalog_source_name=redhat-operators
+              Wait Until Operator Subscription Last Condition Is
+              ...    type=CatalogSourcesUnhealthy    status=False
+              ...    reason=AllCatalogSourcesHealthy    subcription_name=${AUTHORINO_SUB_NAME}
+         ELSE
+              Log To Console    message=Authorino Operator is already installed
+         END
     END
     ${is_installed}=   Check If Operator Is Installed Via CLI   ${SERVICEMESH_OP_NAME}
     IF    not ${is_installed}

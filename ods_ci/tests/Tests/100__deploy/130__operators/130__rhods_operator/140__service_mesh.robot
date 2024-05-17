@@ -4,13 +4,13 @@ Documentation       Test Cases to verify Service Mesh integration
 Library             Collections
 Resource            ../../../../Resources/OCP.resource
 Resource            ../../../../Resources/ODS.robot
+Resource            ../../../../Resources/RHOSi.resource
 Suite Setup         Suite Setup
 Suite Teardown      Suite Teardown
 
 
 *** Variables ***
 ${OPERATOR_NS}                              ${OPERATOR_NAMESPACE}
-${RHOAI_OPERATOR_DEPLOYMENT_NAME}           rhods-operator
 ${DSCI_NAME}                                default-dsci
 ${SERVICE_MESH_OPERATOR_NS}                 openshift-operators
 ${SERVICE_MESH_OPERATOR_DEPLOYMENT_NAME}    istio-operator
@@ -59,7 +59,7 @@ Suite Setup
     [Documentation]    Suite Setup
     RHOSi Setup
     Wait Until Operator Ready    ${SERVICE_MESH_OPERATOR_DEPLOYMENT_NAME}    ${SERVICE_MESH_OPERATOR_NS}
-    Wait Until Operator Ready    ${RHOAI_OPERATOR_DEPLOYMENT_NAME}    ${OPERATOR_NS}
+    Wait Until Operator Ready    ${OPERATOR_DEPLOYMENT_NAME}    ${OPERATOR_NS}
     Wait For DSCI Ready State    ${DSCI_NAME}    ${OPERATOR_NS}
 
 Suite Teardown

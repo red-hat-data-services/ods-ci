@@ -5,22 +5,31 @@ metadata:
 spec:
   components:
     codeflare:
+      devFlags: <codeflare_devflags>
       managementState: <codeflare_value>
     dashboard:
+      devFlags: <dashboard_devflags>
       managementState: <dashboard_value>
     datasciencepipelines:
+      devFlags: <datasciencepipelines_devflags>
       managementState: <datasciencepipelines_value>
     kserve:
+      devFlags: <kserve_devflags>
       defaultDeploymentMode: Serverless
       managementState: <kserve_value>
     modelmeshserving:
+      devFlags: <modelmeshserving_devflags>
       managementState: <modelmeshserving_value>
     ray:
+      devFlags: <ray_devflags>
       managementState: <ray_value>
     kueue:
+      devFlags: <kueue_devflags>
       managementState: <kueue_value>
     trustyai:
+      devFlags: <trustyai_devflags>
       managementState: <trustyai_value>
     workbenches:
+      devFlags: <workbenches_devflags>
       managementState: <workbenches_value>
 

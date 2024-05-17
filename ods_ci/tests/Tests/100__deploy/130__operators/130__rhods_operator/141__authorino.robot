@@ -4,19 +4,18 @@ Documentation       Test Cases to verify RHOAI operator integration with Authori
 Library             Collections
 Resource            ../../../../Resources/OCP.resource
 Resource            ../../../../Resources/ODS.robot
+Resource            ../../../../Resources/RHOSi.resource
 Suite Setup         Suite Setup
 Suite Teardown      Suite Teardown
 
 
 *** Variables ***
 ${OPERATOR_NS}                              ${OPERATOR_NAMESPACE}
-${RHOAI_OPERATOR_DEPLOYMENT_NAME}           rhods-operator
 ${DSCI_NAME}                                default-dsci
 ${SERVICE_MESH_OPERATOR_NS}                 openshift-operators
 ${SERVICE_MESH_OPERATOR_DEPLOYMENT_NAME}    istio-operator
 ${AUTHORINO_OPERATOR_NS}                    openshift-operators
 ${AUTHORINO_OPERATOR_DEPLOYMENT_NAME}       authorino-operator
-${AUTHORINO_CR_NS}                          redhat-ods-applications-auth-provider
 ${AUTHORINO_CR_NAME}                        authorino
 
 ${IS_PRESENT}                           0
@@ -40,7 +39,7 @@ Suite Setup
     [Documentation]    Suite Setup
     RHOSi Setup
     Wait Until Operator Ready    ${SERVICE_MESH_OPERATOR_DEPLOYMENT_NAME}    ${SERVICE_MESH_OPERATOR_NS}
-    Wait Until Operator Ready    ${RHOAI_OPERATOR_DEPLOYMENT_NAME}    ${OPERATOR_NS}
+    Wait Until Operator Ready    ${OPERATOR_DEPLOYMENT_NAME}    ${OPERATOR_NS}
     Wait Until Operator Ready    ${AUTHORINO_OPERATOR_DEPLOYMENT_NAME}    ${AUTHORINO_OPERATOR_NS}
     Wait For DSCI Ready State    ${DSCI_NAME}    ${OPERATOR_NS}
 

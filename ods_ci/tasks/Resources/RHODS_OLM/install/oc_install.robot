@@ -274,6 +274,7 @@ Apply DataScienceCluster CustomResource
         END
     END
     Create DataScienceCluster CustomResource Using Test Variables
+    Apply Custom Manifest in DataScienceCluster CustomResource Using Test Variables
     ${yml} =    Get File    ${file_path}dsc_apply.yml
     Log To Console    Applying DSC yaml
     Log To Console    ${yml}
@@ -304,6 +305,21 @@ Create DataScienceCluster CustomResource Using Test Variables
             Run    sed -i 's/<${cmp}_value>/Managed/' ${file_path}dsc_apply.yml
         ELSE IF    '${COMPONENTS.${cmp}}' == 'Removed'
             Run    sed -i 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
+        END
+    END
+
+Apply Custom Manifest in DataScienceCluster CustomResource Using Test Variables
+    [Documentation]    Apply custom manifests to a DSC file
+    Log To Console    Applying Custom Manifests
+
+    ${file_path} =    Set Variable    tasks/Resources/Files/
+    FOR    ${cmp}    IN    @{COMPONENT_LIST}
+        IF    $cmp in $CUSTOM_MANIFESTS
+            ${manifest_string}=    Convert To String    ${CUSTOM_MANIFESTS}[${cmp}]
+            # Use sed to replace the placeholder with the YAML string
+            Run    sed -i "s|<${cmp}_devflags>|${manifest_string}|g" ${file_path}dsc_apply.yml
+        ELSE
+            Run    sed -i "s|<${cmp}_devflags>||g" ${file_path}dsc_apply.yml
         END
     END
 

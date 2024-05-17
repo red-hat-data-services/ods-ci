@@ -39,7 +39,7 @@ def get_repository(test_repo):
     If $test_repo is a remote repo, the function clones it in "ods-ci-temp" directory.
     If $test_repo is a local path, the function checks the path exists.
     """
-    repo_local_path = "./ods-ci-temp"
+    repo_local_path = "./ods_ci/ods-ci-temp"
     if "http" in test_repo or "git@" in test_repo:
         print("Cloning repo ", test_repo)
         ret = execute_command(
@@ -71,10 +71,13 @@ def execute_dryrun_from_ref(repo_local_path, ref):
             raise Exception("Failed to checkout to the given branch/commit {}".format(ref))
         ret = execute_command("git checkout")
         print(ret)
-        xml_filename = "{curr_dir}/output-{ref}.xml".format(curr_dir=curr_dir, ref=ref)
-        execute_command(
-            "robot -o {xml_filename} --dryrun ods_ci/tests/Tests".format(xml_filename=xml_filename), print_stdout=False
+        xml_filename = "{curr_dir}/ods_ci/fetch-new-tests/output-{ref}.xml".format(curr_dir=curr_dir, ref=ref)
+        ret = execute_command(
+            "robot -o {xml_filename} --dryrun ods_ci/tests/Tests".format(xml_filename=xml_filename),
+            print_stdout=False,
         )
+        print("Dry run (tail) output: ", ret[-500:])
+        # print("Dry run (tail) output: ", ret[-500:-300])
     except Exception as err:
         print(err)
         os.chdir(curr_dir)
@@ -116,11 +119,15 @@ def extract_new_test_cases(test_repo, ref_1, ref_2, output_argument_file):
     print("Done. Found {num} test cases".format(num=len(tests_2)))
     print("\n---| Computing differences |----")
     new_tests = list(set(tests_1) - set(tests_2))
-    print("Done. Found {num} new tests in newer repo".format(num=len(new_tests)))
-    if output_argument_file is not None:
-        print("\n---| Generating RobotFramework arguments file |----")
-        generate_rf_argument_file(new_tests, output_argument_file)
-        print("Done.")
+    if len(new_tests) == 0:
+        print("[WARN] Done. No new tests found in {ref_1} with respect to {ref_2}!".format(ref_1=ref_1, ref_2=ref_2))
+        print("Skip argument file creation")
+    else:
+        print("Done. Found {num} new tests in newer repo".format(num=len(new_tests)))
+        if output_argument_file is not None:
+            print("\n---| Generating RobotFramework arguments file |----")
+            generate_rf_argument_file(new_tests, output_argument_file)
+            print("Done.")
 
 
 if __name__ == "__main__":

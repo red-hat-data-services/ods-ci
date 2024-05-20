@@ -80,7 +80,7 @@ def generate_rf_argument_file(tests, output_filepath):
     """
     content = ""
     for testname in tests:
-        content += '--test "{}"\n'.format(testname.strip())
+        content += '--test {}\n'.format(testname.strip())
     try:
         with open(output_filepath, "w") as argfile:
             argfile.write(content)

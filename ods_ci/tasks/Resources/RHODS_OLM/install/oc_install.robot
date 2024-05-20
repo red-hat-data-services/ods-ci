@@ -151,7 +151,7 @@ Verify RHODS Installation
     Wait For Pods Numbers   1
        ...                   namespace=${APPLICATIONS_NAMESPACE}
        ...                   label_selector=control-plane=kserve-controller-manager
-       ...                   timeout=120
+       ...                   timeout=400
   END
 
   IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${dashboard}" == "true" or "${workbenches}" == "true" or "${modelmeshserving}" == "true" or "${datasciencepipelines}" == "true"  # robocop: disable
@@ -393,7 +393,7 @@ Install Kserve Dependencies
           Wait Until Operator Subscription Last Condition Is
           ...    type=CatalogSourcesUnhealthy    status=False
           ...    reason=AllCatalogSourcesHealthy    subcription_name=${SERVERLESS_SUB_NAME}
-          ...    namespace=${SERVERLESS_NS}
+          ...    namespace=${SERVERLESS_NS} retry=100
           Wait For Pods To Be Ready    label_selector=name=knative-openshift
           ...    namespace=${SERVERLESS_NS}
           Wait For Pods To Be Ready    label_selector=name=knative-openshift-ingress

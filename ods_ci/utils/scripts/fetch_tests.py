@@ -22,14 +22,12 @@ def get_repository(test_repo):
     repo_local_path = "./ods_ci/ods-ci-temp"
     if "http" in test_repo or "git@" in test_repo:
         print("Cloning repo ", test_repo)
-        ret = execute_command(
-            "git clone {test_repo} {output_dir}".format(test_repo=test_repo, output_dir=repo_local_path)
-        )
+        ret = execute_command(f"git clone {test_repo} {repo_local_path}")
         if "error" in ret.lower():
             # actual error gets printed during "execute_command"
             raise Exception("Failed to clone the given repository")
     elif not os.path.exists(test_repo):
-        raise FileNotFoundError("local path {} was not found".format(test_repo))
+        raise FileNotFoundError(f"local path {test_repo} was not found")
     else:
         print("Using local repo ", test_repo)
         repo_local_path = test_repo
@@ -40,12 +38,11 @@ def checkout_repository(ref):
     """
     Checkouts the repository at current directory to the given branch/commit ($ref)
     """
-    ret = execute_command("git checkout {}".format(ref))
+    ret = execute_command(f"git checkout {ref}")
     if "error" in ret.lower():
         # actual error gets printed during "execute_command"
-        raise Exception("Failed to checkout to the given branch/commit {}".format(ref))
+        raise Exception(f"Failed to checkout to the given branch/commit {ref}")
     ret = execute_command("git checkout")
-    print(ret)
 
 
 def extract_test_cases_from_ref(repo_local_path, ref):
@@ -80,7 +77,7 @@ def generate_rf_argument_file(tests, output_filepath):
     """
     content = ""
     for testname in tests:
-        content += "--test {}\n".format(testname.strip())
+        content += f"--test {testname.strip()}\n"
     try:
         with open(output_filepath, "w") as argfile:
             argfile.write(content)
@@ -94,23 +91,19 @@ def extract_new_test_cases(test_repo, ref_1, ref_2, output_argument_file):
     Wrapping function for all the new tests extraction stages.
     """
     repo_local_path = get_repository(test_repo)
-    print("\n---| Extracting test cases from {} branch/commit |---".format(ref_1))
+    print(f"\n---| Extracting test cases from {ref_1} branch/commit |---")
     tests_1 = extract_test_cases_from_ref(repo_local_path, ref_1)
-    print("\nDone. Found {num} test cases".format(num=len(tests_1)))
-    print("\n---| Extracting test cases from {} branch/commit |---".format(ref_2))
+    print(f"\nDone. Found {len(tests_1)} test cases")
+    print(f"\n---| Extracting test cases from {ref_2} branch/commit |---")
     tests_2 = extract_test_cases_from_ref(repo_local_path, ref_2)
-    print("Done. Found {num} test cases".format(num=len(tests_2)))
+    print(f"Done. Found {len(tests_2)} test cases")
     print("\n---| Computing differences |----")
     new_tests = list(set(tests_1) - set(tests_2))
     if len(new_tests) == 0:
-        print("[WARN] Done. No new tests found in {ref_1} with respect to {ref_2}!".format(ref_1=ref_1, ref_2=ref_2))
+        print(f"[WARN] Done. No new tests found in {ref_1} with respect to {ref_2}!")
         print("Skip argument file creation")
     else:
-        print(
-            "Done. Found {num} new tests in {ref_1} which were not present in {ref_2}".format(
-                num=len(new_tests), ref_1=ref_1, ref_2=ref_2
-            )
-        )
+        print(f"Done. Found {len(new_tests)} new tests in {ref_1} which were not present in {ref_2}")
         if output_argument_file is not None:
             print("\n---| Generating RobotFramework arguments file |----")
             generate_rf_argument_file(new_tests, output_argument_file)

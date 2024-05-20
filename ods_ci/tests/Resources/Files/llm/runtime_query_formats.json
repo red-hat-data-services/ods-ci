@@ -96,5 +96,22 @@
             }
         },
         "containers": ["kserve-container"]
+    },
+    "vllm": {
+        "endpoints": {
+            "chat-completions": {
+                "http": {
+                    "endpoint": "v1/chat/completions",
+                    "header": "Content-Type:application/json",
+                    "body": "{'model': '${model_name}','messages': [${query_text}]}",
+                    "response_fields_map": {
+                        "response": "choices",
+                        "completion_tokens":  "completion_tokens",
+                        "response_text":    "content"
+                    }
+                }
+            }
+        },
+        "containers": ["kserve-container"]
     }
 }

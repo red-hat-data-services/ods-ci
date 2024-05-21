@@ -29,8 +29,7 @@ Verify Ods User Can Bind The Route Role
     ...         Test with user3 can access the dsp route for user4, it should fail because it doesn't have the permission    # robocop: disable:line-too-long
     ...         Add the permission using a role binding
     ...         Test with user3 can access the dsp route for user4, it should work because it has the permission
-    [Tags]      Sanity
-    ...         Tier1
+    [Tags]      Tier1
     ...         ODS-2209
     Create A Pipeline Server And Wait For Dsp Route    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}
     ...         ${TEST_USER_3.AUTH_TYPE}    ${PROJECT_USER3}

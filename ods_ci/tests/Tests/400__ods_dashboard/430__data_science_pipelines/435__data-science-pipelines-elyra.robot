@@ -41,7 +41,20 @@ Verify Pipelines Integration With Elyra When Using Standard Data Science Image
     ...    create and run a Data Science Pipeline
     [Tags]    Smoke    Tier1
     ...       ODS-2197   ODS-2199
+    [Timeout]    6m
     Verify Pipelines Integration With Elyra Running Hello World Pipeline Test    Standard Data Science
+
+Verify Pipelines Integration With Elyra When Using PyTorch Image
+    [Documentation]    Verifies that a workbench using the PyTorch Image can be used to
+    ...    create and run a Data Science Pipeline
+    ...    Note: this a templated test case
+    ...    (more info at https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#test-templates)
+    [Template]     Verify Pipelines Integration With Elyra Running Hello World Pipeline Test
+    [Tags]    Sanity    Tier1
+    ...       ODS-2271
+    [Timeout]    10m
+    PyTorch
+
 
 Verify Pipelines Integration With Elyra When Using Standard Data Science Based Images
     [Documentation]    Verifies that a workbench using an image based on the Standard Data Science Image
@@ -49,9 +62,9 @@ Verify Pipelines Integration With Elyra When Using Standard Data Science Based I
     ...    Note: this a templated test case
     ...    (more info at https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#test-templates)
     [Template]     Verify Pipelines Integration With Elyra Running Hello World Pipeline Test
-    [Tags]    Sanity    Tier1
-    ...       ODS-2271
-    PyTorch
+    [Tags]    Tier1
+    ...       ODS-TODO
+    [Timeout]    30m
     TensorFlow
     TrustyAI
     HabanaAI

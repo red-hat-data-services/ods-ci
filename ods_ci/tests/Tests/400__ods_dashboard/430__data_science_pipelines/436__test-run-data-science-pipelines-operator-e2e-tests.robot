@@ -22,7 +22,6 @@ ${KUBECONFIGPATH}                                         %{HOME}/.kube/config
 Run Data Science Pipelines Operator Integration Tests
     [Documentation]    Run Data Science Pipelines Operator Integration Tests
     [Tags]
-    ...     Sanity
     ...     DataSciencePipelines
     ...     Tier1
     ...     ODS-2632

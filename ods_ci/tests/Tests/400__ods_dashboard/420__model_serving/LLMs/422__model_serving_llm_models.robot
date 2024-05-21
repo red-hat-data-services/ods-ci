@@ -11,14 +11,14 @@ Test Tags         KServe-LLM
 
 *** Variables ***
 ${TEST_NS}=    tgismodel
-${RUNTIME_NAME}=   tgis-runtime   #vllm-runtime
+${RUNTIME_NAME}=  tgis-runtime   #vllm-runtime
 ${USE_PVC}=    ${TRUE}
 ${DOWNLOAD_IN_PVC}=    ${TRUE}
 ${USE_GPU}=    ${FALSE}
-${KSERVE_MODE}=    RawDeployment
+${KSERVE_MODE}=    RawDeployment   #Serverless
 ${MODEL_FORMAT}=   pytorch       #vLLM
 ${PROTOCOL}=     grpc         #http
-${OVERLAY}=    vllm
+${OVERLAY}=      ${EMPTY}               #vllm
 
 
 *** Test Cases ***
@@ -162,14 +162,18 @@ Verify User Can Serve And Query A google/flan-t5-xxl Model
 Verify User Can Serve And Query A elyza/elyza-japanese-llama-2-7b-instruct Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and TGIS standalone runtime
-    [Tags]    RHOAIENG-3479
+    [Tags]    RHOAIENG-3479     VLLM
     Setup Test Variables    model_name=elyza-japanese    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=ELYZA-japanese-Llama-2-7b-instruct-hf
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}   protocol=${PROTOCOL}
     ...    storage_size=70Gi    model_path=${model_path}
     ${requests}=    Create Dictionary    memory=40Gi
-    ${overlays}=   Create List    ${OVERLAY}
+    IF    "${OVERLAY}" != "${EMPTY}"
+          ${overlays}=   Create List    ${OVERLAY}
+    ELSE
+          ${overlays}=   Create List
+    END
     Compile Inference Service YAML    isvc_name=${model_name}
     ...    sa_name=${EMPTY}
     ...    model_storage_uri=${storage_uri}
@@ -183,22 +187,31 @@ Verify User Can Serve And Query A elyza/elyza-japanese-llama-2-7b-instruct Model
     ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
     Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
     ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
-    Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
-    ...    inference_type=all-tokens    n_times=1    protocol=${PROTOCOL}
-    ...    namespace=${test_namespace}   query_idx=4    validate_response=${TRUE}    # temp
-    ...    port_forwarding=${use_port_forwarding}
-    Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
-    ...    inference_type=streaming    n_times=1    protocol=${PROTOCOL}
-    ...    namespace=${test_namespace}    query_idx=4    validate_response=${FALSE}
-    ...    port_forwarding=${use_port_forwarding}
-    Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
-    ...    inference_type=tokenize    n_times=1    query_idx=4
-    ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
-    ...    port_forwarding=${use_port_forwarding}
-    Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
-    ...    inference_type=model-info    n_times=1
-    ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
-    ...    port_forwarding=${use_port_forwarding}
+    IF   "${RUNTIME_NAME}" == "tgis-runtime" and "${KSERVE_MODE}" == "RawDeployment"
+            Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
+            ...    inference_type=all-tokens    n_times=1    protocol=${PROTOCOL}
+            ...    namespace=${test_namespace}   query_idx=4    validate_response=${TRUE}    # temp
+            ...    port_forwarding=${use_port_forwarding}
+            Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
+            ...    inference_type=streaming    n_times=1    protocol=${PROTOCOL}
+            ...    namespace=${test_namespace}    query_idx=4    validate_response=${FALSE}
+            ...    port_forwarding=${use_port_forwarding}
+            Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
+            ...    inference_type=tokenize    n_times=1    query_idx=4
+            ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
+            ...    port_forwarding=${use_port_forwarding}
+            Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
+            ...    inference_type=model-info    n_times=1
+            ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
+            ...    port_forwarding=${use_port_forwarding}
+    ELSE IF    "${RUNTIME_NAME}" == "vllm-runtime" and "${KSERVE_MODE}" == "Serverless"
+            Query Model Multiple Times    model_name=${model_name}      runtime=${RUNTIME_NAME}    protocol=http
+            ...    inference_type=chat-completions    n_times=1    query_idx=9
+            ...    namespace=${test_namespace}    string_check_only=${TRUE}
+            Query Model Multiple Times    model_name=${model_name}      runtime=${RUNTIME_NAME}    protocol=http
+            ...    inference_type=completions    n_times=1    query_idx=10
+            ...    namespace=${test_namespace}    string_check_only=${TRUE}
+    END
     [Teardown]    Run Keywords
     ...    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}

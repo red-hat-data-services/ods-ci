@@ -23,6 +23,7 @@ ${MODELS_BUCKET}=    ${S3.BUCKET_3}
 ${SERVICEMESH_CR_NS}=    istio-system
 &{RUNTIME_FLIEPATHS}=    caikit-tgis-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/caikit_tgis_servingruntime_{{protocol}}.yaml
 ...                      tgis-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/tgis_servingruntime_{{protocol}}.yaml
+...                      vllm-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/vllm_servingruntime_{{protocol}}.yaml
 ${DOWNLOAD_PVC_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_model_in_pvc.yaml
 ${DOWNLOAD_PVC_FILLED_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_model_in_pvc_filled.yaml
 

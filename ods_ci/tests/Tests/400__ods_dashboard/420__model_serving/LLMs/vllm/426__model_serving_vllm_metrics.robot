@@ -57,7 +57,7 @@ Verify User Can Deploy A Model With Vllm Via CLI
     Deploy Model Via CLI    ${IS_FILEPATH}    ${TEST_NS}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=vllm-gpt2-openai
     ...    namespace=${TEST_NS}
-    Query Model Multiple Times    model_name=gpt2    isvc_name=vllm-gpt2-openai    runtime=vllm    protocol=http
+    Query Model Multiple Times    model_name=gpt2    isvc_name=vllm-gpt2-openai    runtime=vllm-runtime   protocol=http
     ...    inference_type=chat-completions    n_times=3    query_idx=8
     ...    namespace=${TEST_NS}    string_check_only=${TRUE}
 

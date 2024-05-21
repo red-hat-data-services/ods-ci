@@ -39,12 +39,14 @@ Detect Pre-existing Install Of Argo Workflows And Block RHOAI Install
     ...                     oc get DataScienceCluster default-dsc -o json | jq '.status.conditions[] | select(.type=="data-science-pipelines-operatorReady") | .status'
     ...                     data-science-pipelines-operatorReady
     ...                     "False"
-    ${output}    Run And Return Rc And Output
+    ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete crd -l app.kubernetes.io/part-of=data-science-pipelines-operator -l app.opendatahub.io/data-science-pipelines-operator=true --ignore-not-found
     Log To Console          ${output}
-    ${output}               Run And Return Rc And Output
+    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting CRDs with DSP labels
+    ${return_code}    ${output}               Run And Return Rc And Output
     ...                     oc delete DataScienceCluster default-dsc
     Log To Console          ${output}
+    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting DataScienceCluster CR
     Apply DataScienceCluster CustomResource         default-dsc
 
 

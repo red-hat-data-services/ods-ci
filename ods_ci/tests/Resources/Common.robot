@@ -176,7 +176,7 @@ Get CodeFlare Version
 #robocop: disable: line-too-long
 Wait Until Csv Is Ready
   [Documentation]   Waits ${timeout} for Operators CSV '${display_name}' to have status phase 'Succeeded'
-  [Arguments]    ${display_name}    ${timeout}=3m    ${operators_namespace}=openshift-operators
+  [Arguments]    ${display_name}    ${timeout}=10m    ${operators_namespace}=openshift-operators
   Log    Waiting ${timeout} for Operator CSV '${display_name}' in ${operators_namespace} to have status phase 'Succeeded'    console=yes
   WHILE   True    limit=${timeout}
   ...    on_limit_message=${timeout} Timeout exceeded waiting for CSV '${display_name}' to be created

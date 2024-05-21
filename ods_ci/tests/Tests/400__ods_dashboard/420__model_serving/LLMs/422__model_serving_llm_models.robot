@@ -19,6 +19,8 @@ ${KSERVE_MODE}=    RawDeployment
 ${MODEL_FORMAT}=   pytorch       #vLLM
 ${PROTOCOL}=     grpc         #http
 ${OVERLAY}=    vllm
+
+
 *** Test Cases ***
 Verify User Can Serve And Query A bigscience/mt0-xxl Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
@@ -453,23 +455,6 @@ Suite Setup
 Suite Teardown
     Set Default Storage Class In GCP    default=standard-csi
     RHOSi Teardown
-
-Set Default Storage Class In GCP
-    [Documentation]    If the storage class exists we can assume we are in GCP. We force ssd-csi to be the default class
-    ...    for the duration of this test suite.
-    [Arguments]    ${default}
-    ${rc}=    Run And Return Rc    oc get storageclass ${default}
-    IF    ${rc} == ${0}
-        IF    "${default}" == "ssd-csi"
-            Run    oc patch storageclass standard-csi -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'  #robocop: disable
-            Run    oc patch storageclass ssd-csi -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'  #robocop: disable
-        ELSE
-            Run    oc patch storageclass ssd-csi -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'  #robocop: disable
-            Run    oc patch storageclass standard-csi -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'  #robocop: disable
-        END
-    ELSE
-        Log    Proceeding with default storage class because we're not in GCP
-    END
 
 Setup Test Variables
     [Arguments]    ${model_name}    ${kserve_mode}=Serverless    ${use_pvc}=${FALSE}    ${use_gpu}=${FALSE}

@@ -45,11 +45,11 @@ def checkout_repository(ref):
     ret = execute_command("git checkout")
 
 
-def get_latest_updated_branch(ref_to_exclude):
+def get_branch(ref_to_exclude, selector_attribute):
     """
     List the remote branches and sort by last commit date (ASC order), exclude $ref_to_exclude and get latest
     """
-    ret = execute_command(f"git branch -a --sort=committerdate | grep -v {ref_to_exclude}$ | tail -1")
+    ret = execute_command(f"git branch -a --sort={selector_attribute} | grep releases/ | grep -v {ref_to_exclude}$ | tail -1")
     if ret != "":
         print(f"Done. {ret} branch selected as ref_2")
         return ret
@@ -57,7 +57,7 @@ def get_latest_updated_branch(ref_to_exclude):
         raise Exception("Failed to auto-selecting ref_2 branch.")
 
 
-def extract_test_cases_from_ref(repo_local_path, ref, auto=False, ref_to_exclude=None):
+def extract_test_cases_from_ref(repo_local_path, ref, auto=False, selector_attribute=None, ref_to_exclude=None):
     """
     Navigate to the $test_repo directory, checkouts the target branch/commit ($ref) and extracts
     the test case titles leveraging RobotFramework TestSuiteBuilder() and TestCasesFinder() classes
@@ -67,7 +67,8 @@ def extract_test_cases_from_ref(repo_local_path, ref, auto=False, ref_to_exclude
         os.chdir(repo_local_path)
         if auto:
             print("\n---| Auto-selecting ref_2 branch")
-            ref = get_latest_updated_branch(ref_to_exclude)
+            ref = get_branch(ref_to_exclude, selector_attribute)
+        print(f"\n---| Extracting test cases from {ref} branch/commit |---")
         checkout_repository(ref)
         builder = TestSuiteBuilder()
         testsuite = builder.build("ods_ci/tests/")
@@ -77,12 +78,13 @@ def extract_test_cases_from_ref(repo_local_path, ref, auto=False, ref_to_exclude
         for test in finder.tests:
             # print (f'"{test.tags}"') # for future reference in order to fetch test tags
             tests.append(test.name)
+        print(f"\nDone. Found {len(tests)} test cases")
     except Exception as err:
         print(err)
         os.chdir(curr_dir)
         raise
     os.chdir(curr_dir)
-    return tests
+    return tests, ref
 
 
 def generate_rf_argument_file(tests, output_filepath):
@@ -101,17 +103,13 @@ def generate_rf_argument_file(tests, output_filepath):
         print(err)
 
 
-def extract_new_test_cases(test_repo, ref_1, ref_2, ref_2_auto, output_argument_file):
+def extract_new_test_cases(test_repo, ref_1, ref_2, ref_2_auto, selector_attribute, output_argument_file):
     """
     Wrapping function for all the new tests extraction stages.
     """
     repo_local_path = get_repository(test_repo)
-    print(f"\n---| Extracting test cases from {ref_1} branch/commit |---")
-    tests_1 = extract_test_cases_from_ref(repo_local_path, ref_1)
-    print(f"\nDone. Found {len(tests_1)} test cases")
-    print(f"\n---| Extracting test cases from {ref_2} branch/commit |---")
-    tests_2 = extract_test_cases_from_ref(repo_local_path, ref_2, ref_2_auto, ref_1)
-    print(f"Done. Found {len(tests_2)} test cases")
+    tests_1, _ = extract_test_cases_from_ref(repo_local_path, ref_1)
+    tests_2, ref_2 = extract_test_cases_from_ref(repo_local_path, ref_2, ref_2_auto, selector_attribute, ref_1)
     print("\n---| Computing differences |----")
     new_tests = list(set(tests_1) - set(tests_2))
     if len(new_tests) == 0:
@@ -163,10 +161,18 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--ref2-auto",
-        help="Auto select the second branch to use for comparison (i.e., latest updated branch)",
+        help="Auto select the second branch to use for comparison (e.g., latest updated branch)",
         action="store",
         dest="ref_2_auto",
         default=False,
+    )
+    parser.add_argument(
+        "--selector-attribute",
+        help="Select the git attribute to use when --ref2-auto is enabled",
+        action="store",
+        dest="selector_attribute",
+        choices=["creatordate", "committerdate", "authordate"],
+        default="creatordate",
     )
 
     args = parser.parse_args()
@@ -176,5 +182,6 @@ if __name__ == "__main__":
         args.ref_1,
         args.ref_2,
         args.ref_2_auto,
+        args.selector_attribute,
         args.output_argument_file,
     )

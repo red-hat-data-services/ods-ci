@@ -30,11 +30,14 @@ Upgrade RHODS
     [Documentation]    Appprove the install plan for the upgrade
     [Tags]  ODS-1766
     ...     Upgrade
+    ${initial_version} =  Get RHODS Version
     ${return_code}    ${output}    Run And Return Rc And Output   oc patch installplan $(oc get installplans -n ${OPERATOR_NAMESPACE} | grep -v NAME | awk '{print $1}') -n ${OPERATOR_NAMESPACE} --type='json' -p '[{"op": "replace", "path": "/spec/approved", "value": true}]'   #robocop:disable
-    Should Be Equal As Integers    ${return_code}     0   msg=Error while upgradeing RHODS
-    Sleep  10s      reason=wait for ten second until operator goes into init state
-    ${return_code}    ${output}    Run And Return Rc And Output   oc get pod -n ${OPERATOR_NAMESPACE} -l name=rhods-operator --no-headers --output='custom-columns=STATUS:.status.phase'    #robocop:disable
-    Should Contain    ${output}    Pending
+    Should Be Equal As Integers    ${return_code}     0   msg=Error while upgrading RHODS
+    Sleep  30s      reason=wait for thirty seconds until old CSV is removed and new one is ready
+    ${is_version_gt} =    Is RHODS Version Greater Than    ${initial_version}
+    IF    ${is_version_gt} == False
+        Fail    RHODS version was not greater than initial version ${initial_version}
+    END
     OpenShiftLibrary.Wait For Pods Status  namespace=${OPERATOR_NAMESPACE}  timeout=300
 
 TensorFlow Image Test
@@ -85,3 +88,12 @@ Upgrade Test Teardown
     Log    rhods_aggregate_availability: ${resp.json()["data"]["result"][0]["value"][-1]}
     @{list_values} =    Create List    1
     Run Keyword And Warn On Failure    Should Contain    ${list_values}    ${resp.json()["data"]["result"][0]["value"][-1]}
+
+Is RHODS Version Greater Than
+    [Documentation]    Returns True if:
+    ...    - RHODS version is greater or equal than ${initial_version}
+    [Arguments]  ${initial_version}
+    ${ver} =  Get RHODS Version
+    ${ver} =  Fetch From Left  ${ver}  -
+    ${comparison} =      GT    ${ver}    ${initial_version}
+    RETURN  ${comparison}

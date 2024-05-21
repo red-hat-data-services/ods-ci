@@ -21,7 +21,7 @@ ${COMMIT_MSG}       commit msg2
 Verify Pushing Project Changes Remote Repository
     [Documentation]    Verifies that changes has been pushed successfully to remote repository
     [Tags]    ODS-326
-    ...       Sanity    Tier1
+    ...       Tier1
     Set Staging Status
     ${randnum}=    Generate Random String    9    [NUMBERS]
     ${commit_message}=    Catenate    ${COMMIT_MSG}    ${randnum}
@@ -36,7 +36,7 @@ Verify Pushing Project Changes Remote Repository
 Verify Updating Project With Changes From Git Repository
     [Documentation]    Verifies that changes has been pulled successfully to local repository
     [Tags]    ODS-324
-    ...       Sanity    Tier1
+    ...       Tier1
     Set Staging Status
     Clone Git Repository And Open    ${REPO_URL}    ${FILE_PATH}
     Sleep    1s

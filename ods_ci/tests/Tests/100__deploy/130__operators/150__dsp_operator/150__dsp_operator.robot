@@ -17,7 +17,7 @@ Detect Pre-existing Install Of Argo Workflows And Block RHOAI Install
     [Documentation]    Detect Pre-existing Install Of Argo Workflows And Block RHOAI Install
     [Tags]                  Operator                ODS-2651                Tier1
     ${return_code}          ${output}               Run And Return Rc And Output
-    ...                     oc apply -f tests/Resources/Files/argo/crd.workflows.yaml
+    ...                     oc apply -f ./tests/Resources/Files/argo/crd.workflows.yaml
     Log To Console          ${output}
     Should Be Equal As Integers
     ...                     ${return_code}

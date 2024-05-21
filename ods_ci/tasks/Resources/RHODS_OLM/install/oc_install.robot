@@ -298,14 +298,14 @@ Create DataScienceCluster CustomResource Using Test Variables
     [Arguments]    ${dsc_name}=${DSC_NAME}
     ${file_path} =    Set Variable    tasks/Resources/Files/
     Copy File    source=${file_path}dsc_template.yml    destination=${file_path}dsc_apply.yml
-    Run    sed -i ' ' -e 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
+    Run    sed -i'' -e 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
     FOR    ${cmp}    IN    @{COMPONENT_LIST}
         IF    $cmp not in $COMPONENTS
-            Run    sed -i ' ' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
+            Run    sed -i'' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
         ELSE IF    '${COMPONENTS.${cmp}}' == 'Managed'
-            Run    sed -i ' ' -e 's/<${cmp}_value>/Managed/' ${file_path}dsc_apply.yml
+            Run    sed -i'' -e 's/<${cmp}_value>/Managed/' ${file_path}dsc_apply.yml
         ELSE IF    '${COMPONENTS.${cmp}}' == 'Removed'
-            Run    sed -i ' ' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
+            Run    sed -i'' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
         END
     END
 
@@ -320,7 +320,7 @@ Apply Custom Manifest in DataScienceCluster CustomResource Using Test Variables
         #     # Use sed to replace the placeholder with the YAML string
         #     Run    sed -i "s|<${cmp}_devflags>|${manifest_string}|g" ${file_path}dsc_apply.yml
         # ELSE
-            Run    sed -i ' ' -e "s|<${cmp}_devflags>||g" ${file_path}dsc_apply.yml
+            Run    sed -i'' -e "s|<${cmp}_devflags>||g" ${file_path}dsc_apply.yml
         # END
     END
 

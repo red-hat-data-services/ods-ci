@@ -20,7 +20,8 @@ ${AUTHORINO_SUB_NAME}=    authorino-operator
 ${AUTHORINO_CHANNEL_NAME}=  managed-services
 ${RHODS_CSV_DISPLAY}=    Red Hat OpenShift AI
 ${ODH_CSV_DISPLAY}=    Open Data Hub Operator
-${CUSTOM_MANIFESTS}=${EMPTY}
+${CUSTOM_MANIFESTS}=    ${EMPTY}
+
 *** Keywords ***
 Install RHODS
   [Arguments]  ${cluster_type}     ${image_url}

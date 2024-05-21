@@ -312,14 +312,14 @@ Apply Custom Manifest in DataScienceCluster CustomResource Using Test Variables
     [Documentation]    Apply custom manifests to a DSC file
     Log To Console    Applying Custom Manifests
 
-    ${file_path} =    Set Variable    tasks/Resources/Files/
+    ${file_path} =    Set Variable    ods_ci/tasks/Resources/Files/
     FOR    ${cmp}    IN    @{COMPONENT_LIST}
         # IF    $cmp in ${CUSTOM_MANIFESTS}
         #     ${manifest_string}=    Convert To String    ${CUSTOM_MANIFESTS}[${cmp}]
         #     # Use sed to replace the placeholder with the YAML string
         #     Run    sed -i "s|<${cmp}_devflags>|${manifest_string}|g" ${file_path}dsc_apply.yml
         # ELSE
-            Run    sed -i "s|<${cmp}_devflags>||g" ${file_path}dsc_apply.yml
+            Run    sed -i ' ' -e "s|<${cmp}_devflags>||g" ${file_path}dsc_apply.yml
         # END
     END
 

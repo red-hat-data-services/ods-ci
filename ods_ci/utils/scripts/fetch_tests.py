@@ -45,7 +45,19 @@ def checkout_repository(ref):
     ret = execute_command("git checkout")
 
 
-def extract_test_cases_from_ref(repo_local_path, ref):
+def get_latest_updated_branch(ref_to_exclude):
+    """
+    List the remote branches and sort by last commit date (ASC order), exclude $ref_to_exclude and get latest
+    """
+    ret = execute_command(f"git branch -a --sort=committerdate | grep -v {ref_to_exclude}$ | tail -1")
+    if ret != "":
+        print(f"Done. {ret} branch selected as ref_2")
+        return ret
+    else:
+        raise Exception("Failed to auto-selecting ref_2 branch.")
+
+
+def extract_test_cases_from_ref(repo_local_path, ref, auto=False, ref_to_exclude=None):
     """
     Navigate to the $test_repo directory, checkouts the target branch/commit ($ref) and extracts
     the test case titles leveraging RobotFramework TestSuiteBuilder() and TestCasesFinder() classes
@@ -53,6 +65,9 @@ def extract_test_cases_from_ref(repo_local_path, ref):
     curr_dir = os.getcwd()
     try:
         os.chdir(repo_local_path)
+        if auto:
+            print("\n---| Auto-selecting ref_2 branch")
+            ref = get_latest_updated_branch(ref_to_exclude)
         checkout_repository(ref)
         builder = TestSuiteBuilder()
         testsuite = builder.build("ods_ci/tests/")
@@ -86,7 +101,7 @@ def generate_rf_argument_file(tests, output_filepath):
         print(err)
 
 
-def extract_new_test_cases(test_repo, ref_1, ref_2, output_argument_file):
+def extract_new_test_cases(test_repo, ref_1, ref_2, ref_2_auto, output_argument_file):
     """
     Wrapping function for all the new tests extraction stages.
     """
@@ -95,7 +110,7 @@ def extract_new_test_cases(test_repo, ref_1, ref_2, output_argument_file):
     tests_1 = extract_test_cases_from_ref(repo_local_path, ref_1)
     print(f"\nDone. Found {len(tests_1)} test cases")
     print(f"\n---| Extracting test cases from {ref_2} branch/commit |---")
-    tests_2 = extract_test_cases_from_ref(repo_local_path, ref_2)
+    tests_2 = extract_test_cases_from_ref(repo_local_path, ref_2, ref_2_auto, ref_1)
     print(f"Done. Found {len(tests_2)} test cases")
     print("\n---| Computing differences |----")
     new_tests = list(set(tests_1) - set(tests_2))
@@ -146,6 +161,13 @@ if __name__ == "__main__":
         dest="ref_2",
         default="releases/2.8.0",
     )
+    parser.add_argument(
+        "--ref2-auto",
+        help="Auto select the second branch to use for comparison (i.e., latest updated branch)",
+        action="store",
+        dest="ref_2_auto",
+        default=False,
+    )
 
     args = parser.parse_args()
 
@@ -153,5 +175,6 @@ if __name__ == "__main__":
         args.test_repo,
         args.ref_1,
         args.ref_2,
+        args.ref_2_auto,
         args.output_argument_file,
     )

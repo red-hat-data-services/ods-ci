@@ -264,7 +264,7 @@ Wait For DSCInitialization CustomResource To Be Ready
 Apply DataScienceCluster CustomResource
     [Documentation]
     [Arguments]        ${dsc_name}=${DSC_NAME}
-    ${file_path} =    Set Variable    tasks/Resources/Files/
+    ${file_path} =    Set Variable    ods_ci/tasks/Resources/Files/
     Log to Console    Requested Configuration:
     FOR    ${cmp}    IN    @{COMPONENT_LIST}
         TRY
@@ -295,16 +295,16 @@ Apply DataScienceCluster CustomResource
 Create DataScienceCluster CustomResource Using Test Variables
     [Documentation]
     [Arguments]    ${dsc_name}=${DSC_NAME}
-    ${file_path} =    Set Variable    tasks/Resources/Files/
+    ${file_path} =    Set Variable    ods_ci/tasks/Resources/Files/
     Copy File    source=${file_path}dsc_template.yml    destination=${file_path}dsc_apply.yml
-    Run    sed -i 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
+    Run    sed -i ' ' -e 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
     FOR    ${cmp}    IN    @{COMPONENT_LIST}
         IF    $cmp not in $COMPONENTS
-            Run    sed -i 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
+            Run    sed -i ' ' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
         ELSE IF    '${COMPONENTS.${cmp}}' == 'Managed'
-            Run    sed -i 's/<${cmp}_value>/Managed/' ${file_path}dsc_apply.yml
+            Run    sed -i ' ' -e 's/<${cmp}_value>/Managed/' ${file_path}dsc_apply.yml
         ELSE IF    '${COMPONENTS.${cmp}}' == 'Removed'
-            Run    sed -i 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
+            Run    sed -i ' ' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
         END
     END
 

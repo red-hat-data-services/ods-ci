@@ -823,6 +823,20 @@ Maybe Wait For Dashboard Loading Spinner Page
     ...    AND
     ...    Wait Until Page Does Not Contain Element    ${spinner_ball}    timeout=${timeout}
 
+Maybe Wait For Loading Indicator
+    [Documentation]     Detecs the loading symbol (three dots) and wait for it to disappear.
+    ...                 If the spinner does not appear, the keyword ignores the error.
+    [Arguments]    ${timeout-pre}=3s    ${timeout}=5s
+    ${do not wait for spinner}=    Get Variable Value    ${ODH_DASHBOARD_DO_NOT_WAIT_FOR_SPINNER_PAGE}  # defaults to None if undefined
+    IF   ${do not wait for spinner} == ${true}
+      RETURN
+    END
+    ${spinner_ball}=   Set Variable    xpath=//*[@data-test="loading-indicator"]
+    Run Keyword And Ignore Error    Run Keywords
+    ...    Wait Until Page Contains Element    ${spinner_ball}    timeout=${timeout-pre}
+    ...    AND
+    ...    Wait Until Page Does Not Contain Element    ${spinner_ball}    timeout=${timeout}
+
 Reload RHODS Dashboard Page
     [Documentation]    Reload the web page and wait for RHODS Dashboard
     ...    to be loaded

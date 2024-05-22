@@ -17,17 +17,21 @@ Detect Pre-existing Install Of Argo Workflows And Block RHOAI Install
     [Documentation]    Detect Pre-existing Install Of Argo Workflows And Block RHOAI Install
     [Tags]                  Operator                ODS-2651                Tier1
     ${return_code}          ${output}               Run And Return Rc And Output
-    ...                     oc apply -f ./tests/Resources/Files/argo/crd.workflows.yaml
+    ...                     oc apply -f ./ods_ci/tests/Resources/Files/argo/crd.workflows.yaml
     Log To Console          ${output}
     Should Be Equal As Integers
     ...                     ${return_code}
     ...                     0
-    ...                     msg=Error while applying the provided file
-    Open Installed Operators Page
-    Navigate to Installed Operators
-    ${is_operator_installed}                        Is Operator Installed                           ${OPERATOR_NAME}
-    IF    ${is_operator_installed}    Uninstall ODH Operator
-    ODH Operator Should Be Uninstalled
+    ...                     msg=Error while applying the Argo Workflow file
+    ${return_code}    ${output}    Run And Return Rc And Output
+    ...    oc get subscription ${OPERATOR_DEPLOYMENT_NAME} --namespace ${OPERATOR_NAMESPACE}
+    Log To Console          ${output}
+    IF    ${return_code} == 0    
+        Open Installed Operators Page
+        Navigate to Installed Operators
+        Uninstall ODH Operator
+        ODH Operator Should Be Uninstalled
+    END
     Open OperatorHub
     Install ODH Operator
     Apply DataScienceCluster CustomResource         default-dsc

@@ -23,9 +23,6 @@ def get_repository(test_repo):
     if "http" in test_repo or "git@" in test_repo:
         print("Cloning repo ", test_repo)
         ret = execute_command(f"git clone {test_repo} {repo_local_path}")
-        if "error" in ret.lower():
-            # actual error gets printed during "execute_command"
-            raise Exception("Failed to clone the given repository")
     elif not os.path.exists(test_repo):
         raise FileNotFoundError(f"local path {test_repo} was not found")
     else:
@@ -38,11 +35,7 @@ def checkout_repository(ref):
     """
     Checkouts the repository at current directory to the given branch/commit ($ref)
     """
-    ref_escaped = ref.strip().replace("\n", "")
-    ret = execute_command(f"git checkout {ref_escaped}")
-    if "error" in ret.lower():
-        # actual error gets printed during "execute_command"
-        raise Exception(f"Failed to checkout to the given branch/commit {ref}")
+    ret = execute_command(f"git checkout {ref}")
     ret = execute_command("git checkout")
 
 
@@ -52,8 +45,10 @@ def get_branch(ref_to_exclude, selector_attribute):
     """
     ref_to_exclude_esc = ref_to_exclude.replace("/", "\/")
     ret = execute_command(
-        f"git branch -r --sort={selector_attribute} | grep releases/  | sed  's/.*{ref_to_exclude_esc}$/current/g' |  grep -zPo '[\S\s]+(?=current)' | tail -n 2"
+        f"git branch -r --sort={selector_attribute} | grep releases/  | sed  's/.*{ref_to_exclude_esc}$/current/g' |  grep -zPo '[\S\s]+(?=current)'"
     )
+    branches = ret.split(" ")
+    ret = branches[-1].split('\x00')[0].strip().replace("\n", "")
     if ret != "":
         print(f"Done. {ret} branch selected as ref_2")
         return ret

@@ -296,7 +296,7 @@ Apply DataScienceCluster CustomResource
 Create DataScienceCluster CustomResource Using Test Variables
     [Documentation]
     [Arguments]    ${dsc_name}=${DSC_NAME}
-    ${file_path} =    Set Variable    /tasks/Resources/Files/
+    ${file_path} =    Set Variable    ./tasks/Resources/Files/
     Copy File    source=${file_path}dsc_template.yml    destination=${file_path}dsc_apply.yml
     Run    sed -i'' -e 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
     FOR    ${cmp}    IN    @{COMPONENT_LIST}

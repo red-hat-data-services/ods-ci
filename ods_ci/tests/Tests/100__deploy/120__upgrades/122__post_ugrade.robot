@@ -17,7 +17,8 @@ Resource           ../../../Resources/Common.robot
 Resource           ../../../Resources/Page/OCPDashboard/Pods/Pods.robot
 Resource           ../../../Resources/Page/OCPDashboard/Builds/Builds.robot
 Resource           ../../../Resources/Page/HybridCloudConsole/OCM.robot
-
+Resource           ../../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
+Resource           ../../../Resources/Page/DistributedWorkloads/WorkloadMetricsUI.resource
 
 *** Variables ***
 ${S_SIZE}       25
@@ -30,6 +31,7 @@ ${PRJ_DESCRIPTION}=    project used for model serving tests
 ${MODEL_NAME}=    test-model
 ${MODEL_CREATED}=    ${FALSE}
 ${RUNTIME_NAME}=    Model Serving Test
+${DW_PROJECT_CREATED}=    False
 
 
 *** Test Cases ***
@@ -144,6 +146,39 @@ Verify Custom Runtime Exists After Upgrade
     Page Should Contain Element  //tr[@id='caikit-runtime']
     Delete Serving Runtime Template From CLI By Runtime Name OR Display Name  runtime_name=caikit-runtime
     [Teardown]   Dashboard Test Teardown
+
+Verify Ray Cluster Exists And Monitor Workload Metrics By Submitting Ray Job After Upgrade
+    [Documentation]    check the Ray Cluster exists , submit ray job and  verify resource usage after upgrade
+    [Tags]  Upgrade
+    ${PRJ_UPGRADE}    Set Variable    test-ns-rayupgrade
+    ${LOCAL_QUEUE}    Set Variable    local-queue-mnist
+    ${JOB_NAME}    Set Variable    mnist
+    Run Codeflare Upgrade Tests    TestMnistJobSubmit
+    Set Global Variable    ${DW_PROJECT_CREATED}    True
+    Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
+    ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
+    Open Distributed Workload Metrics Home Page
+    Select Distributed Workload Project By Name    ${PRJ_UPGRADE}
+    Select Refresh Interval    15 seconds
+    Wait Until Element Is Visible    ${DISTRIBUITED_WORKLOAD_RESOURCE_METRICS_TITLE_XP}    timeout=20
+    Wait Until Element Is Visible    xpath=//*[text()="Running"]    timeout=30
+
+    ${cpu_requested} =   Get CPU Requested    ${PRJ_UPGRADE}    ${LOCAL_QUEUE}
+    ${memory_requested} =   Get Memory Requested    ${PRJ_UPGRADE}    ${LOCAL_QUEUE}    Upgrade
+    Check Requested Resources Chart    ${PRJ_UPGRADE}    ${cpu_requested}    ${memory_requested}
+    Check Requested Resources    ${PRJ_UPGRADE}    ${CPU_SHARED_QUOTA}
+    ...    ${MEMEORY_SHARED_QUOTA}    ${cpu_requested}    ${memory_requested}    RayCluster
+
+    Check Distributed Workload Resource Metrics Status    ${JOB_NAME}    Running
+    Check Distributed Worklaod Status Overview    ${JOB_NAME}    Running
+    ...    All pods were ready or succeeded since the workload admission
+
+    Click Button    ${PROJECT_METRICS_TAB_XP}
+    Check Distributed Workload Resource Metrics Chart    ${PRJ_UPGRADE}    ${cpu_requested}
+    ...    ${memory_requested}    RayCluster    ${JOB_NAME}
+
+    [Teardown]    Codeflare Upgrade Tests Teardown    ${PRJ_UPGRADE}    ${DW_PROJECT_CREATED}
+
 
 *** Keywords ***
 Dashboard Suite Setup

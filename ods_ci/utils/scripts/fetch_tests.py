@@ -3,6 +3,7 @@ import os
 
 from robot.model import SuiteVisitor
 from robot.running import TestSuiteBuilder
+import shutil
 from util import execute_command
 
 
@@ -20,15 +21,17 @@ def get_repository(test_repo):
     If $test_repo is a local path, the function checks the path exists.
     """
     repo_local_path = "./ods_ci/ods-ci-temp"
+    cloned = False
     if "http" in test_repo or "git@" in test_repo:
         print("Cloning repo ", test_repo)
+        cloned = True
         ret = execute_command(f"git clone {test_repo} {repo_local_path}")
     elif not os.path.exists(test_repo):
         raise FileNotFoundError(f"local path {test_repo} was not found")
     else:
         print("Using local repo ", test_repo)
         repo_local_path = test_repo
-    return repo_local_path
+    return repo_local_path, cloned
 
 
 def checkout_repository(ref):
@@ -106,7 +109,7 @@ def extract_new_test_cases(test_repo, ref_1, ref_2, ref_2_auto, selector_attribu
     """
     Wrapping function for all the new tests extraction stages.
     """
-    repo_local_path = get_repository(test_repo)
+    repo_local_path, cloned = get_repository(test_repo)
     tests_1, _ = extract_test_cases_from_ref(repo_local_path, ref_1)
     tests_2, ref_2 = extract_test_cases_from_ref(repo_local_path, ref_2, ref_2_auto, selector_attribute, ref_1)
     print("\n---| Computing differences |----")
@@ -120,7 +123,9 @@ def extract_new_test_cases(test_repo, ref_1, ref_2, ref_2_auto, selector_attribu
             print("\n---| Generating RobotFramework arguments file |----")
             generate_rf_argument_file(new_tests, output_argument_file)
             print("Done.")
-
+    if cloned:
+        print(f"\n---| Deleting cloned repo in {repo_local_path} |----")
+        shutil.rmtree(repo_local_path)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(

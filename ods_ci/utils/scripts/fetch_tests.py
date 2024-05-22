@@ -1,3 +1,19 @@
+"""
+Examples
+Input:
+python3 ods_ci/utils/scripts/fetch_tests.py --test-repo git@github.com:red-hat-data-services/ods-ci.git --ref1 releases/2.8.0 --ref2-auto true --selector-attribute creatordate -A new-arg-file.txt
+Output:
+---| Computing differences |----
+Done. Found 30 new tests in releases/2.8.0 which were not present in origin/releases/2.7.0
+
+Input:
+python3 ods_ci/utils/scripts/fetch_tests.py --test-repo git@github.com:red-hat-data-services/ods-ci.git --ref1 master  --ref2-auto true --selector-attribute creatordate -A new-arg-file.txt
+Output:
+---| Computing differences |----
+Done. Found 14 new tests in master which were not present in origin/releases/2.9.0
+
+"""
+
 import argparse
 import os
 import shutil

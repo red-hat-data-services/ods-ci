@@ -25,7 +25,7 @@ def get_repository(test_repo):
     if "http" in test_repo or "git@" in test_repo:
         print("Cloning repo ", test_repo)
         cloned = True
-        ret = execute_command(f"git clone {test_repo} {repo_local_path}")
+        execute_command(f"git clone {test_repo} {repo_local_path}")
     elif not os.path.exists(test_repo):
         raise FileNotFoundError(f"local path {test_repo} was not found")
     else:
@@ -38,8 +38,8 @@ def checkout_repository(ref):
     """
     Checkouts the repository at current directory to the given branch/commit ($ref)
     """
-    ret = execute_command(f"git checkout {ref}")
-    ret = execute_command("git checkout")
+    execute_command(f"git checkout {ref}")
+    execute_command("git checkout")
 
 
 def get_branch(ref_to_exclude, selector_attribute):

@@ -63,18 +63,16 @@ def get_branch(ref_to_exclude, selector_attribute):
     List the remote branches and sort by last commit date (ASC order), exclude $ref_to_exclude and get latest
     """
     ref_to_exclude_esc = ref_to_exclude.replace("/", r"\/")
-    if "master" in ref_to_exclude or "main" in ref_to_exclude:
-        cmd = f"git branch -r --sort={selector_attribute} | grep releases/"
-    else:
-        cmd = rf"git branch -r --sort={selector_attribute} | grep releases/  | sed  's/.*{ref_to_exclude_esc}$/current/g' |  grep -zPo '[\S\s]+(?=current)'"
+    cmd = f"git branch -r --sort={selector_attribute} | grep releases/"
+    if "master" not in ref_to_exclude and "main" not in ref_to_exclude:
+        cmd += rf" | sed  's/.*{ref_to_exclude_esc}$/current/g' |  grep -zPo '[\S\s]+(?=current)'"
     ret = execute_command(cmd)
     branches = ret.split(" ")
-    ret = branches[-1].split("\x00")[0].strip().replace("\n", "")
-    if ret != "":
-        print(f"Done. {ret} branch selected as ref_2")
-        return ret
-    else:
+    branch = branches[-1].split("\x00")[0].strip().replace("\n", "")
+    if not branch or "fatal:" in branch:
         raise Exception("Failed to auto-selecting ref_2 branch.")
+    print(f"Done. {branch} branch selected as ref_2")
+    return branch
 
 
 def extract_test_cases_from_ref(repo_local_path, ref, auto=False, selector_attribute=None, ref_to_exclude=None):

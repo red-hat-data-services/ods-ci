@@ -38,7 +38,8 @@ def checkout_repository(ref):
     """
     Checkouts the repository at current directory to the given branch/commit ($ref)
     """
-    ret = execute_command(f"git checkout {ref}")
+    ref_escaped = ref.strip().replace("\n", "")
+    ret = execute_command(f"git checkout {ref_escaped}")
     if "error" in ret.lower():
         # actual error gets printed during "execute_command"
         raise Exception(f"Failed to checkout to the given branch/commit {ref}")
@@ -49,7 +50,10 @@ def get_branch(ref_to_exclude, selector_attribute):
     """
     List the remote branches and sort by last commit date (ASC order), exclude $ref_to_exclude and get latest
     """
-    ret = execute_command(f"git branch -a --sort={selector_attribute} | grep releases/ | grep -v {ref_to_exclude}$ | tail -1")
+    ref_to_exclude_esc = ref_to_exclude.replace("/", "\/")
+    ret = execute_command(
+        f"git branch -r --sort={selector_attribute} | grep releases/  | sed  's/.*{ref_to_exclude_esc}$/current/g' |  grep -zPo '[\S\s]+(?=current)' | tail -n 2"
+    )
     if ret != "":
         print(f"Done. {ret} branch selected as ref_2")
         return ret

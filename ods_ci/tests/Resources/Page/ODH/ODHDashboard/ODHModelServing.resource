@@ -241,9 +241,10 @@ Open ${section} Options Menu
 Get Access Token via UI
     [Documentation]    Returns the access token for models deployed in a specific project
     ...    by using the UI of DSP
-    [Arguments]    ${project_name}    ${service_account_name}=default-name
+    [Arguments]    ${project_name}    ${service_account_name}=default-name    ${single_model}=${FALSE}
+    ...            ${model_name}=${NONE}
     Open Data Science Project Details Page    ${project_name}    tab_id=model-server
-    ${token}=    Get Model Serving Access Token via UI    ${service_account_name}
+    ${token}=    Get Model Serving Access Token via UI    ${service_account_name}    ${single_model}    ${model_name}
     RETURN    ${token}
 
 Get Model Project
@@ -388,6 +389,7 @@ Deploy Kserve Model Via UI  #robocop: disable
     [Documentation]  Deploys a model using the kserve/caikit runtime using the Data Science Projects UI
     [Arguments]    ${model_name}    ${serving_runtime}    ${data_connection}    ${path}
     ...    ${model_framework}=caikit    ${replicas}=1    ${size}=Small    ${no_gpus}=${0}
+    ...    ${token}=${FALSE}
     Move To Tab    Models
     Click Button    ${DEPLOY_MODEL_BTN}
     Wait Until Page Contains Element    xpath=${KSERVE_MODAL_HEADER}
@@ -396,6 +398,11 @@ Deploy Kserve Model Via UI  #robocop: disable
     Select Framework    ${model_framework}
     Set Replicas Number With Buttons    ${replicas}
     Set Server Size    ${size}
+    IF    ${token}
+#        Select Checkbox    xpath=//input[@data-testid="alt-form-checkbox-auth"]
+#        Checkbox Should Be Selected  xpath=//input[@data-testid="alt-form-checkbox-auth"]
+        Enable Token Authentication
+    END
     Select Existing Data Connection    ${data_connection}
     Set Folder Path    ${path}
     IF    ${no_gpus} > ${0}

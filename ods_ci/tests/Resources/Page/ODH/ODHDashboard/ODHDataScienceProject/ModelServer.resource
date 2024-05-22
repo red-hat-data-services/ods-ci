@@ -187,11 +187,18 @@ Disable Token Authentication
 Get Model Serving Access Token via UI
     [Documentation]    Returns the token used for authentication to the serving route
     ...    TODO: There can be multiple tokens defined for each model server, handle this case as well
-    [Arguments]    ${service_account_name}=default-name
-    Wait Until Page Contains Element    xpath://td[@data-label="Tokens"]/button
-    Click Element    xpath://td[@data-label="Tokens"]/button
-    ${token}=    Get Element Attribute
-    ...    xpath://div[.="${service_account_name} "]/../../td[@data-label="Token Secret"]//input    value
+    [Arguments]    ${service_account_name}=default-name    ${single_model}=${FALSE}    ${model_name}=${NONE}
+    IF    ${single_model}
+        # Expand the model
+        SeleniumLibrary.Click Button    xpath: //div[text()='${model_name}']/parent::td[@data-label='Name']/preceding-sibling::td/button
+        ${token}=    Get Element Attribute
+        ...    xpath://div[text()='${service_account_name}']/parent::td[@data-label='Token Name']/following-sibling::td[@data-label='Token Secret']//input   value
+    ELSE
+        Wait Until Page Contains Element    xpath://td[@data-label="Tokens"]/button
+        Click Element    xpath://td[@data-label="Tokens"]/button
+        ${token}=    Get Element Attribute
+        ...    xpath://div[.="${service_account_name} "]/../../td[@data-label="Token Secret"]//input    value
+    END
     RETURN    ${token}
 
 Click Plus Button

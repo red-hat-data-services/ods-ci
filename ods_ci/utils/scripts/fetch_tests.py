@@ -1,9 +1,9 @@
 import argparse
 import os
+import shutil
 
 from robot.model import SuiteVisitor
 from robot.running import TestSuiteBuilder
-import shutil
 from util import execute_command
 
 
@@ -46,12 +46,14 @@ def get_branch(ref_to_exclude, selector_attribute):
     """
     List the remote branches and sort by last commit date (ASC order), exclude $ref_to_exclude and get latest
     """
-    ref_to_exclude_esc = ref_to_exclude.replace("/", "\/")
-    ret = execute_command(
-        f"git branch -r --sort={selector_attribute} | grep releases/  | sed  's/.*{ref_to_exclude_esc}$/current/g' |  grep -zPo '[\S\s]+(?=current)'"
-    )
+    ref_to_exclude_esc = ref_to_exclude.replace("/", r"\/")
+    if "master" in ref_to_exclude or "main" in ref_to_exclude:
+        cmd = f"git branch -r --sort={selector_attribute} | grep releases/"
+    else:
+        cmd = rf"git branch -r --sort={selector_attribute} | grep releases/  | sed  's/.*{ref_to_exclude_esc}$/current/g' |  grep -zPo '[\S\s]+(?=current)'"
+    ret = execute_command(cmd)
     branches = ret.split(" ")
-    ret = branches[-1].split('\x00')[0].strip().replace("\n", "")
+    ret = branches[-1].split("\x00")[0].strip().replace("\n", "")
     if ret != "":
         print(f"Done. {ret} branch selected as ref_2")
         return ret
@@ -126,6 +128,7 @@ def extract_new_test_cases(test_repo, ref_1, ref_2, ref_2_auto, selector_attribu
     if cloned:
         print(f"\n---| Deleting cloned repo in {repo_local_path} |----")
         shutil.rmtree(repo_local_path)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(

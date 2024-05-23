@@ -1,7 +1,7 @@
 *** Settings ***
 Documentation       Applies RHOSi settings to run the test suites
 
-Library             RPA.RobotLogListener
+#Library             RPA.RobotLogListener
 Resource            Page/ODH/Monitoring/Monitoring.resource
 Resource            Page/OCPDashboard/InstalledOperators/InstalledOperators.robot
 Resource            Page/OCPLogin/OCPLogin.resource
@@ -48,7 +48,7 @@ RHOSi Setup
     [Documentation]    Applies RHOSi Settings and stores availability metrics
     ...                The suggested usage of this keyword is to call it inside all the Suite Setup keywords.
     ...                Do Not extend this keyword for high-level setup, e.g., don't open browser
-    Protect Sensitive Variables In Keywords
+#    Protect Sensitive Variables In Keywords
     Required Global Variables Should Exist
     Initialize Global Variables
     Run Keyword If RHODS Is Managed

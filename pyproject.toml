@@ -22,10 +22,9 @@ robotframework-openshift = {git = "https://git@github.com/red-hat-data-services/
 pytest = "^7.2.1"
 pytest-logger = "^0.5.1"
 Pygments = "^2.14.0"
-requests = "^2.28.2"
+requests = "2.26.0"
 escapism = "^1.0.1"
 semver = "^2"
-rpaframework = "^27.2.0"
 pexpect = "^4.8.0"
 python-openstackclient = "^6.2.0"
 awscli = "^1.27.100"
@@ -35,6 +34,7 @@ junitparser = "3.1.2"
 python-terraform = "0.10.1"
 fuzzywuzzy = "^0.18.0"
 python-levenshtein = "^0.25.1"
+sl-python-robot = {git = "https://github.com/Sealights/sealights-integration-examples.git", rev = "main", subdirectory = "robot-custom-integration"}
 
 [tool.poetry.group.dev.dependencies]
 robotframework-lsp = ">=1.11.0"

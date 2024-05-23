@@ -383,6 +383,7 @@ Install Kserve Dependencies
           Wait Until Operator Subscription Last Condition Is
           ...    type=CatalogSourcesUnhealthy    status=False
           ...    reason=AllCatalogSourcesHealthy    subcription_name=${AUTHORINO_SUB_NAME}
+          ...    retry=150
     ELSE
           Log To Console    message=Authorino Operator is already installed
     END
@@ -394,6 +395,7 @@ Install Kserve Dependencies
           Wait Until Operator Subscription Last Condition Is
           ...    type=CatalogSourcesUnhealthy    status=False
           ...    reason=AllCatalogSourcesHealthy    subcription_name=${SERVICEMESH_SUB_NAME}
+          ...    retry=150
     ELSE
           Log To Console    message=ServiceMesh Operator is already installed
     END
@@ -410,7 +412,8 @@ Install Kserve Dependencies
           Wait Until Operator Subscription Last Condition Is
           ...    type=CatalogSourcesUnhealthy    status=False
           ...    reason=AllCatalogSourcesHealthy    subcription_name=${SERVERLESS_SUB_NAME}
-          ...    namespace=${SERVERLESS_NS}    retry=100
+          ...    namespace=${SERVERLESS_NS}
+          ...    retry=150
           Wait For Pods To Be Ready    label_selector=name=knative-openshift
           ...    namespace=${SERVERLESS_NS}
           Wait For Pods To Be Ready    label_selector=name=knative-openshift-ingress

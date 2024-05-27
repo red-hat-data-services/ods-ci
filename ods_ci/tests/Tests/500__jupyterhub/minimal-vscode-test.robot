@@ -20,7 +20,7 @@ ${NOTEBOOK_IMAGE} =         code-server
 *** Test Cases ***
 Verify VSCode Image Can Be Spawned
     [Documentation]    Spawns vscode image
-    [Tags]  Sanity    Tier1
+    [Tags]  Tier1
     Pass Execution    Passing tests, as suite setup ensures that image can be spawned
 
 

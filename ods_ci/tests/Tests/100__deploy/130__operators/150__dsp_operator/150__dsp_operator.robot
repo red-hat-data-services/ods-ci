@@ -24,15 +24,10 @@ Detect Pre-existing Install Of Argo Workflows And Block RHOAI Install
     ...                     ${return_code}
     ...                     0
     ...                     msg=${output}
-    ${return_code}          ${output}               Run And Return Rc And Output
-    ...                     oc get subscription ${OPERATOR_DEPLOYMENT_NAME} --namespace ${OPERATOR_NAMESPACE}
-    Log To Console          ${output}
-    IF    ${return_code} == 0
-        ${return_code}    Run and Watch Command
-        ...    cd ${EXECDIR}/${OLM_DIR} && ./cleanup.sh -t operator
-        ...    timeout=10 min
-        Should Be Equal As Integers                     ${return_code}          0
-    END
+    ${return_code}          Run and Watch Command
+    ...                     cd ${EXECDIR}/${OLM_DIR} && ./cleanup.sh -t operator
+    ...                     timeout=10 min
+    Should Be Equal As Integers ${return_code}      0
     Open OperatorHub
     Install ODH Operator
     Apply DataScienceCluster CustomResource         default-dsc

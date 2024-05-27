@@ -38,7 +38,7 @@ Verify Ods Users Can Create And Run A Data Science Pipeline Using The kfp Python
 Verify Upload Download In Data Science Pipelines Using The kfp Python Package
     [Documentation]    Creates, runs pipelines with regular user. Double check the pipeline result and clean
     ...    the pipeline resources.
-    [Tags]        Tier1    ODS-TODO
+    [Tags]        Tier1    ODS-2683
     ${upload_download_dict}=    Create Dictionary    mlpipeline_minio_artifact_secret=value    bucket_name=value
     End To End Pipeline Workflow Using Kfp
     ...    username=${TEST_USER.USERNAME}

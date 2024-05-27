@@ -44,7 +44,7 @@ ${TEST_NS}=                   vllm-gpt2
 *** Test Cases ***
 Verify User Can Deploy A Model With Vllm Via CLI
     [Documentation]    Deploy a model (gpt2) using the vllm runtime and confirm that it's running
-    [Tags]    Tier1    Sanity    Resources-GPU    RHOAIENG-6264
+    [Tags]    Tier1    Sanity    Resources-GPU    RHOAIENG-6264   VLLM
     ${rc}    ${out}=    Run And Return Rc And Output    oc apply -f ${DL_POD_FILEPATH}
     Should Be Equal As Integers    ${rc}    ${0}
     Wait For Pods To Succeed    label_selector=gpt-download-pod=true    namespace=${TEST_NS}
@@ -57,7 +57,7 @@ Verify User Can Deploy A Model With Vllm Via CLI
     Deploy Model Via CLI    ${IS_FILEPATH}    ${TEST_NS}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=vllm-gpt2-openai
     ...    namespace=${TEST_NS}
-    Query Model Multiple Times    model_name=gpt2    isvc_name=vllm-gpt2-openai    runtime=vllm    protocol=http
+    Query Model Multiple Times    model_name=gpt2    isvc_name=vllm-gpt2-openai    runtime=vllm-runtime   protocol=http
     ...    inference_type=chat-completions    n_times=3    query_idx=8
     ...    namespace=${TEST_NS}    string_check_only=${TRUE}
 

@@ -96,5 +96,34 @@
             }
         },
         "containers": ["kserve-container"]
+    },
+    "vllm-runtime": {
+        "endpoints": {
+            "chat-completions": {
+                "http": {
+                    "endpoint": "v1/chat/completions",
+                    "header": "Content-Type:application/json",
+                    "body": "{'model': '${model_name}','messages': [${query_text}]}",
+                    "response_fields_map": {
+                        "response": "choices",
+                        "completion_tokens":  "completion_tokens",
+                        "response_text":    "content"
+                    }
+                }
+            },
+            "completions"  : {
+                "http": {
+                    "endpoint": "v1/completions",
+                    "header": "Content-Type:application/json",
+                    "body": "{'model': '${model_name}','prompt': '${query_text}'}",
+                    "response_fields_map": {
+                        "response": "choices",
+                        "completion_tokens":  "completion_tokens",
+                        "response_text":    "text"
+                    }
+                }
+            }
+        },
+        "containers": ["kserve-container"]
     }
 }

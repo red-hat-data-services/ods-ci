@@ -33,8 +33,12 @@ ${WORKBENCH_STOP_BTN_XP}=                 xpath=//button[text()="Stop workbench"
 ${WORKBENCH_IMAGE_VER_LABEL}=        //label[@for="workbench-image-version-selection"]
 ${WORKBENCH_IMAGE_VER_BUTTON}=       ${WORKBENCH_IMAGE_VER_LABEL}/../..//button
 ${WORKBENCH_IMAGE_VER_DROPDOWN}=     //*[@id="workbench-image-version-selection"]
+# Standard Data Science https://github.com/red-hat-data-services/notebooks/blob/main/manifests/base/jupyter-datascience-notebook-imagestream.yaml
+# vs
+# Jupyter Data Science https://github.com/opendatahub-io/notebooks/blob/main/manifests/base/jupyter-datascience-notebook-imagestream.yaml
 &{IMAGE_ID_MAPPING}=                 Minimal Python=minimal-notebook    CUDA=minimal-gpu   PyTorch=pytorch
-...                                  Standard Data Science=data-science-notebook    TensorFlow=tensorflow
+...                                  Standard Data Science=data-science-notebook    Jupyter Data Science=datascience-notebook
+...                                  TensorFlow=tensorflow
 ${KEYVALUE_TYPE}=        Key / value
 ${UPLOAD_TYPE}=        Upload
 ${ENV_VARIABLES_SECTION_XP}=        xpath=//section[@aria-label="Environment variables"]
@@ -204,6 +208,13 @@ Select An Existent PV
 Select Workbench Jupyter Image
     [Documentation]    Selects a Jupyter image in the workbench creation page
     [Arguments]     ${image_name}    ${version}=default
+    IF  "${PRODUCT}" == "ODH"
+        # The name of the Standard Data Science image in ODH is Jupyter Data Science
+        IF  "${image_name}" == "Standard Data Science"
+            ${image_name}=    Set Variable    Jupyter Data Science
+        END
+    END
+
     Click Element    //a[@href="#notebook-image"]
     Wait Until Page Contains Element    ${WORKBENCH_IMAGE_MENU_BTN_XP}
     Click Element    ${WORKBENCH_IMAGE_MENU_BTN_XP}

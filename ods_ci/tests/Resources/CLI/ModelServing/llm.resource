@@ -23,6 +23,7 @@ ${MODELS_BUCKET}=    ${S3.BUCKET_3}
 ${SERVICEMESH_CR_NS}=    istio-system
 &{RUNTIME_FLIEPATHS}=    caikit-tgis-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/caikit_tgis_servingruntime_{{protocol}}.yaml
 ...                      tgis-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/tgis_servingruntime_{{protocol}}.yaml
+...                      vllm-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/vllm_servingruntime_{{protocol}}.yaml
 ${DOWNLOAD_PVC_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_model_in_pvc.yaml
 ${DOWNLOAD_PVC_FILLED_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_model_in_pvc_filled.yaml
 
@@ -787,8 +788,9 @@ Get KServe Default Deployment Mode From DSC
     RETURN    ${mode}
 
 Start Port-forwarding
-    [Arguments]    ${namespace}    ${pod_name}    ${process_alias}=llm-query-process
-    ${process}=    Start Process    oc -n ${namespace} port-forward pod/${pod_name} 8033:8033
+    [Arguments]    ${namespace}    ${pod_name}    ${process_alias}=llm-query-process    ${local_port}=8033
+    ...    ${remote_port}=8033
+    ${process}=    Start Process    oc -n ${namespace} port-forward pod/${pod_name} ${local_port}:${remote_port}
     ...    alias=${process_alias}    stderr=STDOUT    shell=yes
     Process Should Be Running    ${process}
     sleep  7s

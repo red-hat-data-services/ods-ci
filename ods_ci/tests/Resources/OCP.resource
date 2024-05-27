@@ -258,3 +258,20 @@ Check If Pod Does Not Exist
     ${rc}   ${output}=    Run And Return Rc And Output
     ...    oc get pod -l {label_selector} -n ${namespace}
     Should Be Equal    "${rc}"    "1"    msg=${output}
+
+Set Default Storage Class In GCP
+    [Documentation]    If the storage class exists we can assume we are in GCP. We force ssd-csi to be the default class
+    ...    for the duration of this test suite.
+    [Arguments]    ${default}
+    ${rc}=    Run And Return Rc    oc get storageclass ${default}
+    IF    ${rc} == ${0}
+        IF    "${default}" == "ssd-csi"
+            Run    oc patch storageclass standard-csi -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'  #robocop: disable
+            Run    oc patch storageclass ssd-csi -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'  #robocop: disable
+        ELSE
+            Run    oc patch storageclass ssd-csi -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'  #robocop: disable
+            Run    oc patch storageclass standard-csi -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'  #robocop: disable
+        END
+    ELSE
+        Log    Proceeding with default storage class because we're not in GCP
+    END

@@ -146,6 +146,56 @@
                     }
                 }
             }
+        },
+        {
+            "query_text": "{'role': 'system','content': 'You are a poetic assistant, skilled in explaining complex programming concepts with creative flair.'},{'role': 'user','content': 'Compose a poem that explains the concept of recursion in programming.'}",
+            "models": {
+                "gpt2": {
+                    "vllm-runtime": {
+                        "chat-completions_response_text": "A friend of mine came over to the house to play with his wife. He was asleep, and he felt like he'd been hit by a speeding car. He's a big guy. He's like the kind of guy who may not have a very good head, but he's big enough to stand up at a table and read something. I was like, \"I'm going to play with this.\"\n\nThat's where I started playing with my car. It was something I never dreamed of doing, but I'd never imagined that it would be such a big deal.\n\nWe started playing with it. When I was about 12, we started playing with it to see how it would turn out. I was 26, and I was playing it for the first time for the first time ever. It was fun. I remember thinking it was like a different game than I had ever played before. I remember thinking the first time we played would be like, \"Oh my god, I've never played a game like this before before.\"\n\nIt was surreal. I was in my 20s at the time. We got to have a party in my house at the time. I was sitting in the living room with my friend, who's 28. We're from Dallas, and his wife is a pretty big girl. He's about 6 feet tall and 250 pounds. On the phone with his friend said, \"Dad, is it possible you'll be able to do this without your beard?\" I was like, \"Absolutely, actually.\" I thought, \"I'm going to do it.\"\n\nI finally did it and it turned out pretty well. I was able to take our photo with our friend, and he got excited and started laughing. He was like, \"That's awesome.\" I sat in his living room for two hours and made sure he was really excited. He was really excited. We ended up having a workshop and we have a lot of stuff to do.\n\nHe just started playing. It's been amazing. I'm like, \"It's going to be huge.\" At first I was like, \"Wow, my god that's amazing.\" I was like, \"Wow, my God that's awesome.\" He's like, \"I'm so excited about this!\" He was like, \"Oh my god, I can't wait to do it!\"\n\nHe had that awesome physique. He was super skinny. He was like, \"I'm so excited about it.\" He was like, \"Really?\" I was like, \"Yeah, I'm so excited! I'm so excited.\" We did it for two weeks and it turned out pretty well.\n\nHe's like, \"I hope it stays that way.\" I was like, \"I hope it stays that way.\" He was like, \"Oh my god, I've never even played with a computer before!\" I was like, \"Yeah, it's just fun to play with a computer.\" He was like, \"Oh my god, I can't wait to play with a computer!\" He was like, \"It's just a cool thing to do!\"\n\nI was doing it with my friend's dog, a puppy.\n\nI was doing it with my friend's dog. People said, \"You think that's cool?\" I said, \"Yeah, that's cool.\" We had the dog. He was a little bit shy and it was a little bit intimidating and scary.\n\nWe played it twice. It was like a game. He was like, \"Oh my God I've never played with a computer before!\" I was like, \"I hope it stays that way.\" He was like, \"Yeah, it's just a cool thing to do!\" He was like, \"Oh my god, I can't wait to do it!\"\n\nWe played it again on the bus, on the weekend.\n\nWe played it again on the weekend.\n\nThen we went to the store and bought a new Canon 5D Mark II.\n\nI couldn't believe what the customer was saying. I was like, \"That sounds amazing!\" He was like, \"That's amazing!\"\n\nHe was like, \"Wow! That's awesome!\" So we were like, \"Wow! That looks awesome!\" He's like, \"Yeah, that looks awesome!\" I was like, \"Wow! That looks awesome! That looks awesome!\"\n\nWe played it twice again.\n\nI was like, \"Wow! That sounds awesome!\" He was like, \"Wow! That sounds awesome! That sounds awesome!\" I was like, \"Wow! That looks awesome!\"\n\nHe was like, \"Wow! That sounds awesome! That looks awesome!\"\n\nI was just like, \"Wow! That looks awesome! That looks awesome!\" He was like"
+                    }
+                }
+            }
+        },
+        {
+            "query_text": "{'role': 'user' , 'content' : '。桜の木は、桜の花が咲くと'}",
+            "models": {
+                "elyza-japanese":{
+                    "vllm-runtime": {
+                        "chat-completions_response_text": "{\"id\":\"cmpl-53b80efcc34f4dfcbd0b325ff0777051\",\"object\":\"chat.completion\",\"created\":1716276132,\"model\":\"e\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"  桜の木は、桜の花が咲くと芽吹きが始まります。つぼみは膨らみ、色が開き、準備ができた芽を支えます。葉が落ちるまでの間に、芽かきをして、芽だけを残します。\"},\"logprobs\":null,\"finish_reason\":\"stop\",\"stop_reason\":null}],\"usage\":{\"prompt_tokens\":29,\"total_tokens\":181,\"completion_tokens\":152}}"
+                    }
+                }
+            }
+        },
+        {
+            "query_text": "。桜の木は、桜の花が咲くと",
+            "models": {
+                "elyza-japanese":{
+                    "vllm-runtime": {
+                        "completions_response_text": "{\"id\":\"cmpl-8faf5129deac4da88d002e4526fd88a4\",\"object\":\"text_completion\",\"created\":1716279480,\"model\":\"e\",\"choices\":[{\"index\":0,\"text\":\"徒長する。つまり芽吹\",\"logprobs\":null,\"finish_reason\":\"length\",\"stop_reason\":null}],\"usage\":{\"promp21,\"total_tokens\":37,\"completion_tokens\":16}}"
+                    }
+                }
+            }
+        },
+        {
+            "query_text": "San Francisco is a",
+            "models": {
+                "llama-2-13b-chat":{
+                    "vllm-runtime": {
+                        "completions_response_text": "{\"object\":\"text_completion\",\"created\":,\"model\":\"llama-2-13b-chat\",\"choices\":[{\"index\":0,\"text\":\" beautiful city that is full of life and energy. Located along the San Francisco\",\"logprobs\":null,\"finish_reason\":\"length\",\"stop_reason\":null}],\"usage\":{\"prompt_tokens\":5,\"total_tokens\":21,\"completion_tokens\":16}}"
+                    }
+                }
+            }
+        },
+        {
+            "query_text": "{'role': 'user' , 'content' : 'Say this is a test!'}",
+            "models": {
+                "llama-2-13b-chat":{
+                    "vllm-runtime": {
+                        "chat-completions_response_text": "{\"object\":\"chat.completion\",\"created\":,\"model\":\"llama-2-13b-chat\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"  This is a test!\"},\"logprobs\":null,\"finish_reason\":\"stop\",\"stop_reason\":null}],\"usage\":{\"prompt_tokens\":15,\"total_tokens\":22,\"completion_tokens\":7}}"
+                    }
+                }
+            }
         }
     ],
     "model-info": {

@@ -10,7 +10,9 @@ Library       JupyterLibrary
 
 
 *** Variables ***
+# This variable is overriden for ODH runs via 'ods_ci/test-variables-odh-overwrite.yml'
 ${ODH_DASHBOARD_PROJECT_NAME}=   Red Hat OpenShift AI
+
 ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}=         //*[@class="pf-v5-c-drawer__panel-main"]//button[.='Enable']
 ${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}=   //*[@class="pf-v5-c-drawer__panel-main"]//*[.='Get started']
 ${CARDS_XP}=  //*[(contains(@class, 'odh-card')) and (contains(@class, 'pf-v5-c-card'))]

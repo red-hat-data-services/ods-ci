@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation       Test Cases to verify Serverless installation
+Documentation       Test Cases with regards to the DSP Operator
 
 Library             Collections
 Library             SeleniumLibrary
@@ -7,6 +7,7 @@ Library             OpenShiftLibrary
 Resource            ../../../../Resources/Page/OCPDashboard/OCPDashboard.resource
 Resource            ../../../../Resources/OCP.resource
 Resource            ../../../../Resources/RHOSi.resource
+Resource            ../../tasks/Resources/RHODS_OLM/uninstall/uninstall.robot
 
 Suite Setup         Suite Setup
 Suite Teardown      Suite Teardown
@@ -15,42 +16,48 @@ Suite Teardown      Suite Teardown
 *** Test Cases ***
 Detect Pre-existing Install Of Argo Workflows And Block RHOAI Install
     [Documentation]    Detect Pre-existing Install Of Argo Workflows And Block RHOAI Install
-    [Tags]                  Operator                ODS-2651                Tier1
+    [Tags]                  Operator                ODS-2651                Tier3
+    Delete Argo Workflow Crd
     ${return_code}          ${output}               Run And Return Rc And Output
     ...                     oc apply -f ./ods_ci/tests/Resources/Files/argo/crd.workflows.yaml
-    Log To Console          ${output}
     Should Be Equal As Integers
     ...                     ${return_code}
     ...                     0
-    ...                     msg=Error while applying the Argo Workflow file
-    ${return_code}    ${output}    Run And Return Rc And Output
-    ...    oc get subscription ${OPERATOR_DEPLOYMENT_NAME} --namespace ${OPERATOR_NAMESPACE}
+    ...                     msg=${output}
+    ${return_code}          ${output}               Run And Return Rc And Output
+    ...                     oc get subscription ${OPERATOR_DEPLOYMENT_NAME} --namespace ${OPERATOR_NAMESPACE}
     Log To Console          ${output}
-    IF    ${return_code} == 0    
-        Open Installed Operators Page
-        Navigate to Installed Operators
-        Uninstall ODH Operator
-        ODH Operator Should Be Uninstalled
+    IF    ${return_code} == 0
+        ${return_code}    Run and Watch Command
+        ...    cd ${EXECDIR}/${OLM_DIR} && ./cleanup.sh -t operator
+        ...    timeout=10 min
+        Should Be Equal As Integers                     ${return_code}          0
     END
     Open OperatorHub
     Install ODH Operator
     Apply DataScienceCluster CustomResource         default-dsc
-    Resource Status Should Be
+    Wait Until Keyword Succeeds
+    ...                     5 min
+    ...                     30s
+    ...                     Resource Status Should Be
     ...                     oc get DataScienceCluster default-dsc -o json | jq '.status.conditions[] | select(.type=="data-science-pipelines-operatorReady") | .status'
     ...                     CapabilityDSPv2Argo
     ...                     "False"
-    Resource Status Should Be
+    Wait Until Keyword Succeeds
+    ...                     5 min
+    ...                     30s
+    ...                     Resource Status Should Be
     ...                     oc get DataScienceCluster default-dsc -o json | jq '.status.conditions[] | select(.type=="data-science-pipelines-operatorReady") | .status'
     ...                     data-science-pipelines-operatorReady
     ...                     "False"
-    ${return_code}    ${output}    Run And Return Rc And Output
-    ...    oc delete crd -l app.kubernetes.io/part-of=data-science-pipelines-operator -l app.opendatahub.io/data-science-pipelines-operator=true --ignore-not-found
-    Log To Console          ${output}
-    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting CRDs with DSP labels
-    ${return_code}    ${output}               Run And Return Rc And Output
+    Delete Argo Workflow Crd
+    ${return_code}          ${output}               Run And Return Rc And Output
     ...                     oc delete DataScienceCluster default-dsc
     Log To Console          ${output}
-    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting DataScienceCluster CR
+    Should Be Equal As Integers
+    ...                     ${return_code}
+    ...                     0
+    ...                     msg=Error deleting DataScienceCluster CR
     Apply DataScienceCluster CustomResource         default-dsc
 
 
@@ -64,3 +71,9 @@ Suite Teardown
     [Documentation]    Suite Teardown
     Close All Browsers
     RHOSi Teardown
+
+Delete Argo Workflow Crd
+    [Documentation]    Keyword for Argo Workflow CRD CleanUp
+    ${return_code}    ${output}    Run And Return Rc And Output
+    ...    oc delete crd workflows.argoproj.io
+    Log To Console    ${output}

@@ -55,7 +55,7 @@ class DataSciencePipelinesAPI:
         count = 0
         while status != 200 and count < timeout:
             response, status = self.do_get(
-                f"https://{self.route}/apis/v1beta1/runs",
+                f"https://{self.route}/apis/v2beta1/runs",
                 headers={"Authorization": f"Bearer {self.sa_token}"},
             )
             # 503 -> service not deployed

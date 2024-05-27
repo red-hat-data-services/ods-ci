@@ -20,6 +20,7 @@ ${AUTHORINO_SUB_NAME}=    authorino-operator
 ${AUTHORINO_CHANNEL_NAME}=  managed-services
 ${RHODS_CSV_DISPLAY}=    Red Hat OpenShift AI
 ${ODH_CSV_DISPLAY}=    Open Data Hub Operator
+${CUSTOM_MANIFESTS}=    ${EMPTY}
 
 *** Keywords ***
 Install RHODS
@@ -314,13 +315,13 @@ Apply Custom Manifest in DataScienceCluster CustomResource Using Test Variables
 
     ${file_path} =    Set Variable    tasks/Resources/Files/
     FOR    ${cmp}    IN    @{COMPONENT_LIST}
-        # IF    $cmp in ${CUSTOM_MANIFESTS}
-        #     ${manifest_string}=    Convert To String    ${CUSTOM_MANIFESTS}[${cmp}]
-        #     # Use sed to replace the placeholder with the YAML string
-        #     Run    sed -i "s|<${cmp}_devflags>|${manifest_string}|g" ${file_path}dsc_apply.yml
-        # ELSE
+         IF    $cmp in $CUSTOM_MANIFESTS
+             ${manifest_string}=    Convert To String    ${CUSTOM_MANIFESTS}[${cmp}]
+             # Use sed to replace the placeholder with the YAML string
+             Run    sed -i "s|<${cmp}_devflags>|${manifest_string}|g" ${file_path}dsc_apply.yml
+         ELSE
             Run    sed -i "s|<${cmp}_devflags>||g" ${file_path}dsc_apply.yml
-        # END
+         END
     END
 
 Component Should Be Enabled
@@ -382,6 +383,7 @@ Install Kserve Dependencies
           Wait Until Operator Subscription Last Condition Is
           ...    type=CatalogSourcesUnhealthy    status=False
           ...    reason=AllCatalogSourcesHealthy    subcription_name=${AUTHORINO_SUB_NAME}
+          ...    retry=150
     ELSE
           Log To Console    message=Authorino Operator is already installed
     END
@@ -393,6 +395,7 @@ Install Kserve Dependencies
           Wait Until Operator Subscription Last Condition Is
           ...    type=CatalogSourcesUnhealthy    status=False
           ...    reason=AllCatalogSourcesHealthy    subcription_name=${SERVICEMESH_SUB_NAME}
+          ...    retry=150
     ELSE
           Log To Console    message=ServiceMesh Operator is already installed
     END
@@ -409,7 +412,8 @@ Install Kserve Dependencies
           Wait Until Operator Subscription Last Condition Is
           ...    type=CatalogSourcesUnhealthy    status=False
           ...    reason=AllCatalogSourcesHealthy    subcription_name=${SERVERLESS_SUB_NAME}
-          ...    namespace=${SERVERLESS_NS}    retry=100
+          ...    namespace=${SERVERLESS_NS}
+          ...    retry=150
           Wait For Pods To Be Ready    label_selector=name=knative-openshift
           ...    namespace=${SERVERLESS_NS}
           Wait For Pods To Be Ready    label_selector=name=knative-openshift-ingress

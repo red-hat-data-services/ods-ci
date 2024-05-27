@@ -44,7 +44,7 @@ ${TEST_NS}=                   vllm-gpt2
 *** Test Cases ***
 Verify User Can Deploy A Model With Vllm Via CLI
     [Documentation]    Deploy a model (gpt2) using the vllm runtime and confirm that it's running
-    [Tags]    Tier1    Sanity    Resources-GPU    RHOAIENG-6264
+    [Tags]    Tier1    Sanity    Resources-GPU    RHOAIENG-6264   VLLM
     ${rc}    ${out}=    Run And Return Rc And Output    oc apply -f ${DL_POD_FILEPATH}
     Should Be Equal As Integers    ${rc}    ${0}
     Wait For Pods To Succeed    label_selector=gpt-download-pod=true    namespace=${TEST_NS}

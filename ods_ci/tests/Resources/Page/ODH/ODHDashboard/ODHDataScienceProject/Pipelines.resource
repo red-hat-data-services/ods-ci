@@ -53,7 +53,7 @@ Wait Until Pipeline Is Not Listed
     [Documentation]    Waits until pipeline is no longer listed in the pipelines table
     [Arguments]    ${pipeline_name}    ${timeout}=60s
     Maybe Wait For Dashboard Loading Spinner Page
-    ${pipeline_row_xp}=    Set Variable    (//*[@data-testid="table-row-title-${pipeline_name}"])[1]/../..
+    ${pipeline_row_xp}=    Set Variable    (//*[@data-testid="table-row-title" and text()="${pipeline_name}"])[1]/../..
     Wait Until Page Does Not Contain Element    ${pipeline_row_xp}    timeout=${timeout}
 
 Import Pipeline
@@ -106,7 +106,7 @@ Expand Pipeline Details
     [Documentation]    Expands a pipeline row in the dashboard UI
     [Arguments]    ${pipeline_name}
 
-    ${pipeline_row_xp}=                 Set Variable    (//*[@data-testid="table-row-title-${pipeline_name}"])[1]/../..
+    ${pipeline_row_xp}=                 Set Variable    (//*[@data-testid="table-row-title" and text()="${pipeline_name}"])[1]/../..
     ${pipeline_details_xp}=             Set Variable    ${pipeline_row_xp}/td/button[@aria-label="Details"]
     ${expanded_pipeline_details_xp}=    Set Variable    ${pipeline_row_xp}/td/button[@aria-expanded="true"]
 
@@ -117,7 +117,7 @@ Expand Pipeline Details
 Collapse Pipeline Details
     [Documentation]    Collapses a pipeline row in the dashboard UI
     [Arguments]    ${pipeline_name}
-    ${pipeline_row_xp}=                 Set Variable    (//*[@data-testid="table-row-title-${pipeline_name}"])[1]/../..
+    ${pipeline_row_xp}=                 Set Variable    (//*[@data-testid="table-row-title" and text()="${pipeline_name}"])[1]/../..
     ${pipeline_details_xp}=             Set Variable    ${pipeline_row_xp}/td/button[@aria-label="Details"]
     ${expanded_pipeline_details_xp}=    Set Variable    ${pipeline_row_xp}/td/button[@aria-expanded="true"]
 
@@ -129,7 +129,7 @@ Click Action From Pipeline Actions Menu
     [Documentation]    Click an action from Pipeline Actions menu (3-dots menu on the right)
     [Arguments]    ${pipeline_name}    ${action}
     # robocop: off=line-too-long
-    ${pipeline_row_xp}=    Set Variable    (//*[@data-testid="table-row-title-${pipeline_name}"])[1]/../..
+    ${pipeline_row_xp}=    Set Variable    (//*[@data-testid="table-row-title" and text()="${pipeline_name}"])[1]/../..
     ${kebab_xp}=           Set Variable    ${pipeline_row_xp}/td/button[@aria-label="Kebab toggle"]
     ${kebap_action_xp}=    Set Variable    ${pipeline_row_xp}/td/div/div/ul/li/button[.//*[contains(text(), '${action}')]]
     Wait Until Page Contains Element    ${kebab_xp}
@@ -141,9 +141,9 @@ Click Action From Pipeline Version Actions Menu
     [Documentation]    Click an action from Pipeline Version Actions menu (3-dots menu on the right)
     [Arguments]    ${pipeline_version_name_contains}    ${action}
     # robocop: off=line-too-long
-    ${pipeline_row_xp}=    Set Variable    (//*[contains(@data-testid,"table-row-title-${pipeline_version_name_contains}")])[2]/../..
-    ${kebab_xp}=           Set Variable    ${pipeline_row_xp}/td/button[@aria-label="Kebab toggle"]
-    ${kebap_action_xp}=    Set Variable    ${pipeline_row_xp}/td/div/div/ul/li/button[.//*[contains(text(), '${action}')]]
+    ${version_row_xp}=    Set Variable     (//*[@data-testid="table-row-title"]/a[contains(text(),"${pipeline_version_name_contains}")])/../../..
+    ${kebab_xp}=           Set Variable    ${version_row_xp}/td/button[@aria-label="Kebab toggle"]
+    ${kebap_action_xp}=    Set Variable    ${version_row_xp}/td/div/div/ul/li/button[.//*[contains(text(), '${action}')]]
     Wait Until Page Contains Element    ${kebab_xp}
     Click Element                       ${kebab_xp}
     Wait Until Page Contains Element    ${kebap_action_xp}
@@ -153,7 +153,7 @@ Click Action From Pipeline Run Actions Menu
     [Documentation]    In Data Science Pipelines > Runs, click an action from Actions menu (3-dots menu on the right)
     [Arguments]    ${pipeline_run_name}    ${action}
 
-    ${pipeline_run_row_xp}=    Set Variable    //table[@data-testid="pipeline-run-table"]/tbody/tr/td/div/div/p[text()="${pipeline_run_name}"]/../../../..
+    ${pipeline_run_row_xp}=    Set Variable    //span[contains(text(),"${pipeline_run_name}")]/../../../..
     ${kebab_xp}=               Set Variable    ${pipeline_run_row_xp}/td/button[@aria-label="Kebab toggle"]
     ${kebap_action_xp}=        Set Variable    ${pipeline_run_row_xp}/td/div/div/ul/li/button[.//*[contains(text(), '${action}')]]
     Wait Until Page Contains Element    ${kebab_xp}
@@ -193,7 +193,7 @@ Pipeline Should Be Listed
     [Arguments]     ${pipeline_name}    ${pipeline_description}=${EMPTY}
 
     Projects.Move To Tab    Pipelines
-    ${pipeline_title_xp}=    Set Variable      (//*[@data-testid="table-row-title-${pipeline_name}"])[1]
+    ${pipeline_title_xp}=    Set Variable      (//*[@data-testid="table-row-title" and text()="${pipeline_name}"])[1]
     Run Keyword And Continue On Failure    Wait Until Page Contains Element    ${pipeline_title_xp}
 
     IF    "${pipeline_description}" != "${EMPTY}"
@@ -206,7 +206,7 @@ Pipeline Should Not Be Listed
     [Documentation]    Verifies a pipeline not listed in Data Science Project > Pipelines
     [Arguments]     ${pipeline_name}
     Projects.Move To Tab    Pipelines
-    ${pipeline_title_xp}=    Set Variable      (//*[@data-testid="table-row-title-${pipeline_name}"])[1]
+    ${pipeline_title_xp}=    Set Variable      (//*[@data-testid="table-row-title" and text()="${pipeline_name}"])[1]
     Run Keyword And Continue On Failure    Wait Until Page Does Not Contain Element    ${pipeline_title_xp}
 
 Pipeline Last Run Should Be

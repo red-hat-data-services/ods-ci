@@ -29,7 +29,7 @@ Detect Pre-existing Install Of Argo Workflows And Block RHOAI Install
     ...                     0
     ...                     msg=${output}
     ${return_code}          Run and Watch Command
-    ...                     cd ${RHODS_OLM} && ./cleanup.sh -t operator
+    ...                     sh ${RHODS_OLM}/cleanup.sh -t operator
     ...                     timeout=10 min
     Should Be Equal As Integers ${return_code}      0
     Open OperatorHub

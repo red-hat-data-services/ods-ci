@@ -13,7 +13,7 @@ spec:
         - /models-cache
         - --port
         - "8080"
-      image: quay.io/opendatahub/vllm:fast-ibm-nightly-2024-05-21
+      image: quay.io/opendatahub/vllm:fast-ibm-nightly-2024-05-28
       name: kserve-container
       command:
         - python3

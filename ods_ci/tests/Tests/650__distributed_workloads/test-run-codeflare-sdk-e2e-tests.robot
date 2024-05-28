@@ -24,6 +24,14 @@ Run TestRayClusterSDKOauth test
     ...     Codeflare-sdk
     Run Codeflare-sdk E2E Test    mnist_raycluster_sdk_oauth_test.py
 
+Run TestRayLocalInteractiveOauth test
+    [Documentation]    Run Python E2E test: TestRayLocalInteractiveOauth
+    [Tags]
+    ...     Tier1
+    ...     DistributedWorkloads
+    ...     Codeflare-sdk
+    Run Codeflare-sdk E2E Test    local_interactive_sdk_oauth_test.py
+
 *** Keywords ***
 Prepare Codeflare-sdk E2E Test Suite
     [Documentation]    Prepare codeflare-sdk E2E Test Suite

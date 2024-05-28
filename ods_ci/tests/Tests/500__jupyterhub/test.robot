@@ -16,7 +16,7 @@ Test Tags        JupyterHub
 
 *** Test Cases ***
 Logged Into OpenShift
-    [Tags]   Sanity    Smoke
+    [Tags]   Smoke
     ...      Tier1
     ...      ODS-127
     Open OCP Console
@@ -24,7 +24,7 @@ Logged Into OpenShift
     Wait Until OpenShift Console Is Loaded
 
 Can Launch Jupyterhub
-    [Tags]   Sanity    Smoke
+    [Tags]   Smoke
     ...      Tier1
     ...      ODS-935
     #This keyword will work with accounts that are not cluster admins.
@@ -34,7 +34,7 @@ Can Launch Jupyterhub
     Launch Jupyter From RHODS Dashboard Link
 
 Can Login To Jupyterhub
-    [Tags]   Sanity    Smoke
+    [Tags]   Smoke
     ...      Tier1
     ...      ODS-936
     Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
@@ -43,7 +43,7 @@ Can Login To Jupyterhub
     Wait Until Page Contains  Start a notebook server
 
 Can Spawn Notebook
-    [Tags]  Sanity  Smoke
+    [Tags]  Smoke
     ...     Tier1
     ...     ODS-1808
     Fix Spawner Status

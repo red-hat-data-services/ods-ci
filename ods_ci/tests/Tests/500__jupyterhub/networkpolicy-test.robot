@@ -15,7 +15,7 @@ Test Tags       JupyterHub
 Test Network Policy Effect
     [Documentation]    Spawns two Notebooks with two different users and verifies
     ...    That the new network policies prevent user2 from accessing user1's workspace
-    [Tags]  Sanity    Tier1
+    [Tags]  Tier1
     ...     ODS-2046
     Open Browser And Start Notebook As First User
     Open Browser And Start Notebook As Second User With Env Vars

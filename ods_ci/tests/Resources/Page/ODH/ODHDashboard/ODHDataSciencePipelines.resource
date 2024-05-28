@@ -28,7 +28,7 @@ Install DataSciencePipelinesApplication CR
     Oc Apply    kind=DataSciencePipelinesApplication    src=${DATA_SCIENCE_PIPELINES_APPLICATION_PATH}/${dsp_file}    namespace=${project}
     IF    ${assert_install}==True
         ${generation_value}    Run    oc get datasciencepipelinesapplications -n ${project} -o json | jq '.items[0].metadata.generation'
-        Should Be True    ${generation_value} == 1    DataSciencePipelinesApplication created
+        Should Be True    ${generation_value} == 2    DataSciencePipelinesApplication created
     END
 
 Fill In Pipeline Import Form

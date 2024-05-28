@@ -176,6 +176,26 @@
                     }
                 }
             }
+        },
+        {
+            "query_text": "San Francisco is a",
+            "models": {
+                "llama-2-13b-chat":{
+                    "vllm-runtime": {
+                        "completions_response_text": "{\"object\":\"text_completion\",\"created\":,\"model\":\"llama-2-13b-chat\",\"choices\":[{\"index\":0,\"text\":\" beautiful city that is full of life and energy. Located along the San Francisco\",\"logprobs\":null,\"finish_reason\":\"length\",\"stop_reason\":null}],\"usage\":{\"prompt_tokens\":5,\"total_tokens\":21,\"completion_tokens\":16}}"
+                    }
+                }
+            }
+        },
+        {
+            "query_text": "{'role': 'user' , 'content' : 'Say this is a test!'}",
+            "models": {
+                "llama-2-13b-chat":{
+                    "vllm-runtime": {
+                        "chat-completions_response_text": "{\"object\":\"chat.completion\",\"created\":,\"model\":\"llama-2-13b-chat\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"  This is a test!\"},\"logprobs\":null,\"finish_reason\":\"stop\",\"stop_reason\":null}],\"usage\":{\"prompt_tokens\":15,\"total_tokens\":22,\"completion_tokens\":7}}"
+                    }
+                }
+            }
         }
     ],
     "model-info": {

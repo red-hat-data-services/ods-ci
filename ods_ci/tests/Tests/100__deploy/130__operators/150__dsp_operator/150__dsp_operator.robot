@@ -13,10 +13,6 @@ Suite Setup         Suite Setup
 Suite Teardown      Suite Teardown
 
 
-*** Variables ***
-${RHODS_OLM}    /home/jenkins/workspace/rhods/rhods-ci-pr-test/ods-ci/ods_ci/rhodsolm
-
-
 *** Test Cases ***
 Detect Pre-existing Install Of Argo Workflows And Block RHOAI Install
     [Documentation]    Detect Pre-existing Install Of Argo Workflows And Block RHOAI Install
@@ -28,9 +24,7 @@ Detect Pre-existing Install Of Argo Workflows And Block RHOAI Install
     ...                     ${return_code}
     ...                     0
     ...                     msg=${output}
-    ${return_code}          Run and Watch Command
-    ...                     sh ${RHODS_OLM}/cleanup.sh -t operator
-    ...                     timeout=10 min
+    Uninstalling RHODS Operator
     Should Be Equal As Integers ${return_code}      0
     Open OperatorHub
     Install ODH Operator

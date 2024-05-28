@@ -24,7 +24,7 @@ Detect Pre-existing Install Of Argo Workflows And Block RHOAI Install
     ...                     ${return_code}
     ...                     0
     ...                     msg=${output}
-    Uninstalling RHODS Operator
+    Can Uninstall RHODS Operator
     Should Be Equal As Integers ${return_code}      0
     Open OperatorHub
     Install ODH Operator

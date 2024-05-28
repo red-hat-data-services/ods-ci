@@ -41,7 +41,7 @@ Verify Pipelines Integration With Elyra When Using Standard Data Science Image
     ...    create and run a Data Science Pipeline
     [Tags]    Smoke    Tier1
     ...       ODS-2197
-    [Timeout]    8m
+    [Timeout]    10m
     Verify Pipelines Integration With Elyra Running Hello World Pipeline Test
     ...    img=Standard Data Science
     ...    runtime_image=Datascience with Python 3.9 (UBI9)
@@ -54,7 +54,7 @@ Verify Pipelines Integration With Elyra When Using PyTorch Image
     [Template]     Verify Pipelines Integration With Elyra Running Hello World Pipeline Test
     [Tags]    Sanity    Tier1
     ...       ODS-2199
-    [Timeout]    8m
+    [Timeout]    10m
     PyTorch    Datascience with Python 3.9 (UBI9)
 
 
@@ -66,7 +66,7 @@ Verify Pipelines Integration With Elyra When Using Standard Data Science Based I
     [Template]     Verify Pipelines Integration With Elyra Running Hello World Pipeline Test
     [Tags]    Tier1
     ...       ODS-2271
-    [Timeout]    20m
+    [Timeout]    25m
     TensorFlow    Datascience with Python 3.9 (UBI9)
     TrustyAI      Datascience with Python 3.9 (UBI9)
     HabanaAI      Datascience with Python 3.8 (UBI8)

@@ -22,6 +22,7 @@ import shutil
 
 from robot.model import SuiteVisitor
 from robot.running import TestSuiteBuilder
+
 from ods_ci.utils.scripts.util import execute_command
 
 

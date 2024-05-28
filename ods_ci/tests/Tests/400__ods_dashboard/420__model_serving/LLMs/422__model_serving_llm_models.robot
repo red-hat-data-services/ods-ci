@@ -476,7 +476,7 @@ Verify User Can Serve And Query A instructlab/merlinite-7b-lab Model
     ...                using Kserve using TGIS standalone or vllm runtime
     [Tags]    RHOAIENG-7690    VLLM
     Setup Test Variables    model_name=merlinite-7b-lab    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
-    ...    kserve_mode=${KSERVE_MODE}    model_path=merlinite-7b-lab-hf
+    ...    kserve_mode=${KSERVE_MODE}    model_path=merlinite-7b-lab
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}    protocol=${PROTOCOL}
     ...    storage_size=70Gi    model_path=${model_path}

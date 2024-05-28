@@ -20,12 +20,12 @@ ${python_dict}  {'classifiers':[${generic-1}, ${minimal-1}], 'clustering':[${gen
 
 *** Test Cases ***
 Open RHODS Dashboard
-  [Tags]  Sanity    Tier1
+  [Tags]  Tier1
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Wait For RHODS Dashboard To Load
 
 Iterative Testing Classifiers
-  [Tags]  Sanity  POLARION-ID-Classifiers    Tier1
+  [Tags]  POLARION-ID-Classifiers    Tier1
   ...     Execution-Time-Over-15m
   &{DICTIONARY} =  Evaluate  ${python_dict}
   FOR  ${sublist}  IN  @{DICTIONARY}[classifiers]

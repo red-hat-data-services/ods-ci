@@ -7,10 +7,8 @@ import sys
 
 import yaml
 
-dir_path = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(dir_path + "/../")
-from logger import log
-from util import execute_command
+from ods_ci.utils.scripts.logger import log
+from ods_ci.utils.scripts.util import execute_command
 
 """
 Class for Openshift Installation on AWS

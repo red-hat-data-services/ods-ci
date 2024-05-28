@@ -20,8 +20,7 @@ ${regex_pattern}       ERROR
 Validate DSC creates all Serverless CRs
     [Documentation]  The purpose of this Test Case is to validate the creation
     ...    of Serverless Custom Resources
-    ...    ProductBug: RHOAIENG-4358
-    [Tags]  Operator    ODS-2600    ProductBug
+    [Tags]  Operator    ODS-2600    Sanity
     Resource Should Exist     KnativeServing    knative-serving     ${KNATIVESERVING_NS}
     Resource Status Should Be     oc get KnativeServing knative-serving -n ${KNATIVESERVING_NS} -o json | jq '.status.conditions[] | select(.type=="Ready") | .status'     KnativeServing    "True"    # robocop: disable
     Resource Should Exist     Gateway    knative-ingress-gateway     ${KNATIVESERVING_NS}

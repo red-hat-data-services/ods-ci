@@ -1,14 +1,16 @@
 import argparse
-import os
 import re
-import sys
 
-dir_path = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(dir_path + "/../")
-from awsOps import aws_configure
-from logger import log
-from rosaOps import create_account_roles, rosa_create_cluster, rosa_whoami, wait_for_osd_cluster_to_be_ready
-from util import execute_command
+from rosaOps import (
+    create_account_roles,
+    rosa_create_cluster,
+    rosa_whoami,
+    wait_for_osd_cluster_to_be_ready,
+)
+
+from ods_ci.utils.scripts.awsOps import aws_configure
+from ods_ci.utils.scripts.logger import log
+from ods_ci.utils.scripts.util import execute_command
 
 
 class RosaClusterManager:

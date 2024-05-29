@@ -33,7 +33,7 @@ Verify All OOTB Images Have Version Dropdowns
 Verify All OOTB Images Spawn Previous Versions
     [Documentation]    Verifies all images in ${IMAGE_LIST} can be spawned using
     ...                the previous version, and the spawned image is the correct one.
-    [Tags]    Sanity    Tier1
+    [Tags]    Tier1
     ...       ODS-2126
     [Setup]    Multiple Image Tags Suite Setup
     FOR    ${image}    IN    @{IMAGE_LIST}

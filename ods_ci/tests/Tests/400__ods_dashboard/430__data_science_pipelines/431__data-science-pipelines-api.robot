@@ -33,9 +33,9 @@ Verify Ods Users Can Do Http Request That Must Be Redirected to Https
     ${status}    Login And Wait Dsp Route    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
     ...         project-redirect-http
     Should Be True    ${status} == 200    Could not login to the Data Science Pipelines Rest API OR DSP routing is not working    # robocop: disable:line-too-long
-    ${url}    Do Http Request    apis/v1beta1/runs
+    ${url}    Do Http Request    apis/v2beta1/runs
     Should Start With    ${url}    https
-    Remove Pipeline Project    project-redirect-http
+    [Teardown]    Remove Pipeline Project    project-redirect-http
 
 Verify DSPO Operator Reconciliation Retry
     [Documentation]    Verify DSPO Operator is able to recover from missing components during the initialization

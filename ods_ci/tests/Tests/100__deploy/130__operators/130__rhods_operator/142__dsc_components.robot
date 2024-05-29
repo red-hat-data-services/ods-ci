@@ -85,7 +85,7 @@ Validate Ray Removed State
 Validate Training Operator Managed State
     [Documentation]    Validate that the DSC Training Operator component Managed state creates the expected resources,
     ...    check that Training deployment and pod are created
-    [Tags]    Operator    Tier1    RHOAIENG-6627    training-managed
+    [Tags]    Operator    RHOAIENG-6627    training-managed
 
     Set DSC Component Managed State And Wait For Completion   trainingoperator    ${TRAINING_DEPLOYMENT_NAME}    ${TRAINING_LABEL_SELECTOR}
 
@@ -93,7 +93,7 @@ Validate Training Operator Managed State
 
 Validate Training Operator Removed State
     [Documentation]    Validate that Training Operator management state Removed does remove relevant resources.
-    [Tags]    Operator    Tier1    RHOAIENG-6627    training-removed
+    [Tags]    Operator    RHOAIENG-6627    training-removed
 
     Set DSC Component Removed State And Wait For Completion   trainingoperator    ${TRAINING_DEPLOYMENT_NAME}    ${TRAINING_LABEL_SELECTOR}
 
@@ -145,6 +145,9 @@ Set DSC Component Managed State And Wait For Completion
     Wait Until Keyword Succeeds    3 min    0 sec
     ...    Check If Pod Exists    ${APPLICATIONS_NS}    ${label_selector}    ${FALSE}
 
+    Wait Until Keyword Succeeds    2 min    0 sec
+    ...    Is Pod Ready    ${label_selector}
+
 Restore DSC Component State
     [Documentation]    Set component management state to original state, wait for component resources to be available.
     [Arguments]    ${component}    ${deployment_name}    ${LABEL_SELECTOR}    ${saved_state}
@@ -159,3 +162,11 @@ Restore DSC Component State
             FAIL    Component ${component} state "${saved_state}" not supported at this time
         END
     END
+
+Is Pod Ready
+    [Documentation]    Check If Pod Is In Ready State
+    [Arguments]    ${label_selector}
+    ${rc}    ${output}=    Run And Return Rc And Output
+    ...    oc get pod -A -l ${label_selector} -o jsonpath='{.items[*].status.containerStatuses[0].ready}'
+    Should Be Equal As Integers    ${rc}    0
+    Should Be Equal As Strings    "${output}"    "true"

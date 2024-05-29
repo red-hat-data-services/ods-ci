@@ -46,7 +46,7 @@ jobs:
           fetch-depth: 0
 
       - name: Cache poetry in ~/.local
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cached-home-local
         with:
           path: ~/.local
@@ -93,7 +93,7 @@ jobs:
           fetch-depth: 0
 
       - name: Cache poetry in ~/.local
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cached-home-local
         with:
           path: ~/.local

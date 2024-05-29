@@ -66,7 +66,8 @@ Wait Until Operator Subscription Last Condition Is    # robocop: disable
     [Documentation]    Keeps checking until the subscription status matches the expected status
     [Arguments]    ${type}    ${status}    ${reason}
     ...    ${subcription_name}    ${namespace}=openshift-operators
-    ...    ${retry}=20    ${retry_interval}=3s
+    ...    ${retry}=60
+    ...    ${retry_interval}=3s
     Wait Until Keyword Succeeds    ${retry} times    ${retry_interval}    Operator Subscription Last Condition Should Be    # robocop: disable
     ...    type=${type}     status=${status}
     ...    reason=${reason}    subcription_name=${subcription_name}

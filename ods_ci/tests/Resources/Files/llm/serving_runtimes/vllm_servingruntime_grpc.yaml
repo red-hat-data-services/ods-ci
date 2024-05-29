@@ -1,0 +1,29 @@
+apiVersion: serving.kserve.io/v1alpha1
+kind: ServingRuntime
+metadata:
+  name: vllm-runtime
+spec:
+  builtInAdapter:
+    modelLoadingTimeoutMillis: 90000
+  containers:
+    - args:
+        - --model
+        - /mnt/models/
+        - --download-dir
+        - /models-cache
+        - --port
+        - "8080"
+      image: quay.io/opendatahub/vllm:fast-ibm-nightly-2024-05-21
+      name: kserve-container
+      command:
+        - python3
+        - '-m'
+        - vllm.entrypoints.openai.api_server
+      ports:
+        - containerPort: 8033
+          name: h2c
+          protocol: TCP
+  multiModel: false
+  supportedModelFormats:
+    - autoSelect: true
+      name: pytorch

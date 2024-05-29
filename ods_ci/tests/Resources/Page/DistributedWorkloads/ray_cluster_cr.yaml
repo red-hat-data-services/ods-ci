@@ -1,0 +1,57 @@
+apiVersion: ray.io/v1
+kind: RayCluster
+metadata:
+  name: $RAY_CLUSTER_NAME
+  namespace: $NAMESPACE
+  labels:
+      kueue.x-k8s.io/queue-name: $LOCAL_QUEUE
+spec:
+  rayVersion: "2.7.0"
+  headGroupSpec:
+    rayStartParams:
+      dashboard-host: "0.0.0.0"
+    template:
+      spec:
+        containers:
+        - name: ray-head
+          image: quay.io/project-codeflare/ray:latest-py39-cu118
+          ports:
+          - containerPort: 6379
+            name: gcs
+          - containerPort: 8265
+            name: dashboard
+          - containerPort: 10001
+            name: client
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "ray stop"]
+          resources:
+            requests:
+              cpu: '1'
+              memory: 1G
+            limits:
+              cpu: '1'
+              memory: 2G
+  workerGroupSpecs:
+  - replicas: 1
+    minReplicas: 1
+    maxReplicas: 2
+    groupName: small-group
+    rayStartParams: {}
+    template:
+      spec:
+        containers:
+        - name: ray-worker
+          image: quay.io/project-codeflare/ray:latest-py39-cu118
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "ray stop"]
+          resources:
+            requests:
+              cpu: '1'
+              memory: 1G
+            limits:
+              cpu: '1'
+              memory: 2G

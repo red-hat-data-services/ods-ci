@@ -39,34 +39,22 @@ ${DC_NAME} =    elyra-s3
 Verify Pipelines Integration With Elyra When Using Standard Data Science Image
     [Documentation]    Verifies that a workbench using the Standard Data Science Image can be used to
     ...    create and run a Data Science Pipeline
-    [Tags]    Smoke    Tier1
+    [Tags]    Sanity    Tier1
     ...       ODS-2197
     [Timeout]    10m
     Verify Pipelines Integration With Elyra Running Hello World Pipeline Test
     ...    img=Standard Data Science
     ...    runtime_image=Datascience with Python 3.9 (UBI9)
 
-Verify Pipelines Integration With Elyra When Using PyTorch Image
-    [Documentation]    Verifies that a workbench using the PyTorch Image can be used to
-    ...    create and run a Data Science Pipeline
-    ...    Note: this a templated test case
-    ...    (more info at https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#test-templates)
-    [Template]     Verify Pipelines Integration With Elyra Running Hello World Pipeline Test
-    [Tags]    Sanity    Tier1
-    ...       ODS-2199
-    [Timeout]    10m
-    PyTorch    Datascience with Python 3.9 (UBI9)
-
-
 Verify Pipelines Integration With Elyra When Using Standard Data Science Based Images
     [Documentation]    Verifies that a workbench using an image based on the Standard Data Science Image
     ...    can be used to create and run a Data Science Pipeline
     ...    Note: this a templated test case
     ...    (more info at https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#test-templates)
-    [Template]     Verify Pipelines Integration With Elyra Running Hello World Pipeline Test
-    [Tags]    Tier1
-    ...       ODS-2271
-    [Timeout]    25m
+    [Template]    Verify Pipelines Integration With Elyra Running Hello World Pipeline Test
+    [Tags]        Tier1    ODS-2271
+    [Timeout]     30m
+    PyTorch       Datascience with Python 3.9 (UBI9)
     TensorFlow    Datascience with Python 3.9 (UBI9)
     TrustyAI      Datascience with Python 3.9 (UBI9)
     HabanaAI      Datascience with Python 3.8 (UBI8)

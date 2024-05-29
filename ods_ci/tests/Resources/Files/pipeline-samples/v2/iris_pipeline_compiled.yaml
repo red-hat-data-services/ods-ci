@@ -223,8 +223,7 @@ root:
                 producerTask: create-dataset
           parameters:
             standard_scaler:
-              runtimeValue:
-                constant: true
+              componentInputParameter: standard_scaler
         taskInfo:
           name: normalize-dataset
       train-model:

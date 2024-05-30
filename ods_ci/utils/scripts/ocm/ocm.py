@@ -13,10 +13,10 @@ from contextlib import redirect_stderr, redirect_stdout
 import jinja2
 import yaml
 
+from ods_ci.utils.scripts.logger import log
+from ods_ci.utils.scripts.util import compare_dicts, execute_command, read_data_from_json, write_data_in_json
+
 dir_path = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(dir_path + "/../")
-from logger import log
-from util import compare_dicts, execute_command, read_data_from_json, write_data_in_json
 
 """
 Class for Openshift Cluster Manager

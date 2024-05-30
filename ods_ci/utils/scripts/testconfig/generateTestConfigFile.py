@@ -7,9 +7,12 @@ import sys
 
 import yaml
 
-dir_path = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(dir_path + "/../")
-from util import clone_config_repo, execute_command, oc_login, read_yaml
+from ods_ci.utils.scripts.util import (
+    clone_config_repo,
+    execute_command,
+    oc_login,
+    read_yaml,
+)
 
 
 def parse_args():

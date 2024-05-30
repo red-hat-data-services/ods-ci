@@ -132,7 +132,7 @@ Verify The Workload Metrics By Submitting Kueue Batch Workload
     END
 
     Click Button    ${PROJECT_METRICS_TAB_XP}
-    Wait Until Element Is Visible    xpath=//*[@data-testid="dw-workloada-resource-metrics"]//*[text()="No distributed workloads in the selected project are currently consuming resources."]    timeout=60
+    Wait Until Element Is Visible    xpath=//*[@data-testid="dw-workload-resource-metrics"]//*[text()="No distributed workloads in the selected project are currently consuming resources."]    timeout=60
     Page Should Not Contain    ${JOB_NAME_QUEUE}
     Page Should Not Contain    Succeeded
     Check Distributed Workload Status Page Contents

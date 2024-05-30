@@ -471,6 +471,128 @@ Verify User Can Serve And Query A google/flan-t5-xl Prompt Tuned Model
     ...    AND
     ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
 
+Verify User Can Serve And Query A instructlab/merlinite-7b-lab Model
+    [Documentation]    Basic tests for preparing, deploying and querying a LLM model
+    ...                using Kserve using TGIS standalone or vllm runtime
+    [Tags]    RHOAIENG-7690    VLLM
+    Setup Test Variables    model_name=merlinite-7b-lab    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
+    ...    kserve_mode=${KSERVE_MODE}    model_path=merlinite-7b-lab
+    Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
+    ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}    protocol=${PROTOCOL}
+    ...    storage_size=70Gi    model_path=${model_path}
+    ${requests}=    Create Dictionary    memory=40Gi
+    IF    "${OVERLAY}" != "${EMPTY}"
+          ${overlays}=   Create List    ${OVERLAY}
+    ELSE
+          ${overlays}=   Create List
+    END
+    Compile Inference Service YAML    isvc_name=${model_name}
+    ...    sa_name=${EMPTY}
+    ...    model_storage_uri=${storage_uri}
+    ...    model_format=${MODEL_FORMAT}    serving_runtime=${RUNTIME_NAME}
+    ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
+    ...    overlays=${overlays}
+    Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
+    ...    namespace=${test_namespace}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${test_namespace}    runtime=${RUNTIME_NAME}    timeout=900s
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
+    ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    IF     "${RUNTIME_NAME}" == "tgis-runtime" or "${KSERVE_MODE}" == "RawDeployment"
+            Set Test Variable    ${RUNTIME_NAME}    tgis-runtime
+            Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
+            ...    inference_type=all-tokens    n_times=1    protocol=${PROTOCOL}
+            ...    namespace=${test_namespace}   query_idx=0   validate_response=${FALSE}    # temp
+            ...    port_forwarding=${use_port_forwarding}
+            Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
+            ...    inference_type=streaming    n_times=1    protocol=${PROTOCOL}
+            ...    namespace=${test_namespace}    query_idx=0    validate_response=${FALSE}
+            ...    port_forwarding=${use_port_forwarding}
+            Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
+            ...    inference_type=model-info    n_times=0
+            ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
+            ...    port_forwarding=${use_port_forwarding}
+            Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
+            ...    inference_type=tokenize    n_times=0    query_idx=0
+            ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
+            ...    port_forwarding=${use_port_forwarding}
+    ELSE IF    "${RUNTIME_NAME}" == "vllm-runtime" and "${KSERVE_MODE}" == "Serverless"
+            Query Model Multiple Times    model_name=${model_name}      runtime=${RUNTIME_NAME}    protocol=http
+            ...    inference_type=chat-completions    n_times=1    query_idx=12
+            ...    namespace=${test_namespace}    string_check_only=${TRUE}
+            Query Model Multiple Times    model_name=${model_name}      runtime=${RUNTIME_NAME}    protocol=http
+            ...    inference_type=completions    n_times=1    query_idx=11
+            ...    namespace=${test_namespace}    string_check_only=${TRUE}
+    END
+    [Teardown]    Run Keywords
+    ...    Clean Up Test Project    test_ns=${test_namespace}
+    ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
+    ...    kserve_mode=${KSERVE_MODE}
+    ...    AND
+    ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
+
+Verify User Can Serve And Query A ibm-granite/granite-8b-code-base Model
+    [Documentation]    Basic tests for preparing, deploying and querying a LLM model
+    ...                using Kserve using TGIS standalone or vllm runtime
+    [Tags]    RHOAIENG-7689    VLLM
+    Setup Test Variables    model_name=granite-8b-code-base   use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
+    ...    kserve_mode=${KSERVE_MODE}    model_path=granite-8b-code-base
+    Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
+    ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}    protocol=${PROTOCOL}
+    ...    storage_size=40Gi    model_path=${model_path}
+    ${requests}=    Create Dictionary    memory=40Gi
+    IF    "${OVERLAY}" != "${EMPTY}"
+          ${overlays}=   Create List    ${OVERLAY}
+    ELSE
+          ${overlays}=   Create List
+    END
+    Compile Inference Service YAML    isvc_name=${model_name}
+    ...    sa_name=${EMPTY}
+    ...    model_storage_uri=${storage_uri}
+    ...    model_format=${MODEL_FORMAT}    serving_runtime=${RUNTIME_NAME}
+    ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
+    ...    overlays=${overlays}
+    Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
+    ...    namespace=${test_namespace}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${test_namespace}    runtime=${RUNTIME_NAME}    timeout=900s
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
+    ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    IF     "${RUNTIME_NAME}" == "tgis-runtime" or "${KSERVE_MODE}" == "RawDeployment"
+            Set Test Variable    ${RUNTIME_NAME}    tgis-runtime
+            Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
+            ...    inference_type=all-tokens    n_times=1    protocol=${PROTOCOL}
+            ...    namespace=${test_namespace}   query_idx=0   validate_response=${FALSE}   # temp
+            ...    port_forwarding=${use_port_forwarding}
+            Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
+            ...    inference_type=streaming    n_times=1    protocol=${PROTOCOL}
+            ...    namespace=${test_namespace}    query_idx=0    validate_response=${FALSE}
+            ...    port_forwarding=${use_port_forwarding}
+            Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
+            ...    inference_type=model-info    n_times=0
+            ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
+            ...    port_forwarding=${use_port_forwarding}
+            Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
+            ...    inference_type=tokenize    n_times=0    query_idx=0
+            ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
+            ...    port_forwarding=${use_port_forwarding}
+    ELSE IF    "${RUNTIME_NAME}" == "vllm-runtime" and "${KSERVE_MODE}" == "Serverless"
+            Query Model Multiple Times    model_name=${model_name}      runtime=${RUNTIME_NAME}    protocol=http
+            ...    inference_type=chat-completions    n_times=1    query_idx=12
+            ...    namespace=${test_namespace}    string_check_only=${TRUE}
+            Query Model Multiple Times    model_name=${model_name}      runtime=${RUNTIME_NAME}    protocol=http
+            ...    inference_type=completions    n_times=1    query_idx=11
+            ...    namespace=${test_namespace}    string_check_only=${TRUE}
+    END
+    [Teardown]    Run Keywords
+    ...    Clean Up Test Project    test_ns=${test_namespace}
+    ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
+    ...    kserve_mode=${KSERVE_MODE}
+    ...    AND
+    ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
+
 
 *** Keywords ***
 Suite Setup

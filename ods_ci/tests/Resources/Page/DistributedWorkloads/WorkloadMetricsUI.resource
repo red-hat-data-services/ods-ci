@@ -146,8 +146,8 @@ Get Memory Requested Tooltip Text
     @{memory_usage_list}    Split To Lines    ${memory_usage_hover_data}
     ${memory_usage_line}    Set Variable    ${memory_usage_list}[0]
     ${memory_requested_line}    Set Variable    ${memory_usage_list}[1]
-    ${memory_usage_value}     Set Variable    ${memory_usage_line}[16:21]
-    ${memory_requested_value}     Set Variable    ${memory_requested_line}[20:25]
+    ${memory_usage_value}     Set Variable    ${memory_usage_line}[14:19]
+    ${memory_requested_value}     Set Variable    ${memory_requested_line}[18:23]
     RETURN    ${memory_usage_value}     ${memory_requested_value}
 
 Get CPU Requested Tooltip Text
@@ -158,8 +158,8 @@ Get CPU Requested Tooltip Text
     @{cpu_usage_list}    Split To Lines    ${cpu_usage_hover_data}
     ${cpu_usage_line}    Set Variable    ${cpu_usage_list}[0]
     ${cpu_requested_line}    Set Variable    ${cpu_usage_list}[1]
-    ${cpu_usage_value}     Set Variable    ${cpu_usage_line}[13:18]
-    ${cpu_requested_value}     Set Variable    ${cpu_requested_line}[17:18]
+    ${cpu_usage_value}     Set Variable    ${cpu_usage_line}[11:16]
+    ${cpu_requested_value}     Set Variable    ${cpu_requested_line}[15:16]
     RETURN    ${cpu_usage_value}    ${cpu_requested_value}
 
 Create Ray Cluster Workload
@@ -188,7 +188,7 @@ Check Project Metrics Default Page Contents
     Page Should Contain Element    ${RESOURCES_CONSUMING_TITLE_XP}
     Page Should Contain Element    xpath=//*[@data-testid="dw-top-consuming-workloads"]//*[text()="No distributed workloads in the selected project are currently consuming resources."]
     Page Should Contain Element    ${DISTRIBUITED_WORKLOAD_RESOURCE_METRICS_TITLE_XP}
-    Page Should Contain Element    xpath=//*[@data-testid="dw-workloada-resource-metrics"]//*[text()="No distributed workloads in the selected project are currently consuming resources."]
+    Page Should Contain Element    xpath=//*[@data-testid="dw-workload-resource-metrics"]//*[text()="No distributed workloads in the selected project are currently consuming resources."]
 
 Check Distributed Workload Status Page Contents
     [Documentation]    checks Distributed Workload status Default Page contents exists

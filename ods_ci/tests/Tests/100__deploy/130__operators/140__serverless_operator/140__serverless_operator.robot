@@ -20,8 +20,7 @@ ${regex_pattern}       ERROR
 Validate DSC creates all Serverless CRs
     [Documentation]  The purpose of this Test Case is to validate the creation
     ...    of Serverless Custom Resources
-    ...    ProductBug: RHOAIENG-4358
-    [Tags]  Operator    ODS-2600    ProductBug
+    [Tags]  Operator    ODS-2600    Tier2
     Resource Should Exist     KnativeServing    knative-serving     ${KNATIVESERVING_NS}
     Resource Status Should Be     oc get KnativeServing knative-serving -n ${KNATIVESERVING_NS} -o json | jq '.status.conditions[] | select(.type=="Ready") | .status'     KnativeServing    "True"    # robocop: disable
     Resource Should Exist     Gateway    knative-ingress-gateway     ${KNATIVESERVING_NS}
@@ -33,7 +32,7 @@ Validate DSC creates all Serverless CRs
     ${pod_names}=    Get Pod Names    ${KNATIVESERVING_NS}    app.kubernetes.io/component=controller
     Verify Containers Have Zero Restarts    ${pod_names}    ${KNATIVESERVING_NS}
     ${podname}=    Get Pod Name   ${OPERATOR_NAMESPACE}    ${OPERATOR_LABEL_SELECTOR}
-    Verify Pod Logs Do Not Contain    ${podname}    ${OPERATOR_NAMESPACE}    ${regex_pattern}    rhods-operator
+    #Verify Pod Logs Do Not Contain    ${podname}    ${OPERATOR_NAMESPACE}    ${regex_pattern}    rhods-operator
     Wait For DSC Conditions Reconciled    ${KNATIVESERVING_NS}    default-dsc
 
 

@@ -9,6 +9,7 @@ Resource          ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 
 *** Variables ***
 ${TRAINING_OPERATOR_RELEASE_ASSETS}     %{TRAINING_OPERATOR_RELEASE_ASSETS=https://github.com/opendatahub-io/distributed-workloads/releases/latest/download}
+${FMS_HF_TUNING_IMAGE}                  quay.io/modh/fms-hf-tuning:84b0337b7baee119e909d4e901b6dadfe34c1f9a
 
 
 *** Test Cases ***
@@ -69,6 +70,7 @@ Run Training Operator ODH Test
     ...    env:CODEFLARE_TEST_TIMEOUT_MEDIUM=10m
     ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
     ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-kfto-logs
+    ...    env:FMS_HF_TUNING_IMAGE=${FMS_HF_TUNING_IMAGE}
     Log To Console    ${result.stdout}
     IF    ${result.rc} != 0
         FAIL    ${TEST_NAME} failed

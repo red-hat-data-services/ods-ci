@@ -27,17 +27,16 @@ Long Running Jupyter Notebook
     Close Browser
 
 Upgrade RHODS
-    [Documentation]    Appprove the install plan for the upgrade
+    [Documentation]    Approve the install plan for the upgrade and make sure that upgrade has completed
     [Tags]  ODS-1766
     ...     Upgrade
     ${initial_version} =  Get RHODS Version
+    ${initial_creation_date} =  Get Operator Pod Creation Date
     ${return_code}    ${output}    Run And Return Rc And Output   oc patch installplan $(oc get installplans -n ${OPERATOR_NAMESPACE} | grep -v NAME | awk '{print $1}') -n ${OPERATOR_NAMESPACE} --type='json' -p '[{"op": "replace", "path": "/spec/approved", "value": true}]'   #robocop:disable
     Should Be Equal As Integers    ${return_code}     0   msg=Error while upgrading RHODS
     Sleep  30s      reason=wait for thirty seconds until old CSV is removed and new one is ready
-    ${is_version_gt} =    Is RHODS Version Greater Than    ${initial_version}
-    IF    ${is_version_gt} == False
-        Fail    RHODS version was not greater than initial version ${initial_version}
-    END
+    RHODS Version Should Be Greater Than    ${initial_version}
+    Operator Pod Creation Date Should Be Updated    ${initial_creation_date}
     OpenShiftLibrary.Wait For Pods Status  namespace=${OPERATOR_NAMESPACE}  timeout=300
 
 TensorFlow Image Test
@@ -89,11 +88,25 @@ Upgrade Test Teardown
     @{list_values} =    Create List    1
     Run Keyword And Warn On Failure    Should Contain    ${list_values}    ${resp.json()["data"]["result"][0]["value"][-1]}
 
-Is RHODS Version Greater Than
-    [Documentation]    Returns True if:
-    ...    - RHODS version is greater or equal than ${initial_version}
+RHODS Version Should Be Greater Than
+    [Documentation]    Checks if the RHODS version is greater than the given initial version.
+    ...                Fails if the version is not greater.
     [Arguments]  ${initial_version}
     ${ver} =  Get RHODS Version
     ${ver} =  Fetch From Left  ${ver}  -
-    ${comparison} =      GT    ${ver}    ${initial_version}
-    RETURN  ${comparison}
+    Should Be True    '${ver}' > '${initial_version}'    msg=RHODS version was not greater than initial version ${initial_version}
+
+Get Operator Pod Creation Date
+    [Documentation]    Retrieves the creation date of the RHODS operator pod.
+    ...                Returns the creation date as a string.
+    ...                Fails if the command to retrieve the creation date fails.
+    ${return_code}    ${creation_date}    Run And Return Rc And Output    oc get pod -n ${OPERATOR_NAMESPACE} -l name=rhods-operator --no-headers -o jsonpath='{.items[0].metadata.creationTimestamp}'
+    Should Be Equal As Integers    ${return_code}     0   msg=Error while getting creation date of the operator pod
+    [Return]    ${creation_date}
+
+Operator Pod Creation Date Should Be Updated
+    [Documentation]    Checks if the operator pod creation date has been updated after the upgrade.
+    ...                Fails if the updated creation date is not more recent than the initial creation date.
+    [Arguments]  ${initial_creation_date}
+    ${updated_creation_date} =  Get Operator Pod Creation Date
+    Should Be True    '${updated_creation_date}' > '${initial_creation_date}'    msg=Operator pod creation date was not updated after upgrade

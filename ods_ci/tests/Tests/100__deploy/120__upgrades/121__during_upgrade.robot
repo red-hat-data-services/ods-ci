@@ -94,19 +94,21 @@ RHODS Version Should Be Greater Than
     [Arguments]  ${initial_version}
     ${ver} =  Get RHODS Version
     ${ver} =  Fetch From Left  ${ver}  -
-    Should Be True    '${ver}' > '${initial_version}'    msg=RHODS version was not greater than initial version ${initial_version}
+    Should Be True    '${ver}' > '${initial_version}'    msg=Version wasn't greater than initial one ${initial_version}
 
 Get Operator Pod Creation Date
     [Documentation]    Retrieves the creation date of the RHODS operator pod.
     ...                Returns the creation date as a string.
     ...                Fails if the command to retrieve the creation date fails.
-    ${return_code}    ${creation_date}    Run And Return Rc And Output    oc get pod -n ${OPERATOR_NAMESPACE} -l name=rhods-operator --no-headers -o jsonpath='{.items[0].metadata.creationTimestamp}'
+    ${return_code}    ${creation_date} =  Run And Return Rc And Output
+    ...    oc get pod -n ${OPERATOR_NAMESPACE} -l name=rhods-operator --no-headers -o jsonpath='{.items[0].metadata.creationTimestamp}'
     Should Be Equal As Integers    ${return_code}     0   msg=Error while getting creation date of the operator pod
-    [Return]    ${creation_date}
+    RETURN    ${creation_date}
 
 Operator Pod Creation Date Should Be Updated
     [Documentation]    Checks if the operator pod creation date has been updated after the upgrade.
     ...                Fails if the updated creation date is not more recent than the initial creation date.
     [Arguments]  ${initial_creation_date}
     ${updated_creation_date} =  Get Operator Pod Creation Date
-    Should Be True    '${updated_creation_date}' > '${initial_creation_date}'    msg=Operator pod creation date was not updated after upgrade
+    Should Be True    '${updated_creation_date}' > '${initial_creation_date}'
+    ...    msg=Operator pod creation date was not updated after upgrade

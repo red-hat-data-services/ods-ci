@@ -24,7 +24,7 @@ _KFP_PACKAGE_PATH = os.getenv('KFP_PACKAGE_PATH')
 
 @component(
     packages_to_install=['scikit-learn'],
-    base_image='python:3.9',
+    base_image='registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61',
     kfp_package_path=_KFP_PACKAGE_PATH,
 )
 def digit_classification(metrics: Output[Metrics]):

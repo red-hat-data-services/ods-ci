@@ -93,7 +93,7 @@ deploymentSpec:
           \    model.fit(X_train, y_train)\n\n    #accuracy on test set\n    result\
           \ = model.score(X_test, y_test)\n    metrics.log_metric('accuracy', (result\
           \ * 100.0))\n\n"
-        image: python:3.9
+        image: registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61
     exec-html-visualization:
       container:
         args:

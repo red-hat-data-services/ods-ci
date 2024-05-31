@@ -2,8 +2,8 @@
 Documentation     Smoke tests for DistributedWorkloads
 Library           Process
 Resource          ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
-# Suite Setup       Prepare Codeflare E2E Test Suite
-# Suite Teardown    Teardown Codeflare E2E Test Suite
+Suite Setup       Prepare Codeflare E2E Test Suite
+Suite Teardown    Teardown Codeflare E2E Test Suite
 
 
 *** Test Cases ***
@@ -72,7 +72,6 @@ Training operator smoke test
     [Documentation]    Check that Training operator deployment is up and running
     [Tags]    Smoke
     ...       DistributedWorkloads
-    Skip    "Skip until https://issues.redhat.com/browse/RHOAIENG-5442 is completed"
     Log To Console    Waiting for kubeflow-training-operator to be available
     ${result} =    Run Process    oc wait --for\=condition\=Available --timeout\=300s -n ${APPLICATIONS_NAMESPACE} deployment/kubeflow-training-operator
     ...    shell=true    stderr=STDOUT

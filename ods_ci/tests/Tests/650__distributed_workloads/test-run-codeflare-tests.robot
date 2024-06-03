@@ -18,8 +18,8 @@ ${NOTEBOOK_USER_PASSWORD}       ${TEST_USER_3.PASSWORD}
 
 
 *** Test Cases ***
-Run TestMCADRay ODH test
-    [Documentation]    Run Go ODH test: TestMCADRay
+Run TestKueueRay ODH test
+    [Documentation]    Run Go ODH test: TestKueueRay
     [Tags]  ODS-2514
     ...     Tier1
     ...     DistributedWorkloads

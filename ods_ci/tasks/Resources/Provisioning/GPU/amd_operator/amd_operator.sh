@@ -46,7 +46,7 @@ has_csv_succeeded() {
   if [ x"$csv" != "x" ] && [ x"$csv" != x"<none>" ]
   then
     phase=$(oc get clusterserviceversions.operators.coreos.com -n "${ns}" "${csv}" -o=custom-columns=PHASE:.status.phase --no-headers=true)
-    if [ x"$phase" = x"Succeeded" ]
+    if [ "$phase" = "Succeeded" ]
     then
       return 0
     fi

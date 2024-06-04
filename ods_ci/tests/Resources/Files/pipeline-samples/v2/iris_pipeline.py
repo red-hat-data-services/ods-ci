@@ -144,7 +144,7 @@ def my_pipeline(
     create_dataset_task = create_dataset()
 
     normalize_dataset_task = normalize_dataset(
-        input_iris_dataset=create_dataset_task.outputs["iris_dataset"], standard_scaler=True
+        input_iris_dataset=create_dataset_task.outputs["iris_dataset"], standard_scaler=standard_scaler
     )
 
     train_model(

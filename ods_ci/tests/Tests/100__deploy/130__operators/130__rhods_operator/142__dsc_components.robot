@@ -85,7 +85,7 @@ Validate Ray Removed State
 Validate Training Operator Managed State
     [Documentation]    Validate that the DSC Training Operator component Managed state creates the expected resources,
     ...    check that Training deployment and pod are created
-    [Tags]    Operator    RHOAIENG-6627    training-managed
+    [Tags]    Operator    Tier1    RHOAIENG-6627    training-managed
 
     Set DSC Component Managed State And Wait For Completion   trainingoperator    ${TRAINING_DEPLOYMENT_NAME}    ${TRAINING_LABEL_SELECTOR}
 
@@ -93,7 +93,7 @@ Validate Training Operator Managed State
 
 Validate Training Operator Removed State
     [Documentation]    Validate that Training Operator management state Removed does remove relevant resources.
-    [Tags]    Operator    RHOAIENG-6627    training-removed
+    [Tags]    Operator    Tier1    RHOAIENG-6627    training-removed
 
     Set DSC Component Removed State And Wait For Completion   trainingoperator    ${TRAINING_DEPLOYMENT_NAME}    ${TRAINING_LABEL_SELECTOR}
 

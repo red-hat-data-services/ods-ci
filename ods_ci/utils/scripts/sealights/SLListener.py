@@ -5,7 +5,8 @@ os.environ["OTEL_METRICS_EXPORTER"] = "none"
 os.environ["OTEL_TRACES_EXPORTER"] = "none"
 # DO NOT REMOVE THIS IMPORT
 # It allows auto instrumentation for robot and pabot use cases
-import opentelemetry.instrumentation.auto_instrumentation.sitecustomize
+# Node (jgarciao): I've removed the import to solve an error preventing running the listerner in Jenkins
+#import opentelemetry.instrumentation.auto_instrumentation.sitecustomize
 from urllib.parse import quote as quote
 import datetime
 import requests

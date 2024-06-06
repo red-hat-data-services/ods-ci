@@ -12,7 +12,7 @@ Test Tags       ExcludeOnODH
 
 *** Variables ***
 ${intel_aikit_appname}           aikit
-${intel_aikit_container_name}    Intel® oneAPI AI Analytics Toolkit Container
+${intel_aikit_container_name}    Intel® oneAPI AI Analytics Toolkit Containers
 ${intel_aikit_operator_name}    Intel® oneAPI AI Analytics Toolkit Operator
 ${image_path}                   image-registry.openshift-image-registry.svc:5000/${APPLICATIONS_NAMESPACE}
 

@@ -388,7 +388,7 @@ if ${EMAIL_REPORT}
             rm rf_results.tar.gz
             tar cvzf rf_results.tar.gz $(find "${TEST_ARTIFACT_DIR}" -regex  '.*\(xml\|html\)$') &> /dev/null
      fi
-     python3 ods_ci/utils/scripts/Sender/send_report.py send_email_report -s "${EMAIL_FROM}" -r "${EMAIL_TO}" -b "ODS-CI: Run Results" \
+     poetry run python3 ods_ci/utils/scripts/Sender/send_report.py send_email_report -s "${EMAIL_FROM}" -r "${EMAIL_TO}" -b "ODS-CI: Run Results" \
                         -v "${EMAIL_SERVER}" -a "rf_results.tar.gz" -u "${EMAIL_SERVER_USER}" -p "${EMAIL_SERVER_PW}" \
                         -l "${EMAIL_SERVER_SSL}" -d "${EMAIL_SERVER_UNSECURE}"
 fi

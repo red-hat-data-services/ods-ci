@@ -29,13 +29,15 @@ Verify User Can Create, Run and Delete A DS Pipeline From DS Project Details Pag
     ...                DS Project UI
     [Tags]    Smoke
     ...       ODS-2206    ODS-2226    ODS-2633
-
     Open Data Science Project Details Page    ${PRJ_TITLE}
 
     Create Pipeline Server    dc_name=${DC_NAME}    project_title=${PRJ_TITLE}
     Verify There Is No "Error Displaying Pipelines" After Creating Pipeline Server
     Verify That There Are No Sample Pipelines After Creating Pipeline Server
     Wait Until Pipeline Server Is Deployed    project_title=${PRJ_TITLE}
+
+    Run Keyword If Cluster Is Disconnected
+    ...    Configure Test For Disconnected Cluster  ${PRJ_TITLE}
 
     # Import pipeline but cancel dialog
     Import Pipeline    name=${PIPELINE_TEST_NAME}
@@ -81,6 +83,7 @@ Verify User Can Create, Run and Delete A DS Pipeline From DS Project Details Pag
     ODHDataSciencePipelines.Delete Pipeline           ${PIPELINE_TEST_NAME}
     ODHDataSciencePipelines.Delete Pipeline Server    ${PRJ_TITLE}
     [Teardown]    Delete Data Science Project         ${PRJ_TITLE}
+
 
 *** Keywords ***
 Pipelines Suite Setup    # robocop: disable
@@ -150,3 +153,17 @@ Verify Data Science Parameter From A Duplicated Run Are The Same From The Compil
     # look for spec.params inside ${PIPELINE_TEST_FILEPATH} source code
     Should Contain    ${input_parameters}    model_obc
     Should Contain    ${input_parameters}    iris-model
+
+Configure Test For Disconnected Cluster
+    [Documentation]    If the cluster is disconnected, set iris_pipeline_disconnected as pipeline to use for the
+    ...   test and create the ConfigMap required by the pipeline defining pip_index_url and pip_trusted_host.
+    [Arguments]    ${project_title}
+    Set Suite Variable    ${PIPELINE_TEST_FILEPATH}
+    ...    ods_ci/tests/Resources/Files/pipeline-samples/v2/disconnected/iris_pipeline_disconnected_compiled.yaml
+    Create ConfigMap With Disconnected Pipelines Configuration    ${project_title}
+
+Create ConfigMap With Disconnected Pipelines Configuration
+    [Documentation]     Creates a Configmap (ds-pipeline-custom-env-vars) in the project,
+    ...    setting the values for pip_index_url and pip_trusted_host
+    [Arguments]    ${project_title}
+    Run     oc create configmap ds-pipeline-custom-env-vars --from-literal=pip_index_url=${PIP_INDEX_URL} --from-literal=pip_trusted_host=${PIP_TRUSTED_HOST} -n ${project_title}

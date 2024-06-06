@@ -1041,33 +1041,6 @@ class OpenshiftClusterManager:
         output_file = "install_isv.yaml"
         self._render_template(template_file, output_file, replace_vars)
 
-        if operator_name == "serverless-operator":
-            replace_vars = {
-                "ISV_NAME": "serverless-operators",
-                "NAMESPACE": "openshift-serverless",
-            }
-            template_file = "resource.jinja"
-            file_path1 = "resource.yaml"
-            self._render_template(template_file, file_path1, replace_vars)
-
-            def yaml_loader(filepath):
-                with open(filepath, "rb") as file_descriptor:
-                    data = yaml.load(file_descriptor, Loader=yaml.SafeLoader)
-                return data
-
-            data1 = yaml_loader(file_path1)
-            data2 = yaml_loader(output_file)
-            data1.update(data2)
-
-            with open(output_file, "w") as yaml_output:
-                yaml.dump(
-                    data1,
-                    yaml_output,
-                    default_flow_style=False,
-                    explicit_start=True,
-                    allow_unicode=True,
-                )
-
         cmd = "oc apply -f {} ".format(os.path.abspath(output_file))
         ret = execute_command(cmd)
         if ret is None:

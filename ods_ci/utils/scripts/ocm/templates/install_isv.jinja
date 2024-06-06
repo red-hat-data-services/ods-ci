@@ -1,12 +1,12 @@
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
-      name: {{ ISV_NAME }}-operator
+      name: {{ ISV_NAME }}
       namespace: openshift-operators
 spec:
         channel: {{ CHANNEL }}
         installPlanApproval: Automatic
-        name: {{ ISV_NAME }}-operator
+        name: {{ ISV_NAME }}
         source: {{ SOURCE  }}
         sourceNamespace: openshift-marketplace
 

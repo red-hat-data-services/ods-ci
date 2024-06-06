@@ -879,7 +879,7 @@ class OpenshiftClusterManager:
     def install_rhods_addon(self):
         if not self.is_addon_installed():
             # Install dependency operators for rhoai deployment
-            dependency_operators = ["servicemesh", "serverless"]
+            dependency_operators = ["servicemeshoperator", "serverless-operator"]
             for dependency_operator in dependency_operators:
                 self.install_openshift_isv(dependency_operator, "stable", "redhat-operators")
                 self.wait_for_isv_installation_to_complete(dependency_operator, namespace="openshift-operators")
@@ -1041,14 +1041,7 @@ class OpenshiftClusterManager:
         output_file = "install_isv.yaml"
         self._render_template(template_file, output_file, replace_vars)
 
-        if operator_name == "servicemesh":
-            with open(output_file) as f:
-                newdct = yaml.safe_load(f)
-            newdct["spec"]["name"] = "servicemeshoperator"
-            with open(output_file, "w") as f:
-                yaml.dump(newdct, f)
-
-        if operator_name == "serverless":
+        if operator_name == "serverless-operator":
             replace_vars = {
                 "ISV_NAME": "serverless-operators",
                 "NAMESPACE": "openshift-serverless",

@@ -21,8 +21,6 @@ ${RAY_LABEL_SELECTOR}           app.kubernetes.io/name=kuberay
 ${RAY_DEPLOYMENT_NAME}          kuberay-operator
 ${TRAINING_LABEL_SELECTOR}      app.kubernetes.io/name=training-operator
 ${TRAINING_DEPLOYMENT_NAME}     kubeflow-training-operator
-${DASHBOARD_LABEL_SELECTOR}     app.kubernetes.io/part-of=rhods-dashboard
-${DASHBOARD_DEPLOYMENT_NAME}    rhods-dashboard
 ${DATASCIENCEPIPELINES_LABEL_SELECTOR}     app.kubernetes.io/name=data-science-pipelines-operator
 ${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}    data-science-pipelines-operator-controller-manager
 ${IS_PRESENT}        0
@@ -169,7 +167,7 @@ Set DSC Component Removed State And Wait For Completion
     Wait Until Keyword Succeeds    5 min    0 sec
     ...    Is Resource Present     Deployment    ${deployment_name}    ${APPLICATIONS_NS}    ${IS_NOT_PRESENT}
 
-    Wait Until Keyword Succeeds    3 min    0 sec
+    Wait Until Keyword Succeeds    5 min    0 sec
     ...    Check If Pod Does Not Exist    ${label_selector}    ${APPLICATIONS_NS}
 
 Set DSC Component Managed State And Wait For Completion

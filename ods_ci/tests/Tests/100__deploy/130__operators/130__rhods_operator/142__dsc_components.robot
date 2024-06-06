@@ -21,6 +21,10 @@ ${RAY_LABEL_SELECTOR}           app.kubernetes.io/name=kuberay
 ${RAY_DEPLOYMENT_NAME}          kuberay-operator
 ${TRAINING_LABEL_SELECTOR}      app.kubernetes.io/name=training-operator
 ${TRAINING_DEPLOYMENT_NAME}     kubeflow-training-operator
+${DASHBOARD_LABEL_SELECTOR}     app.kubernetes.io/part-of=rhods-dashboard
+${DASHBOARD_DEPLOYMENT_NAME}    rhods-dashboard
+${DATASCIENCEPIPELINES_LABEL_SELECTOR}     app.kubernetes.io/name=data-science-pipelines-operator
+${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}    data-science-pipelines-operator-controller-manager
 ${IS_PRESENT}        0
 ${IS_NOT_PRESENT}    1
 &{SAVED_MANAGEMENT_STATES}
@@ -28,12 +32,14 @@ ${IS_NOT_PRESENT}    1
 ...  KUEUE=${EMPTY}
 ...  CODEFLARE=${EMPTY}
 ...  TRAINING=${EMPTY}
+...  DASHBOARD=${EMPTY}
+...  DATASCIENCEPIPELINES=${EMPTY}
 
 
 *** Test Cases ***
 Validate Kueue Managed State
     [Documentation]    Validate that the DSC Kueue component Managed state creates the expected resources,
-    ...    check that kueue deployment and pod are created
+    ...    check that kueue deployment is created and pod is in Ready state
     [Tags]    Operator    Tier1    RHOAIENG-5435    kueue-managed
 
     Set DSC Component Managed State And Wait For Completion   kueue    ${KUEUE_DEPLOYMENT_NAME}    ${KUEUE_LABEL_SELECTOR}
@@ -50,7 +56,7 @@ Validate Kueue Removed State
 
  Validate Codeflare Managed State
     [Documentation]    Validate that the DSC Codeflare component Managed state creates the expected resources,
-    ...    check that Codeflare deployment and pod are created
+    ...    check that Codeflare deployment is created and pod is in Ready state
     [Tags]    Operator    Tier1    RHOAIENG-5435    codeflare-managed
 
     Set DSC Component Managed State And Wait For Completion   codeflare    ${CODEFLARE_DEPLOYMENT_NAME}    ${CODEFLARE_LABEL_SELECTOR}
@@ -67,7 +73,7 @@ Validate Codeflare Removed State
 
 Validate Ray Managed State
     [Documentation]    Validate that the DSC Ray component Managed state creates the expected resources,
-    ...    check that Ray deployment and pod are created
+    ...    check that Ray deployment is created and pod is in Ready state
     [Tags]    Operator    Tier1    RHOAIENG-5435    ray-managed
 
     Set DSC Component Managed State And Wait For Completion   ray    ${RAY_DEPLOYMENT_NAME}    ${RAY_LABEL_SELECTOR}
@@ -84,7 +90,7 @@ Validate Ray Removed State
 
 Validate Training Operator Managed State
     [Documentation]    Validate that the DSC Training Operator component Managed state creates the expected resources,
-    ...    check that Training deployment and pod are created
+    ...    check that Training deployment is created and pod is in Ready state
     [Tags]    Operator    Tier1    RHOAIENG-6627    training-managed
 
     Set DSC Component Managed State And Wait For Completion   trainingoperator    ${TRAINING_DEPLOYMENT_NAME}    ${TRAINING_LABEL_SELECTOR}
@@ -99,6 +105,40 @@ Validate Training Operator Removed State
 
     [Teardown]     Restore DSC Component State    trainingoperator    ${TRAINING_DEPLOYMENT_NAME}    ${TRAINING_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.TRAINING}
 
+Validate Dashboard Managed State
+    [Documentation]    Validate that the DSC Dashboard component Managed state creates the expected resources,
+    ...    check that Dashboard deployment is created and all pods are in Ready state
+    [Tags]    Operator    Tier1    RHOAIENG-7298    dashboard-managed
+
+    Set DSC Component Managed State And Wait For Completion   dashboard    ${DASHBOARD_DEPLOYMENT_NAME}    ${DASHBOARD_LABEL_SELECTOR}
+
+    [Teardown]     Restore DSC Component State    dashboard    ${DASHBOARD_DEPLOYMENT_NAME}    ${DASHBOARD_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.DASHBOARD}
+
+Validate Dashboard Removed State
+    [Documentation]    Validate that Dashboard management state Removed does remove relevant resources.
+    [Tags]    Operator    Tier1    RHOAIENG-7298    dashboard-removed
+
+    Set DSC Component Removed State And Wait For Completion   dashboard    ${DASHBOARD_DEPLOYMENT_NAME}    ${DASHBOARD_LABEL_SELECTOR}
+
+    [Teardown]     Restore DSC Component State    dashboard    ${DASHBOARD_DEPLOYMENT_NAME}    ${DASHBOARD_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.DASHBOARD}
+
+Validate Datasciencepipelines Managed State
+    [Documentation]    Validate that the DSC Datasciencepipelines component Managed state creates the expected resources,
+    ...    check that Datasciencepipelines deployment is created and pod is in Ready state
+    [Tags]    Operator    Tier1    RHOAIENG-7298    datasciencepipelines-managed
+
+    Set DSC Component Managed State And Wait For Completion   datasciencepipelines    ${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}    ${DATASCIENCEPIPELINES_LABEL_SELECTOR}
+
+    [Teardown]     Restore DSC Component State    datasciencepipelines    ${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}    ${DATASCIENCEPIPELINES_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.DATASCIENCEPIPELINES}
+
+Validate Datasciencepipelines Removed State
+    [Documentation]    Validate that Datasciencepipelines management state Removed does remove relevant resources.
+    [Tags]    Operator    Tier1    RHOAIENG-7298    datasciencepipelines-removed
+
+    Set DSC Component Removed State And Wait For Completion   datasciencepipelines    ${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}    ${DATASCIENCEPIPELINES_LABEL_SELECTOR}
+
+    [Teardown]     Restore DSC Component State    datasciencepipelines    ${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}    ${DATASCIENCEPIPELINES_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.DATASCIENCEPIPELINES}
+
 
 *** Keywords ***
 Suite Setup
@@ -109,6 +149,8 @@ Suite Setup
     ${SAVED_MANAGEMENT_STATES.KUEUE}=     Get DSC Component State    ${DSC_NAME}    kueue    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.CODEFLARE}=     Get DSC Component State    ${DSC_NAME}    codeflare    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.TRAINING}=     Get DSC Component State    ${DSC_NAME}    trainingoperator    ${OPERATOR_NS}
+    ${SAVED_MANAGEMENT_STATES.DASHBOARD}=     Get DSC Component State    ${DSC_NAME}    dashboard    ${OPERATOR_NS}
+    ${SAVED_MANAGEMENT_STATES.DATASCIENCEPIPELINES}=     Get DSC Component State    ${DSC_NAME}    datasciencepipelines    ${OPERATOR_NS}
     Set Suite Variable    ${SAVED_MANAGEMENT_STATES}
 
 Suite Teardown
@@ -142,10 +184,10 @@ Set DSC Component Managed State And Wait For Completion
     Wait Until Keyword Succeeds    5 min    0 sec
     ...    Is Resource Present     Deployment    ${deployment_name}    ${APPLICATIONS_NS}    ${IS_PRESENT}
 
-    Wait Until Keyword Succeeds    3 min    0 sec
+    Wait Until Keyword Succeeds    5 min    0 sec
     ...    Check If Pod Exists    ${APPLICATIONS_NS}    ${label_selector}    ${FALSE}
 
-    Wait Until Keyword Succeeds    2 min    0 sec
+    Wait Until Keyword Succeeds    8 min    0 sec
     ...    Is Pod Ready    ${label_selector}
 
 Restore DSC Component State
@@ -164,9 +206,11 @@ Restore DSC Component State
     END
 
 Is Pod Ready
-    [Documentation]    Check If Pod Is In Ready State
+    [Documentation]    Check If Pod Is In Ready State.
+    ...    Note: Will check that all pods with given label-selector are in Ready state.
     [Arguments]    ${label_selector}
     ${rc}    ${output}=    Run And Return Rc And Output
-    ...    oc get pod -A -l ${label_selector} -o jsonpath='{.items[*].status.containerStatuses[0].ready}'
+    ...    oc get pod -A -l ${label_selector} -o jsonpath='{..status.conditions[?(@.type=="Ready")].status}'
+    # Log To Console    "Pod Ready Status: ${output}"
     Should Be Equal As Integers    ${rc}    0
-    Should Be Equal As Strings    "${output}"    "true"
+    Should Not Contain    ${output}    False

@@ -19,7 +19,7 @@ spec:
   containers: 
     - name: kserve-container
       #image: kserve/vllmserver:latest
-      image: quay.io/wxpe/tgis-vllm:release.74803b6
+      image: quay.io/opendatahub/vllm:stable
       startupProbe: 
         httpGet: 
           port: 8080

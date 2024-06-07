@@ -320,3 +320,24 @@ class Helpers:
         Calculate simple string matching ratio based on Levenshtein distance
         """
         return fuzz.ratio(string1, string2)
+    
+    @keyword
+    def get_vllm_metrics_and_values(self, endpoint):
+        """
+        Fetch exposed metrics and their current values from a deployed vllm endpoint
+        """
+        r = requests.get(endpoint, verify=False)
+        regex = re.compile(r"^vllm:")
+        out = []
+        for line in r.text.split("\n"):
+            if regex.match(line):
+                if 'le="+Inf"' in line:
+                    # TODO: this parameter breaks the query via API although it works fine in the openshift metrics UI
+                    # need to figure out a way to fix it.
+                    # le="+Inf" is converted to le=%22+Inf%22, which makes it return an empty response
+                    # manually sending the request using le%3D\"%2BInf%22 instead works fine
+                    # doing the replace here doesn't work because of \", which breaks the URL entirely somehow
+                    # line = line.replace('le="+Inf"', 'le%3D\"%2BInf')
+                    continue
+                out.append(line.split(" "))
+        return out

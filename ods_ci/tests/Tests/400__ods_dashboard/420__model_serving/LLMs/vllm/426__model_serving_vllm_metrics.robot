@@ -37,6 +37,19 @@ ${TEST_NS}=                   vllm-gpt2
 ...                           vllm:e2e_request_latency_seconds_bucket
 ...                           vllm:e2e_request_latency_seconds_count
 ...                           vllm:e2e_request_latency_seconds_sum
+...                           vllm:request_prompt_tokens_bucket
+...                           vllm:request_prompt_tokens_count
+...                           vllm:request_prompt_tokens_sum
+...                           vllm:request_generation_tokens_bucket
+...                           vllm:request_generation_tokens_count
+...                           vllm:request_generation_tokens_sum
+...                           vllm:request_params_best_of_bucket
+...                           vllm:request_params_best_of_count
+...                           vllm:request_params_best_of_sum
+...                           vllm:request_params_n_bucket
+...                           vllm:request_params_n_count
+...                           vllm:request_params_n_sum
+...                           vllm:request_success_total
 ...                           vllm:avg_prompt_throughput_toks_per_s
 ...                           vllm:avg_generation_throughput_toks_per_s
 
@@ -57,22 +70,40 @@ Verify User Can Deploy A Model With Vllm Via CLI
     Deploy Model Via CLI    ${IS_FILEPATH}    ${TEST_NS}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=vllm-gpt2-openai
     ...    namespace=${TEST_NS}
+    # Disable response validation, keeps changing
     Query Model Multiple Times    model_name=gpt2    isvc_name=vllm-gpt2-openai    runtime=vllm-runtime   protocol=http
     ...    inference_type=chat-completions    n_times=3    query_idx=8
-    ...    namespace=${TEST_NS}    string_check_only=${TRUE}
+    ...    namespace=${TEST_NS}    string_check_only=${TRUE}    validate_response=${FALSE}
 
 Verify Vllm Metrics Are Present
     [Documentation]    Confirm vLLM metrics are exposed in OpenShift metrics
-    [Tags]    Tier1    Sanity    Resources-GPU    RHOAIENG-6264
-    ...       Depends On Test    Verify User Can Deploy A Model With Vllm Via CLI
-    ${host} =    llm.Get KServe Inference Host Via CLI    isvc_name=vllm-gpt2-openai    namespace=${TEST_NS}
-    ${rc}    ${out}=    Run And Return Rc And Output
-    ...    curl -ks ${host}/metrics/
+    [Tags]    Tier1    Sanity    Resources-GPU    RHOAIENG-6264    VLLM
+    Depends On Test    Verify User Can Deploy A Model With Vllm Via CLI
+    ${host}=    llm.Get KServe Inference Host Via CLI    isvc_name=vllm-gpt2-openai    namespace=${TEST_NS}
+    ${rc}    ${out}=    Run And Return Rc And Output    curl -ks https://${host}/metrics/
     Should Be Equal As Integers    ${rc}    ${0}
     Log    ${out}
     ${thanos_url}=    Get OpenShift Thanos URL
+    Set Suite Variable    ${thanos_url}
     ${token}=    Generate Thanos Token
+    Set Suite Variable    ${token}
     Metrics Should Exist In UserWorkloadMonitoring    ${thanos_url}    ${token}    ${SEARCH_METRICS}
+
+Verify Vllm Metrics Values Match Between UWM And Endpoint
+    [Documentation]  Confirm the values returned by UWM and by the model endpoint match for each metric
+    [Tags]    Tier1    Sanity    Resources-GPU    RHOAIENG-6264    RHOAIENG-7687    VLLM
+    Depends On Test    Verify User Can Deploy A Model With Vllm Via CLI
+    Depends On Test    Verify Vllm Metrics Are Present
+    ${host}=    llm.Get KServe Inference Host Via CLI    isvc_name=vllm-gpt2-openai    namespace=${TEST_NS}
+    ${metrics_endpoint}=    Get Vllm Metrics And Values    https://${host}/metrics/
+    FOR    ${index}    ${item}    IN ENUMERATE    @{metrics_endpoint}
+        ${metric} =    Set Variable    ${item}[0]
+        ${value} =    Set Variable    ${item}[1]
+        ${resp} =    Prometheus.Run Query    https://${thanos_url}    ${token}    ${metric}
+        Log    ${resp.json()["data"]}
+        Run Keyword And Warn On Failure
+        ...    Should Be Equal As Numbers    ${value}    ${resp.json()["data"]["result"][0]["value"][1]}
+    END
 
 
 *** Keywords ***

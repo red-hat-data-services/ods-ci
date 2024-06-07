@@ -90,7 +90,7 @@ Verify User Can Deploy A Model With Vllm And tgi Via CLI
     ...    namespace=${TEST_NS}    string_check_only=${TRUE}    validate_response=${FALSE}
 
 Verify Vllm And tgi Metrics Are Present
-    [Documentation]    Confirm vLLM metrics are exposed in OpenShift metrics
+    [Documentation]    Confirm vLLM and tgi metrics are exposed in OpenShift metrics
     [Tags]    Tier1    Sanity    Resources-GPU    RHOAIENG-6264    VLLM
     Depends On Test    Verify User Can Deploy A Model With Vllm Via CLI
     ${host}=    llm.Get KServe Inference Host Via CLI    isvc_name=vllm-gpt2-openai    namespace=${TEST_NS}

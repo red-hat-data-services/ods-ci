@@ -31,6 +31,12 @@ Install DataSciencePipelinesApplication CR
         Should Be True    ${generation_value} == 2    DataSciencePipelinesApplication created
     END
 
+Create Pipelines ConfigMap With Custom Pip Index Url And Trusted Host
+    [Documentation]     Creates a Configmap (ds-pipeline-custom-env-vars) in the project,
+    ...    storing the values for pip_index_url and pip_trusted_host
+    [Arguments]    ${project_title}
+    Run     oc create configmap ds-pipeline-custom-env-vars --from-literal=pip_index_url=${PIP_INDEX_URL} --from-literal=pip_trusted_host=${PIP_TRUSTED_HOST} -n ${project_title}
+
 Fill In Pipeline Import Form
     [Documentation]    Compiles the form to create a pipeline.
     ...                It works when you start server creation from either

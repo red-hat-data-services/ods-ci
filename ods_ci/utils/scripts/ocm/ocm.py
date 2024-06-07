@@ -878,11 +878,19 @@ class OpenshiftClusterManager:
 
     def install_rhods_addon(self):
         if not self.is_addon_installed():
-            # Install dependency operators for rhoai deployment
-            dependency_operators = ["servicemesh", "serverless"]
-            for dependency_operator in dependency_operators:
-                self.install_openshift_isv(dependency_operator, "stable", "redhat-operators")
-                self.wait_for_isv_installation_to_complete(dependency_operator, namespace="openshift-operators")
+            # Install dependency operators for rhoai deployment:
+            # Authorino
+            dependency_operator = "authorino-operator"
+            self.install_openshift_isv(dependency_operator, "managed-services", "redhat-operators")
+            self.wait_for_isv_installation_to_complete(dependency_operator, namespace="openshift-operators")
+            # ServiceMesh
+            dependency_operator = "servicemeshoperator"
+            self.install_openshift_isv(dependency_operator, "stable", "redhat-operators")
+            self.wait_for_isv_installation_to_complete(dependency_operator, namespace="openshift-operators")
+            # Serverless
+            dependency_operator = "serverless-operator"
+            self.install_openshift_isv(dependency_operator, "stable", "redhat-operators")
+            self.wait_for_isv_installation_to_complete(dependency_operator, namespace="openshift-operators")
 
             # Deploy rhoai
             self.install_rhods()
@@ -1040,40 +1048,6 @@ class OpenshiftClusterManager:
         template_file = "install_isv.jinja"
         output_file = "install_isv.yaml"
         self._render_template(template_file, output_file, replace_vars)
-
-        if operator_name == "servicemesh":
-            with open(output_file) as f:
-                newdct = yaml.safe_load(f)
-            newdct["spec"]["name"] = "servicemeshoperator"
-            with open(output_file, "w") as f:
-                yaml.dump(newdct, f)
-
-        if operator_name == "serverless":
-            replace_vars = {
-                "ISV_NAME": "serverless-operators",
-                "NAMESPACE": "openshift-serverless",
-            }
-            template_file = "resource.jinja"
-            file_path1 = "resource.yaml"
-            self._render_template(template_file, file_path1, replace_vars)
-
-            def yaml_loader(filepath):
-                with open(filepath, "rb") as file_descriptor:
-                    data = yaml.load(file_descriptor, Loader=yaml.SafeLoader)
-                return data
-
-            data1 = yaml_loader(file_path1)
-            data2 = yaml_loader(output_file)
-            data1.update(data2)
-
-            with open(output_file, "w") as yaml_output:
-                yaml.dump(
-                    data1,
-                    yaml_output,
-                    default_flow_style=False,
-                    explicit_start=True,
-                    allow_unicode=True,
-                )
 
         cmd = "oc apply -f {} ".format(os.path.abspath(output_file))
         ret = execute_command(cmd)

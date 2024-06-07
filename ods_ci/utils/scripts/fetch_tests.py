@@ -63,7 +63,7 @@ def checkout_repository(ref):
 
 def get_branch(ref_to_exclude, selector_attribute):
     """
-    List the remote branches and sort by last commit date (ASC order), exclude $ref_to_exclude and get latest
+    List the remote branches and sort by selector_attribute date (ASC order), exclude $ref_to_exclude and get latest
     """
     ref_to_exclude_esc = ref_to_exclude.replace("/", r"\/")
     cmd = f"git branch -r --sort={selector_attribute} | grep releases/"
@@ -195,8 +195,8 @@ if __name__ == "__main__":
         help="Select the git attribute to use when --ref2-auto is enabled",
         action="store",
         dest="selector_attribute",
-        choices=["creatordate", "committerdate", "authordate"],
-        default="creatordate",
+        choices=["creatordate", "committerdate", "authordate", "taggerdate", "version:refname"],
+        default="version:refname",
     )
 
     args = parser.parse_args()

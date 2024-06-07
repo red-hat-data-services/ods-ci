@@ -28,7 +28,6 @@ jq -r --arg INSTANCE_TYPE "$INSTANCE_TYPE" '.spec.template.spec.providerSpec.val
   | del(.metadata.uid)
   | del(.metadata.creationTimestamp)
   | del(.metadata.resourceVersion)
-  | .spec.template.spec.taints += [{"effect": "NoSchedule" , "key": "nvidia.com/gpu" , "value": "None"}]
 ' /tmp/source-machineset.json > /tmp/gpu-machineset.json
 
 # Change machineset name

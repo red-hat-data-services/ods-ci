@@ -596,7 +596,7 @@ Verify User Can Serve And Query A ibm-granite/granite-8b-code-base Model
 Verify User Can Serve And Query A intfloat/e5-mistral-7b-instruct Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve using TGIS standalone or vllm runtime
-    [Tags]    RHOAIENG-768912    VLLM
+    [Tags]    RHOAIENG-7427    VLLM
     Setup Test Variables    model_name=e5-mistral-7b   use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=e5-mistral-7b-instruct
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}

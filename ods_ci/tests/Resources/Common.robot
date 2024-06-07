@@ -309,14 +309,6 @@ Run Keyword If RHODS Is Self-Managed
     ${is_self_managed}=    Is RHODS Self-Managed
     IF    ${is_self_managed} == True    Run Keyword    ${name}    @{arguments}
 
-Run Keyword If Cluster Is Disconnected
-    [Documentation]    Runs keyword ${name} using  @{arguments} if cluster is disconnected
-    ...    Note: currently, it assumes that the cluster is disconnected if the global variables
-    ...    PIP_INDEX_URL and PIP_TRUSTED_HOST don't have empty values
-    [Arguments]    ${name}    @{arguments}
-    ${is_disconnected} =    Is Disconnected Cluster
-    IF  ${is_disconnected}==${TRUE}    Run Keyword    ${name}    @{arguments}
-
 Get Sub Domain Of Current URL
     [Documentation]    Gets the sub-domain of the current URL (i.e. everything before the first dot in the URL)
     ...    e.g. https://console-openshift-console.apps.<cluster>.rhods.ccitredhat.com -> https://console-openshift-console

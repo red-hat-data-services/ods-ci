@@ -71,14 +71,6 @@ Is RHODS Self-Managed
     ${rc}=    Run And Return Rc    oc get catalogsource addon-managed-odh-catalog -n ${OPERATOR_NAMESPACE}
     Run Keyword And Return    Run Keyword And Return Status      Should Not Be Equal As Numbers    ${rc}    ${0}
 
-Is Disconnected Cluster
-    [Documentation]    Returns ${TRUE} if cluster is disconnected.
-    ...    Note: currently, it assumes that the cluster is disconnected if the global variables
-    ...    PIP_INDEX_URL and PIP_TRUSTED_HOST don't have empty values
-    ${pip_index_url}=       Get Variable Value    ${PIP_INDEX_URL}       ${EMPTY}
-    ${pip_trusted_host}=    Get Variable Value    ${PIP_TRUSTED_HOST}    ${EMPTY}
-    IF    "${pip_index_url}" != "${EMPTY}" and "${pip_trusted_host}" != "${EMPTY}"    RETURN     ${TRUE}
-
 Get MachineSets
     [Documentation]    Returns a list of machinesets names
     ${machine_sets_oc} =    Run    oc get machinesets -n openshift-machine-api | awk '{split($0,a); print a[1]}'

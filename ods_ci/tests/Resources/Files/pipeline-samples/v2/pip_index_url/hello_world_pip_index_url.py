@@ -1,8 +1,8 @@
-"""Hello world pipeline for disconnected clusters
+"""Hello world pipeline for pip_index_url clusters
 
 This is an example of setting pip_index_url in a pipeline task
 obtaining the value from a ConfigMap, in order to be able to run
-the pipeline in a disconnected environment.
+the pipeline in a pip_index_url environment.
 
 The pipeline reads the values from a ConfigMap (ds-pipeline-custom-env-vars)
 and creates the environment variables PIP_INDEX_URL and PIP_TRUSTED_HOST

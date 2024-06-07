@@ -142,7 +142,7 @@ Verify There Is No "Error Displaying Pipelines" After Creating Pipeline Server
     [Documentation]    Verify me message "Error displaying Pipelines" after creating pipeline server
     ...    Bug: RHOAIENG-2931
     ${expected_text_list} =    Create List    Start by importing a pipeline    Error displaying pipelines
-    Wait Until Page Contains A String In List    ${expected_text_list}
+    Wait Until Page Contains A String In List    ${expected_text_list}    retry=18x
     Run Keyword And Warn On Failure    Page Should Not Contain     Error displaying pipelines
 
 Verify That There Are No Sample Pipelines After Creating Pipeline Server

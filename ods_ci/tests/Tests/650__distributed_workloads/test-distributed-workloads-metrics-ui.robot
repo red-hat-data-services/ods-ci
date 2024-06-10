@@ -20,6 +20,7 @@ ${LOCAL_QUEUE_NAME}=    test-local-queue
 ${CPU_REQUESTED}=    2
 ${MEMORY_REQUESTED}=    2000
 ${JOB_NAME_QUEUE}=    kueue-job
+${RAY_CLUSTER_NAME}=    mnist
 
 
 *** Test Cases ***
@@ -131,7 +132,7 @@ Verify The Workload Metrics By Submitting Kueue Batch Workload
     END
 
     Click Button    ${PROJECT_METRICS_TAB_XP}
-    Wait Until Element Is Visible    xpath=//*[@data-testid="dw-workloada-resource-metrics"]//*[text()="No distributed workloads in the selected project are currently consuming resources."]    timeout=60
+    Wait Until Element Is Visible    xpath=//*[@data-testid="dw-workload-resource-metrics"]//*[text()="No distributed workloads in the selected project are currently consuming resources."]    timeout=60
     Page Should Not Contain    ${JOB_NAME_QUEUE}
     Page Should Not Contain    Succeeded
     Check Distributed Workload Status Page Contents
@@ -141,26 +142,26 @@ Verify The Workload Metrics By Submitting Ray Workload
     [Documentation]    Monitor the workload metrics status and chart details by submitting Ray workload
     [Tags]    RHOAIENG-5216
     ...       Tier1    DistributedWorkloads
-    ${PRJ_RAY} =     Set Variable    test-ns-rayupgrade
-    Create Ray Cluster Workload
+    Create Ray Cluster Workload   ${PRJ_TITLE}    ${LOCAL_QUEUE_NAME}    ${RAY_CLUSTER_NAME}
     Open Distributed Workload Metrics Home Page
-    Select Distributed Workload Project By Name    ${PRJ_RAY}
+    Select Distributed Workload Project By Name    ${PRJ_TITLE}
     Select Refresh Interval    15 seconds
     Wait Until Element Is Visible    ${DISTRIBUITED_WORKLOAD_RESOURCE_METRICS_TITLE_XP}    timeout=20
-    Wait Until Element Is Visible    xpath=//*[text()="Running"]    timeout=30
+    Wait Until Element Is Visible     xpath=//*[text()="Admitted"]    timeout=30
+    Wait Until Element Is Visible    xpath=//*[text()="Running"]    timeout=120
 
-    ${cpu_requested} =   Get CPU Requested    ${PRJ_RAY}    local-queue-mnist
-    ${memory_requested} =   Get Memory Requested    ${PRJ_RAY}    local-queue-mnist    RayCluster
-    Check Requested Resources Chart    ${PRJ_RAY}    ${cpu_requested}    ${memory_requested}
-    Check Requested Resources    ${PRJ_RAY}    ${CPU_SHARED_QUOTA}    ${MEMEORY_SHARED_QUOTA}    ${cpu_requested}    ${memory_requested}    RayCluster
+    ${cpu_requested} =   Get CPU Requested    ${PRJ_TITLE}    ${LOCAL_QUEUE_NAME}
+    ${memory_requested} =   Get Memory Requested    ${PRJ_TITLE}    ${LOCAL_QUEUE_NAME}   RayCluster
+    Check Requested Resources Chart    ${PRJ_TITLE}    ${cpu_requested}    ${memory_requested}
+    Check Requested Resources    ${PRJ_TITLE}    ${CPU_SHARED_QUOTA}    ${MEMEORY_SHARED_QUOTA}    ${cpu_requested}    ${memory_requested}    RayCluster
 
-    Check Distributed Workload Resource Metrics Status    mnist    Running
-    Check Distributed Worklaod Status Overview    mnist    Running    All pods were ready or succeeded since the workload admission
+    Check Distributed Workload Resource Metrics Status    ${RAY_CLUSTER_NAME}    Running
+    Check Distributed Worklaod Status Overview    ${RAY_CLUSTER_NAME}    Running    All pods were ready or succeeded since the workload admission
 
     Click Button    ${PROJECT_METRICS_TAB_XP}
-    Check Distributed Workload Resource Metrics Chart    ${PRJ_RAY}    ${cpu_requested}    ${memory_requested}    RayCluster    mnist
+    Check Distributed Workload Resource Metrics Chart    ${PRJ_TITLE}    ${cpu_requested}    ${memory_requested}    RayCluster    ${RAY_CLUSTER_NAME}
 
-    [Teardown]    Cleanup Ray Cluster Workload    ${PRJ_RAY}
+    [Teardown]    Cleanup Ray Cluster Workload    ${PRJ_TITLE}    ${RAY_CLUSTER_NAME}
 
 
 *** Keywords ***

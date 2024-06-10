@@ -28,8 +28,14 @@ Install DataSciencePipelinesApplication CR
     Oc Apply    kind=DataSciencePipelinesApplication    src=${DATA_SCIENCE_PIPELINES_APPLICATION_PATH}/${dsp_file}    namespace=${project}
     IF    ${assert_install}==True
         ${generation_value}    Run    oc get datasciencepipelinesapplications -n ${project} -o json | jq '.items[0].metadata.generation'
-        Should Be True    ${generation_value} == 1    DataSciencePipelinesApplication created
+        Should Be True    ${generation_value} == 2    DataSciencePipelinesApplication created
     END
+
+Create Pipelines ConfigMap With Custom Pip Index Url And Trusted Host
+    [Documentation]     Creates a Configmap (ds-pipeline-custom-env-vars) in the project,
+    ...    storing the values for pip_index_url and pip_trusted_host
+    [Arguments]    ${project_title}
+    Run     oc create configmap ds-pipeline-custom-env-vars --from-literal=pip_index_url=${PIP_INDEX_URL} --from-literal=pip_trusted_host=${PIP_TRUSTED_HOST} -n ${project_title}
 
 Fill In Pipeline Import Form
     [Documentation]    Compiles the form to create a pipeline.
@@ -135,7 +141,8 @@ Delete Pipeline Server
 Verify There Is No "Error Displaying Pipelines" After Creating Pipeline Server
     [Documentation]    Verify me message "Error displaying Pipelines" after creating pipeline server
     ...    Bug: RHOAIENG-2931
-    Run Keyword And Ignore Error       Wait Until Page Contains    Error displaying pipelines    timeout=60s
+    ${expected_text_list} =    Create List    Start by importing a pipeline    Error displaying pipelines
+    Wait Until Page Contains A String In List    ${expected_text_list}    retry=18x
     Run Keyword And Warn On Failure    Page Should Not Contain     Error displaying pipelines
 
 Verify That There Are No Sample Pipelines After Creating Pipeline Server

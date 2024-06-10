@@ -21,12 +21,10 @@ ${DISTRIBUITED_WORKLOAD_RESOURCE_METRICS_TITLE_XP}=    xpath=//div[text()="Distr
 ${REQUESTED_RESOURCES_TITLE_XP}=    xpath=//div[text()="Requested resources"]
 ${RESOURCES_CONSUMING_TITLE_XP}=    xpath=//div[text()="Top resource-consuming distributed workloads"]
 ${MAX_RETRIES}=    3
-${CODEFLARE-SDK_DIR}=    codeflare-sdk-ui
-${CODEFLARE-SDK_REPO_URL}=    %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
-${VIRTUAL_ENV_NAME}=    venv3.9
 ${RAY_WORKLOAD_CREATED}=    False
 ${KUEUE_RESOURCES_SETUP_FILEPATH}=    ods_ci/tests/Resources/Page/DistributedWorkloads/kueue_resources_setup.sh
 ${KUEUE_WORKLOADS_SETUP_FILEPATH}=    ods_ci/tests/Resources/Page/DistributedWorkloads/kueue_workloads.sh
+${RAY_CR_FILE}=    ods_ci/tests/Resources/Page/DistributedWorkloads/ray_cluster_cr.yaml
 ${CPU_SHARED_QUOTA}=    9
 ${MEMEORY_SHARED_QUOTA}=    36
 ${tolerance}=    1
@@ -123,12 +121,14 @@ Get Memory Requested
     [Arguments]    ${project}    ${local_queue_name}    ${workload_type}
     ${result}  ${output}=    Run And Return Rc And Output
     ...    oc get LocalQueue ${local_queue_name} -n ${project} -o=jsonpath='{.status.flavorsReservation[0].resources[?(@.name=="memory")].total}'
-    ${memory_requested}=    Replace String    ${output}    Mi    ${EMPTY}
-    ${memory_requested_num}=    Convert To Number    ${memory_requested}
     IF    "${workload_type}" == "Job"
+        ${memory_requested}=    Replace String    ${output}    Mi    ${EMPTY}
+        ${memory_requested_num}=    Convert To Number    ${memory_requested}
         ${memory_requested_gb_value}=    Evaluate    round( ${memory_requested_num} / 1024, 3)
     ELSE
-        ${memory_requested_gb_value}=    Evaluate    round( ${memory_requested_num} / (1024*1024*1024), 3)
+        ${memory_requested}=    Replace String    ${output}    Ki    ${EMPTY}
+        ${memory_requested_num}=    Convert To Number    ${memory_requested}
+        ${memory_requested_gb_value}=    Evaluate    round( ${memory_requested_num} / (1024*1024), 3)
     END
     RETURN  ${memory_requested_gb_value}
 
@@ -146,8 +146,8 @@ Get Memory Requested Tooltip Text
     @{memory_usage_list}    Split To Lines    ${memory_usage_hover_data}
     ${memory_usage_line}    Set Variable    ${memory_usage_list}[0]
     ${memory_requested_line}    Set Variable    ${memory_usage_list}[1]
-    ${memory_usage_value}     Set Variable    ${memory_usage_line}[16:21]
-    ${memory_requested_value}     Set Variable    ${memory_requested_line}[20:25]
+    ${memory_usage_value}     Set Variable    ${memory_usage_line}[14:19]
+    ${memory_requested_value}     Set Variable    ${memory_requested_line}[18:23]
     RETURN    ${memory_usage_value}     ${memory_requested_value}
 
 Get CPU Requested Tooltip Text
@@ -158,56 +158,24 @@ Get CPU Requested Tooltip Text
     @{cpu_usage_list}    Split To Lines    ${cpu_usage_hover_data}
     ${cpu_usage_line}    Set Variable    ${cpu_usage_list}[0]
     ${cpu_requested_line}    Set Variable    ${cpu_usage_list}[1]
-    ${cpu_usage_value}     Set Variable    ${cpu_usage_line}[13:18]
-    ${cpu_requested_value}     Set Variable    ${cpu_requested_line}[17:18]
+    ${cpu_usage_value}     Set Variable    ${cpu_usage_line}[11:16]
+    ${cpu_requested_value}     Set Variable    ${cpu_requested_line}[15:16]
     RETURN    ${cpu_usage_value}    ${cpu_requested_value}
 
 Create Ray Cluster Workload
-    [Documentation]    checks Distributed Worklaod Status Overview displaying correctly
-    ${result} =    Run Process    git clone ${CODEFLARE-SDK_REPO_URL} ${CODEFLARE-SDK_DIR}
-    ...    shell=true    stderr=STDOUT
-    Log To Console    ${result.stdout}
-    IF    ${result.rc} != 0
-        FAIL    Unable to clone codeflare-sdk repo
-    END
-
-    ${result} =    Run Process  virtualenv -p python3.9 ${VIRTUAL_ENV_NAME}
-    ...    shell=true    stderr=STDOUT
-    Log To Console    ${result.stdout}
-    IF    ${result.rc} != 0
-        FAIL    Unable to setup Python virtual environment
-    END
-
-    ${result} =    Run Process  source ${VIRTUAL_ENV_NAME}/bin/activate && cd ${CODEFLARE-SDK_DIR} && poetry env use 3.9 && poetry install --with test,docs && poetry run pytest -v -s ./tests/upgrade/raycluster_sdk_upgrade_test.py::TestMNISTRayClusterUp --timeout\=300 && deactivate
-    ...    shell=true
-    ...    stderr=STDOUT
-    Log To Console    ${result.stdout}
-    IF    ${result.rc} != 0
-        FAIL    Running ray workload failed
+    [Documentation]    Creates Ray cluster
+    [Arguments]    ${project}    ${local_queue}    ${ray_cluster_name}
+    ${rc}    ${out}=    Run And Return Rc And Output    sed -e "s/\\$NAMESPACE/${project}/g" -e "s/\\$LOCAL_QUEUE/${local_queue}/g" -e "s/\\$RAY_CLUSTER_NAME/${ray_cluster_name}/g" ${RAY_CR_FILE} | oc apply -f -
+    IF    ${rc} != 0
+        FAIL    Creating ray cluster workload failed
     ELSE
         Set Global Variable    ${RAY_WORKLOAD_CREATED}   True
     END
 
 Cleanup Ray Cluster Workload
     [Documentation]    cleanup the ray cluster created workload
-    [Arguments]    ${project}
-    ${result} =    Run Process  rm -rf ${VIRTUAL_ENV_NAME}
-    ...    shell=true    stderr=STDOUT
-    Log To Console    ${result.stdout}
-    IF    ${result.rc} != 0
-        FAIL   Unable to cleanup Python virtual environment
-    END
-
-    ${result} =    Run Process  rm -rf ${CODEFLARE-SDK_DIR}
-    ...    shell=true    stderr=STDOUT
-    Log To Console    ${result.stdout}
-    IF    ${result.rc} != 0
-        FAIL   Unable to cleanup directory ${CODEFLARE-SDK_DIR}
-    END
-
-    IF  ${RAY_WORKLOAD_CREATED} == True    Run Keywords
-    ...    Run   oc delete project ${project}    AND
-    ...    Run Process    oc delete LocalQueue local-queue-mnist -n ${project} & oc delete ClusterQueue cluster-queue-mnist & oc delete ResourceFlavor default-flavor-mnist    shell=True
+    [Arguments]    ${project}    ${ray_cluster_name}
+    IF  ${RAY_WORKLOAD_CREATED} == True    Run    oc delete RayCluster ${ray_cluster_name} -n ${project}
 
 Check Project Metrics Default Page Contents
     [Documentation]    checks Project Metrics Default Page contents exists
@@ -220,7 +188,7 @@ Check Project Metrics Default Page Contents
     Page Should Contain Element    ${RESOURCES_CONSUMING_TITLE_XP}
     Page Should Contain Element    xpath=//*[@data-testid="dw-top-consuming-workloads"]//*[text()="No distributed workloads in the selected project are currently consuming resources."]
     Page Should Contain Element    ${DISTRIBUITED_WORKLOAD_RESOURCE_METRICS_TITLE_XP}
-    Page Should Contain Element    xpath=//*[@data-testid="dw-workloada-resource-metrics"]//*[text()="No distributed workloads in the selected project are currently consuming resources."]
+    Page Should Contain Element    xpath=//*[@data-testid="dw-workload-resource-metrics"]//*[text()="No distributed workloads in the selected project are currently consuming resources."]
 
 Check Distributed Workload Status Page Contents
     [Documentation]    checks Distributed Workload status Default Page contents exists

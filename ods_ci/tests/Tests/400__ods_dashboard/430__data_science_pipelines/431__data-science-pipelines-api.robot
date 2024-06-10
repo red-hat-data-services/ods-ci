@@ -18,24 +18,29 @@ ${URL_TEST_PIPELINE_RUN_YAML}=                 https://raw.githubusercontent.com
 
 
 *** Test Cases ***
-Verify Ods Users Can Create And Run a Data Science Pipeline Using The Api
-    [Documentation]    Creates, runs pipelines with admin and regular user. Double check the pipeline result and clean
+Verify Admin Users Can Create And Run a Data Science Pipeline Using The Api
+    [Documentation]    Creates, runs pipelines with admin user. Double check the pipeline result and clean
     ...    the pipeline resources.
     [Tags]      Sanity    Tier1    ODS-2083
     End To End Pipeline Workflow Via Api    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}    pipelinesapi1
+
+Verify Regular Users Can Create And Run a Data Science Pipeline Using The Api
+    [Documentation]    Creates, runs pipelines with regular user. Double check the pipeline result and clean
+    ...    the pipeline resources.
+    [Tags]      Tier1    ODS-2677
     End To End Pipeline Workflow Via Api    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    pipelinesapi2
 
 Verify Ods Users Can Do Http Request That Must Be Redirected to Https
     [Documentation]    Verify Ods Users Can Do Http Request That Must Be Redirected to Https
-    [Tags]      Sanity    Tier1    ODS-2234
+    [Tags]        Tier1    ODS-2234
     New Project    project-redirect-http
     Install DataSciencePipelinesApplication CR    project-redirect-http
     ${status}    Login And Wait Dsp Route    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
     ...         project-redirect-http
     Should Be True    ${status} == 200    Could not login to the Data Science Pipelines Rest API OR DSP routing is not working    # robocop: disable:line-too-long
-    ${url}    Do Http Request    apis/v1beta1/runs
+    ${url}    Do Http Request    apis/v2beta1/runs
     Should Start With    ${url}    https
-    Remove Pipeline Project    project-redirect-http
+    [Teardown]    Remove Pipeline Project    project-redirect-http
 
 Verify DSPO Operator Reconciliation Retry
     [Documentation]    Verify DSPO Operator is able to recover from missing components during the initialization

@@ -10,7 +10,6 @@ Resource          ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 *** Variables ***
 ${CODEFLARE_DIR}                codeflare-operator
 ${CODEFLARE_RELEASE_ASSETS}     %{CODEFLARE_RELEASE_ASSETS=https://github.com/project-codeflare/integration-tests/releases/latest/download}
-${ODH_NAMESPACE}                %{ODH_NAMESPACE=redhat-ods-applications}
 ${NOTEBOOK_IMAGE_STREAM_NAME}   %{NOTEBOOK_IMAGE_STREAM_NAME=s2i-generic-data-science-notebook}
 ${NOTEBOOK_ADMIN_NAME}          ${TEST_USER_2.USERNAME}
 ${NOTEBOOK_ADMIN_PASSWORD}      ${TEST_USER_2.PASSWORD}
@@ -19,8 +18,8 @@ ${NOTEBOOK_USER_PASSWORD}       ${TEST_USER_3.PASSWORD}
 
 
 *** Test Cases ***
-Run TestMCADRay ODH test
-    [Documentation]    Run Go ODH test: TestMCADRay
+Run TestKueueRay ODH test
+    [Documentation]    Run Go ODH test: TestKueueRay
     [Tags]  ODS-2514
     ...     Tier1
     ...     DistributedWorkloads
@@ -79,7 +78,7 @@ Run Codeflare ODH Test
     ...    env:CODEFLARE_TEST_TIMEOUT_MEDIUM=10m
     ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
     ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-odh-logs
-    ...    env:ODH_NAMESPACE=${ODH_NAMESPACE}
+    ...    env:ODH_NAMESPACE=${APPLICATIONS_NAMESPACE}
     ...    env:NOTEBOOK_IMAGE_STREAM_NAME=${NOTEBOOK_IMAGE_STREAM_NAME}
     ...    env:NOTEBOOK_ADMIN_NAME=${NOTEBOOK_ADMIN_NAME}
     ...    env:NOTEBOOK_ADMIN_TOKEN=${NOTEBOOK_ADMIN_TOKEN}

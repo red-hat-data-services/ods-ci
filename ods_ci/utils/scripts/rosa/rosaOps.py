@@ -1,8 +1,8 @@
 import sys
 from time import sleep
 
-from logger import log
-from util import execute_command
+from ods_ci.utils.scripts.logger import log
+from ods_ci.utils.scripts.util import execute_command
 
 
 def rosa_whoami():

@@ -13,15 +13,15 @@ Test Tags       JupyterHub
 
 *** Test Cases ***
 Open RHODS Dashboard
-  [Tags]  Sanity    Tier1
+  [Tags]  Tier1
   Wait For RHODS Dashboard To Load
 
 Can Launch Jupyterhub
-  [Tags]  Sanity    Tier1
+  [Tags]  Tier1
   Launch Jupyter From RHODS Dashboard Link
 
 Can Login to Jupyterhub
-  [Tags]  Sanity    Tier1
+  [Tags]  Tier1
   Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   ${authorization_required} =  Is Service Account Authorization Required
   IF  ${authorization_required}  Authorize jupyterhub service account
@@ -29,12 +29,12 @@ Can Login to Jupyterhub
   Wait Until Page Contains  Start a notebook server
 
 Can Spawn Notebook
-  [Tags]  Sanity    Tier1
+  [Tags]  Tier1
   Fix Spawner Status
   Spawn Notebook With Arguments  image=science-notebook
 
 Can Launch Python3 Smoke Test Notebook
-  [Tags]  Sanity    Tier1
+  [Tags]  Tier1
   ##################################################
   # Manual Notebook Input
   ##################################################

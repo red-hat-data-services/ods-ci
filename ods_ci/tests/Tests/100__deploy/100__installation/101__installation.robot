@@ -26,6 +26,13 @@ Can Install ODH Operator
   Install ODH Operator
   ODH Operator Should Be Installed
 
+Check DW Components Are Enabled By Default
+    [Documentation]    Check that DW Components are enabled by default, can be run for OCP and OSD
+    [Tags]    ODS-2685    Operator    OSD
+    Component Should Be Enabled    codeflare
+    Component Should Be Enabled    ray
+    Component Should Be Enabled    kueue
+
 Verify User Can Access RHODS Documentation From OCM Console
   [Documentation]   Checks user can access RHODS documentation from addon on OCM Console
   [Tags]  ODS-1303

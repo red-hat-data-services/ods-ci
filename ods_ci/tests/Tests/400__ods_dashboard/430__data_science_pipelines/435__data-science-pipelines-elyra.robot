@@ -39,22 +39,25 @@ ${DC_NAME} =    elyra-s3
 Verify Pipelines Integration With Elyra When Using Standard Data Science Image
     [Documentation]    Verifies that a workbench using the Standard Data Science Image can be used to
     ...    create and run a Data Science Pipeline
-    [Tags]    Smoke    Tier1
-    ...       ODS-2197   ODS-2199
-    Verify Pipelines Integration With Elyra Running Hello World Pipeline Test    Standard Data Science
+    [Tags]    Sanity    Tier1
+    ...       ODS-2197
+    [Timeout]    10m
+    Verify Pipelines Integration With Elyra Running Hello World Pipeline Test
+    ...    img=Standard Data Science
+    ...    runtime_image=Datascience with Python 3.9 (UBI9)
 
 Verify Pipelines Integration With Elyra When Using Standard Data Science Based Images
     [Documentation]    Verifies that a workbench using an image based on the Standard Data Science Image
     ...    can be used to create and run a Data Science Pipeline
     ...    Note: this a templated test case
     ...    (more info at https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#test-templates)
-    [Template]     Verify Pipelines Integration With Elyra Running Hello World Pipeline Test
-    [Tags]    Sanity    Tier1
-    ...       ODS-2271
-    PyTorch
-    TensorFlow
-    TrustyAI
-    HabanaAI
+    [Template]    Verify Pipelines Integration With Elyra Running Hello World Pipeline Test
+    [Tags]        Tier1    ODS-2271
+    [Timeout]     30m
+    PyTorch       Datascience with Python 3.9 (UBI9)
+    TensorFlow    Datascience with Python 3.9 (UBI9)
+    TrustyAI      Datascience with Python 3.9 (UBI9)
+    HabanaAI      Datascience with Python 3.8 (UBI8)
 
 
 *** Keywords ***
@@ -85,7 +88,7 @@ Elyra Pipelines Suite Teardown
 Verify Pipelines Integration With Elyra Running Hello World Pipeline Test     # robocop: off=too-many-calls-in-keyword
     [Documentation]    Creates and starts a workbench using ${img} and verifies that the Hello World sample pipeline
     ...    runs successfully
-    [Arguments]    ${img}
+    [Arguments]    ${img}    ${runtime_image}
     Create Workbench    workbench_title=elyra_${img}    workbench_description=Elyra test
     ...                 prj_title=${PRJ_TITLE}    image_name=${img}  deployment_size=Small
     ...                 storage=Persistent  pv_existent=${FALSE}
@@ -96,7 +99,7 @@ Verify Pipelines Integration With Elyra Running Hello World Pipeline Test     # 
     Clone Git Repository And Open    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main
     ...    ods-ci-notebooks-main/notebooks/500__jupyterhub/pipelines/v2/elyra/run-pipelines-on-data-science-pipelines/hello-generic-world.pipeline  # robocop: disable
     Verify Hello World Pipeline Elements
-    Set Runtime Image In All Nodes    runtime_image=Datascience with Python 3.9 (UBI9)
+    Set Runtime Image In All Nodes    runtime_image=${runtime_image}
     Run Pipeline    pipeline_name=${img} Pipeline
     Wait Until Page Contains Element    xpath=//a[.="Run Details."]    timeout=30s
     ${pipeline_run_name} =    Get Pipeline Run Name

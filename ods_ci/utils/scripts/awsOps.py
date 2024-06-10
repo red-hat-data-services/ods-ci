@@ -1,7 +1,7 @@
 from time import sleep
 
-from logger import log
-from util import execute_command
+from ods_ci.utils.scripts.logger import log
+from ods_ci.utils.scripts.util import execute_command
 
 
 def aws_configure_execute_cmd(aws_key, aws_value, aws_profile) -> str | None:

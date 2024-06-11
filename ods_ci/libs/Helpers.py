@@ -320,7 +320,7 @@ class Helpers:
         Calculate simple string matching ratio based on Levenshtein distance
         """
         return fuzz.ratio(string1, string2)
-    
+
     @keyword
     def get_vllm_metrics_and_values(self, endpoint):
         """

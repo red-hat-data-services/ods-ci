@@ -1,10 +1,10 @@
 apiVersion: serving.kserve.io/v1alpha1
 kind: ServingRuntime
-metadata: 
+metadata:
   name: kserve-vllm
   namespace: vllm-gpt2
-spec: 
-  annotations: 
+spec:
+  annotations:
     sidecar.istio.io/inject: "true"
     sidecar.istio.io/rewriteAppHTTPProbers: "true"
     serving.knative.openshift.io/enablePassthrough: "true"
@@ -13,46 +13,46 @@ spec:
     prometheus.io/port: '8080'
     prometheus.io/path: "/metrics/"
   multiModel: false
-  supportedModelFormats: 
+  supportedModelFormats:
     - name: vLLM
       autoSelect: true
-  containers: 
+  containers:
     - name: kserve-container
       #image: kserve/vllmserver:latest
-      image: quay.io/opendatahub/vllm:stable
-      startupProbe: 
-        httpGet: 
+      image: quay.io/modh/vllm@sha256:60f335015eff8c99508ff421c80f5f7b23b1310d87b0d4086b6f76f9a136b5a4
+      startupProbe:
+        httpGet:
           port: 8080
           path: /health
         # Allow 12 minutes to start
         failureThreshold: 24
         periodSeconds: 30
-      readinessProbe: 
-        httpGet: 
+      readinessProbe:
+        httpGet:
           port: 8080
           path: /health
         periodSeconds: 30
         timeoutSeconds: 5
-      livenessProbe: 
-        httpGet: 
+      livenessProbe:
+        httpGet:
           port: 8080
           path: /health
         periodSeconds: 100
         timeoutSeconds: 8
       terminationMessagePolicy: "FallbackToLogsOnError"
       terminationGracePeriodSeconds: 120
-      args: 
+      args:
         - --port
         - "8080"
         - --model
         - /mnt/models/gpt2
         - --served-model-name
         - "gpt2"
-      command: 
+      command:
         - python3
         - -m
         - vllm.entrypoints.openai.api_server
-      env: 
+      env:
         - name: STORAGE_URI
           value: pvc://vlmm-gpt2-claim/
         - name: HF_HUB_CACHE
@@ -62,16 +62,16 @@ spec:
         - name: NUM_GPUS
           value: "1"
         - name: CUDA_VISIBLE_DEVICES
-          value: "0"   
-      ports: 
+          value: "0"
+      ports:
         - containerPort: 8080
           protocol: TCP
-      resources: 
-        limits: 
+      resources:
+        limits:
           cpu: "4"
           memory: 8Gi
           nvidia.com/gpu: "1"
-        requests: 
+        requests:
           cpu: "1"
           memory: 4Gi
           nvidia.com/gpu: "1"

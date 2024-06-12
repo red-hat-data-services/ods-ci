@@ -276,13 +276,13 @@ Verify RHODS Notebooks Network Policies
     ${policy_ctrl} =    Run
     ...    oc get networkpolicy ${CR_name}-ctrl-np -n ${NOTEBOOKS_NAMESPACE} -o json | jq '.spec.ingress[0]'
     ${rc}    ${expected_policy_ctrl} =    Run And Return Rc And Output
-    ...    sed "s#SELECTOR_LABEL_VALUE#${APPLICATIONS_NAMESPACE}#" ods_ci/tests/Resources/Files/expected_ctrl_np_template.txt  # robocop: disable:line-too-long
+    ...    sed "s#SELECTOR_LABEL_VALUE#${APPLICATIONS_NAMESPACE}#" tests/Resources/Files/expected_ctrl_np_template.txt  # robocop: disable:line-too-long
     Should Be Equal As Strings    ${policy_ctrl}    ${expected_policy_ctrl}
     Log    ${policy_ctrl}
     Log    ${expected_policy_ctrl}
     ${policy_oauth} =    Run
     ...    oc get networkpolicy ${CR_name}-oauth-np -n ${NOTEBOOKS_NAMESPACE} -o json | jq '.spec.ingress[0]'
-    ${expected_policy_oauth} =    Get File    ods_ci/tests/Resources/Files/expected_oauth_np.txt
+    ${expected_policy_oauth} =    Get File    tests/Resources/Files/expected_oauth_np.txt
     Should Be Equal As Strings    ${policy_oauth}    ${expected_policy_oauth}
     Log    ${policy_oauth}
     Log    ${expected_policy_oauth}

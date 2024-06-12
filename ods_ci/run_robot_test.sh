@@ -360,14 +360,14 @@ if [[ ! -d "${TEST_ARTIFACT_DIR}" ]]; then
 fi
 if ! ${SUBFOLDER}; then
   case "$(uname -s)" in
-    Darwin)
-        # shellcheck disable=SC2046
-        TEST_ARTIFACT_DIR=$(mktemp -d  -t ods-ci-$(date +%Y-%m-%d-%H-%M)-XXXXXXXXXX) -p "${TEST_ARTIFACT_DIR}"
-         ;;
-    Linux)
-        # shellcheck disable=SC2046
-        TEST_ARTIFACT_DIR=$(mktemp -d -p "${TEST_ARTIFACT_DIR}" -t ods-ci-$(date +%Y-%m-%d-%H-%M)-XXXXXXXXXX)
-        ;;
+    Darwin | Linux)
+      # shellcheck disable=SC2046
+      echo "Currently using the same mktemp command on Linux and MacOS"
+      TEST_ARTIFACT_DIR=$(mktemp -d -p "${TEST_ARTIFACT_DIR}" -t ods-ci-$(date +%Y-%m-%d-%H-%M)-XXXXXXXXXX)
+      ;;
+    *)
+      echo "Unrecognized OS"
+      ;;
   esac
 fi
 

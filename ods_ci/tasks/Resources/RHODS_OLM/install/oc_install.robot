@@ -39,13 +39,13 @@ Install RHODS
           ${file_path} =    Set Variable    tasks/Resources/RHODS_OLM/install/
           Copy File    source=${file_path}cs_template.yaml    destination=${file_path}cs_apply.yaml
           IF  "${PRODUCT}" == "ODH"
-              Run    sed -i 's/<CATALOG_SOURCE>/community-operators/' ${file_path}cs_apply.yaml
+              Run    sed -i'' -e 's/<CATALOG_SOURCE>/community-operators/' ${file_path}cs_apply.yaml
           ELSE
-              Run    sed -i 's/<CATALOG_SOURCE>/redhat-operators/' ${file_path}cs_apply.yaml
+              Run    sed -i'' -e 's/<CATALOG_SOURCE>/redhat-operators/' ${file_path}cs_apply.yaml
           END
-          Run    sed -i 's/<OPERATOR_NAME>/${OPERATOR_NAME}/' ${file_path}cs_apply.yaml
-          Run    sed -i 's/<OPERATOR_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}cs_apply.yaml
-          Run    sed -i 's/<UPDATE_CHANNEL>/${UPDATE_CHANNEL}/' ${file_path}cs_apply.yaml
+          Run    sed -i'' -e 's/<OPERATOR_NAME>/${OPERATOR_NAME}/' ${file_path}cs_apply.yaml
+          Run    sed -i'' -e 's/<OPERATOR_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}cs_apply.yaml
+          Run    sed -i'' -e 's/<UPDATE_CHANNEL>/${UPDATE_CHANNEL}/' ${file_path}cs_apply.yaml
           Oc Apply   kind=List   src=${file_path}cs_apply.yaml
           Remove File    ${file_path}cs_apply.yml
       ELSE
@@ -240,9 +240,9 @@ Create DSCInitialization CustomResource Using Test Variables
     [Arguments]    ${dsci_name}=${DSCI_NAME}
     ${file_path} =    Set Variable    tasks/Resources/Files/
     Copy File    source=${file_path}dsci_template.yml    destination=${file_path}dsci_apply.yml
-    Run    sed -i 's/<dsci_name>/${dsci_name}/' ${file_path}dsci_apply.yml
-    Run    sed -i 's/<application_namespace>/${APPLICATIONS_NAMESPACE}/' ${file_path}dsci_apply.yml
-    Run    sed -i 's/<monitoring_namespace>/${MONITORING_NAMESPACE}/' ${file_path}dsci_apply.yml
+    Run    sed -i'' -e 's/<dsci_name>/${dsci_name}/' ${file_path}dsci_apply.yml
+    Run    sed -i'' -e 's/<application_namespace>/${APPLICATIONS_NAMESPACE}/' ${file_path}dsci_apply.yml
+    Run    sed -i'' -e 's/<monitoring_namespace>/${MONITORING_NAMESPACE}/' ${file_path}dsci_apply.yml
 
 Wait For DSCInitialization CustomResource To Be Ready
   [Documentation]   Wait for DSCInitialization CustomResource To Be Ready
@@ -298,14 +298,14 @@ Create DataScienceCluster CustomResource Using Test Variables
     [Arguments]    ${dsc_name}=${DSC_NAME}
     ${file_path} =    Set Variable    tasks/Resources/Files/
     Copy File    source=${file_path}dsc_template.yml    destination=${file_path}dsc_apply.yml
-    Run    sed -i 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
+    Run    sed -i'' -e 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
     FOR    ${cmp}    IN    @{COMPONENT_LIST}
         IF    $cmp not in $COMPONENTS
-            Run    sed -i 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
+            Run    sed -i'' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
         ELSE IF    '${COMPONENTS.${cmp}}' == 'Managed'
-            Run    sed -i 's/<${cmp}_value>/Managed/' ${file_path}dsc_apply.yml
+            Run    sed -i'' -e 's/<${cmp}_value>/Managed/' ${file_path}dsc_apply.yml
         ELSE IF    '${COMPONENTS.${cmp}}' == 'Removed'
-            Run    sed -i 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
+            Run    sed -i'' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
         END
     END
 
@@ -318,9 +318,9 @@ Apply Custom Manifest in DataScienceCluster CustomResource Using Test Variables
          IF    $cmp in $CUSTOM_MANIFESTS
              ${manifest_string}=    Convert To String    ${CUSTOM_MANIFESTS}[${cmp}]
              # Use sed to replace the placeholder with the YAML string
-             Run    sed -i "s|<${cmp}_devflags>|${manifest_string}|g" ${file_path}dsc_apply.yml
+             Run    sed -i'' -e "s|<${cmp}_devflags>|${manifest_string}|g" ${file_path}dsc_apply.yml
          ELSE
-            Run    sed -i "s|<${cmp}_devflags>||g" ${file_path}dsc_apply.yml
+            Run    sed -i'' -e "s|<${cmp}_devflags>||g" ${file_path}dsc_apply.yml
          END
     END
 

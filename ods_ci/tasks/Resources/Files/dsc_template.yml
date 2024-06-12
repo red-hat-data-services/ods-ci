@@ -32,4 +32,7 @@ spec:
     workbenches:
       devFlags: <workbenches_devflags>
       managementState: <workbenches_value>
+    trainingoperator:
+        devFlags: <trainingoperator_devflags>
+        managementState: <trainingoperator_value>
 

@@ -600,12 +600,19 @@ Traffic Should Be Redirected Based On Canary Percentage
 
 Get KServe Inference Host Via CLI
     [Documentation]    Fetches the model URL
-    [Arguments]    ${isvc_name}    ${namespace}
-    Sleep    5s
-    ${rc}    ${ksvc_host}=    Run And Return Rc And Output
-    ...    oc get isvc ${isvc_name} -n ${namespace} -o jsonpath='{.status.url}' | cut -d'/' -f3
-    # ...    oc get ksvc ${isvc_name}-predictor -n ${namespace} -o jsonpath='{.status.url}' | cut -d'/' -f3
-    Should Be Equal As Integers    ${rc}    ${0}
+    [Arguments]    ${isvc_name}    ${namespace}    ${retries}=10
+    ${ksvc_host}=    Set Variable    ""
+    ${condition1}=    Evaluate    ${ksvc_host}=="${EMPTY}"
+    ${condition2}=    Evaluate    ${retries} > 0
+    WHILE    ${condition1} and ${condition2}
+        Sleep    5s
+        ${rc}    ${ksvc_host}=    Run And Return Rc And Output
+        ...    oc get isvc ${isvc_name} -n ${namespace} -o jsonpath='{.status.url}' | cut -d'/' -f3
+        Should Be Equal As Integers    ${rc}    ${0}
+        ${retries} =    Evaluate    ${retries} - 1
+        ${condition1}=    Evaluate    "${ksvc_host}"=="${EMPTY}"
+        ${condition2}=    Evaluate    ${retries} > 0
+    END
     Should Not Be Empty    ${ksvc_host}
     RETURN    ${ksvc_host}
 

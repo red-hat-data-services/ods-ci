@@ -161,7 +161,7 @@ Validate Support For Configuration Of Controller Resources
         Should Not Match    ${d_obj_dictionary.spec.template.spec.serviceAccountName}    random-sa-name
         # Restore old values
         # delete the Deployment resource for operator to recreate 
-        ${rc}    ${out}=    Run And Return Rc And Output
+        ${rc}=    Run And Return Rc
         ...    oc delete Deployment ${controller} -n ${APPLICATIONS_NAMESPACE}
         Should Be Equal As Integers    ${rc}    ${0}
     END

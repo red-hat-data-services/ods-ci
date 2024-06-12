@@ -95,6 +95,7 @@ Assign Vars According To Product
         Set Suite Variable    ${AUTHORINO_CR_NS}    redhat-ods-applications-auth-provider
         Set Suite Variable    ${DASHBOARD_DEPLOYMENT_NAME}    rhods-dashboard
         Set Suite Variable    ${DASHBOARD_LABEL_SELECTOR}     app.kubernetes.io/part-of=rhods-dashboard
+        Set Suite Variable    ${APPLICATIONS_NAMESPACE}    redhat-ods-applications
     ELSE IF    "${PRODUCT}" == "ODH"
         Set Suite Variable    ${OPERATOR_APPNAME}  Open Data Hub Operator
         Set Suite Variable    ${OPERATOR_NAME}    Open Data Hub Operator
@@ -103,4 +104,5 @@ Assign Vars According To Product
         Set Suite Variable    ${AUTHORINO_CR_NS}    opendatahub-auth-provider
         Set Suite Variable    ${DASHBOARD_DEPLOYMENT_NAME}    odh-dashboard
         Set Suite Variable    ${DASHBOARD_LABEL_SELECTOR}     app.kubernetes.io/part-of=dashboard
+        Set Suite Variable    ${APPLICATIONS_NAMESPACE}    opendatahub
     END

@@ -85,5 +85,5 @@ Performance Suite Setup
      END
      Oc Apply    kind=OLMConfig    src=tests/Tests/700__sandbox/olm.yaml
      Run    git clone https://github.com/codeready-toolchain/toolchain-e2e.git
-     ${return_code}    ${output}    Run And Return Rc And Output    sed -i 's/"rhods\.yaml"\,//g' ${EXECDIR}/toolchain-e2e/setup/operators/operators.go    #robocop:disable
+     ${return_code}    ${output}    Run And Return Rc And Output    sed -i'' -e 's/"rhods\.yaml"\,//g' ${EXECDIR}/toolchain-e2e/setup/operators/operators.go    #robocop:disable
      Should Be Equal As Integers	 ${return_code}	 0

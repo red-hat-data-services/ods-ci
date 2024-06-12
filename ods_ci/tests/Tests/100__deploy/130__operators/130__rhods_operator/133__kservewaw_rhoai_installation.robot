@@ -37,24 +37,24 @@ Install RHOAI For KserveRaw
             Log    ${out}    console=yes
             ${image_escaped} =    Escape Forward Slashes    ${image_url}
             Copy File    source=${file_path}cs_template.yaml    destination=${file_path}cs_apply.yaml
-            Run    sed -i 's/<OPERATOR_NAMESPACE>/openshift-marketplace/' ${file_path}cs_apply.yaml
-            Run    sed -i 's/<IMAGE_URL>/${image_escaped}/' ${file_path}cs_apply.yaml
+            Run    sed -i'' -e 's/<OPERATOR_NAMESPACE>/openshift-marketplace/' ${file_path}cs_apply.yaml
+            Run    sed -i'' -e 's/<IMAGE_URL>/${image_escaped}/' ${file_path}cs_apply.yaml
             ${rc}  ${out} =    Run And Return Rc And Output    oc apply -f ${file_path}cs_apply.yaml
             IF    ${rc}!=0    Fail
             Log    ${out}    console=yes
             Remove File    ${file_path}cs_apply.yaml
             Wait for Catalog To Be Ready    catalog_name=rhoai-catalog-dev
             Copy File    source=${file_path}operatorgroup_template.yaml    destination=${file_path}operatorgroup_apply.yaml
-            Run    sed -i 's/<OPERATOR_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}operatorgroup_apply.yaml
+            Run    sed -i'' -e 's/<OPERATOR_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}operatorgroup_apply.yaml
             ${rc}  ${out} =    Run And Return Rc And Output   oc apply -f ${file_path}operatorgroup_apply.yaml
             IF    ${rc}!=0    Fail
             Log    ${out}    console=yes
             Remove File    ${file_path}operatorgroup_apply.yaml
             Copy File    source=${file_path}subscription_template.yaml    destination=${file_path}subscription_apply.yaml  # robocop: disable
-            Run    sed -i 's/<OPERATOR_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}subscription_apply.yaml
-            Run    sed -i 's/<UPDATE_CHANNEL>/${UPDATE_CHANNEL}/' ${file_path}subscription_apply.yaml
-            Run    sed -i 's/<CS_NAME>/rhoai-catalog-dev/' ${file_path}subscription_apply.yaml
-            Run    sed -i 's/<CS_NAMESPACE>/openshift-marketplace/' ${file_path}subscription_apply.yaml
+            Run    sed -i'' -e 's/<OPERATOR_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}subscription_apply.yaml
+            Run    sed -i'' -e 's/<UPDATE_CHANNEL>/${UPDATE_CHANNEL}/' ${file_path}subscription_apply.yaml
+            Run    sed -i'' -e 's/<CS_NAME>/rhoai-catalog-dev/' ${file_path}subscription_apply.yaml
+            Run    sed -i'' -e 's/<CS_NAMESPACE>/openshift-marketplace/' ${file_path}subscription_apply.yaml
             ${rc}  ${out} =    Run And Return Rc And Output    oc apply -f ${file_path}subscription_apply.yaml
             IF    ${rc}!=0    Fail
             Log    ${out}    console=yes

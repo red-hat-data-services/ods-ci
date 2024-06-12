@@ -31,7 +31,7 @@ jq -r --arg INSTANCE_TYPE "$INSTANCE_TYPE" '.spec.template.spec.providerSpec.val
 ' /tmp/source-machineset.json > /tmp/gpu-machineset.json
 
 # Change machineset name
-sed -i "s/$OLD_MACHINESET_NAME/$NEW_MACHINESET_NAME/g" /tmp/gpu-machineset.json
+sed -i'' -e "s/$OLD_MACHINESET_NAME/$NEW_MACHINESET_NAME/g" /tmp/gpu-machineset.json
 # Create new machineset
 oc apply -f /tmp/gpu-machineset.json
 rm /tmp/source-machineset.json

@@ -881,7 +881,7 @@ class OpenshiftClusterManager:
             # Install dependency operators for rhoai deployment:
             # Authorino
             dependency_operator = "authorino-operator"
-            self.install_openshift_isv(dependency_operator, "managed-services", "redhat-operators")
+            self.install_openshift_isv(dependency_operator, "tech-preview-v1", "redhat-operators")
             self.wait_for_isv_installation_to_complete(dependency_operator, namespace="openshift-operators")
             # ServiceMesh
             dependency_operator = "servicemeshoperator"

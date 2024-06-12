@@ -210,6 +210,11 @@
                     "vllm-runtime": {
                         "completions_response_text": "{\"object\":\"text_completion\",\"created\":,\"model\":\"granite-8b-code-base\",\"choices\":[{\"index\":0,\"text\":\" city in California, one of the most populous cities in the United States\",\"logprobs\":null,\"finish_reason\":\"length\",\"stop_reason\":null}],\"usage\":{\"prompt_tokens\":5,\"total_tokens\":20,\"completion_tokens\":16}}"
                     }
+                },
+                "e5-mistral-7b":{
+                    "vllm-runtime": {
+                        "embeddings_response_text": "The actual embedded output is too large, and we don't check or match the response"
+                    }
                 }
             }
         },

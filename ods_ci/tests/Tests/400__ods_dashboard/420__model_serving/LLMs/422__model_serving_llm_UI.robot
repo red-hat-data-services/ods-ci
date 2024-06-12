@@ -31,7 +31,7 @@ Verify User Can Serve And Query A Model Using The UI
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and Caikit runtime
     ...                Intermittently failing: RHOAIENG-3148
-    [Tags]    Smoke    Tier1    ODS-2519    ODS-2522    FlakyTest
+    [Tags]    Sanity    Tier1    ODS-2519    ODS-2522    FlakyTest
     [Setup]    Set Up Project    namespace=${TEST_NS}
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -172,7 +172,7 @@ Verify Model Can Be Served And Query On A GPU Node Using The UI  # robocop: disa
 Verify Non Admin Can Serve And Query A Model Using The UI  # robocop: disable
     [Documentation]    Basic tests leveraging on a non-admin user for preparing, deploying and querying a LLM model
     ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    Smoke    Tier1    ODS-2552
+    [Tags]    Sanity    Tier1    ODS-2552
     [Setup]    Run Keywords    Setup Kserve UI Test    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}  AND
     ...        Set Up Project    namespace=non-admin-test    single_prj=${FALSE}
     ${test_namespace}=    Set Variable     non-admin-test

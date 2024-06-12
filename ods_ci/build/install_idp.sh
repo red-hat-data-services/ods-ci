@@ -147,8 +147,8 @@ function set_htpasswd_users_and_login(){
         OAUTH_HTPASSWD_JSON="$(cat ods_ci/configs/resources/oauth_htp_idp.json)"
         oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders/-", "value": '"$OAUTH_HTPASSWD_JSON"'}]'
         cp ods_ci/configs/templates/ca-rolebinding.yaml ods_ci/configs/ca-rolebinding.yaml
-        sed -i "s/<rolebinding_name>/ods-ci-htp-admin/g" ods_ci/configs/ca-rolebinding.yaml
-        sed -i "s/<username>/$cluster_adm_user/g" ods_ci/configs/ca-rolebinding.yaml
+        sed -i'' -e "s/<rolebinding_name>/ods-ci-htp-admin/g" ods_ci/configs/ca-rolebinding.yaml
+        sed -i'' -e "s/<username>/$cluster_adm_user/g" ods_ci/configs/ca-rolebinding.yaml
         oc apply -f ods_ci/configs/ca-rolebinding.yaml
   fi
   # login using htpasswd
@@ -196,12 +196,12 @@ function set_ldap_users(){
   # update ldap.yaml with creds
   echo "--> configuring LDAP server and users"
   cp ods_ci/configs/templates/ldap/ldap.yaml  ods_ci/configs/ldap.yaml
-  sed -i "s/<users_string>/$users_base64/g" ods_ci/configs/ldap.yaml
-  sed -i "s/<passwords_string>/$rand_base64/g" ods_ci/configs/ldap.yaml
+  sed -i'' -e "s/<users_string>/$users_base64/g" ods_ci/configs/ldap.yaml
+  sed -i'' -e "s/<passwords_string>/$rand_base64/g" ods_ci/configs/ldap.yaml
   rand=$(generate_rand_string)
   export RAND_ADMIN=$rand
   rand_base64=$(echo -n $rand | base64 -w 0)
-  sed -i "s/<adminpassword>/$rand_base64/g" ods_ci/configs/ldap.yaml
+  sed -i'' -e "s/<adminpassword>/$rand_base64/g" ods_ci/configs/ldap.yaml
 
   # create ldap deployment
   oc apply -f ods_ci/configs/ldap.yaml
@@ -214,9 +214,9 @@ function set_ldap_users(){
             exit 1
           fi
           cp  ods_ci/utils/scripts/ocm/templates/create_ldap_idp.jinja  ods_ci/configs/create_ldap_idp.jinja
-          sed -i "s/{{ LDAP_BIND_PASSWORD }}/$RAND_ADMIN/g" ods_ci/configs/create_ldap_idp.jinja
-          sed -i "s/{{ LDAP_BIND_DN }}/cn=admin,dc=example,dc=org/g" ods_ci/configs/create_ldap_idp.jinja
-          sed -i 's/{{ LDAP_URL }}/ldap:\/\/openldap.openldap.svc.cluster.local:1389\/dc=example,dc=org?uid/g' ods_ci/configs/create_ldap_idp.jinja
+          sed -i'' -e "s/{{ LDAP_BIND_PASSWORD }}/$RAND_ADMIN/g" ods_ci/configs/create_ldap_idp.jinja
+          sed -i'' -e "s/{{ LDAP_BIND_DN }}/cn=admin,dc=example,dc=org/g" ods_ci/configs/create_ldap_idp.jinja
+          sed -i'' -e 's/{{ LDAP_URL }}/ldap:\/\/openldap.openldap.svc.cluster.local:1389\/dc=example,dc=org?uid/g' ods_ci/configs/create_ldap_idp.jinja
           ocm post /api/clusters_mgmt/v1/clusters/${ocm_clusterid}/identity_providers --body=ods_ci/configs/create_ldap_idp.jinja
       else
           oc create secret generic ldap-bind-password --from-literal=bindPassword="$RAND_ADMIN" -n openshift-config

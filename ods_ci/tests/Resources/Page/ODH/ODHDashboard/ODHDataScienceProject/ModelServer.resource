@@ -281,6 +281,7 @@ Switch Model Serving Project
     IF    "${project_name}" == "${NONE}"
         ${project_name}=    Set Variable    All projects
     END
+    Wait Until Element Is Visible  //main[contains(@id, 'dashboard-page-main')]//button[contains(@id, 'dropdown-toggle')]
     Click Element  //main[contains(@id, 'dashboard-page-main')]//button[contains(@id, 'dropdown-toggle')]
     Wait Until Element Is Visible     //ul//a[contains(., '${project_name}')]
     Click Element     //ul//a[contains(., '${project_name}')]

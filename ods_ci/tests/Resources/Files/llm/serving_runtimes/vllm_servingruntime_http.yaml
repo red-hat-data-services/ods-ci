@@ -13,7 +13,7 @@ spec:
         - /models-cache
         - --port
         - "8080"
-      image: quay.io/opendatahub/vllm:stable-e392b03
+      image: quay.io/modh/vllm@sha256:60f335015eff8c99508ff421c80f5f7b23b1310d87b0d4086b6f76f9a136b5a4
       name: kserve-container
       command:
         - python3

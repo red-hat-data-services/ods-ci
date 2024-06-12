@@ -32,7 +32,7 @@ ${IS_NOT_PRESENT}    1
 ...  TRAINING=${EMPTY}
 ...  DASHBOARD=${EMPTY}
 ...  DATASCIENCEPIPELINES=${EMPTY}
-@{CONTROLLERS_LIST} =    kserve-controller-manager    odh-model-controller    modelmesh-controller
+@{CONTROLLERS_LIST}    kserve-controller-manager    odh-model-controller    modelmesh-controller
 
 
 *** Test Cases ***
@@ -137,35 +137,34 @@ Validate Datasciencepipelines Removed State
     Set DSC Component Removed State And Wait For Completion   datasciencepipelines    ${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}    ${DATASCIENCEPIPELINES_LABEL_SELECTOR}
 
     [Teardown]     Restore DSC Component State    datasciencepipelines    ${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}    ${DATASCIENCEPIPELINES_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.DATASCIENCEPIPELINES}
+
 Validate Support For Configuration Of Controller Resources
     [Documentation]    Validate support for configuration of controller resources in component deployments
     [Tags]    Operator    Tier1    ODS-2664
     FOR   ${controller}    IN    @{CONTROLLERS_LIST}
-        ${rc}    ${out}=    Run And Return Rc And Output
+        ${rc}=    Run And Return Rc
         ...    oc patch Deployment ${controller} -n ${APPLICATIONS_NAMESPACE} --type=json -p="[{'op': 'replace', 'path': '/spec/template/spec/containers/0/resources/limits/cpu', 'value': '600m'}]"    # robocop: disable
         Should Be Equal As Integers    ${rc}    ${0}
-        ${rc}    ${out}=    Run And Return Rc And Output
+        ${rc}=    Run And Return Rc
         ...    oc patch Deployment ${controller} -n ${APPLICATIONS_NAMESPACE} --type=json -p="[{'op': 'replace', 'path': '/spec/template/spec/containers/0/resources/limits/memory', 'value': '6Gi'}]"    # robocop: disable
         Should Be Equal As Integers    ${rc}    ${0}
-        ${rc}    ${out}=    Run And Return Rc And Output
+        ${rc}=    Run And Return Rc
         ...    oc patch Deployment ${controller} -n ${APPLICATIONS_NAMESPACE} --type=json -p="[{'op': 'replace', 'path': '/spec/template/spec/serviceAccountName', 'value': 'random-sa-name'}]"    # robocop: disable
         Should Be Equal As Integers    ${rc}    ${0}
         Sleep  40  reason=Wait until Deployment is reloaded after being overwritten by Operator
-        @{d_obj} =  OpenShiftLibrary.Oc Get  kind=Deployment  name=${controller}    namespace=${APPLICATIONS_NAMESPACE}
-        &{d_obj_dictionary} =  Set Variable  ${d_obj}[0]    
+        @{d_obj}=  OpenShiftLibrary.Oc Get  kind=Deployment  name=${controller}    namespace=${APPLICATIONS_NAMESPACE}
+        &{d_obj_dictionary}=  Set Variable  ${d_obj}[0]
         ${cpu_limit}=    Set Variable    ${d_obj_dictionary.spec.template.spec.containers[0].resources.limits.cpu}
         ${memory_limit}=    Set Variable    ${d_obj_dictionary.spec.template.spec.containers[0].resources.limits.memory}
-        ${sa_name}=    Set Variable    ${d_obj_dictionary.spec.template.spec.serviceAccountName}
         Should Match    ${d_obj_dictionary.spec.template.spec.containers[0].resources.limits.cpu}    ${cpu_limit}
         Should Match    ${d_obj_dictionary.spec.template.spec.containers[0].resources.limits.memory}    ${memory_limit}
         Should Not Match    ${d_obj_dictionary.spec.template.spec.serviceAccountName}    random-sa-name
         # Restore old values
-        # delete the Deployment resource for operator to recreate 
+        # delete the Deployment resource for operator to recreate
         ${rc}=    Run And Return Rc
         ...    oc delete Deployment ${controller} -n ${APPLICATIONS_NAMESPACE}
         Should Be Equal As Integers    ${rc}    ${0}
     END
-
 
 
 *** Keywords ***

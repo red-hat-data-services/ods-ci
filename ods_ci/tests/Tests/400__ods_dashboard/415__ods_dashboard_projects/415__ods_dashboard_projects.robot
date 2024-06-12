@@ -544,16 +544,16 @@ Verify User Can Access Only Its Owned Projects
     Project Should Be Listed    project_title=${PRJ_2_USER3}
     Launch Data Science Project Main Page    username=${TEST_USER.USERNAME}    password=${TEST_USER.PASSWORD}
     Capture Page Screenshot
-    # User ldap admin should be able to see all 4 projects
-    Number Of Displayed Projects Should Be    expected_number=4
+    # User ldap admin should be able to see all 3 projects
+    Number Of Displayed Projects Should Be    expected_number=3
     Project Should Be Listed    project_title=${PRJ_1_USER3}
     Project Should Be Listed    project_title=${PRJ_2_USER3}
     Project Should Be Listed    project_title=${PRJ_A_USER4}
     Launch Data Science Project Main Page    username=${OCP_ADMIN_USER.USERNAME}    password=${OCP_ADMIN_USER.PASSWORD}
     ...    ocp_user_auth_type=${OCP_ADMIN_USER.AUTH_TYPE}
     Capture Page Screenshot
-    # User cluster admin should be able to see all 4 projects
-    Number Of Displayed Projects Should Be    expected_number=4
+    # User cluster admin should be able to see all 3 projects
+    Number Of Displayed Projects Should Be    expected_number=3
     Project Should Be Listed    project_title=${PRJ_1_USER3}
     Project Should Be Listed    project_title=${PRJ_2_USER3}
     Project Should Be Listed    project_title=${PRJ_A_USER4}

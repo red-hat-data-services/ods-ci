@@ -362,7 +362,7 @@ if ! ${SUBFOLDER}; then
   case "$(uname -s)" in
     Darwin)
         # shellcheck disable=SC2046
-        TEST_ARTIFACT_DIR=$(mktemp -d  "${TEST_ARTIFACT_DIR}" -t "${TEST_ARTIFACT_DIR}"/ods-ci-$(date +%Y-%m-%d-%H-%M)-XXXXXXXXXX)
+        TEST_ARTIFACT_DIR=$(mktemp -d  -t ods-ci-$(date +%Y-%m-%d-%H-%M)-XXXXXXXXXX) -p "${TEST_ARTIFACT_DIR}"
          ;;
     Linux)
         # shellcheck disable=SC2046

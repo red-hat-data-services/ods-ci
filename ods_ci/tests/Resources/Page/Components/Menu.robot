@@ -8,6 +8,7 @@ Navigate To Page
    ...    ${menu}
    ...    ${submenu}=${NONE}
    Wait Until Page Contains    ${menu}   timeout=150
+   Maybe Wait For Loading Indicator
    IF  "${submenu}" == "${NONE}"    Run Keyword And Return
    ...    Click Link    ${menu}
    ${is_menu_expanded}=    Menu.Is Menu Expanded  ${menu}

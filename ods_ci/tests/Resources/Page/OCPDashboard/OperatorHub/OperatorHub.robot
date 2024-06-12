@@ -26,7 +26,7 @@ Select Operator with Catalog Name
     Click Element    //a[contains(@data-test, "${operator}") and (contains(@data-test,"${catalog}"))]
 
 Click Install
-    Wait Until Element is Visible    //*[text()="Install"]
+    Wait Until Element is Visible    //*[text()="Install"]  timeout=20
     Click Element    //*[text()="Install"]
 
 Show Operator Warning Is Visible
@@ -38,7 +38,7 @@ Confirm Show Operator
    Click Element    //*[@id="confirm-action"]
 
 Wait Until Installation Completes
-    Wait Until Page Contains    ready for use   timeout=300
+    Wait Until Page Contains    Installed operator   timeout=300
 
 Operator Should Be Installed
     [Arguments]    ${operator}

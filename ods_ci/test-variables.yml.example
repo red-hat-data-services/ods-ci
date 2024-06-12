@@ -75,6 +75,8 @@ COMPONENTS:
   modelmeshserving: Managed
   workbenches: Removed
   codeflare: Removed
+  trustyai: Removed
+  kueue: Removed
   ray: Removed
 PRODUCT: RHODS
 OPERATOR_NAME: rhods-operator

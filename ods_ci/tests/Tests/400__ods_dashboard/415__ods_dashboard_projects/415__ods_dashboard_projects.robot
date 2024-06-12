@@ -10,6 +10,7 @@ Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProjec
 Suite Setup        Project Suite Setup
 Suite Teardown     Project Suite Teardown
 Test Setup         Launch Data Science Project Main Page
+Test Teardown      SeleniumLibrary.Close All Browsers
 Test Tags          Dashboard
 
 

@@ -101,6 +101,7 @@ Elyra Pipelines SDS Setup
     ...    project_title=${PRJ_TITLE}
     Wait Until Pipeline Server Is Deployed    project_title=${PRJ_TITLE}
     Create Env Var List If RHODS Is Self-Managed
+    Sleep    15s    reason=Wait until pipeline server is detected by dashboard
 
 Elyra Pipelines SDS Teardown
     [Documentation]    Closes the browser and deletes the DS Project created

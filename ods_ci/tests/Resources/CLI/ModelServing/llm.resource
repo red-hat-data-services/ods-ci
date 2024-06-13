@@ -864,11 +864,9 @@ Verify Model KServe Deployment
 Wait For ISVC To Be Loaded
     [Documentation]    Waits for the ISVC to be Loaded (i.e., Success status in the grid)
     [Arguments]    ${isvc_name}    ${namespace}    ${retries}=36
-    ${rc}    ${isvc_status}=    Run And Return Rc And Output
-    ...    oc get isvc ${isvc_name} -n ${namespace} -o=jsonpath='{.status.modelStatus.states.activeModelState}'
-    ${condition1}=    Evaluate    "${isvc_status}"=="${EMPTY}"
-    ${condition2}=    Evaluate    ${rc}==0
-    ${condition3}=    Evaluate    ${retries} > 0
+    ${condition1}=${TRUE}
+    ${condition2}=${TRUE}
+    ${condition3}=${TRUE}
     WHILE    ${condition1} and ${condition2} and ${condition3}
         Sleep    5s
         ${retries}=    Evaluate    ${retries} - 1

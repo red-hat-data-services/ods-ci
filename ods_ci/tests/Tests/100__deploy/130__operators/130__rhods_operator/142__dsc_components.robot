@@ -23,6 +23,12 @@ ${TRAINING_LABEL_SELECTOR}      app.kubernetes.io/name=training-operator
 ${TRAINING_DEPLOYMENT_NAME}     kubeflow-training-operator
 ${DATASCIENCEPIPELINES_LABEL_SELECTOR}     app.kubernetes.io/name=data-science-pipelines-operator
 ${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}    data-science-pipelines-operator-controller-manager
+${MODELMESH_CONTROLLER_LABEL_SELECTOR}     app.kubernetes.io/instance=modelmesh-controller
+${MODELMESH_CONTROLLER_DEPLOYMENT_NAME}    modelmesh-controller
+${ETCD_LABEL_SELECTOR}                     component=model-mesh-etcd
+${ETCD_DEPLOYMENT_NAME}                    etcd
+${ODH_MODEL_CONTROLLER_LABEL_SELECTOR}     app=odh-model-controller
+${ODH_MODEL_CONTROLLER_DEPLOYMENT_NAME}    odh-model-controller
 ${IS_PRESENT}        0
 ${IS_NOT_PRESENT}    1
 &{SAVED_MANAGEMENT_STATES}
@@ -32,6 +38,8 @@ ${IS_NOT_PRESENT}    1
 ...  TRAINING=${EMPTY}
 ...  DASHBOARD=${EMPTY}
 ...  DATASCIENCEPIPELINES=${EMPTY}
+...  MODELMESHERVING=${EMPTY}
+
 @{CONTROLLERS_LIST}    kserve-controller-manager    odh-model-controller    modelmesh-controller
 
 
@@ -138,6 +146,38 @@ Validate Datasciencepipelines Removed State
 
     [Teardown]     Restore DSC Component State    datasciencepipelines    ${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}    ${DATASCIENCEPIPELINES_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.DATASCIENCEPIPELINES}
 
+Validate Modelmeshserving Managed State
+    [Documentation]    Validate that the DSC Modelmeshserving component Managed state creates the expected resources,
+    ...    check that Modelmeshserving deployment is created and pods are in Ready state
+    [Tags]    Operator    Tier1    RHOAIENG-8546    modelmeshserving-managed
+
+    Set DSC Component Managed State And Wait For Completion   modelmeshserving    ${MODELMESH_CONTROLLER_DEPLOYMENT_NAME}    ${MODELMESH_CONTROLLER_LABEL_SELECTOR}
+
+    # Check that ETC resources are ready
+    Wait For Resources To Be Available    ${ETCD_DEPLOYMENT_NAME}    ${ETCD_LABEL_SELECTOR}
+
+    # Check that ODH Model Controller resources are ready
+    Wait For Resources To Be Available    ${ODH_MODEL_CONTROLLER_DEPLOYMENT_NAME}    ${ODH_MODEL_CONTROLLER_LABEL_SELECTOR}
+
+    [Teardown]     Restore DSC Component State    modelmeshserving    ${MODELMESH_CONTROLLER_DEPLOYMENT_NAME}    ${MODELMESH_CONTROLLER_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.MODELMESHERVING}
+
+Validate Modelmeshserving Removed State
+    [Documentation]    Validate that Modelmeshserving management state Removed does remove relevant resources.
+    [Tags]    Operator    Tier1    RHOAIENG-8546    modelmeshserving-removed
+
+    Set DSC Component Removed State And Wait For Completion   modelmeshserving    ${MODELMESH_CONTROLLER_DEPLOYMENT_NAME}    ${MODELMESH_CONTROLLER_LABEL_SELECTOR}
+
+    # Check that ETC resources are removed
+    Wait For Resources To Be Removed    ${ETCD_DEPLOYMENT_NAME}    ${ETCD_LABEL_SELECTOR}
+
+    # Check that ODH Model Controller resources are removed, if KServe managementState is Removed
+    ${state}=    Get DSC Component State    ${DSC_NAME}    kserve    ${OPERATOR_NS}
+    IF    "${state}" == "Removed"
+        Wait For Resources To Be Removed    ${ODH_MODEL_CONTROLLER_DEPLOYMENT_NAME}    ${ODH_MODEL_CONTROLLER_LABEL_SELECTOR}
+    END
+
+    [Teardown]     Restore DSC Component State    modelmeshserving    ${MODELMESH_CONTROLLER_DEPLOYMENT_NAME}    ${MODELMESH_CONTROLLER_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.MODELMESHERVING}
+
 Validate Support For Configuration Of Controller Resources
     [Documentation]    Validate support for configuration of controller resources in component deployments
     [Tags]    Operator    Tier1    ODS-2664
@@ -171,6 +211,8 @@ Validate Support For Configuration Of Controller Resources
 Suite Setup
     [Documentation]    Suite Setup
     RHOSi Setup
+    ${DSC_SPEC}=    Get DataScienceCluster Spec    ${DSC_NAME}
+    Log To Console    DSC Spec: ${DSC_SPEC}
     Wait For DSC Conditions Reconciled    ${OPERATOR_NS}     ${DSC_NAME}
     ${SAVED_MANAGEMENT_STATES.RAY}=     Get DSC Component State    ${DSC_NAME}    ray    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.KUEUE}=     Get DSC Component State    ${DSC_NAME}    kueue    ${OPERATOR_NS}
@@ -178,6 +220,7 @@ Suite Setup
     ${SAVED_MANAGEMENT_STATES.TRAINING}=     Get DSC Component State    ${DSC_NAME}    trainingoperator    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.DASHBOARD}=     Get DSC Component State    ${DSC_NAME}    dashboard    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.DATASCIENCEPIPELINES}=     Get DSC Component State    ${DSC_NAME}    datasciencepipelines    ${OPERATOR_NS}
+    ${SAVED_MANAGEMENT_STATES.MODELMESHERVING}=     Get DSC Component State    ${DSC_NAME}    modelmeshserving    ${OPERATOR_NS}
     Set Suite Variable    ${SAVED_MANAGEMENT_STATES}
 
 Suite Teardown
@@ -193,11 +236,7 @@ Set DSC Component Removed State And Wait For Completion
             Set Component State    ${component}    Removed
     END
 
-    Wait Until Keyword Succeeds    5 min    0 sec
-    ...    Is Resource Present     Deployment    ${deployment_name}    ${APPLICATIONS_NS}    ${IS_NOT_PRESENT}
-
-    Wait Until Keyword Succeeds    5 min    0 sec
-    ...    Check If Pod Does Not Exist    ${label_selector}    ${APPLICATIONS_NS}
+    Wait For Resources To Be Removed    ${deployment_name}    ${label_selector}
 
 Set DSC Component Managed State And Wait For Completion
     [Documentation]    Set component management state to 'Managed', and wait for deployment and pod to be available.
@@ -208,6 +247,11 @@ Set DSC Component Managed State And Wait For Completion
             Set Component State    ${component}    Managed
     END
 
+    Wait For Resources To Be Available    ${deployment_name}    ${label_selector}
+
+Wait For Resources To Be Available
+    [Documentation]    Wait until Deployment and Pod(s) are Available
+    [Arguments]    ${deployment_name}    ${label_selector}
     Wait Until Keyword Succeeds    5 min    0 sec
     ...    Is Resource Present     Deployment    ${deployment_name}    ${APPLICATIONS_NS}    ${IS_PRESENT}
 
@@ -216,6 +260,16 @@ Set DSC Component Managed State And Wait For Completion
 
     Wait Until Keyword Succeeds    8 min    0 sec
     ...    Is Pod Ready    ${label_selector}
+
+Wait For Resources To Be Removed
+    [Documentation]    Wait until Deployment and Pod(s) to Removed
+    [Arguments]    ${deployment_name}    ${label_selector}
+
+    Wait Until Keyword Succeeds    5 min    0 sec
+    ...    Is Resource Present     Deployment    ${deployment_name}    ${APPLICATIONS_NS}    ${IS_NOT_PRESENT}
+
+    Wait Until Keyword Succeeds    5 min    0 sec
+    ...    Check If Pod Does Not Exist    ${label_selector}    ${APPLICATIONS_NS}
 
 Restore DSC Component State
     [Documentation]    Set component management state to original state, wait for component resources to be available.
@@ -241,3 +295,11 @@ Is Pod Ready
     # Log To Console    "Pod Ready Status: ${output}"
     Should Be Equal As Integers    ${rc}    0
     Should Not Contain    ${output}    False
+
+Get DataScienceCluster Spec
+    [Documentation]    Return the DSC Spec
+    [Arguments]    ${DSC_NAME}
+    ${rc}   ${output}=    Run And Return Rc And Output
+    ...    oc get DataScienceCluster/${DSC_NAME} -n ${OPERATOR_NS} -o "jsonpath={".spec"}"
+    Should Be Equal As Integers    ${rc}    0
+    RETURN    ${output}

@@ -209,6 +209,21 @@ Verify User Can Serve And Query A Token Protected Model Using The UI
     ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}    protocol=http
     ...    token=${model_token}
+    Delete Model Via UI    ${flan_model_name}
+    [Teardown]    Clean Up DSP Page
+
+Verify User Can Serve But Can't Query A Token Protected Model Without The Token
+    [Documentation]    Deploying and querying a Token Protected LLM model
+    ...                using Kserve and Caikit runtime
+    ...                Intermittently failing: RHOAIENG-3148
+    [Tags]    Tier1    ODS-XXXXXX
+    [Setup]    Set Up Project    namespace=${TEST_NS}
+    ${test_namespace}=    Set Variable     ${TEST_NS}
+    ${flan_model_name}=    Set Variable    flan-t5-small-caikit
+    Deploy Kserve Model Via UI    ${flan_model_name}    Caikit    kserve-connection    flan-t5-small/${flan_model_name}
+    ...    token=${TRUE}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Query Model Multiple Times    model_name=${flan_model_name}
     ...    inference_type=all-tokens    status_code=401    n_times=1    validate_response=${FALSE}
     ...    namespace=${test_namespace}    protocol=http

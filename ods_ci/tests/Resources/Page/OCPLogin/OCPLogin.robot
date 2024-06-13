@@ -15,3 +15,9 @@ Login To OCP Using API
   [Arguments]    ${username}      ${password}
   ${rc}    ${out}=    Run And Return Rc And Output    oc login $(oc whoami --show-server) -u ${username} -p ${password}  #robocop:disable
   Should Be Equal As Integers    ${rc}    ${0}
+
+Login To OCP Using API And Kubeconfig
+  [Documentation]   Login to openshift using username and password, storing credentials to Kubeconfig file
+  [Arguments]    ${username}      ${password}      ${kubeconfig}
+  ${rc}    ${out}=    Run And Return Rc And Output    oc login $(oc whoami --show-server) -u ${username} -p ${password} --kubeconfig=${kubeconfig} --insecure-skip-tls-verify=true    #robocop:disable
+  Should Be Equal As Integers    ${rc}    ${0}

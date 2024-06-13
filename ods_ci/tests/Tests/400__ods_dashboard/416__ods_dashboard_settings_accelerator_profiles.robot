@@ -6,6 +6,7 @@ Resource        ../../Resources/CLI/AcceleratorProfiles/AcceleratorProfiles.reso
 Resource        ../../Resources/ODS.robot
 Suite Setup     Setup Settings Accelerator Profiles
 Suite Teardown  Teardown Settings Accelerator Profiles
+Test Tags         Dashboard
 
 
 *** Variables ***

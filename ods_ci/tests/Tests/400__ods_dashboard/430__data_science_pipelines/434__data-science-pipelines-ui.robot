@@ -8,6 +8,7 @@ Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipeli
 Test Tags          DataSciencePipelines
 Suite Setup        Pipelines Suite Setup
 Suite Teardown     Pipelines Suite Teardown
+Test Tags          Dashboard
 
 
 *** Variables ***

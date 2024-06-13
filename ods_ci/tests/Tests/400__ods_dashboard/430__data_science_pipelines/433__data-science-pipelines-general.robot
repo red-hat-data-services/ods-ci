@@ -14,6 +14,7 @@ Library             ../../../../libs/DataSciencePipelinesAPI.py
 Test Tags           DataSciencePipelines
 Suite Setup         General Suite Setup
 Suite Teardown      General Suite Teardown
+Test Tags           Dashboard
 
 
 *** Variables ***

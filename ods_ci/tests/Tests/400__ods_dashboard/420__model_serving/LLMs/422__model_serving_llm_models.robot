@@ -6,7 +6,7 @@ Resource          ../../../../Resources/CLI/ModelServing/llm.resource
 Library            OpenShiftLibrary
 Suite Setup       Suite Setup
 Suite Teardown    Suite Teardown
-Test Tags         KServe-LLM
+Test Tags         KServe-LLM    Dashboard
 
 
 *** Variables ***

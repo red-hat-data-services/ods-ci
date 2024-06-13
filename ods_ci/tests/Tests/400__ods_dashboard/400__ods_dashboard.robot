@@ -17,7 +17,7 @@ Suite Setup       Dashboard Suite Setup
 Suite Teardown    RHOSi Teardown
 Test Setup        Dashboard Test Setup
 Test Teardown     Dashboard Test Teardown
-
+Test Tags         Dashboard
 
 *** Variables ***
 @{IMAGES}                               PyTorch  TensorFlow  CUDA

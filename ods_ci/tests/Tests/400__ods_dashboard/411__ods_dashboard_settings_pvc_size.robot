@@ -19,6 +19,7 @@ Resource        ../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
 Suite Setup     RHOSi Setup
 Suite Teardown  PVC Size Suite Teadrown
 Test Setup      PVC Size Test Setup
+Test Tags       Dashboard
 
 
 *** Variables ***

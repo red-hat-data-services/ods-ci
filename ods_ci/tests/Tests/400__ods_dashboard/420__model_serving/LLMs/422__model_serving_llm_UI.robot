@@ -12,7 +12,7 @@ Resource          ../../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProj
 Library            OpenShiftLibrary
 Suite Setup       Setup Kserve UI Test
 Suite Teardown    RHOSi Teardown
-Test Tags         KServe
+Test Tags         KServe    Dashboard
 
 
 *** Variables ***

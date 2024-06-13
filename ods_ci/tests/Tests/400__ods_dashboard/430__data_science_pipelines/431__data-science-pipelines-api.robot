@@ -11,6 +11,7 @@ Library             ../../../../libs/DataSciencePipelinesKfp.py
 Test Tags           DataSciencePipelines
 Suite Setup         Data Science Pipelines Suite Setup
 Suite Teardown      RHOSi Teardown
+Test Tags           Dashboard
 
 
 *** Variables ***

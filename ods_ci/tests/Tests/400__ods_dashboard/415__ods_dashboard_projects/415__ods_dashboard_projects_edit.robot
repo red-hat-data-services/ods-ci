@@ -10,6 +10,7 @@ Suite Setup        Project Suite Setup
 Suite Teardown     Project Suite Teardown
 Test Setup         Launch Data Science Project Main Page
 Test Teardown      Close All Browsers
+Test Tags          Dashboard
 
 
 *** Variables ***

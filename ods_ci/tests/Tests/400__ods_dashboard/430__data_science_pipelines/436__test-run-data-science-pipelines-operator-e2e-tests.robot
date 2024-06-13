@@ -6,7 +6,7 @@ Library           OperatingSystem
 Library           Process
 Resource          ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 Resource          ../../../Resources/RHOSi.resource
-Library             ../../../../libs/DataSciencePipelinesAPI.py
+Library           ../../../../libs/DataSciencePipelinesAPI.py
 
 
 *** Variables ***

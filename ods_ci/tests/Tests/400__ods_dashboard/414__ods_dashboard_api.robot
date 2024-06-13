@@ -10,6 +10,7 @@ Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboardAPI.resource
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Suite Setup       Endpoint Testing Setup
 Suite Teardown    Endpoint Testing Teardown
+Test Tags         Dashboard
 
 
 *** Variables ***

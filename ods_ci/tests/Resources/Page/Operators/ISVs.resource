@@ -25,12 +25,12 @@ Install ISV Operator From OperatorHub Via CLI    # robocop: disable
     END
     ${operator_sub_filepath}=    Set Variable    ${FILES_RESOURCES_DIRPATH}/${operator_name}-sub.yaml
     Copy File    ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${operator_sub_filepath}
-    ${rc}    ${out}=    Run And Return Rc And Output    sed -i "s/<SUBSCRIPTION_NAME>/${subscription_name}/g" ${operator_sub_filepath}    # robocop: disable
-    ${rc}    ${out}=    Run And Return Rc And Output    sed -i "s/<OPERATOR_NAMESPACE>/${namespace}/g" ${operator_sub_filepath}    # robocop: disable
-    ${rc}    ${out}=    Run And Return Rc And Output    sed -i "s/<UPDATE_CHANNEL>/${channel}/g" ${operator_sub_filepath}    # robocop: disable
-    ${rc}    ${out}=    Run And Return Rc And Output    sed -i "s/<OPERATOR_NAME>/${operator_name}/g" ${operator_sub_filepath}    # robocop: disable
-    ${rc}    ${out}=    Run And Return Rc And Output    sed -i "s/<CATALOG_SOURCE>/${catalog_source_name}/g" ${operator_sub_filepath}    # robocop: disable
-    ${rc}    ${out}=    Run And Return Rc And Output    sed -i "s/<CS_NAMESPACE>/${cs_namespace}/g" ${operator_sub_filepath}    # robocop: disable
+    ${rc}    ${out}=    Run And Return Rc And Output    sed -i'' -e "s/<SUBSCRIPTION_NAME>/${subscription_name}/g" ${operator_sub_filepath}    # robocop: disable
+    ${rc}    ${out}=    Run And Return Rc And Output    sed -i'' -e "s/<OPERATOR_NAMESPACE>/${namespace}/g" ${operator_sub_filepath}    # robocop: disable
+    ${rc}    ${out}=    Run And Return Rc And Output    sed -i'' -e "s/<UPDATE_CHANNEL>/${channel}/g" ${operator_sub_filepath}    # robocop: disable
+    ${rc}    ${out}=    Run And Return Rc And Output    sed -i'' -e "s/<OPERATOR_NAME>/${operator_name}/g" ${operator_sub_filepath}    # robocop: disable
+    ${rc}    ${out}=    Run And Return Rc And Output    sed -i'' -e "s/<CATALOG_SOURCE>/${catalog_source_name}/g" ${operator_sub_filepath}    # robocop: disable
+    ${rc}    ${out}=    Run And Return Rc And Output    sed -i'' -e "s/<CS_NAMESPACE>/${cs_namespace}/g" ${operator_sub_filepath}    # robocop: disable
     Oc Apply    kind=Subscription    src=${operator_sub_filepath}
 
 
@@ -40,9 +40,9 @@ Create Operator Group
     [Arguments]    ${name}    ${namespace}    ${target_namespace}    ${operator_name}
     ${operator_group_filepath}=    Set Variable    ${FILES_RESOURCES_DIRPATH}/${operator_name}-group.yaml    # robocop: disable
     Copy File    ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${operator_group_filepath}
-    ${rc}    ${out}=    Run And Return Rc And Output    sed -i "s/<BASE_NAME>/${name}/g" ${operator_group_filepath}    # robocop: disable
-    ${rc}    ${out}=    Run And Return Rc And Output    sed -i "s/<NAMESPACE>/${namespace}/g" ${operator_group_filepath}    # robocop: disable
-    ${rc}    ${out}=    Run And Return Rc And Output    sed -i "s/<TARGET_NAMESPACE>/${target_namespace}/g" ${operator_group_filepath}    # robocop: disable
+    ${rc}    ${out}=    Run And Return Rc And Output    sed -i'' -e "s/<BASE_NAME>/${name}/g" ${operator_group_filepath}    # robocop: disable
+    ${rc}    ${out}=    Run And Return Rc And Output    sed -i'' -e "s/<NAMESPACE>/${namespace}/g" ${operator_group_filepath}    # robocop: disable
+    ${rc}    ${out}=    Run And Return Rc And Output    sed -i'' -e "s/<TARGET_NAMESPACE>/${target_namespace}/g" ${operator_group_filepath}    # robocop: disable
     Oc Apply    kind=OperatorGroup    src=${operator_group_filepath}    api_version=v1
     IF    "${target_namespace}" == "${NONE}"
         ${rc}    ${out}=    Run And Return Rc And Output

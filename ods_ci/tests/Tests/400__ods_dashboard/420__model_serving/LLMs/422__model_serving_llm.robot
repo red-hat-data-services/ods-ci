@@ -644,17 +644,17 @@ Deploy Service Mesh CRs
     # Should Be Equal As Integers    ${rc}    ${0}
     Copy File     ${SERVICEMESH_CONTROLPLANE_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/smcp_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i 's/{{SERVICEMESH_CR_NS}}/${SERVICEMESH_CR_NS}/g' ${LLM_RESOURCES_DIRPATH}/smcp_filled.yaml
+    ...    sed -i'' -e 's/{{SERVICEMESH_CR_NS}}/${SERVICEMESH_CR_NS}/g' ${LLM_RESOURCES_DIRPATH}/smcp_filled.yaml
     Copy File     ${SERVICEMESH_ROLL_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/smmr_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i "s/{{SERVICEMESH_CR_NS}}/${SERVICEMESH_CR_NS}/g" ${LLM_RESOURCES_DIRPATH}/smmr_filled.yaml
+    ...    sed -i'' -e "s/{{SERVICEMESH_CR_NS}}/${SERVICEMESH_CR_NS}/g" ${LLM_RESOURCES_DIRPATH}/smmr_filled.yaml
     Copy File     ${SERVICEMESH_PEERAUTH_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/peer_auth_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i "s/{{SERVICEMESH_CR_NS}}/${SERVICEMESH_CR_NS}/g" ${LLM_RESOURCES_DIRPATH}/peer_auth_filled.yaml
+    ...    sed -i'' -e "s/{{SERVICEMESH_CR_NS}}/${SERVICEMESH_CR_NS}/g" ${LLM_RESOURCES_DIRPATH}/peer_auth_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i "s/{{SERVERLESS_CR_NS}}/${SERVERLESS_CR_NS}/g" ${LLM_RESOURCES_DIRPATH}/peer_auth_filled.yaml
+    ...    sed -i'' -e "s/{{SERVERLESS_CR_NS}}/${SERVERLESS_CR_NS}/g" ${LLM_RESOURCES_DIRPATH}/peer_auth_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i "s/{{KSERVE_NS}}/${KSERVE_NS}/g" ${LLM_RESOURCES_DIRPATH}/peer_auth_filled.yaml
+    ...    sed -i'' -e "s/{{KSERVE_NS}}/${KSERVE_NS}/g" ${LLM_RESOURCES_DIRPATH}/peer_auth_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc apply -f ${LLM_RESOURCES_DIRPATH}/smcp_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
@@ -674,10 +674,10 @@ Deploy Service Mesh CRs
     ...    namespace=${SERVICEMESH_CR_NS}
     Copy File     ${SERVICEMESH_ROLL_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/smmr_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i 's/{{SERVICEMESH_CR_NS}}/${SERVICEMESH_CR_NS}/g' ${LLM_RESOURCES_DIRPATH}/smmr_filled.yaml
+    ...    sed -i'' -e 's/{{SERVICEMESH_CR_NS}}/${SERVICEMESH_CR_NS}/g' ${LLM_RESOURCES_DIRPATH}/smmr_filled.yaml
     Should Be Equal As Integers    ${rc}    ${0}
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i 's/{{KSERVE_NS}}/${KSERVE_NS}/g' ${LLM_RESOURCES_DIRPATH}/smmr_filled.yaml
+    ...    sed -i'' -e 's/{{KSERVE_NS}}/${KSERVE_NS}/g' ${LLM_RESOURCES_DIRPATH}/smmr_filled.yaml
     Should Be Equal As Integers    ${rc}    ${0}
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc apply -f ${LLM_RESOURCES_DIRPATH}/smmr_filled.yaml
@@ -691,7 +691,7 @@ Add Peer Authentication
     [Arguments]    ${namespace}
     Copy File     ${SERVICEMESH_PEERAUTH_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/peer_auth_${namespace}.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i 's/{{NAMESPACE}}/${namespace}/g' ${LLM_RESOURCES_DIRPATH}/peer_auth_${namespace}.yaml
+    ...    sed -i'' -e 's/{{NAMESPACE}}/${namespace}/g' ${LLM_RESOURCES_DIRPATH}/peer_auth_${namespace}.yaml
     Should Be Equal As Integers    ${rc}    ${0}
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc apply -f ${LLM_RESOURCES_DIRPATH}/peer_auth_${namespace}.yaml
@@ -726,7 +726,7 @@ Deploy Serverless CRs
     Add Namespace To ServiceMeshMemberRoll    namespace=${SERVERLESS_CR_NS}
     Copy File     ${SERVERLESS_KNATIVECR_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/knativeserving_istio_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i 's/{{SERVERLESS_CR_NS}}/${SERVERLESS_CR_NS}/g' ${LLM_RESOURCES_DIRPATH}/knativeserving_istio_filled.yaml
+    ...    sed -i'' -e 's/{{SERVERLESS_CR_NS}}/${SERVERLESS_CR_NS}/g' ${LLM_RESOURCES_DIRPATH}/knativeserving_istio_filled.yaml
     Should Be Equal As Integers    ${rc}    ${0}
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc apply -f ${LLM_RESOURCES_DIRPATH}/knativeserving_istio_filled.yaml
@@ -770,10 +770,10 @@ Configure KNative Gateways
     ...    oc create secret tls wildcard-certs --cert=${base_dir}/wildcard.crt --key=${base_dir}/wildcard.key -n ${SERVICEMESH_CR_NS}
     Copy File     ${SERVERLESS_GATEWAYS_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/gateways_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i 's/{{SERVICEMESH_CR_NS}}/${SERVICEMESH_CR_NS}/g' ${LLM_RESOURCES_DIRPATH}/gateways_filled.yaml
+    ...    sed -i'' -e 's/{{SERVICEMESH_CR_NS}}/${SERVICEMESH_CR_NS}/g' ${LLM_RESOURCES_DIRPATH}/gateways_filled.yaml
     Should Be Equal As Integers    ${rc}    ${0}
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i 's/{{SERVERLESS_CR_NS}}/${SERVERLESS_CR_NS}/g' ${LLM_RESOURCES_DIRPATH}/gateways_filled.yaml
+    ...    sed -i'' -e 's/{{SERVERLESS_CR_NS}}/${SERVERLESS_CR_NS}/g' ${LLM_RESOURCES_DIRPATH}/gateways_filled.yaml
     Should Be Equal As Integers    ${rc}    ${0}
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc apply -f ${LLM_RESOURCES_DIRPATH}/gateways_filled.yaml

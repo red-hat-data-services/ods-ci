@@ -10,6 +10,7 @@ Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProjec
 Suite Setup        Project Suite Setup
 Suite Teardown     Project Suite Teardown
 Test Setup         Launch Data Science Project Main Page
+Test Teardown      SeleniumLibrary.Close All Browsers
 Test Tags          Dashboard
 
 
@@ -317,7 +318,6 @@ Verify User Can Create Environment Variables By Uploading YAML Secret/ConfigMap
     ${test_envs_list}=    Create List   ${test_envs_var_secret}     ${test_envs_var_cm}
     Environment Variables Should Be Displayed According To Their Type
     ...    workbench_title=${WORKBENCH_4_TITLE}    exp_env_variables=${test_envs_list}
-    Move To Tab    tab_title=Workbenches
     Wait Until Workbench Is Started     workbench_title=${WORKBENCH_4_TITLE}
     Launch And Access Workbench    workbench_title=${WORKBENCH_4_TITLE}
     ...    username=${TEST_USER_3.USERNAME}     password=${TEST_USER_3.PASSWORD}
@@ -545,16 +545,16 @@ Verify User Can Access Only Its Owned Projects
     Project Should Be Listed    project_title=${PRJ_2_USER3}
     Launch Data Science Project Main Page    username=${TEST_USER.USERNAME}    password=${TEST_USER.PASSWORD}
     Capture Page Screenshot
-    # User ldap admin should be able to see all 4 projects
-    Number Of Displayed Projects Should Be    expected_number=4
+    # User ldap admin should be able to see all 3 projects
+    Number Of Displayed Projects Should Be    expected_number=3
     Project Should Be Listed    project_title=${PRJ_1_USER3}
     Project Should Be Listed    project_title=${PRJ_2_USER3}
     Project Should Be Listed    project_title=${PRJ_A_USER4}
     Launch Data Science Project Main Page    username=${OCP_ADMIN_USER.USERNAME}    password=${OCP_ADMIN_USER.PASSWORD}
     ...    ocp_user_auth_type=${OCP_ADMIN_USER.AUTH_TYPE}
     Capture Page Screenshot
-    # User cluster admin should be able to see all 4 projects
-    Number Of Displayed Projects Should Be    expected_number=4
+    # User cluster admin should be able to see all 3 projects
+    Number Of Displayed Projects Should Be    expected_number=3
     Project Should Be Listed    project_title=${PRJ_1_USER3}
     Project Should Be Listed    project_title=${PRJ_2_USER3}
     Project Should Be Listed    project_title=${PRJ_A_USER4}

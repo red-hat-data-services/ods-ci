@@ -152,8 +152,8 @@ Create Starburst Enteprise License Secret
     [Documentation]    Applies the Starburst Enteprise license
     ${secret_filepath}=    Set Variable    ${FILES_RESOURCES_DIRPATH}/starburst-secret.yaml
     Copy File    ${SEP_SECRET_TEMPLATE_FILEPATH}    ${secret_filepath}
-    ${rc}    ${out}=    Run And Return Rc And Output    sed -i "s/<NAMESPACE>/${NAMESPACE}/g" ${secret_filepath}    # robocop: disable
-    ${rc}    ${out}=    Run And Return Rc And Output    sed -i "s/<VALUE>/${STARBURST.LICENSE_ENCODED}/g" ${secret_filepath}    # robocop: disable
+    ${rc}    ${out}=    Run And Return Rc And Output    sed -i'' -e "s/<NAMESPACE>/${NAMESPACE}/g" ${secret_filepath}    # robocop: disable
+    ${rc}    ${out}=    Run And Return Rc And Output    sed -i'' -e "s/<VALUE>/${STARBURST.LICENSE_ENCODED}/g" ${secret_filepath}    # robocop: disable
     Oc Apply    kind=Secret    src=${secret_filepath}
     Remove File    ${secret_filepath}
 

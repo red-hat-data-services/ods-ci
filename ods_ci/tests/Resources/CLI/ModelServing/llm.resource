@@ -864,9 +864,9 @@ Verify Model KServe Deployment
 Wait For ISVC To Be Loaded
     [Documentation]    Waits for the ISVC to be Loaded (i.e., Success status in the grid)
     [Arguments]    ${isvc_name}    ${namespace}    ${retries}=36
-    ${condition1}=${TRUE}
-    ${condition2}=${TRUE}
-    ${condition3}=${TRUE}
+    ${condition1}=    Set Variable  ${True}
+    ${condition2}=    Set Variable  ${True}
+    ${condition3}=    Set Variable  ${True}
     WHILE    ${condition1} and ${condition2} and ${condition3}
         Sleep    5s
         ${retries}=    Evaluate    ${retries} - 1

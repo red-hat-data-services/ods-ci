@@ -5,7 +5,7 @@ Resource         ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resour
 Suite Setup      Model Serving Cluster Setting Suite Setup
 Suite Teardown   Model Serving Cluster Setting Suite Teardown
 Test Setup       Model Serving Cluster Setting Test Setup
-Test Tags        modelservingsetting  ODS-2574  Tier1  Sanity  Dashboard
+Test Tags        modelservingsetting  ODS-2574  Tier1  Sanity
 
 *** Variables ***
 ${project_title}=  BLANKPROJ

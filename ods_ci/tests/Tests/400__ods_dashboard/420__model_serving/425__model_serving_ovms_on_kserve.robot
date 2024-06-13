@@ -12,7 +12,7 @@ Resource          ../../../Resources/OCP.resource
 Resource          ../../../Resources/CLI/ModelServing/modelmesh.resource
 Suite Setup       OVMS On Kserve Suite Setup
 Suite Teardown    OVMS On Kserve Suite Teardown
-Test Tags         Kserve    Dashboard
+Test Tags         Kserve
 
 
 *** Variables ***

@@ -11,7 +11,7 @@ Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProje
 Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Pipelines.resource
 Library             DateTime
 Library             ../../../../libs/DataSciencePipelinesAPI.py
-Test Tags           DataSciencePipelines    Dashboard
+Test Tags           DataSciencePipelines
 Suite Setup         General Suite Setup
 Suite Teardown      General Suite Teardown
 

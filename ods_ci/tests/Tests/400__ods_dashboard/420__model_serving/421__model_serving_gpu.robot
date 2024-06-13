@@ -10,7 +10,7 @@ Resource          ../../../Resources/Page/ODH/Monitoring/Monitoring.resource
 Resource          ../../../Resources/CLI/ModelServing/modelmesh.resource
 Suite Setup       Model Serving Suite Setup
 Suite Teardown    Model Serving Suite Teardown
-Test Tags         ModelMesh    Dashboard
+Test Tags         ModelMesh
 
 *** Variables ***
 ${RHODS_NAMESPACE}=    ${APPLICATIONS_NAMESPACE}

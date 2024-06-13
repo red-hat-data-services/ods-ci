@@ -16,7 +16,7 @@ Library          Screenshot
 Library          String
 Library          DebugLibrary
 Library          JupyterLibrary
-Test Tags        DataSciencePipelines    Dashboard
+Test Tags        DataSciencePipelines
 Suite Setup      Elyra Pipelines Suite Setup
 Suite Teardown   Elyra Pipelines Suite Teardown
 

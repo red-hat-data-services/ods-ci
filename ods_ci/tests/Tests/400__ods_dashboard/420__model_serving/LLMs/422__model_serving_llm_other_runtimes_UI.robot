@@ -5,7 +5,7 @@ Resource          ../../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProj
 Resource          ../../../../Resources/CLI/ModelServing/llm.resource
 Suite Setup       Non-Admin Setup Kserve UI Test
 Suite Teardown    Non-Admin Teardown Kserve UI Test
-Test Tags         KServe    Dashboard
+Test Tags         KServe
 
 
 *** Variables ***

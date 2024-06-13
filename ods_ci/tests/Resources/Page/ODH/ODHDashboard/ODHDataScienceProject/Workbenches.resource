@@ -111,12 +111,6 @@ Create Workbench
 Add Environment Variables In Workbench
     [Documentation]    Adds the environment variables through the workbench creation page
     [Arguments]    ${env_variables}
-    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
-    IF  ${version_check}==True
-        ${add_key_value_text}=    Set Variable    Add another key / value pair
-    ELSE
-        ${add_key_value_text}=    Set Variable    Add another variable
-    END
     # Use the `Jump to section` links in the page to scroll the section into view
     Click Element    //a[@href="#environment-variables"]
     Click Element    ${WORKBENCH_ADD_VAR_BTN_XP}
@@ -137,14 +131,12 @@ Add Environment Variables In Workbench
                 Input Text    ${ENV_VARIABLES_SECTION_XP}/div[contains(@class, "-l-split")][${idx}]//input[@aria-label="value of item ${pair_idx}"]
                 ...           ${value}
                 IF    ${n_pairs}-${pair_idx} > 1
-                    Click Element    ${ENV_VARIABLES_SECTION_XP}/div[contains(@class, "-l-split")][${idx}]//button[text()="${add_key_value_text}"]
-                    # The element we want to click might get pushed out of view on every loop, let's scroll by an approx
-                    # amount of pixels for the block of elements that gets added.
-                    IF    "${add_key_value_text}" == "Add another key / value pair"
-                        Execute Javascript    document.getElementsByClassName("pf-v5-c-drawer__content")[1].scrollBy(0,500)  # robocop: disable
-                    ELSE IF    "${add_key_value_text}" == "Add another variable"
-                        Execute Javascript    document.getElementsByClassName("pf-v5-c-drawer__content")[1].scrollBy(0,700)  # robocop: disable
-                    END
+                    ${another_key_button_xpath}=    Set Variable
+                    ...    //section[@aria-label="Environment variables"]/div[contains(@class, "-l-split")][${idx}]//button[@data-testid="another-key-value-pair-button"]  # robocop: disable:line-too-long
+                    # Assure that the button we want to click is in the view
+                    Execute Javascript
+                    ...    document.evaluate('${another_key_button_xpath}', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.scrollIntoView()  # robocop: disable:line-too-long
+                    Click Element    xpath=${another_key_button_xpath}
                 END
             END
         ELSE IF  "${input_type}" == "${UPLOAD_TYPE}"

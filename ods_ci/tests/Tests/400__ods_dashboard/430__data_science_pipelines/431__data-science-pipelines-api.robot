@@ -8,10 +8,9 @@ Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipel
 Library             DateTime
 Library             ../../../../libs/DataSciencePipelinesAPI.py
 Library             ../../../../libs/DataSciencePipelinesKfp.py
-Test Tags           DataSciencePipelines
+Test Tags           DataSciencePipelines    Dashboard
 Suite Setup         Data Science Pipelines Suite Setup
 Suite Teardown      RHOSi Teardown
-Test Tags           Dashboard
 
 
 *** Variables ***

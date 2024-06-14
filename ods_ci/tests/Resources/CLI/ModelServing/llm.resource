@@ -872,4 +872,4 @@ ISVC Should Be Loaded
     ${rc}    ${isvc_status}=    Run And Return Rc And Output
     ...    oc get isvc ${isvc_name} -n ${namespace} -o=jsonpath='{.status.modelStatus.states.activeModelState}'
     Should Be Equal As Integers    ${rc}    ${0}
-    Should Not Be Empty    ${isvc_status}
+    Should Be Equal As Strings    ${isvc_status}    Loaded

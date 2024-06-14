@@ -865,6 +865,7 @@ Wait For ISVC To Be Loaded
     [Documentation]    Waits for the ISVC to be Loaded
     [Arguments]    ${isvc_name}    ${namespace}    ${retries}=36
     Wait Until Keyword Succeeds    ${retries} times    5s    ISVC Should Be Loaded    ${isvc_name}    ${namespace}
+    Sleep    30s    msg=There is a 20 seconds polling
 
 ISVC Should Be Loaded
     [Documentation]    Check if the ISVC is Loaded (i.e., Success status in the grid)

@@ -30,6 +30,28 @@ Run TestRayJobSuspend test
     ...     DistributedWorkloads
     ...     Kuberay
     Run Kuberay E2E Test    TestRayJobSuspend
+
+Run TestRayJobLightWeightMode test
+    [Documentation]    Run Go E2E test: TestRayJobLightWeightMode
+    [Tags]  Tier1
+    ...     DistributedWorkloads
+    ...     Kuberay
+    ...     ProductBug:RHOAIENG-6614
+    Run Kuberay E2E Test    TestRayJobLightWeightMode
+
+Run TestRayClusterAutoscaler test
+    [Documentation]    Run Go E2E test: TestRayClusterAutoscaler
+    [Tags]  Tier1
+    ...     DistributedWorkloads
+    ...     Kuberay
+    Run Kuberay E2E Test    TestRayClusterAutoscaler
+
+Run TestRayService test
+    [Documentation]    Run Go E2E test: TestRayService
+    [Tags]  Tier1
+    ...     DistributedWorkloads
+    ...     Kuberay
+    Run Kuberay E2E Test    TestRayService
     
 
 *** Keywords ***

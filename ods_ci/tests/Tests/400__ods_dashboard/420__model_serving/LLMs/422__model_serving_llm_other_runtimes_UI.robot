@@ -16,7 +16,7 @@ ${FLAN_MODEL_S3_DIR}=    flan-t5-small/flan-t5-small-hf
 ${FLAN_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${FLAN_MODEL_S3_DIR}/
 ${TGIS_RUNTIME_NAME}=    tgis-runtime
 @{SEARCH_METRICS}=    tgi_    istio_
-
+${VLLM_RUNTIME_NAME}=    vllm-runtime
 
 *** Test Cases ***
 Verify Non Admin Can Serve And Query A Model Using The UI  # robocop: disable
@@ -78,6 +78,27 @@ Verify Model Can Be Served And Query On A GPU Node Using The UI  # robocop: disa
     ...    namespace=${test_namespace}    protocol=grpc    validate_response=${FALSE}
     Delete Model Via UI    ${isvc__name}
 
+Verify Model Can Be Served And Query On A GPU Node Using The UI For VLMM  # robocop: disable
+    [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
+    ...                using Single-model platform with vllm runtime.
+    [Tags]    Sanity    Tier1    RHOAIENG-6344   Resources-GPU
+    ${test_namespace}=    Set Variable     ${TEST_NS}
+    ${isvc__name}=    Set Variable    gpt2-gpu
+    ${model_name}=    Set Variable    gpt2
+    ${requests}=    Create Dictionary    nvidia.com/gpu=1
+    ${limits}=    Create Dictionary    nvidia.com/gpu=1
+    Deploy Kserve Model Via UI    model_name=${isvc__name}    serving_runtime=vLLM ServingRuntime for KServe
+    ...    data_connection=kserve-connection    model_framework=vLLM   path=gpt2
+    ...    no_gpus=${1}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${isvc__name}
+    ...    namespace=${test_namespace}    runtime=${VLLM_RUNTIME_NAME}   timeout=1200s
+    Container Hardware Resources Should Match Expected    container_name=kserve-container
+    ...    pod_label_selector=serving.kserve.io/inferenceservice=${isvc__name}
+    ...    namespace=${test_namespace}    exp_requests=${requests}    exp_limits=${limits}
+    Query Model Multiple Times    model_name=${isvc__name}    isvc_name=${isvc__name}    runtime=${VLLM_RUNTIME_NAME}   protocol=http
+    ...    inference_type=chat-completions    n_times=3    query_idx=8
+    ...    namespace=${test_namespace}    string_check_only=${TRUE}    validate_response=${FALSE}
+    Delete Model Via UI    ${isvc__name}
 
 *** Keywords ***
 Non-Admin Setup Kserve UI Test

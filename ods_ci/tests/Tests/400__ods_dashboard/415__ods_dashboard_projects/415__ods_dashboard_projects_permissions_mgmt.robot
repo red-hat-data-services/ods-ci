@@ -3,6 +3,7 @@ Documentation      Suite to test additional scenarios for Data Science Projects 
 Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Permissions.resource
 Suite Setup        Project Permissions Mgmt Suite Setup
 Suite Teardown     Project Permissions Mgmt Suite Teardown
+Test Tags          Dashboard
 
 
 *** Variables ***

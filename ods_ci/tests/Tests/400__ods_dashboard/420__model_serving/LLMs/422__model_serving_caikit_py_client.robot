@@ -6,6 +6,7 @@ Resource          ../../../../Resources/CLI/ModelServing/llm.resource
 Suite Setup    Caikit Client Suite Setup
 Suite Teardown    Caikit Client Suite Teardown
 Test Teardown    SeleniumLibrary.Close All Browsers
+Test Tags        Dashboard
 
 
 *** Variables ***
@@ -25,7 +26,7 @@ ${NB_IMAGE}=        Minimal Python
 @{FILES_TO_UPLOAD}=    ${CERTS_BASE_FOLDER}/${NOTEBOOK_FILENAME}    ${CERTS_BASE_FOLDER}/openshift_ca_istio_knative.crt
 ...    ${CERTS_BASE_FOLDER}/client_certs/public.crt    ${CERTS_BASE_FOLDER}/client_certs/private.key
 
- 
+
 *** Test Cases ***
 Verify User Can Use Caikit Nlp Client From Workbenches
     [Documentation]    Deploy two KServe models with Caikit+TGIS runtime (one for grpc and one for HTTP protocol),
@@ -40,7 +41,7 @@ Verify User Can Use Caikit Nlp Client From Workbenches
     Create Workbench    workbench_title=${WORKBENCH_TITLE}    prj_title=${HTTP_MODEL_NS}
     ...    workbench_description=test caikit-nlp-client    image_name=${NB_IMAGE}   deployment_size=Small
     ...    storage=Persistent    pv_name=${NONE}  pv_existent=${NONE}    pv_description=${NONE}
-    ...    pv_size=${NONE}    envs=${WORKBENCH_VARS}            
+    ...    pv_size=${NONE}    envs=${WORKBENCH_VARS}
     Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
     Workbench Status Should Be      workbench_title=${WORKBENCH_TITLE}      status=${WORKBENCH_STATUS_STARTING}
     Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}
@@ -110,7 +111,7 @@ HTTP Model Setup
         Deploy Kserve Model Via UI    model_name=${ISVC_NAME}    serving_runtime=Caikit
         ...    data_connection=kserve-connection    path=${MODEL_S3_DIR}
         Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${ISVC_NAME}
-        ...    namespace=${HTTP_MODEL_NS}  
+        ...    namespace=${HTTP_MODEL_NS}
         Query Model Multiple Times    model_name=${ISVC_NAME}    runtime=caikit-tgis-runtime
         ...    inference_type=all-tokens    n_times=1
         ...    namespace=${HTTP_MODEL_NS}    protocol=http

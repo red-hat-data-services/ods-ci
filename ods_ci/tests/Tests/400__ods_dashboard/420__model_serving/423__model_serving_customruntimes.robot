@@ -6,6 +6,7 @@ Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
 Suite Setup       Custom Serving Runtime Suite Setup
 Suite Teardown    Custom Serving Runtime Suite Teardown
+Test Tags         Dashboard
 
 
 *** Variables ***

@@ -4,6 +4,7 @@ Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboardSettings.resou
 Resource        ../../Resources/ODS.robot
 Suite Setup     Setup Admin UI
 Suite Teardown  Teardown Admin UI
+Test Tags        Dashboard
 
 
 *** Test Cases ***

@@ -4,17 +4,13 @@ from ods_ci.libs.DataSciencePipelinesKfp import DataSciencePipelinesKfp
 
 
 @dsl.component(packages_to_install=["codeflare-sdk"], base_image=DataSciencePipelinesKfp.base_image)
-def ray_fn(openshift_server: str, openshift_token: str) -> int:
+def ray_fn() -> int:
+    # workaround for RHOAIENG-6701
+    import time
     import ray
-    from codeflare_sdk.cluster.auth import TokenAuthentication
     from codeflare_sdk.cluster.cluster import Cluster, ClusterConfiguration
     from codeflare_sdk import generate_cert
 
-    print("before login")
-    auth = TokenAuthentication(token=openshift_token, server=openshift_server, skip_tls=True)
-    auth_return = auth.login()
-    print(f'auth_return: "{auth_return}"')
-    print("after login")
     cluster = Cluster(
         ClusterConfiguration(
             name="raytest",
@@ -35,7 +31,9 @@ def ray_fn(openshift_server: str, openshift_token: str) -> int:
     cluster.down()
     print(cluster.status())
     cluster.up()
-    cluster.wait_ready()
+    # workaround for RHOAIENG-6701
+    # cluster.wait_ready()
+    time.sleep(180)
     print(cluster.status())
     print(cluster.details())
 
@@ -63,7 +61,6 @@ def ray_fn(openshift_server: str, openshift_token: str) -> int:
     assert 100 == result
     ray.shutdown()
     cluster.down()
-    auth.logout()
     return result
 
 
@@ -71,5 +68,5 @@ def ray_fn(openshift_server: str, openshift_token: str) -> int:
     name="Ray Integration Test",
     description="Ray Integration Test",
 )
-def ray_integration(openshift_server: str, openshift_token: str):
-    ray_fn(openshift_server=openshift_server, openshift_token=openshift_token)
+def ray_integration():
+    ray_fn()

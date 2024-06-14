@@ -870,6 +870,6 @@ ISVC Should Be Loaded
     [Documentation]    Check if the ISVC is Loaded (i.e., Success status in the grid)
     [Arguments]    ${isvc_name}    ${namespace}
     ${rc}    ${isvc_status}=    Run And Return Rc And Output
-        ...    oc get isvc ${isvc_name} -n ${namespace} -o=jsonpath='{.status.modelStatus.states.activeModelState}'
+    ...    oc get isvc ${isvc_name} -n ${namespace} -o=jsonpath='{.status.modelStatus.states.activeModelState}'
     Should Be Equal As Integers    ${rc}    ${0}
     Should Not Be Empty    ${isvc_status}

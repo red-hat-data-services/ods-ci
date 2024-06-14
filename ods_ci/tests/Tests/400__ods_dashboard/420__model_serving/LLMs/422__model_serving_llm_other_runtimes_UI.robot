@@ -16,7 +16,6 @@ ${FLAN_MODEL_S3_DIR}=    flan-t5-small/flan-t5-small-hf
 ${FLAN_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${FLAN_MODEL_S3_DIR}/
 ${TGIS_RUNTIME_NAME}=    tgis-runtime
 @{SEARCH_METRICS}=    tgi_    istio_
-${MODEL_S3_DIR}=   e5-mistral-7b-instruct
 ${VLLM_RUNTIME_NAME}=    vllm-runtime
 
 *** Test Cases ***

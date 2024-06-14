@@ -176,7 +176,7 @@ class SLTagsListener:
         return int(dt_value.timestamp() * 1000)
 
     def extract_sl_endpoint(self):
-        payload = jwt.decode(self.token, algorithms=["RS512"], options={"verify_signature": True})
+        payload = jwt.decode(self.token, algorithms=["RS512"], options={"verify_signature": False})
         api_base_url = payload.get("x-sl-server")
         return f'{api_base_url.replace("api", "sl-api")}/v1'
 

@@ -7,6 +7,7 @@ Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProjec
 Resource           ../../../Resources/RHOSi.resource
 Suite Setup        Project Suite Setup
 Suite Teardown     Project Suite Teardown
+Test Tags          Dashboard
 
 
 *** Variables ***

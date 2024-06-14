@@ -5,6 +5,7 @@ Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDashboardSettings.reso
 Library          ../../../libs/Helpers.py
 Suite Setup      Begin Web Test
 Suite Teardown   Teardown
+Test Tags         Dashboard
 
 
 *** Variables ***

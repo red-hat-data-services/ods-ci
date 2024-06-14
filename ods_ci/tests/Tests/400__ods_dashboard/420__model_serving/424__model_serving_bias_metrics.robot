@@ -12,6 +12,7 @@ Resource            ../../../Resources/Page/OCPDashboard/Monitoring/Metrics.robo
 Library             OpenShiftLibrary
 Suite Setup         Bias Metrics Suite Setup
 Suite Teardown      Bias Metrics Suite Teardown
+Test Tags           Dashboard
 
 *** Variables ***
 ${DEFAULT_MONITORING_NS}=            openshift-user-workload-monitoring

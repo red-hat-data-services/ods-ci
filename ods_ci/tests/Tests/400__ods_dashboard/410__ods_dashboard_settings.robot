@@ -9,6 +9,7 @@ Resource            ../../Resources/ODS.robot
 
 Suite Setup         Dashboard Settings Suite Setup
 Suite Teardown      RHOSi Teardown
+Test Tags           Dashboard
 
 
 *** Test Cases ***

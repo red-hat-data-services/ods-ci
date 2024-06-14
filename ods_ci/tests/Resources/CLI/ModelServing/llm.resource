@@ -862,21 +862,14 @@ Verify Model KServe Deployment
     ...    ${n_containers}  ${containers}
 
 Wait For ISVC To Be Loaded
-    [Documentation]    Waits for the ISVC to be Loaded (i.e., Success status in the grid)
+    [Documentation]    Waits for the ISVC to be Loaded
     [Arguments]    ${isvc_name}    ${namespace}    ${retries}=36
-    ${condition1}=    Set Variable  ${True}
-    ${condition2}=    Set Variable  ${True}
-    ${condition3}=    Set Variable  ${True}
-    WHILE    ${condition1} and ${condition2} and ${condition3}
-        Sleep    5s
-        ${retries}=    Evaluate    ${retries} - 1
-        ${rc}    ${isvc_status}=    Run And Return Rc And Output
+    Wait Until Keyword Succeeds    ${retries} times    5s    ISVC Should Be Loaded    ${isvc_name}    ${namespace}
+
+ISVC Should Be Loaded
+    [Documentation]    Check if the ISVC is Loaded (i.e., Success status in the grid)
+    [Arguments]    ${isvc_name}    ${namespace}
+    ${rc}    ${isvc_status}=    Run And Return Rc And Output
         ...    oc get isvc ${isvc_name} -n ${namespace} -o=jsonpath='{.status.modelStatus.states.activeModelState}'
-        ${condition1}=    Evaluate    "${isvc_status}"=="${EMPTY}"
-        ${condition2}=    Evaluate    ${rc}==0
-        ${condition3}=    Evaluate    ${retries} > 0
-    END
-    IF    ${rc} != ${0}
-        Fail    msg=ISVC not ready
-    END
-    Should Be Equal As Strings    ${isvc_status}    Loaded
+    Should Be Equal As Integers    ${rc}    ${0}
+    Should Not Be Empty    ${isvc_status}

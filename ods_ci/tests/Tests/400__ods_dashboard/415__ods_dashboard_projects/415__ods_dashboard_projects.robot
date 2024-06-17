@@ -46,8 +46,8 @@ ${DC_S3_ENDPOINT}=    custom.endpoint.s3.com
 ${DC_S3_REGION}=    ods-ci-region
 ${DC_S3_TYPE}=    Object storage
 @{IMAGE_LIST}    Minimal Python    CUDA   PyTorch    Standard Data Science    TensorFlow
-${ENV_SECRET_FILEPATH}=    ods_ci/tests/Resources/Files/env_vars_secret.yaml
-${ENV_CM_FILEPATH}=    ods_ci/tests/Resources/Files/env_vars_cm.yaml
+${ENV_SECRET_FILEPATH}=    tests/Resources/Files/env_vars_secret.yaml
+${ENV_CM_FILEPATH}=    tests/Resources/Files/env_vars_cm.yaml
 ${NEW_PRJ_DESCRIPTION}=   ${PRJ_TITLE} is a New edited test project for validating DS Projects feature
 ${NEW_PRJ_TITLE}=   ODS-CI DS Project Updated
 

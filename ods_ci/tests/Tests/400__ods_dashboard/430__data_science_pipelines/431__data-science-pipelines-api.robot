@@ -46,7 +46,7 @@ Verify DSPO Operator Reconciliation Retry
     Wait Until Keyword Succeeds    15 times    1s
     ...    Double Check If DSPA Was Created    ${local_project_name}
     DSPA Should Reconcile
-    ${rc}  ${out} =    Run And Return Rc And Output   oc apply -f ods_ci/tests/Resources/Files/dummy-storage-creds.yaml -n ${local_project_name}
+    ${rc}  ${out} =    Run And Return Rc And Output   oc apply -f tests/Resources/Files/dummy-storage-creds.yaml -n ${local_project_name}
     IF    ${rc}!=0    Fail
     # one pod is good when reconciliation finished
     Wait For Pods Number  1    namespace=${local_project_name}    timeout=60

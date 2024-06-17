@@ -52,7 +52,7 @@ Verify Unauthorized User Is Not Able To Spawn Jupyter Notebook
     ...     Note: this test configures user access via ODH Dashboard UI in setting appropriate
     ...     groups in `Settings -> User management` section. There is an another test that changes
     ...     users/groups via `oc adm groups` command,see: `Verify User Can Set Custom RHODS Groups`
-    ...     in ods_ci/tests/Tests/500__jupyterhub/jupyterhub-user-access.robot
+    ...     in tests/Tests/500__jupyterhub/jupyterhub-user-access.robot
     [Tags]  ODS-1680
     ...     Tier1
     ...     Sanity

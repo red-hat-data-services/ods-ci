@@ -3,7 +3,7 @@ Documentation    Collection of keywords to interact with the administration of A
 
 
 *** Variables ***
-${ACCELERATOR_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files/accelerator
+${ACCELERATOR_RESOURCES_DIRPATH}=    tests/Resources/Files/accelerator
 
 
 *** Keywords ***

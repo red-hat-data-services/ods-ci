@@ -31,7 +31,7 @@ Install RHOAI For KserveRaw
         Fail    Use a clean cluster to run this installation
     END
     IF      "${cluster_type}" == "selfmanaged"
-            ${file_path} =    Set Variable    ods_ci/tests/Resources/Files/operatorV2/
+            ${file_path} =    Set Variable    tests/Resources/Files/operatorV2/
             ${rc}  ${out} =    Run And Return Rc And Output    oc create ns ${OPERATOR_NAMESPACE}
             IF    ${rc}!=0    Fail
             Log    ${out}    console=yes
@@ -67,7 +67,7 @@ Install RHOAI For KserveRaw
         FAIL    Vanilla KserveRaw can only be installed in self-managed clusters
     END
 Verify KserveRaw Installtion
-    ${filepath} =      Set Variable    ods_ci/tests/Resources/Files/operatorV2/
+    ${filepath} =      Set Variable    tests/Resources/Files/operatorV2/
     ${rc}  ${out} =    Run And Return Rc And Output    oc apply -f ${file_path}kserve_raw_dsci.yaml
     IF    ${rc}!=0     Fail
     ${rc}  ${out} =    Run And Return Rc And Output    oc apply -f ${file_path}kserve_raw_dsc.yaml

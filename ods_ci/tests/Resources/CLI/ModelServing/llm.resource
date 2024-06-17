@@ -7,7 +7,7 @@ Library           ../../../../libs/Helpers.py
 
 
 *** Variables ***
-${LLM_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files/llm
+${LLM_RESOURCES_DIRPATH}=    tests/Resources/Files/llm
 ${EXP_RESPONSES_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/model_expected_responses.json
 ${RUNTIME_FORMATS_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/runtime_query_formats.json
 ${INFERENCESERVICE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/serving_runtimes/base/isvc.yaml

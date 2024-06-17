@@ -25,7 +25,7 @@ Verify that the must-gather image provides RHODS logs and info
 *** Keywords ***
 Get must-gather Logs
     [Documentation]    Runs the must-gather image and obtains the ODH/RHOAI logs
-    ${output}=    Run process    ods_ci/tests/Tests/505__must_gather/get-must-gather-logs.sh     shell=yes
+    ${output}=    Run process    tests/Tests/505__must_gather/get-must-gather-logs.sh     shell=yes
     Should Not Contain    ${output.stdout}    FAIL
     ${must-gather-dir}=  Run     ls -d must-gather.local.*
     ${namespaces-log-dir}=      Run     ls -d ${must-gather-dir}/quay-io-modh-must-gather-sha256-*/namespaces

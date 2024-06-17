@@ -11,16 +11,16 @@ Test Tags        Dashboard
 
 
 *** Variables ***
-${QS_YAML}=                     ods_ci/tests/Resources/Files/custom_quickstart.yaml
-${APP_YAML}=                    ods_ci/tests/Resources/Files/custom_app.yaml
-${HOWTO_YAML}=                  ods_ci/tests/Resources/Files/custom_doc_howto.yaml
-${TUTORIAL_YAML}=               ods_ci/tests/Resources/Files/custom_doc_tutorial.yaml
+${QS_YAML}=                     tests/Resources/Files/custom_quickstart.yaml
+${APP_YAML}=                    tests/Resources/Files/custom_app.yaml
+${HOWTO_YAML}=                  tests/Resources/Files/custom_doc_howto.yaml
+${TUTORIAL_YAML}=               tests/Resources/Files/custom_doc_tutorial.yaml
 &{EXPECTED_ITEMS_TITLES}=       quickstart=TEST - Custom Quick Start
 ...                             application=TEST - Custom ODS-CI Application
 ...                             howto=TEST - Custom How-To Documentation
 ...                             tutorial=TEST - Custom Tutorial Documentation
 @{EXPECTED_QUICKSTART_IDS}=     custom-quick-start-test
-${CUSTOM_APP_DICT_PATH}=        ods_ci/tests/Resources/Files/CustomAppInfoDictionary.json
+${CUSTOM_APP_DICT_PATH}=        tests/Resources/Files/CustomAppInfoDictionary.json
 
 
 *** Test Cases ***

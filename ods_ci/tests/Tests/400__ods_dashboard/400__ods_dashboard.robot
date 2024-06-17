@@ -59,7 +59,7 @@ Verify Content In RHODS Explore Section
     ...       ProductBug
     ...       AutomationBugOnODH
     # TODO: In ODH there are only 2 Apps, we excpect 7 Apps according to:
-    # ods_ci/tests/Resources/Files/AppsInfoDictionary_latest.json
+    # tests/Resources/Files/AppsInfoDictionary_latest.json
     ${EXP_DATA_DICT}=    Load Expected Data Of RHODS Explore Section
     Click Link    Explore
     Wait For RHODS Dashboard To Load    expected_page=Explore
@@ -73,7 +73,7 @@ Verify RHODS Explore Section Contains Only Expected ISVs
     ...       ODS-1890
     ...       AutomationBugOnODH
     # TODO: In ODH there are only 2 Apps, we excpect 7 Apps according to:
-    # ods_ci/tests/Resources/Files/AppsInfoDictionary_latest.json
+    # tests/Resources/Files/AppsInfoDictionary_latest.json
     ${EXP_DATA_DICT}=    Load Expected Data Of RHODS Explore Section
     Click Link    Explore
     Wait For RHODS Dashboard To Load    expected_page=Explore

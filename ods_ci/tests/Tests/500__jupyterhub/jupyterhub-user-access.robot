@@ -30,7 +30,7 @@ Verify User Can Set Custom RHODS Groups
     ...                command. There is an another test that changes users/groups
     ...                via ODH Dashboard UI in `Settings -> User management` section, see:
     ...                `Verify Unauthorized User Is Not Able To Spawn Jupyter Notebook` in
-    ...                ods_ci/tests/Tests/400__ods_dashboard/413__ods_dashboard_user_mgmt.robot
+    ...                tests/Tests/400__ods_dashboard/413__ods_dashboard_user_mgmt.robot
     [Tags]  Tier1
     ...     ODS-293    ODS-503
     [Setup]      Set Standard RHODS Groups Variables

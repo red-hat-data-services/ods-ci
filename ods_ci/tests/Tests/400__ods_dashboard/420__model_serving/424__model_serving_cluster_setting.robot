@@ -9,6 +9,7 @@ Test Tags        modelservingsetting  ODS-2574  Tier1  Sanity
 
 *** Variables ***
 ${project_title}=  BLANKPROJ
+${models_tab}=  //button[@role="tab" and @aria-controls="model-server"]
 
 *** Test Cases ***
 Verify Correct Value in DS Project after Enabling Both Model Serving Platforms
@@ -19,9 +20,9 @@ Verify Correct Value in DS Project after Enabling Both Model Serving Platforms
     Capture Page Screenshot
     Save Changes In Cluster Settings
     Open Data Science Project Details Page      ${project_title}    tab_id=model-server
-    Click Element     //a[@href="#model-server"]
-    Wait Until Page Contains Element    //*[@id="single-serving-platform-card"]
-    Wait Until Page Contains Element    //*[@id="multi-serving-platform-card"]
+    Click Button     xpath:${models_tab}
+    Wait Until Page Contains Element    //*[@data-testid="single-serving-platform-card"]
+    Wait Until Page Contains Element    //*[@data-testid="multi-serving-platform-card"]
 
 Verify Correct Value in DS Project after Enabling Multi Model Serving Platforms Only
     [Documentation]    Verifies that correct values are present in the DS project after enabling Multi Model serving platforms only
@@ -30,7 +31,7 @@ Verify Correct Value in DS Project after Enabling Multi Model Serving Platforms 
     Capture Page Screenshot
     Save Changes In Cluster Settings
     Open Data Science Project Details Page      ${project_title}    tab_id=model-server
-    Click Element     //a[@href="#model-server"]
+    Click Button     xpath:${models_tab}
     Wait Until Page Contains Element    //*[contains(text(), "Multi-model serving enabled")]
     Wait Until Page Contains Element     //button[contains(text(), 'Add model server')]
     Page Should Not Contain Element    //button[contains(text(), 'Deploy model')]
@@ -42,7 +43,7 @@ Verify Correct Value in DS Project after Enabling Single Model Serving Platforms
     Capture Page Screenshot
     Save Changes In Cluster Settings
     Open Data Science Project Details Page      ${project_title}    tab_id=model-server
-    Click Element     //a[@href="#model-server"]
+    Click Button     xpath:${models_tab}
     Wait Until Page Contains Element    //button[contains(text(), 'Deploy model')]
     Wait Until Page Contains Element    //*[contains(text(), "Single-model serving enabled")]
     Page Should Not Contain Element     /button[contains(text(), 'Add model server')]
@@ -51,7 +52,7 @@ Verify Correct Value in DS Project after Disabling Both Model Serving Platforms
     [Documentation]    Verifies that correct values are present in the DS project after disabling both model serving platforms
     [Tags]  ODS-2574
     Open Data Science Project Details Page      ${project_title}    tab_id=model-server
-    Click Element     //a[@href="#model-server"]
+    Click Button     xpath:${models_tab}
     Wait Until Page Contains Element    //*[contains(text(), "No model serving platform selected")]
     Page Should Not Contain Element     /button[contains(text(), 'Add model server')]
     Page Should Not Contain Element    //button[contains(text(), 'Deploy model')]

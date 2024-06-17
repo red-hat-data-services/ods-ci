@@ -76,7 +76,7 @@ Verify Component Resources
     [Documentation]    Currently always fails, need a better way to check
     [Arguments]    ${component}
     Enable Single Component    ${component}
-    ${filepath} =    Set Variable    ods_ci/tests/Resources/Files/operatorV2/
+    ${filepath} =    Set Variable    tests/Resources/Files/operatorV2/
     ${expected} =    Get File    ${filepath}${component}.txt
     Run    oc get $(oc api-resources --namespaced=true --verbs=list -o name | awk '{printf "%s%s",sep,$0;sep=","}') --ignore-not-found -n ${APPLICATIONS_NAMESPACE} -o=custom-columns=KIND:.kind,NAME:.metadata.name | sort -k1,1 -k2,2 | grep -v "PackageManifest\\|Event\\|ClusterServiceVersion" > ${filepath}${component}_runtime.txt  # robocop: disable
     Process Resource List    filename_in=${filepath}${component}_runtime.txt

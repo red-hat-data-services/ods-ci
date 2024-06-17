@@ -30,7 +30,7 @@ ${OFFICIAL_BADGE_XP_OLD}=  div[@class='pf-v5-c-card__title']//img[contains(@clas
 ${FALLBK_IMAGE_XP}=  ${HEADER_XP}/svg[contains(@class, 'odh-card__header-fallback-img')]
 ${IMAGE_XP}=  ${HEADER_XP}//picture[contains(@class,'pf-m-picture')]/source
 ${IMAGE_XP_OLD}=  ${HEADER_XP}/img[contains(@class, 'odh-card__header-brand')]
-${APPS_DICT_PATH_LATEST}=   ods_ci/tests/Resources/Files/AppsInfoDictionary_latest.json
+${APPS_DICT_PATH_LATEST}=   tests/Resources/Files/AppsInfoDictionary_latest.json
 ${SIDEBAR_TEXT_CONTAINER_XP}=  //div[contains(@class,'odh-markdown-view')]
 ${SUCCESS_MSG_XP}=  //div[@class='pf-v5-c-alert pf-m-success']
 ${PAGE_TITLE_XP}=  //*[@data-testid="app-page-title"]

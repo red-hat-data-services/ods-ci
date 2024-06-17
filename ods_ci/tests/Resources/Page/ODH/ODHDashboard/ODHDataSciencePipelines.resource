@@ -10,7 +10,7 @@ Resource            ODHDataScienceProject/Pipelines.resource
 
 
 *** Variables ***
-${DATA_SCIENCE_PIPELINES_APPLICATION_PATH}=    ods_ci/tests/Resources/Files
+${DATA_SCIENCE_PIPELINES_APPLICATION_PATH}=    tests/Resources/Files
 ${PIPELINES_IMPORT_BTN_FORM_XP}=               xpath://*[@data-testid="import-button"]
 ${PIPELINE_NAME_INPUT_XP}=                     xpath://*[@data-testid="pipeline-name"]
 ${PIPELINE_DESC_INPUT_XP}=                     xpath://*[@data-testid="pipeline-description"]

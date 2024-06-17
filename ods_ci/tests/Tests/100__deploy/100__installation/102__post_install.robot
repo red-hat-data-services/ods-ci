@@ -275,13 +275,13 @@ Verify RHODS Notebooks Network Policies
     ${CR_name} =    Get User CR Notebook Name    username=${TEST_USER.USERNAME}
     ${policy_ctrl} =    Run
     ...    oc get networkpolicy ${CR_name}-ctrl-np -n ${NOTEBOOKS_NAMESPACE} -o json | jq '.spec.ingress[0]'
-    ${expected_policy_ctrl} =    Get File    ods_ci/tests/Resources/Files/expected_ctrl_np.txt
+    ${expected_policy_ctrl} =    Get File    tests/Resources/Files/expected_ctrl_np.txt
     Should Be Equal As Strings    ${policy_ctrl}    ${expected_policy_ctrl}
     Log    ${policy_ctrl}
     Log    ${expected_policy_ctrl}
     ${policy_oauth} =    Run
     ...    oc get networkpolicy ${CR_name}-oauth-np -n ${NOTEBOOKS_NAMESPACE} -o json | jq '.spec.ingress[0]'
-    ${expected_policy_oauth} =    Get File    ods_ci/tests/Resources/Files/expected_oauth_np.txt
+    ${expected_policy_oauth} =    Get File    tests/Resources/Files/expected_oauth_np.txt
     Should Be Equal As Strings    ${policy_oauth}    ${expected_policy_oauth}
     Log    ${policy_oauth}
     Log    ${expected_policy_oauth}

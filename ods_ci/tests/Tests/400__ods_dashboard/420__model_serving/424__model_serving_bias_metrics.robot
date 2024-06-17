@@ -21,7 +21,7 @@ ${MODEL_ALPHA}=                      demo-loan-nn-onnx-alpha
 ${MODEL_PATH_ALPHA}=                 trusty/loan_model_alpha.onnx
 ${MODEL_BETA}=                       demo-loan-nn-onnx-beta
 ${MODEL_PATH_BETA}=                  trusty/loan_model_beta.onnx
-${TRUSTYAI_RESOURCEPATH}=            ods_ci/tests/Resources/Files/TrustyAI
+${TRUSTYAI_RESOURCEPATH}=            tests/Resources/Files/TrustyAI
 ${TRUSTYAI_CR_FILEPATH}=             ${TRUSTYAI_RESOURCEPATH}/trustyai_cr.yaml
 ${aws_bucket}=                       ${S3.BUCKET_1.NAME}
 ${RUNTIME_NAME}=                     Model Bias Serving Test
@@ -146,7 +146,7 @@ Send Batch Inference Data to Model
     [Documentation]    Send Batch Inference data to the already deployed model using Curl commands
     [Arguments]        ${model_name}   ${project_name}    ${lower_range}=1     ${upper_range}=5
     FOR    ${counter}    IN RANGE    ${lower_range}    ${upper_range}
-        ${inference_input}=  Set Variable   @ods_ci/tests/Resources/Files/TrustyAI/loan_default_batched/batch_${counter}.json
+        ${inference_input}=  Set Variable   @tests/Resources/Files/TrustyAI/loan_default_batched/batch_${counter}.json
         ${inference_output}=    Get Model Inference    ${model_name}    ${inference_input}    token_auth=${FALSE}
         ...    project_title=${project_name}
         Should Contain    ${inference_output}    model_name

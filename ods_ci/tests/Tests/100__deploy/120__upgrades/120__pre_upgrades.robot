@@ -25,8 +25,8 @@ Suite Teardown     RHOSi Teardown
 *** Variables ***
 ${CUSTOM_CULLER_TIMEOUT}      60000
 ${S_SIZE}       25
-${INFERENCE_INPUT}=    @ods_ci/tests/Resources/Files/modelmesh-mnist-input.json
-${INFERENCE_INPUT_OPENVINO}=    @ods_ci/tests/Resources/Files/openvino-example-input.json
+${INFERENCE_INPUT}=    @tests/Resources/Files/modelmesh-mnist-input.json
+${INFERENCE_INPUT_OPENVINO}=    @tests/Resources/Files/openvino-example-input.json
 ${EXPECTED_INFERENCE_OUTPUT}=    {"model_name":"test-model__isvc-83d6fab7bd","model_version":"1","outputs":[{"name":"Plus214_Output_0","datatype":"FP32","shape":[1,10],"data":[-8.233053,-7.7497034,-3.4236815,12.3630295,-12.079103,17.266596,-10.570976,0.7130762,3.321715,1.3621228]}]}
 ${EXPECTED_INFERENCE_OUTPUT_OPENVINO}=    {"model_name":"test-model__isvc-8655dc7979","model_version":"1","outputs":[{"name":"Func/StatefulPartitionedCall/output/_13:0","datatype":"FP32","shape":[1,1],"data":[0.99999994]}]}
 ${PRJ_TITLE}=    model-serving-upgrade
@@ -75,7 +75,7 @@ Verify RHODS Accept Multiple Admin Groups And CRD Gets Updates
 Verify Custom Image Can Be Added
     [Documentation]  Create Custome notebook using Cli
     [Tags]  Upgrade
-    Oc Apply    kind=ImageStream   src=ods_ci/tests/Tests/100__deploy/120__upgrades/custome_image.yaml
+    Oc Apply    kind=ImageStream   src=tests/Tests/100__deploy/120__upgrades/custome_image.yaml
 
 Verify User Can Disable The Runtime
     [Documentation]  Disable the Serving runtime using Cli
@@ -112,7 +112,7 @@ Verify Model Can Be Deployed Via UI For Upgrade
 
 Verify User Can Deploy Custom Runtime For Upgrade
     [Tags]  Upgrade
-    Create Custom Serving Runtime Using Template By CLI   ods_ci/tests/Resources/Files/caikit_runtime_template.yaml
+    Create Custom Serving Runtime Using Template By CLI   tests/Resources/Files/caikit_runtime_template.yaml
     Begin Web Test
     Menu.Navigate To Page    Settings    Serving runtimes
     Wait Until Page Contains   Add serving runtime    timeout=15s

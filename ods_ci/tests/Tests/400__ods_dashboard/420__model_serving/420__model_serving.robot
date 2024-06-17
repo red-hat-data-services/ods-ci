@@ -13,8 +13,8 @@ Suite Teardown    Model Serving Suite Teardown
 Test Tags         ModelMesh
 
 *** Variables ***
-${INFERENCE_INPUT}=    @ods_ci/tests/Resources/Files/modelmesh-mnist-input.json
-${INFERENCE_INPUT_OPENVINO}=    @ods_ci/tests/Resources/Files/openvino-example-input.json
+${INFERENCE_INPUT}=    @tests/Resources/Files/modelmesh-mnist-input.json
+${INFERENCE_INPUT_OPENVINO}=    @tests/Resources/Files/openvino-example-input.json
 ${PRJ_TITLE}=    model-serving-project
 ${PRJ_DESCRIPTION}=    project used for model serving tests
 ${MODEL_CREATED}=    ${FALSE}

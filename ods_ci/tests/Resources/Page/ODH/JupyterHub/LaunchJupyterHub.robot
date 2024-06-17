@@ -1,6 +1,11 @@
 *** Settings ***
 Library  JupyterLibrary
 
+
+*** Variables ***
+# This variable is overriden for ODH runs via 'test-variables-odh-overwrite.yml'
+${ODH_DASHBOARD_PROJECT_NAME}=   Red Hat OpenShift AI
+
 *** Keywords ***
 Launch Jupyterhub via Routes
    [Documentation]  This keyword only works with kubeadmin or accounts that are

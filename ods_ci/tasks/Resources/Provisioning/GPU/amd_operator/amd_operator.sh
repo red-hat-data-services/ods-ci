@@ -100,12 +100,33 @@ function monitor_logs() {
     echo "Monitoring logs for pod $pod_name..."
 
     # Use 'kubectl logs' command to fetch logs continuously
-
+    echo podname: $pod_name
+    echo searchtext: $search_text
+    echo namespace: $ns
+    echo cname: $c_name
     oc logs "$pod_name" -c "$c_name" -n "$ns" | while read -r line; do
         if [[ $line == *"$search_text"* ]]; then
             echo "Found \"$search_text\" in pod logs: $line"
         fi
     done
+}
+
+function wait_while_cmd {
+  local seconds timeout interval
+  interval=2
+  seconds=0
+  timeout=$1
+  comm=$2
+  while "${comm[@]}"; do
+    seconds=$(( seconds + interval ))
+    sleep $interval
+    echo -n '.'
+    [[ $seconds -gt $timeout ]] && echo "Time out of ${timeout} exceeded" && return 1
+  done
+  if [[ "$seconds" != '0' ]]; then
+    echo ''
+  fi
+  return 0
 }
 
 check_registry
@@ -132,5 +153,7 @@ echo "Installing AMD operator"
 oc apply -f "$GPU_INSTALL_DIR/amd_gpu_install.yaml"
 wait_while 360 ! has_csv_succeeded openshift-amd-gpu amd-gpu-operator
 create_devconfig
-name=$(oc get pod -n openshift-amd-gpu -l openshift.io/build.name -oname)
-wait_while 1200 ! monitor_logs "$name" "Successfully pushed image-registry.openshift-image-registry.svc:5000/openshift-amd-gpu" openshift-amd-gpu docker-build
+name=$(oc get pod -n openshift-amd-gpu -l openshift.io/build.name -oname | echo "notFound")
+# TO DO - fail fast if "notFound"
+cmd=(monitor_logs $name "Successfully pushed image-registry.openshift-image-registry.svc:5000/openshift-amd-gpu" openshift-amd-gpu docker-build)
+wait_while_cmd 1200 $cmd

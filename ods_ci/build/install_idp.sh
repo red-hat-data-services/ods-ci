@@ -30,7 +30,7 @@ function generate_rand_string(){
 
 function generate_rand_user_base_suffix(){
   array=()
-  for i in {a..z} {A..Z}; 
+  for i in {a..z} {A..Z};
     do
     array[$RANDOM]=$i
   done
@@ -63,14 +63,14 @@ function generate_custom_suffixes(){
         quotes_flag=$(echo $suffix | egrep -o '".+"')
         if [[ -n $quotes_flag ]]; then
           complete_name=$(echo $complete_name | tr -d '"')
-        fi        
+        fi
         USERS_ARR+=($complete_name)
         PWS_ARR+=($pw)
     done
 }
 
 function extract_testvariables_users_mapping(){
-  test_user_mapping=$(jq -r --arg idpname $1 --arg test_user $2 '.[][$idpname][$test_user]' ods_ci/configs/templates/user_config.json)
+  test_user_mapping=$(jq -r --arg idpname $1 --arg test_user $2 '.[][$idpname][$test_user]' configs/templates/user_config.json)
   users_string=$3
   if [[ "$test_user_mapping" = *"<RAND_BASE>"* ]]; then
       test_user_regex=$(echo "${test_user_mapping/<RAND_BASE>/"[a-zA-Z]+"}")
@@ -82,7 +82,7 @@ function extract_testvariables_users_mapping(){
 }
 function generate_users_creds(){
   echo "--> Generating users based on requested configuration"
-  idp=$(jq --arg idpname $1 '.[][$idpname]' ods_ci/configs/templates/user_config.json)
+  idp=$(jq --arg idpname $1 '.[][$idpname]' configs/templates/user_config.json)
   USERS_ARR=()
   PWS_ARR=()
   pw=$(echo $idp | jq -r '.pw')
@@ -144,12 +144,12 @@ function set_htpasswd_users_and_login(){
     else
         htp_string=$(htpasswd -b -B -n $cluster_adm_user $htp_pw)
         oc create secret generic htpasswd-secret --from-literal=htpasswd="$htp_string" -n openshift-config
-        OAUTH_HTPASSWD_JSON="$(cat ods_ci/configs/resources/oauth_htp_idp.json)"
+        OAUTH_HTPASSWD_JSON="$(cat configs/resources/oauth_htp_idp.json)"
         oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders/-", "value": '"$OAUTH_HTPASSWD_JSON"'}]'
-        cp ods_ci/configs/templates/ca-rolebinding.yaml ods_ci/configs/ca-rolebinding.yaml
-        sed -i'' -e "s/<rolebinding_name>/ods-ci-htp-admin/g" ods_ci/configs/ca-rolebinding.yaml
-        sed -i'' -e "s/<username>/$cluster_adm_user/g" ods_ci/configs/ca-rolebinding.yaml
-        oc apply -f ods_ci/configs/ca-rolebinding.yaml
+        cp configs/templates/ca-rolebinding.yaml configs/ca-rolebinding.yaml
+        sed -i'' -e "s/<rolebinding_name>/ods-ci-htp-admin/g" configs/ca-rolebinding.yaml
+        sed -i'' -e "s/<username>/$cluster_adm_user/g" configs/ca-rolebinding.yaml
+        oc apply -f configs/ca-rolebinding.yaml
   fi
   # login using htpasswd
   echo "----> Performing log in with newly created HTP user"
@@ -158,17 +158,17 @@ function set_htpasswd_users_and_login(){
   # add more htpasswd users, if present
   echo "---> Adding additional HTP users, if needed per requested configuration"
   secret_name=$(oc get oauth cluster -o json | jq -r '.spec.identityProviders[] | select(.htpasswd!=null) | .htpasswd.fileData.name')
-  oc get secret $secret_name -ojsonpath={.data.htpasswd} -n openshift-config | base64 --decode > ods_ci/configs/users.htpasswd
+  oc get secret $secret_name -ojsonpath={.data.htpasswd} -n openshift-config | base64 --decode > configs/users.htpasswd
   update_secret=0
   for htp_user in "${HTP_USERS[@]}"; do
     if [[ ! "$htp_user" =  "$cluster_adm_user" ]]
       then
-        htpasswd -bB ods_ci/configs/users.htpasswd $htp_user $htp_pw
+        htpasswd -bB configs/users.htpasswd $htp_user $htp_pw
         update_secret=1
     fi
   done
   if [[ $update_secret -eq 1 ]]; then
-    oc create secret generic $secret_name --from-file=htpasswd=ods_ci/configs/users.htpasswd --dry-run=client -o yaml -n openshift-config | oc replace -f -
+    oc create secret generic $secret_name --from-file=htpasswd=configs/users.htpasswd --dry-run=client -o yaml -n openshift-config | oc replace -f -
   else
     echo "----> SKIP"
   fi
@@ -176,16 +176,16 @@ function set_htpasswd_users_and_login(){
   # update test-variables.yml with admin creds
   export adm_user=$cluster_adm_user
   export adm_p=$htp_pw
-  yq --inplace '.OCP_ADMIN_USER.AUTH_TYPE="htpasswd"' ods_ci/test-variables.yml
-  yq --inplace '.OCP_ADMIN_USER.USERNAME=env(adm_user)' ods_ci/test-variables.yml
-  yq --inplace '.OCP_ADMIN_USER.PASSWORD=env(adm_p)' ods_ci/test-variables.yml
+  yq --inplace '.OCP_ADMIN_USER.AUTH_TYPE="htpasswd"' test-variables.yml
+  yq --inplace '.OCP_ADMIN_USER.USERNAME=env(adm_user)' test-variables.yml
+  yq --inplace '.OCP_ADMIN_USER.PASSWORD=env(adm_p)' test-variables.yml
 
 }
 
 function set_ldap_users(){
   generate_users_creds  ldap
   LDAP_USERS=("${USERS_ARR[@]}")
-  LDAP_PWS=("${PWS_ARR[@]}")  
+  LDAP_PWS=("${PWS_ARR[@]}")
   ldap_users_str=$(printf ,%s ${LDAP_USERS[@]})
   ldap_pws_str=$(printf ,%s ${LDAP_PWS[@]})
   ldap_users_str=${ldap_users_str:1}
@@ -195,16 +195,16 @@ function set_ldap_users(){
   rand_base64=$(echo -n $ldap_pws_str | base64 -w 0)
   # update ldap.yaml with creds
   echo "--> configuring LDAP server and users"
-  cp ods_ci/configs/templates/ldap/ldap.yaml  ods_ci/configs/ldap.yaml
-  sed -i'' -e "s/<users_string>/$users_base64/g" ods_ci/configs/ldap.yaml
-  sed -i'' -e "s/<passwords_string>/$rand_base64/g" ods_ci/configs/ldap.yaml
+  cp configs/templates/ldap/ldap.yaml  configs/ldap.yaml
+  sed -i'' -e "s/<users_string>/$users_base64/g" configs/ldap.yaml
+  sed -i'' -e "s/<passwords_string>/$rand_base64/g" configs/ldap.yaml
   rand=$(generate_rand_string)
   export RAND_ADMIN=$rand
   rand_base64=$(echo -n $rand | base64 -w 0)
-  sed -i'' -e "s/<adminpassword>/$rand_base64/g" ods_ci/configs/ldap.yaml
+  sed -i'' -e "s/<adminpassword>/$rand_base64/g" configs/ldap.yaml
 
   # create ldap deployment
-  oc apply -f ods_ci/configs/ldap.yaml
+  oc apply -f configs/ldap.yaml
   if [ "${USE_OCM_IDP}" -eq 1 ]
       then
           ocm_clusterid=$(ocm list clusters  --no-headers --parameter search="api.url = '${OC_HOST}'" | awk '{print $1}')
@@ -213,14 +213,14 @@ function set_ldap_users(){
             echo "Cluster $OC_HOST not found. Please fix it and try again..."
             exit 1
           fi
-          cp  ods_ci/utils/scripts/ocm/templates/create_ldap_idp.jinja  ods_ci/configs/create_ldap_idp.jinja
-          sed -i'' -e "s/{{ LDAP_BIND_PASSWORD }}/$RAND_ADMIN/g" ods_ci/configs/create_ldap_idp.jinja
-          sed -i'' -e "s/{{ LDAP_BIND_DN }}/cn=admin,dc=example,dc=org/g" ods_ci/configs/create_ldap_idp.jinja
-          sed -i'' -e 's/{{ LDAP_URL }}/ldap:\/\/openldap.openldap.svc.cluster.local:1389\/dc=example,dc=org?uid/g' ods_ci/configs/create_ldap_idp.jinja
-          ocm post /api/clusters_mgmt/v1/clusters/${ocm_clusterid}/identity_providers --body=ods_ci/configs/create_ldap_idp.jinja
+          cp  utils/scripts/ocm/templates/create_ldap_idp.jinja  configs/create_ldap_idp.jinja
+          sed -i'' -e "s/{{ LDAP_BIND_PASSWORD }}/$RAND_ADMIN/g" configs/create_ldap_idp.jinja
+          sed -i'' -e "s/{{ LDAP_BIND_DN }}/cn=admin,dc=example,dc=org/g" configs/create_ldap_idp.jinja
+          sed -i'' -e 's/{{ LDAP_URL }}/ldap:\/\/openldap.openldap.svc.cluster.local:1389\/dc=example,dc=org?uid/g' configs/create_ldap_idp.jinja
+          ocm post /api/clusters_mgmt/v1/clusters/${ocm_clusterid}/identity_providers --body=configs/create_ldap_idp.jinja
       else
           oc create secret generic ldap-bind-password --from-literal=bindPassword="$RAND_ADMIN" -n openshift-config
-          OAUTH_LDAP_JSON="$(cat ods_ci/configs/resources/oauth_ldap_idp.json)"
+          OAUTH_LDAP_JSON="$(cat configs/resources/oauth_ldap_idp.json)"
           oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders/-", "value": '"$OAUTH_LDAP_JSON"'}]'
   fi
 
@@ -230,21 +230,21 @@ function set_ldap_users(){
   test_user_4=$(extract_testvariables_users_mapping  ldap TEST_USER_4 $ldap_users_str)
   export ldap_pw=$ldap_pw
   export username=$test_user
-  yq --inplace '.TEST_USER.AUTH_TYPE="ldap-provider-qe"' ods_ci/test-variables.yml
-  yq --inplace '.TEST_USER.USERNAME=env(username)' ods_ci/test-variables.yml
-  yq --inplace '.TEST_USER.PASSWORD=env(ldap_pw)' ods_ci/test-variables.yml
+  yq --inplace '.TEST_USER.AUTH_TYPE="ldap-provider-qe"' test-variables.yml
+  yq --inplace '.TEST_USER.USERNAME=env(username)' test-variables.yml
+  yq --inplace '.TEST_USER.PASSWORD=env(ldap_pw)' test-variables.yml
   export username=$test_user_2
-  yq --inplace '.TEST_USER_2.AUTH_TYPE="ldap-provider-qe"' ods_ci/test-variables.yml
-  yq --inplace '.TEST_USER_2.USERNAME=env(username)' ods_ci/test-variables.yml
-  yq --inplace '.TEST_USER_2.PASSWORD=env(ldap_pw)' ods_ci/test-variables.yml
+  yq --inplace '.TEST_USER_2.AUTH_TYPE="ldap-provider-qe"' test-variables.yml
+  yq --inplace '.TEST_USER_2.USERNAME=env(username)' test-variables.yml
+  yq --inplace '.TEST_USER_2.PASSWORD=env(ldap_pw)' test-variables.yml
   export username=$test_user_3
-  yq --inplace '.TEST_USER_3.AUTH_TYPE="ldap-provider-qe"' ods_ci/test-variables.yml
-  yq --inplace '.TEST_USER_3.USERNAME=env(username)' ods_ci/test-variables.yml
-  yq --inplace '.TEST_USER_3.PASSWORD=env(ldap_pw)' ods_ci/test-variables.yml
+  yq --inplace '.TEST_USER_3.AUTH_TYPE="ldap-provider-qe"' test-variables.yml
+  yq --inplace '.TEST_USER_3.USERNAME=env(username)' test-variables.yml
+  yq --inplace '.TEST_USER_3.PASSWORD=env(ldap_pw)' test-variables.yml
   export username=$test_user_4
-  yq --inplace '.TEST_USER_4.AUTH_TYPE="ldap-provider-qe"' ods_ci/test-variables.yml
-  yq --inplace '.TEST_USER_4.USERNAME=env(username)' ods_ci/test-variables.yml
-  yq --inplace '.TEST_USER_4.PASSWORD=env(ldap_pw)' ods_ci/test-variables.yml
+  yq --inplace '.TEST_USER_4.AUTH_TYPE="ldap-provider-qe"' test-variables.yml
+  yq --inplace '.TEST_USER_4.USERNAME=env(username)' test-variables.yml
+  yq --inplace '.TEST_USER_4.PASSWORD=env(ldap_pw)' test-variables.yml
 
 }
 
@@ -254,7 +254,7 @@ function create_groups_and_assign_users(){
   oc adm groups new rhods-noaccess
   oc adm groups new dedicated-admins
   for prefix in "${prefixes[@]}"; do
-    groups=$(jq -r --arg idpname ldap --arg pref $prefix '.[][$idpname].groups_map[$pref][]' ods_ci/configs/templates/user_config.json)
+    groups=$(jq -r --arg idpname ldap --arg pref $prefix '.[][$idpname].groups_map[$pref][]' configs/templates/user_config.json)
     echo $groups
     groups=($groups)
     for group in "${groups[@]}"; do
@@ -294,7 +294,7 @@ function install_identity_provider(){
   echo "Stage) Setting LDAP Identity provider"
   set_ldap_users
   echo "Stage) Configure RHODS test user groups"
-  create_groups_and_assign_users  
+  create_groups_and_assign_users
   echo "Stage) Sleeping 180sec to wait for IDPs to become available"
   sleep 180
 }
@@ -335,7 +335,7 @@ function check_installation(){
 
 function validate_user_config_fields_and_values(){
   echo "--> Going through requested users configuration"
-  idp=$(jq --arg idpname $1 '.[][$idpname]' ods_ci/configs/templates/user_config.json)
+  idp=$(jq --arg idpname $1 '.[][$idpname]' configs/templates/user_config.json)
   pw=$(echo $idp | jq -r '.pw')
   if  [[ $pw = "null" || -z "${pw// }" ]]; then
     echo ".pw must be set with a custom value (i.e., no empty string or whitespacesonly) or <GEN_RAMDOM_PW>"
@@ -424,7 +424,7 @@ function validate_user_config_fields_and_values(){
             echo "The given suffix type $suffix_type is not supported..try again"
       esac
       if [[ $1 = "ldap" ]]; then
-        groups=$(jq -r --arg idpname ldap --arg pref $prefix '.[][$idpname].groups_map[$pref][]' ods_ci/configs/templates/user_config.json)
+        groups=$(jq -r --arg idpname ldap --arg pref $prefix '.[][$idpname].groups_map[$pref][]' configs/templates/user_config.json)
         groups=($groups)
         if  [[ $groups = "null" || -z "${groups// }" || ! ${#groups[@]} -gt 0 ]]; then
               echo ".groups_map must be set and have more than 0 element!"
@@ -436,12 +436,12 @@ function validate_user_config_fields_and_values(){
 
 function validate_user_config_file(){
   echo "Stage) validating user_config.json"
-  if [ ! -f "ods_ci/configs/templates/user_config.json" ]; then
-    echo user_config.json is not present in ods_ci/configs/templates! Fix it and try again...
+  if [ ! -f "configs/templates/user_config.json" ]; then
+    echo user_config.json is not present in configs/templates! Fix it and try again...
     exit 1
   else
     echo user_config.json found! Starting json validation..
-  fi  
+  fi
   validate_user_config_fields_and_values htpasswd
   validate_user_config_fields_and_values ldap
 }

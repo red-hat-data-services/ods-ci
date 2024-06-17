@@ -19,7 +19,7 @@ ${SERVERLESS_NS}=    openshift-serverless
 ${SERVERLESS_CR_NS}=    knative-serving
 ${SERVERLESS_KNATIVECR_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/knativeserving_istio.yaml
 ${SERVERLESS_GATEWAYS_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/gateways.yaml
-${WILDCARD_GEN_SCRIPT_FILEPATH}=    ods_ci/utils/scripts/generate-wildcard-certs.sh
+${WILDCARD_GEN_SCRIPT_FILEPATH}=    utils/scripts/generate-wildcard-certs.sh
 ${SERVICEMESH_OP_NAME}=     servicemeshoperator
 ${SERVICEMESH_SUB_NAME}=    servicemeshoperator
 ${SERVICEMESH_CONTROLPLANE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/smcp.yaml
@@ -752,7 +752,7 @@ Deploy Serverless CRs
 
 Configure KNative Gateways
     [Documentation]    Sets up the KNative (Serverless) Gateways
-    ${base_dir}=    Set Variable    ods_ci/tmp/certs
+    ${base_dir}=    Set Variable    tmp/certs
     ${exists}=    Run Keyword And Return Status
     ...    Directory Should Exist    ${base_dir}
     IF    ${exists} == ${FALSE}

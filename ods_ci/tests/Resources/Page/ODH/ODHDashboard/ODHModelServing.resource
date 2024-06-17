@@ -25,7 +25,7 @@ ${MS_TABLE_STATUS_SUCCESS}=     //span[contains(@class,"pf-v5-c-icon__content")]
 ${MS_TABLE_STATUS_FAILURE}=     //span[contains(@class,"pf-v5-c-icon__content")][contains(@class,"pf-m-danger")]
 ${KSERVE_MODAL_HEADER}=    //header[@class="pf-v5-c-modal-box__header"]/h1[.="Deploy model"]
 ${KSERVE_RUNTIME_DROPDOWN}=    //button[@data-testid="serving-runtime-template-selection"]
-${LLM_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files/llm
+${LLM_RESOURCES_DIRPATH}=    tests/Resources/Files/llm
 ${DEPLOY_MODEL_BTN}=    //button[contains(@data-testid,"deploy")]
 
 

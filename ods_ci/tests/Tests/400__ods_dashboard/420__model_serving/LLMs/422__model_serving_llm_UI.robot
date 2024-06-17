@@ -277,10 +277,11 @@ Verify User With Edit Permission Can Deploy Query And Delete A LLM
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
     Move To Tab    Permissions
     Assign Edit Permissions To User ${TEST_USER_3.USERNAME}
-    Move To Tab    Components
+    Move To Tab    Overview
     Logout From RHODS Dashboard
     Login To RHODS Dashboard    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}    ${TEST_USER_3.AUTH_TYPE}
-    Wait For RHODS Dashboard To Load    expected_page=${test_namespace}    wait_for_cards=${FALSE}
+    Wait For RHODS Dashboard To Load
+    Open Data Science Project Details Page    ${test_namespace}
     Run Keyword And Continue On Failure    Deploy Kserve Model Via UI    ${flan_model_name}    Caikit    kserve-connection    flan-t5-small/${flan_model_name}
     # Needed because of ProductBug
     ${modal}=    Run Keyword And Return Status    Page Should Contain Element    xpath=${KSERVE_MODAL_HEADER}
@@ -299,7 +300,7 @@ Verify User With Edit Permission Can Deploy Query And Delete A LLM
     Run Keyword And Continue On Failure    Delete Model Via UI    ${flan_model_name}
     Logout From RHODS Dashboard
     Login To RHODS Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
-    Wait For RHODS Dashboard To Load    expected_page=${test_namespace}    wait_for_cards=${FALSE}
+    Wait For RHODS Dashboard To Load
     [Teardown]    Clean Up DSP Page
 
 Verify User With Admin Permission Can Deploy Query And Delete A LLM
@@ -311,10 +312,11 @@ Verify User With Admin Permission Can Deploy Query And Delete A LLM
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
     Move To Tab    Permissions
     Assign Admin Permissions To User ${TEST_USER_3.USERNAME}
-    Move To Tab    Components
+    Move To Tab    Overview
     Logout From RHODS Dashboard
     Login To RHODS Dashboard    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}    ${TEST_USER_3.AUTH_TYPE}
-    Wait For RHODS Dashboard To Load    expected_page=${test_namespace}    wait_for_cards=${FALSE}
+    Wait For RHODS Dashboard To Load
+    Open Data Science Project Details Page    ${test_namespace}
     Deploy Kserve Model Via UI    ${flan_model_name}    Caikit    kserve-connection    flan-t5-small/${flan_model_name}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
@@ -327,7 +329,7 @@ Verify User With Admin Permission Can Deploy Query And Delete A LLM
     Delete Model Via UI    ${flan_model_name}
     Logout From RHODS Dashboard
     Login To RHODS Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
-    Wait For RHODS Dashboard To Load    expected_page=${test_namespace}    wait_for_cards=${FALSE}
+    Wait For RHODS Dashboard To Load
     [Teardown]    Clean Up DSP Page
 
 

@@ -9,7 +9,7 @@ Test Tags         KServe
 
 
 *** Variables ***
-${LLM_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files/llm
+${LLM_RESOURCES_DIRPATH}=    tests/Resources/Files/llm
 ${TEST_NS}=    runtimes-ui
 ${EXP_RESPONSES_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/model_expected_responses.json
 ${FLAN_MODEL_S3_DIR}=    flan-t5-small/flan-t5-small-hf

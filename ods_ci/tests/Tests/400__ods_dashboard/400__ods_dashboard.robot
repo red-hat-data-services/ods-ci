@@ -56,6 +56,9 @@ Verify Content In RHODS Explore Section
     [Tags]    Sanity    Tier1
     ...       ODS-488    ODS-993    ODS-749    ODS-352    ODS-282
     ...       ProductBug
+    ...       AutomationBugOnODH
+    # TODO: In ODH there are only 2 Apps, we excpect 7 Apps according to:
+    # tests/Resources/Files/AppsInfoDictionary_latest.json
     ${EXP_DATA_DICT}=    Load Expected Data Of RHODS Explore Section
     Click Link    Explore
     Wait For RHODS Dashboard To Load    expected_page=Explore
@@ -67,6 +70,9 @@ Verify RHODS Explore Section Contains Only Expected ISVs
     [Tags]    Smoke
     ...       Tier1
     ...       ODS-1890
+    ...       AutomationBugOnODH
+    # TODO: In ODH there are only 2 Apps, we excpect 7 Apps according to:
+    # tests/Resources/Files/AppsInfoDictionary_latest.json
     ${EXP_DATA_DICT}=    Load Expected Data Of RHODS Explore Section
     Click Link    Explore
     Wait For RHODS Dashboard To Load    expected_page=Explore

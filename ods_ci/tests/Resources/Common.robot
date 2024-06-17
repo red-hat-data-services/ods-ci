@@ -13,8 +13,8 @@ Resource  RHOSi.resource
 
 *** Variables ***
 @{DEFAULT_CHARS_TO_ESCAPE}=    :    /    .
-${UWM_CONFIG_FILEPATH}=       ods_ci/tests/Resources/Files/uwm_cm_conf.yaml
-${UWM_ENABLE_FILEPATH}=       ods_ci/tests/Resources/Files/uwm_cm_enable.yaml
+${UWM_CONFIG_FILEPATH}=       tests/Resources/Files/uwm_cm_conf.yaml
+${UWM_ENABLE_FILEPATH}=       tests/Resources/Files/uwm_cm_enable.yaml
 
 
 *** Keywords ***

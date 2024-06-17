@@ -4,10 +4,10 @@ SKIP_OC_LOGIN=false
 SERVICE_ACCOUNT=""
 SA_NAMESPACE="default"
 SET_RHODS_URLS=false
-TEST_CASE_FILE=ods_ci/tests/Tests
-TEST_VARIABLES_FILE=ods_ci/test-variables.yml
+TEST_CASE_FILE=tests/Tests
+TEST_VARIABLES_FILE=test-variables.yml
 TEST_VARIABLES=""
-TEST_ARTIFACT_DIR="ods_ci/test-output"
+TEST_ARTIFACT_DIR="test-output"
 EXTRA_ROBOT_ARGS=""
 SKIP_INSTALL=0
 TEST_INCLUDE_TAG=""
@@ -388,7 +388,7 @@ if ${EMAIL_REPORT}
             rm rf_results.tar.gz
             tar cvzf rf_results.tar.gz $(find "${TEST_ARTIFACT_DIR}" -regex  '.*\(xml\|html\)$') &> /dev/null
      fi
-     python3 ods_ci/utils/scripts/Sender/send_report.py send_email_report -s "${EMAIL_FROM}" -r "${EMAIL_TO}" -b "ODS-CI: Run Results" \
+     python3 utils/scripts/Sender/send_report.py send_email_report -s "${EMAIL_FROM}" -r "${EMAIL_TO}" -b "ODS-CI: Run Results" \
                         -v "${EMAIL_SERVER}" -a "rf_results.tar.gz" -u "${EMAIL_SERVER_USER}" -p "${EMAIL_SERVER_PW}" \
                         -l "${EMAIL_SERVER_SSL}" -d "${EMAIL_SERVER_UNSECURE}"
 fi

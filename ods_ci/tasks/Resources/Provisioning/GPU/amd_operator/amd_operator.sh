@@ -65,26 +65,26 @@ metadata:
 EOF
 }
 
-function wait_until_pod_ready_status() {
-  local timeout_seconds=1200
-  local pod_label=$1
-  local namespace=$2
-  local timeout=240
+function wait_until_pod_is_created() {
+  label=$1
+  namespace=$2
+  timeout=$3
   start_time=$(date +%s)
   while [ $(($(date +%s) - start_time)) -lt $timeout ]; do
-     pod_status="$(oc get pod -l app="$pod_label" -n "$namespace" --no-headers=true 2>/dev/null)"
-     daemon_status="$(oc get daemonset -l app="$pod_label" -n "$namespace" --no-headers=true 2>/dev/null)"
-     if [[ -n "$daemon_status" || -n "$pod_status" ]] ; then
-        echo "Waiting until GPU Pods or Daemonset of '$pod_label' in namespace '$namespace' are in running state..."
-        echo "Pods status: '$pod_status'"
-        echo "Daemonset status: '$daemon_status'"
-        oc wait --timeout="${timeout_seconds}s" --for=condition=ready pod -n "$namespace" -l app="$pod_label" || \
-        oc rollout status --watch --timeout=3m daemonset -n "$namespace" -l app="$pod_label" || continue
+    podName=$(oc get pods -n $2 -l $1 -oname)
+    if [[ -n $podName ]];
+      then {
+        echo Pod $podName found!
+        return 0
         break
-     fi
-     echo "Waiting for Pods or Daemonset with label app='$pod_label' in namespace '$namespace' to be present..."
-     sleep 5
+      } else {
+        echo "waiting for pod"
+        sleep 1
+      }
+    fi
   done
+  echo "Timeout exceeded, pod with label $label not found"
+  return 1
 }
 
 function machineconfig_updates {
@@ -94,11 +94,11 @@ function machineconfig_updates {
 
 function monitor_logs() {
     local pod_name=$1
-    local search_text=$2
-    local ns=$3
-    local c_name=$4
+    local ns=$2
+    local c_name=$3
+    shift 3
+    local search_text=$(printf "%q " "$@")
     echo "Monitoring logs for pod $pod_name..."
-
     # Use 'kubectl logs' command to fetch logs continuously
     echo podname: $pod_name
     echo searchtext: $search_text
@@ -109,24 +109,6 @@ function monitor_logs() {
             echo "Found \"$search_text\" in pod logs: $line"
         fi
     done
-}
-
-function wait_while_cmd {
-  local seconds timeout interval
-  interval=2
-  seconds=0
-  timeout=$1
-  comm=$2
-  while "${comm[@]}"; do
-    seconds=$(( seconds + interval ))
-    sleep $interval
-    echo -n '.'
-    [[ $seconds -gt $timeout ]] && echo "Time out of ${timeout} exceeded" && return 1
-  done
-  if [[ "$seconds" != '0' ]]; then
-    echo ''
-  fi
-  return 0
 }
 
 check_registry
@@ -153,7 +135,12 @@ echo "Installing AMD operator"
 oc apply -f "$GPU_INSTALL_DIR/amd_gpu_install.yaml"
 wait_while 360 ! has_csv_succeeded openshift-amd-gpu amd-gpu-operator
 create_devconfig
-name=$(oc get pod -n openshift-amd-gpu -l openshift.io/build.name -oname | echo "notFound")
-# TO DO - fail fast if "notFound"
-cmd=(monitor_logs $name "Successfully pushed image-registry.openshift-image-registry.svc:5000/openshift-amd-gpu" openshift-amd-gpu docker-build)
-wait_while_cmd 1200 $cmd
+wait_until_pod_is_created  openshift.io/build.name openshift-amd-gpu 180
+if [[ $? -eq 0 ]];
+  then
+    name=$(oc get pod -n openshift-amd-gpu -l openshift.io/build.name -oname)
+    echo Builder pod name: $name
+  else 
+    exit 1
+fi
+wait_while 1200 ! monitor_logs "$name" openshift-amd-gpu docker-build "Successfully pushed image-registry.openshift-image-registry.svc:5000/openshift-amd-gpu"

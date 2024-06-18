@@ -100,10 +100,6 @@ function monitor_logs() {
     local search_text=$(printf "%q " "$@")
     echo "Monitoring logs for pod $pod_name..."
     # Use 'kubectl logs' command to fetch logs continuously
-    echo podname: $pod_name
-    echo searchtext: $search_text
-    echo namespace: $ns
-    echo cname: $c_name
     oc logs "$pod_name" -c "$c_name" -n "$ns" | while read -r line; do
         if [[ $line == *"$search_text"* ]]; then
             echo "Found \"$search_text\" in pod logs: $line"
@@ -140,7 +136,8 @@ if [[ $? -eq 0 ]];
   then
     name=$(oc get pod -n openshift-amd-gpu -l openshift.io/build.name -oname)
     echo Builder pod name: $name
+    oc wait --timeout="60s" --for=condition=ready pod -n openshift-amd-gpu -l openshift.io/build.name
   else 
     exit 1
 fi
-wait_while 1200 ! monitor_logs "$name" openshift-amd-gpu docker-build "Successfully pushed image-registry.openshift-image-registry.svc:5000/openshift-amd-gpu"
+wait_while 1200 monitor_logs "$name" openshift-amd-gpu docker-build "Successfully pushed image-registry.openshift-image-registry.svc:5000/openshift-amd-gpu"

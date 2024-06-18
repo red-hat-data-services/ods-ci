@@ -34,13 +34,13 @@ items:
         platform:
           aws:
             type: {{ worker_node_instance_type|default("m5.2xlarge") }}
-        replicas: {{ worker_node_replicas|default("2") }}
+        replicas: {{ worker_node_replicas|default("0") }}
       controlPlane:
         name: master
         platform:
           aws:
             type: {{ master_node_instance_type|default("m5.2xlarge") }}
-        replicas: {{ master_node_replicas|default("3") }}
+        replicas: {{ master_node_replicas|default("1") }}
       metadata:
         name: aws-sno
       networking:

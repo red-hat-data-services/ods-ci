@@ -34,13 +34,13 @@ items:
         platform:
           gcp:
             type: {{ worker_node_instance_type|default("custom-8-32768") }}
-        replicas: {{ worker_node_replicas|default("2") }}
+        replicas: {{ worker_node_replicas|default("0") }}
       controlPlane:
         name: master
         platform:
           gcp:
             type: {{ master_node_instance_type|default("custom-8-32768") }}
-        replicas: {{ master_node_replicas|default("3") }}
+        replicas: {{ master_node_replicas|default("1") }}
       metadata:
         name: gcp-sno
       networking:

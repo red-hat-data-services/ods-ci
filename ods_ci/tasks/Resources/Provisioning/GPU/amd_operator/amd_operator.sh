@@ -122,8 +122,10 @@ function wait_until_driver_image_is_built() {
   oc wait --timeout="${build_timeout}s" --for=delete pod -n openshift-amd-gpu -l openshift.io/build.name
   echo "Checking the image stream got created"
   image=$(oc get is amd_gpu_kmm_modules -n openshift-amd-gpu -oname)
-  if [[ ! $? -eq 0 ]];
+  if [[ $? -eq 0 ]];
     then
+      echo ".Image Stream $image found! configuration completed."
+    else
       echo ".Image Stream amd_gpu_kmm_modules not found. Check the cluster"
       exit 1
   fi

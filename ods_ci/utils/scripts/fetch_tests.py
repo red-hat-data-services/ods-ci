@@ -92,7 +92,7 @@ def extract_test_cases_from_ref(repo_local_path, ref, auto=False, selector_attri
         print(f"\n---| Extracting test cases from {ref} branch/commit |---")
         checkout_repository(ref)
         builder = TestSuiteBuilder()
-        testsuite = builder.build("ods_ci/tests/")
+        testsuite = builder.build("tests/")
         finder = TestCasesFinder()
         tests = []
         testsuite.visit(finder)

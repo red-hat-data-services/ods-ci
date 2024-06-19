@@ -71,11 +71,14 @@ GITHUB_USER:
 COMPONENTS:
   dashboard: Managed
   datasciencepipelines: Managed
-  kserve: Removed
+  ray: Managed
+  codeflare: Managed
   modelmeshserving: Managed
-  workbenches: Removed
-  codeflare: Removed
-  ray: Removed
+  workbenches: Managed
+  kserve: Managed
+  trustyai: Managed
+  kueue: Managed
+  trainingoperator: Removed
 PRODUCT: RHODS
 OPERATOR_NAME: rhods-operator
 APPLICATIONS_NAMESPACE: redhat-ods-applications

@@ -22,9 +22,9 @@ ${REQUESTED_RESOURCES_TITLE_XP}=    xpath=//div[text()="Requested resources"]
 ${RESOURCES_CONSUMING_TITLE_XP}=    xpath=//div[text()="Top resource-consuming distributed workloads"]
 ${MAX_RETRIES}=    3
 ${RAY_WORKLOAD_CREATED}=    False
-${KUEUE_RESOURCES_SETUP_FILEPATH}=    ods_ci/tests/Resources/Page/DistributedWorkloads/kueue_resources_setup.sh
-${KUEUE_WORKLOADS_SETUP_FILEPATH}=    ods_ci/tests/Resources/Page/DistributedWorkloads/kueue_workloads.sh
-${RAY_CR_FILE}=    ods_ci/tests/Resources/Page/DistributedWorkloads/ray_cluster_cr.yaml
+${KUEUE_RESOURCES_SETUP_FILEPATH}=    tests/Resources/Page/DistributedWorkloads/kueue_resources_setup.sh
+${KUEUE_WORKLOADS_SETUP_FILEPATH}=    tests/Resources/Page/DistributedWorkloads/kueue_workloads.sh
+${RAY_CR_FILE}=    tests/Resources/Page/DistributedWorkloads/ray_cluster_cr.yaml
 ${CPU_SHARED_QUOTA}=    9
 ${MEMEORY_SHARED_QUOTA}=    36
 ${tolerance}=    1

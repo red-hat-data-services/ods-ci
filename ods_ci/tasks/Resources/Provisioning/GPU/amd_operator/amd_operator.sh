@@ -131,6 +131,29 @@ function wait_until_driver_image_is_built() {
   fi
 }
 
+function create_acceleratorprofile() {
+  echo "Creating an Accelerator Profile for Dashboard"
+  oc create -f - <<EOF
+  apiVersion: dashboard.opendatahub.io/v1
+  kind: AcceleratorProfile
+  metadata:
+    name: ods-ci-amd-gpu
+    namespace: redhat-ods-applications
+  spec:
+    displayName: AMD GPU
+    enabled: true
+    identifier: amd.com/gpu
+    tolerations:
+      - effect: NoSchedule
+        key: amd.com/gpu
+        operator: Exists
+EOF
+  if [ $? -eq 0 ]; then
+    echo "Verifying that an AcceleratorProfiles resource was created in redhat-ods-applications"
+    oc describe AcceleratorProfiles -n redhat-ods-applications
+  fi 
+}
+
 check_registry
 status=$?
 
@@ -160,3 +183,4 @@ wait_until_driver_image_is_built 60 1200
 # the message appears in the logs, but the pod may get delete before our code next iteration checks the logs once again,
 # hence it'd fails to reach the pod. It happened to me
 # wait_while 1200 monitor_logs "$name" openshift-amd-gpu docker-build "Successfully pushed image-registry.openshift-image-registry.svc:5000/openshift-amd-gpu"
+create_acceleratorprofile

@@ -78,7 +78,7 @@ function wait_until_pod_is_created() {
         return 0
         break
       } else {
-        echo "waiting for pod"
+        echo "waiting for pod with label $label"
         sleep 1
       }
     fi

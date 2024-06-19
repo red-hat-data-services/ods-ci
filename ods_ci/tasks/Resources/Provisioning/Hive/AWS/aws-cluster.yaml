@@ -39,7 +39,7 @@ items:
         name: master
         platform:
           aws:
-            type: {{ master_node_instance_type|default("m5.2xlarge") }}
+            type: {{ master_node_instance_type|default("g6.8xlarge") }}
         replicas: {{ master_node_replicas|default("1") }}
       metadata:
         name: aws-sno

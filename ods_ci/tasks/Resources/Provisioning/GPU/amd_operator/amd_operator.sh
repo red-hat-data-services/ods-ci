@@ -157,4 +157,6 @@ wait_while 360 ! has_csv_succeeded openshift-amd-gpu amd-gpu-operator
 create_devconfig
 wait_until_pod_is_created  openshift.io/build.name openshift-amd-gpu 180
 wait_until_driver_image_is_built 60 1200
+# the message appears in the logs, but the pod may get delete before our code next iteration checks the logs once again,
+# hence it'd fails to reach the pod. It happened to me
 # wait_while 1200 monitor_logs "$name" openshift-amd-gpu docker-build "Successfully pushed image-registry.openshift-image-registry.svc:5000/openshift-amd-gpu"

@@ -3,7 +3,7 @@ Library  JupyterLibrary
 
 
 *** Variables ***
-# This variable is overriden for ODH runs via 'ods_ci/test-variables-odh-overwrite.yml'
+# This variable is overriden for ODH runs via 'test-variables-odh-overwrite.yml'
 ${ODH_DASHBOARD_PROJECT_NAME}=   Red Hat OpenShift AI
 
 

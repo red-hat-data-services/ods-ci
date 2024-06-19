@@ -5,7 +5,7 @@ Library             OperatingSystem
 
 
 *** Variables ***
-${FILES_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files
+${FILES_RESOURCES_DIRPATH}=    tests/Resources/Files
 ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}=    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
 ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}=   ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
 

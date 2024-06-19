@@ -15,7 +15,7 @@ Test Tags         KServe
 
 
 *** Variables ***
-${VLLM_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files/llm/vllm
+${VLLM_RESOURCES_DIRPATH}=    tests/Resources/Files/llm/vllm
 ${DL_POD_FILEPATH}=           ${VLLM_RESOURCES_DIRPATH}/download_model.yaml
 ${SR_FILEPATH}=               ${VLLM_RESOURCES_DIRPATH}/vllm_servingruntime.yaml
 ${IS_FILEPATH}=               ${VLLM_RESOURCES_DIRPATH}/vllm-gpt2_inferenceservice.yaml

@@ -16,7 +16,7 @@ Suite Teardown      RHOSi Teardown
 
 *** Variables ***
 ${PROJECT_NAME}=    pipelineskfp1
-${KUEUE_RESOURCES_SETUP_FILEPATH}=    ods_ci/tests/Resources/Page/DistributedWorkloads/kueue_resources_setup.sh
+${KUEUE_RESOURCES_SETUP_FILEPATH}=    tests/Resources/Page/DistributedWorkloads/kueue_resources_setup.sh
 
 
 *** Test Cases ***

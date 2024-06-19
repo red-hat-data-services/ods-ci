@@ -214,7 +214,7 @@ Resource Status Should Be
     ${status}=     Run
     ...  ${oc_get}
     Log    ${status}    console=True
-    Should Be Equal    ${status}    ${expected_status}   msg=${resource} is not in Ready status
+    Should Be Equal    ${status}    ${expected_status}   msg=${resource} is not in ${expected_status} status
 
 Verify Pod Logs Do Not Contain
     [Documentation]    Checks there are no errors on Pod Logs

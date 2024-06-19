@@ -74,7 +74,7 @@ uninstall_identity_provider(){
   # delete htpasswd and LDAp idp
   # delete ldap deployment and idp
   # oc wait --for=delete $(oc get namespace openldap)
-  oc delete -f ods_ci/configs/templates/ldap/ldap.yaml
+  oc delete -f configs/templates/ldap/ldap.yaml
   if [ "${USE_OCM_IDP}" -eq 1 ]
     then
       ocm delete idp -c "${CLUSTER_NAME}" ldap-provider-qe
@@ -105,14 +105,14 @@ function check_installation(){
             echo $ocm_clusterid
             while read -r line; do
               if [[ $line == *"ldap"* ]] || [[ $line == *"htpasswd"* ]] ; then
-                  found=1                 
+                  found=1
               fi
             done < <(ocm get /api/clusters_mgmt/v1/clusters/$ocm_clusterid/identity_providers)
             if  [ -z $found ]
               then
                 echo -e "\033[0;33m LDAP and/or htpasswd Identity not found. Skipping removal of IDPs \033[0m"
                 exit 0
-              else 
+              else
                 echo -e "\033[0;33m LDAP and/or htpasswd Identity providers found. Going to remove IDPs \033[0m"
             fi
       else
@@ -138,14 +138,14 @@ function check_uninstallation(){
             while read -r line; do
               if [[ $line == *"ldap"* ]] || [[ $line == *"htpasswd"* ]] ; then
                   echo -e "\033[0;33m LDAP and/or htpasswd Identity providers are still installed. Please check the cluster \033[0m"
-                  found=1 
+                  found=1
                   exit 0
               fi
             done < <(ocm get /api/clusters_mgmt/v1/clusters/$ocm_clusterid/identity_providers)
             if  [ -z $found ]
               then
                 echo -e "\033[0;33m LDAP and/or htpasswd Identity providers have been deleted from the cluster \033[0m"
-              else 
+              else
                 echo -e "\033[0;33m LDAP and/or htpasswd Identity providers are still installed. Please check the cluster \033[0m"
             fi
       else
@@ -167,7 +167,7 @@ while [ "$#" -gt 0 ]; do
       OC_HOST=$1
       shift
       ;;
-    
+
     --use-ocm)
       shift
       USE_OCM_IDP=$1

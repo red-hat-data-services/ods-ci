@@ -7,7 +7,7 @@ Library           ../../../../libs/Helpers.py
 
 
 *** Variables ***
-${LLM_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files/llm
+${LLM_RESOURCES_DIRPATH}=    tests/Resources/Files/llm
 ${EXP_RESPONSES_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/model_expected_responses.json
 ${RUNTIME_FORMATS_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/runtime_query_formats.json
 ${INFERENCESERVICE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/serving_runtimes/base/isvc.yaml
@@ -824,6 +824,7 @@ Wait For Model KServe Deployment To Be Ready
     ...                the deployment has the expected pods and containers
     [Arguments]    ${label_selector}    ${namespace}    ${runtime}
     ...    ${timeout}=300s    ${exp_replicas}=${1}
+    Wait For Pods To Be Ready    label_selector=${label_selector}    namespace=${namespace}
     # Get the model name from the label_selector variable
     ${splitted_str}    Split String    ${label_selector}    =
     ${model_name}    Set Variable    ${splitted_str}[1]
@@ -863,8 +864,9 @@ Verify Model KServe Deployment
 
 Wait For ISVC To Be Loaded
     [Documentation]    Waits for the ISVC to be Loaded
-    [Arguments]    ${isvc_name}    ${namespace}    ${retries}=36
+    [Arguments]    ${isvc_name}    ${namespace}    ${retries}=60
     Wait Until Keyword Succeeds    ${retries} times    5s    ISVC Should Be Loaded    ${isvc_name}    ${namespace}
+    Sleep    30s    msg=There is a 20 seconds polling
 
 ISVC Should Be Loaded
     [Documentation]    Check if the ISVC is Loaded (i.e., Success status in the grid)

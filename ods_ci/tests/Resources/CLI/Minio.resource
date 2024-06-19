@@ -5,7 +5,7 @@ Resource            ../Common.robot
 
 
 *** Variables ***
-${MINIO_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files/minio
+${MINIO_RESOURCES_DIRPATH}=    tests/Resources/Files/minio
 ${MINIO_POD_FILEPATH}=    ${MINIO_RESOURCES_DIRPATH}/minio.yaml
 ${MINIO_SECRET_FILEPATH}=    ${MINIO_RESOURCES_DIRPATH}/minio_secret.yaml
 ${MINIO_SA_FILEPATH}=    ${MINIO_RESOURCES_DIRPATH}/minio_serviceaccount.yaml

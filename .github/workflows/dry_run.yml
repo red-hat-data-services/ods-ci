@@ -21,8 +21,9 @@ jobs:
 
       - name: Execute ods-ci dryrun
         run: |
-          mv ods_ci/test-variables.yml.example ods_ci/test-variables.yml
-          ./ods_ci/run_robot_test.sh --extra-robot-args '--dryrun' --skip-oclogin true --no-output-subfolder true
+          cd ods_ci
+          mv test-variables.yml.example test-variables.yml
+          ./run_robot_test.sh --extra-robot-args '--dryrun' --skip-oclogin true --no-output-subfolder true
 
       - name: Save PR number and artifacts
         run: |

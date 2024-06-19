@@ -56,14 +56,23 @@ has_csv_succeeded() {
 }
 
 function create_devconfig() {
-  oc create -f - <<EOF
+  dc_name="dc-internal-registry"
+  dc=$(oc get DeviceConfig $dc_name -n openshift-amd-gpu -oname --ignore-not-found)
+  if [[ -n $dc ]];
+    then
+      echo "AMD DeviceConfig $dc_name already exists". Skipping creation
+    else
+      echo "Creating AMD DeviceConfig..."
+      oc create -f - <<EOF
 kind: DeviceConfig
 apiVersion: amd.io/v1alpha1
 metadata:
-  name: dc-internal-registry
+  name: $dc_name
   namespace: openshift-amd-gpu
 EOF
+  fi
 }
+
 
 function wait_until_pod_is_created() {
   label=$1
@@ -124,7 +133,7 @@ function wait_until_driver_image_is_built() {
   image=$(oc get is amd_gpu_kmm_modules -n openshift-amd-gpu -oname)
   if [[ $? -eq 0 ]];
     then
-      echo ".Image Stream $image found! configuration completed."
+      echo ".Image Stream $image found!"
     else
       echo ".Image Stream amd_gpu_kmm_modules not found. Check the cluster"
       exit 1
@@ -133,7 +142,7 @@ function wait_until_driver_image_is_built() {
 
 function create_acceleratorprofile() {
   echo "Creating an Accelerator Profile for Dashboard"
-  oc create -f - <<EOF
+  oc apply -f - <<EOF
   apiVersion: dashboard.opendatahub.io/v1
   kind: AcceleratorProfile
   metadata:
@@ -178,8 +187,15 @@ echo "Installing AMD operator"
 oc apply -f "$GPU_INSTALL_DIR/amd_gpu_install.yaml"
 wait_while 360 ! has_csv_succeeded openshift-amd-gpu amd-gpu-operator
 create_devconfig
-wait_until_pod_is_created  openshift.io/build.name openshift-amd-gpu 180
-wait_until_driver_image_is_built 60 1200
+image=$(oc get is amd_gpu_kmm_modules -n openshift-amd-gpu -oname --ignore-not-found)
+if [[ -n $image ]];
+  then
+      echo ".Image Stream amd_gpu_kmm_modules alredy present! Skipping waiting for builder pod";
+  else
+      wait_until_pod_is_created  openshift.io/build.name openshift-amd-gpu 180
+      wait_until_driver_image_is_built 60 1200
+fi
+echo "Configuration of AMD GPU node and Operators completed"
 # the message appears in the logs, but the pod may get delete before our code next iteration checks the logs once again,
 # hence it'd fails to reach the pod. It happened to me
 # wait_while 1200 monitor_logs "$name" openshift-amd-gpu docker-build "Successfully pushed image-registry.openshift-image-registry.svc:5000/openshift-amd-gpu"

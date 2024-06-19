@@ -107,6 +107,28 @@ function monitor_logs() {
     done
 }
 
+function wait_until_driver_image_is_built() {
+  startup_timeout=$1
+  build_timeout=$2
+  if [[ $? -eq 0 ]];
+  then
+    name=$(oc get pod -n openshift-amd-gpu -l openshift.io/build.name -oname)
+    echo Builder pod name: $name
+    oc wait --timeout="${startup_timeout}s" --for=condition=ready pod -n openshift-amd-gpu -l openshift.io/build.name
+  else 
+    exit 1
+  fi
+  echo "Wait for the image build to finish"
+  oc wait --timeout="${build_timeout}s" --for=delete pod -n openshift-amd-gpu -l openshift.io/build.name
+  echo "Checking the image stream got created"
+  image=$(oc get is amd_gpu_kmm_modules -n openshift-amd-gpu -oname)
+  if [[ ! $? -eq 0 ]];
+    then
+      echo ".Image Stream amd_gpu_kmm_modules not found. Check the cluster"
+      exit 1
+  fi
+}
+
 check_registry
 status=$?
 
@@ -132,12 +154,5 @@ oc apply -f "$GPU_INSTALL_DIR/amd_gpu_install.yaml"
 wait_while 360 ! has_csv_succeeded openshift-amd-gpu amd-gpu-operator
 create_devconfig
 wait_until_pod_is_created  openshift.io/build.name openshift-amd-gpu 180
-if [[ $? -eq 0 ]];
-  then
-    name=$(oc get pod -n openshift-amd-gpu -l openshift.io/build.name -oname)
-    echo Builder pod name: $name
-    oc wait --timeout="60s" --for=condition=ready pod -n openshift-amd-gpu -l openshift.io/build.name
-  else 
-    exit 1
-fi
-wait_while 1200 monitor_logs "$name" openshift-amd-gpu docker-build "Successfully pushed image-registry.openshift-image-registry.svc:5000/openshift-amd-gpu"
+wait_until_driver_image_is_built 60 1200
+# wait_while 1200 monitor_logs "$name" openshift-amd-gpu docker-build "Successfully pushed image-registry.openshift-image-registry.svc:5000/openshift-amd-gpu"

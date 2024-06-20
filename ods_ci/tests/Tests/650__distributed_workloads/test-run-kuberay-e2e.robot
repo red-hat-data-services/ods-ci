@@ -64,7 +64,7 @@ Run Kuberay E2E Test
     ...    env:KUBERAY_TEST_TIMEOUT_SHORT=2m
     ...    env:KUBERAY_TEST_TIMEOUT_MEDIUM=7m
     ...    env:KUBERAY_TEST_TIMEOUT_LONG=10m
-    ...    env:KUBERAY_TEST_RAY_IMAGE=quay.io/project-codeflare/ray:latest-py39-cu118
+    ...    env:KUBERAY_TEST_RAY_IMAGE=quay.io/project-codeflare/ray:latest-py39-cu118@sha256:72b9972b4c9fd39bfd8a1450d8227890fbda75425859a710f3514f17412ae20f
     ...    shell=true
     ...    stderr=STDOUT
     ...    timeout=20m

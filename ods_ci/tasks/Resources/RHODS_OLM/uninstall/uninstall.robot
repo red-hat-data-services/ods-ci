@@ -137,3 +137,28 @@ Uninstall Service Mesh Operator CLI
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete subscription servicemeshoperator -n openshift-operators
 
+Uninstall Serverless Operator CLI
+    [Documentation]    Keyword to uninstall the Serverless Operator
+    Log To Console    message=Deleting KnativeServing CR From Cluster
+    ${return_code}    ${output}    Run And Return Rc And Output
+    ...    oc delete KnativeServing --all --ignore-not-found
+    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting KnativeServing CR
+    Log To Console    message=Deleting KnativeEventing CR From Cluster
+    ${return_code}    ${output}    Run And Return Rc And Output
+    ...    oc delete KnativeEventing --all --ignore-not-found
+    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting KnativeEventing CR
+    Log To Console    message=Deleting KnativeKafka CR From Cluster
+    ${return_code}    ${output}    Run And Return Rc And Output
+    ...    oc delete KnativeKafka --all --ignore-not-found
+    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting KnativeKafka CR
+    Log To Console    message=Deleting Serverless Operator Subscription From Cluster
+    ${return_code}    ${csv_name}    Run And Return Rc And Output
+    ...    oc get subscription serverless-operator -n openshift-serverless -o json | jq '.status.currentCSV' | tr -d '"'
+    IF  "${return_code}" == "0" and "${csv_name}" != "${EMPTY}"
+       ${return_code}    ${output}    Run And Return Rc And Output
+       ...    oc delete clusterserviceversion ${csv_name} -n openshift-serverless
+       Should Be Equal As Integers  ${return_code}   0   msg=Error deleting Serverless CSV ${csv_name}
+    END
+    ${return_code}    ${output}    Run And Return Rc And Output
+    ...    oc delete subscription serverless-operator -n openshift-serverless
+

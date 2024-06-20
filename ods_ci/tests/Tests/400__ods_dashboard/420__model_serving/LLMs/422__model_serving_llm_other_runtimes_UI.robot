@@ -17,6 +17,8 @@ ${FLAN_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${FLAN_MODEL_S3_DIR}/
 ${TGIS_RUNTIME_NAME}=    tgis-runtime
 @{SEARCH_METRICS}=    tgi_    istio_
 ${VLLM_RUNTIME_NAME}=    vllm-runtime
+${MODEL_S3_DIR}=   e5-mistral-7b-instruct
+
 
 *** Test Cases ***
 Verify Non Admin Can Serve And Query A Model Using The UI  # robocop: disable
@@ -100,10 +102,10 @@ Verify Model Can Be Served And Query On A GPU Node Using The UI For VLMM  # robo
     ...    namespace=${test_namespace}    string_check_only=${TRUE}    validate_response=${FALSE}
     Delete Model Via UI    ${isvc__name}
 
-Verify Model Can Be Served And Query On A GPU Node Using The UI For VLMM  # robocop: disable
+Verify Embeddings Model Can Be Served And Query On A GPU Node Using The UI For VLMM  # robocop: disable
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
     ...                using Single-model platform with vllm runtime.
-    [Tags]    Sanity    Tier1    RHOAIENG-6344   Resources-GPU
+    [Tags]    Sanity    Tier1    RHOAIENG-8832  Resources-GPU
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${isvc__name}=    Set Variable    e5-mistral-7b-gpu
     ${model_name}=    Set Variable    e5-mistral-7b

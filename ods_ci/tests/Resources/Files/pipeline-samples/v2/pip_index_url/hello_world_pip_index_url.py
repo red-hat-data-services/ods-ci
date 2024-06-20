@@ -35,14 +35,11 @@ def print_message(message: str):
 def hello_world_pipeline(message: str = "Hello world"):
     print_message_task = print_message(message=message)
     print_message_task.set_caching_options(False)
-
-    kubernetes.use_config_map_as_env(print_message_task,
-                                     config_map_name='ds-pipeline-custom-env-vars',
-                                     config_map_key_to_env={'pip_index_url': 'PIP_INDEX_URL'})
-
-    kubernetes.use_config_map_as_env(print_message_task,
-                                     config_map_name='ds-pipeline-custom-env-vars',
-                                     config_map_key_to_env={'pip_trusted_host': 'PIP_TRUSTED_HOST'})
+    kubernetes.use_config_map_as_env(
+        print_message_task,
+        config_map_name='ds-pipeline-custom-env-vars',
+        config_map_key_to_env={'pip_index_url': 'PIP_INDEX_URL', 'pip_trusted_host': 'PIP_TRUSTED_HOST'}
+    )
 
 
 if __name__ == "__main__":

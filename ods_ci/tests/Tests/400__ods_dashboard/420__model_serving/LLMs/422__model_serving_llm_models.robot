@@ -638,7 +638,7 @@ Verify User Can Serve And Query A intfloat/e5-mistral-7b-instruct Model
 Verify User Can Serve And Query A meta-llama/llama-3-8B-Instruct Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and TGIS standalone or vllm runtime
-    [Tags]    RHOAIENG-3483K    VLLM
+    [Tags]    RHOAIENG-8831    VLLM
     Setup Test Variables    model_name=llama-3-8b-chat    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=Meta-Llama-3-8B-Instruct
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
@@ -699,7 +699,7 @@ Verify User Can Serve And Query A meta-llama/llama-3-8B-Instruct Model
 Verify User Can Serve And Query A ibm-granite/granite-3b-code-instruct Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve using TGIS standalone or vllm runtime
-    [Tags]    RHOAIENG-7689    VLLM
+    [Tags]    RHOAIENG-8819    VLLM
     Setup Test Variables    model_name=granite-8b-code   use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=granite-3b-code-instruct
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
@@ -760,7 +760,7 @@ Verify User Can Serve And Query A ibm-granite/granite-3b-code-instruct Model
 Verify User Can Serve And Query A ibm-granite/granite-8b-code-instruct Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve using TGIS standalone or vllm runtime
-    [Tags]    RHOAIENG-76890    VLLM
+    [Tags]    RHOAIENG-8830    VLLM
     Setup Test Variables    model_name=granite-8b-code   use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=granite-8b-code-instruct
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}

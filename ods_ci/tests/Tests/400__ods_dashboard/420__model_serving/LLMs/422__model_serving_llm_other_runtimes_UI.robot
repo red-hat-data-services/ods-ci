@@ -100,6 +100,28 @@ Verify Model Can Be Served And Query On A GPU Node Using The UI For VLMM  # robo
     ...    namespace=${test_namespace}    string_check_only=${TRUE}    validate_response=${FALSE}
     Delete Model Via UI    ${isvc__name}
 
+Verify Model Can Be Served And Query On A GPU Node Using The UI For VLMM  # robocop: disable
+    [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
+    ...                using Single-model platform with vllm runtime.
+    [Tags]    Sanity    Tier1    RHOAIENG-6344   Resources-GPU
+    ${test_namespace}=    Set Variable     ${TEST_NS}
+    ${isvc__name}=    Set Variable    e5-mistral-7b-gpu
+    ${model_name}=    Set Variable    e5-mistral-7b
+    ${requests}=    Create Dictionary    nvidia.com/gpu=1
+    ${limits}=    Create Dictionary    nvidia.com/gpu=1
+    Deploy Kserve Model Via UI    model_name=${isvc__name}    serving_runtime=vLLM ServingRuntime for KServe
+    ...    data_connection=kserve-connection    model_framework=vLLM   path=${MODEL_S3_DIR}
+    ...    no_gpus=${1}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${isvc__name}
+    ...    namespace=${test_namespace}    runtime=${VLLM_RUNTIME_NAME}   timeout=1200s
+    Container Hardware Resources Should Match Expected    container_name=kserve-container
+    ...    pod_label_selector=serving.kserve.io/inferenceservice=${isvc__name}
+    ...    namespace=${test_namespace}    exp_requests=${requests}    exp_limits=${limits}
+    Query Model Multiple Times    model_name=${isvc__name}      isvc_name=${isvc__name}
+    ...    runtime=${VLLM_RUNTIME_NAME}    protocol=http     inference_type=embeddings
+    ...    n_times=4    query_idx=11       namespace=${test_namespace}    validate_response=${FALSE}
+    Delete Model Via UI    ${isvc__name}
+
 *** Keywords ***
 Non-Admin Setup Kserve UI Test
     [Documentation]    Instaling And Configuring dependency operators: Service Mesh and Serverless.

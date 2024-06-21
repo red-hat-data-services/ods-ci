@@ -437,7 +437,7 @@ Launch Notebook And Stop It    # robocop: disable
     Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =    Is Service Account Authorization Required
     IF    ${authorization_required}    Authorize Jupyterhub Service Account
-    Wait Until Page Contains    Start a notebook server
+    Wait Until Page Contains    Start a notebook server    30
     Fix Spawner Status
     Spawn Notebook With Arguments    image=minimal-notebook
     End Web Test

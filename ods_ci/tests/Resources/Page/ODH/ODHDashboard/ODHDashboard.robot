@@ -54,6 +54,7 @@ ${GROUPS_CONFIG_CM}=    groups-config
 ${RHODS_GROUPS_CONFIG_CM}=    rhods-groups-config
 ${RHODS_LOGO_XPATH}=    //img[@alt="${ODH_DASHBOARD_PROJECT_NAME} Logo"]
 @{ISV_TO_REMOVE_SELF_MANAGED}=      Create List     starburst   nvidia    rhoam
+@{HOME_HEADERS}=    Projects    Train, serve, monitor, and manage AI/ML models    Get oriented with learning resources
 
 
 *** Keywords ***
@@ -64,7 +65,6 @@ Launch Dashboard
   ...    alias=${browser_alias}
   Login To RHODS Dashboard  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
   Wait For RHODS Dashboard To Load    expected_page=${expected_page}
-  ...    wait_for_cards=${wait_for_cards}
 
 Authorize rhods-dashboard service account
   Wait Until Page Contains  Authorize Access
@@ -106,7 +106,17 @@ Wait For RHODS Dashboard To Load
     ...          ${expected_page}=Enabled
     Wait For Condition    return document.title == ${dashboard_title}    timeout=60s
     Wait Until Page Contains Element    xpath:${RHODS_LOGO_XPATH}    timeout=20s
-    IF    "${expected_page}" != "${NONE}"    Wait For Dashboard Page Title    ${expected_page}    timeout=75s
+    IF    "${expected_page}" != "${NONE}"
+        # Detect if we are in the new landing page instead in "Enable"
+        ${first_header}=    Set Variable    (//h1)[1]
+        Wait Until Element Is Visible    xpath:${first_header}
+        ${h1_text}    Get Text    xpath:${first_header}
+        IF    "${expected_page}" == "Enabled" and "${h1_text}" == "${HOME_HEADERS}[0]"
+            Wait For RHOAI Home Page To Load
+        ELSE
+            Wait For Dashboard Page Title    ${expected_page}    timeout=75s
+        END
+    END
     IF    ${wait_for_cards} == ${TRUE}
         Wait Until Keyword Succeeds    3 times   5 seconds    Wait Until Cards Are Loaded
     END
@@ -115,15 +125,26 @@ Wait For Dashboard Page Title
     [Documentation]    Wait until the visible title (h1) of the current Dashboard page is '${page_title}'
     [Arguments]  ${page_title}    ${timeout}=10s
     ${page_title_element}=    Set Variable    //*[@data-testid="app-page-title"]
-    Wait Until Element is Visible    ${page_title_element}    timeout=${timeout}
+    Wait Until Element Is Visible    ${page_title_element}    timeout=${timeout}
     # Sometimes the h1 text is inside a child element, thus get it with textContent attribute
     ${title}=    Get Element Attribute    ${page_title_element}    textContent
     Should Be Equal    ${title}    ${page_title}
 
+Wait For RHOAI Home Page To Load
+    [Documentation]    Compare the h1 headers of the landing page with the expected ones
+    Wait Until Element Is Visible    xpath:(//h1)[1]
+    ${h1_elements}=   Get WebElements    xpath://h1
+    ${h1_texts}=    Create List
+    FOR    ${element}    IN    @{h1_elements}
+        ${text}=    Get Text    ${element}
+        Append To List    ${h1_texts}    ${text}
+    END
+    List Should Contain Sub List    ${h1_texts}    ${HOME_HEADERS}
+
 Wait Until RHODS Dashboard ${dashboard_app} Is Visible
   # Ideally the timeout would be an arg but Robot does not allow "normal" and "embedded" arguments
   # Setting timeout to 30seconds since anything beyond that should be flagged as a UI bug
-  Wait Until Element is Visible    xpath://div[contains(@class,'gallery')]/div//div[@class="pf-v5-c-card__title"]//*[text()="${dashboard_app}"]
+  Wait Until Element Is Visible    xpath://div[contains(@class,'gallery')]/div//div[@class="pf-v5-c-card__title"]//*[text()="${dashboard_app}"]
   ...    timeout=30s
 
 Launch ${dashboard_app} From RHODS Dashboard Link

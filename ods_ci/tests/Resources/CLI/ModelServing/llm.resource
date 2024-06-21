@@ -581,12 +581,19 @@ Traffic Should Be Redirected Based On Canary Percentage
 
 Get KServe Inference Host Via CLI
     [Documentation]    Fetches the model URL
-    [Arguments]    ${isvc_name}    ${namespace}
-    Sleep    5s
-    ${rc}    ${ksvc_host}=    Run And Return Rc And Output
-    ...    oc get isvc ${isvc_name} -n ${namespace} -o jsonpath='{.status.url}' | cut -d'/' -f3
-    # ...    oc get ksvc ${isvc_name}-predictor -n ${namespace} -o jsonpath='{.status.url}' | cut -d'/' -f3
-    Should Be Equal As Integers    ${rc}    ${0}
+    [Arguments]    ${isvc_name}    ${namespace}    ${retries}=10
+    ${ksvc_host}=    Set Variable    ""
+    ${condition1}=    Evaluate    ${ksvc_host}=="${EMPTY}"
+    ${condition2}=    Evaluate    ${retries} > 0
+    WHILE    ${condition1} and ${condition2}
+        Sleep    5s
+        ${rc}    ${ksvc_host}=    Run And Return Rc And Output
+        ...    oc get isvc ${isvc_name} -n ${namespace} -o jsonpath='{.status.url}' | cut -d'/' -f3
+        Should Be Equal As Integers    ${rc}    ${0}
+        ${retries} =    Evaluate    ${retries} - 1
+        ${condition1}=    Evaluate    "${ksvc_host}"=="${EMPTY}"
+        ${condition2}=    Evaluate    ${retries} > 0
+    END
     Should Not Be Empty    ${ksvc_host}
     RETURN    ${ksvc_host}
 
@@ -780,7 +787,11 @@ Wait For Model KServe Deployment To Be Ready
     ...                the deployment has the expected pods and containers
     [Arguments]    ${label_selector}    ${namespace}    ${runtime}
     ...    ${timeout}=300s    ${exp_replicas}=${1}
-    Wait For Pods To Be Ready    label_selector=${label_selector}    namespace=${namespace}    timeout=${timeout}
+    Wait For Pods To Be Ready    label_selector=${label_selector}    namespace=${namespace}
+    # Get the model name from the label_selector variable
+    ${splitted_str}    Split String    ${label_selector}    =
+    ${model_name}    Set Variable    ${splitted_str}[1]
+    Wait For ISVC To Be Loaded     ${model_name}     ${namespace}
     Verify Model KServe Deployment    ${label_selector}    ${namespace}    ${runtime}    ${exp_replicas}
 
 Verify Model KServe Deployment
@@ -813,3 +824,17 @@ Verify Model KServe Deployment
     ${n_containers}=    Get Length    ${containers}
     Run Keyword And Continue On Failure    Verify Deployment    ${model_pods}  ${exp_replicas}
     ...    ${n_containers}  ${containers}
+
+Wait For ISVC To Be Loaded
+    [Documentation]    Waits for the ISVC to be Loaded
+    [Arguments]    ${isvc_name}    ${namespace}    ${retries}=60
+    Wait Until Keyword Succeeds    ${retries} times    5s    ISVC Should Be Loaded    ${isvc_name}    ${namespace}
+    Sleep    30s    msg=There is a 20 seconds polling
+
+ISVC Should Be Loaded
+    [Documentation]    Check if the ISVC is Loaded (i.e., Success status in the grid)
+    [Arguments]    ${isvc_name}    ${namespace}
+    ${rc}    ${isvc_status}=    Run And Return Rc And Output
+    ...    oc get isvc ${isvc_name} -n ${namespace} -o=jsonpath='{.status.modelStatus.states.activeModelState}'
+    Should Be Equal As Integers    ${rc}    ${0}
+    Should Be Equal As Strings    ${isvc_status}    Loaded

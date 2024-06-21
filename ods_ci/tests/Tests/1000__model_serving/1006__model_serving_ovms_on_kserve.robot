@@ -1,15 +1,15 @@
 *** Settings ***
 Documentation     Suite of test cases for OVMS in Kserve
 Library           OperatingSystem
-Library           ../../../../libs/Helpers.py
-Resource          ../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
-Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
-Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
-Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
-Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/ModelServer.resource
-Resource          ../../../Resources/Page/ODH/Monitoring/Monitoring.resource
-Resource          ../../../Resources/OCP.resource
-Resource          ../../../Resources/CLI/ModelServing/modelmesh.resource
+Library           ../../../libs/Helpers.py
+Resource          ../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
+Resource          ../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
+Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
+Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
+Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/ModelServer.resource
+Resource          ../../Resources/Page/ODH/Monitoring/Monitoring.resource
+Resource          ../../Resources/OCP.resource
+Resource          ../../Resources/CLI/ModelServing/modelmesh.resource
 Suite Setup       OVMS On Kserve Suite Setup
 Suite Teardown    OVMS On Kserve Suite Teardown
 Test Tags         Kserve

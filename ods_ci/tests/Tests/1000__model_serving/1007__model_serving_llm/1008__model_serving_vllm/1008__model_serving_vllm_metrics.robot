@@ -1,13 +1,13 @@
 *** Settings ***
 Documentation     Basic vLLM deploy test to validate metrics being correctly exposed in OpenShift
-Resource          ../../../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
-Resource          ../../../../../Resources/OCP.resource
-Resource          ../../../../../Resources/Page/Operators/ISVs.resource
-Resource          ../../../../../Resources/Page/ODH/ODHDashboard/ODHDashboardAPI.resource
-Resource          ../../../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/ModelServer.resource
-Resource          ../../../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
-Resource          ../../../../../Resources/CLI/ModelServing/llm.resource
-Resource          ../../../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Permissions.resource
+Resource          ../../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
+Resource          ../../../../Resources/OCP.resource
+Resource          ../../../../Resources/Page/Operators/ISVs.resource
+Resource          ../../../../Resources/Page/ODH/ODHDashboard/ODHDashboardAPI.resource
+Resource          ../../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/ModelServer.resource
+Resource          ../../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
+Resource          ../../../../Resources/CLI/ModelServing/llm.resource
+Resource          ../../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Permissions.resource
 Library           OpenShiftLibrary
 Suite Setup       Suite Setup
 Suite Teardown    Suite Teardown

@@ -52,10 +52,24 @@ ${TEST_NS}=                   vllm-gpt2
 ...                           vllm:request_success_total
 ...                           vllm:avg_prompt_throughput_toks_per_s
 ...                           vllm:avg_generation_throughput_toks_per_s
-
+...                           tgi_tokenize_request_tokens_bucket
+...                           tgi_tokenize_request_tokens_count
+...                           tgi_tokenize_request_tokens_sum
+...                           tgi_tokenize_request_input_count_total
+...                           tgi_request_input_count_total
+...                           tgi_request_queue_duration_bucket
+...                           tgi_request_queue_duration_sum
+...                           tgi_queue_size
+...                           tgi_batch_current_size
+...                           tgi_request_input_length_bucket
+...                           tgi_request_input_length_count
+...                           tgi_request_input_length_sum
+...                           tgi_request_generated_tokens_bucket
+...                           tgi_request_generated_tokens_count
+...                           tgi_request_generated_tokens_sum
 
 *** Test Cases ***
-Verify User Can Deploy A Model With Vllm Via CLI
+Verify User Can Deploy A Model With Vllm And tgi Via CLI
     [Documentation]    Deploy a model (gpt2) using the vllm runtime and confirm that it's running
     [Tags]    Tier1    Sanity    Resources-GPU    RHOAIENG-6264   VLLM
     ${rc}    ${out}=    Run And Return Rc And Output    oc apply -f ${DL_POD_FILEPATH}
@@ -75,8 +89,8 @@ Verify User Can Deploy A Model With Vllm Via CLI
     ...    inference_type=chat-completions    n_times=3    query_idx=8
     ...    namespace=${TEST_NS}    string_check_only=${TRUE}    validate_response=${FALSE}
 
-Verify Vllm Metrics Are Present
-    [Documentation]    Confirm vLLM metrics are exposed in OpenShift metrics
+Verify Vllm And tgi Metrics Are Present
+    [Documentation]    Confirm vLLM and tgi metrics are exposed in OpenShift metrics
     [Tags]    Tier1    Sanity    Resources-GPU    RHOAIENG-6264    VLLM
     Depends On Test    Verify User Can Deploy A Model With Vllm Via CLI
     ${host}=    llm.Get KServe Inference Host Via CLI    isvc_name=vllm-gpt2-openai    namespace=${TEST_NS}
@@ -89,7 +103,7 @@ Verify Vllm Metrics Are Present
     Set Suite Variable    ${token}
     Metrics Should Exist In UserWorkloadMonitoring    ${thanos_url}    ${token}    ${SEARCH_METRICS}
 
-Verify Vllm Metrics Values Match Between UWM And Endpoint
+Verify Vllm And tgi Metrics Values Match Between UWM And Endpoint
     [Documentation]  Confirm the values returned by UWM and by the model endpoint match for each metric
     [Tags]    Tier1    Sanity    Resources-GPU    RHOAIENG-6264    RHOAIENG-7687    VLLM
     Depends On Test    Verify User Can Deploy A Model With Vllm Via CLI

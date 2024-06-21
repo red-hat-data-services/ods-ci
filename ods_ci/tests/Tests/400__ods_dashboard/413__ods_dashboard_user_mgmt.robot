@@ -13,7 +13,6 @@ Verify RHODS Accept Multiple Admin Groups And CRD Gets Updates
     ...                check OdhDashboardConfig CRD gets updated according to Admin UI
     [Tags]  ODS-1661    ODS-1555
     ...     Tier1
-    ...     Sanity
     Launch Dashboard And Check User Management Option Is Available For The User   ${TEST_USER.USERNAME}   ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     Clear User Management Settings
     Add OpenShift Groups To Data Science Administrators   rhods-admins  rhods-users
@@ -81,7 +80,6 @@ Verify Automatically Detects a Group Selected Is Removed and Notify the User
     ...    message / notification
     [Tags]  ODS-1686
     ...     Tier1
-    ...     Sanity
     ${new_group_name}=    Set Variable    new-group-test
     Create Group  ${new_group_name}
     Launch Dashboard And Check User Management Option Is Available For The User   ${TEST_USER.USERNAME}   ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}

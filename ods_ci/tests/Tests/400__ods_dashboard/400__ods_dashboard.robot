@@ -121,8 +121,7 @@ Verify License Of Disabled Cards Can Be Re-validated
 
 Verify CSS Style Of Getting Started Descriptions
     [Documentation]    Verifies the CSS style is not changed. It uses JupyterHub card as sample
-    [Tags]    Smoke
-    ...       Tier1
+    [Tags]    Tier1
     ...       ODS-1165
     Click Link    Explore
     Wait For RHODS Dashboard To Load    expected_page=Explore

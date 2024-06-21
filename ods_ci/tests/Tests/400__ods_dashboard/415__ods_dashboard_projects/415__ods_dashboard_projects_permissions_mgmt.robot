@@ -84,7 +84,7 @@ Verify User Can Assign Access Permissions To User Groups
     ${USER_C} Should Not Have Access To ${PRJ_USER_B_TITLE}
 
 Verify Project Sharing Does Not Override Dashboard Permissions
-    [Tags]                  Tier1                   Sanity                  ODS-2223
+    [Tags]                  Tier1                   ODS-2223
     [Setup]                 Set RHODS Users Group To rhods-users
     Launch Data Science Project Main Page    username=${OCP_ADMIN_USER.USERNAME}    password=${OCP_ADMIN_USER.PASSWORD}
     ...    ocp_user_auth_type=${OCP_ADMIN_USER.AUTH_TYPE}

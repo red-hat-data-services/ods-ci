@@ -58,7 +58,7 @@ Verify RHODS Admins Can Import A Custom Serving Runtime Template For Each Servin
 Verify RHODS Users Can Deploy A Model Using A Custom Serving Runtime
     [Documentation]    Verifies that a model can be deployed using only the UI.
     ...    At the end of the process, verifies the correct resources have been deployed.
-    [Tags]    Sanity    Tier1    ODS-2281    ModelMesh
+    [Tags]    Tier1    ODS-2281    ModelMesh
     [Setup]    Run Keywords
     ...    Skip If Component Is Not Enabled    modelmeshserving
     ...    AND

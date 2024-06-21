@@ -26,8 +26,7 @@ Verify Quick Starts Work As Expected On Yes And Restart
     [Documentation]   Verify the Quickstarts are completed successfully
     ...    when all steps are marked as yes and restarted later
     ...    ProductBug: RHOAIENG-5273
-    [Tags]  Sanity
-    ...     Tier1
+    [Tags]  Tier1
     ...     ODS-1306    ODS-1308    ODS-1166    ODS-1406    ODS-1405
     Set Quick Starts Elements List Based On RHODS Type
     Validate Number Of Quick Starts In Dashboard Is As Expected    ${QUICKSTART_ELEMENTS}

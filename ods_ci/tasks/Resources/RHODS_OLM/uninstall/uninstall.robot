@@ -5,7 +5,6 @@ Resource   ../../../../tests/Resources/Common.robot
 Resource   oc_uninstall.robot
 Library    Process
 
-
 *** Keywords ***
 Uninstalling RHODS Operator
   ${is_operator_installed} =  Is RHODS Installed
@@ -112,3 +111,54 @@ Uninstall RHODS V2
         ${return_code}    ${output}    Run And Return Rc And Output   oc delete namespace ${OPERATOR_NAMESPACE} --ignore-not-found
         Verify Project Does Not Exists  ${OPERATOR_NAMESPACE}
     END
+
+Uninstall Service Mesh Operator CLI
+    [Documentation]    Keyword to uninstall the Service Mesh Operator
+    Log To Console    message=Deleting ServiceMeshControlPlane CR From Cluster
+    ${return_code}    ${output}    Run And Return Rc And Output
+    ...    oc delete ServiceMeshControlPlane --all --ignore-not-found
+    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting ServiceMeshControlPlane CR
+    Log To Console    message=Deleting ServiceMeshMember CR From Cluster
+    ${return_code}    ${output}    Run And Return Rc And Output
+    ...    oc delete ServiceMeshMember --all --ignore-not-found
+    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting ServiceMeshMember CR
+    Log To Console    message=Deleting ServiceMeshMemberRoll CR From Cluster
+    ${return_code}    ${output}    Run And Return Rc And Output
+    ...    oc delete ServiceMeshMemberRoll --all --ignore-not-found
+    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting ServiceMeshMemberRoll CR
+    Log To Console    message=Deleting Service Mesh Operator Subscription From Cluster
+    ${return_code}    ${csv_name}    Run And Return Rc And Output
+    ...    oc get subscription servicemeshoperator -n openshift-operators -o json | jq '.status.currentCSV' | tr -d '"'
+    IF  "${return_code}" == "0" and "${csv_name}" != "${EMPTY}"
+       ${return_code}    ${output}    Run And Return Rc And Output
+       ...    oc delete clusterserviceversion ${csv_name} -n openshift-operators
+       Should Be Equal As Integers  ${return_code}   0   msg=Error deleting ServiceMesh CSV ${csv_name}
+    END
+    ${return_code}    ${output}    Run And Return Rc And Output
+    ...    oc delete subscription servicemeshoperator -n openshift-operators
+
+Uninstall Serverless Operator CLI
+    [Documentation]    Keyword to uninstall the Serverless Operator
+    Log To Console    message=Deleting KnativeServing CR From Cluster
+    ${return_code}    ${output}    Run And Return Rc And Output
+    ...    oc delete KnativeServing --all --ignore-not-found
+    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting KnativeServing CR
+    Log To Console    message=Deleting KnativeEventing CR From Cluster
+    ${return_code}    ${output}    Run And Return Rc And Output
+    ...    oc delete KnativeEventing --all --ignore-not-found
+    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting KnativeEventing CR
+    Log To Console    message=Deleting KnativeKafka CR From Cluster
+    ${return_code}    ${output}    Run And Return Rc And Output
+    ...    oc delete KnativeKafka --all --ignore-not-found
+    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting KnativeKafka CR
+    Log To Console    message=Deleting Serverless Operator Subscription From Cluster
+    ${return_code}    ${csv_name}    Run And Return Rc And Output
+    ...    oc get subscription serverless-operator -n openshift-serverless -o json | jq '.status.currentCSV' | tr -d '"'
+    IF  "${return_code}" == "0" and "${csv_name}" != "${EMPTY}"
+       ${return_code}    ${output}    Run And Return Rc And Output
+       ...    oc delete clusterserviceversion ${csv_name} -n openshift-serverless
+       Should Be Equal As Integers  ${return_code}   0   msg=Error deleting Serverless CSV ${csv_name}
+    END
+    ${return_code}    ${output}    Run And Return Rc And Output
+    ...    oc delete subscription serverless-operator -n openshift-serverless
+

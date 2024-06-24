@@ -47,8 +47,8 @@ ${DC_S3_ENDPOINT}=    custom.endpoint.s3.com
 ${DC_S3_REGION}=    ods-ci-region
 ${DC_S3_TYPE}=    Object storage
 @{IMAGE_LIST}    Minimal Python    CUDA   PyTorch    Standard Data Science    TensorFlow
-${ENV_SECRET_FILEPATH}=    ods_ci/tests/Resources/Files/env_vars_secret.yaml
-${ENV_CM_FILEPATH}=    ods_ci/tests/Resources/Files/env_vars_cm.yaml
+${ENV_SECRET_FILEPATH}=    tests/Resources/Files/env_vars_secret.yaml
+${ENV_CM_FILEPATH}=    tests/Resources/Files/env_vars_cm.yaml
 ${NEW_PRJ_DESCRIPTION}=   ${PRJ_TITLE} is a New edited test project for validating DS Projects feature
 ${NEW_PRJ_TITLE}=   ODS-CI DS Project Updated
 
@@ -57,7 +57,7 @@ ${NEW_PRJ_TITLE}=   ODS-CI DS Project Updated
 Verify Data Science Projects Page Is Accessible
     [Documentation]    Verifies "Data Science Projects" page is accessible from
     ...                the navigation menu on the left
-    [Tags]    Smoke    Sanity
+    [Tags]    Smoke
     ...       Tier1
     ...       ODS-1876
     Open Data Science Projects Home Page
@@ -66,7 +66,7 @@ Verify Data Science Projects Page Is Accessible
 Verify User Can Access Jupyter Launcher From DS Project Page
     [Documentation]    Verifies Data Science Projects home page contains
     ...                a link to Jupyter Spawner and it is working
-    [Tags]    Smoke    Sanity
+    [Tags]    Smoke
     ...       Tier1
     ...       ODS-1877
     Open Data Science Projects Home Page
@@ -77,7 +77,7 @@ Verify User Can Access Jupyter Launcher From DS Project Page
 Verify Workbench Images Have Multiple Versions
     [Documentation]    Verifies that workbench images have an additional
     ...                dropdown which supports N/N-1 image versions.
-    [Tags]    Smoke    Sanity
+    [Tags]    Sanity
     ...       Tier1
     ...       ODS-2131
     Open Data Science Project Details Page    project_title=${PRJ_TITLE}    tab_id=workbenches
@@ -105,7 +105,7 @@ Verify User Cannot Create Project Using Special Chars In Resource Name
     Close Generic Modal If Present
 
 Verify User Can Create A Data Science Project
-    [Tags]    Smoke    Sanity    ODS-1775    Tier1
+    [Tags]    Smoke    ODS-1775    Tier1
     [Documentation]    Verifies users can create a DS project
     Open Data Science Projects Home Page
     Log    message=DS Project creation covered by the Suite Setup
@@ -114,7 +114,7 @@ Verify User Can Create A Data Science Project
     ${ns_name}=    Check Corresponding Namespace Exists    project_title=${PRJ_TITLE}
 
 Verify User Can Create And Start A Workbench With Existent PV Storage
-    [Tags]    Smoke    Sanity    ODS-1814    Tier1
+    [Tags]    Smoke    ODS-1814    Tier1
     [Documentation]    Verifies users can create a workbench and connect an existent PersistenVolume
     ${pv_name}=    Set Variable    ${PV_BASENAME}-existent
     Create PersistentVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}    project_title=${PRJ_TITLE}
@@ -161,7 +161,7 @@ Verify User Can Create A PV Storage
     ...    Delete PVC In Project From CLI    pvc_title=${pv_name}    project_title=${PRJ_TITLE}
 
 Verify User Can Create And Start A Workbench Adding A New PV Storage
-    [Tags]    Smoke    Sanity    ODS-1816    Tier1    ExcludeOnDisconnected
+    [Tags]    Sanity    ODS-1816    Tier1    ExcludeOnDisconnected
     [Documentation]    Verifies users can create a workbench and connect a new PersistenVolume
     ...    We skip this test on Disconnected environment because we have a PVs predefined there hardcoded to 100Gi.
     ...    Since there is a size check in this test, it would fail unless some extra condition to be brought in here.
@@ -432,7 +432,7 @@ Verify Error Is Reported When Workbench Fails To Start    # robocop: disable
     Wait Until Project Is Open    project_title=${PRJ_TITLE}
 
 Verify Users Can Start, Stop, Launch And Delete A Workbench
-    [Tags]    Smoke    Sanity    Tier1
+    [Tags]    Smoke    Tier1
     ...       ODS-1813    ODS-1815   ODS-1817
     [Documentation]    Verifies users can start, stop, launch and delete a running workbench from project details page
     [Setup]        Run Keywords
@@ -502,7 +502,7 @@ Verify Users Can Start, Stop And Launch A Workbench From DS Projects Home Page
     ...    SeleniumLibrary.Close Browser
 
 Verify User Can Delete A Data Science Project
-    [Tags]    Smoke    Sanity    Tier1
+    [Tags]    Smoke    Tier1
     ...       ODS-1784
     [Documentation]    Verifies users can delete a Data Science project
     Open Data Science Projects Home Page

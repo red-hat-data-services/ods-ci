@@ -19,6 +19,7 @@ Resource        ../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
 Suite Setup     RHOSi Setup
 Suite Teardown  PVC Size Suite Teadrown
 Test Setup      PVC Size Test Setup
+Test Tags       Dashboard
 
 
 *** Variables ***
@@ -56,8 +57,7 @@ Verify User Can Spawn Notebook After Changing PVC Size Using UI
     [Documentation]   Verify if dedicated admin user able to chnage PVC
     ...    and RHODS user is able to spawn notebook for supported PVC
     ...    and verify PVC size
-    [Tags]    Sanity
-    ...       Tier1
+    [Tags]    Tier1
     ...       ODS-1220    ODS-1222
     Verify PVC change using UI     ${S_SIZE}
     ${pvc_size}   Get Notebook PVC Size        username=${TEST_USER.USERNAME}   namespace=${NOTEBOOKS_NAMESPACE}

@@ -163,37 +163,31 @@ def my_pipeline(
 ):
     create_dataset_task = create_dataset()
     create_dataset_task.set_caching_options(False)
-    kubernetes.use_config_map_as_env(create_dataset_task,
-                                     config_map_name='ds-pipeline-custom-env-vars',
-                                     config_map_key_to_env={'pip_index_url': 'PIP_INDEX_URL'})
-
-    kubernetes.use_config_map_as_env(create_dataset_task,
-                                     config_map_name='ds-pipeline-custom-env-vars',
-                                     config_map_key_to_env={'pip_trusted_host': 'PIP_TRUSTED_HOST'})
+    kubernetes.use_config_map_as_env(
+        create_dataset_task,
+        config_map_name='ds-pipeline-custom-env-vars',
+        config_map_key_to_env={'pip_index_url': 'PIP_INDEX_URL', 'pip_trusted_host': 'PIP_TRUSTED_HOST'}
+    )
 
     normalize_dataset_task = normalize_dataset(
         input_iris_dataset=create_dataset_task.outputs["iris_dataset"], standard_scaler=standard_scaler
     )
     normalize_dataset_task.set_caching_options(False)
-    kubernetes.use_config_map_as_env(normalize_dataset_task,
-                                     config_map_name='ds-pipeline-custom-env-vars',
-                                     config_map_key_to_env={'pip_index_url': 'PIP_INDEX_URL'})
-
-    kubernetes.use_config_map_as_env(normalize_dataset_task,
-                                     config_map_name='ds-pipeline-custom-env-vars',
-                                     config_map_key_to_env={'pip_trusted_host': 'PIP_TRUSTED_HOST'})
+    kubernetes.use_config_map_as_env(
+        normalize_dataset_task,
+        config_map_name='ds-pipeline-custom-env-vars',
+        config_map_key_to_env={'pip_index_url': 'PIP_INDEX_URL', 'pip_trusted_host': 'PIP_TRUSTED_HOST'}
+    )
 
     train_model_task = train_model(
         normalized_iris_dataset=normalize_dataset_task.outputs["normalized_iris_dataset"], n_neighbors=neighbors
     )
     train_model_task.set_caching_options(False)
-    kubernetes.use_config_map_as_env(train_model_task,
-                                     config_map_name='ds-pipeline-custom-env-vars',
-                                     config_map_key_to_env={'pip_index_url': 'PIP_INDEX_URL'})
-
-    kubernetes.use_config_map_as_env(train_model_task,
-                                     config_map_name='ds-pipeline-custom-env-vars',
-                                     config_map_key_to_env={'pip_trusted_host': 'PIP_TRUSTED_HOST'})
+    kubernetes.use_config_map_as_env(
+        train_model_task,
+        config_map_name='ds-pipeline-custom-env-vars',
+        config_map_key_to_env={'pip_index_url': 'PIP_INDEX_URL', 'pip_trusted_host': 'PIP_TRUSTED_HOST'}
+    )
 
 
 compiler.Compiler().compile(pipeline_func=my_pipeline, package_path=__file__.replace(".py", "_compiled.yaml"))

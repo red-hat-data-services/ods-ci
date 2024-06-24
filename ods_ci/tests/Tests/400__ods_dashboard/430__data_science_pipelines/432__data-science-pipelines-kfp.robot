@@ -16,7 +16,7 @@ Suite Teardown      RHOSi Teardown
 
 *** Variables ***
 ${PROJECT_NAME}=    pipelineskfp1
-${KUEUE_RESOURCES_SETUP_FILEPATH}=    ods_ci/tests/Resources/Page/DistributedWorkloads/kueue_resources_setup.sh
+${KUEUE_RESOURCES_SETUP_FILEPATH}=    tests/Resources/Page/DistributedWorkloads/kueue_resources_setup.sh
 
 
 *** Test Cases ***
@@ -59,6 +59,7 @@ Verify Ods Users Can Create And Run A Data Science Pipeline With Ray Using The k
     ...         ODS-2541
     Skip If Component Is Not Enabled    ray
     Skip If Component Is Not Enabled    codeflare
+    ${ray_dict}=    Create Dictionary
     End To End Pipeline Workflow Using Kfp
     ...    username=${TEST_USER.USERNAME}
     ...    password=${TEST_USER.PASSWORD}
@@ -66,7 +67,7 @@ Verify Ods Users Can Create And Run A Data Science Pipeline With Ray Using The k
     ...    python_file=ray_integration.py
     ...    method_name=ray_integration
     ...    status_check_timeout=440
-    ...    pipeline_params={'openshift_server': 'value', 'openshift_token': 'value'}
+    ...    pipeline_params=${ray_dict}
     ...    ray=${TRUE}
     [Teardown]    Remove Pipeline Project    ${PROJECT_NAME}
 

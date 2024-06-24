@@ -191,14 +191,10 @@ Validate Support For Configuration Of Controller Resources
         ${rc}=    Run And Return Rc
         ...    oc patch Deployment ${controller} -n ${APPLICATIONS_NAMESPACE} --type=json -p="[{'op': 'replace', 'path': '/spec/template/spec/serviceAccountName', 'value': 'random-sa-name'}]"    # robocop: disable
         Should Be Equal As Integers    ${rc}    ${0}
-        Sleep  40  reason=Wait until Deployment is reloaded after being overwritten by Operator
-        @{d_obj}=  OpenShiftLibrary.Oc Get  kind=Deployment  name=${controller}    namespace=${APPLICATIONS_NAMESPACE}
-        &{d_obj_dictionary}=  Set Variable  ${d_obj}[0]
-        ${cpu_limit}=    Set Variable    ${d_obj_dictionary.spec.template.spec.containers[0].resources.limits.cpu}
-        ${memory_limit}=    Set Variable    ${d_obj_dictionary.spec.template.spec.containers[0].resources.limits.memory}
-        Should Match    ${d_obj_dictionary.spec.template.spec.containers[0].resources.limits.cpu}    ${cpu_limit}
-        Should Match    ${d_obj_dictionary.spec.template.spec.containers[0].resources.limits.memory}    ${memory_limit}
-        Should Not Match    ${d_obj_dictionary.spec.template.spec.serviceAccountName}    random-sa-name
+
+        Wait Until Keyword Succeeds    3 min    0 sec
+        ...    Check Controller Conditions Are Accomplished      ${controller}
+
         # Restore old values
         # delete the Deployment resource for operator to recreate
         ${rc}=    Run And Return Rc
@@ -226,6 +222,18 @@ Suite Setup
 Suite Teardown
     [Documentation]    Suite Teardown
     RHOSi Teardown
+
+Check Controller Conditions Are Accomplished
+    [Documentation]    Wait for the conditions related to a specific controller are accomplished
+    [Arguments]    ${controller}
+
+    @{d_obj}=  OpenShiftLibrary.Oc Get  kind=Deployment  name=${controller}    namespace=${APPLICATIONS_NAMESPACE}
+    &{d_obj_dictionary}=  Set Variable  ${d_obj}[0]
+    ${cpu_limit}=    Set Variable    ${d_obj_dictionary.spec.template.spec.containers[0].resources.limits.cpu}
+    ${memory_limit}=    Set Variable    ${d_obj_dictionary.spec.template.spec.containers[0].resources.limits.memory}
+    Should Match    ${d_obj_dictionary.spec.template.spec.containers[0].resources.limits.cpu}    ${cpu_limit}
+    Should Match    ${d_obj_dictionary.spec.template.spec.containers[0].resources.limits.memory}    ${memory_limit}
+    Should Not Match    ${d_obj_dictionary.spec.template.spec.serviceAccountName}    random-sa-name
 
 Set DSC Component Removed State And Wait For Completion
     [Documentation]    Set component management state to 'Removed', and wait for deployment and pod to be removed.

@@ -133,7 +133,7 @@ Verify User Can Remove GPUs From Workbench
 Verify DS Projects Home Page Shows The Right Number Of Items The User Has Selected
     [Documentation]    Verifies that correct number of data science projects appear when
     ...                multiple data science projects are added
-    [Tags]    ODS-2015    Sanity    Tier1
+    [Tags]    ODS-2015    Tier1
     [Setup]    Launch Data Science Project Main Page    username=${TEST_USER_4.USERNAME}
     ${all_projects}=    Create Multiple Data Science Projects    title=ds-project-ldap-user     description=numbered project -
     ...    number=20

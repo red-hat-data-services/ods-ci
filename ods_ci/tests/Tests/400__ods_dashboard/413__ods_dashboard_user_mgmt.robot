@@ -4,6 +4,7 @@ Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboardSettings.resou
 Resource        ../../Resources/ODS.robot
 Suite Setup     Setup Admin UI
 Suite Teardown  Teardown Admin UI
+Test Tags        Dashboard
 
 
 *** Test Cases ***
@@ -12,7 +13,6 @@ Verify RHODS Accept Multiple Admin Groups And CRD Gets Updates
     ...                check OdhDashboardConfig CRD gets updated according to Admin UI
     [Tags]  ODS-1661    ODS-1555
     ...     Tier1
-    ...     Sanity
     Launch Dashboard And Check User Management Option Is Available For The User   ${TEST_USER.USERNAME}   ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     Clear User Management Settings
     Add OpenShift Groups To Data Science Administrators   rhods-admins  rhods-users
@@ -52,7 +52,7 @@ Verify Unauthorized User Is Not Able To Spawn Jupyter Notebook
     ...     Note: this test configures user access via ODH Dashboard UI in setting appropriate
     ...     groups in `Settings -> User management` section. There is an another test that changes
     ...     users/groups via `oc adm groups` command,see: `Verify User Can Set Custom RHODS Groups`
-    ...     in ods_ci/tests/Tests/500__jupyterhub/jupyterhub-user-access.robot
+    ...     in tests/Tests/500__jupyterhub/jupyterhub-user-access.robot
     [Tags]  ODS-1680
     ...     Tier1
     ...     Sanity
@@ -80,7 +80,6 @@ Verify Automatically Detects a Group Selected Is Removed and Notify the User
     ...    message / notification
     [Tags]  ODS-1686
     ...     Tier1
-    ...     Sanity
     ${new_group_name}=    Set Variable    new-group-test
     Create Group  ${new_group_name}
     Launch Dashboard And Check User Management Option Is Available For The User   ${TEST_USER.USERNAME}   ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}

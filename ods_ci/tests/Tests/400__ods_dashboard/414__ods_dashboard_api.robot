@@ -10,7 +10,6 @@ Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboardAPI.resource
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Suite Setup       Endpoint Testing Setup
 Suite Teardown    Endpoint Testing Teardown
-Test Tags         Dashboard
 
 
 *** Variables ***
@@ -257,7 +256,7 @@ Verify Access To Notebook envs/configmap API Endpoint
     ...                 `configmap/<notebook_namespace>/jupyterhub-singleuser-profile-{username}-envs`
 
     [Tags]    ODS-1719
-    ...       Tier1    Sanity
+    ...       Tier1
     ...       Security
     Spawn Minimal Python Notebook Server     username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
     ${NOTEBOOK_BASIC_USER}=   Get Safe Username    ${TEST_USER_3.USERNAME}
@@ -306,7 +305,7 @@ Verify Access To Notebook envs/secret API Endpoint
     ...                 The syntax to reach this endpoint is:
     ...                 `secret/<notebook_namespace>/jupyterhub-singleuser-profile-{username}-envs`
     [Tags]    ODS-1720
-    ...       Tier1    Sanity
+    ...       Tier1
     ...       Security
     Spawn Minimal Python Notebook Server     username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
     ${NOTEBOOK_BASIC_USER}=   Get Safe Username    ${TEST_USER_3.USERNAME}
@@ -564,7 +563,7 @@ Verify Access to notebooks API Endpoint
     ...                 The syntax to reach this endpoint is:
     ...                 `notebooks/<notebook_namespace>/jupyter-nb-<username_nb>`
     [Tags]    ODS-1729
-    ...       Tier1    Sanity
+    ...       Tier1
     ...       Security
     ${NOTEBOOK_CR_NAME}  ${IMAGE_TAG_NAME}=    Spawn Minimal Python Notebook Server     username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
     ${NB_BASIC_USER}=   Get Safe Username    ${TEST_USER_3.USERNAME}
@@ -629,7 +628,7 @@ Verify Access to rolebindings API Endpoint
     ...                 The syntax to reach this endpoint is:
     ...                 `rolebindings/<dashboard_namespace>/<notebook_namespace>-image-pullers`
     [Tags]    ODS-1730
-    ...       Tier1    Sanity
+    ...       Tier1
     ...       Security
     Perform Dashboard API Endpoint GET Call   endpoint=${ROLE_BIND_ENDPOINT_PT1}    token=${BASIC_USER_TOKEN}
     Operation Should Be Allowed

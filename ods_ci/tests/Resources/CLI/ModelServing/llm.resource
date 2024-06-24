@@ -825,6 +825,7 @@ Wait For Model KServe Deployment To Be Ready
     ...                the deployment has the expected pods and containers
     [Arguments]    ${label_selector}    ${namespace}    ${runtime}
     ...    ${timeout}=300s    ${exp_replicas}=${1}
+    Wait For Pods To Be Ready    label_selector=${label_selector}    namespace=${namespace}
     # Get the model name from the label_selector variable
     ${splitted_str}    Split String    ${label_selector}    =
     ${model_name}    Set Variable    ${splitted_str}[1]
@@ -864,7 +865,7 @@ Verify Model KServe Deployment
 
 Wait For ISVC To Be Loaded
     [Documentation]    Waits for the ISVC to be Loaded
-    [Arguments]    ${isvc_name}    ${namespace}    ${retries}=36
+    [Arguments]    ${isvc_name}    ${namespace}    ${retries}=60
     Wait Until Keyword Succeeds    ${retries} times    5s    ISVC Should Be Loaded    ${isvc_name}    ${namespace}
     Sleep    30s    msg=There is a 20 seconds polling
 

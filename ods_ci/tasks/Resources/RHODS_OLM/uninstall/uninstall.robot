@@ -118,14 +118,22 @@ Uninstall Service Mesh Operator CLI
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete ServiceMeshControlPlane --all --ignore-not-found
     Should Be Equal As Integers  ${return_code}   0   msg=Error deleting ServiceMeshControlPlane CR
+    Wait Until Keyword Succeeds    2 min    0 sec
+    ...        Check Number Of Resource Instances Equals To      ServiceMeshControlPlane    istio-system    0
     Log To Console    message=Deleting ServiceMeshMember CR From Cluster
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete ServiceMeshMember --all --ignore-not-found
     Should Be Equal As Integers  ${return_code}   0   msg=Error deleting ServiceMeshMember CR
+    Wait Until Keyword Succeeds    2 min    0 sec
+    ...        Check Number Of Resource Instances Equals To      ServiceMeshMember     istio-system     0
     Log To Console    message=Deleting ServiceMeshMemberRoll CR From Cluster
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete ServiceMeshMemberRoll --all --ignore-not-found
     Should Be Equal As Integers  ${return_code}   0   msg=Error deleting ServiceMeshMemberRoll CR
+    Wait Until Keyword Succeeds    2 min    0 sec
+    ...        Check Number Of Resource Instances Equals To      ServiceMeshMemberRoll     knative-serving      0
+    Wait Until Keyword Succeeds    2 min    0 sec
+    ...        Check Number Of Resource Instances Equals To      ServiceMeshMemberRoll     redhat-ods-applications-auth-provider      0        # robocop: disable
     Log To Console    message=Deleting Service Mesh Operator Subscription From Cluster
     ${return_code}    ${csv_name}    Run And Return Rc And Output
     ...    oc get subscription servicemeshoperator -n openshift-operators -o json | jq '.status.currentCSV' | tr -d '"'
@@ -143,14 +151,20 @@ Uninstall Serverless Operator CLI
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete KnativeServing --all --ignore-not-found
     Should Be Equal As Integers  ${return_code}   0   msg=Error deleting KnativeServing CR
+    Wait Until Keyword Succeeds    2 min    0 sec
+    ...        Check Number Of Resource Instances Equals To      KnativeServing     knative-serving      0
     Log To Console    message=Deleting KnativeEventing CR From Cluster
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete KnativeEventing --all --ignore-not-found
     Should Be Equal As Integers  ${return_code}   0   msg=Error deleting KnativeEventing CR
+    Wait Until Keyword Succeeds    2 min    0 sec
+    ...        Check Number Of Resource Instances Equals To      KnativeEventing     knative-eventing      0
     Log To Console    message=Deleting KnativeKafka CR From Cluster
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete KnativeKafka --all --ignore-not-found
     Should Be Equal As Integers  ${return_code}   0   msg=Error deleting KnativeKafka CR
+    Wait Until Keyword Succeeds    2 min    0 sec
+    ...        Check Number Of Resource Instances Equals To      KnativeKafka     knative-eventing      0
     Log To Console    message=Deleting Serverless Operator Subscription From Cluster
     ${return_code}    ${csv_name}    Run And Return Rc And Output
     ...    oc get subscription serverless-operator -n openshift-serverless -o json | jq '.status.currentCSV' | tr -d '"'
@@ -162,3 +176,11 @@ Uninstall Serverless Operator CLI
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete subscription serverless-operator -n openshift-serverless
 
+Check Number Of Resource Instances Equals To
+    [Documentation]    Keyword to check if the amount of instances of a specific CRD in a given namespace
+    ...                equals to a given number
+    [Arguments]     ${resource}      ${namespace}     ${desired_amount}
+    ${return_code}    ${amount}    Run And Return Rc And Output
+    ...    oc get ${resource} -n ${namespace} -o json | jq -r '.items | length'
+    Should Be Equal As Integers  ${return_code}   0   msg=Error calculating number of ${resource}
+    Should Be Equal As Integers  ${amount}   ${desired_amount}   msg=Error: ${amount} not equals to ${desired_amount}

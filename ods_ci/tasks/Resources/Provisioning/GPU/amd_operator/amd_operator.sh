@@ -85,10 +85,9 @@ function wait_until_pod_is_created() {
       then {
         echo Pod $podName found!
         return 0
-        break
       } else {
         echo "waiting for pod with label $label"
-        sleep 1
+        sleep 2
       }
     fi
   done
@@ -119,14 +118,9 @@ function monitor_logs() {
 function wait_until_driver_image_is_built() {
   startup_timeout=$1
   build_timeout=$2
-  if [[ $? -eq 0 ]];
-  then
-    name=$(oc get pod -n openshift-amd-gpu -l openshift.io/build.name -oname)
-    echo Builder pod name: $name
-    oc wait --timeout="${startup_timeout}s" --for=condition=ready pod -n openshift-amd-gpu -l openshift.io/build.name
-  else 
-    exit 1
-  fi
+  name=$(oc get pod -n openshift-amd-gpu -l openshift.io/build.name -oname)
+  echo Builder pod name: $name
+  oc wait --timeout="${startup_timeout}s" --for=condition=ready pod -n openshift-amd-gpu -l openshift.io/build.name
   echo "Wait for the image build to finish"
   oc wait --timeout="${build_timeout}s" --for=delete pod -n openshift-amd-gpu -l openshift.io/build.name
   echo "Checking the image stream got created"

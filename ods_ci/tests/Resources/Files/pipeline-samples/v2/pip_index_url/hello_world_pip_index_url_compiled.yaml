@@ -79,7 +79,5 @@ platforms:
             keyToEnv:
             - configMapKey: pip_index_url
               envVar: PIP_INDEX_URL
-          - configMapName: ds-pipeline-custom-env-vars
-            keyToEnv:
             - configMapKey: pip_trusted_host
               envVar: PIP_TRUSTED_HOST

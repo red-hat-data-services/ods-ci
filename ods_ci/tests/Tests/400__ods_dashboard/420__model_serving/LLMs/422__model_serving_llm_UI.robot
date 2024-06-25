@@ -35,7 +35,8 @@ Verify User Can Serve And Query A Model Using The UI
     [Setup]    Set Up Project    namespace=${TEST_NS}
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
-    Deploy Kserve Model Via UI    ${flan_model_name}    Caikit    kserve-connection    flan-t5-small/${flan_model_name}
+    Deploy Kserve Model Via UI    ${flan_model_name}    serving_runtime=Caikit TGIS    data_connection=kserve-connection
+    ...    path=flan-t5-small/${flan_model_name}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Query Model Multiple Times    model_name=${flan_model_name}
@@ -54,12 +55,12 @@ Verify User Can Deploy Multiple Models In The Same Namespace Using The UI  # rob
     ${test_namespace}=    Set Variable     ${TEST_NS}-multisame
     ${model_one_name}=    Set Variable    bloom-560m-caikit
     ${model_two_name}=    Set Variable    flan-t5-small-caikit
-    Deploy Kserve Model Via UI    ${model_one_name}    Caikit    kserve-connection
-    ...    ${BLOOM_MODEL_S3_DIR}
+    Deploy Kserve Model Via UI    ${model_one_name}    serving_runtime=Caikit TGIS    data_connection=kserve-connection
+    ...    path=${BLOOM_MODEL_S3_DIR}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
     ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
-    Deploy Kserve Model Via UI    ${model_two_name}    Caikit    kserve-connection
-    ...    flan-t5-small/${model_two_name}
+    Deploy Kserve Model Via UI    ${model_two_name}    serving_runtime=Caikit TGIS    data_connection=kserve-connection
+    ...    path=flan-t5-small/${model_two_name}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
     ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Query Model Multiple Times    inference_type=all-tokens    model_name=${model_one_name}
@@ -78,16 +79,16 @@ Verify User Can Deploy Multiple Models In Different Namespaces Using The UI  # r
     [Setup]    Set Up Project    namespace=singlemodel-multi1
     ${model_one_name}=    Set Variable    bloom-560m-caikit
     ${model_two_name}=    Set Variable    flan-t5-small-caikit
-    Deploy Kserve Model Via UI    ${model_one_name}    Caikit    kserve-connection
-    ...    bloom-560m/${model_one_name}
+    Deploy Kserve Model Via UI    ${model_one_name}    serving_runtime=Caikit TGIS    data_connection=kserve-connection
+    ...    path=bloom-560m/${model_one_name}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
     ...    namespace=singlemodel-multi1    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Query Model Multiple Times    inference_type=all-tokens    model_name=${model_one_name}
     ...    n_times=2    namespace=singlemodel-multi1    protocol=http
     Open Data Science Projects Home Page
     Set Up Project    namespace=singlemodel-multi2    single_prj=${FALSE}    dc_name=kserve-connection-2
-    Deploy Kserve Model Via UI    ${model_two_name}    Caikit    kserve-connection-2
-    ...    flan-t5-small/${model_two_name}
+    Deploy Kserve Model Via UI    ${model_two_name}    serving_runtime=Caikit TGIS
+    ...    data_connection=kserve-connection-2    path=flan-t5-small/${model_two_name}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
     ...    namespace=singlemodel-multi2    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Query Model Multiple Times    inference_type=all-tokens    model_name=${model_two_name}
@@ -101,7 +102,8 @@ Verify Model Pods Are Deleted When No Inference Service Is Present Using The UI 
     [Setup]    Set Up Project    namespace=no-infer-kserve
     ${flan_isvc_name}=    Set Variable    flan-t5-small-caikit
     ${model_name}=    Set Variable    flan-t5-small-caikit
-    Deploy Kserve Model Via UI    ${model_name}    Caikit    kserve-connection    flan-t5-small/${model_name}
+    Deploy Kserve Model Via UI    ${model_name}    serving_runtime=Caikit TGIS    data_connection=kserve-connection
+    ...    path=flan-t5-small/${model_name}
     Delete InfereceService    isvc_name=${flan_isvc_name}    namespace=no-infer-kserve
     ${rc}    ${out}=    Run And Return Rc And Output    oc wait pod -l serving.kserve.io/inferenceservice=${flan_isvc_name} -n no-infer-kserve --for=delete --timeout=200s  #robocop: disable
     Should Be Equal As Integers    ${rc}    ${0}
@@ -115,7 +117,8 @@ Verify User Can Set Requests And Limits For A Model Using The UI  # robocop: dis
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
     ${requests}=    Create Dictionary    cpu=1    memory=4Gi
     ${limits}=    Create Dictionary    cpu=2    memory=8Gi
-    Deploy Kserve Model Via UI    ${flan_model_name}    Caikit    kserve-connection    flan-t5-small/${flan_model_name}
+    Deploy Kserve Model Via UI    ${flan_model_name}    serving_runtime=Caikit TGIS    data_connection=kserve-connection
+    ...    path=flan-t5-small/${flan_model_name}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     # ${rev_id}=    Get Current Revision ID    model_name=${flan_model_name}
@@ -132,8 +135,8 @@ Verify User Can Set Requests And Limits For A Model Using The UI  # robocop: dis
     # Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${rev_id}
     # ...    namespace=${test_namespace}
     #### Editing the size of an existing model does not work in 2.5, deploying a different one with different size
-    Deploy Kserve Model Via UI    ${flan_model_name}-medium    Caikit    kserve-connection
-    ...    flan-t5-small/${flan_model_name}  size=Medium
+    Deploy Kserve Model Via UI    ${flan_model_name}-medium    serving_runtime=Caikit TGIS
+    ...    data_connection=kserve-connection    path=flan-t5-small/${flan_model_name}  size=Medium
     # Wait For Model KServe Deployment To Be Ready
     # ...    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     # ...    namespace=${test_namespace}    exp_replicas=1    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
@@ -153,8 +156,8 @@ Verify Model Can Be Served And Query On A GPU Node Using The UI  # robocop: disa
     ${model_name}=    Set Variable    flan-t5-small-caikit
     ${requests}=    Create Dictionary    nvidia.com/gpu=1
     ${limits}=    Create Dictionary    nvidia.com/gpu=1
-    Deploy Kserve Model Via UI    ${model_name}    Caikit    kserve-connection
-    ...    flan-t5-small/${model_name}    no_gpus=${1}
+    Deploy Kserve Model Via UI    ${model_name}    serving_runtime=Caikit TGIS    data_connection=kserve-connection
+    ...    path=flan-t5-small/${model_name}    no_gpus=${1}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Container Hardware Resources Should Match Expected    container_name=kserve-container
@@ -177,7 +180,8 @@ Verify Non Admin Can Serve And Query A Model Using The UI  # robocop: disable
     ...        Set Up Project    namespace=non-admin-test    single_prj=${FALSE}
     ${test_namespace}=    Set Variable     non-admin-test
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
-    Deploy Kserve Model Via UI    ${flan_model_name}    Caikit    kserve-connection    flan-t5-small/${flan_model_name}
+    Deploy Kserve Model Via UI    ${flan_model_name}    serving_runtime=Caikit TGIS    data_connection=kserve-connection
+    ...    path=flan-t5-small/${flan_model_name}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     # ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_model_name}   namespace=${test_namespace}
@@ -197,8 +201,8 @@ Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector Using The UI  #
     [Setup]    Set Up Project    namespace=grammar-model
     ${test_namespace}=    Set Variable     grammar-model
     ${flan_model_name}=    Set Variable    flan-t5-large-grammar-synthesis-caikit
-    Deploy Kserve Model Via UI    ${flan_model_name}    Caikit
-    ...    kserve-connection    flan-t5-large-grammar-synthesis-caikit/${flan_model_name}
+    Deploy Kserve Model Via UI    ${flan_model_name}    serving_runtime=Caikit TGIS    data_connection=kserve-connection
+    ...    path=flan-t5-large-grammar-synthesis-caikit/${flan_model_name}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Sleep    30s
@@ -215,8 +219,8 @@ Verify User Can Serve And Query Flan-t5 Large Using The UI  # robocop: disable
     [Setup]    Set Up Project    namespace=flan-t5-large3
     ${test_namespace}=    Set Variable     flan-t5-large3
     ${flan_model_name}=    Set Variable    flan-t5-large
-    Deploy Kserve Model Via UI    ${flan_model_name}    Caikit
-    ...    kserve-connection    flan-t5-large/flan-t5-large
+    Deploy Kserve Model Via UI    ${flan_model_name}    serving_runtime=Caikit TGIS    data_connection=kserve-connection
+    ...    path=flan-t5-large/flan-t5-large
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Sleep    30s
@@ -241,7 +245,8 @@ Verify User Can Access Model Metrics From UWM Using The UI  # robocop: disable
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
     ${thanos_url}=    Get OpenShift Thanos URL
     ${token}=    Generate Thanos Token
-    Deploy Kserve Model Via UI    ${flan_model_name}    Caikit    kserve-connection    flan-t5-small/${flan_model_name}
+    Deploy Kserve Model Via UI    ${flan_model_name}    serving_runtime=Caikit TGIS    data_connection=kserve-connection
+    ...    path=flan-t5-small/${flan_model_name}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Wait Until Keyword Succeeds    30 times    4s
@@ -282,7 +287,8 @@ Verify User With Edit Permission Can Deploy Query And Delete A LLM
     Login To RHODS Dashboard    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}    ${TEST_USER_3.AUTH_TYPE}
     Wait For RHODS Dashboard To Load
     Open Data Science Project Details Page    ${test_namespace}
-    Run Keyword And Continue On Failure    Deploy Kserve Model Via UI    ${flan_model_name}    Caikit    kserve-connection    flan-t5-small/${flan_model_name}
+    Run Keyword And Continue On Failure    Deploy Kserve Model Via UI    ${flan_model_name}
+    ...    serving_runtime=Caikit TGIS    data_connection=kserve-connection    path=flan-t5-small/${flan_model_name}
     # Needed because of ProductBug
     ${modal}=    Run Keyword And Return Status    Page Should Contain Element    xpath=${KSERVE_MODAL_HEADER}
     IF  ${modal}==${TRUE}
@@ -317,7 +323,8 @@ Verify User With Admin Permission Can Deploy Query And Delete A LLM
     Login To RHODS Dashboard    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}    ${TEST_USER_3.AUTH_TYPE}
     Wait For RHODS Dashboard To Load
     Open Data Science Project Details Page    ${test_namespace}
-    Deploy Kserve Model Via UI    ${flan_model_name}    Caikit    kserve-connection    flan-t5-small/${flan_model_name}
+    Deploy Kserve Model Via UI    ${flan_model_name}    serving_runtime=Caikit TGIS    data_connection=kserve-connection
+    ...    path=flan-t5-small/${flan_model_name}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Query Model Multiple Times    model_name=${flan_model_name}

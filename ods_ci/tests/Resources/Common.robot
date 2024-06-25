@@ -482,14 +482,24 @@ Enable User Workload Monitoring
     [Documentation]    Enable User Workload Monitoring for the cluster for user-defined-projects
     ${return_code}    ${output}    Run And Return Rc And Output   oc apply -f ${UWM_ENABLE_FILEPATH}
     Log To Console    ${output}
-    Should Be Equal As Integers    ${return_code}     0   msg=Error while applying the provided file
+    IF    "already exists" in ${output}
+        Log    configmap already existed on the cluster, continuing
+        RETURN
+    ELSE
+        Should Be Equal As Integers    ${return_code}     0   msg=Error while applying the provided file
+    END
 
 Configure User Workload Monitoring
     [Documentation]    Configure the retention period in User Workload Monitoring for the cluster.
     ...                This period can be configured for the component as and when needed.
     ${return_code}    ${output}    Run And Return Rc And Output   oc apply -f ${UWM_CONFIG_FILEPATH}
     Log To Console    ${output}
-    Should Be Equal As Integers    ${return_code}     0   msg=Error while applying the provided file
+    IF    "already exists" in ${output}
+        Log    configmap already existed on the cluster, continuing
+        RETURN
+    ELSE
+        Should Be Equal As Integers    ${return_code}     0   msg=Error while applying the provided file
+    END
 
 Clear Element And Input Text
     [Documentation]    Clear and input text element, wait .5 seconds and input new text on it

@@ -424,7 +424,7 @@ Deploy Kserve Model Via UI  #robocop: disable
 Set Model Server Runtime
     [Documentation]    Opens the Serving runtime dropdown in the deploy model modal window for models
     ...    and select the given runtime
-    [Arguments]    ${runtime}=Caikit
+    [Arguments]    ${runtime}=Caikit TGIS
     Page Should Contain Element    ${KSERVE_RUNTIME_DROPDOWN}
     Click Element    ${KSERVE_RUNTIME_DROPDOWN}
     Click Element    ${KSERVE_RUNTIME_DROPDOWN}/..//span[contains(text(),"${runtime}")]

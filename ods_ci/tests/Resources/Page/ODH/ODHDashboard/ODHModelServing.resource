@@ -389,7 +389,7 @@ Deploy Kserve Model Via UI  #robocop: disable
     [Documentation]  Deploys a model using the kserve/caikit runtime using the Data Science Projects UI
     [Arguments]    ${model_name}    ${serving_runtime}    ${data_connection}    ${path}
     ...    ${model_framework}=caikit    ${replicas}=1    ${size}=Small    ${no_gpus}=${0}
-    ...    ${token}=${FALSE}
+    ...    ${token}=${FALSE}    ${multi_token}=${FALSE}    ${multi_service_account_name}=default-name2
     Move To Tab    Models
     Click Button    ${DEPLOY_MODEL_BTN}
     Wait Until Page Contains Element    xpath=${KSERVE_MODAL_HEADER}
@@ -402,6 +402,9 @@ Deploy Kserve Model Via UI  #robocop: disable
 #        Select Checkbox    xpath=//input[@data-testid="alt-form-checkbox-auth"]
 #        Checkbox Should Be Selected  xpath=//input[@data-testid="alt-form-checkbox-auth"]
         Enable Token Authentication
+        IF    ${multi_token}
+            Add Another Service Account
+        END
     END
     Select Existing Data Connection    ${data_connection}
     Set Folder Path    ${path}

@@ -56,6 +56,9 @@ Test Inference Without Token Authentication
     [Tags]    Smoke    FlakyTest
     ...       ODS-2053
     Depends On Test  Verify Openvino_IR Model Via UI
+    # This inference request often fails because of timing, currently it is sent ~10 seconds after the model is shown as
+    # ready, let's add 30 second on top.
+    Sleep    30s
     Run Keyword And Continue On Failure    Verify Model Inference    ${MODEL_NAME}    ${INFERENCE_INPUT_OPENVINO}
     ...    ${EXPECTED_INFERENCE_OUTPUT_OPENVINO}    token_auth=${FALSE}
     [Teardown]   Run Keyword If Test Failed    Get Modelmesh Events And Logs

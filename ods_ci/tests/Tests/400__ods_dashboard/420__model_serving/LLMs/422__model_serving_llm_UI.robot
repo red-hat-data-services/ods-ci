@@ -215,7 +215,6 @@ Verify User Can Serve And Query A Token Protected Model Using The UI
 Verify User Can Serve But Can't Query A Token Protected Model Without The Token
     [Documentation]    Deploying and querying a Token Protected LLM model
     ...                using Kserve and Caikit runtime
-    ...                Intermittently failing: RHOAIENG-3148
     [Tags]    Tier1    ODS-XXXXXX
     [Setup]    Set Up Project    namespace=${TEST_NS}
     ${test_namespace}=    Set Variable     ${TEST_NS}
@@ -233,8 +232,7 @@ Verify User Can Serve But Can't Query A Token Protected Model Without The Token
 Verify User Can Serve And Query A Model Using The UI Protected With Multiple Tokens
     [Documentation]    Deploying and querying a Token Protected LLM model
     ...                using Kserve and Caikit runtime, using multiple tokens
-    ...                Intermittently failing: RHOAIENG-3148
-    [Tags]    Sanity    Tier1    ODS-XXXXXX2
+    [Tags]    Sanity    Tier1    ODS-XXXXXX
     [Setup]    Set Up Project    namespace=${TEST_NS}
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -257,8 +255,38 @@ Verify User Can Serve And Query A Model Using The UI Protected With Multiple Tok
     Delete Model Via UI    ${flan_model_name}
     [Teardown]    Clean Up DSP Page
 
-# Verify user can not query a token protected model with a disabled token
+Verify User Can not Query A Token Protected Model With A Disabled Token Using The UI
+    [Documentation]    Deploy an LLM (using Kserve and Caikit runtime) protected by different Tokens
+    ...                and try to query it using a disabled token
+    [Tags]    Sanity    Tier1    ODS-XXXXXX2
+    [Setup]    Set Up Project    namespace=${TEST_NS}
+    ${test_namespace}=    Set Variable     ${TEST_NS}
+    ${flan_model_name}=    Set Variable    flan-t5-small-caikit
+    Deploy Kserve Model Via UI    ${flan_model_name}    Caikit    kserve-connection    flan-t5-small/${flan_model_name}
+    ...    token=${TRUE}    multi_token=${TRUE}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
+    ${model_token_1}=    Get Access Token via UI    ${test_namespace}    service_account_name=default-name
+    ...    single_model=${TRUE}    model_name=${flan_model_name}
+    Open Model Edit Modal    ${flan_model_name}
+    Disable Token Authentication    service_account_name=default-name
+    Click Button    Deploy
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
+#    Run Keyword And Continue On Failure    Verify Model Inference With Retries
+#    ...    ${SECURED_MODEL}    ${INFERENCE_INPUT}    ${EXPECTED_INFERENCE_SECURED_OUTPUT}    token_auth=${TRUE}
+#    ...    project_title=${SECOND_PROJECT}
+#Run Keyword And Expect Error    Unexpected Pod Toleration
+#    Run Keyword And Continue On Failure    Query Model Multiple Times    model_name=${flan_model_name}
+    Run Keyword And Expect Error    *Expected status: 401 != 200*
+    ...    Query Model Multiple Times    model_name=${flan_model_name}
+    ...        inference_type=all-tokens    n_times=1
+    ...        namespace=${test_namespace}    protocol=http
+    ...        token=${model_token_1}
+    Delete Model Via UI    ${flan_model_name}
+    [Teardown]    Clean Up DSP Page
 
+#TODO: DISABLE ALL TOKENS
 Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector Using The UI  # robocop: disable
     [Documentation]    Deploys and queries flan-t5-large-grammar-synthesis model
     [Tags]    Tier2    ODS-2553

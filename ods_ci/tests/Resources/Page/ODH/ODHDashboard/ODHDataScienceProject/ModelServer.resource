@@ -185,9 +185,14 @@ Enable Token Authentication
     END
 
 Disable Token Authentication
-    [Documentation]    Enables Token authentication to serving route
-    SeleniumLibrary.Unselect Checkbox    ${TOKEN_AUTH_CHECKBOX_XP}
-    # TODO: change service account name
+    [Documentation]    Disable Token authentication to serving route
+    ...                If a Service Account is given, just disable the token for the specific one.
+    [Arguments]    ${service_account_name}=${NONE}
+    IF    "${service_account_name}" != "${NONE}"
+        Click Button    xpath://input[@value="${service_account_name}"]/parent::span/parent::div/following::div/button[@aria-label="Remove service account"]
+    ELSE
+        SeleniumLibrary.Unselect Checkbox    ${TOKEN_AUTH_CHECKBOX_XP}
+    END
 
 Add Another Service Account
     [Documentation]    Add another Service Account once the Token Authorization is enabled

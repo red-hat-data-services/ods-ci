@@ -200,7 +200,8 @@ Open Model Edit Modal
     [Documentation]    Opens the modal used to edit the details of an already deployed model.
     [Arguments]    ${model_name}
     ODHDashboard.Click Action From Actions Menu    item_title=${model_name}    action=Edit
-    Wait For Dashboard Page Title    Deploy model
+    # Wait for modal header
+    Wait Until Page Contains Element    xpath://span[contains(@class, "modal") and text()="Deploy model"]
 
 Get Model Route Via UI
     [Documentation]    Grabs the serving route (URL) of an already deployed model from the Model Serving page.

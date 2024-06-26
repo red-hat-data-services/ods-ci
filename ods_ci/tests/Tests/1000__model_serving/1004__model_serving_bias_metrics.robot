@@ -1,14 +1,14 @@
 *** Settings ***
 Documentation       TestSuite testing Bias metrics for Deployed Models
-Resource            ../../../Resources/RHOSi.resource
-Resource            ../../../Resources/OCP.resource
-Resource            ../../../Resources/Common.robot
-Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
-Resource            ../../../Resources/Page/Operators/ISVs.resource
-Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
-Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
-Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/ModelServer.resource
-Resource            ../../../Resources/Page/OCPDashboard/Monitoring/Metrics.robot
+Resource            ../../Resources/RHOSi.resource
+Resource            ../../Resources/OCP.resource
+Resource            ../../Resources/Common.robot
+Resource            ../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
+Resource            ../../Resources/Page/Operators/ISVs.resource
+Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
+Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
+Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/ModelServer.resource
+Resource            ../../Resources/Page/OCPDashboard/Monitoring/Metrics.robot
 Library             OpenShiftLibrary
 Suite Setup         Bias Metrics Suite Setup
 Suite Teardown      Bias Metrics Suite Teardown

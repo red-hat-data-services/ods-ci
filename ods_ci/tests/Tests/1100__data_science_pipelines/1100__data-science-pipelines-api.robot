@@ -1,13 +1,13 @@
 *** Settings ***
 Documentation       Test suite for OpenShift Pipeline API
-Resource            ../../../Resources/RHOSi.resource
-Resource            ../../../Resources/ODS.robot
-Resource            ../../../Resources/Common.robot
-Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
-Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipelines.resource
+Resource            ../../Resources/RHOSi.resource
+Resource            ../../Resources/ODS.robot
+Resource            ../../Resources/Common.robot
+Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
+Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipelines.resource
 Library             DateTime
-Library             ../../../../libs/DataSciencePipelinesAPI.py
-Library             ../../../../libs/DataSciencePipelinesKfp.py
+Library             ../../../libs/DataSciencePipelinesAPI.py
+Library             ../../../libs/DataSciencePipelinesKfp.py
 Test Tags           DataSciencePipelines
 Suite Setup         Data Science Pipelines Suite Setup
 Suite Teardown      RHOSi Teardown

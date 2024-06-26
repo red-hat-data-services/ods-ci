@@ -2,9 +2,9 @@
 Documentation     Collection of CLI tests to validate fetching models from different object storages
 ...               in the scope of model serving stack for Large Language Models (LLM).
 ...               These tests leverage on TGIS Standalone Serving Runtime
-Resource          ../../../../Resources/OCP.resource
-Resource          ../../../../Resources/CLI/ModelServing/llm.resource
-Resource          ../../../../Resources/CLI/Minio.resource
+Resource          ../../../Resources/OCP.resource
+Resource          ../../../Resources/CLI/ModelServing/llm.resource
+Resource          ../../../Resources/CLI/Minio.resource
 Library           OpenShiftLibrary
 Suite Setup       Suite Setup
 Suite Teardown    RHOSi Teardown

@@ -56,35 +56,43 @@ has_csv_succeeded() {
 }
 
 function create_devconfig() {
-  oc create -f - <<EOF
+  dc_name="dc-internal-registry"
+  dc=$(oc get DeviceConfig $dc_name -n openshift-amd-gpu -oname --ignore-not-found)
+  if [[ -n $dc ]];
+    then
+      echo "AMD DeviceConfig $dc_name already exists". Skipping creation
+    else
+      echo "Creating AMD DeviceConfig..."
+      oc create -f - <<EOF
 kind: DeviceConfig
 apiVersion: amd.io/v1alpha1
 metadata:
-  name: dc-internal-registry
+  name: $dc_name
   namespace: openshift-amd-gpu
 EOF
+  fi
 }
 
-function wait_until_pod_ready_status() {
-  local timeout_seconds=1200
-  local pod_label=$1
-  local namespace=$2
-  local timeout=240
+
+function wait_until_pod_is_created() {
+  label=$1
+  namespace=$2
+  timeout=$3
   start_time=$(date +%s)
   while [ $(($(date +%s) - start_time)) -lt $timeout ]; do
-     pod_status="$(oc get pod -l app="$pod_label" -n "$namespace" --no-headers=true 2>/dev/null)"
-     daemon_status="$(oc get daemonset -l app="$pod_label" -n "$namespace" --no-headers=true 2>/dev/null)"
-     if [[ -n "$daemon_status" || -n "$pod_status" ]] ; then
-        echo "Waiting until GPU Pods or Daemonset of '$pod_label' in namespace '$namespace' are in running state..."
-        echo "Pods status: '$pod_status'"
-        echo "Daemonset status: '$daemon_status'"
-        oc wait --timeout="${timeout_seconds}s" --for=condition=ready pod -n "$namespace" -l app="$pod_label" || \
-        oc rollout status --watch --timeout=3m daemonset -n "$namespace" -l app="$pod_label" || continue
-        break
-     fi
-     echo "Waiting for Pods or Daemonset with label app='$pod_label' in namespace '$namespace' to be present..."
-     sleep 5
+    podName=$(oc get pods -n $2 -l $1 -oname)
+    if [[ -n $podName ]];
+      then {
+        echo Pod $podName found!
+        return 0
+      } else {
+        echo "waiting for pod with label $label"
+        sleep 2
+      }
+    fi
   done
+  echo "Timeout exceeded, pod with label $label not found"
+  return 1
 }
 
 function machineconfig_updates {
@@ -94,18 +102,59 @@ function machineconfig_updates {
 
 function monitor_logs() {
     local pod_name=$1
-    local search_text=$2
-    local ns=$3
-    local c_name=$4
+    local ns=$2
+    local c_name=$3
+    shift 3
+    local search_text=$(printf "%q " "$@")
     echo "Monitoring logs for pod $pod_name..."
-
     # Use 'kubectl logs' command to fetch logs continuously
-
     oc logs "$pod_name" -c "$c_name" -n "$ns" | while read -r line; do
         if [[ $line == *"$search_text"* ]]; then
             echo "Found \"$search_text\" in pod logs: $line"
         fi
     done
+}
+
+function wait_until_driver_image_is_built() {
+  startup_timeout=$1
+  build_timeout=$2
+  name=$(oc get pod -n openshift-amd-gpu -l openshift.io/build.name -oname)
+  echo Builder pod name: $name
+  oc wait --timeout="${startup_timeout}s" --for=condition=ready pod -n openshift-amd-gpu -l openshift.io/build.name
+  echo "Wait for the image build to finish"
+  oc wait --timeout="${build_timeout}s" --for=delete pod -n openshift-amd-gpu -l openshift.io/build.name
+  echo "Checking the image stream got created"
+  image=$(oc get is amd_gpu_kmm_modules -n openshift-amd-gpu -oname)
+  if [[ $? -eq 0 ]];
+    then
+      echo ".Image Stream $image found!"
+    else
+      echo ".Image Stream amd_gpu_kmm_modules not found. Check the cluster"
+      exit 1
+  fi
+}
+
+function create_acceleratorprofile() {
+  echo "Creating an Accelerator Profile for Dashboard"
+  oc apply -f - <<EOF
+  apiVersion: dashboard.opendatahub.io/v1
+  kind: AcceleratorProfile
+  metadata:
+    name: ods-ci-amd-gpu
+    namespace: redhat-ods-applications
+  spec:
+    displayName: AMD GPU
+    enabled: true
+    identifier: amd.com/gpu
+    tolerations:
+      - effect: NoSchedule
+        key: amd.com/gpu
+        operator: Exists
+EOF
+  if [ $? -eq 0 ]; then
+    echo "Verifying that an AcceleratorProfiles resource was created in redhat-ods-applications"
+    oc describe AcceleratorProfiles -n redhat-ods-applications
+  fi 
 }
 
 check_registry
@@ -132,5 +181,16 @@ echo "Installing AMD operator"
 oc apply -f "$GPU_INSTALL_DIR/amd_gpu_install.yaml"
 wait_while 360 ! has_csv_succeeded openshift-amd-gpu amd-gpu-operator
 create_devconfig
-name=$(oc get pod -n openshift-amd-gpu -l openshift.io/build.name -oname)
-wait_while 1200 ! monitor_logs "$name" "Successfully pushed image-registry.openshift-image-registry.svc:5000/openshift-amd-gpu" openshift-amd-gpu docker-build
+image=$(oc get is amd_gpu_kmm_modules -n openshift-amd-gpu -oname --ignore-not-found)
+if [[ -n $image ]];
+  then
+      echo ".Image Stream amd_gpu_kmm_modules alredy present! Skipping waiting for builder pod";
+  else
+      wait_until_pod_is_created  openshift.io/build.name openshift-amd-gpu 180
+      wait_until_driver_image_is_built 60 1200
+fi
+echo "Configuration of AMD GPU node and Operators completed"
+# the message appears in the logs, but the pod may get delete before our code next iteration checks the logs once again,
+# hence it'd fails to reach the pod. It happened to me
+# wait_while 1200 monitor_logs "$name" openshift-amd-gpu docker-build "Successfully pushed image-registry.openshift-image-registry.svc:5000/openshift-amd-gpu"
+create_acceleratorprofile

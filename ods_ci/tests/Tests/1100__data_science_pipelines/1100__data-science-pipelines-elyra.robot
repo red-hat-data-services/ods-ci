@@ -1,17 +1,17 @@
 *** Settings ***
 Documentation    Test Suite for Elyra pipelines in workbenches
-Resource         ../../../Resources/ODS.robot
-Resource         ../../../Resources/Common.robot
-Resource         ../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
-Resource         ../../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
-Resource         ../../../Resources/Page/ODH/JupyterHub/Elyra.resource
-Resource         ../../../Resources/Page/OCPDashboard/Builds/Builds.robot
-Resource         ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
-Resource         ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Workbenches.resource
-Resource         ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Storages.resource
-Resource         ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
-Resource         ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Pipelines.resource
-Resource         ../../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipelines.resource
+Resource         ../../Resources/ODS.robot
+Resource         ../../Resources/Common.robot
+Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
+Resource         ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
+Resource         ../../Resources/Page/ODH/JupyterHub/Elyra.resource
+Resource         ../../Resources/Page/OCPDashboard/Builds/Builds.robot
+Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
+Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Workbenches.resource
+Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Storages.resource
+Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
+Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Pipelines.resource
+Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipelines.resource
 Library          Screenshot
 Library          String
 Library          DebugLibrary

@@ -1,10 +1,10 @@
 *** Settings ***
 Documentation     Collection of CLI tests to validate the model serving stack for Large Language Models (LLM).
 ...               These tests leverage on Caikit+TGIS combined Serving Runtime
-Resource          ../../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
-Resource          ../../../../Resources/OCP.resource
-Resource          ../../../../Resources/Page/Operators/ISVs.resource
-Resource          ../../../../Resources/CLI/ModelServing/llm.resource
+Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
+Resource          ../../../Resources/OCP.resource
+Resource          ../../../Resources/Page/Operators/ISVs.resource
+Resource          ../../../Resources/CLI/ModelServing/llm.resource
 Library            OpenShiftLibrary
 Suite Setup       Install Model Serving Stack Dependencies
 Suite Teardown    RHOSi Teardown

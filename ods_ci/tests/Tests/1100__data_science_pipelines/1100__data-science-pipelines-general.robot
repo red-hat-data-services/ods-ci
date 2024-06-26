@@ -1,16 +1,16 @@
 *** Settings ***
 Documentation       Test suite for OpenShift Pipeline API
 
-Resource            ../../../Resources/RHOSi.resource
-Resource            ../../../Resources/ODS.robot
-Resource            ../../../Resources/Common.robot
-Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
-Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipelines.resource
-Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
-Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
-Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Pipelines.resource
+Resource            ../../Resources/RHOSi.resource
+Resource            ../../Resources/ODS.robot
+Resource            ../../Resources/Common.robot
+Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
+Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipelines.resource
+Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
+Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
+Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Pipelines.resource
 Library             DateTime
-Library             ../../../../libs/DataSciencePipelinesAPI.py
+Library             ../../../libs/DataSciencePipelinesAPI.py
 Test Tags           DataSciencePipelines
 Suite Setup         General Suite Setup
 Suite Teardown      General Suite Teardown

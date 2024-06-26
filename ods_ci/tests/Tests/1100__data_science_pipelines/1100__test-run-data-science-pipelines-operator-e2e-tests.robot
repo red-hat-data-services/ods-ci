@@ -4,9 +4,9 @@ Suite Setup       Prepare Data Science Pipelines Operator Integration Tests Suit
 Suite Teardown    Teardown Data Science Pipelines Operator Integration Tests Suite
 Library           OperatingSystem
 Library           Process
-Resource          ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
-Resource          ../../../Resources/RHOSi.resource
-Library           ../../../../libs/DataSciencePipelinesAPI.py
+Resource          ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
+Resource          ../../Resources/RHOSi.resource
+Library           ../../../libs/DataSciencePipelinesAPI.py
 
 
 *** Variables ***

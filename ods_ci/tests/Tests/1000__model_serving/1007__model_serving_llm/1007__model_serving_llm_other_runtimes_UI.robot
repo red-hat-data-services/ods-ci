@@ -1,8 +1,8 @@
 *** Settings ***
 Documentation     Collection of UI tests to validate the model serving stack for Large Language Models (LLM)
-Resource          ../../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
-Resource          ../../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/ModelServer.resource
-Resource          ../../../../Resources/CLI/ModelServing/llm.resource
+Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
+Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/ModelServer.resource
+Resource          ../../../Resources/CLI/ModelServing/llm.resource
 Suite Setup       Non-Admin Setup Kserve UI Test
 Suite Teardown    Non-Admin Teardown Kserve UI Test
 Test Tags         KServe

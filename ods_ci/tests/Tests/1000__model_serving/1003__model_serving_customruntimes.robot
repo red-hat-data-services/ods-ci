@@ -1,9 +1,9 @@
 *** Settings ***
 Documentation     Collection of tests to validate the model serving stack for Large Language Models (LLM)
-Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
-Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDashboardSettingsRuntimes.resource
-Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
-Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
+Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
+Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboardSettingsRuntimes.resource
+Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
+Resource          ../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
 Suite Setup       Custom Serving Runtime Suite Setup
 Suite Teardown    Custom Serving Runtime Suite Teardown
 Test Tags         Dashboard

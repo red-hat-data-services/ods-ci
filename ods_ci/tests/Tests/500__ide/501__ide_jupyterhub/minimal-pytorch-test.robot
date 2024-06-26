@@ -1,11 +1,11 @@
 *** Settings ***
 Documentation    Test Suite for PyTorch image
-Resource         ../../Resources/ODS.robot
-Resource         ../../Resources/Common.robot
-Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
-Resource         ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
-Resource         ../../Resources/Page/ODH/JupyterHub/GPU.resource
-Resource         ../../Resources/Page/OCPDashboard/Builds/Builds.robot
+Resource         ../../../Resources/ODS.robot
+Resource         ../../../Resources/Common.robot
+Resource         ../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
+Resource         ../../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
+Resource         ../../../Resources/Page/ODH/JupyterHub/GPU.resource
+Resource         ../../../Resources/Page/OCPDashboard/Builds/Builds.robot
 Library          DebugLibrary
 Library          JupyterLibrary
 Suite Setup      Verify PyTorch Image Suite Setup

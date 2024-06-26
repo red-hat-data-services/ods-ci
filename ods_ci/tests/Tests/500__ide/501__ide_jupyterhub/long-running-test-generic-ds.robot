@@ -1,8 +1,8 @@
 *** Settings ***
-Resource            ../../Resources/ODS.robot
-Resource            ../../Resources/Common.robot
-Resource            ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
-Resource            ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
+Resource            ../../../Resources/ODS.robot
+Resource            ../../../Resources/Common.robot
+Resource            ../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
+Resource            ../../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Library             DebugLibrary
 Library             JupyterLibrary
 

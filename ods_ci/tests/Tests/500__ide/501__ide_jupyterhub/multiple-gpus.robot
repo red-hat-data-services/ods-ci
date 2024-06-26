@@ -1,12 +1,12 @@
 *** Settings ***
 Documentation    Tests for a scenario in which multiple GPUs are present in the cluster
 ...              Specifically, we want to test for two nodes with 1 GPU each.
-Resource         ../../Resources/ODS.robot
-Resource         ../../Resources/Common.robot
-Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
-Resource         ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
-Resource         ../../Resources/Page/ODH/JupyterHub/GPU.resource
-Resource         ../../Resources/Page/OCPDashboard/Pods/Pods.robot
+Resource         ../../../Resources/ODS.robot
+Resource         ../../../Resources/Common.robot
+Resource         ../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
+Resource         ../../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
+Resource         ../../../Resources/Page/ODH/JupyterHub/GPU.resource
+Resource         ../../../Resources/Page/OCPDashboard/Pods/Pods.robot
 Library          JupyterLibrary
 Suite Setup      Spawner Suite Setup
 Suite Teardown   Double User Teardown

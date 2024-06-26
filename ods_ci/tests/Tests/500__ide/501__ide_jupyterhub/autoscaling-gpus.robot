@@ -2,12 +2,12 @@
 Documentation     Tests for a scenario in which a gpu machine pool with autoscaling
 ...               Is present on the cluster. Tests that the spawner shows the correct
 ...               No. of GPUs available and that autoscaling can be triggered
-Resource          ../../Resources/ODS.robot
-Resource          ../../Resources/Common.robot
-Resource          ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
-Resource          ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
-Resource          ../../Resources/Page/ODH/JupyterHub/GPU.resource
-Resource          ../../Resources/Page/OCPDashboard/Pods/Pods.robot
+Resource          ../../../Resources/ODS.robot
+Resource          ../../../Resources/Common.robot
+Resource          ../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
+Resource          ../../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
+Resource          ../../../Resources/Page/ODH/JupyterHub/GPU.resource
+Resource          ../../../Resources/Page/OCPDashboard/Pods/Pods.robot
 Library           JupyterLibrary
 Suite Setup       Spawner Suite Setup
 Suite Teardown    End Web Test

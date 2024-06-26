@@ -1,9 +1,9 @@
 *** Settings ***
-Resource            ../../Resources/ODS.robot
-Resource            ../../Resources/Common.robot
-Resource            ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
-Resource            ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
-Resource            ../../Resources/RHOSi.resource
+Resource            ../../../Resources/ODS.robot
+Resource            ../../../Resources/Common.robot
+Resource            ../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
+Resource            ../../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
+Resource            ../../../Resources/RHOSi.resource
 Library             DebugLibrary
 Test Teardown       Clean Up Server
 Suite Setup         Server Setup

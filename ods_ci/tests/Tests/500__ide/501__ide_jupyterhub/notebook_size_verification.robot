@@ -13,9 +13,9 @@ Library             OperatingSystem
 Library             Collections
 Library             Process
 Library             SeleniumLibrary
-Resource            ../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
-Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
-Resource            ../../Resources/RHOSi.resource
+Resource            ../../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
+Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
+Resource            ../../../Resources/RHOSi.resource
 
 Test Setup          Dashboard Test Setup
 Test Teardown       Dashboard Test Teardown

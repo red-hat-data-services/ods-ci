@@ -1,9 +1,9 @@
 *** Settings ***
-Test Tags       JupyterHub
-Resource         ../../Resources/ODS.robot
-Resource         ../../Resources/Common.robot
-Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
-Resource         ../../Resources/RHOSi.resource
+Test Tags       J../upyterHub
+Resource         ../../../Resources/ODS.robot
+Resource         ../../../Resources/Common.robot
+Resource         ../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
+Resource         ../../../Resources/RHOSi.resource
 Library          DebugLibrary
 Library          JupyterLibrary
 Suite Setup      Special User Testing Suite Setup

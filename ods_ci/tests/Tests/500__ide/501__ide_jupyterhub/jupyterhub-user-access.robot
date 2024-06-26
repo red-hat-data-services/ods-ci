@@ -1,10 +1,10 @@
 *** Settings ***
-Resource         ../../Resources/ODS.robot
-Resource         ../../Resources/Common.robot
-Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
-Resource         ../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
-Resource         ../../Resources/Page/OCPLogin/OCPLogin.robot
-Resource         ../../Resources/ODS.robot
+Resource         ../../../Resources/ODS.robot
+Resource         ../../../Resources/Common.robot
+Resource         ../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
+Resource         ../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
+Resource         ../../../Resources/Page/OCPLogin/OCPLogin.robot
+Resource         ../../../Resources/ODS.robot
 Library          OperatingSystem
 Library          DebugLibrary
 Library          JupyterLibrary

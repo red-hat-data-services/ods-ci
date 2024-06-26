@@ -2,8 +2,8 @@
 Documentation    TC to verify Pip changes are not permenemt
 ...    after restarting notebook
 
-Resource         ../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
-Resource         ../../Resources/Common.robot
+Resource         ../../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
+Resource         ../../../Resources/Common.robot
 Suite Setup      Test Setup
 Suite Teardown   End Web Test
 Test Tags       JupyterHub

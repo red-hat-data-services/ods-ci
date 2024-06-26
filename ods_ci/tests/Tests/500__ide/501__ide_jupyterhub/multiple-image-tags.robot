@@ -1,11 +1,11 @@
 *** Settings ***
 Documentation    Test Suite for the multiple notebook image versions
-Resource         ../../Resources/ODS.robot
-Resource         ../../Resources/Common.robot
-Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
-Resource         ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
-Resource         ../../Resources/Page/ODH/JupyterHub/GPU.resource
-Resource         ../../Resources/Page/OCPDashboard/Builds/Builds.robot
+Resource         ../../../Resources/ODS.robot
+Resource         ../../../Resources/Common.robot
+Resource         ../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
+Resource         ../../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
+Resource         ../../../Resources/Page/ODH/JupyterHub/GPU.resource
+Resource         ../../../Resources/Page/OCPDashboard/Builds/Builds.robot
 Library          Screenshot
 Library          DebugLibrary
 Library          JupyterLibrary

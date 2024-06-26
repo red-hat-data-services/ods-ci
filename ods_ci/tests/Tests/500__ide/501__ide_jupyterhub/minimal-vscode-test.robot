@@ -1,10 +1,10 @@
 *** Settings ***
 Documentation    Test Suite for Visual Studio Code (VSCode) image
-Resource         ../../Resources/ODS.robot
-Resource         ../../Resources/Common.robot
-Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
-Resource         ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
-Resource         ../../Resources/Page/OCPDashboard/Builds/Builds.robot
+Resource         ../../../Resources/ODS.robot
+Resource         ../../../Resources/Common.robot
+Resource         ../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
+Resource         ../../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
+Resource         ../../../Resources/Page/OCPDashboard/Builds/Builds.robot
 Library          Screenshot
 Library          DebugLibrary
 Library          JupyterLibrary

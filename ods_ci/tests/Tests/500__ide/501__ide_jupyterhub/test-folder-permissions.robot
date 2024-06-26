@@ -1,10 +1,10 @@
 *** Settings ***
 Documentation       Test Suite to check the folder permissions
-
-Resource            ../../Resources/ODS.robot
-Resource            ../../Resources/Common.robot
-Resource            ../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
-Resource            ../../Resources/Page/OCPDashboard/Builds/Builds.robot
+../
+Resource            ../../../Resources/ODS.robot
+Resource            ../../../Resources/Common.robot
+Resource            ../../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
+Resource            ../../../Resources/Page/OCPDashboard/Builds/Builds.robot
 
 Library             JupyterLibrary
 

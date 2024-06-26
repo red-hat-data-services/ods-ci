@@ -3,10 +3,10 @@ Library         SeleniumLibrary
 Library         Collections
 Library         JupyterLibrary
 Library         String
-Resource        ../../Resources/Page/LoginPage.robot
-Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
-Resource        ../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
-Resource        ../../Resources/RHOSi.resource
+Resource        ../../../Resources/Page/LoginPage.robot
+Resource        ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
+Resource        ../../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
+Resource        ../../../Resources/RHOSi.resource
 Suite Setup     Plugin Testing Suite Setup
 Suite Teardown   Plugin Testing Suite Teardown
 Test Tags       JupyterHub

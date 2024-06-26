@@ -1,10 +1,10 @@
 *** Settings ***
 Library          DebugLibrary
-Resource         ../../Resources/ODS.robot
-Resource         ../../Resources/Common.robot
-Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
-Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
-Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
+Resource         ../../../Resources/ODS.robot
+Resource         ../../../Resources/Common.robot
+Resource         ../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
+Resource         ../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
+Resource         ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Suite Setup      JupyterHub Testing Suite Setup
 Suite Teardown   End Web Test
 Test Tags        JupyterHub

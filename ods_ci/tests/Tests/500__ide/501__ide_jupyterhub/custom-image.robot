@@ -1,12 +1,12 @@
 *** Settings ***
 Documentation    Testing custom image imports (Adding ImageStream to ${APPLICATIONS_NAMESPACE})
-Resource         ../../Resources/ODS.robot
-Resource         ../../Resources/Common.robot
-Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
-Resource         ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
-Resource         ../../Resources/Page/ODH/JupyterHub/GPU.resource
-Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
-Resource         ../../Resources/RHOSi.resource
+Resource         ../../../Resources/ODS.robot
+Resource         ../../../Resources/Common.robot
+Resource         ../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
+Resource         ../../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
+Resource         ../../../Resources/Page/ODH/JupyterHub/GPU.resource
+Resource         ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
+Resource         ../../../Resources/RHOSi.resource
 Library          JupyterLibrary
 Library          OpenShiftLibrary
 Suite Setup      Custom Notebook Settings Suite Setup

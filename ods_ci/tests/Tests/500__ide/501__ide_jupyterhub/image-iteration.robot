@@ -1,6 +1,6 @@
 *** Settings ***
-Resource         ../../Resources/ODS.robot
-Resource         ../../Resources/Common.robot
+Resource         ../../../Resources/ODS.robot
+Resource         ../../../Resources/Common.robot
 Library          DebugLibrary
 Library          JupyterLibrary
 Suite Setup      Begin Web Test

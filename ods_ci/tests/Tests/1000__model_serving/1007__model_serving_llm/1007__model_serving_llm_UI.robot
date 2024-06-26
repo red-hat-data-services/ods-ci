@@ -235,7 +235,7 @@ Verify User Can Serve But Can't Query A Token Protected Model Without The Token
 Verify User Can Serve And Query A Model Using The UI Protected With Multiple Tokens
     [Documentation]    Deploying and querying a Token Protected LLM model
     ...                using Kserve and Caikit runtime, using multiple tokens
-    [Tags]    Tier1    RHOAIENG-46032
+    [Tags]    Tier1    RHOAIENG-4603
     [Setup]    Set Up Project    namespace=${TEST_NS}
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit

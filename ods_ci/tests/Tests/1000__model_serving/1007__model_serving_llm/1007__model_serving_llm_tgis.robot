@@ -1,8 +1,8 @@
 *** Settings ***
 Documentation     Collection of CLI tests to validate the model serving stack for Large Language Models (LLM).
 ...               These tests leverage on TGIS Standalone Serving Runtime
-Resource          ../../../../Resources/OCP.resource
-Resource          ../../../../Resources/CLI/ModelServing/llm.resource
+Resource          ../../../Resources/OCP.resource
+Resource          ../../../Resources/CLI/ModelServing/llm.resource
 Library            OpenShiftLibrary
 Suite Setup       Suite Setup
 Suite Teardown    RHOSi Teardown

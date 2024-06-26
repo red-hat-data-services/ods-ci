@@ -1,7 +1,7 @@
 *** Settings ***
 Documentation    Test cases that verify High Availability for ModelServing CLuster Setting
-Resource         ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
-Resource         ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
+Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
+Resource         ../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
 Suite Setup      Model Serving Cluster Setting Suite Setup
 Suite Teardown   Model Serving Cluster Setting Suite Teardown
 Test Setup       Model Serving Cluster Setting Test Setup

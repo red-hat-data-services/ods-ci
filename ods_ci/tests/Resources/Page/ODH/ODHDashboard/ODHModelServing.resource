@@ -581,3 +581,52 @@ Set Up Project
     ELSE
         Log    message=Skipping UserWorkloadMonitoring enablement.
     END
+
+Verify OVNS Model Inference Via CLI
+    [Documentation]    Verifies that the inference result of a model is equal to an expected output
+    [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}=${FALSE}
+    ...    ${test_namespace}=${NONE}    ${kserve_mode}="Serverless"    ${retries}=${10}
+    ${url}=   Set Variable     ${NONE}
+    ${inference_output}=    Set Variable     ${NONE}
+    IF    '${kserve_mode}' == 'Serverless'
+        ${rc}    ${url}=    Run And Return Rc And Output
+        ...    oc get ksvc ${model_name}-predictor -n ${test_namespace} -o jsonpath='{.status.url}'
+         Should Be Equal As Integers    ${rc}    ${0}
+        ${curl_cmd}=   Set Variable    curl -sk ${url}/v2/models/${model_name}/infer -d ${inference_input}
+    END
+
+    IF     '${kserve_mode}' == "RawDeployment"
+            ${url}=   Set Variable    http://localhost:8888/v2/models/${model_name}/infer
+            ${curl_cmd}=     Set Variable    curl -sk ${url} -d ${inference_input}
+    END
+
+    IF      ${token_auth}
+            ${token}     Create Inference Access Token   ${test_namespace}    ${DEFAULT_BUCKET_SA_NAME}
+            ${url}=     Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
+    END
+
+    ${retry}=    Set Variable    ${0}
+    WHILE    ${retry} < ${retries}
+        IF    ${retry} > 0
+            Log    message=Modelmesh inference call failed ${retry}/${retries}.
+            ...    level=WARN
+        END
+        ${rc}    ${inference_output}=    Run And Return Rc And Output     ${curl_cmd}
+
+        ${result}    ${list}=    Inference Comparison    ${expected_inference_output}    ${inference_output}
+        Log    ${result}
+        Log    ${list}
+
+        IF   ${result}
+            BREAK
+        END
+
+        ${retry}=    Evaluate    ${retry} + 1
+        Sleep    5s
+    END
+
+    IF    ${result}==False
+        ${events}    ${podlogs}=    Get Events And Pod Logs    namespace=${test_namespace}
+        ...    label_selector=modelmesh-service=modelmesh-serving
+        Fail    msg=comparison between expected and actual failed, ${list}
+    END

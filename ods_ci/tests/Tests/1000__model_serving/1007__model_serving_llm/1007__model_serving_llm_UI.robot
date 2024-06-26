@@ -198,7 +198,7 @@ Verify Non Admin Can Serve And Query A Model Using The UI  # robocop: disable
 Verify User Can Serve And Query A Token Protected Model Using The UI
     [Documentation]    Deploying and querying a Token Protected LLM model
     ...                using Kserve and Caikit runtime
-    [Tags]    Sanity    Tier1    RHOAIENG-4603
+    [Tags]    Tier1    RHOAIENG-4603
     [Setup]    Set Up Project    namespace=${TEST_NS}
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -218,7 +218,7 @@ Verify User Can Serve And Query A Token Protected Model Using The UI
 Verify User Can Serve But Can't Query A Token Protected Model Without The Token
     [Documentation]    Deploying and querying a Token Protected LLM model
     ...                using Kserve and Caikit runtime
-    [Tags]    Sanity    Tier1    RHOAIENG-4603
+    [Tags]    Tier1    RHOAIENG-4603
     [Setup]    Set Up Project    namespace=${TEST_NS}
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -310,7 +310,7 @@ Verify User Can Query A Token Protected Model Using The UI Without Token After D
     Disable Token Authentication
     Click Button    Deploy
     # The verification will fail due to a temporary duplication of the replicas while the model is restarted
-    Sleep    30s    msg=Wait for the model pod replicas to scale down
+    Sleep    60s    msg=Wait for the model pod replicas to scale down
     Wait For Pods Numbers    1
         ...                   namespace=${test_namespace}
         ...                   label_selector=serving.kserve.io/inferenceservice=${flan_model_name}

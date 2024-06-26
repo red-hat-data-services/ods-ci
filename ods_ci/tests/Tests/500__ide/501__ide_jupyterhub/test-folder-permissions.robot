@@ -1,6 +1,5 @@
 *** Settings ***
 Documentation       Test Suite to check the folder permissions
-../
 Resource            ../../../Resources/ODS.robot
 Resource            ../../../Resources/Common.robot
 Resource            ../../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource

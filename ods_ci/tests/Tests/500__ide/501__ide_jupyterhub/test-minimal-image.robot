@@ -5,7 +5,7 @@ Resource            ../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.rob
 Resource            ../../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Library             DebugLibrary
 Library             JupyterLibrary
-Library             ../../../libs/Helpers.py
+Library             ../../../../libs/Helpers.py
 
 Suite Setup         Begin Web Test
 Suite Teardown      End Web Test

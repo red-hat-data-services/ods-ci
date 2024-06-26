@@ -1,7 +1,7 @@
 *** Settings ***
-Resource        ../../../Resources/Page/LoginPage.robot
-Resource        ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
-Resource        ../../../Resources/RHOSi.resource
+Resource        ../../Resources/Page/LoginPage.robot
+Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
+Resource        ../../Resources/RHOSi.resource
 Library         SeleniumLibrary
 Suite Setup     IBM Watsonx AI Suite Setup
 Suite Teardown  IBM Watsonx AI Suite Teardown

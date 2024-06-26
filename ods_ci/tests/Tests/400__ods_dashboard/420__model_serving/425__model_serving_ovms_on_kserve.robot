@@ -38,6 +38,9 @@ Verify Openvino_IR Model Via UI (OVMS on Kserve)
     ...       ODS-2626
     Create Openvino Models For Kserve    server_name=${RUNTIME_NAME}    model_name=${MODEL_NAME}
     ...    project_name=${PRJ_TITLE}   num_projects=1
+    # This inference request often fails because of timing, currently it is sent ~10 seconds after the model is shown as
+    # ready, let's add 30 second on top.
+    Sleep    30s
     Run Keyword And Continue On Failure    Verify Model Inference    ${MODEL_NAME}    ${INFERENCE_INPUT_OPENVINO}
     ...    ${EXPECTED_INFERENCE_OUTPUT_OPENVINO}    token_auth=${FALSE}
     [Teardown]    Run Keywords    Clean All Models Of Current User    AND

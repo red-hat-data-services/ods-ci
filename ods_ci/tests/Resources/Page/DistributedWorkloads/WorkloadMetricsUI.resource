@@ -125,10 +125,13 @@ Get Memory Requested
         ${memory_requested}=    Replace String    ${output}    Mi    ${EMPTY}
         ${memory_requested_num}=    Convert To Number    ${memory_requested}
         ${memory_requested_gb_value}=    Evaluate    round( ${memory_requested_num} / 1024, 3)
-    ELSE
+    ELSE IF    "${workload_type}" == "RayCluster"
         ${memory_requested}=    Replace String    ${output}    Ki    ${EMPTY}
         ${memory_requested_num}=    Convert To Number    ${memory_requested}
         ${memory_requested_gb_value}=    Evaluate    round( ${memory_requested_num} / (1024*1024), 3)
+    ELSE
+        ${memory_requested_num}=    Convert To Number    ${output}
+        ${memory_requested_gb_value}=    Evaluate    round( ${memory_requested_num} / (1024*1024*1024), 3)
     END
     RETURN  ${memory_requested_gb_value}
 

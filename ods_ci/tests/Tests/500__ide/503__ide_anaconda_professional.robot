@@ -10,7 +10,7 @@ Resource        ../../Resources/Page/ODH/AiApps/Anaconda.resource
 Resource        ../../Resources/RHOSi.resource
 Library         SeleniumLibrary
 Library         JupyterLibrary
-Library         ../../../../libs/Helpers.py
+Library         ../../../libs/Helpers.py
 Suite Setup     Anaconda Suite Setup
 Test Tags       ExcludeOnODH
 

@@ -202,8 +202,8 @@ Verify User Can Serve And Query A Token Protected Model Using The UI
     [Setup]    Set Up Project    namespace=${TEST_NS}
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
-    Deploy Kserve Model Via UI    ${flan_model_name}    Caikit    kserve-connection    flan-t5-small/${flan_model_name}
-    ...    token=${TRUE}
+    Deploy Kserve Model Via UI    ${flan_model_name}    serving_runtime=Caikit TGIS    data_connection=kserve-connection
+    ...    path=flan-t5-small/${flan_model_name}    token=${TRUE}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     ${model_token}=    Get Access Token Via UI    ${test_namespace}    single_model=${TRUE}
@@ -222,8 +222,8 @@ Verify User Can Serve But Can't Query A Token Protected Model Without The Token
     [Setup]    Set Up Project    namespace=${TEST_NS}
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
-    Deploy Kserve Model Via UI    ${flan_model_name}    Caikit    kserve-connection    flan-t5-small/${flan_model_name}
-    ...    token=${TRUE}
+    Deploy Kserve Model Via UI    ${flan_model_name}    serving_runtime=Caikit TGIS    data_connection=kserve-connection
+    ...    path=flan-t5-small/${flan_model_name}    token=${TRUE}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Query Model Multiple Times    model_name=${flan_model_name}
@@ -235,12 +235,12 @@ Verify User Can Serve But Can't Query A Token Protected Model Without The Token
 Verify User Can Serve And Query A Model Using The UI Protected With Multiple Tokens
     [Documentation]    Deploying and querying a Token Protected LLM model
     ...                using Kserve and Caikit runtime, using multiple tokens
-    [Tags]    Tier1    RHOAIENG-4603
+    [Tags]    Tier1    RHOAIENG-46032
     [Setup]    Set Up Project    namespace=${TEST_NS}
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
-    Deploy Kserve Model Via UI    ${flan_model_name}    Caikit    kserve-connection    flan-t5-small/${flan_model_name}
-    ...    token=${TRUE}    multi_token=${TRUE}
+    Deploy Kserve Model Via UI    ${flan_model_name}    serving_runtime=Caikit TGIS    data_connection=kserve-connection
+    ...    path=flan-t5-small/${flan_model_name}    token=${TRUE}    multi_token=${TRUE}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     ${model_token_1}=    Get Access Token Via UI    ${test_namespace}    service_account_name=default-name
@@ -265,8 +265,8 @@ Verify User Can not Query A Token Protected Model With A Disabled Token Using Th
     [Setup]    Set Up Project    namespace=${TEST_NS}
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
-    Deploy Kserve Model Via UI    ${flan_model_name}    Caikit    kserve-connection    flan-t5-small/${flan_model_name}
-    ...    token=${TRUE}    multi_token=${TRUE}
+    Deploy Kserve Model Via UI    ${flan_model_name}    serving_runtime=Caikit TGIS    data_connection=kserve-connection
+    ...    path=flan-t5-small/${flan_model_name}    token=${TRUE}    multi_token=${TRUE}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     ${model_token_1}=    Get Access Token Via UI    ${test_namespace}    service_account_name=default-name
@@ -292,8 +292,8 @@ Verify User Can Query A Token Protected Model Using The UI Without Token After D
     [Setup]    Set Up Project    namespace=${TEST_NS}
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
-    Deploy Kserve Model Via UI    ${flan_model_name}    Caikit    kserve-connection    flan-t5-small/${flan_model_name}
-    ...    token=${TRUE}
+    Deploy Kserve Model Via UI    ${flan_model_name}    serving_runtime=Caikit TGIS    data_connection=kserve-connection
+    ...    path=flan-t5-small/${flan_model_name}    token=${TRUE}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     ${model_token}=    Get Access Token Via UI    ${test_namespace}    single_model=${TRUE}

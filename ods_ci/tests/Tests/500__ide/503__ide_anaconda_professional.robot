@@ -1,13 +1,13 @@
 *** Settings ***
 Documentation   Test integration with Anaconda ISV
-Resource        ../../../Resources/Page/LoginPage.robot
-Resource        ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
-Resource        ../../../Resources/Page/OCPDashboard/Page.robot
-Resource        ../../../Resources/Page/ODH/JupyterHub/LoginJupyterHub.robot
-Resource        ../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
-Resource        ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
-Resource        ../../../Resources/Page/ODH/AiApps/Anaconda.resource
-Resource        ../../../Resources/RHOSi.resource
+Resource        ../../Resources/Page/LoginPage.robot
+Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
+Resource        ../../Resources/Page/OCPDashboard/Page.robot
+Resource        ../../Resources/Page/ODH/JupyterHub/LoginJupyterHub.robot
+Resource        ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
+Resource        ../../Resources/Page/OCPDashboard/OCPDashboard.resource
+Resource        ../../Resources/Page/ODH/AiApps/Anaconda.resource
+Resource        ../../Resources/RHOSi.resource
 Library         SeleniumLibrary
 Library         JupyterLibrary
 Library         ../../../../libs/Helpers.py

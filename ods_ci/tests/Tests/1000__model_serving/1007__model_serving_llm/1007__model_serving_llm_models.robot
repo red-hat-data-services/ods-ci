@@ -19,7 +19,7 @@ ${KSERVE_MODE}=    RawDeployment   #Serverless
 ${MODEL_FORMAT}=   pytorch       #vLLM
 ${PROTOCOL}=     grpc         #http
 ${OVERLAY}=      ${EMPTY}               #vllm
-
+${GPU_TYPE}=     NVIDIA
 
 *** Test Cases ***
 Verify User Can Serve And Query A bigscience/mt0-xxl Model
@@ -845,7 +845,14 @@ Setup Test Variables
         Set Test Variable    ${storage_uri}    s3://${S3.BUCKET_3.NAME}/${model_path}
     END
     IF   ${use_gpu}
-        ${limits}=    Create Dictionary    nvidia.com/gpu=1
+        ${supported_gpu_type}=   Convert To Lowercase         ${GPU_TYPE}
+        IF  "${supported_gpu_type}" == "nvidia"
+             ${limits}=    Create Dictionary    nvidia.com/gpu=1
+        ELSE IF    "${supported_gpu_type}" == "amd"
+             ${limits}=    Create Dictionary    amd.com/gpu=1
+        ELSE
+            FAIL   msg=Provided GPU type is not yet supported. Only nvidia and amd gpu type are supported
+        END
         Set Test Variable    ${limits}
     ELSE
         Set Test Variable    ${limits}    &{EMPTY}

@@ -204,7 +204,7 @@ Input Service Account Name
     [Documentation]    Input the name of the last Added Service Account.
     [Arguments]    ${service_account_name}=default-name
     ${service_accounts}=    Get WebElements    ${SERVICE_ACCOUNT_INPUT}
-    ${last_service_account} =    Set Variable    ${service_accounts}[-1]
+    ${last_service_account}=    Set Variable    ${service_accounts}[-1]
     Clear Element And Input Text    ${last_service_account}   ${service_account_name}
 
 Get Model Serving Access Token via UI

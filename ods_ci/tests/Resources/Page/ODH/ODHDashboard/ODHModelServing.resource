@@ -239,7 +239,7 @@ Open ${section} Options Menu
         SeleniumLibrary.Click Element    xpath://span[.="${section}"]/../../..//button  # Remove attribute which is not present anymore
     END
 
-Get Access Token via UI
+Get Access Token Via UI
     [Documentation]    Returns the access token for models deployed in a specific project
     ...    by using the UI of DSP
     [Arguments]    ${project_name}    ${service_account_name}=default-name    ${single_model}=${FALSE}
@@ -271,7 +271,7 @@ Get Model Inference
         IF    "${project_title}" == "${NONE}"
             ${project_title}=    Get Model Project    ${model_name}
         END
-        ${token}=    Get Access Token via UI    ${project_title}
+        ${token}=    Get Access Token Via UI    ${project_title}
         ${curl_cmd}=     Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
     END
     IF  ${kserve}
@@ -400,11 +400,9 @@ Deploy Kserve Model Via UI  #robocop: disable
     Set Replicas Number With Buttons    ${replicas}
     Set Server Size    ${size}
     IF    ${token}
-#        Select Checkbox    xpath=//input[@data-testid="alt-form-checkbox-auth"]
-#        Checkbox Should Be Selected  xpath=//input[@data-testid="alt-form-checkbox-auth"]
         Enable Token Authentication
         IF    ${multi_token}
-            Add Another Service Account
+            Add Another Service Account    ${multi_service_account_name}
         END
     END
     Select Existing Data Connection    ${data_connection}

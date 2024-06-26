@@ -206,7 +206,7 @@ Verify User Can Serve And Query A Token Protected Model Using The UI
     ...    token=${TRUE}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
-    ${model_token}=    Get Access Token via UI    ${test_namespace}    single_model=${TRUE}
+    ${model_token}=    Get Access Token Via UI    ${test_namespace}    single_model=${TRUE}
     ...    model_name=${flan_model_name}
     Query Model Multiple Times    model_name=${flan_model_name}
     ...    inference_type=all-tokens    n_times=1
@@ -243,9 +243,9 @@ Verify User Can Serve And Query A Model Using The UI Protected With Multiple Tok
     ...    token=${TRUE}    multi_token=${TRUE}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
-    ${model_token_1}=    Get Access Token via UI    ${test_namespace}    service_account_name=default-name
+    ${model_token_1}=    Get Access Token Via UI    ${test_namespace}    service_account_name=default-name
     ...    single_model=${TRUE}    model_name=${flan_model_name}
-    ${model_token_2}=    Get Access Token via UI    ${test_namespace}    service_account_name=default-name2
+    ${model_token_2}=    Get Access Token Via UI    ${test_namespace}    service_account_name=default-name2
     ...    single_model=${TRUE}    model_name=${flan_model_name}
     Query Model Multiple Times    model_name=${flan_model_name}
     ...    inference_type=all-tokens    n_times=1
@@ -269,11 +269,13 @@ Verify User Can not Query A Token Protected Model With A Disabled Token Using Th
     ...    token=${TRUE}    multi_token=${TRUE}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
-    ${model_token_1}=    Get Access Token via UI    ${test_namespace}    service_account_name=default-name
+    ${model_token_1}=    Get Access Token Via UI    ${test_namespace}    service_account_name=default-name
     ...    single_model=${TRUE}    model_name=${flan_model_name}
     Open Model Edit Modal    ${flan_model_name}
     Disable Token Authentication    service_account_name=default-name
     Click Button    Deploy
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Run Keyword And Expect Error    *Expected status: 401 != 200*
     ...    Query Model Multiple Times    model_name=${flan_model_name}
     ...        inference_type=all-tokens    n_times=1
@@ -294,7 +296,7 @@ Verify User Can Query A Token Protected Model Using The UI Without Token After D
     ...    token=${TRUE}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
-    ${model_token}=    Get Access Token via UI    ${test_namespace}    single_model=${TRUE}
+    ${model_token}=    Get Access Token Via UI    ${test_namespace}    single_model=${TRUE}
     ...    model_name=${flan_model_name}
     Query Model Multiple Times    model_name=${flan_model_name}
     ...    inference_type=all-tokens    n_times=1
@@ -307,6 +309,14 @@ Verify User Can Query A Token Protected Model Using The UI Without Token After D
     Open Model Edit Modal    ${flan_model_name}
     Disable Token Authentication
     Click Button    Deploy
+    # The verification will fail due to a temporary duplication of the replicas while the model is restarted
+    Sleep    30s    msg=Wait for the model pod replicas to scale down
+    Wait For Pods Numbers    1
+        ...                   namespace=${test_namespace}
+        ...                   label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+        ...                   timeout=1200
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Query Model Multiple Times    model_name=${flan_model_name}
     ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}    protocol=http

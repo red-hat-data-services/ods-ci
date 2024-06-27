@@ -4,7 +4,7 @@ set -e
 # Optional params
 INSTANCE_TYPE=${1:-"g4dn.xlarge"}
 PROVIDER=${2:-"AWS"}
-KUSTOMIZE_PATH="$PWD/ods_ci/tasks/Resources/Provisioning/Hive/GPU"
+KUSTOMIZE_PATH="$PWD/tasks/Resources/Provisioning/Hive/GPU"
 MACHINESET_PATH="$KUSTOMIZE_PATH/base/source-machineset.yaml"
 
 # Check if existing machineset GPU already exists

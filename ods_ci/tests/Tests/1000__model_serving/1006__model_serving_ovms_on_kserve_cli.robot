@@ -1,9 +1,8 @@
 *** Settings ***
 Documentation     Collection of CLI tests to validate the model serving stack for different Large Language Models (LLM).
 ...               These tests leverage on TGIS Standalone Serving Runtime
-Resource          ../../../../Resources/OCP.resource
-Resource          ../../../../Resources/CLI/ModelServing/llm.resource
-
+Resource          ../../Resources/OCP.resource
+Resource          ../../Resources/CLI/ModelServing/llm.resource
 Library            OpenShiftLibrary
 Suite Setup       Suite Setup
 Suite Teardown    Suite Teardown
@@ -25,11 +24,11 @@ ${INFERENCE_INPUT}=    @tests/Resources/Files/modelmesh-mnist-input.json
 ${INFERENCE_INPUT_OPENVINO}=    @tests/Resources/Files/openvino-example-input.json
 
 *** Test Cases ***
-Verify User Can Serve And Query A bigscience/mt0-xxl Model
+Verify User Can Serve And Query A ovns Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and TGIS runtime
     [Tags]    RHOAIENG-ovns
-    ${test_namespace}=  Set Variable     tgismodel-test-dir
+    ${test_namespace}=  Set Variable     ovns-test-dir
     ${model_name}=  Set Variable    test-dir
     Setup Test Variables    model_name=test-dir    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}

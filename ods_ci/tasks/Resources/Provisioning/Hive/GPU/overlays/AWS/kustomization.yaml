@@ -1,13 +1,10 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 metadata:
-  name: prompt-tuned-model
+  name: add-gpu
 resources:
   - ../../base/
 patches:
-  - path: cleanup.yaml
-    target:
-      kind: MachineSet
   - path: gpu.yaml
     target:
       kind: MachineSet

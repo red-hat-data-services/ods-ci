@@ -321,6 +321,7 @@ Query Model Multiple Times
     ...            ${runtime}=caikit-tgis-runtime
     ...            ${isvc_name}=${model_name}
     ...            ${inference_type}=all-tokens
+    ...            ${status_code}=200
     ...            ${n_times}=10
     ...            ${query_idx}=0
     ...            ${validate_response}=${TRUE}
@@ -356,7 +357,7 @@ Query Model Multiple Times
     ...    inference_type=${inference_type}    model_name=${model_name}    body_params=${body_params}
     ...    query_text=${EXP_RESPONSES}[queries][${query_idx}][query_text]
     IF    "${token}" != "${None}"
-        ${header}=    Set Variable  "Authorization: Bearer ${token}" -H ${header}
+        Set To Dictionary    ${header}    Authorization    Bearer ${token}
     END
     ${runtime_details}=    Set Variable    ${RUNTIME_FORMATS}[${runtime}][endpoints][${inference_type}][${protocol}]
     ${endpoint}=    Set Variable    ${runtime_details}[endpoint]
@@ -381,7 +382,7 @@ Query Model Multiple Times
             Log Dictionary    ${args}
             ${res}=    Run Keyword And Continue On Failure     Perform Request     request_type=POST
             ...    skip_res_json=${skip_json_load_response}    &{args}
-            Run Keyword And Continue On Failure    Status Should Be  200
+            Run Keyword And Continue On Failure    Status Should Be  ${status_code}
         END
         Log    ${res}
         IF    ${validate_response} == ${TRUE}

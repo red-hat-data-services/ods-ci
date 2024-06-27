@@ -195,6 +195,134 @@ Verify Non Admin Can Serve And Query A Model Using The UI  # robocop: disable
     ...    namespace=${test_namespace}    protocol=http    validate_response=$FALSE
     [Teardown]    Run Keywords    Clean Up DSP Page    AND    Close Browser    AND    Switch Browser    1
 
+Verify User Can Serve And Query A Token Protected Model Using The UI
+    [Documentation]    Deploying and querying a Token Protected LLM model
+    ...                using Kserve and Caikit runtime
+    [Tags]    Tier1    RHOAIENG-4603
+    [Setup]    Set Up Project    namespace=${TEST_NS}
+    ${test_namespace}=    Set Variable     ${TEST_NS}
+    ${flan_model_name}=    Set Variable    flan-t5-small-caikit
+    Deploy Kserve Model Via UI    ${flan_model_name}    serving_runtime=Caikit TGIS    data_connection=kserve-connection
+    ...    path=flan-t5-small/${flan_model_name}    token=${TRUE}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
+    ${model_token}=    Get Access Token Via UI    ${test_namespace}    single_model=${TRUE}
+    ...    model_name=${flan_model_name}
+    Query Model Multiple Times    model_name=${flan_model_name}
+    ...    inference_type=all-tokens    n_times=1
+    ...    namespace=${test_namespace}    protocol=http
+    ...    token=${model_token}
+    Delete Model Via UI    ${flan_model_name}
+    [Teardown]    Clean Up DSP Page
+
+Verify User Can Serve But Can't Query A Token Protected Model Without The Token
+    [Documentation]    Deploying and querying a Token Protected LLM model
+    ...                using Kserve and Caikit runtime
+    [Tags]    Tier1    RHOAIENG-4603
+    [Setup]    Set Up Project    namespace=${TEST_NS}
+    ${test_namespace}=    Set Variable     ${TEST_NS}
+    ${flan_model_name}=    Set Variable    flan-t5-small-caikit
+    Deploy Kserve Model Via UI    ${flan_model_name}    serving_runtime=Caikit TGIS    data_connection=kserve-connection
+    ...    path=flan-t5-small/${flan_model_name}    token=${TRUE}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
+    Query Model Multiple Times    model_name=${flan_model_name}
+    ...    inference_type=all-tokens    status_code=401    n_times=1    validate_response=${FALSE}
+    ...    namespace=${test_namespace}    protocol=http
+    Delete Model Via UI    ${flan_model_name}
+    [Teardown]    Clean Up DSP Page
+
+Verify User Can Serve And Query A Model Using The UI Protected With Multiple Tokens
+    [Documentation]    Deploying and querying a Token Protected LLM model
+    ...                using Kserve and Caikit runtime, using multiple tokens
+    [Tags]    Tier1    RHOAIENG-4603
+    [Setup]    Set Up Project    namespace=${TEST_NS}
+    ${test_namespace}=    Set Variable     ${TEST_NS}
+    ${flan_model_name}=    Set Variable    flan-t5-small-caikit
+    Deploy Kserve Model Via UI    ${flan_model_name}    serving_runtime=Caikit TGIS    data_connection=kserve-connection
+    ...    path=flan-t5-small/${flan_model_name}    token=${TRUE}    multi_token=${TRUE}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
+    ${model_token_1}=    Get Access Token Via UI    ${test_namespace}    service_account_name=default-name
+    ...    single_model=${TRUE}    model_name=${flan_model_name}
+    ${model_token_2}=    Get Access Token Via UI    ${test_namespace}    service_account_name=default-name2
+    ...    single_model=${TRUE}    model_name=${flan_model_name}
+    Query Model Multiple Times    model_name=${flan_model_name}
+    ...    inference_type=all-tokens    n_times=1
+    ...    namespace=${test_namespace}    protocol=http
+    ...    token=${model_token_1}
+    Query Model Multiple Times    model_name=${flan_model_name}
+    ...    inference_type=all-tokens    n_times=1
+    ...    namespace=${test_namespace}    protocol=http
+    ...    token=${model_token_2}
+    Delete Model Via UI    ${flan_model_name}
+    [Teardown]    Clean Up DSP Page
+
+Verify User Can not Query A Token Protected Model With A Disabled Token Using The UI
+    [Documentation]    Deploy an LLM (using Kserve and Caikit runtime) protected by different Tokens
+    ...                and try to query it using a disabled token
+    [Tags]    Tier1    RHOAIENG-4603
+    [Setup]    Set Up Project    namespace=${TEST_NS}
+    ${test_namespace}=    Set Variable     ${TEST_NS}
+    ${flan_model_name}=    Set Variable    flan-t5-small-caikit
+    Deploy Kserve Model Via UI    ${flan_model_name}    serving_runtime=Caikit TGIS    data_connection=kserve-connection
+    ...    path=flan-t5-small/${flan_model_name}    token=${TRUE}    multi_token=${TRUE}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
+    ${model_token_1}=    Get Access Token Via UI    ${test_namespace}    service_account_name=default-name
+    ...    single_model=${TRUE}    model_name=${flan_model_name}
+    Open Model Edit Modal    ${flan_model_name}
+    Disable Token Authentication    service_account_name=default-name
+    Click Button    Deploy
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
+    Run Keyword And Expect Error    *Expected status: 401 != 200*
+    ...    Query Model Multiple Times    model_name=${flan_model_name}
+    ...        inference_type=all-tokens    n_times=1
+    ...        namespace=${test_namespace}    protocol=http
+    ...        token=${model_token_1}
+    Delete Model Via UI    ${flan_model_name}
+    [Teardown]    Clean Up DSP Page
+
+Verify User Can Query A Token Protected Model Using The UI Without Token After Disabling Token Protection
+    [Documentation]    Deploying and querying a Token Protected LLM model using Kserve and Caikit runtime.
+    ...                Verify the token Works and without Token it Does not Work.
+    ...                Disable the token authentication and verify that the model can be queried without token.
+    [Tags]    Sanity    Tier1    RHOAIENG-4603
+    [Setup]    Set Up Project    namespace=${TEST_NS}
+    ${test_namespace}=    Set Variable     ${TEST_NS}
+    ${flan_model_name}=    Set Variable    flan-t5-small-caikit
+    Deploy Kserve Model Via UI    ${flan_model_name}    serving_runtime=Caikit TGIS    data_connection=kserve-connection
+    ...    path=flan-t5-small/${flan_model_name}    token=${TRUE}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
+    ${model_token}=    Get Access Token Via UI    ${test_namespace}    single_model=${TRUE}
+    ...    model_name=${flan_model_name}
+    Query Model Multiple Times    model_name=${flan_model_name}
+    ...    inference_type=all-tokens    n_times=1
+    ...    namespace=${test_namespace}    protocol=http
+    ...    token=${model_token}
+    Run Keyword And Expect Error    *Expected status: 401 != 200*
+    ...    Query Model Multiple Times    model_name=${flan_model_name}
+    ...        inference_type=all-tokens    n_times=1
+    ...        namespace=${test_namespace}    protocol=http
+    Open Model Edit Modal    ${flan_model_name}
+    Disable Token Authentication
+    Click Button    Deploy
+    # The verification will fail due to a temporary duplication of the replicas while the model is restarted
+    Sleep    60s    msg=Wait for the model pod replicas to scale down
+    Wait For Pods Numbers    1
+        ...                   namespace=${test_namespace}
+        ...                   label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+        ...                   timeout=1200
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
+    Query Model Multiple Times    model_name=${flan_model_name}
+    ...    inference_type=all-tokens    n_times=1
+    ...    namespace=${test_namespace}    protocol=http
+    Delete Model Via UI    ${flan_model_name}
+    [Teardown]    Clean Up DSP Page
+
 Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector Using The UI  # robocop: disable
     [Documentation]    Deploys and queries flan-t5-large-grammar-synthesis model
     [Tags]    Tier2    ODS-2553

@@ -6,7 +6,7 @@ Resource          ../../Resources/CLI/ModelServing/llm.resource
 Library            OpenShiftLibrary
 Suite Setup       Suite Setup
 Suite Teardown    Suite Teardown
-Test Tags         KServe-OVNS
+Test Tags         KServe-OVNS   Sanity
 
 
 *** Variables ***
@@ -15,7 +15,7 @@ ${RUNTIME_NAME}=  ovns-runtime
 ${USE_PVC}=    ${TRUE}
 ${DOWNLOAD_IN_PVC}=    ${TRUE}
 ${USE_GPU}=    ${FALSE}
-${KSERVE_MODE}=    RawDeployment   #Serverless
+${KSERVE_MODE}=    Serverless    #RawDeployment   
 ${MODEL_FORMAT}=   onnx
 ${PROTOCOL}=     http
 ${OVERLAY}=      ${EMPTY}

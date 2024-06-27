@@ -90,16 +90,9 @@ Verify The Workload Metrics By Submitting Kueue Batch Workload
     [Documentation]    Monitor the workload metrics status and chart details by submitting kueue batch workload
     [Tags]    RHOAIENG-5216
     ...       Tier1    DistributedWorkloads
-
     Open Distributed Workload Metrics Home Page
     # Submitting kueue batch workload
-    ${result} =    Run Process    sh ${KUEUE_WORKLOADS_SETUP_FILEPATH} ${LOCAL_QUEUE_NAME} ${PRJ_TITLE} ${CPU_REQUESTED} ${MEMORY_REQUESTED} ${JOB_NAME_QUEUE}
-    ...    shell=true
-    ...    stderr=STDOUT
-    Log To Console    ${result.stdout}
-    IF    ${result.rc} != 0
-        FAIL    Failed to submit kueue workloads
-    END
+    Submit Kueue Workload    ${LOCAL_QUEUE_NAME}    ${PRJ_TITLE}    ${CPU_REQUESTED}    ${MEMORY_REQUESTED}    ${JOB_NAME_QUEUE}
     Select Distributed Workload Project By Name    ${PRJ_TITLE}
     Select Refresh Interval    15 seconds
     Wait Until Element Is Visible    ${DISTRIBUITED_WORKLOAD_RESOURCE_METRICS_TITLE_XP}    timeout=20
@@ -163,6 +156,50 @@ Verify The Workload Metrics By Submitting Ray Workload
 
     [Teardown]    Cleanup Ray Cluster Workload    ${PRJ_TITLE}    ${RAY_CLUSTER_NAME}
 
+Verify Requested resources When Multiple Local Queue Exists
+    [Documentation]    Verify That Not Admin Users Can Access Distributed workload metrics default page contents
+    [Tags]    RHOAIENG-8559
+    ...       Tier1    DistributedWorkloads
+    Submit Kueue Workload    ${LOCAL_QUEUE_NAME}    ${PRJ_TITLE}    ${CPU_REQUESTED}    ${MEMORY_REQUESTED}    ${JOB_NAME_QUEUE}
+    ${MULTIPLE_LOCAL_QUEUE}    Set Variable    test-multiple-local-queue
+    ${MULTIPLE_JOB_NAME}    Set Variable    multiple-lq-job
+    # setup Kueue resource for the created project
+    Setup Kueue Resources    ${PRJ_TITLE}    ${CLUSTER_QUEUE_NAME}    ${RESOURCE_FLAVOR_NAME}    ${MULTIPLE_LOCAL_QUEUE}
+    # Submitting kueue batch workload
+    Submit Kueue Workload    ${MULTIPLE_LOCAL_QUEUE}    ${PRJ_TITLE}    ${CPU_REQUESTED}    ${MEMORY_REQUESTED}    ${MULTIPLE_JOB_NAME}
+    Open Distributed Workload Metrics Home Page
+    Select Distributed Workload Project By Name    ${PRJ_TITLE}
+    Select Refresh Interval    15 seconds
+    Wait Until Element Is Visible    ${DISTRIBUITED_WORKLOAD_RESOURCE_METRICS_TITLE_XP}    timeout=20
+    Wait For Job With Status    ${JOB_NAME_QUEUE}    Running    60
+    Wait For Job With Status   ${MULTIPLE_JOB_NAME}    Running    60
+
+    # verify Requested by all projects requested resources
+    ${cpu_requested_1} =   Get CPU Requested    ${PRJ_TITLE}    ${LOCAL_QUEUE_NAME}
+    ${cpu_requested_2} =   Get CPU Requested    ${PRJ_TITLE}    ${MULTIPLE_LOCAL_QUEUE}
+    ${cpu_requested} =    Evaluate    ${cpu_requested_1} + ${cpu_requested_2}
+    ${memory_requested_1} =   Get Memory Requested    ${PRJ_TITLE}    ${LOCAL_QUEUE_NAME}    Job
+    ${memory_requested_2} =   Get Memory Requested    ${PRJ_TITLE}    ${MULTIPLE_LOCAL_QUEUE}    Job
+    ${memory_requested} =    Evaluate    ${memory_requested_1} + ${memory_requested_2}
+    Check Requested Resources    ${PRJ_TITLE}    ${CPU_SHARED_QUOTA}    ${MEMEORY_SHARED_QUOTA}    ${cpu_requested}    ${memory_requested}    Job
+
+    Wait Until Element Is Visible    xpath=//*[@id="topResourceConsumingCPU-ChartLabel-title"]    timeout=120
+    Wait Until Element Is Visible    xpath=//*[@id="topResourceConsumingCPU-ChartLegend-ChartLabel-0"]   timeout=120
+    ${cpu_usage} =    Get Current CPU Usage    ${PRJ_TITLE}    Job
+    ${cpu_consuming} =    Get Text    xpath:(//*[@style[contains(., 'var(--pf-v5-chart-donut--label--title--Fill')]])[1]
+    Check Resource Consuming Usage    ${cpu_usage}    ${cpu_consuming}    CPU
+
+    Wait Until Element Is Visible    xpath=//*[@id="topResourceConsumingMemory-ChartLabel-title"]    timeout=120
+    Wait Until Element Is Visible    xpath=//*[@id="topResourceConsumingMemory-ChartLegend-ChartLabel-0"]    timeout=120
+    ${memory_usage} =    Get Current Memory Usage    ${PRJ_TITLE}    Job
+    ${memory_consuming} =    Get Text    xpath:(//*[@style[contains(., 'var(--pf-v5-chart-donut--label--title--Fill')]])[2]
+    Check Resource Consuming Usage    ${memory_usage}    ${memory_consuming}    Memory
+
+    Wait For Job With Status    ${JOB_NAME_QUEUE}    Succeeded    180
+    Wait For Job With Status   ${MULTIPLE_JOB_NAME}    Succeeded    180
+
+    [Teardown]    Run Process    oc delete LocalQueue ${MULTIPLE_LOCAL_QUEUE} -n ${PRJ_TITLE}
+    ...    shell=true
 
 *** Keywords ***
 Project Suite Setup

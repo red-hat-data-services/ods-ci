@@ -66,7 +66,6 @@ Select Refresh Interval
 Get Current CPU Usage
     [Documentation]    Returns value of current cpu usage
     [Arguments]    ${namespace}    ${workload_type}
-
     ${thanos_url}=    Get OpenShift Thanos URL
     ${token}=    Generate Thanos Token
     ${expression}=    Set Variable
@@ -81,8 +80,8 @@ Get Current CPU Usage
             Wait Until Element Is Visible    xpath=//*[@id="topResourceConsumingCPU-ChartLegend-ChartLabel-0"]    timeout=60
         END
     END
-    ${QUERY_RESULT}=    Set Variable    ${query_result.json()["data"]["result"][0]["value"][-1]}
-    ${cpu_requested}=    Convert To Number    ${QUERY_RESULT}
+    ${cpu_usage_value}=    Get Query Value    ${query_result}
+    ${cpu_requested}=    Convert To Number    ${cpu_usage_value}
     ${cpu_usage_rounded_value}=    Evaluate    round( ${cpu_requested}, 3)
     RETURN  ${cpu_usage_rounded_value}
 
@@ -103,11 +102,28 @@ Get Current Memory Usage
             Wait Until Element Is Visible    xpath=//*[@id="topResourceConsumingMemory-ChartLegend-ChartLabel-0"]     timeout=60
         END
     END
-
-    ${value}=    Set Variable    ${query_result.json()["data"]["result"][0]["value"][-1]}
-    ${memory_requested}=    Convert To Number    ${value}
+    ${memory_usage_value}=   Get Query Value    ${query_result}
+    ${memory_requested}=    Convert To Number    ${memory_usage_value}
     ${memory_requested_gb_value}=    Evaluate    round( ${memory_requested} / (1024**3), 3)
     RETURN  ${memory_requested_gb_value}
+
+Get Query Value
+    [Documentation]    Returns total value of query response
+    [Arguments]    ${query_response}
+    @{data}=    BuiltIn.Evaluate   list(${query_response.json()["data"]["result"]})
+    Log  ${data}
+    ${size}=    Get Length    ${data}
+    ${total}=    Set Variable    0
+    IF    ${size}>1
+        FOR    ${item}    IN    @{data}
+            ${value}=    Get From Dictionary    ${item}    value
+            ${last_value}=    Get From List    ${value}    -1
+            ${total}=    Evaluate    ${total} + ${last_value}
+        END
+    ELSE
+        ${total}=    Set Variable    ${query_response.json()["data"]["result"][0]["value"][-1]}
+    END
+    RETURN    ${total}
 
 Get CPU Requested
     [Documentation]    get CPU requested from LocalQueue  flavorsReservation
@@ -318,3 +334,20 @@ Check Resource Consuming Usage
     ...    ELSE IF    ${usage_hover} > ${usage_lower_bound} and ${usage_hover} < ${usage_higher_bound}
     ...    Log    ${resource_name} usage value is partially matches
     ...    ELSE    Fail    ${resource_name} usage hover value ${usage_hover} is not matching with expected value ${usage_expected}
+
+Submit Kueue Workload
+    [Documentation]    method for creating kueue workload
+    [Arguments]    ${local_queue}   ${project}    ${cpu_requested}    ${memory_requested}    ${job_name_queue}
+    ${result}=    Run Process    sh ${KUEUE_WORKLOADS_SETUP_FILEPATH} ${local_queue} ${project} ${cpu_requested} ${memory_requested} ${job_name_queue}
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Failed to submit kueue workloads
+    END
+
+Wait For Job With Status
+    [Documentation]    Wait for job status with job name
+    [Arguments]    ${job_name}    ${job_status}    ${timeout}
+    Wait Until Element Is Visible    //td[@class='pf-v5-c-table__td' and contains(text(), '${job_name}')]/following-sibling::td[@data-label='Status']/span/span/span[@class='pf-v5-c-label__text'and text()='${job_status}']    timeout=${timeout}
+

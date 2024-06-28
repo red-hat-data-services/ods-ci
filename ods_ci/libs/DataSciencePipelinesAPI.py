@@ -4,6 +4,7 @@ import subprocess
 import time
 from json import JSONDecodeError
 
+import certifi
 import requests
 from robotlibcore import keyword
 
@@ -44,7 +45,7 @@ class DataSciencePipelinesAPI:
         self.route = ""
         count = 0
         while self.route == "" and count < 60:
-            self.route, _ = self.run_oc(f"oc get route -n {project} {route_name} --template={{{{.spec.host}}}}")
+            self.route, _ = self.run_command(f"oc get route -n {project} {route_name} --template={{{{.spec.host}}}}")
             time.sleep(1)
             count += 1
 
@@ -70,11 +71,11 @@ class DataSciencePipelinesAPI:
     @keyword
     def remove_pipeline_project(self, project):
         print(f"We are removing the project({project}) because we could run the test multiple times")
-        self.run_oc(f"oc delete project {project} --wait=true --force=true")
+        self.run_command(f"oc delete project {project} --wait=true --force=true")
         print("Wait because it could be in Terminating status")
         count = 0
         while count < 30:
-            project_status, error = self.run_oc(f"oc get project {project} --template={{{{.status.phase}}}}")
+            project_status, error = self.run_command(f"oc get project {project} --template={{{{.status.phase}}}}")
             print(f"Project status: {project_status}")
             print(f"Error message: {error}")
             if project_status == "":
@@ -84,7 +85,9 @@ class DataSciencePipelinesAPI:
 
     @keyword
     def add_role_to_user(self, name, user, project):
-        output, error = self.run_oc(f"oc policy add-role-to-user {name} {user} -n {project} --role-namespace={project}")
+        output, error = self.run_command(
+            f"oc policy add-role-to-user {name} {user} -n {project} --role-namespace={project}"
+        )
         print(output, "->", error)
 
     @keyword
@@ -101,7 +104,7 @@ class DataSciencePipelinesAPI:
         pod_count = 0
         count = 0
         while pod_count != pod_criteria and count < timeout:
-            bash_str, _ = self.run_oc(oc_command)
+            bash_str, _ = self.run_command(oc_command)
             # | wc -l is returning an empty string
             pod_count = sum(1 for line in bash_str.split("\n") if line.strip())
             if pod_count >= pod_criteria:
@@ -115,7 +118,7 @@ class DataSciencePipelinesAPI:
         count = 0
         while pod_count != pod_criteria and count < timeout:
             pods = []
-            response, _ = self.run_oc(oc_command)
+            response, _ = self.run_command(oc_command)
             try:
                 response = json.loads(response)
                 items = response["items"]
@@ -134,7 +137,7 @@ class DataSciencePipelinesAPI:
         return pod_count
 
     def retrieve_auth_url(self):
-        response, _ = self.run_oc("oc cluster-info")
+        response, _ = self.run_command("oc cluster-info")
         host_begin_index = response.index("://") + 3
         response = response[host_begin_index:]
         host = response[: response.index(":")]
@@ -142,7 +145,7 @@ class DataSciencePipelinesAPI:
         return f"https://oauth-openshift.apps.{host[4:]}/oauth/authorize?response_type=token&client_id=openshift-challenging-client"
 
     def get_default_storage(self):
-        result, _ = self.run_oc("oc get storageclass -A -o json")
+        result, _ = self.run_command("oc get storageclass -A -o json")
         result = json.loads(result)
         for storage_class in result["items"]:
             if "annotations" in storage_class["metadata"]:
@@ -152,21 +155,18 @@ class DataSciencePipelinesAPI:
 
     @keyword
     def get_openshift_server(self):
-        return self.run_oc("oc whoami --show-server=true")[0].replace("\n", "")
+        return self.run_command("oc whoami --show-server=true")[0].replace("\n", "")
 
     def get_openshift_token(self):
-        return self.run_oc("oc whoami --show-token=true")[0].replace("\n", "")
+        return self.run_command("oc whoami --show-token=true")[0].replace("\n", "")
 
-    def run_oc(self, command):
+    def run_command(self, command):
         process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
         output, error = process.communicate()
         return self.byte_to_str(output), error
 
-    def do_get(self, url, headers=None, skip_ssl=False):
-        if skip_ssl:
-            response = requests.get(url, headers=headers, verify=False)
-        else:
-            response = requests.get(url, headers=headers, verify=self.get_cert())
+    def do_get(self, url, headers=None):
+        response = requests.get(url, headers=headers, verify=self.get_cert())
         return self.byte_to_str(response.content), response.status_code
 
     def do_post(self, url, headers, json):
@@ -185,7 +185,7 @@ class DataSciencePipelinesAPI:
         return content.decode("utf-8", "ignore")
 
     def get_secret(self, project, name):
-        secret_json, _ = self.run_oc(f"oc get secret -n {project} {name} -o json")
+        secret_json, _ = self.run_command(f"oc get secret -n {project} {name} -o json")
         assert len(secret_json) > 0
         return json.loads(secret_json)
 
@@ -193,9 +193,11 @@ class DataSciencePipelinesAPI:
         cert_json = self.get_secret("openshift-ingress-operator", "router-ca")
         cert = cert_json["data"]["tls.crt"]
         decoded_cert = base64.b64decode(cert).decode("utf-8")
-
         file_name = "/tmp/kfp-cert"
-        cert_file = open(file_name, "w")
-        cert_file.write(decoded_cert)
-        cert_file.close()
+        with open(file_name, "w") as cert_file:
+            cert_file.write(decoded_cert)
+            # append also the trusted certificates
+            with open(certifi.where()) as trusted_cert:
+                for line in trusted_cert.readlines():
+                    cert_file.write(line)
         return file_name

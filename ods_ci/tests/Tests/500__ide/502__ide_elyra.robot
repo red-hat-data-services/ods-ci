@@ -45,6 +45,7 @@ Verify Pipelines Integration With Elyra When Using Standard Data Science Image
     Verify Pipelines Integration With Elyra Running Hello World Pipeline Test
     ...    img=Standard Data Science
     ...    runtime_image=Datascience with Python 3.9 (UBI9)
+    ...    experiment_name=standard data science pipeline
 
 Verify Pipelines Integration With Elyra When Using Standard Data Science Based Images
     [Documentation]    Verifies that a workbench using an image based on the Standard Data Science Image
@@ -54,10 +55,10 @@ Verify Pipelines Integration With Elyra When Using Standard Data Science Based I
     [Template]    Verify Pipelines Integration With Elyra Running Hello World Pipeline Test
     [Tags]        Tier1    ODS-2271
     [Timeout]     30m
-    PyTorch       Datascience with Python 3.9 (UBI9)
-    TensorFlow    Datascience with Python 3.9 (UBI9)
-    TrustyAI      Datascience with Python 3.9 (UBI9)
-    HabanaAI      Datascience with Python 3.8 (UBI8)
+    PyTorch       Datascience with Python 3.9 (UBI9)    pytorch pipeline
+    TensorFlow    Datascience with Python 3.9 (UBI9)    tensorflow pipeline
+    TrustyAI      Datascience with Python 3.9 (UBI9)    trustyai pipeline
+    HabanaAI      Datascience with Python 3.8 (UBI8)    habanaai pipeline
 
 
 *** Keywords ***
@@ -88,7 +89,7 @@ Elyra Pipelines Suite Teardown
 Verify Pipelines Integration With Elyra Running Hello World Pipeline Test     # robocop: off=too-many-calls-in-keyword
     [Documentation]    Creates and starts a workbench using ${img} and verifies that the Hello World sample pipeline
     ...    runs successfully
-    [Arguments]    ${img}    ${runtime_image}
+    [Arguments]    ${img}    ${runtime_image}    ${experiment_name}
     Create Workbench    workbench_title=elyra_${img}    workbench_description=Elyra test
     ...                 prj_title=${PRJ_TITLE}    image_name=${img}  deployment_size=Small
     ...                 storage=Persistent  pv_existent=${FALSE}
@@ -110,7 +111,7 @@ Verify Pipelines Integration With Elyra Running Hello World Pipeline Test     # 
     Menu.Navigate To Page    Data Science Pipelines
     Select Pipeline Project By Name    ${PRJ_TITLE}
     Log    ${pipeline_run_name}
-    Verify Pipeline Run Is Completed    ${pipeline_run_name}    timeout=5m    experiment_name=standard data science pipeline
+    Verify Pipeline Run Is Completed    ${pipeline_run_name}    timeout=5m    experiment_name=${experiment_name}
     [Teardown]    Verify Pipelines Integration With Elyra Teardown    ${img}
 
 Verify Pipelines Integration With Elyra Teardown

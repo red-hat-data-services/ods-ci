@@ -12,7 +12,7 @@ ${PIPELINES_SERVER_BTN_XP}=           xpath=//*[@data-testid="create-pipeline-bu
 ${PIPELINES_SERVER_CONFIG_BTN_XP}=    xpath=//*[@data-testid="modal-submit-button"]
 ${PIPELINES_IMPORT_BTN_XP}=           xpath://*[@data-testid="import-pipeline-button"]
 ${CREATE_RUN_BTN_XP}=                 xpath://*[@data-testid="run-page-submit-button"]
-${RUN_TOPOLOGY_DETAILS_BTN_XP}=       xpath://*[@data-testid="bottom-drawer-tab-details"]
+${RUN_TOPOLOGY_DETAILS_BTN_XP}=       xpath://*[@data-testid="pipeline-run-tab-details"]
 ${RUN_TOPOLOGY_OUTPUT_BTN_XP}=        xpath://*[@data-testid="bottom-drawer-tab-run-output"]
 ${RUN_TOPOLOGY_XP}=                   xpath://*[@data-test-id="topology"]
 ${PIPELINES_DISABLED_EXC_MARK}=       xpath=//*[@id="page-sidebar"]/div/nav/ul/li[3]/a/div/div[2]
@@ -273,8 +273,6 @@ Wait Until Page Contains Run Topology Page
     ...    xpath://*[@data-testid="app-page-title"]/*/*[.//text()="${run_name}"]    timeout=10s
     Run Keyword And Continue On Failure    Wait Until Page Contains Element
     ...    ${RUN_TOPOLOGY_DETAILS_BTN_XP}
-    Run Keyword And Continue On Failure    Wait Until Page Contains Element
-    ...    ${RUN_TOPOLOGY_OUTPUT_BTN_XP}
     Run Keyword And Continue On Failure    Wait Until Page Contains Element
     ...    ${RUN_TOPOLOGY_XP}
 

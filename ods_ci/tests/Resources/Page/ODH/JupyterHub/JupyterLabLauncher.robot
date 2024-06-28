@@ -244,21 +244,19 @@ Clone Git Repository
   [Documentation]    Clones git repository and logs error message if fails to clone
   [Arguments]  ${REPO_URL}
   ${status}    ${err_msg} =    Run Keyword and Ignore Error    Clone Repo and Return Error Message    ${REPO_URL}
-    IF    "${status}" == "PASS"
-        ${dir_name} =    Get Directory Name From Git Repo URL    ${REPO_URL}
-        ${current_user} =    Get Current User In JupyterLab
-        Delete Folder In User Notebook
-        ...    admin_username=${OCP_ADMIN_USER.USERNAME}
-        ...    username=${current_user}
-        ...    folder=${dir_name}
-        ${status}    ${err_msg} =    Run Keyword and Ignore Error    Clone Repo and Return Error Message    ${REPO_URL}
-        IF    "${status}" == "PASS"
-            Log    Error Message : ${err_msg}
-            FAIL
-        END
-    ELSE
-        Run Keyword And Warn On Failure    Wait Until Page Contains    Successfully cloned    timeout=60s
-    END
+  IF    "${status}" == "PASS"
+      ${dir_name} =    Get Directory Name From Git Repo URL    ${REPO_URL}
+      ${current_user} =    Get Current User In JupyterLab
+      Delete Folder In User Notebook
+      ...    admin_username=${OCP_ADMIN_USER.USERNAME}
+      ...    username=${current_user}
+      ...    folder=${dir_name}
+      ${status}    ${err_msg} =    Run Keyword and Ignore Error    Clone Repo and Return Error Message    ${REPO_URL}
+      IF    "${status}" == "PASS"
+          Log    Error Message : ${err_msg}
+          FAIL
+      END
+  END
 
 Clone Git Repository And Open
   [Documentation]  The ${NOTEBOOK_TO_RUN} argument should be of the form /path/relative/to/jlab/root.ipynb

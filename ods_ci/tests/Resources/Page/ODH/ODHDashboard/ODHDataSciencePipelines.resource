@@ -10,13 +10,16 @@ Resource            ODHDataScienceProject/Pipelines.resource
 
 
 *** Variables ***
-${DATA_SCIENCE_PIPELINES_APPLICATION_PATH}=    tests/Resources/Files
-${PIPELINES_IMPORT_BTN_FORM_XP}=               xpath://*[@data-testid="import-button"]
-${PIPELINE_NAME_INPUT_XP}=                     xpath://*[@data-testid="pipeline-name"]
-${PIPELINE_DESC_INPUT_XP}=                     xpath://*[@data-testid="pipeline-description"]
-${PIPELINE_RUN_NAME_INPUT_XP}=                 id:run-name
-${PIPELINE_RUN_DESC_INPUT_XP}=                 id:run-description
-${PIPELINE_RUN_CREATE_BTN_XP}=                 xpath://*[@data-testid="run-page-submit-button"]
+${DATA_SCIENCE_PIPELINES_APPLICATION_PATH}=      tests/Resources/Files
+${PIPELINES_IMPORT_BTN_FORM_XP}=                 xpath://*[@data-testid="import-button"]
+${PIPELINE_NAME_INPUT_XP}=                       xpath://*[@data-testid="pipeline-name"]
+${PIPELINE_DESC_INPUT_XP}=                       xpath://*[@data-testid="pipeline-description"]
+${PIPELINE_RUN_NAME_INPUT_XP}=                   id:run-name
+${PIPELINE_RUN_DESC_INPUT_XP}=                   id:run-description
+${PIPELINE_RUN_EXPERIMENT_BUTTON_XP}=            xpath://*[@data-testid="experiment-toggle-button"]
+${PIPELINE_RUN_EXPERIMENT_SELECTOR_TABLE_XP}=    xpath://*[@data-testid="experiment-selector-table-list"]
+${PIPELINE_RUN_CREATE_BTN_XP}=                   xpath://*[@data-testid="run-page-submit-button"]
+${PIPELINE_EXPERIMENT_TABLE_XP}=                 xpath://*[@data-testid="experiment-table"]
 
 
 *** Keywords ***
@@ -61,6 +64,8 @@ Fill In Run Creation Form    # robocop: disable
     Input Text    ${PIPELINE_RUN_NAME_INPUT_XP}    ${name}
     Input Text    ${PIPELINE_RUN_DESC_INPUT_XP}    ${name}
 
+    Select Experiment For The Run    Default
+
 #    TODO: by fix it to select latest version of ${pipeline_name}
 #    IF    "${pipeline_name}" != "${NONE}"
 #        Select Pipeline For The Run    pipeline_name=${pipeline_name}
@@ -88,6 +93,16 @@ Select Pipeline For The Run
     Wait Until Page Contains Element    xpath://ul/li/a[text()="${pipeline_name}"]
     Click Element                       xpath://ul/li/a[text()="${pipeline_name}"]
 
+Select Experiment For The Run
+    [Documentation]    Selects the given ${experiment_name} in the Run creation form
+    [Arguments]    ${experiment_name}
+
+    Click Element                       ${PIPELINE_RUN_EXPERIMENT_BUTTON_XP}
+    Wait Until Page Contains Element
+    ...    ${PIPELINE_RUN_EXPERIMENT_SELECTOR_TABLE_XP}//*[contains(text(), "${experiment_name}")]
+    Click Element
+    ...    ${PIPELINE_RUN_EXPERIMENT_SELECTOR_TABLE_XP}//*[contains(text(), "${experiment_name}")]
+
 Get Workflow Name From Topology Page
     [Documentation]    Returns the workflow name corresponding to the displayed pipeline.
     ...                The workflow name can be used to retrieve pods, for example
@@ -113,7 +128,7 @@ Delete Pipeline
     ...    available and deletes the pipeline using the pipelines actions menu.
     ...    TODO: improve keyword to delete multiple pipeline versions
     [Arguments]    ${pipeline_name}
-    Navigate To Page    Data Science Pipelines    Pipelines
+    Navigate To Page    Data Science Pipelines
     ODHDashboard.Maybe Wait For Dashboard Loading Spinner Page
 
     Pipelines.Expand Pipeline Details    ${pipeline_name}
@@ -127,7 +142,7 @@ Delete Pipeline
 Delete Pipeline Server
     [Documentation]    Navigates to "Data Science Pipelines" -> Pipelines and deletes the pipeline server
     [Arguments]    ${data_science_project_name}
-    Navigate To Page    Data Science Pipelines    Pipelines
+    Navigate To Page    Data Science Pipelines
     ODHDashboard.Maybe Wait For Dashboard Loading Spinner Page
     Wait Until Page Contains Element    xpath://button[contains(span/text(), 'Pipeline server actions')]
     Wait Until Element Is Enabled       xpath://button[contains(span/text(), 'Pipeline server actions')]
@@ -172,9 +187,11 @@ Open Pipeline Detail
 
 Open Pipeline Run
     [Documentation]    Open the Pipeline Run detail.
-    [Arguments]    ${pipeline_run_name}
-    Navigate To Page    Data Science Pipelines    Runs
-    ODHDashboard.Maybe Wait For Dashboard Loading Spinner Page
+    [Arguments]    ${pipeline_run_name}    ${experiment_name}=Default
+    Navigate To Page    Experiments    Experiments and runs
+    ODHDashboard.Maybe Wait For Dashboard Loading Spinner Page    timeout=30s
+    Click Element    ${PIPELINE_EXPERIMENT_TABLE_XP}//*[contains(text(), "${experiment_name}")]
+    ODHDashboard.Maybe Wait For Dashboard Loading Spinner Page     timeout=30s
     Wait Until Page Contains Element    xpath=//*[@data-testid="active-runs-tab"]      timeout=30s
     Click Element    xpath=//*[@data-testid="active-runs-tab"]
     Wait Until Page Contains Element    xpath=//span[text()='${pipeline_run_name}']
@@ -199,16 +216,16 @@ Get Pipeline Run Step Log
 
 Verify Pipeline Run Is Completed
     [Documentation]    Open the Pipeline detail and wait for the Completed Status
-    [Arguments]    ${pipeline_run_name}    ${timeout}=10m
-    Open Pipeline Run    ${pipeline_run_name}
+    [Arguments]    ${pipeline_run_name}    ${timeout}=10m   ${experiment_name}=Default
+    Open Pipeline Run    ${pipeline_run_name}    ${experiment_name}
     Wait Until Page Contains Element    //span[@class='pf-v5-c-label__text' and text()='Succeeded']    timeout=${timeout}
     Capture Page Screenshot
 
 # robocop: disable:line-too-long
 Get Pipeline Run Duplicate Parameters
     [Documentation]    Get Pipeline Run Duplicate Parameters
-    [Arguments]    ${pipeline_run_name}
-    Open Pipeline Run    ${PIPELINE_TEST_RUN_BASENAME}
+    [Arguments]    ${pipeline_run_name}    ${experiment_name}=Default
+    Open Pipeline Run    ${pipeline_run_name}    ${experiment_name}
     Wait Until Page Contains Element    xpath://button[contains(span/text(), 'Actions')]
     Click Element    xpath://button[contains(span/text(), 'Actions')]
     Wait Until Page Contains Element    xpath://a[@role='menuitem' and text()='Duplicate']

@@ -128,7 +128,7 @@ Delete Pipeline
     ...    available and deletes the pipeline using the pipelines actions menu.
     ...    TODO: improve keyword to delete multiple pipeline versions
     [Arguments]    ${pipeline_name}
-    Navigate To Page    Data Science Pipelines    Pipelines
+    Navigate To Page    Data Science Pipelines
     ODHDashboard.Maybe Wait For Dashboard Loading Spinner Page
 
     Pipelines.Expand Pipeline Details    ${pipeline_name}
@@ -142,7 +142,7 @@ Delete Pipeline
 Delete Pipeline Server
     [Documentation]    Navigates to "Data Science Pipelines" -> Pipelines and deletes the pipeline server
     [Arguments]    ${data_science_project_name}
-    Navigate To Page    Data Science Pipelines    Pipelines
+    Navigate To Page    Data Science Pipelines
     ODHDashboard.Maybe Wait For Dashboard Loading Spinner Page
     Wait Until Page Contains Element    xpath://button[contains(span/text(), 'Pipeline server actions')]
     Wait Until Element Is Enabled       xpath://button[contains(span/text(), 'Pipeline server actions')]

@@ -3,10 +3,9 @@ from kfp import dsl
 from ods_ci.libs.DataSciencePipelinesKfp import DataSciencePipelinesKfp
 
 
-@dsl.component(packages_to_install=["codeflare-sdk"], base_image=DataSciencePipelinesKfp.base_image)
+# image and the sdk has a fixed value because the version matters
+@dsl.component(packages_to_install=["codeflare-sdk==0.16.4"], base_image=DataSciencePipelinesKfp.base_image)
 def ray_fn() -> int:
-    # workaround for RHOAIENG-6701
-    import time
     import ray
     from codeflare_sdk.cluster.cluster import Cluster, ClusterConfiguration
     from codeflare_sdk import generate_cert
@@ -16,13 +15,13 @@ def ray_fn() -> int:
             name="raytest",
             num_workers=1,
             head_cpus=1,
-            head_memory=2,
+            head_memory=4,
             min_cpus=1,
             max_cpus=1,
             min_memory=1,
             max_memory=2,
             num_gpus=0,
-            image="quay.io/project-codeflare/ray:latest-py39-cu118",
+            image="quay.io/project-codeflare/ray:2.20.0-py39-cu118",
             verify_tls=False
         )
     )
@@ -31,9 +30,7 @@ def ray_fn() -> int:
     cluster.down()
     print(cluster.status())
     cluster.up()
-    # workaround for RHOAIENG-6701
-    # cluster.wait_ready()
-    time.sleep(180)
+    cluster.wait_ready()
     print(cluster.status())
     print(cluster.details())
 
@@ -50,7 +47,7 @@ def ray_fn() -> int:
     # establish connection to ray cluster
     generate_cert.generate_tls_cert(cluster.config.name, cluster.config.namespace)
     generate_cert.export_env(cluster.config.name, cluster.config.namespace)
-    ray.init(address=cluster.cluster_uri())
+    ray.init(address=cluster.cluster_uri(), logging_level="DEBUG")
     print("Ray cluster is up and running: ", ray.is_initialized())
 
     @ray.remote

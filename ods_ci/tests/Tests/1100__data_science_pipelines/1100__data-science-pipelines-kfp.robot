@@ -102,6 +102,8 @@ Data Science Pipelines Suite Setup
 Setup Kueue Resources
     [Documentation]    Setup the kueue resources for the project
     [Arguments]    ${project_name}    ${cluster_queue_name}    ${resource_flavor_name}    ${local_queue_name}
+    # Easy for debug
+    Log    sh ${KUEUE_RESOURCES_SETUP_FILEPATH} ${cluster_queue_name} ${resource_flavor_name} ${local_queue_name} ${project_name} "2" "8"
     ${result} =    Run Process    sh ${KUEUE_RESOURCES_SETUP_FILEPATH} ${cluster_queue_name} ${resource_flavor_name} ${local_queue_name} ${project_name} "2" "8"
     ...    shell=true
     ...    stderr=STDOUT

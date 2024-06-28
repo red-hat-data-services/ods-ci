@@ -101,7 +101,7 @@ class DataSciencePipelinesKfp:
         if current_path is None:
             current_path = os.getcwd()
         my_source = self.import_souce_code(
-            f"{current_path}/ods_ci/tests/Resources/Files/pipeline-samples/v2/{source_code}"
+            f"{current_path}/tests/Resources/Files/pipeline-samples/v2/{source_code}"
         )
         pipeline = getattr(my_source, fn)
 
@@ -124,3 +124,4 @@ class DataSciencePipelinesKfp:
         # easy to debug and double check failures
         print(result)
         return result.run_id
+

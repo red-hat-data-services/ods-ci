@@ -124,4 +124,3 @@ class DataSciencePipelinesKfp:
         # easy to debug and double check failures
         print(result)
         return result.run_id
-

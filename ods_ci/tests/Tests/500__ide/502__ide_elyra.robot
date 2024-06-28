@@ -110,7 +110,7 @@ Verify Pipelines Integration With Elyra Running Hello World Pipeline Test     # 
     Menu.Navigate To Page    Data Science Pipelines
     Select Pipeline Project By Name    ${PRJ_TITLE}
     Log    ${pipeline_run_name}
-    Verify Pipeline Run Is Completed    ${pipeline_run_name}    timeout=5m    experiment_name="hello-generic-world"
+    Verify Pipeline Run Is Completed    ${pipeline_run_name}    timeout=5m    experiment_name=standard data science pipeline
     [Teardown]    Verify Pipelines Integration With Elyra Teardown    ${img}
 
 Verify Pipelines Integration With Elyra Teardown

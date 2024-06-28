@@ -107,10 +107,10 @@ Verify Pipelines Integration With Elyra Running Hello World Pipeline Test     # 
     # We need to navigate to the page because the project name hold a state
     # In a fresh cluster, if not state found, it will select the first one
     # In this case, the first could not be the project created
-    Menu.Navigate To Page    Data Science Pipelines    Runs
+    Menu.Navigate To Page    Experiments    Experiments and runs
     Select Pipeline Project By Name    ${PRJ_TITLE}
     Log    ${pipeline_run_name}
-    Verify Pipeline Run Is Completed    ${pipeline_run_name}    timeout=5m
+    Verify Experiment Has Completed    "standard data science pipeline"    ${pipeline_run_name}    timeout=5m
     [Teardown]    Verify Pipelines Integration With Elyra Teardown    ${img}
 
 Verify Pipelines Integration With Elyra Teardown

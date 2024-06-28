@@ -205,6 +205,15 @@ Verify Pipeline Run Is Completed
     Capture Page Screenshot
 
 # robocop: disable:line-too-long
+Verify Experiment Has Completed
+    [Documentation]    Check that the "Last 5 runs" field of an "Experiments and runs" screen reports success
+    [Arguments]    ${experiment_name}    ${pipeline_run_name}    ${timeout}=10m
+    SeleniumLibrary.Wait Until Page Contains Element
+    ...    //tr[td[@data-label="Experiment"]/a[text()="standard data science pipeline"]] // td[@data-label="Last 5 runs"] // span[contains(class, "pf-v5-c-icon__content pf-m-success")]
+    ...    timeout=${timeout}
+    SeleniumLibrary.Capture Page Screenshot
+
+# robocop: disable:line-too-long
 Get Pipeline Run Duplicate Parameters
     [Documentation]    Get Pipeline Run Duplicate Parameters
     [Arguments]    ${pipeline_run_name}

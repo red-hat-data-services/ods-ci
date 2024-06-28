@@ -28,7 +28,7 @@ ${IS_NOT_PRESENT}                       1
 Validate DSC and DSCI Created Without Service Mesh Operator     #robocop:disable
     [Documentation]    The purpose of this Test Case is to validate that DSC and DSCI are created
     ...                without Service Mesh Operator installer, but with errors
-    [Tags]    Operator    Sanity    Tier1    ODS-2584
+    [Tags]    Operator    Tier3    ODS-2584
 
     Log To Console    message=Creating DSCInitialization CR via CLI
     Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}

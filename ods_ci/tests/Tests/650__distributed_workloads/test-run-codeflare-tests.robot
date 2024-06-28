@@ -24,7 +24,7 @@ Run TestKueueRay ODH test
     ...     Tier1
     ...     DistributedWorkloads
     ...     CodeflareOperator
-    Run Codeflare ODH Test    TestMnistRay
+    Run Codeflare ODH Test    TestMnistRayCpu
 
 
 *** Keywords ***

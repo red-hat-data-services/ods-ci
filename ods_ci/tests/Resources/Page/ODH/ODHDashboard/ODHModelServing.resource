@@ -200,7 +200,8 @@ Open Model Edit Modal
     [Documentation]    Opens the modal used to edit the details of an already deployed model.
     [Arguments]    ${model_name}
     ODHDashboard.Click Action From Actions Menu    item_title=${model_name}    action=Edit
-    Wait For Dashboard Page Title    Deploy model
+    # Wait for modal header
+    Wait Until Page Contains Element    xpath://span[contains(@class, "modal") and text()="Deploy model"]
 
 Get Model Route Via UI
     [Documentation]    Grabs the serving route (URL) of an already deployed model from the Model Serving page.
@@ -238,12 +239,13 @@ Open ${section} Options Menu
         SeleniumLibrary.Click Element    xpath://span[.="${section}"]/../../..//button  # Remove attribute which is not present anymore
     END
 
-Get Access Token via UI
+Get Access Token Via UI
     [Documentation]    Returns the access token for models deployed in a specific project
     ...    by using the UI of DSP
-    [Arguments]    ${project_name}    ${service_account_name}=default-name
+    [Arguments]    ${project_name}    ${service_account_name}=default-name    ${single_model}=${FALSE}
+    ...            ${model_name}=${NONE}
     Open Data Science Project Details Page    ${project_name}    tab_id=model-server
-    ${token}=    Get Model Serving Access Token via UI    ${service_account_name}
+    ${token}=    Get Model Serving Access Token via UI    ${service_account_name}    ${single_model}    ${model_name}
     RETURN    ${token}
 
 Get Model Project
@@ -269,7 +271,7 @@ Get Model Inference
         IF    "${project_title}" == "${NONE}"
             ${project_title}=    Get Model Project    ${model_name}
         END
-        ${token}=    Get Access Token via UI    ${project_title}
+        ${token}=    Get Access Token Via UI    ${project_title}
         ${curl_cmd}=     Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
     END
     IF  ${kserve}
@@ -388,6 +390,7 @@ Deploy Kserve Model Via UI  #robocop: disable
     [Documentation]  Deploys a model using the kserve/caikit runtime using the Data Science Projects UI
     [Arguments]    ${model_name}    ${serving_runtime}    ${data_connection}    ${path}
     ...    ${model_framework}=caikit    ${replicas}=1    ${size}=Small    ${no_gpus}=${0}
+    ...    ${token}=${FALSE}    ${multi_token}=${FALSE}    ${multi_service_account_name}=default-name2
     Move To Tab    Models
     Click Button    ${DEPLOY_MODEL_BTN}
     Wait Until Page Contains Element    xpath=${KSERVE_MODAL_HEADER}
@@ -396,6 +399,12 @@ Deploy Kserve Model Via UI  #robocop: disable
     Select Framework    ${model_framework}
     Set Replicas Number With Buttons    ${replicas}
     Set Server Size    ${size}
+    IF    ${token}
+        Enable Token Authentication
+        IF    ${multi_token}
+            Add Another Service Account    ${multi_service_account_name}
+        END
+    END
     Select Existing Data Connection    ${data_connection}
     Set Folder Path    ${path}
     IF    ${no_gpus} > ${0}

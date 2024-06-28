@@ -1,23 +1,22 @@
 *** Settings ***
-Documentation      Test suite for Nodel Registry
+Documentation      Test suite for Model Registry
 Suite Setup       Prepare Model Registry Test Setup
 Suite Teardown    Teardown Model Registry Test Setup
 Library           OperatingSystem
 Library           Process
 Library           OpenShiftLibrary
-Resource          ../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
-Resource          ../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
-Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
-Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
+Resource          ../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
+Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
+Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 
 
 *** Variables ***
 ${PRJ_TITLE}=                        model-registry-project
 ${PRJ_DESCRIPTION}=                  model resgistry test project
-${aws_bucket}=                       ${S3.BUCKET_2.NAME}
+${AWS_BUCKET}=                       ${S3.BUCKET_2.NAME}
 ${WORKBENCH_TITLE}=                  registry-wb
 ${DC_S3_NAME}=                       model-registry-connection
-${MODELREGISTRY_BASE_FOLDER}=        ods_ci/tests/Resources/CLI/ModelRegistry
+${MODELREGISTRY_BASE_FOLDER}=        tests/Resources/CLI/ModelRegistry
 ${SAMPLE_ONNX_MODEL}=                ${MODELREGISTRY_BASE_FOLDER}/mnist.onnx
 ${MODEL_REGISTRY_DB_SAMPLES}=        ${MODELREGISTRY_BASE_FOLDER}/samples
 ${JUPYTER_NOTEBOOK}=                 NotebookIntegration.ipynb
@@ -38,8 +37,9 @@ Verify Model Registry Integration With Jupyter Notebook
     ${workbenches}=    Create List    ${WORKBENCH_TITLE}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME}
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
-    ...            aws_bucket_name=${aws_bucket}    connected_workbench=${workbenches}
+    ...            aws_bucket_name=${AWS_BUCKET}    connected_workbench=${workbenches}
     Data Connection Should Be Listed    name=${DC_S3_NAME}    type=${DC_S3_TYPE}    connected_workbench=${workbenches}
+    Open Data Science Project Details Page       project_title=${prj_title}    tab_id=workbenches
     Wait Until Workbench Is Started     workbench_title=registry-wb
     Wait For Model Registry Containers To Be Ready
     Upload File In The Workbench     filepath=${SAMPLE_ONNX_MODEL}    workbench_title=${WORKBENCH_TITLE}
@@ -47,15 +47,16 @@ Verify Model Registry Integration With Jupyter Notebook
     Upload File In The Workbench     filepath=${JUPYTER_NOTEBOOK_FILEPATH}    workbench_title=${WORKBENCH_TITLE}
     ...         workbench_namespace=${PRJ_TITLE}
     Launch And Access Workbench    workbench_title=${WORKBENCH_TITLE}
-    ...    username=${TEST_USER_3.USERNAME}     password=${TEST_USER_3.PASSWORD}
-    ...    auth_type=${TEST_USER_3.AUTH_TYPE}
+    ...    username=${TEST_USER.USERNAME}     password=${TEST_USER.PASSWORD}
+    ...    auth_type=${TEST_USER.AUTH_TYPE}
     Jupyter Notebook Should Run Successfully     ${JUPYTER_NOTEBOOK}
+
 
 *** Keywords ***
 Prepare Model Registry Test Setup
     [Documentation]    Suite setup steps for testing Model Registry.
     Set Library Search Order    SeleniumLibrary
-    #Skip If Component Is Not Enabled    modelregistry
+    # Skip If Component Is Not Enabled    modelregistry
     RHOSi Setup
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
@@ -69,12 +70,13 @@ Apply Db Config Samples
     [Arguments]    ${namespace}
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc apply -k ${MODEL_REGISTRY_DB_SAMPLES}/mysql -n ${namespace}
-    Should Be Equal As Integers	  ${rc}	 0
+    Should Be Equal As Integers	  ${rc}	 0   msg=${out}
 
 Teardown Model Registry Test Setup
     [Documentation]  Teardown Model Registry Suite
     JupyterLibrary.Close All Browsers
-    ${return_code}    ${output}     Run And Return Rc And Output    oc delete project ${PRJ_TITLE} --force --grace-period=0
+    ${return_code}    ${output}=    Run And Return Rc And Output    oc delete project ${PRJ_TITLE} --force --grace-period=0
+    Should Be Equal As Integers	  ${return_code}	 0
     Log    ${output}
     RHOSi Teardown
 
@@ -82,7 +84,7 @@ Jupyter Notebook Should Run Successfully
     [Documentation]    Runs the test workbench and check if there was no error during execution
     [Arguments]    ${filepath}
     Open Notebook File In JupyterLab    ${filepath}
-   # Open With JupyterLab Menu  Run  Run All Cells
+    # Open With JupyterLab Menu  Run  Run All Cells
     Open With JupyterLab Menu  Run  Restart Kernel and Run All Cells…
     Click Element    xpath=//div[contains(text(),"Restart") and @class="jp-Dialog-buttonLabel"]
     Wait Until JupyterLab Code Cell Is Not Active  timeout=120s
@@ -96,12 +98,13 @@ Upload File In The Workbench
     [Documentation]    Uploads the working files inside the workbench PVC
     [Arguments]    ${workbench_title}    ${workbench_namespace}    ${filepath}
     ${rc}    ${out}=    Run And Return Rc And Output    oc cp ${EXECDIR}/${filepath} ${workbench_title}-0:/opt/app-root/src -n ${workbench_namespace}
-    Should Be Equal As Integers    ${rc}    ${0}
+    Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
 
 Wait For Model Registry Containers To Be Ready
     [Documentation]    Wait for model-registry-deployment to be ready
-    ${result} =    Run Process    oc wait --for\=condition\=Available --timeout\=5m -n ${PRJ_TITLE} deployment/model-registry-db
+    ${result}=    Run Process    oc wait --for\=condition\=Available --timeout\=5m -n ${PRJ_TITLE} deployment/model-registry-db
     ...    shell=true    stderr=STDOUT
-    ${result} =    Run Process    oc wait --for\=condition\=Available --timeout\=5m -n ${PRJ_TITLE} deployment/model-registry-deployment
+    Log To Console    ${result.stdout}
+    ${result}=    Run Process    oc wait --for\=condition\=Available --timeout\=5m -n ${PRJ_TITLE} deployment/model-registry-deployment
     ...    shell=true    stderr=STDOUT
-
+    Log To Console    ${result.stdout}

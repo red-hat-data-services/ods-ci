@@ -12,7 +12,7 @@ Library       JupyterLibrary
 *** Variables ***
 # This variable is overriden for ODH runs via 'test-variables-odh-overwrite.yml'
 ${ODH_DASHBOARD_PROJECT_NAME}=   Red Hat OpenShift AI
-
+${ODH_DASHBOARD_SPINNER_XP}=     xpath://*[@data-id="loading-empty-state" or @aria-valuetext="Loading..."]
 ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}=         //*[@class="pf-v5-c-drawer__panel-main"]//button[.='Enable']
 ${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}=   //*[@class="pf-v5-c-drawer__panel-main"]//*[.='Get started']
 ${CARDS_XP}=  //*[(contains(@class, 'odh-card')) and (contains(@class, 'pf-v5-c-card'))]
@@ -817,11 +817,10 @@ Maybe Wait For Dashboard Loading Spinner Page
     IF   ${do not wait for spinner} == ${true}
       RETURN
     END
-    ${spinner_ball}=   Set Variable    xpath=//span[@class="pf-v5-c-spinner__tail-ball"]
     Run Keyword And Ignore Error    Run Keywords
-    ...    Wait Until Page Contains Element    ${spinner_ball}    timeout=${timeout-pre}
+    ...    Wait Until Page Contains Element    ${ODH_DASHBOARD_SPINNER_XP}    timeout=${timeout-pre}
     ...    AND
-    ...    Wait Until Page Does Not Contain Element    ${spinner_ball}    timeout=${timeout}
+    ...    Wait Until Page Does Not Contain Element    ${ODH_DASHBOARD_SPINNER_XP}    timeout=${timeout}
 
 Reload RHODS Dashboard Page
     [Documentation]    Reload the web page and wait for RHODS Dashboard

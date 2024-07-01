@@ -12,7 +12,7 @@ ${PIPELINES_SERVER_BTN_XP}=           xpath=//*[@data-testid="create-pipeline-bu
 ${PIPELINES_SERVER_CONFIG_BTN_XP}=    xpath=//*[@data-testid="modal-submit-button"]
 ${PIPELINES_IMPORT_BTN_XP}=           xpath://*[@data-testid="import-pipeline-button"]
 ${CREATE_RUN_BTN_XP}=                 xpath://*[@data-testid="run-page-submit-button"]
-${RUN_TOPOLOGY_DETAILS_BTN_XP}=       xpath://*[@data-testid="bottom-drawer-tab-details"]
+${RUN_TOPOLOGY_DETAILS_BTN_XP}=       xpath://*[@data-testid="pipeline-run-tab-details"]
 ${RUN_TOPOLOGY_OUTPUT_BTN_XP}=        xpath://*[@data-testid="bottom-drawer-tab-run-output"]
 ${RUN_TOPOLOGY_XP}=                   xpath://*[@data-test-id="topology"]
 ${PIPELINES_DISABLED_EXC_MARK}=       xpath=//*[@id="page-sidebar"]/div/nav/ul/li[3]/a/div/div[2]
@@ -165,7 +165,7 @@ Pipeline Context Menu Should Be Working
     [Documentation]   Test Pipeline YAML context menu works with mouse right-click and with keyboard
     [Arguments]    ${pipeline_name}
     ${orig wait}=    SeleniumLibrary.Set Selenium Implicit Wait    10s
-    Menu.Navigate To Page    Data Science Pipelines    Pipelines
+    Menu.Navigate To Page    Data Science Pipelines
     Wait Until Element Is Visible     //a[text()="${pipeline_name}"]          timeout=30s
     Click Link      ${pipeline_name}
     Click Element     //button[@aria-label="Pipeline YAML Tab"]
@@ -179,7 +179,7 @@ Pipeline Yaml Should Be Readonly
     [Documentation]   Verify Pipeline Yaml is read only (https://github.com/opendatahub-io/odh-dashboard/issues/1689)
     [Arguments]    ${pipeline_name}
     ${orig wait}=    SeleniumLibrary.Set Selenium Implicit Wait    10s
-    Menu.Navigate To Page    Data Science Pipelines    Pipelines
+    Menu.Navigate To Page    Data Science Pipelines
     Wait Until Element Is Visible     //a[text()="${pipeline_name}"]          timeout=30s
     Click Link      ${pipeline_name}
     Click Element     //button[@aria-label="Pipeline YAML Tab"]
@@ -274,8 +274,6 @@ Wait Until Page Contains Run Topology Page
     Run Keyword And Continue On Failure    Wait Until Page Contains Element
     ...    ${RUN_TOPOLOGY_DETAILS_BTN_XP}
     Run Keyword And Continue On Failure    Wait Until Page Contains Element
-    ...    ${RUN_TOPOLOGY_OUTPUT_BTN_XP}
-    Run Keyword And Continue On Failure    Wait Until Page Contains Element
     ...    ${RUN_TOPOLOGY_XP}
 
 Verify Pipeline Server Deployments    # robocop: disable
@@ -361,7 +359,7 @@ Verify Successful Pipeline Run Via Pipelines Runs UI
     [Documentation]    Validates that a given pipeline run in a given pipeline is in successful end state
     ...                View: Data Science Pipelines -> Runs, Triggered tab
     [Arguments]    ${pipeline_name}
-    Menu.Navigate To Page    Data Science Pipelines    Runs
+    Menu.Navigate To Page    Data Science Pipelines
     Wait Until Page Contains Element    xpath://span[text()='Triggered']   timeout=10s
     Click Element    //span[text()='Active']
     Wait Until Pipeline Run Is Started    pipeline_name=${pipeline_name}

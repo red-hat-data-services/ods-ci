@@ -1,7 +1,6 @@
 *** Settings ***
 Documentation    Test Cases to verify Serverless installation
 Library         Collections
-Library         SeleniumLibrary
 Library         OpenShiftLibrary
 Resource        ../../../../Resources/Page/OCPDashboard/OCPDashboard.resource
 Resource        ../../../../Resources/OCP.resource
@@ -25,6 +24,7 @@ Validate DSC creates all Serverless CRs
     Resource Status Should Be     oc get KnativeServing knative-serving -n ${KNATIVESERVING_NS} -o json | jq '.status.conditions[] | select(.type=="Ready") | .status'     KnativeServing    "True"    # robocop: disable
     Resource Should Exist     Gateway    knative-ingress-gateway     ${KNATIVESERVING_NS}
     Resource Should Exist     Gateway    knative-local-gateway     ${KNATIVESERVING_NS}
+    Resource Should Exist     Gateway    kserve-local-gateway     ${ISTIO_NS}
     Resource Should Exist     Service    knative-local-gateway     ${ISTIO_NS}
     Resource Should Exist     deployment    controller     ${KNATIVESERVING_NS}
     Wait For Pods Numbers  2    namespace=${KNATIVESERVING_NS}
@@ -39,18 +39,10 @@ Validate DSC creates all Serverless CRs
 *** Keywords ***
 Suite Setup
     [Documentation]    Suite Setup
-    Set Library Search Order    SeleniumLibrary
+    Wait For DSC Conditions Reconciled    ${OPERATOR_NAMESPACE}    default-dsc
     RHOSi Setup
 
 Suite Teardown
     [Documentation]    Suite Teardown
-    Close All Browsers
     RHOSi Teardown
 
-Wait For DSC Conditions Reconciled
-    [Documentation]    Checks all DSC conditions to be successfully reconciled
-    [Arguments]    ${namespace}    ${dsc_name}
-    ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc wait --timeout=3m --for jsonpath='{.status.conditions[].reason}'=ReconcileCompleted -n ${namespace} dsc ${dsc_name}    # robocop: disable
-    Should Be Equal As Integers    ${rc}     ${0}
-    Log    ${out}    console=${out}

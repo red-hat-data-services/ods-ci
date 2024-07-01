@@ -1,0 +1,3 @@
+- op: replace
+  path: /spec/template/spec/providerSpec/value/instanceType
+  value: INSTANCE_TYPE

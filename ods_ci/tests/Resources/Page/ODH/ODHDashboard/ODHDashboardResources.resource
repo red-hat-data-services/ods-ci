@@ -126,7 +126,7 @@ Wait Until Resource Page Is Loaded
 Get Link Web Elements From Resource Page
     [Documentation]    Returns the link web elements from Resources page which redirects users to
     ...                external websites. It excludes Quick Starts items
-    ${link_elements}=    Get WebElements    //a[@class="odh-card__footer__link" and not(starts-with(@href, '#'))]
+    ${link_elements}=    Get WebElements     //a[contains(@class,"odh-card__footer__link") and not(starts-with(@href, '#'))]
     ${len}=    Get Length    ${link_elements}
     Log To Console    ${len} Links found\n
     RETURN    ${link_elements}

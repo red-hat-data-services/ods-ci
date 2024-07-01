@@ -25,6 +25,7 @@ Validate DSC creates all Serverless CRs
     Resource Should Exist     Gateway    knative-ingress-gateway     ${KNATIVESERVING_NS}
     Resource Should Exist     Gateway    knative-local-gateway     ${KNATIVESERVING_NS}
     Resource Should Exist     Gateway    kserve-local-gateway     ${ISTIO_NS}
+    Resource Should Exist     Service    kserve-local-gateway     ${ISTIO_NS}
     Resource Should Exist     Service    knative-local-gateway     ${ISTIO_NS}
     Resource Should Exist     deployment    controller     ${KNATIVESERVING_NS}
     Wait For Pods Numbers  2    namespace=${KNATIVESERVING_NS}

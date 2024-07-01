@@ -31,7 +31,7 @@ Validate DSC creates all Serverless CRs
     ...    label_selector=app.kubernetes.io/component=controller    timeout=120
     ${pod_names}=    Get Pod Names    ${KNATIVESERVING_NS}    app.kubernetes.io/component=controller
     Verify Containers Have Zero Restarts    ${pod_names}    ${KNATIVESERVING_NS}
-    ${podname}=    Get Pod Name   ${OPERATOR_NAMESPACE}    ${OPERATOR_LABEL_SELECTOR}
+    #${podname}=    Get Pod Name   ${OPERATOR_NAMESPACE}    ${OPERATOR_LABEL_SELECTOR}
     #Verify Pod Logs Do Not Contain    ${podname}    ${OPERATOR_NAMESPACE}    ${regex_pattern}    rhods-operator
     Wait For DSC Conditions Reconciled    ${KNATIVESERVING_NS}    default-dsc
 
@@ -41,7 +41,6 @@ Suite Setup
     [Documentation]    Suite Setup
     RHOSi Setup
     Wait For DSC Conditions Reconciled    ${OPERATOR_NAMESPACE}    default-dsc
-
 
 Suite Teardown
     [Documentation]    Suite Teardown

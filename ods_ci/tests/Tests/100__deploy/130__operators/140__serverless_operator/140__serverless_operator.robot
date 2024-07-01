@@ -39,10 +39,10 @@ Validate DSC creates all Serverless CRs
 *** Keywords ***
 Suite Setup
     [Documentation]    Suite Setup
-    Wait For DSC Conditions Reconciled    ${OPERATOR_NAMESPACE}    default-dsc
     RHOSi Setup
+    Wait For DSC Conditions Reconciled    ${OPERATOR_NAMESPACE}    default-dsc
+
 
 Suite Teardown
     [Documentation]    Suite Teardown
     RHOSi Teardown
-

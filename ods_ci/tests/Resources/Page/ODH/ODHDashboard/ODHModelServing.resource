@@ -301,8 +301,6 @@ Get Model Inference
                     ${curl_cmd}=     Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
             END
     END
-
-
     ${inference_output}=    Run    ${curl_cmd}
     RETURN    ${inference_output}
 

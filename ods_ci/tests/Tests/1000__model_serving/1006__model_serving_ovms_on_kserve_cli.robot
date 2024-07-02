@@ -27,7 +27,7 @@ ${INFERENCE_INPUT_OPENVINO}=    @tests/Resources/Files/openvino-example-input.js
 
 *** Test Cases ***
 Verify User Can Serve And Query ovms model Model
-    [Documentation]    Basic tests for preparing, deploying and querying a LLM model
+    [Documentation]    Basic tests for preparing, deploying and querying model
     ...                using Kserve and ovms runtime
     [Tags]    OVMS
     ...       Tier1

@@ -94,12 +94,6 @@ Jupyter Notebook Should Run Successfully
     Run Cell And Check For Errors    print("RegisteredModel:");print(registry.get_registered_model(registeredmodel_name))
     SeleniumLibrary.Capture Page Screenshot
 
-Upload File In The Workbench
-    [Documentation]    Uploads the working files inside the workbench PVC
-    [Arguments]    ${workbench_title}    ${workbench_namespace}    ${filepath}
-    ${rc}    ${out}=    Run And Return Rc And Output    oc cp ${EXECDIR}/${filepath} ${workbench_title}-0:/opt/app-root/src -n ${workbench_namespace}
-    Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
-
 Wait For Model Registry Containers To Be Ready
     [Documentation]    Wait for model-registry-deployment to be ready
     ${result}=    Run Process    oc wait --for\=condition\=Available --timeout\=5m -n ${PRJ_TITLE} deployment/model-registry-db

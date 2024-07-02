@@ -284,11 +284,6 @@ Get Model Inference
             Fetch Openshift CA Bundle
             ${curl_cmd}=     Catenate    ${curl_cmd}    --cacert openshift_ca.crt
         END
-<<<<<<< HEAD
-=======
-        ${token}=    Get Access Token Via UI    ${project_title}
-        ${curl_cmd}=     Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
->>>>>>> master
     END
     IF  ${deployment_mode} == 'Cli'
             IF    '${kserve_mode}' == 'Serverless'

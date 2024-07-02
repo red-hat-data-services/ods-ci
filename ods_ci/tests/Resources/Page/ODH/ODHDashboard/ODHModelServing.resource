@@ -282,14 +282,69 @@ Get Model Inference
     ${inference_output}=    Run    ${curl_cmd}
     RETURN    ${inference_output}
 
+Get Model Inference
+    [Documentation]    Returns the inference result after sending a POST request to a deployed
+    ...    model endpoint. If token authentication is needed for the model, ${token_auth} should be
+    ...    set to ${TRUE}.
+    [Arguments]    ${model_name}    ${inference_input}    ${token_auth}=${FALSE}    ${kserve_mode}=Serverless
+    ...    ${project_title}=${NONE}   ${deployment_mode}='UI'   ${service_port}=8888   ${end_point}=${NONE}
+    ${curl_cmd}=     Set Variable    ${NONE}
+
+    IF  ${deployment_mode} == 'UI'
+        ${self_managed}=    Is RHODS Self-Managed
+        ${url}=    Get Model Route Via UI    ${model_name}
+        ${kserve}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain    Single-model serving enabled
+        ${curl_cmd}=     Set Variable    curl -s ${url} -d ${inference_input}
+        IF    ${token_auth}
+            IF    "${project_title}" == "${NONE}"
+                ${project_title}=    Get Model Project    ${model_name}
+            END
+            ${token}=    Get Access Token via UI    ${project_title}
+            ${curl_cmd}=     Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
+        END
+        IF  ${kserve}
+            Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
+            ${curl_cmd}=     Catenate    ${curl_cmd}    --cacert openshift_ca_istio_knative.crt
+        ELSE IF  ${self_managed}
+            Fetch Openshift CA Bundle
+            ${curl_cmd}=     Catenate    ${curl_cmd}    --cacert openshift_ca.crt
+        END
+    END
+    IF  ${deployment_mode} == 'Cli'
+            IF    '${kserve_mode}' == 'Serverless'
+                ${rc}    ${url}=    Run And Return Rc And Output
+                ...    oc get ksvc ${model_name}-predictor -n ${project_title} -o jsonpath='{.status.url}'
+                 Should Be Equal As Integers    ${rc}    ${0}
+                ${curl_cmd}=   Set Variable    curl -sk ${url}${end_point} -d ${inference_input}
+            END
+
+            IF     '${kserve_mode}' == "RawDeployment"
+                    ${url}=   Set Variable    http://localhost:${service_port}${end_point}
+                    ${curl_cmd}=     Set Variable    curl -sk ${url} -d ${inference_input}
+            END
+
+            IF      ${token_auth}
+                    ${token}     Create Inference Access Token   ${project_title}    ${DEFAULT_BUCKET_SA_NAME}
+                    ${curl_cmd}=     Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
+            END
+    END
+
+
+    ${inference_output}=    Run    ${curl_cmd}
+    RETURN    ${inference_output}
+
 Verify Model Inference
     [Documentation]    Verifies that the inference result of a model is equal to an expected output
     [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}=${FALSE}
-    ...    ${project_title}=${NONE}
-    Open Model Serving Home Page
-    Switch Model Serving Project    ${project_title}
-    ${inference_output}=    Get Model Inference    ${model_name}    ${inference_input}    ${token_auth}
-    ...    project_title=${project_title}
+    ...    ${project_title}=${NONE}    ${deployment_mode}=UI  ${kserve_mode}=Serverless
+    ...    ${service_port}=${NONE}   ${end_point}=${NONE} 
+    IF   ${deployment_mode} == 'UI'
+        Open Model Serving Home Page
+        Switch Model Serving Project    ${project_title}
+    END
+    ${inference_output}=    Get Model Inference    model_name=${model_name}    inference_input=${inference_input}   token_auth=${token_auth}    kserve_mode=${kserve_mode}
+    ...    project_title=${project_title}   deployment_mode=${deployment_mode}   service_port=${service_port}   end_point=${end_point}
+
     ${result}    ${list}=    Inference Comparison    ${expected_inference_output}    ${inference_output}
     Log    ${result}
     Log    ${list}
@@ -309,7 +364,8 @@ Verify Model Inference With Retries
     ...                endpoint exposed.
     ...                This is a temporary mitigation meanwhile we find a better way to check the model
     [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}
-    ...            ${token_auth}=${FALSE}    ${project_title}=${NONE}    ${retries}=${5}
+    ...            ${token_auth}=${FALSE}    ${project_title}=${NONE}     ${deployment_mode}=UI  ${kserve_mode}=Serverless
+    ...            ${service_port}=${NONE}   ${end_point}=${NONE}    ${retries}=${5}
     ${status}=    Run Keyword And Return Status    Verify Model Inference
     ...    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}    ${project_title}
     IF    not ${status}
@@ -321,7 +377,8 @@ Verify Model Inference With Retries
             END
             ${status}=    Run Keyword And Return Status    Verify Model Inference
             ...    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}
-            ...    ${project_title}
+            ...    project_title=${project_title}     deployment_mode=${deployment_mode}  kserve_mode=${kserve_mode}
+            ...    service_port=${service_port}   end_point=${end_point}
             IF    ${status}
                 BREAK
             END
@@ -580,53 +637,4 @@ Set Up Project
         Configure User Workload Monitoring
     ELSE
         Log    message=Skipping UserWorkloadMonitoring enablement.
-    END
-
-Verify OVNS Model Inference Via CLI
-    [Documentation]    Verifies that the inference result of a model is equal to an expected output
-    [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}=${FALSE}
-    ...    ${test_namespace}=${NONE}    ${kserve_mode}="Serverless"    ${retries}=${10}
-    ${url}=   Set Variable     ${NONE}
-    ${inference_output}=    Set Variable     ${NONE}
-    IF    '${kserve_mode}' == 'Serverless'
-        ${rc}    ${url}=    Run And Return Rc And Output
-        ...    oc get ksvc ${model_name}-predictor -n ${test_namespace} -o jsonpath='{.status.url}'
-         Should Be Equal As Integers    ${rc}    ${0}
-        ${curl_cmd}=   Set Variable    curl -sk ${url}/v2/models/${model_name}/infer -d ${inference_input}
-    END
-
-    IF     '${kserve_mode}' == "RawDeployment"
-            ${url}=   Set Variable    http://localhost:8888/v2/models/${model_name}/infer
-            ${curl_cmd}=     Set Variable    curl -sk ${url} -d ${inference_input}
-    END
-
-    IF      ${token_auth}
-            ${token}     Create Inference Access Token   ${test_namespace}    ${DEFAULT_BUCKET_SA_NAME}
-            ${url}=     Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
-    END
-
-    ${retry}=    Set Variable    ${0}
-    WHILE    ${retry} < ${retries}
-        IF    ${retry} > 0
-            Log    message=Modelmesh inference call failed ${retry}/${retries}.
-            ...    level=WARN
-        END
-        ${rc}    ${inference_output}=    Run And Return Rc And Output     ${curl_cmd}
-
-        ${result}    ${list}=    Inference Comparison    ${expected_inference_output}    ${inference_output}
-        Log    ${result}
-        Log    ${list}
-
-        IF   ${result}
-            BREAK
-        END
-
-        ${retry}=    Evaluate    ${retry} + 1
-        Sleep    5s
-    END
-
-    IF    ${result}==False
-        ${events}    ${podlogs}=    Get Events And Pod Logs    namespace=${test_namespace}
-        ...    label_selector=modelmesh-service=modelmesh-serving
-        Fail    msg=comparison between expected and actual failed, ${list}
     END

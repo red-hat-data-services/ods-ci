@@ -1,7 +1,7 @@
 apiVersion: serving.kserve.io/v1alpha1
 kind: ServingRuntime
 metadata:
-  name: ovns-runtime
+  name: ovms-runtime
 spec:
   annotations:
     prometheus.io/path: /metrics

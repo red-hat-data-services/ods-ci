@@ -259,33 +259,6 @@ Get Model Inference
     [Documentation]    Returns the inference result after sending a POST request to a deployed
     ...    model endpoint. If token authentication is needed for the model, ${token_auth} should be
     ...    set to ${TRUE}.
-    [Arguments]    ${model_name}    ${inference_input}    ${token_auth}=${FALSE}
-    ...    ${project_title}=${NONE}
-    ${self_managed}=    Is RHODS Self-Managed
-    ${url}=    Get Model Route Via UI    ${model_name}
-    ${kserve}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain    Single-model serving enabled
-    ${curl_cmd}=     Set Variable    curl -s ${url} -d ${inference_input}
-    IF    ${token_auth}
-        IF    "${project_title}" == "${NONE}"
-            ${project_title}=    Get Model Project    ${model_name}
-        END
-        ${token}=    Get Access Token via UI    ${project_title}
-        ${curl_cmd}=     Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
-    END
-    IF  ${kserve}
-        Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
-        ${curl_cmd}=     Catenate    ${curl_cmd}    --cacert openshift_ca_istio_knative.crt
-    ELSE IF  ${self_managed}
-        Fetch Openshift CA Bundle
-        ${curl_cmd}=     Catenate    ${curl_cmd}    --cacert openshift_ca.crt
-    END
-    ${inference_output}=    Run    ${curl_cmd}
-    RETURN    ${inference_output}
-
-Get Model Inference
-    [Documentation]    Returns the inference result after sending a POST request to a deployed
-    ...    model endpoint. If token authentication is needed for the model, ${token_auth} should be
-    ...    set to ${TRUE}.
     [Arguments]    ${model_name}    ${inference_input}    ${token_auth}=${FALSE}    ${kserve_mode}=Serverless
     ...    ${project_title}=${NONE}   ${deployment_mode}='UI'   ${service_port}=8888   ${end_point}=${NONE}
     ${curl_cmd}=     Set Variable    ${NONE}
@@ -336,7 +309,7 @@ Get Model Inference
 Verify Model Inference
     [Documentation]    Verifies that the inference result of a model is equal to an expected output
     [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}=${FALSE}
-    ...    ${project_title}=${NONE}    ${deployment_mode}=UI  ${kserve_mode}=Serverless
+    ...    ${project_title}=${NONE}    ${deployment_mode}='UI'  ${kserve_mode}=Serverless
     ...    ${service_port}=${NONE}   ${end_point}=${NONE} 
     IF   ${deployment_mode} == 'UI'
         Open Model Serving Home Page

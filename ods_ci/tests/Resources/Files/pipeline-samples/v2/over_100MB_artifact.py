@@ -16,8 +16,8 @@ def html_visualization(html_artifact: Output[HTML]):
     target_size = 110 * 1024 * 1024  # 110 MB
     chunk_size = 1024 * 1024  # 1 MB
 
-    with open("output_file.txt", "wb") as f:
-        while os.path.getsize("output_file.txt") < target_size:
+    with open(html_artifact.path, "wb") as f:
+        while os.path.getsize(html_artifact.path) < target_size:
             f.write(b'0' * chunk_size)
 
 

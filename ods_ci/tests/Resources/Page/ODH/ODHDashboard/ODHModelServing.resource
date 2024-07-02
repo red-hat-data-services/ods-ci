@@ -288,8 +288,7 @@ Get Model Inference
     IF  ${deployment_mode} == 'Cli'
         Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
         IF     '${kserve_mode}' == 'Serverless'
-                    ${rc}    ${url}=    Run And Return Rc And Output
-                    ...    oc get ksvc ${model_name}-predictor -n ${project_title} -o jsonpath='{.status.url}'
+                    ${rc}    ${url}=    Run And Return Rc And Output    oc get ksvc ${model_name}-predictor -n ${project_title} -o jsonpath='{.status.url}'
                     ...    Should Be Equal As Integers    ${rc}    ${0}
                     ${curl_cmd}=   Set Variable    curl -s ${url}${end_point} -d ${inference_input} --cacert openshift_ca_istio_knative.crt
         END

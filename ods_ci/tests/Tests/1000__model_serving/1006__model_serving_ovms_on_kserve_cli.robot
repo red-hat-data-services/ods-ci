@@ -26,7 +26,7 @@ ${INFERENCE_INPUT_OPENVINO}=    @tests/Resources/Files/openvino-example-input.js
 #${EXPECTED_INFERENCE_OUTPUT_OPENVINO}=    {"model_name":"${MODEL_NAME}__isvc-8655dc7979","model_version":"1","outputs":[{"name":"Func/StatefulPartitionedCall/output/_13:0","datatype":"FP32","shape":[1,1],"data":[0.99999994]}]}  #robocop: disable
 
 *** Test Cases ***
-Verify User Can Serve And Query ovms model Model
+Verify User Can Serve And Query ovms Model
     [Documentation]    Basic tests for preparing, deploying and querying model
     ...                using Kserve and ovms runtime
     [Tags]    OVMS

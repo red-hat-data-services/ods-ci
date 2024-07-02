@@ -223,6 +223,7 @@ URLs HTTP Status Code Should Be Equal To
     [Documentation]    Given a list of link web elements, extracts the URLs and
     ...                checks if the http status code expected one is equal to the
     [Arguments]    ${link_elements}    ${expected_status}=200    ${timeout}=20
+    Should Not Be Empty    ${link_elements}    msg=The list of URLs to validate is empty (Maybe an invalid Xpath caused it).
     FOR    ${idx}    ${ext_link}    IN ENUMERATE    @{link_elements}    start=1
         ${href}=    Get Element Attribute    ${ext_link}    href
         ${text}=    Get Text    ${ext_link}
@@ -482,7 +483,7 @@ Enable User Workload Monitoring
     [Documentation]    Enable User Workload Monitoring for the cluster for user-defined-projects
     ${return_code}    ${output}    Run And Return Rc And Output   oc apply -f ${UWM_ENABLE_FILEPATH}
     Log To Console    ${output}
-    IF    "already exists" in ${output}
+    IF    "already exists" in $output
         Log    configmap already existed on the cluster, continuing
         RETURN
     ELSE
@@ -494,7 +495,7 @@ Configure User Workload Monitoring
     ...                This period can be configured for the component as and when needed.
     ${return_code}    ${output}    Run And Return Rc And Output   oc apply -f ${UWM_CONFIG_FILEPATH}
     Log To Console    ${output}
-    IF    "already exists" in ${output}
+    IF    "already exists" in $output
         Log    configmap already existed on the cluster, continuing
         RETURN
     ELSE

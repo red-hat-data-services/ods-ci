@@ -29,7 +29,11 @@ ${INFERENCE_INPUT_OPENVINO}=    @tests/Resources/Files/openvino-example-input.js
 Verify User Can Serve And Query ovms model Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and ovms runtime
-    [Tags]    RHOAIENG-OVMS
+    [Tags]    OVMS
+    ...       Tier1
+    ...       Smoke
+    ...       OpenDataHub
+    ...       RHOAIENG-9045
     Setup Test Variables    model_name=test-dir    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}
     ${EXPECTED_INFERENCE_SECURED_OUTPUT}  Set Variable    {"model_name":"${model_name}__isvc-83d6fab7bd","model_version":"1","outputs":[{"name":"Plus214_Output_0","datatype":"FP32","shape":[1,10],"data":[-8.233053,-7.7497034,-3.4236815,12.3630295,-12.079103,17.266596,-10.570976,0.7130762,3.321715,1.3621228]}]}  #robocop: disable

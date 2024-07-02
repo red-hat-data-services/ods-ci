@@ -122,7 +122,7 @@ Create Secret For S3-Like Buckets
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc apply -f ${LLM_RESOURCES_DIRPATH}/bucket_secret_filled.yaml -n ${namespace}
     Should Be Equal As Integers    ${rc}    ${0}
-    Run Keyword And Ignore Error    Run    oc create -f ${LLM_RESOURCES_DIRPATH}/bucket_sa_filled.yaml -n ${namespace}
+    Run Keyword And Continue On Failure    Run    oc create -f ${LLM_RESOURCES_DIRPATH}/bucket_sa_filled.yaml -n ${namespace}
     Add Secret To Service Account    sa_name=${sa_name}    secret_name=${name}    namespace=${namespace}
     IF    ${verify_ssl} == ${FALSE}
         ${rc}    ${out}=    Run And Return Rc And Output
@@ -758,7 +758,7 @@ Extract Service Port
     IF    '${protocol}' == 'grpc'
         ${port_name}=    Set Variable    h2c
     ELSE IF    '${protocol}' == 'TCP'
-           ${name}=    Set Variable    protocol
+            ${name}=    Set Variable    protocol
             ${port_name}=    Set Variable    TCP
     ELSE
         ${port_name}=    Set Variable    ${protocol}

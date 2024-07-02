@@ -261,8 +261,8 @@ Get Model Inference
     [Documentation]    Returns the inference result after sending a POST request to a deployed
     ...    model endpoint. If token authentication is needed for the model, ${token_auth} should be
     ...    set to ${TRUE}.
-    [Arguments]    ${model_name}    ${inference_input}    ${token_auth}=${FALSE}    ${kserve_mode}=Serverless
-    ...    ${project_title}=${NONE}   ${deployment_mode}='UI'   ${service_port}=8888   ${end_point}=${NONE}
+    [Arguments]    ${model_name}    ${inference_input}    ${token_auth}=${FALSE}   ${project_title}=${NONE}    
+    ...    ${kserve_mode}=Serverless   ${deployment_mode}='UI'   ${service_port}=8888   ${end_point}=${NONE}
     ${curl_cmd}=     Set Variable    ${NONE}
 
     IF  ${deployment_mode} == 'UI'
@@ -286,22 +286,23 @@ Get Model Inference
         END
     END
     IF  ${deployment_mode} == 'Cli'
-            IF    '${kserve_mode}' == 'Serverless'
-                ${rc}    ${url}=    Run And Return Rc And Output
-                ...    oc get ksvc ${model_name}-predictor -n ${project_title} -o jsonpath='{.status.url}'
-                 Should Be Equal As Integers    ${rc}    ${0}
-                ${curl_cmd}=   Set Variable    curl -sk ${url}${end_point} -d ${inference_input}
-            END
+        Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
+        IF     '${kserve_mode}' == 'Serverless'
+                    ${rc}    ${url}=    Run And Return Rc And Output
+                    ...    oc get ksvc ${model_name}-predictor -n ${project_title} -o jsonpath='{.status.url}'
+                    ...    Should Be Equal As Integers    ${rc}    ${0}
+                    ${curl_cmd}=   Set Variable    curl -s ${url}${end_point} -d ${inference_input} --cacert openshift_ca_istio_knative.crt
+        END
 
-            IF     '${kserve_mode}' == "RawDeployment"
+        IF     '${kserve_mode}' == "RawDeployment"
                     ${url}=   Set Variable    http://localhost:${service_port}${end_point}
-                    ${curl_cmd}=     Set Variable    curl -sk ${url} -d ${inference_input}
-            END
+                    ${curl_cmd}=     Set Variable    curl -s ${url} -d ${inference_input} --cacert openshift_ca_istio_knative.crt
+        END
 
-            IF      ${token_auth}
+        IF      ${token_auth}
                     ${token}     Create Inference Access Token   ${project_title}    ${DEFAULT_BUCKET_SA_NAME}
                     ${curl_cmd}=     Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
-            END
+        END
     END 
     ${inference_output}=    Run    ${curl_cmd}
     RETURN    ${inference_output}
@@ -312,8 +313,8 @@ Verify Model Inference
     ...    ${project_title}=${NONE}    ${deployment_mode}='UI'  ${kserve_mode}=Serverless
     ...    ${service_port}=${NONE}   ${end_point}=${NONE} 
     IF   ${deployment_mode} == 'UI'
-        Open Model Serving Home Page
-        Switch Model Serving Project    ${project_title}
+            Open Model Serving Home Page
+            Switch Model Serving Project    ${project_title}
     END
     ${inference_output}=    Get Model Inference    model_name=${model_name}    inference_input=${inference_input}   token_auth=${token_auth}    kserve_mode=${kserve_mode}
     ...    project_title=${project_title}   deployment_mode=${deployment_mode}   service_port=${service_port}   end_point=${end_point}
@@ -336,9 +337,9 @@ Verify Model Inference With Retries
     ...                timing: model not ready to reply yet, despite the pod is up and running and the
     ...                endpoint exposed.
     ...                This is a temporary mitigation meanwhile we find a better way to check the model
-    [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}
-    ...            ${token_auth}=${FALSE}    ${project_title}=${NONE}     ${deployment_mode}=UI  ${kserve_mode}=Serverless
-    ...            ${service_port}=${NONE}   ${end_point}=${NONE}    ${retries}=${5}
+    [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}=${FALSE}    
+    ...            ${project_title}=${NONE}    ${retries}=${5}     ${deployment_mode}=UI  ${kserve_mode}=Serverless
+    ...            ${service_port}=${NONE}   ${end_point}=${NONE} 
     ${status}=    Run Keyword And Return Status    Verify Model Inference
     ...    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}    ${project_title}
     IF    not ${status}

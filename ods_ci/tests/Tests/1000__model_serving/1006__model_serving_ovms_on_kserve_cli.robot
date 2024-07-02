@@ -1,6 +1,5 @@
 *** Settings ***
-Documentation     Collection of CLI tests to validate the model serving stack for different Large Language Models (LLM).
-...               These tests leverage on TGIS Standalone Serving Runtime
+Documentation     Collection of CLI tests to validate the model serving stack for OVMS.
 Resource          ../../Resources/OCP.resource
 Resource          ../../Resources/CLI/ModelServing/llm.resource
 Library           OpenShiftLibrary

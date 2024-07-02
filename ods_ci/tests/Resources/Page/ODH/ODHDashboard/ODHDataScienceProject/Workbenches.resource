@@ -580,3 +580,9 @@ Get Workbench Pod
     ...    workbench_title=${workbench_title}  namespace=${ns_name}
     ${pod_info}=    Oc Get    kind=Pod  name=${cr_name}-0  api_version=v1  namespace=${ns_name}
     RETURN    ${ns_name}    ${cr_name}    ${pod_info}
+
+ Upload File In The Workbench
+    [Documentation]    Uploads the working files inside the workbench PVC
+    [Arguments]    ${workbench_title}    ${workbench_namespace}    ${filepath}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc cp ${EXECDIR}/${filepath} ${workbench_title}-0:/opt/app-root/src -n ${workbench_namespace}
+    Should Be Equal As Integers    ${rc}    ${0}    msg=${out}

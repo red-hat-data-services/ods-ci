@@ -223,6 +223,7 @@ URLs HTTP Status Code Should Be Equal To
     [Documentation]    Given a list of link web elements, extracts the URLs and
     ...                checks if the http status code expected one is equal to the
     [Arguments]    ${link_elements}    ${expected_status}=200    ${timeout}=20
+    Should Not Be Empty    ${link_elements}    msg=The list of URLs to validate is empty (Maybe an invalid Xpath caused it).
     FOR    ${idx}    ${ext_link}    IN ENUMERATE    @{link_elements}    start=1
         ${href}=    Get Element Attribute    ${ext_link}    href
         ${text}=    Get Text    ${ext_link}

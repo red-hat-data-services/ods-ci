@@ -18,6 +18,8 @@ Verify Model Registry Operator Installation
     ...    deployed in the ${APPLICATIONS_NAMESPACE} namespace in ODS
     [Tags]    Smoke
     ...       Tier1
+    ...       Operator
+    ...       ModelRegistry
     ...       OpenDataHub    robot:recursive-continue-on-failure
     Wait Until Keyword Succeeds  1 min  10 sec  Verify Model Registry Operator Deployment
     Wait Until Keyword Succeeds    10 times  5s    Verify Model Registry ReplicaSets Info
@@ -51,7 +53,6 @@ Registry Suite Setup
     ${REGISTRY} =    Is Component Enabled    modelregistry    ${DSC_NAME}
     IF    "${REGISTRY}" == "false"    Enable Component    modelregistry
     Set Suite Variable     ${REGISTRY}
-
 
 Teardown
     [Documentation]    Disable Registry if Enabled

@@ -31,7 +31,7 @@ class DataSciencePipelinesKfp:
         return self.client, self.api
 
     def get_bucket_name(self, api, project):
-        bucket_name, _ = api.run_oc(f"oc get dspa -n {project} dspa -o json")
+        bucket_name, _ = api.run_command(f"oc get dspa -n {project} dspa -o json")
         objectStorage = json.loads(bucket_name)["spec"]["objectStorage"]
         if "minio" in objectStorage:
             return objectStorage["minio"]["bucket"]
@@ -56,7 +56,7 @@ class DataSciencePipelinesKfp:
     def import_run_pipeline(self, pipeline_url, pipeline_params):
         print(f"pipeline_params({type(pipeline_params)}): {pipeline_params}")
         print(f"downloading: {pipeline_url}")
-        test_pipeline_run_yaml, _ = self.api.do_get(pipeline_url, skip_ssl=True)
+        test_pipeline_run_yaml, _ = self.api.do_get(pipeline_url)
         pipeline_file = "/tmp/test_pipeline_run_yaml.yaml"
         with open(pipeline_file, "w", encoding="utf-8") as f:
             f.write(test_pipeline_run_yaml)
@@ -100,9 +100,7 @@ class DataSciencePipelinesKfp:
         # the current_path will be ods-ci
         if current_path is None:
             current_path = os.getcwd()
-        my_source = self.import_souce_code(
-            f"{current_path}/ods_ci/tests/Resources/Files/pipeline-samples/v2/{source_code}"
-        )
+        my_source = self.import_souce_code(f"{current_path}/tests/Resources/Files/pipeline-samples/v2/{source_code}")
         pipeline = getattr(my_source, fn)
 
         # pipeline_params

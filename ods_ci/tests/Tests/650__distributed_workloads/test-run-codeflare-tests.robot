@@ -18,13 +18,21 @@ ${NOTEBOOK_USER_PASSWORD}       ${TEST_USER_3.PASSWORD}
 
 
 *** Test Cases ***
-Run TestKueueRay ODH test
-    [Documentation]    Run Go ODH test: TestKueueRay
+Run TestKueueRayCpu ODH test
+    [Documentation]    Run Go ODH test: TestKueueRayCpu
     [Tags]  ODS-2514
     ...     Tier1
     ...     DistributedWorkloads
     ...     CodeflareOperator
     Run Codeflare ODH Test    TestMnistRayCpu
+
+Run TestKueueRayGpu ODH test
+    [Documentation]    Run Go ODH test: TestKueueRayGpu
+    [Tags]  Resources-GPU
+    ...     Tier1
+    ...     DistributedWorkloads
+    ...     CodeflareOperator
+    Run Codeflare ODH Test    TestMnistRayGpu
 
 
 *** Keywords ***

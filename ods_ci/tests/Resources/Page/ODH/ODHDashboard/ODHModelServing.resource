@@ -261,7 +261,7 @@ Get Model Inference
     [Documentation]    Returns the inference result after sending a POST request to a deployed
     ...    model endpoint. If token authentication is needed for the model, ${token_auth} should be
     ...    set to ${TRUE}.
-    [Arguments]    ${model_name}    ${inference_input}    ${token_auth}=${FALSE}   ${project_title}=${NONE}    
+    [Arguments]    ${model_name}    ${inference_input}    ${token_auth}=${FALSE}   ${project_title}=${NONE}
     ...    ${kserve_mode}=Serverless   ${deployment_mode}='UI'   ${service_port}=8888   ${end_point}=${NONE}
     ${curl_cmd}=     Set Variable    ${NONE}
 
@@ -287,22 +287,20 @@ Get Model Inference
     END
     IF  ${deployment_mode} == 'Cli'
         Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
-        IF     '${kserve_mode}' == 'Serverless'
-                    ${rc}    ${url}=    Run And Return Rc And Output    oc get ksvc ${model_name}-predictor -n ${project_title} -o jsonpath='{.status.url}'
-                    ...    Should Be Equal As Integers    ${rc}    ${0}
-                    ${curl_cmd}=   Set Variable    curl -s ${url}${end_point} -d ${inference_input} --cacert openshift_ca_istio_knative.crt
-        END
+        Run Keyword If    '${kserve_mode}' == 'Serverless'
+        ...    ${rc}    ${url}=    Run And Return Rc And Output    oc get ksvc ${model_name}-predictor -n ${project_title} -o jsonpath='{.status.url}'
+        ...    Should Be Equal As Integers    ${rc}    0
+        ...    ${curl_cmd}=    Set Variable    curl -s ${url}${end_point} -d ${inference_input} --cacert openshift_ca_istio_knative.crt
 
-        IF     '${kserve_mode}' == "RawDeployment"
-                    ${url}=   Set Variable    http://localhost:${service_port}${end_point}
-                    ${curl_cmd}=     Set Variable    curl -s ${url} -d ${inference_input} --cacert openshift_ca_istio_knative.crt
-        END
+        Run Keyword If    '${kserve_mode}' == 'RawDeployment'
+        ...    ${url}=    Set Variable    http://localhost:${service_port}${end_point}
+        ...    ${curl_cmd}=    Set Variable    curl -s ${url} -d ${inference_input} --cacert openshift_ca_istio_knative.crt
 
-        IF      ${token_auth}
-                    ${token}     Create Inference Access Token   ${project_title}    ${DEFAULT_BUCKET_SA_NAME}
-                    ${curl_cmd}=     Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
-        END
-    END 
+        Run Keyword If    ${token_auth}
+        ...    ${token}=    Create Inference Access Token    ${project_title}    ${DEFAULT_BUCKET_SA_NAME}
+        ...    ${curl_cmd}=    Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
+    END
+
     ${inference_output}=    Run    ${curl_cmd}
     RETURN    ${inference_output}
 

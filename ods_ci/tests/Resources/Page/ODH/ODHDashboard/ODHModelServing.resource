@@ -302,7 +302,7 @@ Get Model Inference
                     ${token}     Create Inference Access Token   ${project_title}    ${DEFAULT_BUCKET_SA_NAME}
                     ${curl_cmd}=     Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
             END
-    END
+    END 
     ${inference_output}=    Run    ${curl_cmd}
     RETURN    ${inference_output}
 

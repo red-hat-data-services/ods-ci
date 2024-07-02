@@ -37,11 +37,11 @@ deploymentSpec:
 
           '
         - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
-          \ *\n\ndef html_visualization(html_artifact: Output[HTML]):\n    target_size\
-          \ = 110 * 1024 * 1024  # 110 MB\n    chunk_size = 1024 * 1024  # 1 MB\n\n\
-          \    with open(\"output_file.txt\", \"wb\") as f:\n        while os.path.getsize(\"\
-          output_file.txt\") < target_size:\n            f.write(b'0' * chunk_size)\n\
-          \n"
+          \ *\n\ndef html_visualization(html_artifact: Output[HTML]):\n    import\
+          \ os\n    target_size = 110 * 1024 * 1024  # 110 MB\n    chunk_size = 1024\
+          \ * 1024  # 1 MB\n\n    with open(\"output_file.txt\", \"wb\") as f:\n \
+          \       while os.path.getsize(\"output_file.txt\") < target_size:\n    \
+          \        f.write(b'0' * chunk_size)\n\n"
         image: registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61
 pipelineInfo:
   name: over-100mb-artifact

@@ -1,5 +1,4 @@
 import os
-
 from kfp import dsl, compiler
 from kfp.dsl import (component, Output, ClassificationMetrics, Metrics, HTML,
                      Markdown)
@@ -13,6 +12,7 @@ _KFP_PACKAGE_PATH = os.getenv('KFP_PACKAGE_PATH')
     kfp_package_path=_KFP_PACKAGE_PATH,
 )
 def html_visualization(html_artifact: Output[HTML]):
+    import os
     target_size = 110 * 1024 * 1024  # 110 MB
     chunk_size = 1024 * 1024  # 1 MB
 

@@ -20,7 +20,7 @@ spec:
       command:
         - python3
         - '-m'
-        - vllm.entrypoints.openai.api_server
+        - vllm_tgis_adapter
       ports:
         - containerPort: 8033
           name: h2c

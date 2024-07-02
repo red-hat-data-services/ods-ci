@@ -31,7 +31,6 @@ Verify User Can Serve And Query ovms Model
     ...                using Kserve and ovms runtime
     [Tags]    OVMS
     ...       Tier1
-    ...       Smoke
     ...       OpenDataHub
     ...       RHOAIENG-9045
     Setup Test Variables    model_name=test-dir    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}

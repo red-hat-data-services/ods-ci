@@ -287,18 +287,19 @@ Get Model Inference
     END
     IF  ${deployment_mode} == 'Cli'
         Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
-        Run Keyword If    '${kserve_mode}' == 'Serverless'
-        ...    ${rc}    ${url}=    Run And Return Rc And Output    oc get ksvc ${model_name}-predictor -n ${project_title} -o jsonpath='{.status.url}'
-        ...    Should Be Equal As Integers    ${rc}    0
-        ...    ${curl_cmd}=    Set Variable    curl -s ${url}${end_point} -d ${inference_input} --cacert openshift_ca_istio_knative.crt
-
-        Run Keyword If    '${kserve_mode}' == 'RawDeployment'
-        ...    ${url}=    Set Variable    http://localhost:${service_port}${end_point}
-        ...    ${curl_cmd}=    Set Variable    curl -s ${url} -d ${inference_input} --cacert openshift_ca_istio_knative.crt
-
-        Run Keyword If    ${token_auth}
-        ...    ${token}=    Create Inference Access Token    ${project_title}    ${DEFAULT_BUCKET_SA_NAME}
-        ...    ${curl_cmd}=    Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
+        IF    '${kserve_mode}' == 'Serverless'
+               ${rc}    ${url}=    Run And Return Rc And Output    oc get ksvc ${model_name}-predictor -n ${project_title} -o jsonpath='{.status.url}'
+               Should Be Equal As Integers    ${rc}    0
+               ${curl_cmd}=    Set Variable    curl -s ${url}${end_point} -d ${inference_input} --cacert openshift_ca_istio_knative.crt
+        END
+        IF    '${kserve_mode}' == 'RawDeployment'
+               ${url}=   Set Variable    http://localhost:${service_port}${end_point}
+               ${curl_cmd}=    Set Variable    curl -s ${url} -d ${inference_input} --cacert openshift_ca_istio_knative.crt
+        END
+        IF    ${token_auth}
+              ${token}=    Create Inference Access Token    ${project_title}    ${DEFAULT_BUCKET_SA_NAME}
+              ${curl_cmd}=    Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
+        END
     END
 
     ${inference_output}=    Run    ${curl_cmd}

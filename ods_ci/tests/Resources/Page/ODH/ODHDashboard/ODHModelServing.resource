@@ -286,11 +286,17 @@ Get Model Inference
         END
     END
     IF  ${deployment_mode} == 'Cli'
-        Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
+        IF  ${self_managed}
+            Fetch Openshift CA Bundle
+            ${cert}=   Set Variable   --cacert openshift_ca.crt
+        ELSE
+            Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
+            ${cert}=    Set Variable    --cacert openshift_ca_istio_knative.crt
+        END       
         IF    '${kserve_mode}' == 'Serverless'
                ${rc}    ${url}=    Run And Return Rc And Output    oc get ksvc ${model_name}-predictor -n ${project_title} -o jsonpath='{.status.url}'
                Should Be Equal As Integers    ${rc}    0
-               ${curl_cmd}=    Set Variable    curl -s ${url}${end_point} -d ${inference_input} --cacert openshift_ca_istio_knative.crt
+               ${curl_cmd}=    Set Variable    curl -s ${url}${end_point} -d ${inference_input} 
         END
         IF    '${kserve_mode}' == 'RawDeployment'
                ${url}=   Set Variable    http://localhost:${service_port}${end_point}
@@ -311,8 +317,8 @@ Verify Model Inference
     ...    ${project_title}=${NONE}    ${deployment_mode}='UI'   ${kserve_mode}=Serverless
     ...    ${service_port}=${NONE}   ${end_point}=${NONE} 
     IF   ${deployment_mode} == 'UI'
-            Open Model Serving Home Page
-            Switch Model Serving Project    ${project_title}
+         Open Model Serving Home Page
+         Switch Model Serving Project    ${project_title}
     END
     ${inference_output}=    Get Model Inference    model_name=${model_name}    inference_input=${inference_input}   token_auth=${token_auth}    kserve_mode=${kserve_mode}
     ...    project_title=${project_title}   deployment_mode=${deployment_mode}   service_port=${service_port}   end_point=${end_point}
@@ -322,8 +328,8 @@ Verify Model Inference
     Log    ${list}
     IF    ${result}==False
         IF    $project_title == $NONE
-            ${rc}    ${project_title}=    Run And Return Rc And Output
-            ...    oc get InferenceServices --all-namespaces -ojson | jq '.items[] | select(.metadata.name=="${model_name}") | .metadata.namespace' | tr -d '"'    # robocop: disable
+              ${rc}    ${project_title}=    Run And Return Rc And Output
+              ...    oc get InferenceServices --all-namespaces -ojson | jq '.items[] | select(.metadata.name=="${model_name}") | .metadata.namespace' | tr -d '"'    # robocop: disable
         END
         ${events}    ${podlogs}=    Get Events And Pod Logs    namespace=${project_title}
         ...    label_selector=modelmesh-service=modelmesh-serving

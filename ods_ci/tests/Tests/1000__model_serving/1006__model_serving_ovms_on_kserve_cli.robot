@@ -17,6 +17,8 @@ ${USE_GPU}=    ${FALSE}
 ${KSERVE_MODE}=    Serverless    #RawDeployment   #Serverless
 ${MODEL_FORMAT}=   onnx
 ${PROTOCOL}=     http
+${MODEL_NAME}=    test-dir
+${EXPECTED_INFERENCE_SECURED_OUTPUT}  Set Variable    {"model_name":"${model_name}__isvc-83d6fab7bd","model_version":"1","outputs":[{"name":"Plus214_Output_0","datatype":"FP32","shape":[1,10],"data":[-8.233053,-7.7497034,-3.4236815,12.3630295,-12.079103,17.266596,-10.570976,0.7130762,3.321715,1.3621228]}]}  #robocop: disable
 ${OVERLAY}=      ${EMPTY}
 ${MODELS_BUCKET}=    ${S3.BUCKET_1}
 ${INFERENCE_INPUT}=    @tests/Resources/Files/modelmesh-mnist-input.json
@@ -32,11 +34,10 @@ Verify User Can Serve And Query ovms Model
     ...       RHOAIENG-9045
     Setup Test Variables    model_name=test-dir    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}
-    ${EXPECTED_INFERENCE_SECURED_OUTPUT}  Set Variable    {"model_name":"${model_name}__isvc-83d6fab7bd","model_version":"1","outputs":[{"name":"Plus214_Output_0","datatype":"FP32","shape":[1,10],"data":[-8.233053,-7.7497034,-3.4236815,12.3630295,-12.079103,17.266596,-10.570976,0.7130762,3.321715,1.3621228]}]}  #robocop: disable
     Set Project And Runtime    runtime=${RUNTIME_NAME}     protocol=${PROTOCOL}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}
-    ...    storage_size=10Gi
-    ${requests}=    Create Dictionary    memory=10Gi
+    ...    storage_size=5Gi
+    ${requests}=    Create Dictionary    memory=5Gi
     Compile Inference Service YAML    isvc_name=${model_name}
     ...    sa_name=${EMPTY}
     ...    model_storage_uri=${storage_uri}

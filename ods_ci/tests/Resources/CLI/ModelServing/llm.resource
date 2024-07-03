@@ -122,7 +122,7 @@ Create Secret For S3-Like Buckets
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc apply -f ${LLM_RESOURCES_DIRPATH}/bucket_secret_filled.yaml -n ${namespace}
     Should Be Equal As Integers    ${rc}    ${0}
-    Run Keyword And Continue On Failure    Run    oc create -f ${LLM_RESOURCES_DIRPATH}/bucket_sa_filled.yaml -n ${namespace}
+    Run Keyword And Ignore Error    Run    oc create -f ${LLM_RESOURCES_DIRPATH}/bucket_sa_filled.yaml -n ${namespace}
     Add Secret To Service Account    sa_name=${sa_name}    secret_name=${name}    namespace=${namespace}
     IF    ${verify_ssl} == ${FALSE}
         ${rc}    ${out}=    Run And Return Rc And Output
@@ -746,7 +746,7 @@ Create PVC And Download Model From S3
     Create File From Template    ${DOWNLOAD_PVC_FILEPATH}    ${DOWNLOAD_PVC_FILLED_FILEPATH}
     ${rc}    ${out}=    Run And Return Rc And Output    oc -n ${namespace} apply -f ${DOWNLOAD_PVC_FILLED_FILEPATH}
     Should Be Equal As Integers    ${rc}    ${0}
-    Run Keyword And Ignore Error   Wait For Pods To Be Ready    label_selector=name=download-${model_name}    namespace=${namespace}
+    Run Keyword And Continue On Failure   Wait For Pods To Be Ready    label_selector=name=download-${model_name}    namespace=${namespace}
     Wait For Pods To Succeed    label_selector=name=download-${model_name}    namespace=${namespace}
     ...    timeout=${download_timeout}
     ${rc}    ${out}=    Run And Return Rc And Output    oc delete pods -l name=download-${model_name} -n ${namespace}
@@ -754,17 +754,17 @@ Create PVC And Download Model From S3
 
 Extract Service Port
     [Arguments]    ${service_name}    ${namespace}    ${protocol}
-    ${name}     Set Variable    name
+    ${protocol_name}     Set Variable    name
     IF    '${protocol}' == 'grpc'
         ${port_name}=    Set Variable    h2c
     ELSE IF    '${protocol}' == 'TCP'
-            ${name}=    Set Variable    protocol
+            ${protocol_name}=    Set Variable    protocol
             ${port_name}=    Set Variable    TCP
     ELSE
         ${port_name}=    Set Variable    ${protocol}
     END
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc get svc/${service_name} -n ${namespace} -o jsonpath='{range .spec.ports[?(@.${name}=="${port_name}")]}{@.targetPort}{end}'
+    ...    oc get svc/${service_name} -n ${namespace} -o jsonpath='{range .spec.ports[?(@.${protocol_name}=="${port_name}")]}{@.targetPort}{end}'
     Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
     RETURN    ${out}
 

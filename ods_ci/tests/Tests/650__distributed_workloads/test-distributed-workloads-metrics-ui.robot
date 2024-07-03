@@ -96,7 +96,7 @@ Verify The Workload Metrics By Submitting Kueue Batch Workload
     Select Distributed Workload Project By Name    ${PRJ_TITLE}
     Select Refresh Interval    15 seconds
     Wait Until Element Is Visible    ${DISTRIBUITED_WORKLOAD_RESOURCE_METRICS_TITLE_XP}    timeout=20
-    Wait Until Element Is Visible    xpath=//*[text()="Running"]    timeout=30
+    Wait For Job With Status    ${JOB_NAME_QUEUE}    Running    60
 
     ${cpu_requested} =   Get CPU Requested    ${PRJ_TITLE}    ${LOCAL_QUEUE_NAME}
     ${memory_requested} =   Get Memory Requested    ${PRJ_TITLE}    ${LOCAL_QUEUE_NAME}    Job
@@ -110,12 +110,13 @@ Verify The Workload Metrics By Submitting Kueue Batch Workload
     Click Button    ${PROJECT_METRICS_TAB_XP}
 
     Check Distributed Workload Resource Metrics Chart    ${PRJ_TITLE}    ${cpu_requested}    ${memory_requested}    Job    ${JOB_NAME_QUEUE}
-    Wait Until Element Is Visible    xpath=//*[text()="Succeeded"]    timeout=180
+    Wait For Job With Status    ${JOB_NAME_QUEUE}    Succeeded    180
     Select Refresh Interval    15 seconds
     Page Should Not Contain Element    xpath=//*[text()="Running"]
     Check Requested Resources    ${PRJ_TITLE}    ${CPU_SHARED_QUOTA}    ${MEMEORY_SHARED_QUOTA}    0    0    Job
     Check Distributed Workload Resource Metrics Status    ${JOB_NAME_QUEUE}    Succeeded
-    Check Distributed Worklaod Status Overview    ${JOB_NAME_QUEUE}    Succeeded    Job finished successfully
+    # Once fixed  https://issues.redhat.com/browse/RHOAIENG-9092 update Job success message
+    Check Distributed Worklaod Status Overview    ${JOB_NAME_QUEUE}    Succeeded    No message
 
     ${result} =    Run Process  oc delete Job ${JOB_NAME_QUEUE} -n ${PRJ_TITLE}
     ...    shell=true    stderr=STDOUT
@@ -140,8 +141,8 @@ Verify The Workload Metrics By Submitting Ray Workload
     Select Distributed Workload Project By Name    ${PRJ_TITLE}
     Select Refresh Interval    15 seconds
     Wait Until Element Is Visible    ${DISTRIBUITED_WORKLOAD_RESOURCE_METRICS_TITLE_XP}    timeout=20
-    Wait Until Element Is Visible     xpath=//*[text()="Admitted"]    timeout=30
-    Wait Until Element Is Visible    xpath=//*[text()="Running"]    timeout=120
+    Wait For Job With Status    ${RAY_CLUSTER_NAME}    Admitted    30
+    Wait For Job With Status    ${RAY_CLUSTER_NAME}    Running    180
 
     ${cpu_requested} =   Get CPU Requested    ${PRJ_TITLE}    ${LOCAL_QUEUE_NAME}
     ${memory_requested} =   Get Memory Requested    ${PRJ_TITLE}    ${LOCAL_QUEUE_NAME}   RayCluster

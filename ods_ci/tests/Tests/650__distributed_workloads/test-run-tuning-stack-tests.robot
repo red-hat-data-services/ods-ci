@@ -9,7 +9,7 @@ Resource          ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 
 *** Variables ***
 ${TRAINING_OPERATOR_RELEASE_ASSETS}     %{TRAINING_OPERATOR_RELEASE_ASSETS=https://github.com/opendatahub-io/distributed-workloads/releases/latest/download}
-${FMS_HF_TUNING_IMAGE}                  quay.io/modh/fms-hf-tuning:84b0337b7baee119e909d4e901b6dadfe34c1f9a
+${FMS_HF_TUNING_IMAGE}                  quay.io/modh/fms-hf-tuning:release-5e4e9441febdb5b2beb21eaecdda1103abd1db05
 
 
 *** Test Cases ***

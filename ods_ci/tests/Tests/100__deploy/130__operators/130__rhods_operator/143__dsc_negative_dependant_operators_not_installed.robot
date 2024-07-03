@@ -27,7 +27,7 @@ ${IS_NOT_PRESENT}                           1
 *** Test Cases ***
 Validate DSC and DSCI Created With Errors When Service Mesh Operator Is Not Installed    #robocop:disable
     [Documentation]    The purpose of this Test Case is to validate that DSC and DSCI are created
-    ...                without Service Mesh Operator installer, but with errors
+    ...                without Service Mesh Operator installed, but with errors
     [Tags]    Operator    Tier3    ODS-2584    RHOAIENG-2514
 
     Remove DSC And DSCI Resources
@@ -47,6 +47,26 @@ Validate DSC and DSCI Created With Errors When Service Mesh Operator Is Not Inst
 
     [Teardown]    Reinstall Service Mesh Operator And Recreate DSC And DSCI
 
+Validate DSC and DSCI Created With Errors When Serverless Operator Is Not Installed    #robocop:disable
+    [Documentation]    The purpose of this Test Case is to validate that DSC and DSCI are created
+    ...                without Serverless Operator installed, but with errors
+    [Tags]    Operator    Tier3    ODS-2586    RHOAIENG-2512
+
+    Remove DSC And DSCI Resources
+    Uninstall Serverless Operator CLI
+
+    Log To Console    message=Creating DSCInitialization CR via CLI
+    Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
+    Wait For DSCInitialization CustomResource To Be Ready    timeout=600
+
+    Log To Console    message=Creating DataScienceCluster CR via CLI
+    Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
+    Log To Console    message=Checking DataScienceCluster conditions
+    Wait Until Keyword Succeeds    6 min    0 sec
+    ...    DataScienceCluster Should Fail Because Serverless Operator Is Not Installed
+
+    [Teardown]    Reinstall Serverless Operator And Recreate DSC And DSCI
+
 Validate DSC and DSCI Created With Errors When Service Mesh And Serverless Operators Are Not Installed   #robocop:disable
     [Documentation]    The purpose of this Test Case is to validate that DSC and DSCI are created
     ...                without dependant operators ((servicemesh, serverless) installed, but with errors
@@ -58,13 +78,17 @@ Validate DSC and DSCI Created With Errors When Service Mesh And Serverless Opera
 
     Log To Console    message=Creating DSCInitialization CR via CLI
     Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
-    Sleep  45s     reason=wait for 45 seconds until DSCI is created and reconciled
+    Log To Console    message=Checking DSCInitialization conditions
+    Wait Until Keyword Succeeds    6 min    0 sec
+    ...    DSCInitialization Should Fail Because Service Mesh Operator Is Not Installed
 
     Log To Console    message=Creating DataScienceCluster CR via CLI
     Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
     Log To Console    message=Checking DataScienceCluster conditions
     Wait Until Keyword Succeeds    6 min    0 sec
-    ...    DataScienceCluster Should Fail Because Service Mesh And Serverless Operators Are Not Installed
+    ...    DataScienceCluster Should Fail Because Service Mesh Operator Is Not Installed
+    Wait Until Keyword Succeeds    6 min    0 sec
+    ...    DataScienceCluster Should Fail Because Serverless Operator Is Not Installed
 
     [Teardown]    Reinstall Service Mesh And Serverless Operators And Recreate DSC And DSCI
 
@@ -124,6 +148,17 @@ Reinstall Service Mesh Operator And Recreate DSC And DSCI
     Set Service Mesh State To Managed And Wait For CR Ready
     ...           ${SERVICE_MESH_CR_NAME}    ${SERVICE_MESH_CR_NS}    ${SERVICE_MESH_OPERATOR_NS}
 
+Reinstall Serverless Operator And Recreate DSC And DSCI
+    [Documentation]    Reinstalls Service Mesh operator and waits for the Service Mesh Control plane to be created
+    Remove DSC And DSCI Resources
+    Install Serverless Operator Via Cli
+    Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
+    Wait For DSCInitialization CustomResource To Be Ready    timeout=180
+    Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
+    Wait For DataScienceCluster CustomResource To Be Ready   timeout=600
+    Set Service Mesh State To Managed And Wait For CR Ready
+    ...           ${SERVICE_MESH_CR_NAME}    ${SERVICE_MESH_CR_NS}    ${SERVICE_MESH_OPERATOR_NS}
+
 Reinstall Service Mesh And Serverless Operators And Recreate DSC And DSCI
     [Documentation]    Reinstalls Dependant (service mesh, serverless) operators and waits for the Service Mesh Control plane to be created
     Remove DSC And DSCI Resources
@@ -156,18 +191,9 @@ Remove DSC And DSCI Resources
     ...    Is Resource Present    DSCInitialization    ${DSCI_NAME}
     ...    ${OPERATOR_NS}      ${IS_NOT_PRESENT}
 
-DataScienceCluster Should Fail Because Service Mesh And Serverless Operators Are Not Installed
-    [Documentation]   Keyword to check the DSC conditions when dependant (servicemesh, serverless) operators are not installed.
-    ...               Two conditions, one per operator, should appear saying this operator is needed to enable kserve component.
-    ${return_code}    ${output}=    Run And Return Rc And Output
-    ...    oc get DataScienceCluster ${DSC_NAME} -n ${OPERATOR_NS} -o json | jq -r '.status.conditions | map(.message) | join(",")'    #robocop:disable
-    Should Be Equal As Integers  ${return_code}   0   msg=Error retrieved DSC conditions
-    Should Contain    ${output}    operator servicemeshoperator not found. Please install the operator before enabling kserve component    #robocop:disable
-    Should Contain    ${output}    operator serverless-operator not found. Please install the operator before enabling kserve component    #robocop:disable
-
 DSCInitialization Should Fail Because Service Mesh Operator Is Not Installed
     [Documentation]   Keyword to check the DSCI conditions when service mesh operator is not installed.
-        ...           One condition should appear saying this operator is needed to enable kserve component.
+    ...           One condition should appear saying this operator is needed to enable kserve component.
     ${return_code}    ${output}=    Run And Return Rc And Output
     ...    oc get DSCInitialization ${DSCI_NAME} -n ${OPERATOR_NS} -o json | jq -r '.status.conditions | map(.message) | join(",")'     #robocop:disable
     Should Be Equal As Integers  ${return_code}   0   msg=Error retrieved DSCI conditions
@@ -179,9 +205,17 @@ DataScienceCluster Should Fail Because Service Mesh Operator Is Not Installed
     ${return_code}    ${output}=    Run And Return Rc And Output
     ...    oc get DataScienceCluster ${DSC_NAME} -n ${OPERATOR_NS} -o json | jq -r '.status.conditions | map(.message) | join(",")'    #robocop:disable
     Should Be Equal As Integers  ${return_code}   0   msg=Error retrieved DSC conditions
-    Should Contain    ${output}    Component reconciliation failed: 1 error occurred:\n\t* operator servicemeshoperator not found. Please install the operator before enabling kserve component    #robocop:disable
+    Should Contain    ${output}    operator servicemeshoperator not found. Please install the operator before enabling kserve component    #robocop:disable
 
     ${rc}    ${logs}=    Run And Return Rc And Output
     ...    oc logs -l name=rhods-operator -c rhods-operator -n ${OPERATOR_NS} --ignore-errors
 
     Should Contain    ${logs}    failed to find the pre-requisite Service Mesh Operator subscription, please ensure Service Mesh Operator is installed.    #robocop:disable
+
+DataScienceCluster Should Fail Because Serverless Operator Is Not Installed
+    [Documentation]   Keyword to check the DSC conditions when serverless operator is not installed.
+    ...           One condition should appear saying this operator is needed to enable kserve component.
+    ${return_code}    ${output}=    Run And Return Rc And Output
+    ...    oc get DataScienceCluster ${DSC_NAME} -n ${OPERATOR_NS} -o json | jq -r '.status.conditions | map(.message) | join(",")'    #robocop:disable
+    Should Be Equal As Integers  ${return_code}   0   msg=Error retrieved DSC conditions
+    Should Contain    ${output}    operator serverless-operator not found. Please install the operator before enabling kserve component    #robocop:disable

@@ -117,7 +117,7 @@ Watch Hive Install Log
         ${last_line_index} =    Get Line Count    ${old_log_data}
         ${pod} =    Oc Get    kind=Pod    namespace=${namespace}
         TRY
-            ${new_log_data} =    Oc Get Pod Logs    name=${pod[0]['metadata']['name']}    container=hive    namespace=${namespace}
+            ${new_log_data} =    Oc Get Pod Logs    name=${pod[0]['metadata']['name']}    container=installer   namespace=${namespace}
         EXCEPT
             # Hive container (OCP installer log) is not ready yet
             Log To Console    .    no_newline=true

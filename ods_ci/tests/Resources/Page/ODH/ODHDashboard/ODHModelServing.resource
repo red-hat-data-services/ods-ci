@@ -288,7 +288,7 @@ Get Model Inference
         IF  ${self_managed}
             Fetch Openshift CA Bundle
             ${cert}=   Set Variable   --cacert openshift_ca.crt
-        ELSE
+        ELSE IF  ${self_managed}
             Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
             ${cert}=    Set Variable    --cacert openshift_ca_istio_knative.crt
         END       
@@ -296,10 +296,10 @@ Get Model Inference
                ${rc}    ${url}=    Run And Return Rc And Output    oc get ksvc ${model_name}-predictor -n ${project_title} -o jsonpath='{.status.url}'
                Should Be Equal As Integers    ${rc}    0
                ${curl_cmd}=    Set Variable    curl -s ${url}${end_point} -d ${inference_input} 
-        END
-        IF    '${kserve_mode}' == 'RawDeployment'
-               ${url}=   Set Variable    http://localhost:${service_port}${end_point}
-               ${curl_cmd}=    Set Variable    curl -s ${url} -d ${inference_input} --cacert openshift_ca_istio_knative.crt
+        
+        ELSE IF    '${kserve_mode}' == 'RawDeployment'
+                    ${url}=   Set Variable    http://localhost:${service_port}${end_point}
+                    ${curl_cmd}=    Set Variable    curl -s ${url} -d ${inference_input} --cacert openshift_ca_istio_knative.crt
         END
         IF    ${token_auth}
               ${token}=    Create Inference Access Token    ${project_title}    ${DEFAULT_BUCKET_SA_NAME}

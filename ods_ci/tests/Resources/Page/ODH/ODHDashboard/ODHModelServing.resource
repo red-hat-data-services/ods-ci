@@ -264,9 +264,8 @@ Get Model Inference
     [Arguments]    ${model_name}    ${inference_input}    ${token_auth}=${FALSE}   ${project_title}=${NONE}
     ...    ${kserve_mode}=Serverless   ${deployment_mode}='UI'   ${service_port}=8888   ${end_point}=${NONE}
     ${curl_cmd}=     Set Variable    ${NONE}
-
+    ${self_managed}=    Is RHODS Self-Managed
     IF  ${deployment_mode} == 'UI'
-        ${self_managed}=    Is RHODS Self-Managed
         ${url}=    Get Model Route Via UI    ${model_name}
         ${kserve}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain    Single-model serving enabled
         ${curl_cmd}=     Set Variable    curl -s ${url} -d ${inference_input}

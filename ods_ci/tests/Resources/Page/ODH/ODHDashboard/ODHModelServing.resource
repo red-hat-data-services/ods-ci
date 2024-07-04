@@ -288,7 +288,7 @@ Get Model Inference
         IF  ${self_managed}
             Fetch Openshift CA Bundle
             ${cert}=   Set Variable   --cacert openshift_ca.crt
-        ELSE IF  ${self_managed}
+        ELSE IF  ${kserve}
             Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
             ${cert}=    Set Variable    --cacert openshift_ca_istio_knative.crt
         END       

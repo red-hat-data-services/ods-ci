@@ -37,14 +37,14 @@ items:
       - name: worker
         platform:
           openstack:
-            type: ${infrastructure_configurations}[osp_flavor]
-        replicas: 3
+            type: ${infrastructure_configurations}[worker_node_instance_type]
+        replicas: ${infrastructure_configurations}[worker_node_replicas]
       controlPlane:
         name: master
         platform:
           openstack:
-            type: ${infrastructure_configurations}[osp_flavor]
-        replicas: 3
+            type: ${infrastructure_configurations}[master_node_instance_type]
+        replicas: ${infrastructure_configurations}[master_node_replicas]
       metadata:
         name: ${infrastructure_configurations}[hive_cluster_name]-install
       networking:

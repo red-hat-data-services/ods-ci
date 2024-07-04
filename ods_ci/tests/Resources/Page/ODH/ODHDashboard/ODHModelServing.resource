@@ -300,8 +300,8 @@ Get Model Inference
                ${curl_cmd}=    Set Variable    curl -s ${url}${end_point} -d ${inference_input} 
         
         ELSE IF    '${kserve_mode}' == 'RawDeployment'
-                ${url}=   Set Variable    http://localhost:${service_port}${end_point}
-                ${curl_cmd}=    Set Variable    curl -s ${url} -d ${inference_input} --cacert openshift_ca_istio_knative.crt
+            ${url}=   Set Variable    http://localhost:${service_port}${end_point}
+            ${curl_cmd}=    Set Variable    curl -s ${url} -d ${inference_input} --cacert openshift_ca_istio_knative.crt
         END
         IF    ${token_auth}
               ${token}=    Create Inference Access Token    ${project_title}    ${DEFAULT_BUCKET_SA_NAME}

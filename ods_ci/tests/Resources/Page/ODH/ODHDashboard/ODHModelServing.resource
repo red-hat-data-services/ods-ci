@@ -285,13 +285,15 @@ Get Model Inference
         END
     END
     IF  ${deployment_mode} == 'Cli'
-        IF  ${self_managed}
-            Fetch Openshift CA Bundle
-            ${cert}=   Set Variable   --cacert openshift_ca.crt
-        ELSE IF  ${kserve}
+        ${rc}   ${cmd_op}   Run And Return Rc And Output    oc get isvc ${model_name} -o jsonpath='{.metadata.name}'
+        Should Be Equal As Integers    ${rc}    0
+         IF  "${cmd_op}" == "${model_name}"
             Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
             ${cert}=    Set Variable    --cacert openshift_ca_istio_knative.crt
-        END       
+         ELSE IF  ${self_managed}
+            Fetch Openshift CA Bundle
+            ${cert}=   Set Variable   --cacert openshift_ca.crt
+        END     
         IF    '${kserve_mode}' == 'Serverless'
                ${rc}    ${url}=    Run And Return Rc And Output    oc get ksvc ${model_name}-predictor -n ${project_title} -o jsonpath='{.status.url}'
                Should Be Equal As Integers    ${rc}    0

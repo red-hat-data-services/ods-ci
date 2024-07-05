@@ -33,6 +33,14 @@ Verify Ods Users Can Create And Run A Data Science Pipeline Using The kfp Python
     ...    method_name=flipcoin_pipeline
     ...    status_check_timeout=440
     ...    pipeline_params=${emtpy_dict}
+    End To End Pipeline Workflow Using Kfp
+    ...    username=${TEST_USER.USERNAME}
+    ...    password=${TEST_USER.PASSWORD}
+    ...    project=${PROJECT_NAME}
+    ...    python_file=iris_pipeline.py
+    ...    method_name=my_pipeline
+    ...    status_check_timeout=440
+    ...    pipeline_params=${emtpy_dict}
     [Teardown]    Remove Pipeline Project    ${PROJECT_NAME}
 
 Verify Upload Download In Data Science Pipelines Using The kfp Python Package

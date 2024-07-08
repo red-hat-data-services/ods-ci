@@ -8,6 +8,7 @@ Resource          ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 
 *** Variables ***
 ${KUBERAY_RELEASE_ASSETS}     %{KUBERAY_RELEASE_ASSETS=https://github.com/opendatahub-io/kuberay/releases/latest/download}
+${KUBERAY_TEST_RAY_IMAGE}     quay.io/rhoai/ray@sha256:859f5c41d41bad1935bce455ad3732dff9d4d4c342b7155a7cd23809e85698ab
 
 *** Test Cases ***
 Run TestRayJob test
@@ -87,7 +88,7 @@ Run Kuberay E2E Test
     ...    env:KUBERAY_TEST_TIMEOUT_SHORT=2m
     ...    env:KUBERAY_TEST_TIMEOUT_MEDIUM=7m
     ...    env:KUBERAY_TEST_TIMEOUT_LONG=10m
-    ...    env:KUBERAY_TEST_RAY_IMAGE=quay.io/project-codeflare/ray:latest-py39-cu118@sha256:72b9972b4c9fd39bfd8a1450d8227890fbda75425859a710f3514f17412ae20f
+    ...    env:KUBERAY_TEST_RAY_IMAGE=${KUBERAY_TEST_RAY_IMAGE}
     ...    env:KUBERAY_TEST_OUTPUT_DIR=%{WORKSPACE}/kuberay-logs
     ...    shell=true
     ...    stderr=STDOUT

@@ -5,6 +5,7 @@ Suite Teardown    Teardown Codeflare E2E Test Suite
 Library           OperatingSystem
 Library           Process
 Resource          ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
+Resource          ../../../tests/Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 
 
 *** Variables ***
@@ -37,6 +38,9 @@ Run TestKueueRayGpu ODH test
 
 *** Keywords ***
 Prepare Codeflare E2E Test Suite
+    Log To Console    "Restarting kueue"
+    Restart Kueue
+
     Log To Console    "Downloading compiled test binary odh"
     ${result} =    Run Process    curl --location --silent --output odh ${CODEFLARE_RELEASE_ASSETS}/odh && chmod +x odh
     ...    shell=true

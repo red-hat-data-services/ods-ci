@@ -2,6 +2,7 @@
 Documentation       Suite to test Workload metrics feature
 Library             SeleniumLibrary
 Library             OpenShiftLibrary
+Resource            ../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 Resource            ../../Resources/Page/DistributedWorkloads/WorkloadMetricsUI.resource
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Suite Setup         Project Suite Setup
@@ -136,6 +137,10 @@ Verify The Workload Metrics By Submitting Ray Workload
     [Documentation]    Monitor the workload metrics status and chart details by submitting Ray workload
     [Tags]    RHOAIENG-5216
     ...       Tier1    DistributedWorkloads
+    # Once fixed https://issues.redhat.com/browse/RHOAIENG-7887 , remove kueue restart workaround
+    Log To Console    "Restarting kueue"
+    Restart Kueue
+
     Create Ray Cluster Workload   ${PRJ_TITLE}    ${LOCAL_QUEUE_NAME}    ${RAY_CLUSTER_NAME}
     Open Distributed Workload Metrics Home Page
     Select Distributed Workload Project By Name    ${PRJ_TITLE}

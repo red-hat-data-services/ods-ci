@@ -107,3 +107,22 @@ Codeflare Upgrade Tests Teardown
     ...    Run Process    oc delete LocalQueue local-queue-mnist -n ${project_name} &
     ...    oc delete ClusterQueue cluster-queue-mnist &
     ...    oc delete ResourceFlavor default-flavor-mnist    shell=True
+
+Restart Kueue
+    Log To Console    "Rollout restart kueue-controller-manager"
+    ${result} =    Run Process    oc rollout restart deployment/kueue-controller-manager -n ${APPLICATIONS_NAMESPACE}
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Failed to restart Kueue
+    END
+
+    Log To Console    "Wait for kueue-controller-manager rollout to finish"
+    ${result} =    Run Process    oc rollout status deployment/kueue-controller-manager -w -n ${APPLICATIONS_NAMESPACE}
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Failed to finish Kueue rollout
+    END

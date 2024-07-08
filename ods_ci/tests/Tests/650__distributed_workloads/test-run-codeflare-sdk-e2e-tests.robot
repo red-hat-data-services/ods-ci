@@ -6,6 +6,7 @@ Library           OperatingSystem
 Library           Process
 Resource          ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 Resource          ../../Resources/RHOSi.resource
+Resource          ../../../tests/Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 
 
 *** Variables ***
@@ -35,6 +36,9 @@ Run TestRayLocalInteractiveOauth test
 *** Keywords ***
 Prepare Codeflare-sdk E2E Test Suite
     [Documentation]    Prepare codeflare-sdk E2E Test Suite
+    Log To Console    "Restarting kueue"
+    Restart Kueue
+
     ${latest_tag} =    Run Process   curl -s "${CODEFLARE-SDK-API_URL}" | grep '"tag_name":' | cut -d '"' -f 4
     ...    shell=True    stderr=STDOUT
     Log To Console  codeflare-sdk latest tag is : ${latest_tag.stdout}

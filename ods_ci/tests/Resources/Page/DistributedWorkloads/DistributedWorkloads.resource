@@ -5,10 +5,6 @@ Library          Process
 
 
 *** Variables ***
-${CODEFLARE_TEST_TIMEOUT_LONG}    20m
-${GO_TEST_TIMEOUT}    1h
-${JOB_GO_BIN}    %{WORKSPACE=.}/go-bin
-${GO_JUNIT_REPORT_TOOL}    github.com/jstemmer/go-junit-report/v2@latest
 ${VIRTUAL_ENV_NAME}    venv3.9
 ${CODEFLARE-SDK-API_URL}            %{CODEFLARE-SDK-API_URL=https://api.github.com/repos/project-codeflare/codeflare-sdk/releases/latest}
 ${CODEFLARE-SDK_DIR}    codeflare-sdk-upgrade
@@ -24,38 +20,6 @@ Clone Git Repository
     Log To Console    ${result.stdout}
     IF    ${result.rc} != 0
         FAIL    Unable to clone DW repo ${DW_REPO_URL}:${DW_REPO_BRANCH}:${DW_DIR}
-    END
-
-Run Distributed Workloads Tests
-    [Documentation]   Run distributed workloads E2E tests from integration directory
-    [Arguments]    ${DW_DIR}    ${DW_TEST_RESULT_FILE}    ${TEST_PARAMETERS}
-    ${result} =    Run Process
-    ...    go test -v -timeout ${GO_TEST_TIMEOUT} ./integration ${TEST_PARAMETERS} 2>&1 > ${DW_TEST_RESULT_FILE}
-    ...    shell=true    cwd=${DW_DIR}/tests    env:ODH_NAMESPACE=redhat-ods-applications
-    ...    env:CODEFLARE_TEST_TIMEOUT_LONG=${CODEFLARE_TEST_TIMEOUT_LONG}
-    ...    env:CODEFLARE_TEST_RAY_IMAGE=quay.io/project-codeflare/ray:2.5.0-py38-cu116
-    Log To Console    ${result.stdout}
-    ${test_output}=    Get File    ${DW_TEST_RESULT_FILE}
-    Log To Console    ${test_output}
-    RETURN    ${result.rc}
-
-Install Go Junit Report Tool
-    [Documentation]   Use Go install command to install Go Junit report tool
-    ${result} =    Run Process    go install ${GO_JUNIT_REPORT_TOOL}
-    ...    shell=true    env:GOBIN=${JOB_GO_BIN}    stderr=STDOUT
-    Log To Console    ${result.stdout}
-    IF    ${result.rc} != 0
-        FAIL    Failed to install Go junit report tool
-    END
-
-Convert Go Test Results To Junit
-    [Documentation]   Use Go Junit report tool to convert Go test results to Junit
-    [Arguments]    ${DW_TEST_RESULT_FILE}    ${DW_JUNIT_FILE}
-    ${result} =    Run Process    ${JOB_GO_BIN}/go-junit-report -in ${DW_TEST_RESULT_FILE} -iocopy -out ${DW_JUNIT_FILE}
-    ...    shell=true    stderr=STDOUT
-    Log To Console    ${result.stdout}
-    IF    ${result.rc} != 0
-        FAIL    Failed to convert Go test results to Junit
     END
 
 Run Codeflare Upgrade Tests

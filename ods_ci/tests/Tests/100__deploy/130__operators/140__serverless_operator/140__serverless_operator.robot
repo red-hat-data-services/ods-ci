@@ -36,6 +36,22 @@ Validate DSC creates all Serverless CRs
     #Verify Pod Logs Do Not Contain    ${podname}    ${OPERATOR_NAMESPACE}    ${regex_pattern}    rhods-operator
     Wait For DSC Conditions Reconciled    ${KNATIVESERVING_NS}    default-dsc
 
+Validate DSC Recreates The KnativeServing Resource When Deleted If Kserve is Managed
+    [Documentation]  The purpose of this test case is to validate the recreation of
+    ...    the Serverless KnativeServing resource if is previously deleted if kserve cmp is managed
+    [Tags]   Operator     Tier2     RHOAIENG-2510      ODS-2594
+    ${return_code}    ${output}    Run And Return Rc And Output
+    ...    oc delete KnativeServing knative-serving -n ${KNATIVESERVING_NS} --ignore-not-found
+    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting knative-serving, ${output}
+    Wait Until Keyword Succeeds    2 min    0 sec
+    ...        Check Number Of Resource Instances Equals To      KnativeServing     knative-serving      0
+    Wait Until Keyword Succeeds    20 min    0 sec
+    ...        Resource Should Exist     KnativeServing    knative-serving     ${KNATIVESERVING_NS}
+    Wait Until Keyword Succeeds    20 min    0 sec
+    ...        Resource Status Should Be     oc get KnativeServing knative-serving -n ${KNATIVESERVING_NS} -o json | jq '.status.conditions[] | select(.type=="Ready") | .status'     KnativeServing    "True"    # robocop: disable
+    Wait For Pods Numbers  2    namespace=${KNATIVESERVING_NS}
+    ...    label_selector=app.kubernetes.io/component=controller    timeout=120
+    Wait For DSC Conditions Reconciled    ${KNATIVESERVING_NS}    default-dsc
 
 *** Keywords ***
 Suite Setup

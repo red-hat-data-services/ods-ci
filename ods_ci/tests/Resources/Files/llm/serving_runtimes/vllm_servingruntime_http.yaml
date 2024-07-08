@@ -15,7 +15,7 @@ spec:
         - "8080"
         - --distributed-executor-backend
         - mp
-      image: quay.io/modh/vllm@sha256:a43f7f6e339cce63442020217fdf9201f296e498251a6bf0b5c0d2294ba8c8b5
+      image: quay.io/modh/vllm@sha256:e14cae9114044dc9fe71e99c3db692a892b2caffe04283067129ab1093a7bde5
       name: kserve-container
       command:
         - python3

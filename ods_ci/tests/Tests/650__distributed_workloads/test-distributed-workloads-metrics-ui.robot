@@ -4,6 +4,7 @@ Library             SeleniumLibrary
 Library             OpenShiftLibrary
 Resource            ../../Resources/Page/DistributedWorkloads/WorkloadMetricsUI.resource
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
+Resource          ../../../tests/Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 Suite Setup         Project Suite Setup
 Suite Teardown      Project Suite Teardown
 Test Tags           DistributedWorkloadMetrics
@@ -205,6 +206,9 @@ Verify Requested resources When Multiple Local Queue Exists
 *** Keywords ***
 Project Suite Setup
     [Documentation]    Suite setup steps for testing Distributed workload Metrics UI
+    Log To Console    "Restarting kueue"
+    Restart Kueue
+    
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}

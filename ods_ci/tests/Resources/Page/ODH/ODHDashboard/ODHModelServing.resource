@@ -288,7 +288,7 @@ Get Model Inference
         ${rc}   ${cmd_op}   Run And Return Rc And Output    
         ...    oc get isvc ${model_name} -o jsonpath='{.metadata.annotations.serving\.kserve\.io/deploymentMode}' -n ${project_title}
         Should Be Equal As Integers    ${rc}    0
-         IF  "${cmd_op}" == "ModelMesh"
+         IF  "${cmd_op}" != "ModelMesh"
             Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
             ${cert}=    Set Variable    --cacert openshift_ca_istio_knative.crt
          ELSE IF  ${self_managed}

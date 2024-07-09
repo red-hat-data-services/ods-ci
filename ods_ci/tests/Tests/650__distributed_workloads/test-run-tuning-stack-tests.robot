@@ -5,6 +5,7 @@ Suite Teardown    Teardown Training Operator E2E Test Suite
 Library           OperatingSystem
 Library           Process
 Resource          ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
+Resource          ../../../tests/Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 
 
 *** Variables ***
@@ -44,6 +45,8 @@ Prepare Training Operator E2E Test Suite
     Create Directory    %{WORKSPACE}/codeflare-kfto-logs
     Enable Component    trainingoperator
     Wait Component Ready    trainingoperator
+    Log To Console    "Restarting kueue"
+    Restart Kueue
     RHOSi Setup
 
 Teardown Training Operator E2E Test Suite

@@ -7,15 +7,11 @@ spec:
     modelLoadingTimeoutMillis: 90000
   containers:
     - args:
-        - --model
-        - /mnt/models/
-        - --download-dir
-        - /models-cache
-        - --port
-        - "8080"
-        - --distributed-executor-backend
-        - mp
-      image: quay.io/modh/vllm@sha256:23425b36194ec2a704c094a222735498b95c8eafbfe76e511b20c0112da6c542
+        - '--port=8080'
+        - '--model=/mnt/models'
+        - '--served-model-name={{.Name}}'
+        - '--distributed-executor-backend=mp'
+      image: quay.io/modh/vllm@sha256:e14cae9114044dc9fe71e99c3db692a892b2caffe04283067129ab1093a7bde5
       name: kserve-container
       command:
         - python3

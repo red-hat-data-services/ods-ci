@@ -11,7 +11,7 @@ Library             ../../libs/DataSciencePipelinesAPI.py
 
 
 *** Variables ***
-${REDHAT_OPENSHIFT_PIPELINES_YAML}      ods_ci/tests/Resources/Files/redhat-openshift-pipelines.yaml
+${REDHAT_OPENSHIFT_PIPELINES_YAML}      tests/Resources/Files/redhat-openshift-pipelines.yaml
 
 
 *** Keywords ***

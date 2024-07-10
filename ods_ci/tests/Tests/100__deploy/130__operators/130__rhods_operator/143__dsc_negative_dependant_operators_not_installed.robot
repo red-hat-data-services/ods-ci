@@ -175,7 +175,7 @@ Remove DSC And DSCI Resources
     [Documentation]   Removed DSC and DSCI CRs resources from the cluster
     Log To Console    message=Deleting DataScienceCluster CR From Cluster
     ${return_code}    ${output}=    Run And Return Rc And Output
-    ...    oc delete DataScienceCluster --all --ignore-not-found
+    ...    oc delete DataScienceCluster --all --ignore-not-found --force --grace-period=0
     Should Be Equal As Integers  ${return_code}   0   msg=Error deleting DataScienceCluster CR
 
     Wait Until Keyword Succeeds    3 min    0 sec
@@ -184,7 +184,7 @@ Remove DSC And DSCI Resources
 
     Log To Console    message=Deleting DSCInitialization CR From Cluster
     ${return_code}    ${output}=    Run And Return Rc And Output
-    ...    oc delete DSCInitialization --all --ignore-not-found
+    ...    oc delete DSCInitialization --all --ignore-not-found --force --grace-period=0
     Should Be Equal As Integers  ${return_code}   0   msg=Error deleting DSCInitialization CR
 
     Wait Until Keyword Succeeds    3 min    0 sec

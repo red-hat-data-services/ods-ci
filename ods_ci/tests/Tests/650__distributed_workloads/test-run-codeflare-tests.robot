@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation     Codeflare operator E2E tests - https://github.com/project-codeflare/integration-tests/tree/main/test/odh
+Documentation     Codeflare operator E2E tests - https://github.com/opendatahub-io/distributed-workloads/tree/main/tests/odh
 Suite Setup       Prepare Codeflare E2E Test Suite
 Suite Teardown    Teardown Codeflare E2E Test Suite
 Library           OperatingSystem
@@ -9,7 +9,6 @@ Resource          ../../../tests/Resources/Page/DistributedWorkloads/Distributed
 
 
 *** Variables ***
-${CODEFLARE_DIR}                codeflare-operator
 ${CODEFLARE_RELEASE_ASSETS}     %{CODEFLARE_RELEASE_ASSETS=https://github.com/opendatahub-io/distributed-workloads/releases/latest/download}
 ${NOTEBOOK_IMAGE_STREAM_NAME}   %{NOTEBOOK_IMAGE_STREAM_NAME=s2i-generic-data-science-notebook}
 ${NOTEBOOK_ADMIN_NAME}          ${TEST_USER_2.USERNAME}

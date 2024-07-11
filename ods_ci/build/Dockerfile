@@ -56,9 +56,10 @@ COPY ods_ci/utils/scripts/ocm/templates/create_ldap_idp.jinja utils/scripts/ocm/
 RUN  chmod +x build/run.sh &&\
      chmod +x build/clean_idp.sh
 
-COPY ../pyproject.toml ../
-COPY ../poetry.lock ../
-COPY ../README.md ../
+COPY pyproject.toml ../
+COPY poetry.lock ../
+COPY README.md ../
+
 RUN alternatives --install /usr/local/bin/python3 python3 /usr/bin/python${PYTHON_VERSION} 1
 RUN python3 --version
 RUN curl -sSL https://install.python-poetry.org | python3 -

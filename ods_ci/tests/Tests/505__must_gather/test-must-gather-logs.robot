@@ -12,6 +12,7 @@ Verify that the must-gather image provides RHODS logs and info
     [Tags]   Smoke
     ...      Tier1
     ...      ODS-505
+    ...      Operator
     ...      Upgrade
     Get must-gather Logs
     Verify logs for ${APPLICATIONS_NAMESPACE}

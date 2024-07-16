@@ -182,6 +182,14 @@ Verify Ray Cluster Exists And Monitor Workload Metrics By Submitting Ray Job Aft
     [Teardown]    Run Keywords    Cleanup Codeflare Setup    AND
     ...    Codeflare Upgrade Tests Teardown    ${PRJ_UPGRADE}    ${DW_PROJECT_CREATED}
 
+Run Training Operator ODH Run PyTorchJob Test Use Case
+    [Documentation]    Run Training Operator ODH Run PyTorchJob Test Use Case
+    [Tags]             Upgrade
+    [Setup]            Prepare Training Operator E2E Upgrade Test Suite
+    Run Training Operator ODH Upgrade Test    TestRunPytorchjob
+    [Teardown]         Teardown Training Operator E2E Upgrade Test Suite
+
+
 *** Keywords ***
 Dashboard Suite Setup
     [Documentation]  Basic suite setup

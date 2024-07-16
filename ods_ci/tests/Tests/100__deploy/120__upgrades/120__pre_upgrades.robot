@@ -157,6 +157,13 @@ Verify Distributed Workload Metrics Resources By Creating Ray Cluster Workload
     [Teardown]    Run Keywords    Cleanup Codeflare Setup    AND
     ...    Run Keyword If Test Failed    Codeflare Upgrade Tests Teardown    ${PRJ_UPGRADE}    ${DW_PROJECT_CREATED}
 
+Run Training Operator ODH Setup PyTorchJob Test Use Case
+    [Documentation]    Run Training Operator ODH Setup PyTorchJob Test Use Case
+    [Tags]             Upgrade
+    [Setup]            Prepare Training Operator E2E Upgrade Test Suite
+    Run Training Operator ODH Upgrade Test    TestSetupPytorchjob
+    [Teardown]         Teardown Training Operator E2E Upgrade Test Suite
+
 
 *** Keywords ***
 Dashboard Suite Setup

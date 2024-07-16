@@ -174,8 +174,10 @@ def get_dashboard_url():
     """
     Get dashboard url for the open data science.
     """
-    cmd = "oc get route -A -o json  | jq '.items[].spec.host' | grep 'dashboard'"
-
+    cmd = (
+        "(oc get route -n opendatahub -o json  | jq '.items[].spec.host' | grep odh-dashboard) || "
+        "(oc get route -n redhat-ods-applications -o json  | jq '.items[].spec.host' | grep rhods-dashboard)"
+    )
     dashboard_url = execute_command(cmd)
     return "https://" + dashboard_url.strip('"').strip("\n")
 

@@ -189,6 +189,13 @@ Run Training Operator ODH Run PyTorchJob Test Use Case
     Run Training Operator ODH Upgrade Test    TestRunPytorchjob
     [Teardown]         Teardown Training Operator E2E Upgrade Test Suite
 
+Run Training Operator ODH Run Sleep PyTorchJob Test Use Case
+    [Documentation]    Verify that running PyTorchJob Pod wasn't restarted
+    [Tags]             Upgrade
+    [Setup]            Prepare Training Operator E2E Upgrade Test Suite
+    Run Training Operator ODH Upgrade Test    TestVerifySleepPytorchjob
+    [Teardown]         Teardown Training Operator E2E Upgrade Test Suite
+
 
 *** Keywords ***
 Dashboard Suite Setup

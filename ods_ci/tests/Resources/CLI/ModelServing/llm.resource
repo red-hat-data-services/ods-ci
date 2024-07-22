@@ -24,6 +24,7 @@ ${SERVICEMESH_CR_NS}=    istio-system
 &{RUNTIME_FLIEPATHS}=    caikit-tgis-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/caikit_tgis_servingruntime_{{protocol}}.yaml
 ...                      tgis-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/tgis_servingruntime_{{protocol}}.yaml
 ...                      vllm-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/vllm_servingruntime_{{protocol}}.yaml
+...                      ovms-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/ovms_servingruntime_{{protocol}}.yaml
 ${DOWNLOAD_PVC_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_model_in_pvc.yaml
 ${DOWNLOAD_PVC_FILLED_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_model_in_pvc_filled.yaml
 
@@ -745,7 +746,7 @@ Create PVC And Download Model From S3
     Create File From Template    ${DOWNLOAD_PVC_FILEPATH}    ${DOWNLOAD_PVC_FILLED_FILEPATH}
     ${rc}    ${out}=    Run And Return Rc And Output    oc -n ${namespace} apply -f ${DOWNLOAD_PVC_FILLED_FILEPATH}
     Should Be Equal As Integers    ${rc}    ${0}
-    Wait For Pods To Be Ready    label_selector=name=download-${model_name}    namespace=${namespace}
+    Run Keyword And Continue On Failure   Wait For Pods To Be Ready    label_selector=name=download-${model_name}    namespace=${namespace}
     Wait For Pods To Succeed    label_selector=name=download-${model_name}    namespace=${namespace}
     ...    timeout=${download_timeout}
     ${rc}    ${out}=    Run And Return Rc And Output    oc delete pods -l name=download-${model_name} -n ${namespace}
@@ -753,13 +754,17 @@ Create PVC And Download Model From S3
 
 Extract Service Port
     [Arguments]    ${service_name}    ${namespace}    ${protocol}
-    IF    "${protocol}" == "grpc"
+    ${protocol_name}     Set Variable    name
+    IF    '${protocol}' == 'grpc'
         ${port_name}=    Set Variable    h2c
+    ELSE IF    '${protocol}' == 'TCP'
+            ${protocol_name}=    Set Variable    protocol
+            ${port_name}=    Set Variable    TCP
     ELSE
         ${port_name}=    Set Variable    ${protocol}
     END
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc get svc/${service_name} -n ${namespace} -o jsonpath='{range .spec.ports[?(@.name=="${port_name}")]}{@.targetPort}{end}'
+    ...    oc get svc/${service_name} -n ${namespace} -o jsonpath='{range .spec.ports[?(@.${protocol_name}=="${port_name}")]}{@.targetPort}{end}'
     Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
     RETURN    ${out}
 

@@ -1,14 +1,14 @@
 *** Settings ***
-Documentation     Codeflare operator E2E tests - https://github.com/project-codeflare/integration-tests/tree/main/test/odh
+Documentation     Codeflare operator E2E tests - https://github.com/opendatahub-io/distributed-workloads/tree/main/tests/odh
 Suite Setup       Prepare Codeflare E2E Test Suite
 Suite Teardown    Teardown Codeflare E2E Test Suite
 Library           OperatingSystem
 Library           Process
 Resource          ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
+Resource          ../../../tests/Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 
 
 *** Variables ***
-${CODEFLARE_DIR}                codeflare-operator
 ${CODEFLARE_RELEASE_ASSETS}     %{CODEFLARE_RELEASE_ASSETS=https://github.com/opendatahub-io/distributed-workloads/releases/latest/download}
 ${NOTEBOOK_IMAGE_STREAM_NAME}   %{NOTEBOOK_IMAGE_STREAM_NAME=s2i-generic-data-science-notebook}
 ${NOTEBOOK_ADMIN_NAME}          ${TEST_USER_2.USERNAME}
@@ -37,6 +37,9 @@ Run TestKueueRayGpu ODH test
 
 *** Keywords ***
 Prepare Codeflare E2E Test Suite
+    Log To Console    "Restarting kueue"
+    Restart Kueue
+
     Log To Console    "Downloading compiled test binary odh"
     ${result} =    Run Process    curl --location --silent --output odh ${CODEFLARE_RELEASE_ASSETS}/odh && chmod +x odh
     ...    shell=true

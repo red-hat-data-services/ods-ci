@@ -129,6 +129,8 @@ Verify Distributed Workload Metrics Resources By Creating Ray Cluster Workload
     ${PRJ_UPGRADE}    Set Variable    test-ns-rayupgrade
     ${JOB_NAME}    Set Variable    mnist
     Run Codeflare Upgrade Tests    TestMNISTRayClusterUp
+    Set Library Search Order    SeleniumLibrary
+    RHOSi Setup
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
     Open Distributed Workload Metrics Home Page
@@ -139,7 +141,7 @@ Verify Distributed Workload Metrics Resources By Creating Ray Cluster Workload
     Wait Until Element Is Visible    xpath=//*[text()="Running"]    timeout=30
 
     ${cpu_requested} =   Get CPU Requested    ${PRJ_UPGRADE}    local-queue-mnist
-    ${memory_requested} =   Get Memory Requested    ${PRJ_UPGRADE}    local-queue-mnist    Upgrade
+    ${memory_requested} =   Get Memory Requested    ${PRJ_UPGRADE}    local-queue-mnist    RayCluster
     Check Requested Resources Chart    ${PRJ_UPGRADE}    ${cpu_requested}    ${memory_requested}
     Check Requested Resources    ${PRJ_UPGRADE}    ${CPU_SHARED_QUOTA}
     ...    ${MEMEORY_SHARED_QUOTA}    ${cpu_requested}    ${memory_requested}    RayCluster
@@ -152,8 +154,22 @@ Verify Distributed Workload Metrics Resources By Creating Ray Cluster Workload
     Check Distributed Workload Resource Metrics Chart    ${PRJ_UPGRADE}    ${cpu_requested}
     ...    ${memory_requested}    RayCluster    ${JOB_NAME}
 
-    [Teardown]    Run Keyword If Test Failed
-    ...    Codeflare Upgrade Tests Teardown    ${PRJ_UPGRADE}    ${DW_PROJECT_CREATED}
+    [Teardown]    Run Keywords    Cleanup Codeflare Setup    AND
+    ...    Run Keyword If Test Failed    Codeflare Upgrade Tests Teardown    ${PRJ_UPGRADE}    ${DW_PROJECT_CREATED}
+
+Run Training Operator ODH Setup PyTorchJob Test Use Case
+    [Documentation]    Run Training Operator ODH Setup PyTorchJob Test Use Case
+    [Tags]             Upgrade
+    [Setup]            Prepare Training Operator E2E Upgrade Test Suite
+    Run Training Operator ODH Upgrade Test    TestSetupPytorchjob
+    [Teardown]         Teardown Training Operator E2E Upgrade Test Suite
+
+Run Training Operator ODH Setup Sleep PyTorchJob Test Use Case
+    [Documentation]    Setup PyTorchJob which is kept running for 24 hours
+    [Tags]             Upgrade
+    [Setup]            Prepare Training Operator E2E Upgrade Test Suite
+    Run Training Operator ODH Upgrade Test    TestSetupSleepPytorchjob
+    [Teardown]         Teardown Training Operator E2E Upgrade Test Suite
 
 
 *** Keywords ***

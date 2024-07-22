@@ -20,3 +20,9 @@ robocop.log
 infrastructure_configuration.yaml
 log/
 text-generation-inference/
+chrome-mac-arm64/
+log.html
+output.xml
+report.html
+# Ignore runtime files created by the run_robot_test.sh script
+ods_ci/certs/

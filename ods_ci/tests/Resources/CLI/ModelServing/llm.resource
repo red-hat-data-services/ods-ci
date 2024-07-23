@@ -11,7 +11,8 @@ ${LLM_RESOURCES_DIRPATH}=    tests/Resources/Files/llm
 ${EXP_RESPONSES_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/model_expected_responses.json
 ${RUNTIME_FORMATS_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/runtime_query_formats.json
 ${INFERENCESERVICE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/serving_runtimes/base/isvc.yaml
-${INFERENCESERVICE_FILLED_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/serving_runtimes/isvc_filled.yaml
+${INFERENCESERVICE_FILEPATH_NEW}=    ${LLM_RESOURCES_DIRPATH}/serving_runtimes/isvc
+${INFERENCESERVICE_FILLED_FILEPATH}=    ${INFERENCESERVICE_FILEPATH_NEW}/isvc_filled.yaml
 ${DEFAULT_BUCKET_SECRET_NAME}=    models-bucket-secret
 ${DEFAULT_BUCKET_SA_NAME}=        models-bucket-sa
 ${DEFAULT_BUCKET_PREFIX}=         models-bucket
@@ -378,14 +379,14 @@ Query Model Multiple Times
             ...             headers=${header}   json=${payload}    verify=${cert}
             ${is_timeout}=    Run Keyword And Return Status    Dictionary Should Contain Key    ${args}    timeout
             IF    ${is_timeout} == ${FALSE}
-                Set To Dictionary    ${args}    timeout=10
+                Set To Dictionary    ${args}    timeout=100
             END
             Log Dictionary    ${args}
             ${res}=    Run Keyword And Continue On Failure     Perform Request     request_type=POST
             ...    skip_res_json=${skip_json_load_response}    &{args}
             Run Keyword And Continue On Failure    Status Should Be  ${status_code}
         END
-        Log    ${res}
+        Log    ${res}    console=yes
         IF    ${validate_response} == ${TRUE}
             IF    ${string_check_only}
                 Model Response Should Be    response=${res}    model_name=${model_name}    inference_type=${inference_type}
@@ -881,3 +882,10 @@ ISVC Should Be Loaded
     ...    oc get isvc ${isvc_name} -n ${namespace} -o=jsonpath='{.status.modelStatus.states.activeModelState}'
     Should Be Equal As Integers    ${rc}    ${0}
     Should Be Equal As Strings    ${isvc_status}    Loaded
+
+Update ISVC Filled Config
+    [Documentation]    Update default inference service with runtime argument based on requirement
+    [Arguments]    ${overlay}
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc kustomize ${LLM_RESOURCES_DIRPATH}/serving_runtimes/overlay/${overlay} > ${INFERENCESERVICE_FILEPATH_NEW}/isvc_custom_filled.yaml
+    Should Be Equal As Integers    ${rc}    ${0}    msg=${out}

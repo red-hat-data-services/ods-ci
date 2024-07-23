@@ -1686,7 +1686,7 @@ if __name__ == "__main__":
         dest="cluster_name",
         metavar="",
         default="",
-        required=True
+        required=True,
     )
     cluster_exists_parser.set_defaults(func=ocm_obj.fail_if_cluster_does_not_exist)
 

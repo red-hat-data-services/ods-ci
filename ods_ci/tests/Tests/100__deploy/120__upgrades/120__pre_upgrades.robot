@@ -125,10 +125,11 @@ Verify User Can Deploy Custom Runtime For Upgrade
 
 Verify Distributed Workload Metrics Resources By Creating Ray Cluster Workload
     [Documentation]    Creates the Ray Cluster and verify resource usage
-    [Tags]  Upgrade
+    [Tags]    Upgrade
+    [Setup]    Prepare Codeflare-SDK Test Setup
     ${PRJ_UPGRADE}    Set Variable    test-ns-rayupgrade
     ${JOB_NAME}    Set Variable    mnist
-    Run Codeflare Upgrade Tests    TestMNISTRayClusterUp
+    Run Codeflare-SDK Test    upgrade    raycluster_sdk_upgrade_test.py::TestMNISTRayClusterUp
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
@@ -154,7 +155,7 @@ Verify Distributed Workload Metrics Resources By Creating Ray Cluster Workload
     Check Distributed Workload Resource Metrics Chart    ${PRJ_UPGRADE}    ${cpu_requested}
     ...    ${memory_requested}    RayCluster    ${JOB_NAME}
 
-    [Teardown]    Run Keywords    Cleanup Codeflare Setup    AND
+    [Teardown]    Run Keywords    Cleanup Codeflare-SDK Setup    AND
     ...    Run Keyword If Test Failed    Codeflare Upgrade Tests Teardown    ${PRJ_UPGRADE}    ${DW_PROJECT_CREATED}
 
 Run Training Operator ODH Setup PyTorchJob Test Use Case

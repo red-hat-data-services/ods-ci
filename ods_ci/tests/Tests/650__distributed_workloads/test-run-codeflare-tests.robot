@@ -9,12 +9,19 @@ Resource          ../../../tests/Resources/Page/DistributedWorkloads/Distributed
 
 
 *** Variables ***
-${CODEFLARE_RELEASE_ASSETS}     %{CODEFLARE_RELEASE_ASSETS=https://github.com/opendatahub-io/distributed-workloads/releases/latest/download}
-${NOTEBOOK_IMAGE_STREAM_NAME}   %{NOTEBOOK_IMAGE_STREAM_NAME=s2i-generic-data-science-notebook}
-${NOTEBOOK_ADMIN_NAME}          ${TEST_USER_2.USERNAME}
-${NOTEBOOK_ADMIN_PASSWORD}      ${TEST_USER_2.PASSWORD}
-${NOTEBOOK_USER_NAME}           ${TEST_USER_3.USERNAME}
-${NOTEBOOK_USER_PASSWORD}       ${TEST_USER_3.PASSWORD}
+${CODEFLARE_RELEASE_ASSETS}         %{CODEFLARE_RELEASE_ASSETS=https://github.com/opendatahub-io/distributed-workloads/releases/latest/download}
+${NOTEBOOK_IMAGE_STREAM_NAME}       %{NOTEBOOK_IMAGE_STREAM_NAME=s2i-generic-data-science-notebook}
+${NOTEBOOK_USER_NAME}               ${TEST_USER_3.USERNAME}
+${NOTEBOOK_USER_PASSWORD}           ${TEST_USER_3.PASSWORD}
+${NOTEBOOK_IMAGE}                   quay.io/modh/odh-generic-data-science-notebook@sha256:465e81c69c891565b979668b84adcf0c645b1ed99e1bf107474ef6bb56090027
+${CODEFLARE_TEST_RAY_IMAGE}         quay.io/rhoai/ray@sha256:859f5c41d41bad1935bce455ad3732dff9d4d4c342b7155a7cd23809e85698ab
+${AWS_DEFAULT_ENDPOINT}             ${S3.AWS_DEFAULT_ENDPOINT}
+${AWS_ACCESS_KEY_ID}                ${S3.AWS_ACCESS_KEY_ID}
+${AWS_SECRET_ACCESS_KEY}            ${S3.AWS_SECRET_ACCESS_KEY}
+${AWS_STORAGE_BUCKET}               ${S3.BUCKET_6.NAME}
+${AWS_STORAGE_BUCKET_MNIST_DIR}     mnist-datasets
+${PIP_INDEX_URL}                    ${PIP_INDEX_URL}
+${PIP_TRUSTED_HOST}                 ${PIP_TRUSTED_HOST}
 
 
 *** Test Cases ***
@@ -50,8 +57,6 @@ Prepare Codeflare E2E Test Suite
     END
     Create Directory    %{WORKSPACE}/codeflare-odh-logs
     Log To Console    "Retrieving user tokens"
-    ${user_admin_token} =    Generate User Token    ${NOTEBOOK_ADMIN_NAME}    ${NOTEBOOK_ADMIN_PASSWORD}
-    Set Suite Variable    ${NOTEBOOK_ADMIN_TOKEN}    ${user_admin_token}
     ${common_user_token} =    Generate User Token    ${NOTEBOOK_USER_NAME}    ${NOTEBOOK_USER_PASSWORD}
     Set Suite Variable    ${NOTEBOOK_USER_TOKEN}   ${common_user_token}
     Log To Console    "Log back as cluster admin"
@@ -89,12 +94,18 @@ Run Codeflare ODH Test
     ...    env:CODEFLARE_TEST_TIMEOUT_MEDIUM=10m
     ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
     ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-odh-logs
+    ...    env:CODEFLARE_TEST_RAY_IMAGE=${CODEFLARE_TEST_RAY_IMAGE}
     ...    env:ODH_NAMESPACE=${APPLICATIONS_NAMESPACE}
-    ...    env:NOTEBOOK_IMAGE_STREAM_NAME=${NOTEBOOK_IMAGE_STREAM_NAME}
-    ...    env:NOTEBOOK_ADMIN_NAME=${NOTEBOOK_ADMIN_NAME}
-    ...    env:NOTEBOOK_ADMIN_TOKEN=${NOTEBOOK_ADMIN_TOKEN}
     ...    env:NOTEBOOK_USER_NAME=${NOTEBOOK_USER_NAME}
     ...    env:NOTEBOOK_USER_TOKEN=${NOTEBOOK_USER_TOKEN}
+    ...    env:NOTEBOOK_IMAGE=${NOTEBOOK_IMAGE}
+    ...    env:AWS_DEFAULT_ENDPOINT=${AWS_DEFAULT_ENDPOINT}
+    ...    env:AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+    ...    env:AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    ...    env:AWS_STORAGE_BUCKET=${AWS_STORAGE_BUCKET}
+    ...    env:AWS_STORAGE_BUCKET_MNIST_DIR=${AWS_STORAGE_BUCKET_MNIST_DIR}
+    ...    env:PIP_INDEX_URL=${PIP_INDEX_URL}
+    ...    env:PIP_TRUSTED_HOST=${PIP_TRUSTED_HOST}
     Log To Console    ${result.stdout}
     IF    ${result.rc} != 0
         FAIL    ${TEST_NAME} failed

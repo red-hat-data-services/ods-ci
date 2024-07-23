@@ -14,6 +14,14 @@ ${CODEFLARE-SDK_DIR}                codeflare-sdk
 ${CODEFLARE-SDK_REPO_URL}           %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
 ${CODEFLARE-SDK-API_URL}            %{CODEFLARE-SDK-API_URL=https://api.github.com/repos/project-codeflare/codeflare-sdk/releases/latest}
 ${VIRTUAL_ENV_NAME}                 venv3.9
+${RAY_IMAGE}                        quay.io/rhoai/ray@sha256:859f5c41d41bad1935bce455ad3732dff9d4d4c342b7155a7cd23809e85698ab
+${AWS_DEFAULT_ENDPOINT}             ${S3.AWS_DEFAULT_ENDPOINT}
+${AWS_ACCESS_KEY_ID}                ${S3.AWS_ACCESS_KEY_ID}
+${AWS_SECRET_ACCESS_KEY}            ${S3.AWS_SECRET_ACCESS_KEY}
+${AWS_STORAGE_BUCKET}               ${S3.BUCKET_6.NAME}
+${AWS_STORAGE_BUCKET_MNIST_DIR}     mnist-datasets
+${PIP_INDEX_URL}                    ${PIP_INDEX_URL}
+${PIP_TRUSTED_HOST}                 ${PIP_TRUSTED_HOST}
 
 
 *** Test Cases ***
@@ -91,6 +99,14 @@ Run Codeflare-sdk E2E Test
     [Arguments]    ${TEST_NAME}
     Log To Console    "Running codeflare-sdk test: ${TEST_NAME}"
     ${result} =    Run Process  source ${VIRTUAL_ENV_NAME}/bin/activate && cd codeflare-sdk && poetry env use 3.9 && poetry install --with test,docs && poetry run pytest -v -s ./tests/e2e/${TEST_NAME} --timeout\=600 && deactivate
+    ...    env:RAY_IMAGE=${RAY_IMAGE}
+    ...    env:AWS_DEFAULT_ENDPOINT=${AWS_DEFAULT_ENDPOINT}
+    ...    env:AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+    ...    env:AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    ...    env:AWS_STORAGE_BUCKET=${AWS_STORAGE_BUCKET}
+    ...    env:AWS_STORAGE_BUCKET_MNIST_DIR=${AWS_STORAGE_BUCKET_MNIST_DIR}
+    ...    env:PIP_INDEX_URL=${PIP_INDEX_URL}
+    ...    env:PIP_TRUSTED_HOST=bastion.dis-shared-01.osp.rh-ods.com:9443
     ...    shell=true
     ...    stderr=STDOUT
     Log To Console    ${result.stdout}

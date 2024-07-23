@@ -9,10 +9,18 @@ Resource          ../../../tests/Resources/Page/DistributedWorkloads/Distributed
 
 
 *** Variables ***
-${CODEFLARE_RELEASE_ASSETS}     %{CODEFLARE_RELEASE_ASSETS=https://github.com/opendatahub-io/distributed-workloads/releases/latest/download}
-${NOTEBOOK_IMAGE}               %{NOTEBOOK_IMAGE_STREAM_NAME=quay.io/modh/odh-generic-data-science-notebook@sha256:9d7f80080a453bcf7dee01b986df9ee811ee74f6f433c601a8b67d283c160547}
-${NOTEBOOK_USER_NAME}           ${TEST_USER_3.USERNAME}
-${NOTEBOOK_USER_PASSWORD}       ${TEST_USER_3.PASSWORD}
+${CODEFLARE_RELEASE_ASSETS}         %{CODEFLARE_RELEASE_ASSETS=https://github.com/opendatahub-io/distributed-workloads/releases/latest/download}
+${NOTEBOOK_IMAGE}                   quay.io/modh/odh-generic-data-science-notebook@sha256:9d7f80080a453bcf7dee01b986df9ee811ee74f6f433c601a8b67d283c160547
+${NOTEBOOK_USER_NAME}               ${TEST_USER_3.USERNAME}
+${NOTEBOOK_USER_PASSWORD}           ${TEST_USER_3.PASSWORD}
+${CODEFLARE_TEST_RAY_IMAGE}         quay.io/rhoai/ray@sha256:859f5c41d41bad1935bce455ad3732dff9d4d4c342b7155a7cd23809e85698ab
+${PIP_INDEX_URL}                    ${PIP_INDEX_URL}
+${PIP_TRUSTED_HOST}                 ${PIP_TRUSTED_HOST}
+${AWS_DEFAULT_ENDPOINT}             ${S3.BUCKET_5.ENDPOINT}
+${AWS_STORAGE_BUCKET}               ${S3.BUCKET_5.NAME}
+${AWS_ACCESS_KEY_ID}                ${S3.AWS_ACCESS_KEY_ID}
+${AWS_SECRET_ACCESS_KEY}            ${S3.AWS_SECRET_ACCESS_KEY}
+${AWS_STORAGE_BUCKET_MNIST_DIR}     mnist-datasets
 
 
 *** Test Cases ***
@@ -100,10 +108,18 @@ Run Codeflare ODH Test
     ...    env:CODEFLARE_TEST_TIMEOUT_MEDIUM=10m
     ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
     ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-odh-logs
+    ...    env:CODEFLARE_TEST_RAY_IMAGE=${CODEFLARE_TEST_RAY_IMAGE}
     ...    env:ODH_NAMESPACE=${APPLICATIONS_NAMESPACE}
-    ...    env:NOTEBOOK_IMAGE=${NOTEBOOK_IMAGE}
     ...    env:NOTEBOOK_USER_NAME=${NOTEBOOK_USER_NAME}
     ...    env:NOTEBOOK_USER_TOKEN=${NOTEBOOK_USER_TOKEN}
+    ...    env:NOTEBOOK_IMAGE=${NOTEBOOK_IMAGE}
+    ...    env:AWS_DEFAULT_ENDPOINT=${AWS_DEFAULT_ENDPOINT}
+    ...    env:AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+    ...    env:AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    ...    env:AWS_STORAGE_BUCKET=${AWS_STORAGE_BUCKET}
+    ...    env:AWS_STORAGE_BUCKET_MNIST_DIR=${AWS_STORAGE_BUCKET_MNIST_DIR}
+    ...    env:PIP_INDEX_URL=${PIP_INDEX_URL}
+    ...    env:PIP_TRUSTED_HOST=${PIP_TRUSTED_HOST}
     Log To Console    ${result.stdout}
     IF    ${result.rc} != 0
         FAIL    ${TEST_NAME} failed

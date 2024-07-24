@@ -16,11 +16,7 @@ cat <<EOF | kubectl apply --server-side -f -
       namespace: $namespace
       labels:
         kueue.x-k8s.io/queue-name: $local_queue_name
-      annotations:
-        kueue.x-k8s.io/job-min-parallelism: "1"
     spec:
-      parallelism: 2
-      completions: 2
       suspend: true
       template:
         spec:

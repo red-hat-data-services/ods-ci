@@ -149,11 +149,12 @@ Verify Custom Runtime Exists After Upgrade
 
 Verify Ray Cluster Exists And Monitor Workload Metrics By Submitting Ray Job After Upgrade
     [Documentation]    check the Ray Cluster exists , submit ray job and  verify resource usage after upgrade
-    [Tags]  Upgrade
+    [Tags]    Upgrade
+    [Setup]    Prepare Codeflare-SDK Test Setup
     ${PRJ_UPGRADE}    Set Variable    test-ns-rayupgrade
     ${LOCAL_QUEUE}    Set Variable    local-queue-mnist
     ${JOB_NAME}    Set Variable    mnist
-    Run Codeflare Upgrade Tests    TestMnistJobSubmit
+    Run Codeflare-SDK Test    upgrade    raycluster_sdk_upgrade_test.py::TestMnistJobSubmit
     Set Global Variable    ${DW_PROJECT_CREATED}    True
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
@@ -179,7 +180,7 @@ Verify Ray Cluster Exists And Monitor Workload Metrics By Submitting Ray Job Aft
     Check Distributed Workload Resource Metrics Chart    ${PRJ_UPGRADE}    ${cpu_requested}
     ...    ${memory_requested}    RayCluster    ${JOB_NAME}
 
-    [Teardown]    Run Keywords    Cleanup Codeflare Setup    AND
+    [Teardown]    Run Keywords    Cleanup Codeflare-SDK Setup    AND
     ...    Codeflare Upgrade Tests Teardown    ${PRJ_UPGRADE}    ${DW_PROJECT_CREATED}
 
 Run Training Operator ODH Run PyTorchJob Test Use Case

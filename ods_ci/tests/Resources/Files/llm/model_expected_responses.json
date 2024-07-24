@@ -283,6 +283,16 @@
                     }
                 }
             }
+        },
+        {
+            "query_text": "{'role': 'user', 'content': [{'type': 'text', 'text': 'What is in this image?'}, {'type': 'image_url', 'image_url': {'url': 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Gfp-wisconsin-madison-the-nature-boardwalk.jpg/2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg'}}]}",
+            "models": {
+                "phi-3-vision":{
+                    "vllm-runtime": {
+                        "chat-completions_response_text": "{\"object\":\"chat.completion\",\"created\":,\"model\":\"llama-2-13b-chat\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"  This is a test!\"},\"logprobs\":null,\"finish_reason\":\"stop\",\"stop_reason\":null}],\"usage\":{\"prompt_tokens\":15,\"total_tokens\":22,\"completion_tokens\":7}}"
+                    }
+                }
+            }
         }
     ],
     "model-info": {

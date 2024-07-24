@@ -1,0 +1,13 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: ${isvc_name}
+spec:
+  predictor:
+    model:
+          args:
+            - "--dtype=float16"
+            - "--tensor-parallel-size=1"
+            - '--trust-remote-code'
+            - '--uvicorn-log-level=info'
+            - '--max_model_len=4096'

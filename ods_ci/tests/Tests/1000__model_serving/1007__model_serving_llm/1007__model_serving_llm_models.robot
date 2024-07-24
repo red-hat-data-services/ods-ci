@@ -882,7 +882,7 @@ Verify User Can Serve And Query A ibm-granite/granite-7b-lab Model
 Verify User Can Serve And Query A ibm-granite/granite-7b-lab ngram speculative Model
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve using TGIS standalone or vllm runtime
-    [Tags]    RHOAIENG-88300    VLLM
+    [Tags]    RHOAIENG-10162   VLLM
     Setup Test Variables    model_name=granite-7b-lab   use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=granite-7b-lab
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
@@ -936,6 +936,50 @@ Verify User Can Serve And Query A ibm-granite/granite-7b-lab ngram speculative M
             ...    inference_type=completions    n_times=1    query_idx=14
             ...    namespace=${test_namespace}   validate_response=${FALSE}
     END
+    [Teardown]    Run Keywords
+    ...    Clean Up Test Project    test_ns=${test_namespace}
+    ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
+    ...    kserve_mode=${KSERVE_MODE}
+    ...    AND
+    ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
+
+Verify User Can Serve And Query A microsoft/Phi-3-vision-128k-instruct vision Model
+    [Documentation]    Basic tests for preparing, deploying and querying a LLM model
+    ...                using Kserve using TGIS standalone or vllm runtime
+    [Tags]    RHOAIENG-10164    VLLM
+    Setup Test Variables    model_name=phi-3-vision   use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
+    ...    kserve_mode=${KSERVE_MODE}    model_path=Phi-3-vision-128k-instruct
+    Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
+    ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}    protocol=${PROTOCOL}
+    ...    storage_size=40Gi    model_path=${model_path}
+    ${requests}=    Create Dictionary    memory=40Gi
+    IF    "${OVERLAY}" != "${EMPTY}"
+          ${overlays}=   Create List    ${OVERLAY}
+    ELSE
+          ${overlays}=   Create List
+    END
+    Compile Inference Service YAML    isvc_name=${model_name}
+    ...    sa_name=${EMPTY}
+    ...    model_storage_uri=${storage_uri}
+    ...    model_format=${MODEL_FORMAT}    serving_runtime=${RUNTIME_NAME}
+    ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
+    ...    overlays=${overlays}
+    IF    "${RUNTIME_NAME}" == "vllm-runtime"
+           Update ISVC Filled Config  vision
+    END
+    Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILEPATH_NEW}/isvc_custom_filled.yaml
+    ...    namespace=${test_namespace}
+    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${test_namespace}    runtime=${RUNTIME_NAME}    timeout=900s
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    IF     "${RUNTIME_NAME}" == "tgis-runtime" or "${KSERVE_MODE}" == "RawDeployment"
+            Skip   msg=Vision model is not supported for tgis as of now
+    END
+    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
+    ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    Query Model Multiple Times    model_name=${model_name}      runtime=${RUNTIME_NAME}    protocol=http
+    ...    inference_type=chat-completions    n_times=1    query_idx=15
+    ...    namespace=${test_namespace}   validate_response=${FALSE}
     [Teardown]    Run Keywords
     ...    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}

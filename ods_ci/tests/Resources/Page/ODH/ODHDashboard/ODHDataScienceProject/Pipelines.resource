@@ -44,8 +44,8 @@ Select Data Connection
     ...                in the modal for Pipeline Server creation
     [Arguments]    ${dc_name}
     # robocop: off=line-too-long
-    Wait Until Page Contains Element    xpath://div[@class="pf-v5-c-form__group"][.//label//*[text()="Access key"]]//div[@data-ouia-component-type="PF5/Dropdown"]
-    Click Element                       xpath://div[@class="pf-v5-c-form__group"][.//label//*[text()="Access key"]]//div[@data-ouia-component-type="PF5/Dropdown"]
+    Wait Until Page Contains Element    xpath://button[@data-testid="select-data-connection"]
+    Click Button                        xpath://button[@data-testid="select-data-connection"]
     Wait Until Page Contains Element    xpath://button//*[text()="${dc_name}"]
     Click Element    xpath://button//*[text()="${dc_name}"]
 
@@ -53,7 +53,7 @@ Wait Until Pipeline Is Not Listed
     [Documentation]    Waits until pipeline is no longer listed in the pipelines table
     [Arguments]    ${pipeline_name}    ${timeout}=60s
     Maybe Wait For Dashboard Loading Spinner Page
-    ${pipeline_row_xp}=    Set Variable    (//*[@data-testid="table-row-title" and text()="${pipeline_name}"])[1]/../..
+    ${pipeline_row_xp}=    Set Variable    //*[@data-testid="table-row-title"]/a/span[text()="${pipeline_name}"]/ancestor::tr
     Wait Until Page Does Not Contain Element    ${pipeline_row_xp}    timeout=${timeout}
 
 Import Pipeline
@@ -106,10 +106,11 @@ Expand Pipeline Details
     [Documentation]    Expands a pipeline row in the dashboard UI
     [Arguments]    ${pipeline_name}
 
-    ${pipeline_row_xp}=                 Set Variable    (//*[@data-testid="table-row-title" and text()="${pipeline_name}"])[1]/../..
+    ${pipeline_row_xp}=                 Set Variable    //*[@data-testid="table-row-title"]/a/span[text()="${pipeline_name}"]/ancestor::tr
     ${pipeline_details_xp}=             Set Variable    ${pipeline_row_xp}/td/button[@aria-label="Details"]
     ${expanded_pipeline_details_xp}=    Set Variable    ${pipeline_row_xp}/td/button[@aria-expanded="true"]
 
+    Sleep    2    reason=Sometimes it takes ~1sec to render the row
     ${is_expanded}=  Run Keyword And Return Status
     ...  Page Should Contain Element  xpath:${expanded_pipeline_details_xp}
     IF  not ${is_expanded}    Click Button  xpath:${pipeline_details_xp}
@@ -117,7 +118,7 @@ Expand Pipeline Details
 Collapse Pipeline Details
     [Documentation]    Collapses a pipeline row in the dashboard UI
     [Arguments]    ${pipeline_name}
-    ${pipeline_row_xp}=                 Set Variable    (//*[@data-testid="table-row-title" and text()="${pipeline_name}"])[1]/../..
+    ${pipeline_row_xp}=                 Set Variable    //*[@data-testid="table-row-title"]/a/span[text()="${pipeline_name}"]/ancestor::tr
     ${pipeline_details_xp}=             Set Variable    ${pipeline_row_xp}/td/button[@aria-label="Details"]
     ${expanded_pipeline_details_xp}=    Set Variable    ${pipeline_row_xp}/td/button[@aria-expanded="true"]
 
@@ -129,7 +130,7 @@ Click Action From Pipeline Actions Menu
     [Documentation]    Click an action from Pipeline Actions menu (3-dots menu on the right)
     [Arguments]    ${pipeline_name}    ${action}
     # robocop: off=line-too-long
-    ${pipeline_row_xp}=    Set Variable    (//*[@data-testid="table-row-title" and text()="${pipeline_name}"])[1]/../..
+    ${pipeline_row_xp}=    Set Variable    //*[@data-testid="table-row-title"]//span[text()="${pipeline_name}"]/ancestor::tr
     ${kebab_xp}=           Set Variable    ${pipeline_row_xp}/td/button[@aria-label="Kebab toggle"]
     ${kebap_action_xp}=    Set Variable    ${pipeline_row_xp}/td/div/div/ul/li/button[.//*[contains(text(), '${action}')]]
     Wait Until Page Contains Element    ${kebab_xp}
@@ -141,7 +142,7 @@ Click Action From Pipeline Version Actions Menu
     [Documentation]    Click an action from Pipeline Version Actions menu (3-dots menu on the right)
     [Arguments]    ${pipeline_version_name_contains}    ${action}
     # robocop: off=line-too-long
-    ${version_row_xp}=    Set Variable     (//*[@data-testid="table-row-title"]/a[contains(text(),"${pipeline_version_name_contains}")])/../../..
+    ${version_row_xp}=    Set Variable     //*[@data-testid="table-row-title"]/span/a[contains(text(),"${pipeline_version_name_contains}")]/ancestor::tr
     ${kebab_xp}=           Set Variable    ${version_row_xp}/td/button[@aria-label="Kebab toggle"]
     ${kebap_action_xp}=    Set Variable    ${version_row_xp}/td/div/div/ul/li/button[.//*[contains(text(), '${action}')]]
     Wait Until Page Contains Element    ${kebab_xp}
@@ -193,13 +194,13 @@ Pipeline Should Be Listed
     [Arguments]     ${pipeline_name}    ${pipeline_description}=${EMPTY}
 
     Projects.Move To Tab    Pipelines
-    ${pipeline_title_xp}=    Set Variable      (//*[@data-testid="table-row-title" and text()="${pipeline_name}"])[1]
+    ${pipeline_title_xp}=    Set Variable      //*[@data-testid="table-row-title"]/a/span[text()="${pipeline_name}"]
     Run Keyword And Continue On Failure    Wait Until Page Contains Element    ${pipeline_title_xp}
 
     IF    "${pipeline_description}" != "${EMPTY}"
         Run Keyword And Continue On Failure
         ...    Wait Until Page Contains Element
-        ...        ${pipeline_title_xp}/following-sibling::*[p[text()="${pipeline_description}"]]
+        ...        ${pipeline_title_xp}/ancestor::b/following-sibling::*[p[text()="${pipeline_description}"]]
     END
 
 Pipeline Should Not Be Listed

@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation     Test suite for Model Registry Integration
+Documentation      Test suite for Model Registry Integration
 Suite Setup       Prepare Model Registry Test Setup
 Suite Teardown    Teardown Model Registry Test Setup
 Library           OperatingSystem
@@ -18,7 +18,9 @@ ${WORKBENCH_TITLE}=                  registry-wb
 ${DC_S3_NAME}=                       model-registry-connection
 ${MODELREGISTRY_BASE_FOLDER}=        tests/Resources/CLI/ModelRegistry
 ${EXAMPLE_ISTIO_ENV}=                ${MODELREGISTRY_BASE_FOLDER}/samples/istio/components/example_istio.env
+${INTERMEDIARY_ENV}=                 ${MODELREGISTRY_BASE_FOLDER}/samples/istio/components/intermediary.env
 ${ISTIO_ENV}=                        ${MODELREGISTRY_BASE_FOLDER}/samples/istio/components/istio.env
+${ENV_FOR_UPLOAD}=                   ${MODELREGISTRY_BASE_FOLDER}/samples/istio/components/notebook_vars.env
 ${SAMPLE_ONNX_MODEL}=                ${MODELREGISTRY_BASE_FOLDER}/mnist.onnx
 ${SERVICE_MESH_MEMBER}=              ${MODELREGISTRY_BASE_FOLDER}/serviceMeshMember.yaml
 ${ENABLE_REST_API}=                  ${MODELREGISTRY_BASE_FOLDER}/enable_rest_api_route.yaml
@@ -28,16 +30,19 @@ ${MODEL_REGISTRY_DB_SAMPLES}=        ${MODELREGISTRY_BASE_FOLDER}/samples/secure
 ${JUPYTER_NOTEBOOK}=                 MRMS_UPDATED.ipynb
 ${JUPYTER_NOTEBOOK_FILEPATH}=        ${MODELREGISTRY_BASE_FOLDER}/${JUPYTER_NOTEBOOK}
 ${DC_S3_TYPE}=                       Object storage
+${OPENSSL_PACKAGE}=                  openssl
 ${NAMESPACE_ISTIO}=                  istio-system
 ${NAMESPACE_MODEL-REGISTRY}=         odh-model-registries
 ${SECRET_PART_NAME_1}=               modelregistry-sample-rest
 ${SECRET_PART_NAME_2}=               modelregistry-sample-grpc
 ${SECRET_PART_NAME_3}=               model-registry-db
 
+
 *** Test Cases ***
+
 Verify Model Registry Integration With Secured-DB
     [Documentation]    Verifies the Integartion of Model Registry operator with Jupyter Notebook
-    [Tags]    OpenDataHub
+    [Tags]    OpenDataHub    Tony
     Create Workbench    workbench_title=${WORKBENCH_TITLE}    workbench_description=Registry test
     ...                 prj_title=${PRJ_TITLE}    image_name=Minimal Python  deployment_size=Small
     ...                 storage=Persistent   pv_existent=${NONE}
@@ -61,7 +66,9 @@ Verify Model Registry Integration With Secured-DB
     Upload Certificate To Jupyter Notebook    ${CERTS_DIRECTORY}/domain.crt
     Jupyter Notebook Should Run Successfully     ${JUPYTER_NOTEBOOK}
 
+
 *** Keywords ***
+
 Prepare Model Registry Test Setup
     [Documentation]    Suite setup steps for testing Model Registry.
     Set Library Search Order    SeleniumLibrary
@@ -97,11 +104,14 @@ Create Project
     Create OpenShift Project    ${NAMESPACE_MODEL-REGISTRY}
 
 Run OC Commands And Capture Output
-    [Documentation]  Logs the Domain and Token capture
+    [Documentation]  Logs the Domain and Token capture.
+    # ${host}=    Get Host
     ${domain}=    Get Domain
     ${token}=    Get Token
+    # Set Suite Variable    ${HOST}    ${host}
     Set Suite Variable    ${DOMAIN}    ${domain}
     Set Suite Variable    ${TOKEN}    ${token}
+    # Log    Host: ${HOST}
     Log    Domain: ${DOMAIN}
     Log    Token: ${TOKEN}
 
@@ -119,9 +129,9 @@ Generate ModelRegistry Certificates
     ...    ${certs_dir}/modelregistry-sample-rest.domain.crt    ${certs_dir}/modelregistry-sample-rest.domain.csr
     ...    ${certs_dir}/modelregistry-sample-rest.domain.ext    ${certs_dir}/modelregistry-sample-rest.domain.key
     Generate Local ModelRegistry Certificates    ${DOMAIN}    ${generate_certs_script}    ${cert_files}
-
+    
 Generate Local ModelRegistry Certificates
-    [Documentation]    Generates ModelRegistry certificates using the generate_certs.sh script
+    [Documentation]    Generates ModelRegistry certificates using the generate_certs.sh script    
     [Arguments]    ${domain}    ${generate_certs_script}    ${cert_files}
     Run Process    ${generate_certs_script}    ${domain}    stdout=PIPE    stderr=PIPE
     Check Certificate Files Created    ${cert_files}
@@ -154,8 +164,8 @@ Check Certificate Files Created
     END
 
 Upload Certificate To Jupyter Notebook
-    [Arguments]    ${domain_cert}
     [Documentation]    Uploads file to Jupyter Notebook
+    [Arguments]    ${domain_cert}
     Upload File In The Workbench     filepath=${domain_cert}    workbench_title=${WORKBENCH_TITLE}
     ...    workbench_namespace=${PRJ_TITLE}
 
@@ -181,23 +191,54 @@ Jupyter Notebook Should Run Successfully
     [Documentation]    Runs the test workbench and check if there was no error during execution
     [Arguments]    ${filepath}
     Open Notebook File In JupyterLab    ${filepath}
-    # Open With JupyterLab Menu  Run  Run All Cells
     Open With JupyterLab Menu  Run  Restart Kernel and Run All Cells…
-    Click Element    xpath=//div[contains(text(),"Restart") and @class="jp-Dialog-buttonLabel"]
+    Click Element    xpath=//div[contains(text(),"Restart") and @class="jp-Dialog-buttonLabel"]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
     Wait Until JupyterLab Code Cell Is Not Active  timeout=120s
     Sleep    2m    msg=Waits until the jupyter notebook has completed execution of all cells
     JupyterLab Code Cell Error Output Should Not Be Visible
     SeleniumLibrary.Capture Page Screenshot
 
+Wait For Model Registry Containers To Be Ready
+    [Documentation]    Wait for model-registry-deployment to be ready
+    ${result}=    Run Process
+    ...        oc wait --for\=condition\=Available --timeout\=5m -n ${PRJ_TITLE} deployment/model-registry-db
+    ...        shell=true    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    ${result}=    Run Process
+    ...        oc wait --for\=condition\=Available --timeout\=5m -n ${PRJ_TITLE} deployment/model-registry-deployment
+    ...        shell=true    stderr=STDOUT
+    Log To Console    ${result.stdout}
+
+Get Host
+    [Documentation]  Gets the Host Domain and Token and returns it to 'Run Oc Commands And Capture Output'.
+    # Run the command to get the ingress host
+    ${host_result}=    Run Process    oc    get    route    odh-model-registries-modelregistry-sample-rest
+    ...    -n    istio-system    -o    yaml    stdout=PIPE    stderr=PIPE
+    ${rc}=    Set Variable    ${host_result.rc}
+    IF    $rc > 0    Fail    Command 'oc whoami -t' returned non-zero exit code: ${rc}
+    ${host_yaml_output}=    Set Variable    ${host_result.stdout}
+
+    # Return the host from stdout
+    ${host_parsed_yaml}=    Evaluate    yaml.load('''${host_yaml_output}''', Loader=yaml.FullLoader)
+    ${ingress_host}=    Set Variable    ${host_parsed_yaml['spec']['host']}
+
+    # Return both results
+    RETURN    ${ingress_host}
+
 Get Domain
     [Documentation]  Gets the Host Domain and Token and returns it to 'Run Oc Commands And Capture Output'.
+    # Run the command to get the ingress domain
     ${domain_result}=    Run Process    oc    get    ingresses.config/cluster
     ...    -o    yaml    stdout=PIPE    stderr=PIPE
     ${rc}=    Set Variable    ${domain_result.rc}
     IF    $rc > 0    Fail    Command 'oc whoami -t' returned non-zero exit code: ${rc}
     ${domain_yaml_output}=    Set Variable    ${domain_result.stdout}
+
+    # Return the domain from stdout
     ${domain_parsed_yaml}=    Evaluate    yaml.load('''${domain_yaml_output}''', Loader=yaml.FullLoader)
     ${ingress_domain}=    Set Variable    ${domain_parsed_yaml['spec']['domain']}
+
+    # Return both results
     RETURN    ${ingress_domain}
 
 Get Token
@@ -209,15 +250,17 @@ Get Token
     RETURN    ${token}
 
 Create OpenShift Project
-    [Documentation]    Creates a test namespace and track it under ServiceMesh
+    [Documentation]    Creates a test namespace and tracks it via ServiceMesh
     [Arguments]    ${NAMESPACE_MODEL-REGISTRY}
     ${rc}    ${out}=    Run And Return Rc And Output    oc get project ${NAMESPACE_MODEL-REGISTRY}
-    IF    "${rc}" == "${0}"
+    Log    ${out}
+    IF    ${rc} == ${0}
         Log    message=OpenShift Project ${NAMESPACE_MODEL-REGISTRY} already present. Skipping project setup...
         ...    level=WARN
         RETURN
     END
-    ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${NAMESPACE_MODEL-REGISTRY}
+    ${rc}    ${output}=    Run And Return Rc And Output    oc new-project ${NAMESPACE_MODEL-REGISTRY}
+    Log    ${output}
     Should Be Equal As Numbers    ${rc}    ${0}
 
 Apply ServiceMeshMember Configuration
@@ -229,8 +272,8 @@ Apply Rest API Configuration
     Apply OpenShift Configuration    ${ENABLE_REST_API}
 
 Apply OpenShift Configuration
-    [Arguments]    ${config}
     [Documentation]    Apply the provided OpenShift configuration using oc apply -f -.
+    [Arguments]    ${config}
     ${command}=    Set Variable    oc apply -f ${config}
     ${result}=    Run Process    ${command}    stdin=${config}    shell=True    stdout=PIPE    stderr=PIPE
     Should Be Equal As Strings    ${result.rc}    0    The oc apply command failed
@@ -238,13 +281,13 @@ Apply OpenShift Configuration
     Log    ${result.stderr}
 
 Log File Content
-    [Documentation]    Logs the contents of given file
     [Arguments]    ${file_path}
+    [Documentation]    Logs the contents of given file
     ${content}=    Get File    ${file_path}
     Log    ${content}
 
 Append Key Value To Env File
-    [Documentation]    Adding the Key/Value to Env File
+    [Documentation]    Applies key and value to an env file
     [Arguments]    ${env_file}    ${key}    ${value}
     ${formatted_line}=    Set Variable    \n${key}=${value}
     Append To File    ${env_file}    ${formatted_line}

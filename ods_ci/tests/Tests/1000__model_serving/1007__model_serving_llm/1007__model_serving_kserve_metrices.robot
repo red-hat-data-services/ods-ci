@@ -20,9 +20,9 @@ ${KSERVE_MODE}=   Serverless
 *** Test Cases ***
 
 Verify User Can Serve And Query A Model
-    [Documentation]    Basic tests for preparing, deploying and querying a LLM model
+    [Documentation]    Basic tests for chekcing configmapby deploying and querying a LLM model
     ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    Sanity    Tier1    ODS-milind
+    [Tags]    Sanity    Tier1    
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -60,5 +60,6 @@ Suite Setup
     
 Verify Metrics Dashboard Is Present
     [Documentation]  Check if Metrics Dashboard Is Present
-    ${rc}    ${output}=    Run And Return Rc And Output    oc get cm -n ${TEST_NS} ${MODEL_NAME}-metrics-dashboard
+    ${rc}    ${output}=    Run And Return Rc And Output    oc get cm -n ${TEST_NS} ${MODEL_NAME}-metrics-dashboard -o jsonpath='{.data.supported}'
     Should Be Equal As Numbers    ${rc}    0
+    Should Be Equal    true    ${output}

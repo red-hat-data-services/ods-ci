@@ -18,7 +18,7 @@ ${CAIKIT_TGIS_RUNTIME_NAME}=    caikit-tgis-runtime
 Verify User Can Serve And Query A Model
     [Documentation]    Basic tests for chekcing configmapby deploying and querying a LLM model
     ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    Sanity    Tier1   ODS-milind
+    [Tags]    Sanity    Tier1   RHOAIENG-10372
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit

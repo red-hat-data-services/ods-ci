@@ -8,21 +8,17 @@ Resource          ../../../Resources/CLI/ModelServing/llm.resource
 Library           OpenShiftLibrary
 Suite Setup       Suite Setup
 
-
 *** Variables ***
 ${TEST_NS}=    singlemodel
-${EXP_RESPONSES_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/model_expected_responses.json
 ${FLAN_MODEL_S3_DIR}=    flan-t5-small/flan-t5-small-caikit
 ${FLAN_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${FLAN_MODEL_S3_DIR}/
 ${CAIKIT_TGIS_RUNTIME_NAME}=    caikit-tgis-runtime
-${KSERVE_MODE}=   Serverless
 
 *** Test Cases ***
-
 Verify User Can Serve And Query A Model
     [Documentation]    Basic tests for chekcing configmapby deploying and querying a LLM model
     ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    Sanity    Tier1    
+    [Tags]    Sanity    Tier1   ODS-milind
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -37,29 +33,23 @@ Verify User Can Serve And Query A Model
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     ...    inference_type=streaming    n_times=1
     ...    namespace=${test_namespace}    validate_response=${FALSE}
-    
     Verify Metrics Dashboard Is Present
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
 *** Keywords ***
 Suite Setup
-    [Documentation]
+    [Documentation]    Suite Setup for model deployment
     Skip If Component Is Not Enabled    kserve
     RHOSi Setup
     Load Expected Responses
-    Run    git clone https://github.com/IBM/text-generation-inference/
     Set Suite Variable    ${GPU_LIMITS}    &{EMPTY}
     ${dsc_kserve_mode}=    Get KServe Default Deployment Mode From DSC
-    Set Suite Variable    ${DSC_KSERVE_MODE}    ${dsc_kserve_mode}
-    IF    "${dsc_kserve_mode}" == "RawDeployment"
-        Set Suite Variable    ${IS_KSERVE_RAW}    ${TRUE}
-    ELSE
-        Set Suite Variable    ${IS_KSERVE_RAW}    ${FALSE}
-    END
-    
+    Set Suite Variable    ${KSERVE_MODE}   Serverless
+    Set Suite Variable    ${IS_KSERVE_RAW}    ${FALSE}
+
 Verify Metrics Dashboard Is Present
-    [Documentation]  Check if Metrics Dashboard Is Present
+    [Documentation]    Check if Metrics Dashboard Is Present
     ${rc}    ${output}=    Run And Return Rc And Output    oc get cm -n ${TEST_NS} ${MODEL_NAME}-metrics-dashboard -o jsonpath='{.data.supported}'
     Should Be Equal As Numbers    ${rc}    0
     Should Be Equal    true    ${output}

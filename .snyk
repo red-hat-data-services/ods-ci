@@ -1,0 +1,15 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.25.0
+# ignores vulnerabilities until expiry date; change duration by modifying expiry date
+ignore:
+  8813971b-e775-4f65-bbdd-d493a1027c67:
+    - ods_ci/libs/DataSciencePipelinesAPI.py:
+        reason: Internal endpoint used for testing
+        expires: 2026-07-18T00:00:00.000Z
+        created: 2024-07-18T07:39:29.883Z
+  80053e48-aa71-4d90-8e76-c0ece5ca5304:
+    - ods_ci/libs/Helpers.py:
+        reason: Internal endpoint used for testing
+        expires: 2026-07-18T00:00:00.000Z
+        created: 2024-07-18T07:38:47.802Z
+patch: {}

@@ -158,16 +158,16 @@ Create Data Science Project
 Create Data Science Project From CLI
     [Documentation]    Creates a Data Science Project, adding the needed labels to be recognized by Dashboard.
     ...    - If ${as_user} is provided, the project is created for that user, and group will be set as
-    ...      system:authenticated:oauth, as it is recommended in https://docs.openshift.com/container-platform/4.16/applications/projects/creating-project-other-user.html
+    ...      recommended in https://docs.openshift.com/container-platform/4.16/applications/projects/creating-project-other-user.html
     ...    - If ${randomize_name}=${TRUE} a numerical suffix will be added to ${name} (e.g. ${name}-1234)
     ...    - If ${randomize_name}=${FALSE} and project already exists, it returns doing nothing
     ...    - If ${display_name}=${EMPTY} the final project name (including randomization) will be set as display_name
-    ...    - RETURNS: ${complete_name} of the created project
+    ...    - RETURNS: ${complete_name} of the created project (including randomization)
     [Arguments]    ${name}    ${display_name}=${EMPTY}    ${description}=${EMPTY}    ${as_user}=${EMPTY}
     ...    ${randomize_name}=${FALSE}
 
     IF    ${randomize_name} == ${TRUE}
-        ${project_suffix} =    Generate Random String    4   [NUMBERS]
+        ${project_suffix}=    Generate Random String    4   [NUMBERS]
         ${complete_name}=    Catenate    SEPARATOR=-    ${name}    ${project_suffix}
     ELSE
         ${complete_name}=    Set Variable    ${name}

@@ -9,13 +9,21 @@ Resource          ../../../tests/Resources/Page/DistributedWorkloads/Distributed
 
 
 *** Test Cases ***
-Run Training operator ODH test base use case
-    [Documentation]    Run Go ODH tests for Training operator base use case
+Run Training operator ODH test base finetuning use case
+    [Documentation]    Run Go ODH tests for Training operator base finetuning use case
     [Tags]  RHOAIENG-6965
     ...     Tier1
     ...     DistributedWorkloads
     ...     TrainingOperator
-    Run Training Operator ODH Core Test    TestPytorchjobWithSFTtrainer
+    Run Training Operator ODH Core Test    TestPytorchjobWithSFTtrainerFinetuning
+
+Run Training operator ODH test base LoRA use case
+    [Documentation]    Run Go ODH tests for Training operator base LoRA use case
+    [Tags]  RHOAIENG-6965
+    ...     Tier1
+    ...     DistributedWorkloads
+    ...     TrainingOperator
+    Run Training Operator ODH Core Test    TestPytorchjobWithSFTtrainerLoRa
 
 Run Training operator ODH test with Kueue quota
     [Documentation]    Run Go ODH tests for Training operator with Kueue quota

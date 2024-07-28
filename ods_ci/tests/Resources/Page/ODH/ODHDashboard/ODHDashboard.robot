@@ -861,4 +861,5 @@ Click Action From Actions Menu
         ${action}=    Catenate    ${action}    ${item_type}
     END
     Wait Until Page Contains Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]//td//li//*[text()="${action}"]    # robocop: disable
+    Sleep    0.5    msg=Avoid element missclicking
     Click Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]//td//li//*[text()="${action}"]

@@ -19,8 +19,6 @@ robotframework-seleniumlibrary = "^6.1.1"
 selenium = "4.13.0"
 robotframework-jupyterlibrary = "^0.4.0"
 robotframework-openshift = {git = "https://git@github.com/red-hat-data-services/robotframework-openshift.git"}
-pytest = "^7.2.1"
-pytest-logger = "^0.5.1"
 Pygments = "^2.14.0"
 requests = "^2.28.2"
 escapism = "^1.0.1"
@@ -48,6 +46,9 @@ robotframework-tidy = "^4.5.0"
 ruff = "0.3.4"
 pyright = "1.1.356"
 pre-commit = "3.7.0"
+pytest = "^8.3.2"
+pytest-logger = "^1.1.1"
+testcontainers = "^4.7.2"
 
 [build-system]
 requires = ["poetry-core"]
@@ -116,6 +117,8 @@ ignore = [
  # intentionally disabled
   "E203", # space before : (needed for how black formats slicing)
   "ISC001", # single-line-implicit-string-concatenation (ruff format wants this disabled)
+ # prefer readability over dubious performance gains
+  "G004", # Logging statement uses f-string
  # various limits and unimportant warnings
   "E501", # Line too long
   "E741", # Ambiguous variable name: `l`
@@ -165,8 +168,9 @@ skip-magic-trailing-comma = false
 docstring-code-format = true
 docstring-code-line-length = "dynamic"
 
+# https://docs.pytest.org/en/7.1.x/reference/reference.html#configuration-options
 [tool.pytest.ini_options]
-addopts = "-rfEX -p doctest --doctest-modules --strict-markers --import-mode=importlib"
+addopts = "-rfEX -p doctest --doctest-modules --strict-markers --import-mode=importlib --capture=no --tb=short"
 python_files = ["test_*.py"]
 python_classes = ["Test"]
 python_functions = ["test"]

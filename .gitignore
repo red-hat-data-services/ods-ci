@@ -1,0 +1,22 @@
+# Ignore the variables file required for test execution
+test-variables.yml
+# Ignore runtime files created by the run_robot_test.sh script
+venv/
+ods_ci.egg-info/
+ods-ci.log*
+test-output/
+dist/
+drivers/**/chromedriver
+must-gather-results.txt
+.DS_Store
+.idea/
+.vscode
+.history/
+.setup/
+Results/
+results/
+__pycache__/
+robocop.log
+infrastructure_configuration.yaml
+log/
+text-generation-inference/

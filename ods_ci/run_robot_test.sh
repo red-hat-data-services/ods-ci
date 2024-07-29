@@ -324,6 +324,8 @@ if [[ ${SKIP_INSTALL} -eq 0 ]]; then
   if [[ -d "${virtenv}" ]]; then
     echo "Using a pre-created virtual environment in '${virtenv}' for poetry to save time."
     poetry config --local virtualenvs.in-project true
+    # Workaround for Poetry urllib3 connection error
+    poetry config --local installer.parallel false
     ln --symbolic "${virtenv}" "${basepath}/../.venv"
   else
     echo "Pre-created virtual environment has not been found in '${virtenv}'. All dependencies will be installed from scratch."

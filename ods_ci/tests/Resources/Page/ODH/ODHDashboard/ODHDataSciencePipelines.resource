@@ -147,8 +147,8 @@ Delete Pipeline Server
     Wait Until Page Contains Element    xpath://button[contains(span/text(), 'Pipeline server actions')]
     Wait Until Element Is Enabled       xpath://button[contains(span/text(), 'Pipeline server actions')]
     Click Element                       xpath://button[contains(span/text(), 'Pipeline server actions')]
-    Wait Until Page Contains Element    xpath://li[contains(a/text(), 'Delete pipeline server')]
-    Click Element    //li[contains(a/text(), 'Delete pipeline server')]
+    Wait Until Page Contains Element    xpath://button/span/span[text()='Delete pipeline server']
+    Click Element    xpath://button/span/span[text()='Delete pipeline server']
     Handle Deletion Confirmation Modal    ${data_science_project_name} pipeline server    pipeline server
     Wait Until Page Contains     text=Configure pipeline server    timeout=120s
     Pipelines.Wait Until Pipeline Server Is Deleted    ${data_science_project_name}

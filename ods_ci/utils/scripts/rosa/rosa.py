@@ -37,7 +37,9 @@ class RosaClusterManager:
             f"awk '{{print $1}}' | grep -w '^{re.escape(version)}*' | head -n1"
         )
         latest_version = execute_command(latest_version_cmd)
-        self.rosa_version = latest_version.strip()
+        # when rosa cli is not the latest one, we see WARN messages, and this is breaking the automations when
+        # picking up the retrieved version, so adding this spilitlines method to take the correct part of the output
+        self.rosa_version = latest_version.splitlines()[-1].strip()
         log.info(f"Using the latest rosa version: {self.rosa_version}")
 
     def create_rosa_cluster(self):

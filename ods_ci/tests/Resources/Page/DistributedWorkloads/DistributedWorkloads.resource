@@ -10,7 +10,7 @@ ${CODEFLARE-SDK-API_URL}                 %{CODEFLARE-SDK-API_URL=https://api.git
 ${CODEFLARE-SDK_DIR}                     codeflare-sdk
 ${CODEFLARE-SDK_REPO_URL}                %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
 ${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}  https://github.com/opendatahub-io/distributed-workloads/releases/latest/download
-${FMS_HF_TUNING_IMAGE}                   quay.io/modh/fms-hf-tuning:release-5e4e9441febdb5b2beb21eaecdda1103abd1db05
+${FMS_HF_TUNING_IMAGE}                   quay.io/modh/fms-hf-tuning@sha256:8c52d4608229f7833a40af5f8bc9c8a9823dcc489829ec147b5e9b52e5ae0d62
 ${KFTO_CORE_BINARY_NAME}                 kfto
 ${KFTO_UPGRADE_BINARY_NAME}              kfto-upgrade
 

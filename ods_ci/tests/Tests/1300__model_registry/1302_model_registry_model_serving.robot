@@ -18,9 +18,7 @@ ${WORKBENCH_TITLE}=                  registry-wb
 ${DC_S3_NAME}=                       model-registry-connection
 ${MODELREGISTRY_BASE_FOLDER}=        tests/Resources/CLI/ModelRegistry
 ${EXAMPLE_ISTIO_ENV}=                ${MODELREGISTRY_BASE_FOLDER}/samples/istio/components/example_istio.env
-${INTERMEDIARY_ENV}=                 ${MODELREGISTRY_BASE_FOLDER}/samples/istio/components/intermediary.env
 ${ISTIO_ENV}=                        ${MODELREGISTRY_BASE_FOLDER}/samples/istio/components/istio.env
-${ENV_FOR_UPLOAD}=                   ${MODELREGISTRY_BASE_FOLDER}/samples/istio/components/notebook_vars.env
 ${SAMPLE_ONNX_MODEL}=                ${MODELREGISTRY_BASE_FOLDER}/mnist.onnx
 ${SERVICE_MESH_MEMBER}=              ${MODELREGISTRY_BASE_FOLDER}/serviceMeshMember.yaml
 ${ENABLE_REST_API}=                  ${MODELREGISTRY_BASE_FOLDER}/enable_rest_api_route.yaml
@@ -39,7 +37,6 @@ ${SECRET_PART_NAME_3}=               model-registry-db
 
 
 *** Test Cases ***
-
 Verify Model Registry Integration With Secured-DB
     [Documentation]    Verifies the Integartion of Model Registry operator with Jupyter Notebook
     [Tags]    OpenDataHub
@@ -68,7 +65,6 @@ Verify Model Registry Integration With Secured-DB
 
 
 *** Keywords ***
-
 Prepare Model Registry Test Setup
     [Documentation]    Suite setup steps for testing Model Registry.
     Set Library Search Order    SeleniumLibrary
@@ -129,7 +125,7 @@ Generate ModelRegistry Certificates
     ...    ${certs_dir}/modelregistry-sample-rest.domain.crt    ${certs_dir}/modelregistry-sample-rest.domain.csr
     ...    ${certs_dir}/modelregistry-sample-rest.domain.ext    ${certs_dir}/modelregistry-sample-rest.domain.key
     Generate Local ModelRegistry Certificates    ${DOMAIN}    ${generate_certs_script}    ${cert_files}
-    
+
 Generate Local ModelRegistry Certificates
     [Documentation]    Generates ModelRegistry certificates using the generate_certs.sh script    
     [Arguments]    ${domain}    ${generate_certs_script}    ${cert_files}
@@ -281,8 +277,8 @@ Apply OpenShift Configuration
     Log    ${result.stderr}
 
 Log File Content
-    [Arguments]    ${file_path}
     [Documentation]    Logs the contents of given file
+    [Arguments]    ${file_path}
     ${content}=    Get File    ${file_path}
     Log    ${content}
 

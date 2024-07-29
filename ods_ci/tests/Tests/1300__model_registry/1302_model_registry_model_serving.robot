@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation      Test suite for Model Registry Integration
+Documentation     Test suite for Model Registry Integration
 Suite Setup       Prepare Model Registry Test Setup
 Suite Teardown    Teardown Model Registry Test Setup
 Library           OperatingSystem
@@ -123,7 +123,7 @@ Generate ModelRegistry Certificates
     Generate Local ModelRegistry Certificates    ${DOMAIN}    ${generate_certs_script}    ${cert_files}
 
 Generate Local ModelRegistry Certificates
-    [Documentation]    Generates ModelRegistry certificates using the generate_certs.sh script    
+    [Documentation]    Generates ModelRegistry certificates using the generate_certs.sh script
     [Arguments]    ${domain}    ${generate_certs_script}    ${cert_files}
     Run Process    ${generate_certs_script}    ${domain}    stdout=PIPE    stderr=PIPE
     Check Certificate Files Created    ${cert_files}
@@ -184,7 +184,7 @@ Jupyter Notebook Should Run Successfully
     [Arguments]    ${filepath}
     Open Notebook File In JupyterLab    ${filepath}
     Open With JupyterLab Menu  Run  Restart Kernel and Run All Cells…
-    Click Element    xpath=//div[contains(text(),"Restart") and @class="jp-Dialog-buttonLabel"]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+    Click Element    xpath=//div[contains(text(),"Restart") and @class="jp-Dialog-buttonLabel"]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
     Wait Until JupyterLab Code Cell Is Not Active  timeout=120s
     Sleep    2m    msg=Waits until the jupyter notebook has completed execution of all cells
     JupyterLab Code Cell Error Output Should Not Be Visible

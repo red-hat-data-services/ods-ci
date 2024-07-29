@@ -568,17 +568,9 @@ Clean Up DSP Page
     END
     Open Data Science Projects Home Page
     ${projects}=    Get All Displayed Projects
-    ${projects_count}=    Get Length    ${projects}
-    WHILE    ${projects_count} > 0    limit=${projects_count}m
-    ...    on_limit_message=Timeout exceeded waiting for all DS projects deletion
-        Delete Data Science Projects From CLI    ${projects}
-        Reload Page
-        ${reloaded}=    Run Keyword And Return Status
-        ...    SeleniumLibrary.Wait Until Page Contains    Data science projects    timeout=30s
-        IF  ${reloaded}==${FALSE}    SeleniumLibrary.Capture Page Screenshot
-        ${projects}=    Get All Displayed Projects
-        ${projects_count}=    Get Length    ${projects}
-    END
+    Delete Data Science Projects From CLI    ${projects}
+    Reload Page
+    Wait For Dashboard Page Title    Data Science Projects    timeout=30s
 
 Clean All Models Of Current User
     [Documentation]    Tries to clean up DSP and Model Serving pages

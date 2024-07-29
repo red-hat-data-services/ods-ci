@@ -101,13 +101,10 @@ Create Project
 
 Run OC Commands And Capture Output
     [Documentation]  Logs the Domain and Token capture.
-    # ${host}=    Get Host
     ${domain}=    Get Domain
     ${token}=    Get Token
-    # Set Suite Variable    ${HOST}    ${host}
     Set Suite Variable    ${DOMAIN}    ${domain}
     Set Suite Variable    ${TOKEN}    ${token}
-    # Log    Host: ${HOST}
     Log    Domain: ${DOMAIN}
     Log    Token: ${TOKEN}
 
@@ -205,24 +202,8 @@ Wait For Model Registry Containers To Be Ready
     ...        shell=true    stderr=STDOUT
     Log To Console    ${result.stdout}
 
-Get Host
-    [Documentation]  Gets the Host Domain and Token and returns it to 'Run Oc Commands And Capture Output'.
-    # Run the command to get the ingress host
-    ${host_result}=    Run Process    oc    get    route    odh-model-registries-modelregistry-sample-rest
-    ...    -n    istio-system    -o    yaml    stdout=PIPE    stderr=PIPE
-    ${rc}=    Set Variable    ${host_result.rc}
-    IF    $rc > 0    Fail    Command 'oc whoami -t' returned non-zero exit code: ${rc}
-    ${host_yaml_output}=    Set Variable    ${host_result.stdout}
-
-    # Return the host from stdout
-    ${host_parsed_yaml}=    Evaluate    yaml.load('''${host_yaml_output}''', Loader=yaml.FullLoader)
-    ${ingress_host}=    Set Variable    ${host_parsed_yaml['spec']['host']}
-
-    # Return both results
-    RETURN    ${ingress_host}
-
 Get Domain
-    [Documentation]  Gets the Host Domain and Token and returns it to 'Run Oc Commands And Capture Output'.
+    [Documentation]  Gets the Domain and returns it to 'Run Oc Commands And Capture Output'.
     # Run the command to get the ingress domain
     ${domain_result}=    Run Process    oc    get    ingresses.config/cluster
     ...    -o    yaml    stdout=PIPE    stderr=PIPE
@@ -238,7 +219,7 @@ Get Domain
     RETURN    ${ingress_domain}
 
 Get Token
-    [Documentation]    Gets the Host Domain and Token and returns it to 'Run Oc Commands And Capture Output'.
+    [Documentation]    Gets the Token and returns it to 'Run Oc Commands And Capture Output'.
     ${token_result}=    Run Process    oc    whoami    -t    stdout=YES
     ${rc}=    Set Variable    ${token_result.rc}
     IF    ${rc} > 0    Fail    Command 'oc whoami -t' returned non-zero exit code: ${rc}

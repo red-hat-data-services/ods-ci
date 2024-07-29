@@ -28,7 +28,6 @@ ${MODEL_REGISTRY_DB_SAMPLES}=        ${MODELREGISTRY_BASE_FOLDER}/samples/secure
 ${JUPYTER_NOTEBOOK}=                 MRMS_UPDATED.ipynb
 ${JUPYTER_NOTEBOOK_FILEPATH}=        ${MODELREGISTRY_BASE_FOLDER}/${JUPYTER_NOTEBOOK}
 ${DC_S3_TYPE}=                       Object storage
-${OPENSSL_PACKAGE}=                  openssl
 ${NAMESPACE_ISTIO}=                  istio-system
 ${NAMESPACE_MODEL-REGISTRY}=         odh-model-registries
 ${SECRET_PART_NAME_1}=               modelregistry-sample-rest

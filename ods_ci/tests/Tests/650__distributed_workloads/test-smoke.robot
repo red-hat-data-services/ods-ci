@@ -2,8 +2,8 @@
 Documentation     Smoke tests for DistributedWorkloads
 Library           Process
 Resource          ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
-Suite Setup       Prepare Codeflare E2E Test Suite
-Suite Teardown    Teardown Codeflare E2E Test Suite
+Suite Setup       RHOSi Setup
+Suite Teardown    RHOSi Teardown
 
 
 *** Test Cases ***
@@ -72,6 +72,9 @@ Training operator smoke test
     [Documentation]    Check that Training operator deployment is up and running
     [Tags]    Smoke
     ...       DistributedWorkloads
+    [Setup]    Prepare Training Operator Test Setup
+    [Teardown]    Teardown Training Operator Test Setup
+
     Log To Console    Waiting for kubeflow-training-operator to be available
     ${result} =    Run Process    oc wait --for\=condition\=Available --timeout\=300s -n ${APPLICATIONS_NAMESPACE} deployment/kubeflow-training-operator
     ...    shell=true    stderr=STDOUT
@@ -82,11 +85,9 @@ Training operator smoke test
 
 
 *** Keywords ***
-Prepare Codeflare E2E Test Suite
+Prepare Training Operator Test Setup
     Enable Component    trainingoperator
     Wait Component Ready    trainingoperator
-    RHOSi Setup
 
-Teardown Codeflare E2E Test Suite
+Teardown Training Operator Test Setup
     Disable Component    trainingoperator
-    RHOSi Teardown

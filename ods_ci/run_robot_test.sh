@@ -320,7 +320,8 @@ fi
 
 if [[ ${SKIP_INSTALL} -eq 0 ]]; then
   # look for pre-created poetry .venv
-  virtenv="${HOME}/.local/ods-ci/.venv"
+  branch=$(git branch --show-current)
+  virtenv="${HOME}/.local/ods-ci/${branch%,*}/.venv"
   if [[ -d "${virtenv}" ]]; then
     echo "Using a pre-created virtual environment in '${virtenv}' for poetry to save time."
     poetry config --local virtualenvs.in-project true

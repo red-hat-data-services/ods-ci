@@ -13,8 +13,8 @@ Library        OperatingSystem
 Library        String
 Library        OpenShiftLibrary
 
-Resource       ../../../Resources/RHOSi.resource
-Resource       ../../../Resources/Common.robot
+Resource       ../../../../Resources/RHOSi.resource
+Resource       ../../../../Resources/Common.robot
 
 Suite Setup     RHOSi Setup
 Suite Teardown  RHOSi Teardown

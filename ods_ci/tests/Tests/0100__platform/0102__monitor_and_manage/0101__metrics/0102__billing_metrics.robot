@@ -1,14 +1,14 @@
 *** Settings ***
 Documentation       Test suite testing ODS Metrics related to billing
-Resource            ../../../Resources/RHOSi.resource
-Resource            ../../../Resources/ODS.robot
-Resource            ../../../Resources/Common.robot
-Resource            ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
-Resource            ../../../Resources/Page/OCPDashboard/Monitoring/Metrics.robot
-Resource            ../../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
-Resource            ../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
-Resource            ../../../Resources/Page/OCPLogin/OCPLogin.resource
-Resource            ../../../Resources/OCP.resource
+Resource            ../../../../Resources/RHOSi.resource
+Resource            ../../../../Resources/ODS.robot
+Resource            ../../../../Resources/Common.robot
+Resource            ../../../../Resources/Page/OCPDashboard/OCPDashboard.resource
+Resource            ../../../../Resources/Page/OCPDashboard/Monitoring/Metrics.robot
+Resource            ../../../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
+Resource            ../../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
+Resource            ../../../../Resources/Page/OCPLogin/OCPLogin.resource
+Resource            ../../../../Resources/OCP.resource
 Library             JupyterLibrary
 Library             SeleniumLibrary
 

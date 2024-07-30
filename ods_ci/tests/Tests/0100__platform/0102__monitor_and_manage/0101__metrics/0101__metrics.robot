@@ -1,8 +1,8 @@
 *** Settings ***
 Documentation       Test suite testing ODS Metrics
-Resource            ../../../Resources/RHOSi.resource
-Resource            ../../../Resources/ODS.robot
-Resource            ../../../Resources/Common.robot
+Resource            ../../../../Resources/RHOSi.resource
+Resource            ../../../../Resources/ODS.robot
+Resource            ../../../../Resources/Common.robot
 Library             DateTime
 Suite Setup         RHOSi Setup
 Suite Teardown      RHOSi Teardown

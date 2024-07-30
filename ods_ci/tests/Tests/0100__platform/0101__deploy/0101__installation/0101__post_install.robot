@@ -23,7 +23,7 @@ Verify Dashbord has no message with NO Component Found
     [Documentation]   Verify "NO Component Found" message dosen't display
     ...     on Rhods Dashbord page with bad subscription present in openshift
     [Setup]   Test Setup For Rhods Dashboard
-    Oc Apply  kind=Subscription  src=tests/Tests/100__deploy/100__installation/bad_subscription.yaml
+    Oc Apply  kind=Subscription  src=tests/Tests/0100__platform/0101__deploy/100__installation/bad_subscription.yaml
     Delete Dashboard Pods And Wait Them To Be Back
     Reload Page
     Menu.Navigate To Page    Applications    Explore

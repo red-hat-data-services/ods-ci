@@ -122,6 +122,7 @@ Validate DSC and DSCI Created With No Errors When Kserve Serving Is Unmanaged An
 Suite Setup
     [Documentation]    Suite Setup
     Set Library Search Order    SeleniumLibrary
+    RHOSi Setup
 
 Suite Teardown
     [Documentation]    Suite Teardown
@@ -208,7 +209,7 @@ DataScienceCluster Should Fail Because Service Mesh Operator Is Not Installed
     Should Contain    ${output}    operator servicemeshoperator not found. Please install the operator before enabling kserve component    #robocop:disable
 
     ${rc}    ${logs}=    Run And Return Rc And Output
-    ...    oc logs -l name=rhods-operator -c rhods-operator -n ${OPERATOR_NS} --ignore-errors
+    ...    oc logs -l ${OPERATOR_LABEL_SELECTOR} -c ${OPERATOR_POD_CONTAINER_NAME} -n ${OPERATOR_NS} --ignore-errors
 
     Should Contain    ${logs}    failed to find the pre-requisite Service Mesh Operator subscription, please ensure Service Mesh Operator is installed.    #robocop:disable
 

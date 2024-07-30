@@ -1,12 +1,12 @@
 *** Settings ***
 Documentation       Test Suite for Upgrade testing,to be run during the upgrade
-Resource            ../../../../Resources/ODS.robot
-Resource            ../../../../Resources/Common.robot
-Resource            ../../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
-Resource            ../../../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
-Resource            ../../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
-Resource            ../../../../Resources/Page/ODH/ODHDashboard/ODHDashboardSettings.resource
-Resource            ../../../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
+Resource            ../../Resources/ODS.robot
+Resource            ../../Resources/Common.robot
+Resource            ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
+Resource            ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
+Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
+Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboardSettings.resource
+Resource            ../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
 Library             DebugLibrary
 Library             JupyterLibrary
 

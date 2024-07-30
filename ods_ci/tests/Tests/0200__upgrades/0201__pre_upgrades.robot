@@ -1,25 +1,25 @@
 *** Settings ***
 Documentation      Test Suite for Upgrade testing, to be run before the upgrade
 Library            OpenShiftLibrary
-Resource           ../../../../Resources/RHOSi.resource
-Resource           ../../../../Resources/ODS.robot
-Resource           ../../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
-Resource           ../../../../Resources/Page/ODH/ODHDashboard/ODHDashboardResources.resource
-Resource           ../../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
-Resource           ../../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
-Resource           ../../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
-Resource           ../../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
-Resource           ../../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/ModelServer.resource
-Resource           ../../../../Resources/Page/ODH/AiApps/Anaconda.resource
-Resource           ../../../../Resources/Page/LoginPage.robot
-Resource           ../../../../Resources/Page/OCPLogin/OCPLogin.robot
-Resource           ../../../../Resources/Common.robot
-Resource           ../../../../Resources/Page/OCPDashboard/Pods/Pods.robot
-Resource           ../../../../Resources/Page/OCPDashboard/Builds/Builds.robot
-Resource           ../../../../Resources/Page/HybridCloudConsole/OCM.robot
-Resource           ../../../../Resources/CLI/ModelServing/modelmesh.resource
-Resource           ../../../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
-Resource           ../../../../Resources/Page/DistributedWorkloads/WorkloadMetricsUI.resource
+Resource           ../../Resources/RHOSi.resource
+Resource           ../../Resources/ODS.robot
+Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
+Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDashboardResources.resource
+Resource           ../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
+Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
+Resource           ../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
+Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
+Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/ModelServer.resource
+Resource           ../../Resources/Page/ODH/AiApps/Anaconda.resource
+Resource           ../../Resources/Page/LoginPage.robot
+Resource           ../../Resources/Page/OCPLogin/OCPLogin.robot
+Resource           ../../Resources/Common.robot
+Resource           ../../Resources/Page/OCPDashboard/Pods/Pods.robot
+Resource           ../../Resources/Page/OCPDashboard/Builds/Builds.robot
+Resource           ../../Resources/Page/HybridCloudConsole/OCM.robot
+Resource           ../../Resources/CLI/ModelServing/modelmesh.resource
+Resource           ../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
+Resource           ../../Resources/Page/DistributedWorkloads/WorkloadMetricsUI.resource
 Suite Setup        Dashboard Suite Setup
 Suite Teardown     RHOSi Teardown
 
@@ -79,7 +79,7 @@ Verify RHODS Accept Multiple Admin Groups And CRD Gets Updates
 Verify Custom Image Can Be Added
     [Documentation]  Create Custome notebook using Cli
     [Tags]  Upgrade
-    Oc Apply    kind=ImageStream   src=tests/Tests/0100__platform/0101__deploy/120__upgrades/custome_image.yaml
+    Oc Apply    kind=ImageStream   src=tests/Tests/0200__upgrades/custome_image.yaml
 
 Verify User Can Disable The Runtime
     [Documentation]  Disable the Serving runtime using Cli

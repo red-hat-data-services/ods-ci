@@ -2,9 +2,9 @@
 Documentation       Test Cases to verify RHOAI operator integration with Authorino operator
 
 Library             Collections
-Resource            ../../../../Resources/OCP.resource
-Resource            ../../../../Resources/ODS.robot
-Resource            ../../../../Resources/RHOSi.resource
+Resource            ../../../../../Resources/OCP.resource
+Resource            ../../../../../Resources/ODS.robot
+Resource            ../../../../../Resources/RHOSi.resource
 Suite Setup         Suite Setup
 Suite Teardown      Suite Teardown
 

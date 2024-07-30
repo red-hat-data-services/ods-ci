@@ -1,8 +1,8 @@
 *** Settings ***
 Documentation       Post install test cases that verify OCP KServe resources and objects
 Library             OpenShiftLibrary
-Resource            ../../../Resources/ODS.robot
-Resource            ../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
+Resource            ../../../../Resources/ODS.robot
+Resource            ../../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 # Resource            ../../../Resources/RHOSi.resource
 # Suite Setup         RHOSi Setup
 # Suite Teardown      RHOSi Teardown

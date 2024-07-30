@@ -1,8 +1,8 @@
 *** Settings ***
 Documentation       Post install test cases that verify Model Registry
 Library             OpenShiftLibrary
-Resource            ../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
-Resource            ../../../Resources/OCP.resource
+Resource            ../../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
+Resource            ../../../../Resources/OCP.resource
 Suite Setup         Registry Suite Setup
 Suite Teardown      Teardown
 Test Tags           ExcludeOnRHOAI

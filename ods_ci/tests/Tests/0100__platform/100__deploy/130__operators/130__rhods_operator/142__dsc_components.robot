@@ -2,9 +2,9 @@
 Documentation       Test Cases to verify DSC Distributed Workloads Components
 
 Library             Collections
-Resource            ../../../../Resources/OCP.resource
-Resource            ../../../../Resources/ODS.robot
-Resource            ../../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
+Resource            ../../../../../Resources/OCP.resource
+Resource            ../../../../../Resources/ODS.robot
+Resource            ../../../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 Suite Setup         Suite Setup
 Suite Teardown      Suite Teardown
 

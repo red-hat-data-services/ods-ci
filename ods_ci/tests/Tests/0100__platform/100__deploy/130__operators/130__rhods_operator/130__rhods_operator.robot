@@ -2,9 +2,9 @@
 Library         SeleniumLibrary
 Library         RequestsLibrary
 Library         Collections
-Resource        ../../../../Resources/Page/OCPDashboard/OCPDashboard.resource
-Resource        ../../../../Resources/Common.robot
-Resource        ../../../../Resources/RHOSi.resource
+Resource        ../../../../../Resources/Page/OCPDashboard/OCPDashboard.resource
+Resource        ../../../../../Resources/Common.robot
+Resource        ../../../../../Resources/RHOSi.resource
 Suite Setup     RHODS Operator Suite Setup
 Suite Teardown  RHODS Operator Suite Teardown
 

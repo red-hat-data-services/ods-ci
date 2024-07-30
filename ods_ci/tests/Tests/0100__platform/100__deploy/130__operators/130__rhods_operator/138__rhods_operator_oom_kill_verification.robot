@@ -9,9 +9,9 @@ Documentation       RHODS_OPERATOR_OOM_KILL_VERIFICATION
 
 Library             OperatingSystem
 Library             SeleniumLibrary
-Resource            ../../../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
-Resource            ../../../../Resources/Page/OCPDashboard/OCPDashboard.resource
-Resource            ../../../../Resources/Common.robot
+Resource            ../../../../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
+Resource            ../../../../../Resources/Page/OCPDashboard/OCPDashboard.resource
+Resource            ../../../../../Resources/Common.robot
 
 Suite Setup         RHOSi Setup
 Suite Teardown      RHOSi Teardown

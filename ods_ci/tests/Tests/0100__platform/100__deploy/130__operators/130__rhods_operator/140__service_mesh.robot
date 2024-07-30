@@ -2,10 +2,10 @@
 Documentation       Test Cases to verify Service Mesh integration
 
 Library             Collections
-Resource            ../../../../Resources/OCP.resource
-Resource            ../../../../Resources/ODS.robot
-Resource            ../../../../Resources/RHOSi.resource
-Resource            ../../../../Resources/ServiceMesh.resource
+Resource            ../../../../../Resources/OCP.resource
+Resource            ../../../../../Resources/ODS.robot
+Resource            ../../../../../Resources/RHOSi.resource
+Resource            ../../../../../Resources/ServiceMesh.resource
 Suite Setup         Suite Setup
 Suite Teardown      Suite Teardown
 

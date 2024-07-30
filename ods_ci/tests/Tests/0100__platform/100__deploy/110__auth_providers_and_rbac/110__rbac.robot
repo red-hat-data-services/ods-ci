@@ -1,7 +1,7 @@
 *** Settings ***
-Resource            ../../../Resources/ODS.robot
-Resource            ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
-Resource            ../../../Resources/RHOSi.resource
+Resource            ../../../../Resources/ODS.robot
+Resource            ../../../../Resources/Page/OCPDashboard/OCPDashboard.resource
+Resource            ../../../../Resources/RHOSi.resource
 Suite Setup         Rbac Suite Setup
 Suite Teardown      Rbac Suite Teardown
 

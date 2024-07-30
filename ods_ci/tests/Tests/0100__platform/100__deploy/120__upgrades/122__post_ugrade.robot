@@ -1,24 +1,24 @@
 *** Settings ***
 Documentation       Test Suite for Upgrade testing,to be run after the upgrade
 Library            OpenShiftLibrary
-Resource           ../../../Resources/RHOSi.resource
-Resource           ../../../Resources/ODS.robot
-Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
-Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDashboardResources.resource
-Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
-Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
-Resource           ../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
-Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
-Resource           ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/ModelServer.resource
-Resource           ../../../Resources/Page/ODH/AiApps/Anaconda.resource
-Resource           ../../../Resources/Page/LoginPage.robot
-Resource           ../../../Resources/Page/OCPLogin/OCPLogin.robot
-Resource           ../../../Resources/Common.robot
-Resource           ../../../Resources/Page/OCPDashboard/Pods/Pods.robot
-Resource           ../../../Resources/Page/OCPDashboard/Builds/Builds.robot
-Resource           ../../../Resources/Page/HybridCloudConsole/OCM.robot
-Resource           ../../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
-Resource           ../../../Resources/Page/DistributedWorkloads/WorkloadMetricsUI.resource
+Resource           ../../../../Resources/RHOSi.resource
+Resource           ../../../../Resources/ODS.robot
+Resource           ../../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
+Resource           ../../../../Resources/Page/ODH/ODHDashboard/ODHDashboardResources.resource
+Resource           ../../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
+Resource           ../../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
+Resource           ../../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
+Resource           ../../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
+Resource           ../../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/ModelServer.resource
+Resource           ../../../../Resources/Page/ODH/AiApps/Anaconda.resource
+Resource           ../../../../Resources/Page/LoginPage.robot
+Resource           ../../../../Resources/Page/OCPLogin/OCPLogin.robot
+Resource           ../../../../Resources/Common.robot
+Resource           ../../../../Resources/Page/OCPDashboard/Pods/Pods.robot
+Resource           ../../../../Resources/Page/OCPDashboard/Builds/Builds.robot
+Resource           ../../../../Resources/Page/HybridCloudConsole/OCM.robot
+Resource           ../../../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
+Resource           ../../../../Resources/Page/DistributedWorkloads/WorkloadMetricsUI.resource
 
 *** Variables ***
 ${S_SIZE}       25

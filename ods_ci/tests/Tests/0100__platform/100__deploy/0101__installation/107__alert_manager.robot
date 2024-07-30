@@ -1,8 +1,8 @@
 *** Settings ***
 Documentation     Post install test cases that verify OCP Alert Manager resources and objects
 Library           OpenShiftLibrary
-Resource          ../../../Resources/ODS.robot
-Resource          ../../../Resources/RHOSi.resource
+Resource          ../../../../Resources/ODS.robot
+Resource          ../../../../Resources/RHOSi.resource
 Suite Setup       RHOSi Setup
 Suite Teardown    RHOSi Teardown
 

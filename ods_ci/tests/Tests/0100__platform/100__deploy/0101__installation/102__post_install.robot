@@ -3,16 +3,16 @@ Documentation       Post install test cases that mainly verify OCP resources and
 Library             String
 Library             OperatingSystem
 Library             OpenShiftLibrary
-Library             ../../../../libs/Helpers.py
-Resource            ../../../Resources/RHOSi.resource
-Resource            ../../../Resources/OCP.resource
-Resource            ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
-Resource            ../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
-Resource            ../../../Resources/Page/ODH/Prometheus/Prometheus.robot
-Resource            ../../../Resources/ODS.robot
-Resource            ../../../Resources/Page/ODH/Grafana/Grafana.resource
-Resource            ../../../Resources/Page/HybridCloudConsole/HCCLogin.robot
-Resource            ../../../Resources/Common.robot
+Library             ../../../../../libs/Helpers.py
+Resource            ../../../../Resources/RHOSi.resource
+Resource            ../../../../Resources/OCP.resource
+Resource            ../../../../Resources/Page/OCPDashboard/OCPDashboard.resource
+Resource            ../../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
+Resource            ../../../../Resources/Page/ODH/Prometheus/Prometheus.robot
+Resource            ../../../../Resources/ODS.robot
+Resource            ../../../../Resources/Page/ODH/Grafana/Grafana.resource
+Resource            ../../../../Resources/Page/HybridCloudConsole/HCCLogin.robot
+Resource            ../../../../Resources/Common.robot
 Suite Setup         RHOSi Setup
 Suite Teardown      RHOSi Teardown
 

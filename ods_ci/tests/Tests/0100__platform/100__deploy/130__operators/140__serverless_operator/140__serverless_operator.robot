@@ -2,9 +2,9 @@
 Documentation    Test Cases to verify Serverless installation
 Library         Collections
 Library         OpenShiftLibrary
-Resource        ../../../../Resources/Page/OCPDashboard/OCPDashboard.resource
-Resource        ../../../../Resources/OCP.resource
-Resource        ../../../../Resources/RHOSi.resource
+Resource        ../../../../../Resources/Page/OCPDashboard/OCPDashboard.resource
+Resource        ../../../../../Resources/OCP.resource
+Resource        ../../../../../Resources/RHOSi.resource
 Suite Setup      Suite Setup
 Suite Teardown   Suite Teardown
 

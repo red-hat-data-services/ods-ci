@@ -1,10 +1,10 @@
 *** Settings ***
 Library          OperatingSystem
 Library          Process
-Resource         ../../../Resources/Page/ODH/Grafana/Grafana.resource
-Resource         ../../../Resources/RHOSi.resource
-Resource         ../../../Resources/ODS.robot
-Resource         ../../../Resources/Common.robot
+Resource         ../../../../Resources/Page/ODH/Grafana/Grafana.resource
+Resource         ../../../../Resources/RHOSi.resource
+Resource         ../../../../Resources/ODS.robot
+Resource         ../../../../Resources/Common.robot
 Suite Setup      Post Install Monitoring Port Forwarding Suite Setup
 Suite Teardown   Post Install Monitoring Port Forwarding Suite Teardown
 

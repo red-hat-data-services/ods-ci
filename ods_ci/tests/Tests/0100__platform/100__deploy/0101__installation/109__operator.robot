@@ -1,9 +1,9 @@
 *** Settings ***
 Documentation       Post install test cases that verify OCP operator resources and objects
 
-Library             OpenShiftLibrary
-Resource            ../../../Resources/ODS.robot
-Resource          ../../../Resources/RHOSi.resource
+Library           OpenShiftLibrary
+Resource          ../../../../Resources/ODS.robot
+Resource          ../../../../Resources/RHOSi.resource
 Suite Setup       RHOSi Setup
 Suite Teardown    RHOSi Teardown
 

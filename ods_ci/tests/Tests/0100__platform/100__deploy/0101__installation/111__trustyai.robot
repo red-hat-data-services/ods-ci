@@ -1,8 +1,8 @@
 *** Settings ***
 Documentation       Post install test cases that verify OCP KServe resources and objects
 Library             OpenShiftLibrary
-Resource            ../../../Resources/OCP.resource
-Resource            ../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
+Resource            ../../../../Resources/OCP.resource
+Resource            ../../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 
 
 *** Variables ***

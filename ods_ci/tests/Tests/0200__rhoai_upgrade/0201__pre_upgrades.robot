@@ -79,7 +79,7 @@ Verify RHODS Accept Multiple Admin Groups And CRD Gets Updates
 Verify Custom Image Can Be Added
     [Documentation]  Create Custome notebook using Cli
     [Tags]  Upgrade
-    Oc Apply    kind=ImageStream   src=tests/Tests/0200__upgrades/custome_image.yaml
+    Oc Apply    kind=ImageStream   src=tests/Tests/0200__rhoai_upgrade/custome_image.yaml
 
 Verify User Can Disable The Runtime
     [Documentation]  Disable the Serving runtime using Cli

@@ -65,6 +65,7 @@ Install RHODS
           # odh-nightly is not build for Managed, it is only possible for Self-Managed
           Set Global Variable    ${OPERATOR_NAMESPACE}    openshift-marketplace
           Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
+          Set Global Variable    ${OPERATOR_NAME}         opendatahub-operator
       ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "CLi"
           Install RHODS In Managed Cluster Using CLI  ${cluster_type}     ${image_url}
       ELSE

@@ -319,9 +319,18 @@ if command -v yq &> /dev/null
 fi
 
 if [[ ${SKIP_INSTALL} -eq 0 ]]; then
-  # look for pre-created poetry .venv
-  branch=$(git branch --show-current)
-  virtenv="${HOME}/.local/ods-ci/${branch%,*}/.venv"
+  # Look for pre-created poetry .venv
+  # NOTE: handle that checkout might happen through `git checkout -f somehash` and branch names may include `/` char
+  refname="$(git branch --remote --no-abbrev --format="%(refname:lstrip=3)" --contains "HEAD" | head -1)"
+  venvdir="${refname%,*}"
+  echo "Git revision refname='${refname}', venvdir='${venvdir}'."
+  for venvdir in "${venvdir}" "master"; do
+    virtenv="${HOME}/.local/ods-ci/${venvdir}/.venv"
+    echo "Checking whether '${virtenv}' exists."
+    if [[ -d "${virtenv}" ]]; then
+      break
+    fi
+  done
   if [[ -d "${virtenv}" ]]; then
     echo "Using a pre-created virtual environment in '${virtenv}' for poetry to save time."
     poetry config --local virtualenvs.in-project true

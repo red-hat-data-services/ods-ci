@@ -336,7 +336,10 @@ if [[ ${SKIP_INSTALL} -eq 0 ]]; then
     poetry config --local virtualenvs.in-project true
     # Workaround for Poetry urllib3 connection error
     poetry config --local installer.parallel false
+    # Link in the venv we're going to be using
     ln --symbolic "${virtenv}" "${basepath}/../.venv"
+    # Workaround for .venv directory not being movable (hashbangs in bin/ hardcode python interpreter path)
+    ln --symbolic "${virtenv}" "${HOME}/.local/ods-ci/.venv"
   else
     echo "Pre-created virtual environment has not been found in '${virtenv}'. All dependencies will be installed from scratch."
   fi

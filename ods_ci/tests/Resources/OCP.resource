@@ -275,3 +275,11 @@ Set Default Storage Class In GCP
     ELSE
         Log    Proceeding with default storage class because we're not in GCP
     END
+
+Apply OpenShift Configuration
+    [Documentation]    Apply the provided OpenShift configuration using oc apply -f -.
+    [Arguments]    ${config}
+    ${command}=    Set Variable    oc apply -f ${config}
+    ${result}=    Run Process    ${command}    stdin=${config}    shell=True    stdout=PIPE    stderr=PIPE
+    Should Be Equal As Strings    ${result.rc}    0    The oc apply command failed
+    Log    ${result.stdout}

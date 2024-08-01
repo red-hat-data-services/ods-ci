@@ -8,6 +8,7 @@ Library           OpenShiftLibrary
 Resource          ../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
+Resource          ../../Resources/OCP.resource            
 
 
 *** Variables ***
@@ -60,7 +61,7 @@ Verify Model Registry Integration With Secured-DB
     ...    username=${TEST_USER.USERNAME}     password=${TEST_USER.PASSWORD}
     ...    auth_type=${TEST_USER.AUTH_TYPE}
     Upload Certificate To Jupyter Notebook    ${CERTS_DIRECTORY}/domain.crt
-    Jupyter Notebook Should Run Successfully     ${JUPYTER_NOTEBOOK}
+    Jupyter Notebook Can Query Model Registry     ${JUPYTER_NOTEBOOK}
 
 
 *** Keywords ***
@@ -72,9 +73,9 @@ Prepare Model Registry Test Setup
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
-    Create Project
+    Create Namespace In Openshift    ${NAMESPACE_MODEL-REGISTRY}
     Apply ServiceMeshMember Configuration
-    Run OC Commands And Capture Output
+    Get Cluster Domain And Token
     Run Update Notebook Script
     Copy File    ${EXAMPLE_ISTIO_ENV}    ${ISTIO_ENV}
     Append Key Value To Env File    ${ISTIO_ENV}    DOMAIN    ${DOMAIN}
@@ -94,18 +95,13 @@ Teardown Model Registry Test Setup
     Log    ${output}
     RHOSi Teardown
 
-Create Project
-    [Documentation]    Create a project using oc command.
-    Create OpenShift Project    ${NAMESPACE_MODEL-REGISTRY}
-
-Run OC Commands And Capture Output
+Get Cluster Domain And Token
     [Documentation]  Logs the Domain and Token capture.
     ${domain}=    Get Domain
     ${token}=    Get Token
     Set Suite Variable    ${DOMAIN}    ${domain}
     Set Suite Variable    ${TOKEN}    ${token}
     Log    Domain: ${DOMAIN}
-    Log    Token: ${TOKEN}
 
 Generate ModelRegistry Certificates
     [Documentation]    Generates OpenSSL certificates for Model-Registry using the generate_certs.sh script.
@@ -165,8 +161,8 @@ Create Generic Secret
     [Documentation]    Creates Secret for model registry in a given namespace
     [Arguments]    ${namespace}    ${secret_name}    ${key_file}    ${crt_file}    ${ca_file}
     Log    This is the secret name ${secret_name}
-    ${command}=    Set Variable    oc create secret -n ${namespace} generic ${secret_name} --from-file=tls.key=${key_file} --from-file=tls.crt=${crt_file} --from-file=ca.crt=${ca_file}
-    Log    ${command}
+    ${command}=    Set Variable    
+    ...    oc create secret -n ${namespace} generic ${secret_name} --from-file=tls.key=${key_file} --from-file=tls.crt=${crt_file} --from-file=ca.crt=${ca_file}
     Run Process    ${command}    shell=True
     Log    Secret ${secret_name}, namespace ${namespace}
     ${output}=    Run Process    oc get secret ${secret_name} -n ${namespace}    shell=True
@@ -179,7 +175,7 @@ Apply Db Config Samples
     ...    oc apply -k ${MODEL_REGISTRY_DB_SAMPLES} -n ${namespace}
     Should Be Equal As Integers	  ${rc}	 0   msg=${out}
 
-Jupyter Notebook Should Run Successfully
+Jupyter Notebook Can Query Model Registry
     [Documentation]    Runs the test workbench and check if there was no error during execution
     [Arguments]    ${filepath}
     Open Notebook File In JupyterLab    ${filepath}
@@ -202,7 +198,7 @@ Wait For Model Registry Containers To Be Ready
     Log To Console    ${result.stdout}
 
 Get Domain
-    [Documentation]  Gets the Domain and returns it to 'Run Oc Commands And Capture Output'.
+    [Documentation]  Gets the Domain and returns it to 'Get Cluster Domain And Token'.
     # Run the command to get the ingress domain
     ${domain_result}=    Run Process    oc    get    ingresses.config/cluster
     ...    -o    yaml    stdout=PIPE    stderr=PIPE
@@ -218,26 +214,12 @@ Get Domain
     RETURN    ${ingress_domain}
 
 Get Token
-    [Documentation]    Gets the Token and returns it to 'Run Oc Commands And Capture Output'.
+    [Documentation]    Gets the Token and returns it to 'Get Cluster Domain And Token'.
     ${token_result}=    Run Process    oc    whoami    -t    stdout=YES
     ${rc}=    Set Variable    ${token_result.rc}
     IF    ${rc} > 0    Fail    Command 'oc whoami -t' returned non-zero exit code: ${rc}
     ${token}=    Set Variable    ${token_result.stdout}
     RETURN    ${token}
-
-Create OpenShift Project
-    [Documentation]    Creates a test namespace and tracks it via ServiceMesh
-    [Arguments]    ${NAMESPACE_MODEL-REGISTRY}
-    ${rc}    ${out}=    Run And Return Rc And Output    oc get project ${NAMESPACE_MODEL-REGISTRY}
-    Log    ${out}
-    IF    ${rc} == ${0}
-        Log    message=OpenShift Project ${NAMESPACE_MODEL-REGISTRY} already present. Skipping project setup...
-        ...    level=WARN
-        RETURN
-    END
-    ${rc}    ${output}=    Run And Return Rc And Output    oc new-project ${NAMESPACE_MODEL-REGISTRY}
-    Log    ${output}
-    Should Be Equal As Numbers    ${rc}    ${0}
 
 Apply ServiceMeshMember Configuration
     [Documentation]    Apply a ServiceMeshMember configuration using oc.
@@ -246,15 +228,6 @@ Apply ServiceMeshMember Configuration
 Apply Rest API Configuration
     [Documentation]    Apply a Rest API configuration using oc.
     Apply OpenShift Configuration    ${ENABLE_REST_API}
-
-Apply OpenShift Configuration
-    [Documentation]    Apply the provided OpenShift configuration using oc apply -f -.
-    [Arguments]    ${config}
-    ${command}=    Set Variable    oc apply -f ${config}
-    ${result}=    Run Process    ${command}    stdin=${config}    shell=True    stdout=PIPE    stderr=PIPE
-    Should Be Equal As Strings    ${result.rc}    0    The oc apply command failed
-    Log    ${result.stdout}
-    Log    ${result.stderr}
 
 Log File Content
     [Documentation]    Logs the contents of given file

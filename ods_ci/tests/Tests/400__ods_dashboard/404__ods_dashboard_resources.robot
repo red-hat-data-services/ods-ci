@@ -183,7 +183,7 @@ Set Expected Items Based On RHODS Type    # robocop: disable
         # Remove From List   ${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}   -1
         # Remove From List   ${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}   -1
         # Remove From List   ${EXPECTED_ITEMS_FOR_COMBINATIONS}   -1
-        ${n_items}=    Set Variable    48
+        ${n_items}=    Set Variable    36
     END
     Set Suite Variable    ${EXPECTED_RESOURCE_ITEMS}    ${n_items}
     Set Suite Variable    ${EXPECTED_ITEMS_FOR_ENABLE}    ${EXPECTED_ITEMS_FOR_ENABLE}

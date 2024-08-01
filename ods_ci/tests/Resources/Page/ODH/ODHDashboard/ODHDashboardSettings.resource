@@ -11,16 +11,19 @@ ${GROUP_BTN_XP}=    //button[@data-ouia-component-id="Remove"]
 ${SINGLE_MODE_SERVING_CHECK_BOX}=   //input[@id="single-model-serving-platform-enabled-checkbox"]
 ${MULTI_MODEL_SERVING_CHECK_BOX}=   //input[@id="multi-model-serving-platform-enabled-checkbox"]
 ${CUSTOM_EMPTY_GROUP}=    empty-group
+${ADMIN_GROUPS_SECTION}=    //div[@data-testid="data-science-administrator-groups"]
+${USER_GROUPS_SECTION}=    //div[@data-testid="data-science-user-groups"]
 
 *** Keywords ***
 Add OpenShift Groups To Data Science Administrators
     [Documentation]  Add OpenShift Groups to Data Science administrators From RHODS Dashboard
     [Arguments]     @{admin_groups}
-    Click Button   (//button[@aria-label="Options menu"])[${1}]
+    Click Button   ${ADMIN_GROUPS_SECTION}//button[@aria-label="Options menu"]
     FOR    ${admin_group}    IN    @{admin_groups}
-             ${present}=  Run Keyword And Return Status    Element Should Be Visible   //button[@role="option" and text()="${admin_group}" and @aria-selected="true"]
+             ${present}=  Run Keyword And Return Status    Element Should Be Visible   
+             ...    ${ADMIN_GROUPS_SECTION}//div[@role="group" and @aria-label="Current selections"]//*[text()="${admin_group}"]
             IF  ${present} != True
-                Click Button    //button[@role="option" and text()="${admin_group}"]
+                Click Element    ${ADMIN_GROUPS_SECTION}//*[text()="${admin_group}"]
             END
     END
     Press Keys    None    ESC
@@ -28,14 +31,13 @@ Add OpenShift Groups To Data Science Administrators
 Add OpenShift Groups To Data Science User Groups
     [Documentation]  Add OpenShift Groups to Data Science User From RHODS Dashboard
     [Arguments]     @{user_groups}
-    Click Button    (//button[@aria-label="Options menu"])[${2}]
-
-    FOR    ${user_group}    IN    @{user_groups}
-            ${present}=  Run Keyword And Return Status
-               ...  Element Should Be Visible   //button[@role="option" and text()="${user_group}" and @aria-selected="true"]
-             IF  ${present} != True
-                Click Element    //button[@role="option" and text()="${user_group}"]
-             END
+    Click Button   ${USER_GROUPS_SECTION}//button[@aria-label="Options menu"]
+    FOR    ${admin_group}    IN    @{admin_groups}
+             ${present}=  Run Keyword And Return Status    Element Should Be Visible   
+             ...    ${USER_GROUPS_SECTION}//div[@role="group" and @aria-label="Current selections"]//*[text()="${admin_group}"]
+            IF  ${present} != True
+                Click Element    ${USER_GROUPS_SECTION}//*[text()="${admin_group}"]
+            END
     END
     Press Keys    None    ESC
 

@@ -53,6 +53,7 @@ ${NOTIFICATION_DRAWER_CLOSED}=  //div[@class="pf-v5-c-drawer__panel" and @hidden
 ${GROUPS_CONFIG_CM}=    groups-config
 ${RHODS_GROUPS_CONFIG_CM}=    rhods-groups-config
 ${RHODS_LOGO_XPATH}=    //img[@alt="${ODH_DASHBOARD_PROJECT_NAME} Logo"]
+${USER_MENU_TOGGLE}=    //button[@id="user-menu-toggle"]
 @{ISV_TO_REMOVE_SELF_MANAGED}=      Create List     starburst   nvidia    rhoam
 
 
@@ -74,7 +75,7 @@ Authorize rhods-dashboard service account
 Login To RHODS Dashboard
    [Arguments]  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
    # Wait until we are in the OpenShift auth page or already in Dashboard
-   ${expected_text_list}=    Create List    Log in with    Data Science Projects
+   ${expected_text_list}=    Create List    Log in with
    Wait Until Page Contains A String In List    ${expected_text_list}
    ${oauth_prompt_visible}=  Is OpenShift OAuth Login Prompt Visible
    IF  ${oauth_prompt_visible}  Click Button  Log in with OpenShift
@@ -88,15 +89,7 @@ Logout From RHODS Dashboard
     [Documentation]  Logs out from the current user in the RHODS dashboard
     ...    This will reload the page and show the `Log in with OpenShift` page
     ...    so you want to use `Login to RHODS Dashboard` after this
-    # Another option for the logout button
-    #${user} =  Get Text  xpath:/html/body/div/div/header/div[2]/div/div[3]/div/button/span[1]
-    #Click Element  xpath://span[.="${user}"]/..
-    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.21.0
-    IF  ${version_check}==True
-        Click Button  xpath://button[@id="user-menu-toggle"]
-    ELSE
-        Click Button  xpath:(//button[@id="toggle-id"])[2]
-    END
+    Click Button  ${USER_MENU_TOGGLE}
     Wait Until Page Contains Element  xpath://a[.="Log out"]
     Click Element  xpath://a[.="Log out"]
     Wait Until Page Contains  Log in with OpenShift
@@ -541,15 +534,7 @@ Search Items In Resources Section
 Verify Username Displayed On RHODS Dashboard
     [Documentation]    Verifies that given username matches with username present on RHODS Dashboard
     [Arguments]    ${user_name}
-    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.21.0
-    IF  ${version_check}==True
-        ${versioned_user_xp}=    Set Variable
-        ...    xpath=//button[@id="user-menu-toggle"]/span[contains(@class,'toggle-text')]
-    ELSE
-        ${versioned_user_xp}=    Set Variable  xpath=//div[@class='pf-v5-c-page__header-tools-item'][3]//span[1]
-    END
-
-    Element Text Should Be    ${versioned_user_xp}    ${user_name}
+    Element Text Should Be    ${USER_MENU_TOGGLE}    ${user_name}
 
 RHODS Notification Drawer Should Contain
     [Documentation]    Verifies RHODS Notifications contains given Message
@@ -807,7 +792,7 @@ Get Links From Switcher
 
 Open Application Switcher Menu
     [Documentation]     Clicks on the App Switcher in the top navigation bar of RHODS Dashboard
-    Click Button    //button[@class="pf-v5-c-app-launcher__toggle"]
+    Click Button    //div[@data-testid="application-launcher"]//button
 
 Maybe Wait For Dashboard Loading Spinner Page
     [Documentation]     Detecs the loading symbol (spinner) and wait for it to disappear.

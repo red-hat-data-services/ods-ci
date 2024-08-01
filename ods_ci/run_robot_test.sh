@@ -331,7 +331,9 @@ if [[ ${SKIP_INSTALL} -eq 0 ]]; then
       break
     fi
   done
-  if [[ -d "${virtenv}" ]]; then
+  if [[ -d "${basepath}/../.venv" ]]; then
+    echo "We ran already before and settled in venv we linked into '${basepath}/../.venv'."
+  elif [[ -d "${virtenv}" ]]; then
     echo "Using a pre-created virtual environment in '${virtenv}' for poetry to save time."
     poetry config --local virtualenvs.in-project true
     # Workaround for Poetry urllib3 connection error

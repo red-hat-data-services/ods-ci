@@ -1,0 +1,14 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: ${isvc_name}
+spec:
+  predictor:
+    model:
+          args:
+            - '--dtype=float16'
+            - '--tensor-parallel-size=1'
+            - '--model=/mnt/models/granite-7b-instruct'
+            - '--speculative-model=/mnt/models/granite-7b-instruct-accelerator'
+            - '--num-speculative-tokens=5'
+            - '--use-v2-block-manager'

@@ -8,7 +8,7 @@ Library           OpenShiftLibrary
 Resource          ../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
-Resource          ../../Resources/OCP.resource            
+Resource          ../../Resources/OCP.resource      
 
 
 *** Variables ***

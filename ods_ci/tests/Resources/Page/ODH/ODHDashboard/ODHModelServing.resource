@@ -27,6 +27,7 @@ ${KSERVE_MODAL_HEADER}=    //header[@class="pf-v5-c-modal-box__header"]/h1[.="De
 ${KSERVE_RUNTIME_DROPDOWN}=    //button[@data-testid="serving-runtime-template-selection"]
 ${LLM_RESOURCES_DIRPATH}=    tests/Resources/Files/llm
 ${DEPLOY_MODEL_BTN}=    //button[contains(@data-testid,"deploy")]
+${TOKEN_AUTH_CHECKBOX_XP}=    xpath://input[@id="alt-form-checkbox-auth"]
 
 
 *** Keywords ***
@@ -439,7 +440,14 @@ Deploy Kserve Model Via UI  #robocop: disable
         Enable External Serving Route
         # By default this also enables Token Authentication. Let's disable it and let it get re-enable by the next
         # IF block if needed.
-        Disable Token Authentication
+        ${token_enabled} =     Run Keyword And Return Status    SeleniumLibrary.Checkbox Should Be Selected
+        ...    xpath=${TOKEN_AUTH_CHECKBOX_XP}
+        IF    ${token_enabled}
+            Disable Token Authentication
+        ELSE
+            Log    Token Authentication was supposed to be automatically enabled, but it wasn't    level=ERROR
+            ...    console=${True}
+        END
     END
     IF    ${token}
         Enable Token Authentication

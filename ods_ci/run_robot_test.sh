@@ -319,12 +319,29 @@ if command -v yq &> /dev/null
 fi
 
 if [[ ${SKIP_INSTALL} -eq 0 ]]; then
-  # look for pre-created poetry .venv
-  virtenv="${HOME}/.local/ods-ci/.venv"
-  if [[ -d "${virtenv}" ]]; then
+  # Look for pre-created poetry .venv
+  # NOTE: handle that checkout might happen through `git checkout -f somehash` and branch names may include `/` char
+  refname="$(git branch --remote --no-abbrev --format="%(refname:lstrip=3)" --contains "HEAD" | head -1)"
+  venvdir="${refname%,*}"
+  echo "Git revision refname='${refname}', venvdir='${venvdir}'."
+  for venvdir in "${venvdir}" "master"; do
+    virtenv="${HOME}/.local/ods-ci/${venvdir}/.venv"
+    echo "Checking whether '${virtenv}' exists."
+    if [[ -d "${virtenv}" ]]; then
+      break
+    fi
+  done
+  if [[ -d "${basepath}/../.venv" ]]; then
+    echo "We ran already before and settled in venv we linked into '${basepath}/../.venv'."
+  elif [[ -d "${virtenv}" ]]; then
     echo "Using a pre-created virtual environment in '${virtenv}' for poetry to save time."
     poetry config --local virtualenvs.in-project true
+    # Workaround for Poetry urllib3 connection error
+    poetry config --local installer.parallel false
+    # Link in the venv we're going to be using
     ln --symbolic "${virtenv}" "${basepath}/../.venv"
+    # Workaround for .venv directory not being movable (hashbangs in bin/ hardcode python interpreter path)
+    ln --symbolic "${virtenv}" "${HOME}/.local/ods-ci/.venv"
   else
     echo "Pre-created virtual environment has not been found in '${virtenv}'. All dependencies will be installed from scratch."
   fi
@@ -388,7 +405,7 @@ if ${EMAIL_REPORT}
             rm rf_results.tar.gz
             tar cvzf rf_results.tar.gz $(find "${TEST_ARTIFACT_DIR}" -regex  '.*\(xml\|html\)$') &> /dev/null
      fi
-     python3 utils/scripts/Sender/send_report.py send_email_report -s "${EMAIL_FROM}" -r "${EMAIL_TO}" -b "ODS-CI: Run Results" \
+     poetry run python3 utils/scripts/Sender/send_report.py send_email_report -s "${EMAIL_FROM}" -r "${EMAIL_TO}" -b "ODS-CI: Run Results" \
                         -v "${EMAIL_SERVER}" -a "rf_results.tar.gz" -u "${EMAIL_SERVER_USER}" -p "${EMAIL_SERVER_PW}" \
                         -l "${EMAIL_SERVER_SSL}" -d "${EMAIL_SERVER_UNSECURE}"
 fi

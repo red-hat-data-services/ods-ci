@@ -59,16 +59,28 @@ class TestExecuteCommand(unittest.TestCase):
             assert "No such file or directory" in util.execute_command("/this-file-does-not-exist", print_stdout=False)
 
     def test_success(self):
-        assert util.execute_command("/bin/true") == ""
+        assert util.execute_command("true") == ""
 
     def test_fail(self):
-        assert util.execute_command("/bin/false") == ""
+        assert util.execute_command("false") == ""
 
     def test_stdout(self):
         assert util.execute_command("echo stdout") == "stdout\n"
 
     def test_stderr(self):
         assert util.execute_command("echo stderr >&2") == "stderr\n"
+
+    def test_output_printing_spaces(self):
+        with contextlib.redirect_stdout(io.StringIO()) as output:
+            assert util.execute_command("echo hello world") == "hello world\n"
+        assert output.getvalue() == ">: hello world\n"
+
+    def test_output_printing_tab(self):
+        with contextlib.redirect_stdout(io.StringIO()) as output:
+            # use printf, not the shell builtin, nor echo binary, because some shells (e.g. /bin/sh on Ubuntu) don't support -e
+            #  and the echo binary on macOS also does not support -e
+            assert util.execute_command("printf '%b\n' 'hello\tworld'") == "hello\tworld\n"
+        assert output.getvalue() == ">: hello\tworld\n"
 
     def test_string_cmd(self):
         assert util.execute_command("echo hello world", print_stdout=False) == "hello world\n"

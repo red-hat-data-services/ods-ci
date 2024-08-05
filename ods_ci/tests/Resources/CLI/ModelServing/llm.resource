@@ -831,7 +831,7 @@ Wait For Model KServe Deployment To Be Ready
     ...                the deployment has the expected pods and containers
     [Arguments]    ${label_selector}    ${namespace}    ${runtime}
     ...    ${timeout}=300s    ${exp_replicas}=${1}
-    Wait For Pods To Be Ready    label_selector=${label_selector}    namespace=${namespace}
+    Wait For Pods To Be Ready    label_selector=${label_selector}    namespace=${namespace}   timeout=${timeout}
     # Get the model name from the label_selector variable
     ${splitted_str}    Split String    ${label_selector}    =
     ${model_name}    Set Variable    ${splitted_str}[1]
@@ -888,4 +888,12 @@ Update ISVC Filled Config
     [Arguments]    ${overlay}
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc kustomize ${LLM_RESOURCES_DIRPATH}/serving_runtimes/overlay/${overlay} > ${INFERENCESERVICE_FILEPATH_NEW}/isvc_custom_filled.yaml
+    Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
+
+Remove Model Mount Path From Runtime
+    [Documentation]    This keyword is to remove model mount(mnt/model) path from runtime
+    ...   This is required for speculative decoding using draft model
+    [Arguments]     ${namespace}   ${runtime}=vllm-runtime
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...   oc patch servingruntime ${runtime} -n ${namespace} --type='json' -p='[{"op": "remove", "path": "/spec/containers/0/args/1"}]'
     Should Be Equal As Integers    ${rc}    ${0}    msg=${out}

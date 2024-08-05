@@ -6,6 +6,7 @@ Resource            ../../Resources/ODS.robot
 Resource            ../../Resources/Common.robot
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipelines.resource
+Resource            ../../Resources/CLI/DataSciencePipelines/DataSciencePipelinesBackend.resource
 Library             DateTime
 Library             ../../../libs/DataSciencePipelinesAPI.py
 Library             ../../../libs/DataSciencePipelinesKfp.py
@@ -88,7 +89,7 @@ End To End Pipeline Workflow Using Kfp
     ...    ${pipeline_params}    ${status_check_timeout}=160    ${ray}=${FALSE}
     Remove Pipeline Project    ${project}
     New Project    ${project}
-    Install DataSciencePipelinesApplication CR    ${project}
+    DataSciencePipelinesBackend.Create PipelineServer Using Custom DSPA    ${project}
     ${status}    Login And Wait Dsp Route    ${username}    ${password}    ${project}
     Should Be True    ${status} == 200    Could not login to the Data Science Pipelines Rest API OR DSP routing is not working
     # we remove and add a new project for sanity. LocalQueue is  per namespace

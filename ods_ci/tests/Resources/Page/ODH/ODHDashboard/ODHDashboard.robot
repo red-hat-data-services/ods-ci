@@ -844,10 +844,11 @@ Handle Deletion Confirmation Modal
 Click Action From Actions Menu
     [Documentation]    Clicks an action from Actions menu (3-dots menu on the right)
     [Arguments]    ${item_title}    ${action}    ${item_type}=${NONE}
-    Click Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]/td[contains(@class,"-table__action")]//button[@aria-label="Kebab toggle"]    # robocop: disable
+    ${item_row}=    Set Variable    //tr[td[@data-label="Name"]//*[text()="${item_title}"]]
+    Click Element       xpath=${item_row}//button[@aria-label="Kebab toggle"]
     IF    "${item_type}" != "${NONE}"
         ${action}=    Catenate    ${action}    ${item_type}
     END
-    Wait Until Page Contains Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]//td//li//*[text()="${action}"]    # robocop: disable
+    Wait Until Page Contains Element    xpath=${item_row}//button[@role="menuitem"]//*[.="${action}"]
     Sleep    0.5    msg=Avoid element missclicking
-    Click Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]//td//li//*[text()="${action}"]
+    Click Element    xpath=${item_row}//button[@role="menuitem"]//*[.="${action}"]

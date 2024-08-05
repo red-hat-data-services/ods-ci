@@ -348,7 +348,7 @@ Open Get Started Sidebar And Return Status
 
 Close Get Started Sidebar
     Click Button  xpath://button[@aria-label='Close drawer panel']
-    Wait Until Page Does Not Contain Element    xpath://div[contains(@class,'odh-markdown-view')]/h1
+    Wait Until Page Does Not Contain Element    xpath:${EXPLORE_PANEL_XP}
 
 Check Get Started Sidebar Status
     [Arguments]  ${sidebar_status}  ${badges_titles}
@@ -393,8 +393,9 @@ Check Sidebar Links
 
 Check Sidebar Header Text
     [Arguments]  ${app_id}  ${expected_data}
-    ${h1}=  Get Text    xpath://div[contains(@class,'odh-markdown-view')]/h1
-    Run Keyword And Continue On Failure  Should Be Equal  ${h1}  ${expected_data}[${app_id}][sidebar_h1]
+    Page Should Contain Element  xpath:${SIDEBAR_TEXT_CONTAINER_XP}/h1    message=Missing Sidebar Title for App Card ${app_id} 
+    ${header}=  Get Text    xpath:${SIDEBAR_TEXT_CONTAINER_XP}/h1
+    Run Keyword And Continue On Failure  Should Be Equal  ${header}  ${expected_data}[${app_id}][sidebar_h1]
     ${getstarted_title}=  Get Text  xpath://div[contains(@class,'pf-v5-c-drawer__head')]
     ${titles}=    Split String    ${getstarted_title}   separator=\n    max_split=1
     Run Keyword And Continue On Failure  Should Be Equal   ${titles[0]}  ${expected_data}[${app_id}][title]

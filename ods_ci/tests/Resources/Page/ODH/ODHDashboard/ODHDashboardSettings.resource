@@ -7,7 +7,7 @@ Resource        ../../../ODS.robot
 
 *** Variables ***
 ${TOLERATION_CHECKBOX}=    //input[@id="tolerations-enabled-checkbox"]
-${GROUP_BTN_XP}=    //button[@data-ouia-component-id="Remove"]
+${GROUP_BTN_XP}=    //button[@aria-label="Clear input value"]
 ${SINGLE_MODE_SERVING_CHECK_BOX}=   //input[@id="single-model-serving-platform-enabled-checkbox"]
 ${MULTI_MODEL_SERVING_CHECK_BOX}=   //input[@id="multi-model-serving-platform-enabled-checkbox"]
 ${CUSTOM_EMPTY_GROUP}=    empty-group
@@ -19,11 +19,11 @@ Add OpenShift Groups To Data Science Administrators
     [Documentation]  Add OpenShift Groups to Data Science administrators From RHODS Dashboard
     [Arguments]     @{admin_groups}
     Click Button   ${ADMIN_GROUPS_SECTION}//button[@aria-label="Options menu"]
-    FOR    ${admin_group}    IN    @{admin_groups}
+    FOR    ${group}    IN    @{admin_groups}
              ${present}=  Run Keyword And Return Status    Element Should Be Visible   
-             ...    ${ADMIN_GROUPS_SECTION}//div[@role="group" and @aria-label="Current selections"]//*[text()="${admin_group}"]
+             ...    ${ADMIN_GROUPS_SECTION}//div[@role="group" and @aria-label="Current selections"]//*[text()="${group}"]
             IF  ${present} != True
-                Click Element    ${ADMIN_GROUPS_SECTION}//*[text()="${admin_group}"]
+                Click Element    ${ADMIN_GROUPS_SECTION}//*[text()="${group}"]
             END
     END
     Press Keys    None    ESC
@@ -32,11 +32,11 @@ Add OpenShift Groups To Data Science User Groups
     [Documentation]  Add OpenShift Groups to Data Science User From RHODS Dashboard
     [Arguments]     @{user_groups}
     Click Button   ${USER_GROUPS_SECTION}//button[@aria-label="Options menu"]
-    FOR    ${admin_group}    IN    @{admin_groups}
+    FOR    ${group}    IN    @{user_groups}
              ${present}=  Run Keyword And Return Status    Element Should Be Visible   
-             ...    ${USER_GROUPS_SECTION}//div[@role="group" and @aria-label="Current selections"]//*[text()="${admin_group}"]
+             ...    ${USER_GROUPS_SECTION}//div[@role="group" and @aria-label="Current selections"]//*[text()="${group}"]
             IF  ${present} != True
-                Click Element    ${USER_GROUPS_SECTION}//*[text()="${admin_group}"]
+                Click Element    ${USER_GROUPS_SECTION}//*[text()="${group}"]
             END
     END
     Press Keys    None    ESC
@@ -70,9 +70,10 @@ Remove OpenShift Groups From Data Science Administrator Groups
 
 Save Changes In User Management Setting
     [Documentation]  Save User Management Settings In Dashboard
+    [Arguments]    ${timeout}=10s
     Press Keys    None    ESC
     Click Button    Save changes
-    Sleep    120s    reason=Wait for Dashboard to apply the updated configuration...
+    Sleep    ${timeout}    reason=Wait for Dashboard to apply the updated configuration...
 
 AdminGroups In OdhDashboardConfig CRD Should Be
     [Documentation]  Verify Expect Changes Are Present In CRD

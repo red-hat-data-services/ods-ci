@@ -54,6 +54,7 @@ ${GROUPS_CONFIG_CM}=    groups-config
 ${RHODS_GROUPS_CONFIG_CM}=    rhods-groups-config
 ${RHODS_LOGO_XPATH}=    //img[@alt="${ODH_DASHBOARD_PROJECT_NAME} Logo"]
 ${USER_MENU_TOGGLE}=    //button[@id="user-menu-toggle"]
+${LOGOUT_BTN}=    //button[.="Log out"]
 @{ISV_TO_REMOVE_SELF_MANAGED}=      Create List     starburst   nvidia    rhoam
 
 
@@ -90,16 +91,17 @@ Logout From RHODS Dashboard
     ...    This will reload the page and show the `Log in with OpenShift` page
     ...    so you want to use `Login to RHODS Dashboard` after this
     Click Button  ${USER_MENU_TOGGLE}
-    Wait Until Page Contains Element  xpath://a[.="Log out"]
-    Click Element  xpath://a[.="Log out"]
+    Wait Until Page Contains Element  xpath:${LOGOUT_BTN}
+    Click Element  xpath:${LOGOUT_BTN}
     Wait Until Page Contains  Log in with OpenShift
 
 Wait For RHODS Dashboard To Load
     [Arguments]  ${dashboard_title}="${ODH_DASHBOARD_PROJECT_NAME}"    ${wait_for_cards}=${TRUE}
-    ...          ${expected_page}=Enabled
-    Wait For Condition    return document.title == ${dashboard_title}    timeout=60s
-    Wait Until Page Contains Element    xpath:${RHODS_LOGO_XPATH}    timeout=20s
-    IF    "${expected_page}" != "${NONE}"    Wait For Dashboard Page Title    ${expected_page}    timeout=75s
+    ...          ${expected_page}=Enabled    ${timeout}=60
+    ${half_timeout}=   Evaluate    int(${timeout}) / 2
+    Wait For Condition    return document.title == ${dashboard_title}    timeout=${half_timeout}
+    Wait Until Page Contains Element    xpath:${RHODS_LOGO_XPATH}    timeout=${half_timeout}
+    IF    "${expected_page}" != "${NONE}"    Wait For Dashboard Page Title    ${expected_page}    timeout=${timeout}
     IF    ${wait_for_cards} == ${TRUE}
         Wait Until Keyword Succeeds    3 times   5 seconds    Wait Until Cards Are Loaded
     END

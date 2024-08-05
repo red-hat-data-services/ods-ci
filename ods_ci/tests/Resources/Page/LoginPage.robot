@@ -54,7 +54,7 @@ Login To Openshift
     Wait Until Page Contains  Log in to your account
     Input Text  id=inputUsername  ${ocp_user_name}
     Input Text  id=inputPassword  ${ocp_user_pw}
-    Click Element  xpath=/html/body/div/div/main/div/form/div[4]/button
+    Click Button   //*[@type="submit"]
     Maybe Skip Tour
 
 Log In Should Be Requested

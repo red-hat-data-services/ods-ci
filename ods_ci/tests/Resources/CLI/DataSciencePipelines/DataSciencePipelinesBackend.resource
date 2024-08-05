@@ -35,7 +35,7 @@ Create PipelineServer Using Custom DSPA
     [Documentation]    Install and verifies that DataSciencePipelinesApplication CRD is installed and working
     [Arguments]     ${namespace}    ${dspa_file}=data-science-pipelines-sample.yaml    ${assert_install}=True
 
-    Run     oc apply -f "${DSPA_PATH}/${dsp_file}" -n ${namespace}
+    Run     oc apply -f "${DSPA_PATH}/${dspa_file}" -n ${namespace}
     IF    ${assert_install}==True
         ${generation_value}    Run    oc get datasciencepipelinesapplications -n ${namespace} -o json | jq '.items[0].metadata.generation'
         Should Be True    ${generation_value} == 2    DataSciencePipelinesApplication created

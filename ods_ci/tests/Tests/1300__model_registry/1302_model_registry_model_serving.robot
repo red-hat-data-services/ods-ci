@@ -8,7 +8,7 @@ Library           OpenShiftLibrary
 Resource          ../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
-Resource          ../../Resources/OCP.resource      
+Resource          ../../Resources/OCP.resource
 
 
 *** Variables ***
@@ -161,7 +161,7 @@ Create Generic Secret
     [Documentation]    Creates Secret for model registry in a given namespace
     [Arguments]    ${namespace}    ${secret_name}    ${key_file}    ${crt_file}    ${ca_file}
     Log    This is the secret name ${secret_name}
-    ${command}=    Set Variable    
+    ${command}=    Set Variable
     ...    oc create secret -n ${namespace} generic ${secret_name} --from-file=tls.key=${key_file} --from-file=tls.crt=${crt_file} --from-file=ca.crt=${ca_file}
     Run Process    ${command}    shell=True
     Log    Secret ${secret_name}, namespace ${namespace}
@@ -180,7 +180,7 @@ Jupyter Notebook Can Query Model Registry
     [Arguments]    ${filepath}
     Open Notebook File In JupyterLab    ${filepath}
     Open With JupyterLab Menu  Run  Restart Kernel and Run All Cells…
-    Click Element    xpath=//div[contains(text(),"Restart") and @class="jp-Dialog-buttonLabel"]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+    Click Element    xpath=//div[contains(text(),"Restart") and @class="jp-Dialog-buttonLabel"]
     Wait Until JupyterLab Code Cell Is Not Active  timeout=120s
     Sleep    2m    msg=Waits until the jupyter notebook has completed execution of all cells
     JupyterLab Code Cell Error Output Should Not Be Visible

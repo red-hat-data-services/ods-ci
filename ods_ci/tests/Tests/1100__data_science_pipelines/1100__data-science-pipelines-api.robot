@@ -10,7 +10,7 @@ Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipeline
 Library             DateTime
 Library             ../../../libs/DataSciencePipelinesAPI.py
 Library             ../../../libs/DataSciencePipelinesKfp.py
-Test Tags           DataSciencePipelines
+Test Tags           DataSciencePipelines-Backend
 Suite Setup         Data Science Pipelines Suite Setup
 Suite Teardown      RHOSi Teardown
 

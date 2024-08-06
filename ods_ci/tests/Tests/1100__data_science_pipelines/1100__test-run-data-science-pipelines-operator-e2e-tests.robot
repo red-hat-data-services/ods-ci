@@ -22,7 +22,7 @@ ${KUBECONFIGPATH}                                         %{HOME}/.kube/config
 Run Data Science Pipelines Operator Integration Tests
     [Documentation]    Run Data Science Pipelines Operator Integration Tests
     [Tags]
-    ...     DataSciencePipelines
+    ...     DataSciencePipelines-Backend
     ...     Tier1
     ...     ODS-2632    AutomationBug
     ${openshift_api}    Get Openshift Server

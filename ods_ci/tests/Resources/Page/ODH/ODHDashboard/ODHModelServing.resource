@@ -444,7 +444,7 @@ Deploy Kserve Model Via UI  #robocop: disable
         # By default this also enables Token Authentication. Let's disable it and let it get re-enable by the next
         # IF block if needed.
         ${token_enabled} =     Run Keyword And Return Status    SeleniumLibrary.Checkbox Should Be Selected
-        ...    xpath=${TOKEN_AUTH_CHECKBOX_XP}
+        ...    ${TOKEN_AUTH_CHECKBOX_XP}
         IF    ${token_enabled}
             Disable Token Authentication
         ELSE

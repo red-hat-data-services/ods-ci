@@ -32,7 +32,7 @@ Verify Ods Users Can Create And Run A Data Science Pipeline Using The kfp Python
     ...    project=${PROJECT_NAME}
     ...    python_file=flip_coin.py
     ...    method_name=flipcoin_pipeline
-    ...    status_check_timeout=440
+    ...    status_check_timeout=180
     ...    pipeline_params=${emtpy_dict}
     End To End Pipeline Workflow Using Kfp
     ...    username=${TEST_USER.USERNAME}
@@ -40,7 +40,7 @@ Verify Ods Users Can Create And Run A Data Science Pipeline Using The kfp Python
     ...    project=${PROJECT_NAME}
     ...    python_file=iris_pipeline.py
     ...    method_name=my_pipeline
-    ...    status_check_timeout=440
+    ...    status_check_timeout=180
     ...    pipeline_params=${emtpy_dict}
     [Teardown]    Remove Pipeline Project    ${PROJECT_NAME}
 
@@ -55,7 +55,7 @@ Verify Upload Download In Data Science Pipelines Using The kfp Python Package
     ...    project=${PROJECT_NAME}
     ...    python_file=upload_download.py
     ...    method_name=wire_up_pipeline
-    ...    status_check_timeout=440
+    ...    status_check_timeout=180
     ...    pipeline_params=${upload_download_dict}
     [Teardown]    Remove Pipeline Project    ${PROJECT_NAME}
 
@@ -74,7 +74,7 @@ Verify Ods Users Can Create And Run A Data Science Pipeline With Ray Using The k
     ...    project=${PROJECT_NAME}
     ...    python_file=ray_integration.py
     ...    method_name=ray_integration
-    ...    status_check_timeout=440
+    ...    status_check_timeout=600
     ...    pipeline_params=${ray_dict}
     ...    ray=${TRUE}
     [Teardown]    Remove Pipeline Project    ${PROJECT_NAME}
@@ -98,7 +98,7 @@ End To End Pipeline Workflow Using Kfp
     END
     ${run_id}    Create Run From Pipeline Func    ${username}    ${password}    ${project}
     ...    ${python_file}    ${method_name}    pipeline_params=${pipeline_params}
-    ${run_status}    Check Run Status    ${run_id}    timeout=500
+    ${run_status}    Check Run Status    ${run_id}    timeout=${status_check_timeout}
     Should Be Equal As Strings    ${run_status}    SUCCEEDED    Pipeline run doesn't have a status that means success. Check the logs
     Remove Pipeline Project    ${project}
 

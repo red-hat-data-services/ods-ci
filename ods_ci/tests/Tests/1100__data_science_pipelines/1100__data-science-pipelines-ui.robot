@@ -35,7 +35,7 @@ Verify User Can Create, Run and Delete A DS Pipeline From DS Project Details Pag
 
     Open Data Science Project Details Page    ${PRJ_TITLE}
 
-    Create Pipeline Server    dc_name=${DC_NAME}    project_title=${PRJ_TITLE}
+    Pipelines.Create Pipeline Server    dc_name=${DC_NAME}    project_title=${PRJ_TITLE}
     Verify There Is No "Error Displaying Pipelines" After Creating Pipeline Server
     Verify That There Are No Sample Pipelines After Creating Pipeline Server
     Wait Until Pipeline Server Is Deployed    project_title=${PRJ_TITLE}

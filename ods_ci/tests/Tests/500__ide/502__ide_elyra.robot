@@ -76,7 +76,7 @@ Elyra Pipelines Suite Setup    # robocop: off=too-many-calls-in-keyword
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_NAME}
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-ds-pipelines
-    Create Pipeline Server    dc_name=${DC_NAME}
+    Pipelines.Create Pipeline Server    dc_name=${DC_NAME}
     ...    project_title=${PRJ_TITLE}
     Wait Until Pipeline Server Is Deployed    project_title=${PRJ_TITLE}
     Sleep    15s    reason=Wait until pipeline server is detected by dashboard

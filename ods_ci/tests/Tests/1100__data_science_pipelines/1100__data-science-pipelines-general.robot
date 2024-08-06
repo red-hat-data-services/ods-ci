@@ -72,7 +72,7 @@ Create A Pipeline Server And Wait For Dsp Route
     ...                          aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...                          aws_s3_endpoint=${S3.AWS_DEFAULT_ENDPOINT}    aws_region=${S3.AWS_DEFAULT_REGION}
     ...                          aws_bucket_name=${S3_BUCKET}
-    Create Pipeline Server    dc_name=${project}-dc    project_title=${project}
+    Pipelines.Create Pipeline Server    dc_name=${project}-dc    project_title=${project}
     Wait Until Pipeline Server Is Deployed    project_title=${project}
     ${status}    Login And Wait Dsp Route    ${user}    ${password}    ${project}
     Should Be True    ${status} == 200    Could not login to the Data Science Pipelines Rest API OR DSP routing is not working    # robocop: disable:line-too-long

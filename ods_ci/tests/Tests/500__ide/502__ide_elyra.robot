@@ -78,7 +78,7 @@ Elyra Pipelines Suite Setup    # robocop: off=too-many-calls-in-keyword
     ...            aws_bucket_name=ods-ci-ds-pipelines
     Pipelines.Create Pipeline Server    dc_name=${DC_NAME}
     ...    project_title=${PRJ_TITLE}
-    Wait Until Pipeline Server Is Deployed    project_title=${PRJ_TITLE}
+    Wait Until Pipeline Server Is Deployed    namespace=${PRJ_TITLE}
     Sleep    15s    reason=Wait until pipeline server is detected by dashboard
 
 Elyra Pipelines Suite Teardown

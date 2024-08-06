@@ -24,7 +24,7 @@ Run Data Science Pipelines Operator Integration Tests
     [Tags]
     ...     DataSciencePipelines
     ...     Tier1
-    ...     ODS-2632
+    ...     ODS-2632    AutomationBug
     ${openshift_api}    Get Openshift Server
     Log    ${openshift_api}
     ${return_code}    ${output}    Run And Return Rc And Output    cd ${DATA-SCIENCE-PIPELINES-OPERATOR-SDK_DIR} && make integrationtest K8SAPISERVERHOST=${openshift_api} DSPANAMESPACE=${DSPANAMESPACE} KUBECONFIGPATH=${KUBECONFIGPATH}

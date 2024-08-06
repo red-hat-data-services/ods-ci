@@ -11,17 +11,18 @@ Resource          ../../Resources/RHOSi.resource
 *** Variables ***
 ${CODEFLARE-SDK_DIR}                codeflare-sdk
 ${CODEFLARE-SDK_REPO_URL}           %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
-${CODEFLARE-SDK_REPO_BRANCH}        %{CODEFLARE-SDK_REPO_BRANCH=main}
+${CODEFLARE-SDK_REPO_BRANCH}        %{CODEFLARE-SDK_REPO_BRANCH=vv0.14.1}
+${VIRTUAL_ENV_NAME}                 venv3.9
 
 
 *** Test Cases ***
 Run TestMNISTRayClusterSDK test
-    [Documentation]    Run Go E2E test: TestMNISTRayClusterSDK
+    [Documentation]    Run Go E2E test: TestRayClusterSDKOauth
     [Tags]  ODS-2544
     ...     Sanity    Tier1
     ...     DistributedWorkloads
     ...     Codeflare-sdk
-    Run Codeflare-sdk E2E Test    TestMNISTRayClusterSDK
+    Run Codeflare-sdk E2E Test    mnist_raycluster_sdk_oauth_test.py
 
 
 *** Keywords ***
@@ -35,28 +36,51 @@ Prepare Codeflare-sdk E2E Test Suite
     END
     Enable Component    codeflare
     Enable Component    ray
-    Create Directory    %{WORKSPACE}/codeflare-sdk-e2e-logs
+
+     ${result} =    Run Process  virtualenv -p python3.9 ${VIRTUAL_ENV_NAME}
+    ...    shell=true    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Unable to setup Python virtual environment
+    END
+
     RHOSi Setup
 
 Teardown Codeflare-sdk E2E Test Suite
     [Documentation]    Teardown codeflare-sdk E2E Test Suite
     Disable Component    codeflare
     Disable Component    ray
+
+    ${result} =    Run Process  rm -rf ${VIRTUAL_ENV_NAME}
+    ...    shell=true    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL   Unable to cleanup Python virtual environment
+    END
+
+    ${result} =    Run Process    poetry env use 3.11
+    ...    shell=true    stderr=STDOUT
+    IF    ${result.rc} != 0
+        FAIL   Unable to switch python environment 3.11
+    END
+
+    ${result} =    Run Process  rm -rf ${CODEFLARE-SDK_DIR}
+    ...    shell=true    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL   Unable to cleanup directory ${CODEFLARE-SDK_DIR}
+    END
+    
     RHOSi Teardown
 
 Run Codeflare-sdk E2E Test
     [Documentation]    Run codeflare-sdk E2E Test
     [Arguments]    ${test_name}
     Log To Console    Running codeflare-sdk test: ${test_name}
-    ${result} =    Run Process    go test -timeout 30m -v ./tests/e2e -run ${test_name}
+    ${result} =    Run Process  source ${VIRTUAL_ENV_NAME}/bin/activate && cd codeflare-sdk && poetry env use 3.9 && poetry install --with test,docs && poetry run pytest -v -s ./tests/e2e/${TEST_NAME} --timeout\=600 && deactivate
     ...    shell=true
     ...    stderr=STDOUT
-    ...    cwd=${CODEFLARE-SDK_DIR}
-    ...    env:CODEFLARE_TEST_TIMEOUT_SHORT=5m
-    ...    env:CODEFLARE_TEST_TIMEOUT_MEDIUM=10m
-    ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
-    ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-sdk-e2e-logs
     Log To Console    ${result.stdout}
     IF    ${result.rc} != 0
-        FAIL    ${test_name} failed
+        FAIL    ${TEST_NAME} failed
     END

@@ -41,6 +41,7 @@ Resource            Common.robot
 ...                         Generate Minio Random Credentials
 ...                         Get Minio Credentials
 ...                         Create Inference Access Token
+...                         Create Secret With Pipelines Object Storage Information
 
 
 *** Keywords ***

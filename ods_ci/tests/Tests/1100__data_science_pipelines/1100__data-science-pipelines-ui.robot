@@ -4,8 +4,9 @@ Documentation      Suite to test Data Science Pipeline feature using RHODS UI
 Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Pipelines.resource
+Resource           ../../Resources/CLI/DataSciencePipelines/DataSciencePipelinesBackend.resource
 Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipelines.resource
-Test Tags          DataSciencePipelines
+Test Tags          DataSciencePipelines-Dashboard
 Suite Setup        Pipelines Suite Setup
 Suite Teardown     Pipelines Suite Teardown
 
@@ -34,10 +35,10 @@ Verify User Can Create, Run and Delete A DS Pipeline From DS Project Details Pag
 
     Open Data Science Project Details Page    ${PRJ_TITLE}
 
-    Create Pipeline Server    dc_name=${DC_NAME}    project_title=${PRJ_TITLE}
+    Pipelines.Create Pipeline Server    dc_name=${DC_NAME}    project_title=${PRJ_TITLE}
     Verify There Is No "Error Displaying Pipelines" After Creating Pipeline Server
     Verify That There Are No Sample Pipelines After Creating Pipeline Server
-    Wait Until Pipeline Server Is Deployed    project_title=${PRJ_TITLE}
+    Wait Until Pipeline Server Is Deployed    namespace=${PRJ_TITLE}
 
     Import Pipeline    name=${PIPELINE_TEST_NAME}
     ...    description=${PIPELINE_TEST_DESC}

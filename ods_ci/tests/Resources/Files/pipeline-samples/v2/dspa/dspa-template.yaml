@@ -1,0 +1,39 @@
+kind: Template
+apiVersion: template.openshift.io/v1
+metadata:
+    name: dspa-template
+objects:
+    -   apiVersion: datasciencepipelinesapplications.opendatahub.io/v1alpha1
+        kind: DataSciencePipelinesApplication
+        metadata:
+            name: dspa
+        spec:
+            dspVersion:  ${DSP_VERSION}
+            objectStorage:
+                disableHealthCheck: false
+                enableExternalRoute: false
+                externalStorage:
+                    basePath: ''
+                    bucket: ${OBJECT_STORAGE_BUCKET}
+                    host: ${OBJECT_STORAGE_HOST}
+                    port: ''
+                    region: ${OBJECT_STORAGE_REGION}
+                    s3CredentialsSecret:
+                        accessKey: AWS_ACCESS_KEY_ID
+                        secretKey: AWS_SECRET_ACCESS_KEY
+                        secretName: dashboard-dspa-secret
+                    scheme: https
+            podToPodTLS: true
+parameters:
+- description: Kubeflow Pipelines Version
+  value: "v2"
+  name: DSP_VERSION
+- description: Object Storage Bucket Name
+  value: "ods-ci-ds-pipelines"
+  name: OBJECT_STORAGE_BUCKET
+- description: Object Storage Host
+  value: "s3.amazonaws.com"
+  name: OBJECT_STORAGE_HOST
+- description: Object Storage Region
+  value: "us-east-1"
+  name: OBJECT_STORAGE_REGION

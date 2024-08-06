@@ -5,12 +5,12 @@ Resource            ../../../ODS.robot
 Resource            ../../../Common.robot
 Resource            ../../../Page/ODH/ODHDashboard/ODHDashboard.robot
 Library             DateTime
+Resource            ../../../CLI/DataSciencePipelines/DataSciencePipelinesBackend.resource
 Library             ../../../../../libs/DataSciencePipelinesAPI.py
 Resource            ODHDataScienceProject/Pipelines.resource
 
 
 *** Variables ***
-${DATA_SCIENCE_PIPELINES_APPLICATION_PATH}=      tests/Resources/Files
 ${PIPELINES_IMPORT_BTN_FORM_XP}=                 xpath://*[@data-testid="import-button"]
 ${PIPELINE_NAME_INPUT_XP}=                       xpath://*[@data-testid="pipeline-name"]
 ${PIPELINE_DESC_INPUT_XP}=                       xpath://*[@data-testid="pipeline-description"]
@@ -23,23 +23,6 @@ ${PIPELINE_EXPERIMENT_TABLE_XP}=                 xpath://*[@data-testid="experim
 
 
 *** Keywords ***
-# robocop: disable:line-too-long
-Install DataSciencePipelinesApplication CR
-    [Documentation]    Install and verifies that DataSciencePipelinesApplication CRD is installed and working
-    [Arguments]     ${project}    ${dsp_file}=data-science-pipelines-sample.yaml    ${assert_install}=True
-    Log    ${project}
-    Oc Apply    kind=DataSciencePipelinesApplication    src=${DATA_SCIENCE_PIPELINES_APPLICATION_PATH}/${dsp_file}    namespace=${project}
-    IF    ${assert_install}==True
-        ${generation_value}    Run    oc get datasciencepipelinesapplications -n ${project} -o json | jq '.items[0].metadata.generation'
-        Should Be True    ${generation_value} == 2    DataSciencePipelinesApplication created
-    END
-
-Create Pipelines ConfigMap With Custom Pip Index Url And Trusted Host
-    [Documentation]     Creates a Configmap (ds-pipeline-custom-env-vars) in the project,
-    ...    storing the values for pip_index_url and pip_trusted_host
-    [Arguments]    ${project_title}
-    Run     oc create configmap ds-pipeline-custom-env-vars --from-literal=pip_index_url=${PIP_INDEX_URL} --from-literal=pip_trusted_host=${PIP_TRUSTED_HOST} -n ${project_title}
-
 Fill In Pipeline Import Form
     [Documentation]    Compiles the form to create a pipeline.
     ...                It works when you start server creation from either
@@ -151,7 +134,7 @@ Delete Pipeline Server
     Click Element    xpath://button/span/span[text()='Delete pipeline server']
     Handle Deletion Confirmation Modal    ${data_science_project_name} pipeline server    pipeline server
     Wait Until Page Contains     text=Configure pipeline server    timeout=120s
-    Pipelines.Wait Until Pipeline Server Is Deleted    ${data_science_project_name}
+    DataSciencePipelinesBackend.Wait Until Pipeline Server Is Deleted    ${data_science_project_name}
 
 Verify There Is No "Error Displaying Pipelines" After Creating Pipeline Server
     [Documentation]    Verify me message "Error displaying Pipelines" after creating pipeline server

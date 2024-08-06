@@ -36,7 +36,7 @@ Verify User Can Serve And Query ovms Model
     ...    kserve_mode=${KSERVE_MODE}
     Set Project And Runtime    runtime=${RUNTIME_NAME}     protocol=${PROTOCOL}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}
-    ...    storage_size=1Gi    memory_request=1Gi
+    ...    storage_size=100Mi    memory_request=100Mi
     ${requests}=    Create Dictionary    memory=1Gi
     Compile Inference Service YAML    isvc_name=${model_name}
     ...    sa_name=${EMPTY}
@@ -45,16 +45,21 @@ Verify User Can Serve And Query ovms Model
     ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
+    # File is not needed anymore after applying
+    Remove File    ${INFERENCESERVICE_FILLED_FILEPATH}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ${service_port}=    Extract Service Port    service_name=${model_name}-predictor    protocol=TCP    namespace=${test_namespace}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ${service_port}=    Extract Service Port    service_name=${model_name}-predictor    protocol=TCP
+    ...    namespace=${test_namespace}
     Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
     ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}  local_port=${service_port}
     ...    remote_port=${service_port}    process_alias=ovms-process
     Verify Model Inference With Retries   model_name=${model_name}    inference_input=${INFERENCE_INPUT}
-    ...    expected_inference_output=${EXPECTED_INFERENCE_OUTPUT}   project_title=${test_namespace}    deployment_mode="Cli"  kserve_mode=${KSERVE_MODE}
-    ...    service_port=${service_port}   end_point=/v2/models/${model_name}/infer  retries=10
+    ...    expected_inference_output=${EXPECTED_INFERENCE_OUTPUT}   project_title=${test_namespace}
+    ...    deployment_mode="Cli"  kserve_mode=${KSERVE_MODE}    service_port=${service_port}
+    ...    end_point=/v2/models/${model_name}/infer  retries=10
 
    [Teardown]    Run Keywords
    ...    Clean Up Test Project    test_ns=${test_namespace}

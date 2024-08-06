@@ -62,13 +62,15 @@ Verify Ods Users Can Do Http Request That Must Be Redirected to Https
 Verify DSPO Operator Reconciliation Retry
     [Documentation]    Verify DSPO Operator is able to recover from missing components during the initialization
     [Tags]      Sanity    Tier1    ODS-2477
+
     ${local_project_name} =    Set Variable    recon-test
     New Project    ${local_project_name}
-    DataSciencePipelinesBackend.Create PipelineServer Using Custom DSPA    ${local_project_name}    data-science-pipelines-reconciliation.yaml    False
+    DataSciencePipelinesBackend.Create PipelineServer Using Custom DSPA
+    ...    ${local_project_name}    data-science-pipelines-reconciliation.yaml    False
     Wait Until Keyword Succeeds    15 times    1s
     ...    Double Check If DSPA Was Created    ${local_project_name}
     DSPA Should Reconcile
-    ${rc}  ${out} =    Run And Return Rc And Output   oc apply -f DataSciencePipelinesBackend.${DSPA_PATH}/dummy-storage-creds.yaml -n ${local_project_name}
+    ${rc}  ${out} =    Run And Return Rc And Output   oc apply -f ${DSPA_PATH}/dummy-storage-creds.yaml -n ${local_project_name}
     IF    ${rc}!=0    Fail
     # one pod is good when reconciliation finished
     Wait For Pods Number  1    namespace=${local_project_name}    timeout=60

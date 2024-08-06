@@ -12,7 +12,8 @@ Resource          ../../Resources/RHOSi.resource
 ${CODEFLARE-SDK_DIR}                codeflare-sdk
 ${CODEFLARE-SDK_REPO_URL}           %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
 ${CODEFLARE-SDK_REPO_BRANCH}        %{CODEFLARE-SDK_REPO_BRANCH=vv0.14.1}
-${VIRTUAL_ENV_NAME}                 venv3.9
+${PYTHON_VERSION}                   3.9
+${VIRTUAL_ENV_NAME}                 venv${PYTHON_VERSION}
 
 
 *** Test Cases ***
@@ -37,7 +38,7 @@ Prepare Codeflare-sdk E2E Test Suite
     Enable Component    codeflare
     Enable Component    ray
 
-     ${result} =    Run Process  virtualenv -p python3.9 ${VIRTUAL_ENV_NAME}
+     ${result} =    Run Process  virtualenv -p python${PYTHON_VERSION} ${VIRTUAL_ENV_NAME}
     ...    shell=true    stderr=STDOUT
     Log To Console    ${result.stdout}
     IF    ${result.rc} != 0
@@ -77,10 +78,10 @@ Run Codeflare-sdk E2E Test
     [Documentation]    Run codeflare-sdk E2E Test
     [Arguments]    ${test_name}
     Log To Console    Running codeflare-sdk test: ${test_name}
-    ${result} =    Run Process  source ${VIRTUAL_ENV_NAME}/bin/activate && cd codeflare-sdk && poetry env use 3.9 && poetry install --with test,docs && poetry run pytest -v -s ./tests/e2e/${TEST_NAME} --timeout\=600 && deactivate
+    ${result} =    Run Process  source ${VIRTUAL_ENV_NAME}/bin/activate && cd codeflare-sdk && poetry env use ${PYTHON_VERSION} && poetry install --with test,docs && poetry run pytest -v -s ./tests/e2e/${test_name} --timeout\=600 && deactivate
     ...    shell=true
     ...    stderr=STDOUT
     Log To Console    ${result.stdout}
     IF    ${result.rc} != 0
-        FAIL    ${TEST_NAME} failed
+        FAIL    ${test_name} failed
     END

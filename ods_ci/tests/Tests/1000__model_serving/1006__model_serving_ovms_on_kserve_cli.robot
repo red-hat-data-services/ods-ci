@@ -10,7 +10,7 @@ Test Tags         KServe-OVMS
 
 *** Variables ***
 ${TEST_NS}=        ovmsmodel
-${RUNTIME_NAME}=  ovms-runtime   
+${RUNTIME_NAME}=  ovms-runtime
 ${USE_PVC}=    ${TRUE}
 ${DOWNLOAD_IN_PVC}=    ${TRUE}
 ${USE_GPU}=    ${FALSE}
@@ -36,8 +36,8 @@ Verify User Can Serve And Query ovms Model
     ...    kserve_mode=${KSERVE_MODE}
     Set Project And Runtime    runtime=${RUNTIME_NAME}     protocol=${PROTOCOL}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}
-    ...    storage_size=5Gi
-    ${requests}=    Create Dictionary    memory=5Gi
+    ...    storage_size=1Gi    memory_request=1Gi
+    ${requests}=    Create Dictionary    memory=1Gi
     Compile Inference Service YAML    isvc_name=${model_name}
     ...    sa_name=${EMPTY}
     ...    model_storage_uri=${storage_uri}

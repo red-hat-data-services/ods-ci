@@ -32,6 +32,21 @@ Run TestKueueRayGpu ODH test
     ...     CodeflareOperator
     Run Codeflare ODH Test    TestMnistRayGpu
 
+Run TestRayTuneHPOCpu ODH test
+    [Documentation]    Run Go ODH test: TestMnistRayTuneHpoCpu
+    [Tags]  RHOAIENG-10004
+    ...     Tier1
+    ...     DistributedWorkloads
+    ...     CodeflareOperator
+    Run Codeflare ODH Test    TestMnistRayTuneHpoCpu
+
+Run TestRayTuneHPOGpu ODH test
+    [Documentation]    Run Go ODH test: TestMnistRayTuneHpoGpu
+    [Tags]  Resources-GPU
+    ...     Tier1
+    ...     DistributedWorkloads
+    ...     CodeflareOperator
+    Run Codeflare ODH Test    TestMnistRayTuneHpoGpu
 
 *** Keywords ***
 Prepare Codeflare E2E Test Suite

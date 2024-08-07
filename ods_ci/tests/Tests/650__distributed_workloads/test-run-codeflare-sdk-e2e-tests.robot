@@ -11,7 +11,7 @@ Resource          ../../Resources/RHOSi.resource
 *** Variables ***
 ${CODEFLARE-SDK_DIR}                codeflare-sdk
 ${CODEFLARE-SDK_REPO_URL}           %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
-${CODEFLARE-SDK_REPO_BRANCH}        %{CODEFLARE-SDK_REPO_BRANCH=vv0.14.1}
+${CODEFLARE-SDK_REPO_BRANCH}        %{CODEFLARE-SDK_REPO_BRANCH=adjustments-release-v0.14.1}
 ${PYTHON_VERSION}                   3.9
 ${VIRTUAL_ENV_NAME}                 venv${PYTHON_VERSION}
 

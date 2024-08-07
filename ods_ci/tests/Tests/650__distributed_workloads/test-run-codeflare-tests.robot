@@ -9,7 +9,7 @@ Resource          ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 
 *** Variables ***
 ${CODEFLARE_DIR}                codeflare-operator
-${CODEFLARE_RELEASE_ASSETS}     %{CODEFLARE_RELEASE_ASSETS=https://github.com/opendatahub-io/codeflare-operator/releases/latest/download}
+${CODEFLARE_RELEASE_ASSETS}     %{CODEFLARE_RELEASE_ASSETS=https://github.com/opendatahub-io/codeflare-operator/releases/download/v1.2.0}
 ${ODH_NAMESPACE}                %{ODH_NAMESPACE=redhat-ods-applications}
 ${NOTEBOOK_IMAGE_STREAM_NAME}   %{NOTEBOOK_IMAGE_STREAM_NAME=s2i-generic-data-science-notebook}
 

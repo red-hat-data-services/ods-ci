@@ -1,3 +1,13 @@
+"""
+The script compares the given build date (e.g. received in the UMB message) and
+the code freeze date which is reported in Smartsheet.
+If the date is over the the code freeze, the build is considered a Release Candidate.
+
+Output: 
+- returns code 0 if the build is RC
+- returns code 1 if the build is NOT RC
+"""
+
 import argparse
 from datetime import datetime
 import smartsheet

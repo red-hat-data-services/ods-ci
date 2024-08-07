@@ -68,12 +68,14 @@ Set Project And Runtime
     [Arguments]    ${namespace}    ${enable_metrics}=${FALSE}    ${runtime}=caikit-tgis-runtime    ${protocol}=grpc
     ...            ${access_key_id}=${S3.AWS_ACCESS_KEY_ID}    ${access_key}=${S3.AWS_SECRET_ACCESS_KEY}
     ...            ${endpoint}=${MODELS_BUCKET.ENDPOINT}    ${verify_ssl}=${TRUE}
-    ...            ${download_in_pvc}=${FALSE}    ${storage_size}=70Gi    ${model_name}=${NONE}    ${model_path}=${model_name}    ${download_timeout}=600s
+    ...            ${download_in_pvc}=${FALSE}    ${storage_size}=70Gi    ${model_name}=${NONE}
+    ...            ${model_path}=${model_name}    ${download_timeout}=600s    ${memory_request}=40Gi
     Set Up Test OpenShift Project    test_ns=${namespace}
     IF    ${download_in_pvc}
-        Create PVC And Download Model From S3    model_name=${model_name}    namespace=${namespace}    bucket_name=${MODELS_BUCKET.NAME}
-        ...    use_https=${USE_BUCKET_HTTPS}    download_timeout=${download_timeout}
-        ...    storage_size=${storage_size}    model_path=${model_path}
+        Create PVC And Download Model From S3    model_name=${model_name}    namespace=${namespace}
+        ...    bucket_name=${MODELS_BUCKET.NAME}    use_https=${USE_BUCKET_HTTPS}
+        ...    download_timeout=${download_timeout}    storage_size=${storage_size}    model_path=${model_path}
+        ...    memory_request=${memory_request}
     ELSE
         Create Secret For S3-Like Buckets    endpoint=${endpoint}
         ...    region=${MODELS_BUCKET.REGION}    namespace=${namespace}
@@ -734,7 +736,7 @@ Clean Up Test Project
 Create PVC And Download Model From S3
     [Arguments]    ${model_name}    ${bucket_name}
     ...            ${use_https}    ${namespace}    ${storage_size}
-    ...            ${model_path}    ${download_timeout}=500s
+    ...            ${model_path}    ${memory_request}    ${download_timeout}=500s
     Set Log Level    NONE
     Set Test Variable    ${model_name}
     Set Test Variable    ${bucket_name}
@@ -743,10 +745,13 @@ Create PVC And Download Model From S3
     Set Test Variable    ${namespace}
     Set Test Variable    ${storage_size}
     Set Test Variable    ${model_path}
+    Set Test Variable    ${memory_request}
     Set Log Level    INFO
     Create File From Template    ${DOWNLOAD_PVC_FILEPATH}    ${DOWNLOAD_PVC_FILLED_FILEPATH}
     ${rc}    ${out}=    Run And Return Rc And Output    oc -n ${namespace} apply -f ${DOWNLOAD_PVC_FILLED_FILEPATH}
     Should Be Equal As Integers    ${rc}    ${0}
+    # No reason to keep this file around once it's applied
+    Remove File    ${DOWNLOAD_PVC_FILLED_FILEPATH}
     Run Keyword And Continue On Failure   Wait For Pods To Be Ready    label_selector=name=download-${model_name}    namespace=${namespace}
     Wait For Pods To Succeed    label_selector=name=download-${model_name}    namespace=${namespace}
     ...    timeout=${download_timeout}

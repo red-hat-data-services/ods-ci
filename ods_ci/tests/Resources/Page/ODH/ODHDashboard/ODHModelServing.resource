@@ -312,6 +312,9 @@ Get Model Inference
     END
 
     ${inference_output}=    Run    ${curl_cmd}
+    # Passes if file does not exist, cleans up otherwise. No point keeping these after executing the curl call.
+    Remove File    openshift_ca_istio_knative.crt
+    Remove File    openshift_ca.crt
     RETURN    ${inference_output}
 
 Verify Model Inference

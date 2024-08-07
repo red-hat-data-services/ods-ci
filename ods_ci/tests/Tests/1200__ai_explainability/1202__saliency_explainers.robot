@@ -30,7 +30,7 @@ ${FRAMEWORK_ONNX}=                   onnx - 1
 *** Test Cases ***
 Verify Lime And SHAP Explainers Are Availble For A Model Deployed Via CLI
     [Documentation]    Verifies that the Lime and shap Explainers are available on sending a request
-    [Tags]    OpenDataHub     Smoke    RHOAIENG-9628     ExcludeOnRHOAI    test
+    [Tags]    OpenDataHub     Smoke    RHOAIENG-9628     ExcludeOnRHOAI
     Set Project And Serving Runtime    namespace=${TEST_NS}    runtime_path=${EXPLAINERS_PATH}/odh-mlserver-1.x.yaml
     Oc Apply    kind=Secret    src=${EXPLAINERS_PATH}/storage-config.yaml     namespace=${TEST_NS}
     Deploy Model Via CLI    isvc_filepath=${EXPLAINERS_PATH}/housing.yaml

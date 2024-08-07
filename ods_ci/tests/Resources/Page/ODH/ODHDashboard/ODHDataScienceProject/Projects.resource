@@ -382,10 +382,15 @@ Filter Projects By ${Type}
     [Documentation]    Search for projects where ${Type} includes "${text}"
     [Arguments]     ${text}
     Open Data Science Projects Home Page
-    Wait Until Page Contains Element    xpath:${PROJECT_SEARCH_BAR}
-    Click Element    xpath:${PROJECT_FILTER_TYPE}
-    Click Element    xpath:${PROJECT_SEARCH_BAR}//li[@data-testid="dropdown-item ${Type}"]
-    Input Text    ${PROJECT_SEARCH_INPUT}    ${text}
+    ${searchbar_exists}=    Run Keyword And Return Status
+    ...    Page Should Contain Element    xpath:${PROJECT_SEARCH_BAR}
+    IF    ${searchbar_exists}
+        Click Element    xpath:${PROJECT_FILTER_TYPE}
+        Click Element    xpath:${PROJECT_SEARCH_BAR}//li[@data-testid="dropdown-item ${Type}"]
+        Input Text    ${PROJECT_SEARCH_INPUT}    ${text}
+    ELSE
+        Log    No projects are listed
+    END
 
 Check Pagination Is Correct On The Current Page
     [Documentation]    Check the pagination is correct for the Data Science displayed on current page

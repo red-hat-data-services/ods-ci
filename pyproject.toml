@@ -39,6 +39,7 @@ python-levenshtein = "^0.25.1"
 # Needed by Sealights: opentelemetry-distro,pyjwt
 opentelemetry-distro = "^0.46b0"
 pyjwt = "^2.8.0"
+smartsheet-python-sdk = "^3.0"
 
 
 [tool.poetry.group.dev.dependencies]

@@ -58,7 +58,7 @@ def is_build_rc(sheet, build_version, build_date, build_date_format):
     else:
         print(f"The buiild {build_version} is NOT an RC because created before code freeze date {cf_date} ")
         missing_days = cf_date - build_date
-        print(missing_days.days)
+        print(f"Days remaining from Code Freeze {missing_days.days}")
         sys.exit(1)
 
 

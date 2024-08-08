@@ -9,11 +9,12 @@ Output:
 """
 
 import argparse
-from datetime import datetime
-import smartsheet
 import re
-import semver
 import sys
+from datetime import datetime
+
+import semver
+import smartsheet
 
 
 def parse_date(date_string, format):
@@ -23,21 +24,22 @@ def parse_date(date_string, format):
             date = datetime.fromisoformat(date_string).date()
         except ValueError as e:
             print(e)
-            print(">> [ERROR]The given build date string {date_string} is not compatible with ISO format.")
+            print(f">> [ERROR]The given build date string {date_string} is not compatible with ISO format.")
         except Exception as e:
             print(e)
-            print("Something went wrong while converting the build date string {date_string} to datetime.")
+            print(f"Something went wrong while converting the build date string {date_string} to datetime.")
     else:
         try:
             date = datetime.strptime(date_string, format).date()
         except ValueError as e:
             print(e)
-            print(">>> [ERROR] The given build date string {date_string} is not compatible with given {format} format.")
+            print(f">>> [ERROR] The given build date string {date_string} is not compatible with given {format} format.")
     return date
 
 
 def get_code_freeze_date(sheet, build_version):
     xy_ver = ""
+    codefreeze = ""
     for idx, item in enumerate(semver.VersionInfo.parse(build_version)):
         xy_ver += str(item)
         if idx + 1 > 1:
@@ -50,7 +52,8 @@ def get_code_freeze_date(sheet, build_version):
             and re.match(xy_ver + r"[\s]+code.?freeze", str(row.cells[1].value).lower())
         ):
             codefreeze = datetime.strptime(row.cells[3].value, "%Y-%m-%dT%H:%M:%S").date()
-            return codefreeze
+            break
+    return codefreeze
 
 
 def is_build_rc(sheet, build_version, build_date, build_date_format):

@@ -3,7 +3,7 @@ The script compares the given build date (e.g. received in the UMB message) and
 the code freeze date which is reported in Smartsheet.
 If the date is over the the code freeze, the build is considered a Release Candidate.
 
-Output: 
+Output:
 - returns code 0 if the build is RC
 - returns code 1 if the build is NOT RC
 """
@@ -35,18 +35,23 @@ def parse_date(date_string, format):
             print(">>> [ERROR] The given build date string {date_string} is not compatible with given {format} format.")
     return date
 
+
 def get_code_freeze_date(sheet, build_version):
     xy_ver = ""
     for idx, item in enumerate(semver.VersionInfo.parse(build_version)):
         xy_ver += str(item)
-        if idx+1 > 1:
+        if idx + 1 > 1:
             break
         xy_ver += "."
-    print(xy_ver)
     for row in sheet.rows:
-        if row.cells[3].value and row.cells[1].value and re.match(xy_ver+r'[\s]+code.?freeze', str(row.cells[1].value).lower()):
-            codefreeze = datetime.strptime(row.cells[3].value, '%Y-%m-%dT%H:%M:%S').date()
+        if (
+            row.cells[3].value
+            and row.cells[1].value
+            and re.match(xy_ver + r"[\s]+code.?freeze", str(row.cells[1].value).lower())
+        ):
+            codefreeze = datetime.strptime(row.cells[3].value, "%Y-%m-%dT%H:%M:%S").date()
             return codefreeze
+
 
 def is_build_rc(sheet, build_version, build_date, build_date_format):
     cf_date = get_code_freeze_date(sheet, build_version)
@@ -62,42 +67,42 @@ def is_build_rc(sheet, build_version, build_date, build_date_format):
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '--smartsheet-token',
-        default='',
+        "--smartsheet-token",
+        default="",
         required=True,
-        help='Token to access Smartshee API',
-        dest='sheet_token'
+        help="Token to access Smartshee API",
+        dest="sheet_token",
     )
     parser.add_argument(
-        '--smartsheet-id',
-        default='',
+        "--smartsheet-id",
+        default="",
         required=True,
-        help='ID of the smartsheet containing RHOAI dates',
-        dest='sheet_id'
+        help="ID of the smartsheet containing RHOAI dates",
+        dest="sheet_id",
     )
     parser.add_argument(
-        '--build-version',
-        default='',
+        "--build-version",
+        default="",
         required=True,
-        help='RHOAI version of the target build (e.g., 2.13.0)',
-        dest='build_version'
+        help="RHOAI version of the target build (e.g., 2.13.0)",
+        dest="build_version",
     )
     parser.add_argument(
-        '--build-date',
-        default='',
+        "--build-date",
+        default="",
         required=True,
-        help='Date the build was created',
-        dest='build_date'
+        help="Date the build was created",
+        dest="build_date",
     )
     parser.add_argument(
-        '--date-format',
-        default='ISO',
+        "--date-format",
+        default="ISO",
         required=False,
-        help='Date format of the build date argument. e.g., %Y-%m-%dT%H:%M:%S',
-        dest='build_date_format'
+        help="Date format of the build date argument. e.g., %Y-%m-%dT%H:%M:%S",
+        dest="build_date_format",
     )
     args = parser.parse_args()
 

@@ -128,6 +128,13 @@ Get All Strings That Contain
     END
     RETURN   ${matched_list}
 
+Lists Should Contain Same Items
+    [Documentation]  Compare two lists, but ignore the order of the items
+    [Arguments]   ${list_one}    ${list_two}
+    Sort List  ${list_one}
+    Sort List  ${list_two}
+    Lists Should Be Equal      ${list_one}  ${list_two}
+
 Page Should Contain A String In List
     [Documentation]    Verifies that page contains at least one of the strings in text_list
     [Arguments]  ${text_list}

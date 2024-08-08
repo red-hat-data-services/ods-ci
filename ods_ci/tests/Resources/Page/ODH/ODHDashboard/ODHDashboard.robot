@@ -176,7 +176,7 @@ Verify Service Is Available In The Explore Page
   END
 
 Verify Service Is Not Available In The Explore Page
-  [Documentation]   Verify the service appears in Applications > Explore
+  [Documentation]   Verify the service does not appear in Applications > Explore
   [Arguments]  ${app_name}    ${split_last}=${FALSE}
   Menu.Navigate To Page    Applications    Explore
   Wait For RHODS Dashboard To Load    expected_page=Explore

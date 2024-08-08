@@ -12,7 +12,7 @@ Resource          ../../Resources/RHOSi.resource
 ${TRUSTYAI-TESTS_URL}                 %{TRUSTYAI-TESTS-URL=https://github.com/trustyai-explainability/trustyai-tests}
 ${TRUSTYAI-TESTS_DIR}                 trustyai-tests
 ${GIT_BRANCH}                         main
-${PYTHON_VERSION}                     3.9
+${PYTHON_VERSION}                     3.12
 ${VIRTUAL_ENV_NAME}                   venv${PYTHON_VERSION}
 ${TESTS_FOLDER}                       drift
 ${LOG_OUTPUT_FILE}                    drift_test.txt
@@ -33,7 +33,7 @@ Prepare TrustyAi-tests Test Suite
     RHOSi Setup
 
 Teardown TrustyAi-tests Test Suite
-    [Documentation]    Teardown codeflare-sdk E2E Test Suite
+    [Documentation]    TrustyAi-tests Test Suite
     Cleanup TrustyAI-Tests Setup
     RHOSi Teardown
 

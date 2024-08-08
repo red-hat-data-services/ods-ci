@@ -1,0 +1,14 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: ${isvc_name}
+spec:
+  predictor:
+    model:
+          args:
+            - "--dtype=float16"
+            - "--tensor-parallel-size=1"
+            - "--speculative-model=[ngram]"
+            - '--num-speculative-tokens=5'
+            - '--ngram-prompt-lookup-max=4'
+            - '--use-v2-block-manager'

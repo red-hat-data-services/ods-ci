@@ -27,6 +27,7 @@ ${KSERVE_MODAL_HEADER}=    //header[@class="pf-v5-c-modal-box__header"]/h1[.="De
 ${KSERVE_RUNTIME_DROPDOWN}=    //button[@data-testid="serving-runtime-template-selection"]
 ${LLM_RESOURCES_DIRPATH}=    tests/Resources/Files/llm
 ${DEPLOY_MODEL_BTN}=    //button[contains(@data-testid,"deploy")]
+${TOKEN_AUTH_CHECKBOX_XP}=    xpath://input[@id="alt-form-checkbox-auth"]
 
 
 *** Keywords ***
@@ -285,7 +286,7 @@ Get Model Inference
         END
     END
     IF  ${deployment_mode} == 'Cli'
-        ${rc}   ${cmd_op}   Run And Return Rc And Output    
+        ${rc}   ${cmd_op}   Run And Return Rc And Output
         ...    oc get isvc ${model_name} -o jsonpath='{.metadata.annotations.serving\.kserve\.io/deploymentMode}' -n ${project_title}
         Should Be Equal As Integers    ${rc}    0
          IF  "${cmd_op}" != "ModelMesh"
@@ -294,15 +295,17 @@ Get Model Inference
          ELSE IF  ${self_managed}
             Fetch Openshift CA Bundle
             ${cert}=   Set Variable   --cacert openshift_ca.crt
-        END     
+        END
         IF    '${kserve_mode}' == 'Serverless'
                ${rc}    ${url}=    Run And Return Rc And Output    oc get ksvc ${model_name}-predictor -n ${project_title} -o jsonpath='{.status.url}'
                Should Be Equal As Integers    ${rc}    0
-               ${curl_cmd}=    Set Variable    curl -s ${url}${end_point} -d ${inference_input} 
-        
+               ${curl_cmd}=    Set Variable    curl -s ${url}${end_point} -d ${inference_input}
+
         ELSE IF    '${kserve_mode}' == 'RawDeployment'
             ${url}=   Set Variable    http://localhost:${service_port}${end_point}
             ${curl_cmd}=    Set Variable    curl -s ${url} -d ${inference_input} --cacert openshift_ca_istio_knative.crt
+        ELSE
+            Log    "Modelmesh CLI mode only"
         END
         IF    ${token_auth}
               ${token}=    Create Inference Access Token    ${project_title}    ${DEFAULT_BUCKET_SA_NAME}
@@ -311,13 +314,16 @@ Get Model Inference
     END
 
     ${inference_output}=    Run    ${curl_cmd}
+    # Passes if file does not exist, cleans up otherwise. No point keeping these after executing the curl call.
+    Remove File    openshift_ca_istio_knative.crt
+    Remove File    openshift_ca.crt
     RETURN    ${inference_output}
 
 Verify Model Inference
     [Documentation]    Verifies that the inference result of a model is equal to an expected output
     [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}=${FALSE}
     ...    ${project_title}=${NONE}    ${deployment_mode}='UI'   ${kserve_mode}=Serverless
-    ...    ${service_port}=${NONE}   ${end_point}=${NONE} 
+    ...    ${service_port}=${NONE}   ${end_point}=${NONE}
     IF   ${deployment_mode} == 'UI'
          Open Model Serving Home Page
          Switch Model Serving Project    ${project_title}
@@ -343,9 +349,9 @@ Verify Model Inference With Retries
     ...                timing: model not ready to reply yet, despite the pod is up and running and the
     ...                endpoint exposed.
     ...                This is a temporary mitigation meanwhile we find a better way to check the model
-    [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}=${FALSE}    
+    [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}=${FALSE}
     ...            ${project_title}=${NONE}    ${retries}=${5}     ${deployment_mode}=UI    ${kserve_mode}=Serverless
-    ...            ${service_port}=${NONE}   ${end_point}=${NONE} 
+    ...            ${service_port}=${NONE}   ${end_point}=${NONE}
     ${status}=    Run Keyword And Return Status    Verify Model Inference
     ...    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}    ${project_title}
     IF    not ${status}
@@ -426,6 +432,7 @@ Deploy Kserve Model Via UI  #robocop: disable
     [Arguments]    ${model_name}    ${serving_runtime}    ${data_connection}    ${path}
     ...    ${model_framework}=caikit    ${replicas}=1    ${size}=Small    ${no_gpus}=${0}
     ...    ${token}=${FALSE}    ${multi_token}=${FALSE}    ${multi_service_account_name}=default-name2
+    ...    ${public_endpoint}=${TRUE}
     Move To Tab    Models
     Click Button    ${DEPLOY_MODEL_BTN}
     Wait Until Page Contains Element    xpath=${KSERVE_MODAL_HEADER}
@@ -434,6 +441,19 @@ Deploy Kserve Model Via UI  #robocop: disable
     Select Framework    ${model_framework}
     Set Replicas Number With Buttons    ${replicas}
     Set Server Size    ${size}
+    IF    ${public_endpoint}
+        Enable External Serving Route
+        # By default this also enables Token Authentication. Let's disable it and let it get re-enable by the next
+        # IF block if needed.
+        ${token_enabled} =     Run Keyword And Return Status    SeleniumLibrary.Checkbox Should Be Selected
+        ...    ${TOKEN_AUTH_CHECKBOX_XP}
+        IF    ${token_enabled}
+            Disable Token Authentication
+        ELSE
+            Log    Token Authentication was supposed to be automatically enabled, but it wasn't    level=ERROR
+            ...    console=${True}
+        END
+    END
     IF    ${token}
         Enable Token Authentication
         IF    ${multi_token}
@@ -568,17 +588,9 @@ Clean Up DSP Page
     END
     Open Data Science Projects Home Page
     ${projects}=    Get All Displayed Projects
-    ${projects_count}=    Get Length    ${projects}
-    WHILE    ${projects_count} > 0    limit=${projects_count}m
-    ...    on_limit_message=Timeout exceeded waiting for all DS projects deletion
-        Delete Data Science Projects From CLI    ${projects}
-        Reload Page
-        ${reloaded}=    Run Keyword And Return Status
-        ...    SeleniumLibrary.Wait Until Page Contains    Data science projects    timeout=30s
-        IF  ${reloaded}==${FALSE}    SeleniumLibrary.Capture Page Screenshot
-        ${projects}=    Get All Displayed Projects
-        ${projects_count}=    Get Length    ${projects}
-    END
+    Delete Data Science Projects From CLI    ${projects}
+    Reload Page
+    Wait For Dashboard Page Title    Data Science Projects    timeout=30s
 
 Clean All Models Of Current User
     [Documentation]    Tries to clean up DSP and Model Serving pages

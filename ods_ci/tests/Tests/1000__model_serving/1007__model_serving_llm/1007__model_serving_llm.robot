@@ -556,7 +556,7 @@ Verify User Can Serve And Query A Model With Token
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                With Token using Kserve and Caikit+TGIS runtime
     [Tags]    RHOAIENG-6333
-    ...       Tier1
+    ...       Tier1    AutomationBug
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}-cli
     ${test_namespace}=    Set Variable     ${TEST_NS}-cli
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -566,20 +566,21 @@ Verify User Can Serve And Query A Model With Token
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     ...    overlays=${overlays}
-
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
     ...    namespace=${test_namespace}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
-   Create Role Binding For Authorino   name=${DEFAULT_BUCKET_PREFIX}   namespace=${test_namespace}
-   ${inf_token}     Create Inference Access Token   ${test_namespace}    ${DEFAULT_BUCKET_SA_NAME}
+    Create Role Binding For Authorino   name=${DEFAULT_BUCKET_PREFIX}   namespace=${test_namespace}
+    # TODO: The token created from this keyword does not work to query the model, it will result in a 401 Unauthorized
+    # error being sent back. Investigate and figure out why, fix the logic.
+    ${inf_token}=    Create Inference Access Token   ${test_namespace}   ${DEFAULT_BUCKET_SA_NAME}
+    Sleep    600s
     Query Model Multiple Times    model_name=${flan_model_name}
     ...    inference_type=all-tokens    n_times=1
-    ...    namespace=${test_namespace}   token=${inf_token}
+    ...    namespace=${test_namespace}   token=${inf_token}    protocol=http
     Query Model Multiple Times    model_name=${flan_model_name}
     ...    inference_type=streaming    n_times=1
-    ...    namespace=${test_namespace}   token=${inf_token}
-
+    ...    namespace=${test_namespace}   token=${inf_token}    protocol=http
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 

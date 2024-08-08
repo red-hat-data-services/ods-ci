@@ -23,6 +23,7 @@ Can Install RHODS Operator
   [Tags]  install
   IF  "${PRODUCT}" == "ODH"
       Set Global Variable  ${OPERATOR_NAMESPACE}  opendatahub-operators
+      Set Global Variable  ${OPERATOR_NAME_LABEL}  opendatahub-operator
       IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
           Set Global Variable  ${OPERATOR_NAME}  rhods-operator
       ELSE
@@ -30,6 +31,7 @@ Can Install RHODS Operator
       END
   ELSE
       Set Global Variable  ${OPERATOR_NAME}  rhods-operator
+      Set Global Variable  ${OPERATOR_NAME_LABEL}  rhods-operator
   END
   Given Selected Cluster Type ${cluster_type}
   When Installing RHODS Operator ${image_url}

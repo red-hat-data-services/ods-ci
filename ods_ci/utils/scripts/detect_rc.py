@@ -27,13 +27,13 @@ def parse_date(date_string, format):
             print(f">> [ERROR]The given build date string {date_string} is not compatible with ISO format.")
         except Exception as e:
             print(e)
-            print(f"Something went wrong while converting the build date string {date_string} to datetime.")
+            print(f">> Something went wrong while converting the build date string {date_string} to datetime.")
     else:
         try:
             date = datetime.strptime(date_string, format).date()
         except ValueError as e:
             print(e)
-            print(f">>> [ERROR] The given build date string {date_string} is not compatible with given {format} format.")
+            print(f">>> [ERROR] The given build date string {date_string} is not compatible with {format} format.")
     return date
 
 

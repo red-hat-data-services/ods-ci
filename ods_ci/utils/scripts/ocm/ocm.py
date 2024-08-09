@@ -262,6 +262,16 @@ class OpenshiftClusterManager:
             sys.exit(1)
         return cluster_console_url.strip("\n")
 
+    def get_osd_cluster_api_url(self):
+        """Gets osd cluster api url"""
+
+        filter_str = "--json | jq -r '.api.url'"
+        cluster_api_url = self.ocm_describe(jq_filter=filter_str)
+        if cluster_api_url in [None, ""]:
+            log.error(f"Unable to retrieve cluster api url for cluster name {self.cluster_name}. EXITING")
+            sys.exit(1)
+        return cluster_api_url.strip("\n")
+
     def get_osd_cluster_info(self, config_file="cluster_config.yaml"):
         """Gets osd cluster information and stores in config file"""
 
@@ -270,6 +280,8 @@ class OpenshiftClusterManager:
         cluster_info["OCP_CONSOLE_URL"] = console_url
         cluster_version = self.get_osd_cluster_version()
         cluster_info["CLUSTER_VERSION"] = cluster_version
+        api_url = self.get_osd_cluster_api_url()
+        cluster_info["OCP_API_URL"] = api_url
         odh_dashboard_url = console_url.replace(
             "console-openshift-console",
             "rhods-dashboard-redhat-ods-applications",

@@ -194,6 +194,7 @@ def generate_test_config_file(
     data["S3"]["BUCKET_5"]["ENDPOINT"] = config_data["S3"]["BUCKET_5"]["ENDPOINT"]
     data["ANACONDA_CE"]["ACTIVATION_KEY"] = config_data["ANACONDA_CE"]["ACTIVATION_KEY"]
     data["OCP_CONSOLE_URL"] = config_data["TEST_CLUSTERS"][test_cluster]["OCP_CONSOLE_URL"]
+    data["OCP_API_URL"] = config_data["TEST_CLUSTERS"][test_cluster]["OCP_API_URL"]
     data["ODH_DASHBOARD_URL"] = config_data["TEST_CLUSTERS"][test_cluster]["ODH_DASHBOARD_URL"]
     data["TEST_USER"]["AUTH_TYPE"] = config_data["TEST_CLUSTERS"][test_cluster]["TEST_USER"]["AUTH_TYPE"]
     data["TEST_USER"]["USERNAME"] = config_data["TEST_CLUSTERS"][test_cluster]["TEST_USER"]["USERNAME"]
@@ -237,7 +238,7 @@ def generate_test_config_file(
 
     # Login to test cluster using oc command
     oc_login(
-        data["OCP_CONSOLE_URL"],
+        data["OCP_API_URL"],
         data["OCP_ADMIN_USER"]["USERNAME"],
         data["OCP_ADMIN_USER"]["PASSWORD"],
     )

@@ -30,8 +30,10 @@ Verify User Can Create, Run and Delete A DS Pipeline From DS Project Details Pag
     [Documentation]    Verifies users are able to create and execute Data Science Pipelines using the UI.
     ...    The pipeline to run will be using the values for pip_index_url and pip_trusted_host
     ...    availables in a ConfigMap created in the SuiteSetup.
+    ...    AutomationBug: RHOAIENG-10941
     [Tags]    Smoke
     ...       ODS-2206    ODS-2226    ODS-2633
+    ...       AutomationBug
 
     Open Data Science Project Details Page    ${PRJ_TITLE}
 

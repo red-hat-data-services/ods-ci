@@ -10,9 +10,7 @@ Resource          ../../../tests/Resources/Page/DistributedWorkloads/Distributed
 
 *** Variables ***
 ${CODEFLARE_RELEASE_ASSETS}     %{CODEFLARE_RELEASE_ASSETS=https://github.com/opendatahub-io/distributed-workloads/releases/latest/download}
-${NOTEBOOK_IMAGE_STREAM_NAME}   %{NOTEBOOK_IMAGE_STREAM_NAME=s2i-generic-data-science-notebook}
-${NOTEBOOK_ADMIN_NAME}          ${TEST_USER_2.USERNAME}
-${NOTEBOOK_ADMIN_PASSWORD}      ${TEST_USER_2.PASSWORD}
+${NOTEBOOK_IMAGE}               %{NOTEBOOK_IMAGE_STREAM_NAME=quay.io/modh/odh-generic-data-science-notebook@sha256:9d7f80080a453bcf7dee01b986df9ee811ee74f6f433c601a8b67d283c160547}
 ${NOTEBOOK_USER_NAME}           ${TEST_USER_3.USERNAME}
 ${NOTEBOOK_USER_PASSWORD}       ${TEST_USER_3.PASSWORD}
 
@@ -50,8 +48,6 @@ Prepare Codeflare E2E Test Suite
     END
     Create Directory    %{WORKSPACE}/codeflare-odh-logs
     Log To Console    "Retrieving user tokens"
-    ${user_admin_token} =    Generate User Token    ${NOTEBOOK_ADMIN_NAME}    ${NOTEBOOK_ADMIN_PASSWORD}
-    Set Suite Variable    ${NOTEBOOK_ADMIN_TOKEN}    ${user_admin_token}
     ${common_user_token} =    Generate User Token    ${NOTEBOOK_USER_NAME}    ${NOTEBOOK_USER_PASSWORD}
     Set Suite Variable    ${NOTEBOOK_USER_TOKEN}   ${common_user_token}
     Log To Console    "Log back as cluster admin"
@@ -90,9 +86,7 @@ Run Codeflare ODH Test
     ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
     ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-odh-logs
     ...    env:ODH_NAMESPACE=${APPLICATIONS_NAMESPACE}
-    ...    env:NOTEBOOK_IMAGE_STREAM_NAME=${NOTEBOOK_IMAGE_STREAM_NAME}
-    ...    env:NOTEBOOK_ADMIN_NAME=${NOTEBOOK_ADMIN_NAME}
-    ...    env:NOTEBOOK_ADMIN_TOKEN=${NOTEBOOK_ADMIN_TOKEN}
+    ...    env:NOTEBOOK_IMAGE=${NOTEBOOK_IMAGE}
     ...    env:NOTEBOOK_USER_NAME=${NOTEBOOK_USER_NAME}
     ...    env:NOTEBOOK_USER_TOKEN=${NOTEBOOK_USER_TOKEN}
     Log To Console    ${result.stdout}

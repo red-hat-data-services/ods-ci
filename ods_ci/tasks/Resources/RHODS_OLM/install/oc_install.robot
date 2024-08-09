@@ -80,7 +80,7 @@ Verify RHODS Installation
   Log To Console    Waiting for all RHODS resources to be up and running
   Wait For Pods Numbers  1
   ...                   namespace=${OPERATOR_NAMESPACE}
-  ...                   label_selector=name=${OPERATOR_NAME}
+  ...                   label_selector=name=${OPERATOR_NAME_LABEL}
   ...                   timeout=2000
   Wait For Pods Status  namespace=${OPERATOR_NAMESPACE}  timeout=1200
   Log  Verified ${OPERATOR_NAMESPACE}  console=yes
@@ -365,7 +365,7 @@ Component Should Not Be Enabled
 Is Component Enabled
     [Documentation]    Returns the enabled status of a single component (true/false)
     [Arguments]    ${component}    ${dsc_name}=${DSC_NAME}
-    ${return_code}    ${output} =    Run And Return Rc And Output    oc get datasciencecluster ${dsc_name} -o json | jq '.spec.components.${component}.managementState'  #robocop:disable
+    ${return_code}    ${output} =    Run And Return Rc And Output    oc get datasciencecluster ${dsc_name} -o json | jq '.spec.components.${component}.managementState // "Removed"'  #robocop:disable
     Log    ${output}
     Should Be Equal As Integers  ${return_code}  0  msg=Error detected while getting component status
     ${n_output} =    Evaluate    '${output}' == ''

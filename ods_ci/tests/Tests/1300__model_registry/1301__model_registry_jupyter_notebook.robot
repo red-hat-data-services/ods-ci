@@ -27,7 +27,7 @@ ${DC_S3_TYPE}=                       Object storage
 *** Test Cases ***
 Verify Model Registry Integration With Jupyter Notebook
     [Documentation]    Verifies the Integartion of Model Registry operator with Jupyter Notebook
-    [Tags]    OpenDataHub     RHOAIENG-4501
+    [Tags]    OpenDataHub     RHOAIENG-4501    ExcludeOnRHOAI
     Create Workbench    workbench_title=${WORKBENCH_TITLE}    workbench_description=Registry test
     ...                 prj_title=${PRJ_TITLE}    image_name=Minimal Python  deployment_size=Small
     ...                 storage=Persistent   pv_existent=${NONE}

@@ -261,8 +261,8 @@ Remove Model Registry
     Run OC Delete Command    oc delete namespace ${NAMESPACE_MODEL-REGISTRY} --force
 
 Run OC Delete Command
-    [Arguments]    ${command}
     [Documentation]    Run an oc delete command and log the output and errors
+    [Arguments]    ${command}
     ${result}=    Run Process    ${command}    shell=True    stdout=PIPE    stderr=PIPE
     Log    ${result.stdout}
     Log    ${result.stderr}
@@ -273,4 +273,3 @@ Remove Certificates
     FOR    ${file}    IN    @{files}
         Run Process    rm    -f    ${CERTS_DIRECTORY}/${file}
     END
-

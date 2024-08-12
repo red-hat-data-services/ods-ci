@@ -523,3 +523,13 @@ Clear Element And Input Text
     Clear Element Text    ${element_xpath}
     Sleep    0.5s
     Input Text    ${element_xpath}    ${new_text}
+
+Clone Git Repository
+    [Documentation]   Clone Git repository in local framework
+    [Arguments]    ${REPO_URL}    ${REPO_BRANCH}    ${DIR}
+    ${result} =    Run Process    git clone -b ${REPO_BRANCH} ${REPO_URL} ${DIR}
+    ...    shell=true    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Unable to clone DW repo ${REPO_URL}:${REPO_BRANCH}:${DIR}
+    END

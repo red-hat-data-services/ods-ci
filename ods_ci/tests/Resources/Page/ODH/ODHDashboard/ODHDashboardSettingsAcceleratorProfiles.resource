@@ -16,9 +16,9 @@ ${ACCELERATOR_DESCRIPTION}=    //textarea[@id="accelerator-description"]
 ${ACCELERATOR_ENABLED_SWITCH}=    //input[@id="accelerator-enabled"]/following-sibling::span
 ${ACCELERATOR_ADD_TOLERATION_BTN}=    //button[@data-testid="add-toleration-button"]
 ${ACCELERATOR_ADD_TOLERATION_MODAL_FORM}=    //div[contains(@id, "pf-modal-part")]//span[text()="Add toleration"]
-${ACCELERATOR_TOLERATION_OPERATOR_DROPDOWN}=    //div[@data-testid="toleration-operator-select"]/button
+${ACCELERATOR_TOLERATION_OPERATOR_DROPDOWN}=    //button[@data-testid="toleration-operator-select"]
 ${CREATE_OR_UPDATE_ACCELERATOR_PROFILE_DETAIL_BTN}=    //button[@id="create-button"]
-${ACCELERATOR_TOLERATION_EFFECT_DROPDOWN}=    //label[@for="effect-select"]/parent::*/following::*[1]//button
+${ACCELERATOR_TOLERATION_EFFECT_DROPDOWN}=    //button[@data-testid="toleration-effect-select"]
 ${ACCELERATOR_TOLERATION_KEY}=    //input[@id='toleration-key']
 ${ACCELERATOR_TOLERATION_VALUE}=    //input[@id='toleration-value']
 ${ACCELERATOR_TOLERATION_SECONDS_FOREVER_RADIO}=    //input[@id="forever"]
@@ -91,7 +91,7 @@ Create An Accelerator Profile Via UI
     ...                create button
     ...                view: Create Accelerator profile
     [Arguments]   ${name}  ${identifier}  ${description}=${EMPTY}  ${enabled}=True
-    ...           ${tolerations}=${EMPTY}  ${tol_operator}=Equal  ${tol_effect}=None  ${tol_key}=key
+    ...           ${tolerations}=${EMPTY}  ${tol_operator}=Equal  ${tol_effect}=${EMPTY}  ${tol_key}=key
     ...           ${tol_value}=value  ${tol_seconds}=Forever
     Click On Create Accelerator Profile Button
     Wait Until Page Contains Element  ${ACCELERATOR_NAME}  timeout=5s
@@ -108,10 +108,10 @@ Create An Accelerator Profile Via UI
         Wait Until Element Is Visible    ${ACCELERATOR_ADD_TOLERATION_MODAL_FORM}
         # Select Operator
         Click Button    ${ACCELERATOR_TOLERATION_OPERATOR_DROPDOWN}
-        Click Element    //div[@data-testid="toleration-operator-select"]//div[text()="${tol_operator}"]
+        Click Element    //li[@data-testid="dropdown-item ${tol_operator}"]
         # Select Effect
         Click Button    ${ACCELERATOR_TOLERATION_EFFECT_DROPDOWN}
-        Click Element    //label[@for="effect-select"]/parent::*/following::div//*[text()="${tol_effect}"]
+        Click Element    //li[@data-testid="dropdown-item ${tol_effect}"]
         # Input Key and value
         Input Text    ${ACCELERATOR_TOLERATION_KEY}    ${tol_key}
         Input Text    ${ACCELERATOR_TOLERATION_VALUE}    ${tol_value}
@@ -156,11 +156,11 @@ Edit Accelerator Profile
         Wait Until Element Is Visible    ${ACCELERATOR_EDIT_TOLERATION_MODAL_FORM}    timeout=10
         IF    "${tol_operator}" != "${EMPTY}"
             Click Button    ${ACCELERATOR_TOLERATION_OPERATOR_DROPDOWN}
-            Click Element    //div[@data-testid="toleration-operator-select"]//div[text()="${tol_operator}"]
+            Click Element    //li[@data-testid="dropdown-item ${tol_operator}"]
         END
         IF    "${tol_effect}" != "${EMPTY}"
             Click Button    ${ACCELERATOR_TOLERATION_EFFECT_DROPDOWN}
-            Click Element    //label[@for="effect-select"]/parent::*/following::div//*[text()="${tol_effect}"]
+            Click Element    //li[@data-testid="dropdown-item ${tol_effect}"]
         END
         IF    "${tol_key}" != "${EMPTY}"
             Clear Element And Input Text    ${ACCELERATOR_TOLERATION_KEY}    ${tol_key}

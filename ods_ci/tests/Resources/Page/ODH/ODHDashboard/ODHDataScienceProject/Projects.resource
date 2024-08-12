@@ -16,6 +16,9 @@ ${ACTIONS_BTN_XP}=    xpath=//div/button[@aria-label="Actions"]
 ${DELETE_ACTION_BTN_XP}=  xpath=//div/ul/li/button[text()="Delete project"]
 ${EDIT_ACTION_BTN_XP}=    xpath=//div/ul/li/button[text()="Edit project"]
 ${SPAWNER_LINK}=        xpath=//*[text()="Launch Jupyter"]
+${PROJECT_SEARCH_BAR}=    //div[@data-testid="dashboard-table-toolbar"]
+${PROJECT_FILTER_TYPE}=    ${PROJECT_SEARCH_BAR}//button[@data-testid="filter-dropdown-select"]
+${PROJECT_SEARCH_INPUT}=    ${PROJECT_SEARCH_BAR}//input[@aria-label="Search input"]
 
 *** Keywords ***
 Open Data Science Projects Home Page
@@ -102,7 +105,7 @@ Project Should Be Listed
 Wait Until Project Is Listed
     [Documentation]    Waits until the DS projects appears in the list in DS project Home Page
     [Arguments]     ${project_title}    ${timeout}=30s
-    Wait Until Page Contains Element    xpath=//div/div/a[text()="${project_title}"]
+    Wait Until Page Contains Element    xpath=//div//a[text()="${project_title}"]
     ...    timeout=${timeout}
 
 Project Should Not Be Listed
@@ -122,6 +125,7 @@ Create Data Science Project
     ...    Reuse project if already exists: ${existing_project}
     [Arguments]    ${title}    ${description}    ${resource_name}=${NONE}    ${existing_project}=${FALSE}
     IF    ${existing_project}
+        Filter Projects By Name    ${title}
         ${existing_project}=  Run Keyword And Return Status
         ...    Wait Until Page Contains Element    xpath://a[text()="${title}"]
     END
@@ -374,10 +378,24 @@ Remove Current Page Projects From All Projects
     END
     RETURN    ${all_projects}
 
+Filter Projects By ${Type}
+    [Documentation]    Search for projects where ${Type} includes "${text}"
+    [Arguments]     ${text}
+    Open Data Science Projects Home Page
+    ${searchbar_exists}=    Run Keyword And Return Status
+    ...    Page Should Contain Element    xpath:${PROJECT_SEARCH_BAR}
+    IF    ${searchbar_exists}
+        Click Element    xpath:${PROJECT_FILTER_TYPE}
+        Click Element    xpath:${PROJECT_SEARCH_BAR}//li[@data-testid="dropdown-item ${Type}"]
+        Input Text    ${PROJECT_SEARCH_INPUT}    ${text}
+    ELSE
+        Log    No projects are listed
+    END
+
 Check Pagination Is Correct On The Current Page
     [Documentation]    Check the pagination is correct for the Data Science displayed on current page
     [Arguments]     ${page}    ${total}
-    ${actual_text}=    SeleniumLibrary.Get Text    xpath://button[contains(@class,"-menu-toggle")]
+    ${actual_text}=    SeleniumLibrary.Get Text    xpath://button[@id="table-pagination-top-toggle"]
     IF    ${page}==1
         ${expected_text}=    Set Variable   1 - 10 of ${total} items
     ELSE IF    ${page}==2

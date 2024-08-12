@@ -94,9 +94,9 @@ Set Standard RHODS Groups Variables
 Apply Access Groups Settings
     [Documentation]    Changes the rhods-groups config map to set the new access configuration
     ...                and rolls out JH to make the changes effecting in Jupyter
-    [Arguments]     ${admins_group}   ${users_group}
+    [Arguments]     ${admins_group}   ${users_group}    ${timeout}=10s
     Set Access Groups Settings    admins_group=${admins_group}   users_group=${users_group}
-    Sleep    120     reason=Wait for Dashboard to get the updated configuration...
+    Sleep    ${timeout}     reason=Wait for Dashboard to get the updated configuration...
 
 Set Access Groups Settings
     [Documentation]    Changes the rhods-groups config map to set the new access configuration

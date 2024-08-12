@@ -53,10 +53,8 @@ Verify Content In RHODS Explore Section
     ...    It compares the actual data with the one registered in a JSON file. The checks are about:
     ...    - Card's details (text, badges, images)
     ...    - Sidebar (titles, links text, links status)
-    ...    ProducBug: RHOAIENG-935
     [Tags]    Sanity    Tier1
     ...       ODS-488    ODS-993    ODS-749    ODS-352    ODS-282
-    ...       ProductBug
     ...       AutomationBugOnODH
     # TODO: In ODH there are only 2 Apps, we excpect 7 Apps according to:
     # tests/Resources/Files/AppsInfoDictionary_latest.json

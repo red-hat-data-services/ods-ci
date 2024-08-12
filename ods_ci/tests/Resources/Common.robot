@@ -39,7 +39,8 @@ Begin Web Test
 
 End Web Test
     [Arguments]    ${username}=${TEST_USER.USERNAME}
-    ${server}=  Run Keyword and Return Status  Page Should Contain Element  //div[@id='jp-top-panel']//div[contains(@class, 'p-MenuBar-itemLabel')][text() = 'File']
+    ${server}=    Run Keyword And Return Status    Page Should Contain Element
+    ...    //div[@id='jp-top-panel']//div[contains(@class, 'p-MenuBar-itemLabel')][text() = 'File']
     IF  ${server}==True
         Clean Up Server    username=${username}
         Stop JupyterLab Notebook Server
@@ -128,6 +129,13 @@ Get All Strings That Contain
     END
     RETURN   ${matched_list}
 
+Lists Should Contain Same Items
+    [Documentation]  Compare two lists, but ignore the order of the items
+    [Arguments]   ${list_one}    ${list_two}
+    Sort List  ${list_one}
+    Sort List  ${list_two}
+    Lists Should Be Equal      ${list_one}  ${list_two}
+
 Page Should Contain A String In List
     [Documentation]    Verifies that page contains at least one of the strings in text_list
     [Arguments]  ${text_list}
@@ -213,10 +221,17 @@ Wait Until HTTP Status Code Is
 
 Check HTTP Status Code
     [Documentation]     Verifies Status Code of URL Matches Expected Status Code
-    [Arguments]  ${link_to_check}    ${expected}=200    ${timeout}=20   ${verify_ssl}=${True}
-    ${headers}=    Create Dictionary    User-Agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36
-    ${response}=    RequestsLibrary.GET  ${link_to_check}   expected_status=any    headers=${headers}   timeout=${timeout}  verify=${verify_ssl}
-    Run Keyword And Continue On Failure  Status Should Be  ${expected}
+    [Arguments]  ${link_to_check}    ${expected}=200    ${timeout}=20   ${verify_ssl}=${True}    ${allow_redirects}=${True}
+    ${headers}=    Create Dictionary    User-Agent="Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0"
+    ${response}=    RequestsLibrary.GET  ${link_to_check}   expected_status=any   headers=${headers}
+    ...    timeout=${timeout}  verify=${verify_ssl}    allow_redirects=${allow_redirects}
+    ${status_verified}=    Run Keyword And Return Status    Status Should Be    ${expected}    ${response}
+    IF    not ${status_verified}
+        Log    URL '${link_to_check}' returned '${response.status_code}' - Retrying with empty Headers    console=True
+        ${response}=    RequestsLibrary.GET  ${link_to_check}   expected_status=any
+        ...    timeout=${timeout}  verify=${verify_ssl}    allow_redirects=${allow_redirects}
+        Run Keyword And Continue On Failure    Status Should Be    ${expected}    ${response}
+    END
     RETURN  ${response.status_code}
 
 URLs HTTP Status Code Should Be Equal To

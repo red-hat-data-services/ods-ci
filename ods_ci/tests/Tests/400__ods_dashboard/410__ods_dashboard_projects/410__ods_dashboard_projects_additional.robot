@@ -24,13 +24,14 @@ ${WORKBENCH_TITLE_TOL_2}=   ODS-CI Workbench Tol 2
 ${WORKBENCH_DESCRIPTION}=   a test workbench to check tolerations are applied
 ${WORKBENCH_TITLE_GPU}=   ODS-CI Workbench GPU
 ${WORKBENCH_DESCRIPTION_GPU}=   ${WORKBENCH_TITLE_GPU} is a test workbench using GPU
-${NB_IMAGE}=        Minimal Python
-${NB_IMAGE_GPU}=        PyTorch
-${PV_NAME_TOL_1}=         ods-ci-tolerations
-${PV_NAME_TOL_2}=         ods-ci-tolerations-2
-${PV_NAME_GPU}=         ods-ci-gpu
-${PV_DESCRIPTION}=         it is a PV created to test DS Projects feature
-${PV_SIZE}=         1
+${NB_IMAGE}=    Minimal Python
+${NB_IMAGE_GPU}=    PyTorch
+${PV_NAME_TOL_1}=    ods-ci-tolerations
+${PV_NAME_TOL_2}=    ods-ci-tolerations-2
+${PV_NAME_GPU}=    ods-ci-gpu
+${PV_DESCRIPTION}=    it is a PV created to test DS Projects feature
+${PV_SIZE}=    1
+${MULTI_PROJECT_PREFIX}=    multi-project-index
 
 
 *** Test Cases ***
@@ -135,8 +136,9 @@ Verify DS Projects Home Page Shows The Right Number Of Items The User Has Select
     ...                multiple data science projects are added
     [Tags]    ODS-2015    Tier1
     [Setup]    Launch Data Science Project Main Page    username=${TEST_USER_4.USERNAME}
-    ${all_projects}=    Create Multiple Data Science Projects    title=ds-project-ldap-user     description=numbered project -
-    ...    number=20
+    ${all_projects}=    Create Multiple Data Science Projects
+    ...    title=${MULTI_PROJECT_PREFIX}     description=numbered project -    number=20
+    Filter Projects By Name    ${MULTI_PROJECT_PREFIX}
     Number Of Displayed Projects Should Be    expected_number=10
     ${curr_page_projects}=    Get All Displayed Projects
     ${remaining_projects}=    Remove Current Page Projects From All Projects
@@ -152,7 +154,7 @@ Verify DS Projects Home Page Shows The Right Number Of Items The User Has Select
     [Teardown]    Run Keywords
     ...    SeleniumLibrary.Close All Browsers
     ...    AND
-    ...    Delete Multiple Data Science Projects    title=ds-project-ldap-user    number=20
+    ...    Delete Multiple Data Science Projects    title=${MULTI_PROJECT_PREFIX}    number=20
 
 *** Keywords ***
 Project Suite Setup
@@ -165,7 +167,7 @@ Project Suite Setup
     Launch Data Science Project Main Page
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
-    ...    resource_name=${PRJ_RESOURCE_NAME}
+    ...    resource_name=${PRJ_RESOURCE_NAME}    existing_project=${TRUE}
 
 Project Suite Teardown
     [Documentation]    Suite teardown steps after testing DSG. It Deletes
@@ -305,7 +307,8 @@ Create Multiple Data Science Projects
     [Arguments]    ${title}     ${description}    ${number}
     ${all_projects}=    Create List
     FOR    ${counter}    IN RANGE    1    ${number}+1    1
-        Create Data Science Project    title=${title}${counter}    description=${description}-${number}
+        Create Data Science Project    title=${title}${counter}    description=${description} ${counter}/${number}
+        ...    existing_project=${TRUE}
         Open Data Science Projects Home Page
         Append To List    ${all_projects}    ${title}${counter}
     END
@@ -315,4 +318,7 @@ Delete Multiple Data Science Projects
     [Arguments]    ${title}     ${number}
     FOR    ${counter}    IN RANGE    1    ${number}+1    1
         ${rc}  ${output}=    Run And Return Rc And Output    oc delete project ${title}${counter}
+        IF  "${rc}" != "0"
+            Run Keyword And Continue On Failure    Fail    msg=${output}
+        END
     END

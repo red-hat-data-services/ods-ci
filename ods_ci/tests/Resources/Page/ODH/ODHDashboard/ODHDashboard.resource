@@ -22,3 +22,4 @@ Open ODS Dashboard With Non Admin User
     [Documentation]    Opens a browser and logs into ODS Dashboard with a user belonging to the rhods-users group
     Launch Dashboard    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}    ${TEST_USER_3.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    browser_options=${BROWSER.OPTIONS}
+    ...    expected_page=${NONE}

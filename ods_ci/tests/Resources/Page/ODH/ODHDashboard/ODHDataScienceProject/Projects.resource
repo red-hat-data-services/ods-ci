@@ -155,6 +155,45 @@ Create Data Science Project
         END
     END
 
+Create Data Science Project From CLI
+    [Documentation]    Creates a Data Science Project, adding the needed labels to be recognized by Dashboard.
+    ...    - If ${as_user} is provided, the project is created for that user, and group will be set as
+    ...      recommended in https://docs.openshift.com/container-platform/4.16/applications/projects/creating-project-other-user.html
+    ...    - If ${randomize_name}=${TRUE} a numerical suffix will be added to ${name} (e.g. ${name}-1234)
+    ...    - If ${randomize_name}=${FALSE} and project already exists, it returns doing nothing
+    ...    - If ${display_name}=${EMPTY} the final project name (including randomization) will be set as display_name
+    ...    - RETURNS: ${complete_name} of the created project (including randomization)
+    [Arguments]    ${name}    ${display_name}=${EMPTY}    ${description}=${EMPTY}    ${as_user}=${EMPTY}
+    ...    ${randomize_name}=${FALSE}
+
+    IF    ${randomize_name} == ${TRUE}
+        ${project_suffix}=    Generate Random String    4   [NUMBERS]
+        ${complete_name}=    Catenate    SEPARATOR=-    ${name}    ${project_suffix}
+    ELSE
+        ${complete_name}=    Set Variable    ${name}
+        ${rc}=    Run And Return Rc    oc get project ${complete_name}
+        IF    "${rc}" == "${0}"
+            Log    message=OpenShift Project ${complete_name} already present. Skipping project creation...    level=WARN
+            RETURN    ${complete_name}
+        END
+    END
+
+    IF    "${display_name}" == "${EMPTY}"
+        ${display_name}=    Set Variable    ${complete_name}
+    END
+
+    IF    "${as_user}" != "${EMPTY}"
+        ${rc}=    Run And Return Rc    oc new-project "${complete_name}" --display-name="${display_name}" --description="${description}" --as=${as_user} --as-group=system:authenticated --as-group=system:authenticated:oauth    # robocop: off=line-too-long
+        Should Be Equal As Numbers    ${rc}    ${0}
+    ELSE
+        ${rc}=    Run And Return Rc    oc new-project "${complete_name}" --display-name="${display_name}" --description="${description}"    # robocop: off=line-too-long
+        Should Be Equal As Numbers    ${rc}    ${0}
+    END
+
+    Run    oc label namespace ${complete_name} opendatahub.io/dashboard=true
+    Run    oc label namespace ${complete_name} modelmesh-enabled=true
+    RETURN    ${complete_name}
+
 Validate Generated Resource Name
     [Documentation]    Checks if the generated resource name matches the expected validation regex
     [Arguments]    ${project_title}
@@ -180,7 +219,7 @@ Delete Data Science Projects From CLI
     END
 
 Delete Data Science Project From CLI
-    [Documentation]    Deletes a single DS project usig CLI command
+    [Documentation]    Deletes a single DS project usig CLI command by project display-name
     [Arguments]     ${displayed_name}
     ${project_k8s_name}=     Run     oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.labels."opendatahub.io/dashboard"=="true") and (.metadata.annotations."openshift.io/display-name"=="${displayed_name}")) | .metadata.name'    # robocop: disable
     ${project_k8s_name}=    Replace String    ${project_k8s_name}    "    ${EMPTY}
@@ -188,12 +227,17 @@ Delete Data Science Project From CLI
         Log    msg=There are probably no DS Projects with Display Name equal to ${displayed_name}
         ...    level=WARN
     ELSE
-        Oc Delete    kind=Project   name=${project_k8s_name}
-        WHILE    ${TRUE}
-            ${exists}=    Run And Return Rc    oc get project ${project_k8s_name}
-            IF    "${exists}" == "1"    BREAK
-            Sleep    5s    reason=let's not overload the API
-        END
+        Delete Data Science Project From CLI By Name    name=${project_k8s_name}
+    END
+
+Delete Data Science Project From CLI By Name
+    [Documentation]    Deletes a single DS project usig CLI command by project resource name
+    [Arguments]     ${name}
+    Oc Delete    kind=Project   name=${name}
+    WHILE    ${TRUE}
+        ${exists}=    Run And Return Rc    oc get project ${name}
+        IF    "${exists}" == "1"    BREAK
+        Sleep    5s    reason=let's not overload the API
     END
 
 #robocop: disable: line-too-long

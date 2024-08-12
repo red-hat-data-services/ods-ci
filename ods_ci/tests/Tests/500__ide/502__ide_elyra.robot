@@ -66,12 +66,13 @@ Elyra Pipelines Suite Setup    # robocop: off=too-many-calls-in-keyword
     [Documentation]    Suite Setup
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
-    Launch Data Science Project Main Page
-    ${project_suffix} =    Generate Random String    3   [NUMBERS]
-    Set Suite Variable    \${PRJ_TITLE}    ${PRJ_TITLE}-${project_suffix}
-    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
-    ${to_delete} =    Create List    ${PRJ_TITLE}
-    Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}
+    Set Suite Variable    ${USERNAME}    ${TEST_USER_3.USERNAME}
+    Set Suite Variable    ${PASSWORD}    ${TEST_USER_3.PASSWORD}
+    Launch Data Science Project Main Page    username=${USERNAME}    password=${PASSWORD}
+    ${project_name_complete}=    Create Data Science Project From CLI    name=${PRJ_TITLE}
+    ...    description=${PRJ_DESCRIPTION}    randomize_name=${TRUE}    as_user=${USERNAME}
+    Set Suite Variable    ${PRJ_TITLE}            ${project_name_complete}
+    Set Suite Variable    ${PROJECT_TO_DELETE}    ${project_name_complete}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_NAME}
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-ds-pipelines
@@ -82,7 +83,7 @@ Elyra Pipelines Suite Setup    # robocop: off=too-many-calls-in-keyword
 
 Elyra Pipelines Suite Teardown
     [Documentation]    Closes the browser and performs RHOSi Teardown
-    Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
+    Delete Data Science Project From CLI By Name    name=${PROJECT_TO_DELETE}
     Close All Browsers
     RHOSi Teardown
 

@@ -81,10 +81,7 @@ Handle Already Existing Cluster
 
 Create Provider Resources
     Log    Creating Hive resources for cluster ${cluster_name} on ${provider_type} according to: ${template}   console=True
-    IF    "${provider_type}" == "AWS"
-        Oc Apply    kind=List    src=${template}    api_version=v1
-        ...    template_data=${infrastructure_configurations}
-    ELSE IF    "${provider_type}" == "GCP"
+    IF    "${provider_type}" in ["AWS", "GCP", "AZURE"]
         Oc Apply    kind=List    src=${template}    api_version=v1
         ...    template_data=${infrastructure_configurations}
     ELSE IF    "${provider_type}" == "OSP"
@@ -103,19 +100,18 @@ Select Provisioner Template
     [Arguments]    ${provider_type}
     IF    "${provider_type}" == "AWS"
         Set Task Variable    ${template}    tasks/Resources/Provisioning/Hive/AWS/aws-cluster.yaml
-        Log    Setting AWS Hive Template ${template}   console=True
     ELSE IF    "${provider_type}" == "GCP"
         Set Task Variable    ${template}    tasks/Resources/Provisioning/Hive/GCP/gcp-cluster.yaml
-        Log    Setting GCP Hive Template ${template}    console=True
     ELSE IF    "${provider_type}" == "OSP"
         Set Task Variable    ${template}    tasks/Resources/Provisioning/Hive/OSP/hive_osp_cluster_template.yaml
-        Log    Setting OSP Hive Template ${template}    console=True
     ELSE IF    "${provider_type}" == "IBM"
         Set Task Variable    ${template}    tasks/Resources/Provisioning/Hive/IBM/ibmcloud-cluster.yaml
-        Log    Setting IBM Hive Template ${template}    console=True
+    ELSE IF    "${provider_type}" == "AZURE"
+        Set Task Variable    ${template}    tasks/Resources/Provisioning/Hive/AZURE/azure-cluster.yaml
     ELSE
         FAIL    Invalid provider name
     END
+    Log    Setting ${provider_type} Hive Template ${template}    console=True
     RETURN    ${template}
 
 Create Openstack Resources

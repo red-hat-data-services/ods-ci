@@ -62,7 +62,6 @@ class OpenshiftClusterManager:
         self.idp_name = args.get("idp_name")
         self.pool_instance_type = args.get("pool_instance_type")
         self.pool_node_count = args.get("pool_node_count")
-        self.taints = args.get("taints")
         self.pool_name = args.get("pool_name")
         self.reuse_machine_pool = args.get("reuse_machine_pool")
         self.notification_email = args.get("notification_email")
@@ -384,12 +383,11 @@ class OpenshiftClusterManager:
             log.info(f"MachinePool with name {self.pool_name} exists in cluster {self.cluster_name}. Hence reusing it")
         else:
             self.get_osd_cluster_id()
-            cmd = "ocm --v={} create machinepool --cluster {} --instance-type {} --replicas {} --taints {} {}".format(
+            cmd = "ocm --v={} create machinepool --cluster {} --instance-type {} --replicas {} {}".format(
                 self.ocm_verbose_level,
                 self.cluster_id,
                 self.pool_instance_type,
                 self.pool_node_count,
-                self.taints,
                 self.pool_name,
             )
             ret = execute_command(cmd)
@@ -1829,14 +1827,6 @@ if __name__ == "__main__":
         dest="pool_node_count",
         metavar="",
         default="1",
-    )
-    optional_machinepool_cluster_parser.add_argument(
-        "--taints",
-        help="Machine pool taints information",
-        action="store",
-        dest="taints",
-        metavar="",
-        default="nvidia.com/gpu=NONE:NoSchedule",
     )
     optional_machinepool_cluster_parser.add_argument(
         "--pool-name",

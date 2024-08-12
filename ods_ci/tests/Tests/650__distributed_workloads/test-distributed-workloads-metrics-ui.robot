@@ -18,8 +18,8 @@ ${project_created}=    False
 ${RESOURCE_FLAVOR_NAME}=    test-resource-flavor
 ${CLUSTER_QUEUE_NAME}=    test-cluster-queue
 ${LOCAL_QUEUE_NAME}=    test-local-queue
-${CPU_REQUESTED}=    2
-${MEMORY_REQUESTED}=    2000
+${CPU_REQUESTED}=    1
+${MEMORY_REQUESTED}=    1500
 ${JOB_NAME_QUEUE}=    kueue-job
 ${RAY_CLUSTER_NAME}=    mnist
 
@@ -168,7 +168,7 @@ Verify Requested resources When Multiple Local Queue Exists
     # setup Kueue resource for the created project
     Setup Kueue Resources    ${PRJ_TITLE}    ${CLUSTER_QUEUE_NAME}    ${RESOURCE_FLAVOR_NAME}    ${MULTIPLE_LOCAL_QUEUE}
     # Submitting kueue batch workload
-    Submit Kueue Workload    ${MULTIPLE_LOCAL_QUEUE}    ${PRJ_TITLE}    ${CPU_REQUESTED}    ${MEMORY_REQUESTED}    ${MULTIPLE_JOB_NAME}
+    Submit Kueue Workload    ${MULTIPLE_LOCAL_QUEUE}    ${PRJ_TITLE}    0   ${MEMORY_REQUESTED}    ${MULTIPLE_JOB_NAME}
     Open Distributed Workload Metrics Home Page
     Select Distributed Workload Project By Name    ${PRJ_TITLE}
     Select Refresh Interval    15 seconds
@@ -208,7 +208,7 @@ Project Suite Setup
     [Documentation]    Suite setup steps for testing Distributed workload Metrics UI
     Log To Console    "Restarting kueue"
     Restart Kueue
-    
+
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}

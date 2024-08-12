@@ -27,7 +27,7 @@ Verify RHODS Accept Multiple Admin Groups And CRD Gets Updates
     Save Changes In User Management Setting
     AdminGroups In OdhDashboardConfig CRD Should Be     rhods-admins  rhods-users
     AllowedGroups In OdhDashboardConfig CRD Should Be   system:authenticated
-    Launch Dashboard And Check User Management Option Is Available For The User   
+    Launch Dashboard And Check User Management Option Is Available For The User
     ...  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
 
 Verify If Unauthorized User Can Not Change The Permission
@@ -50,7 +50,7 @@ Verify If Unauthorized User Can Not Change The Permission
     Launch Dashboard And Check User Management Option Is Available For The User
     ...  ${TEST_USER_3.USERNAME}  ${TEST_USER_3.PASSWORD}  ${TEST_USER_3.AUTH_TYPE}
     @{non_admin_session} =  Get Browser Ids
-    # Switch back to RHOAI Admin session, and remove TEST_USER_3 permissions 
+    # Switch back to RHOAI Admin session, and remove TEST_USER_3 permissions
     Switch Browser  ${admin_session}[0]
     Menu.Navigate To Page    Settings    User management
     Remove OpenShift Groups From Data Science Administrator Groups     rhods-users

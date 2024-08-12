@@ -89,8 +89,8 @@ Verify Project Sharing Does Not Override Dashboard Permissions
     [Setup]                 Set RHODS Users Group To rhods-users
     Launch Data Science Project Main Page    username=${OCP_ADMIN_USER.USERNAME}    password=${OCP_ADMIN_USER.PASSWORD}
     ...    ocp_user_auth_type=${OCP_ADMIN_USER.AUTH_TYPE}
-    Assign Admin Permissions To User ${USER_B} in Project ${PRJ_USER_B_TITLE}
-    Assign Contributor Permissions To User ${USER_C} in Project ${PRJ_USER_C_TITLE}
+    Assign Admin Permissions To User ${USER_B} In Project ${PRJ_USER_B_TITLE}
+    Assign Contributor Permissions To User ${USER_C} In Project ${PRJ_USER_C_TITLE}
     Remove User From Group    username=${USER_B}    group_name=rhods-users
     Remove User From Group    username=${USER_B}    group_name=rhods-admins
     Remove User From Group    username=${USER_C}    group_name=rhods-users

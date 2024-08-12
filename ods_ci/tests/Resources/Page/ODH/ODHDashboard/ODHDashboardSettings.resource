@@ -23,11 +23,11 @@ Add OpenShift Groups To Data Science Administrators
     [Arguments]     @{admin_groups}
     Click Button   ${ADMIN_GROUPS_SECTION}//button[@aria-label="Options menu"]
     FOR    ${group}    IN    @{admin_groups}
-             ${present}=  Run Keyword And Return Status    Element Should Be Visible   
-             ...    ${ADMIN_GROUPS_LIST}//*[text()="${group}"]
-            IF  ${present} != True
-                Click Element    ${ADMIN_GROUPS_SECTION}//*[text()="${group}"]
-            END
+        ${present}=    Run Keyword And Return Status    Element Should Be Visible
+        ...    ${ADMIN_GROUPS_LIST}//*[text()="${group}"]
+        IF    not ${present}
+            Click Element    ${ADMIN_GROUPS_SECTION}//*[text()="${group}"]
+        END
     END
     Press Keys    None    ESC
 
@@ -36,11 +36,11 @@ Add OpenShift Groups To Data Science User Groups
     [Arguments]     @{user_groups}
     Click Button   ${USER_GROUPS_SECTION}//button[@aria-label="Options menu"]
     FOR    ${group}    IN    @{user_groups}
-             ${present}=  Run Keyword And Return Status    Element Should Be Visible   
-             ...    ${USER_GROUPS_LIST}//*[text()="${group}"]
-            IF  ${present} != True
-                Click Element    ${USER_GROUPS_SECTION}//*[text()="${group}"]
-            END
+        ${present}=    Run Keyword And Return Status    Element Should Be Visible
+        ...    ${USER_GROUPS_LIST}//*[text()="${group}"]
+        IF    not ${present}
+            Click Element    ${USER_GROUPS_SECTION}//*[text()="${group}"]
+        END
     END
     Press Keys    None    ESC
 
@@ -53,8 +53,9 @@ Launch Dashboard And Check User Management Option Is Available For The User
     ${authorization_required}=  Is Service Account Authorization Required
     IF    ${authorization_required}    Authorize jupyterhub service account
     IF    ${settings_should_be}
-        Menu.Navigate To Page    Settings    User management
-        Wait Until Element Is Visible    //button[@aria-label="Options menu"]    timeout=20
+        # Wait up to 2 minutes as a workaround for bug RHOAIENG-11116
+        Menu.Navigate To Page    Settings    User management    timeout=2m
+        Wait Until Element Is Visible    //button[@aria-label="Options menu"]    timeout=10s
     ELSE
         Verify Cluster Settings Is Not Available
     END
@@ -65,7 +66,7 @@ Remove OpenShift Groups From Data Science User Groups
     FOR    ${group}    IN    @{user_groups}
         ${group_exists}=    Run Keyword And Return Status
         ...    Wait Until Element Is Visible    ${USER_GROUPS_LIST}//*[.="${group}"]    timeout=10s
-        IF    ${group_exists}    Click Button     
+        IF    ${group_exists}    Click Button
         ...    ${USER_GROUPS_LIST}//*[.="${group}"]/following::button[@aria-label="close"]
     END
     Press Keys    None    ESC
@@ -76,7 +77,7 @@ Remove OpenShift Groups From Data Science Administrator Groups
     FOR    ${group}    IN    @{admin_groups}
         ${group_exists}=    Run Keyword And Return Status
         ...    Wait Until Element Is Visible    ${ADMIN_GROUPS_LIST}//*[.="${group}"]    timeout=10s
-        IF    ${group_exists}    Click Button     
+        IF    ${group_exists}    Click Button
         ...    ${ADMIN_GROUPS_LIST}//*[.="${group}"]/following::button[@aria-label="close"]
     END
     Press Keys    None    ESC
@@ -87,7 +88,7 @@ Save Changes In User Management Setting
     Press Keys    None    ESC
     ${button_enabled}=    Run Keyword And Return Status
     ...    Wait Until Element Is Enabled   ${SAVE_BUTTON}
-    IF    ${button_enabled}    
+    IF    ${button_enabled}
         Click Button    ${SAVE_BUTTON}
         Sleep    ${timeout}    reason=Wait for Dashboard to apply the updated configuration...
     END
@@ -158,8 +159,9 @@ Save Changes In Cluster Settings
 Settings Page Should Be Unavailable
     [Documentation]    Wait up to ${timeout} for the Setting Page to become Unavailable (for non-Admin RHOAI users)
     [Arguments]    ${timeout}=30s
-    ${setting_disapeared} =    Set Variable    ${FALSE}
-    WHILE   not ${setting_disapeared}    limit=${timeout}    on_limit_message=Timeout exceeded waiting for Setting Page to become Unavailable
+    ${setting_disapeared}=    Set Variable    ${FALSE}
+    WHILE   not ${setting_disapeared}    limit=${timeout}
+    ...    on_limit_message=Timeout exceeded waiting for Setting Page to become Unavailable
         Reload Page
         Sleep   5s
         ${setting_disapeared}=    Run Keyword And Return Status

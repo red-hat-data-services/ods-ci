@@ -101,7 +101,9 @@ Wait For RHODS Dashboard To Load
     ${half_timeout}=   Evaluate    int(${timeout}) / 2
     Wait For Condition    return document.title == ${dashboard_title}    timeout=${half_timeout}
     Wait Until Page Contains Element    xpath:${RHODS_LOGO_XPATH}    timeout=${half_timeout}
-    IF    "${expected_page}" != "${NONE}"    Wait For Dashboard Page Title    ${expected_page}    timeout=${timeout}
+    IF    "${expected_page}" != "${NONE}"
+        Wait For Dashboard Page Title    ${expected_page}    timeout=${timeout}
+    END
     IF    ${wait_for_cards} == ${TRUE}
         Wait Until Keyword Succeeds    3 times   5 seconds    Wait Until Cards Are Loaded
     END
@@ -258,7 +260,7 @@ Load Expected Data Of RHODS Explore Section
 
 Wait Until Cards Are Loaded
     [Documentation]    Waits until the Application cards are displayed in the page
-    ${status}=    Run Keyword and Return Status    Wait Until Page Contains Element
+    ${status}=    Run Keyword And Return Status    Wait Until Page Contains Element
     ...    xpath:${CARDS_XP}    timeout=10s
     IF    not ${status}    Reload Page
     Should Be True   ${status}   msg=This might be caused by bug RHOAIENG-404
@@ -393,7 +395,8 @@ Check Sidebar Links
 
 Check Sidebar Header Text
     [Arguments]  ${app_id}  ${expected_data}
-    Page Should Contain Element  xpath:${SIDEBAR_TEXT_CONTAINER_XP}/h1    message=Missing Sidebar Title for App Card ${app_id} 
+    Page Should Contain Element  xpath:${SIDEBAR_TEXT_CONTAINER_XP}/h1
+    ...    message=Missing Sidebar Title for App Card ${app_id}
     ${header}=  Get Text    xpath:${SIDEBAR_TEXT_CONTAINER_XP}/h1
     Run Keyword And Continue On Failure  Should Be Equal  ${header}  ${expected_data}[${app_id}][sidebar_h1]
     ${getstarted_title}=  Get Text  xpath://div[contains(@class,'pf-v5-c-drawer__head')]
@@ -849,6 +852,7 @@ Click Action From Actions Menu
     IF    "${item_type}" != "${NONE}"
         ${action}=    Catenate    ${action}    ${item_type}
     END
-    Wait Until Page Contains Element    xpath=${item_row}//button[@role="menuitem"]//*[.="${action}"]
+    Wait Until Page Contains Element
+    ...    xpath=${item_row}//button[@role="menuitem"]//*[.="${action}"]
     Sleep    0.5    msg=Avoid element missclicking
     Click Element    xpath=${item_row}//button[@role="menuitem"]//*[.="${action}"]

@@ -24,7 +24,7 @@ Assign ${permission_type} Permissions To User ${username}
     Select Permission Type    permission_type=${permission_type}
     Save Permission
 
-Assign ${permission_type} Permissions To User ${username} in Project ${project_title}
+Assign ${permission_type} Permissions To User ${username} In Project ${project_title}
     Open Data Science Projects Home Page
     Wait Until Project Is Listed    project_title=${project_title}
     Open Data Science Project Details Page    ${project_title}    tab_id=permissions

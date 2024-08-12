@@ -136,8 +136,8 @@ Verify DS Projects Home Page Shows The Right Number Of Items The User Has Select
     ...                multiple data science projects are added
     [Tags]    ODS-2015    Tier1
     [Setup]    Launch Data Science Project Main Page    username=${TEST_USER_4.USERNAME}
-    ${all_projects}=    Create Multiple Data Science Projects    title=${MULTI_PROJECT_PREFIX}     description=numbered project -
-    ...    number=20
+    ${all_projects}=    Create Multiple Data Science Projects
+    ...    title=${MULTI_PROJECT_PREFIX}     description=numbered project -    number=20
     Filter Projects By Name    ${MULTI_PROJECT_PREFIX}
     Number Of Displayed Projects Should Be    expected_number=10
     ${curr_page_projects}=    Get All Displayed Projects
@@ -318,6 +318,7 @@ Delete Multiple Data Science Projects
     [Arguments]    ${title}     ${number}
     FOR    ${counter}    IN RANGE    1    ${number}+1    1
         ${rc}  ${output}=    Run And Return Rc And Output    oc delete project ${title}${counter}
-        IF  "${rc}" != "0"    Run Keyword And Continue On Failure    
-        ...    Fail    msg=${output}
+        IF  "${rc}" != "0"
+            Run Keyword And Continue On Failure    Fail    msg=${output}
+        END
     END

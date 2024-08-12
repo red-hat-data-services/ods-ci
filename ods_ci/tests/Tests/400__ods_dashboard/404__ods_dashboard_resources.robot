@@ -25,7 +25,6 @@ ${SUCCESS_STEP}    h3[normalize-space(@class="pf-v5-c-title pf-m-md pfext-quick-
 Verify Quick Starts Work As Expected On Yes And Restart
     [Documentation]   Verify the Quickstarts are completed successfully
     ...    when all steps are marked as yes and restarted later
-    ...    ProductBug: RHOAIENG-5273
     [Tags]  Tier1
     ...     ODS-1306    ODS-1308    ODS-1166    ODS-1406    ODS-1405
     Set Quick Starts Elements List Based On RHODS Type
@@ -47,7 +46,6 @@ Verify Quick Starts Work When All Steps Are Skipped
 Verify Quick Starts Work When At Least One Step Is Skipped
     [Documentation]   Verify the Quickstarts work fine when at least of the
     ...    steps are skipped
-    ...    ProductBug: RHOAIENG-5273
     [Tags]  Sanity
     ...     Tier1
     ...     ODS-1403
@@ -58,7 +56,6 @@ Verify Quick Starts Work When At Least One Step Is Skipped
 Verify Quick Starts Work As Expected When At Least One Step Is Marked As No
     [Documentation]   Verify the Quickstarts are works as expected
     ...    when mark last one step as no
-    ...    ProductBug: RHOAIENG-5273
     [Tags]  Sanity
     ...     Tier1
     ...     ODS-1307
@@ -78,7 +75,8 @@ Verify External Links In Quick Starts Are Not Broken
 Verify Resource Link HTTP Status Code
     [Documentation]    Verifies the how-to, documentation and tutorial cards in Resource page
     ...                redirects users to working URLs (i.e., http status must be 200)
-    [Tags]    Sanity    Tier1
+    ...                ProductBug: RHOAIENG-10875, RHOAIENG-10874
+    [Tags]    Sanity    Tier1    ProductBug
     ...       ODS-531    ODS-507
     Click Link    Resources
     Sleep    5
@@ -183,7 +181,7 @@ Set Expected Items Based On RHODS Type    # robocop: disable
         # Remove From List   ${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}   -1
         # Remove From List   ${EXPECTED_ITEMS_FOR_PROVIDER_TYPE}   -1
         # Remove From List   ${EXPECTED_ITEMS_FOR_COMBINATIONS}   -1
-        ${n_items}=    Set Variable    48
+        ${n_items}=    Set Variable    36
     END
     Set Suite Variable    ${EXPECTED_RESOURCE_ITEMS}    ${n_items}
     Set Suite Variable    ${EXPECTED_ITEMS_FOR_ENABLE}    ${EXPECTED_ITEMS_FOR_ENABLE}

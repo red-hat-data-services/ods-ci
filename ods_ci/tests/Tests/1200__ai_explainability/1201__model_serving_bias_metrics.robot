@@ -101,7 +101,7 @@ Bias Metrics Suite Setup
 
 Bias Metrics Suite Teardown
     [Documentation]     Bias Metrics Suite Teardown
-    Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
+    Delete List Of Projects Via CLI   ocp_projects=${PROJECTS_TO_DELETE}
     RHOSi Teardown
 
 Verify User Workload Monitoring Configuration

@@ -16,7 +16,7 @@ Verify RHODS Accept Multiple Admin Groups And CRD Gets Updates
     [Tags]  ODS-1661    ODS-1555
     ...     Tier1
     # Login with RHOAI regular user (Settings should not be avaiable)
-    Launch Dashboard And Check User Management Option Is Available For The User   
+    Launch Dashboard And Check User Management Option Is Available For The User
     ...  ${TEST_USER_3.USERNAME}  ${TEST_USER_3.PASSWORD}  ${TEST_USER_3.AUTH_TYPE}  settings_should_be=${FALSE}
     # Login with RHOAI Admin user (Settings should be avaiable)
     Launch Dashboard And Check User Management Option Is Available For The User

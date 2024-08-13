@@ -50,7 +50,7 @@ Verify User Can Edit A Data Science Project
     ...    project_title=${PRJ_TITLE_2}    new_title=${NEW_PRJ_TITLE}    new_description=${NEW_PRJ_DESCRIPTION}
     ${ns_newname}=    Get Openshift Namespace From Data Science Project   project_title=${NEW_PRJ_TITLE}
     Should Be Equal As Strings  ${ns_name}  ${ns_newname}
-    [Teardown]     Delete Data Science Projects From CLI    ${PROJECTS_TO_DELETE}
+    [Teardown]     Delete List Of Projects Via CLI    ${PROJECTS_TO_DELETE}
 
 Verify User Can Edit A Workbench
     [Documentation]    Verifies users can edit a workbench name and description
@@ -60,7 +60,7 @@ Verify User Can Edit A Workbench
     [Setup]    Open Data Science Project Details Page    project_title=${PRJ_TITLE}    tab_id=workbenches
     Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
     ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
-    ...                 storage=Persistent  pv_existent=${FALSE}
+    ...                 storage=Persistent  pv_existent=${NONE}
     ...                 pv_name=${PV_BASENAME}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
     Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
     Workbench Status Should Be      workbench_title=${WORKBENCH_TITLE}      status=${WORKBENCH_STATUS_STARTING}
@@ -105,18 +105,17 @@ Project Suite Setup
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
     Launch Data Science Project Main Page
+    Delete List Of Projects Via CLI    ${PROJECTS_TO_DELETE}
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
-    ...    resource_name=${PRJ_RESOURCE_NAME}
+    ...    resource_name=${PRJ_RESOURCE_NAME}    existing_project=${TRUE}
     Open Data Science Projects Home Page
-    ${to_delete}=    Create List    ${PRJ_TITLE}
-    Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}
 
 Project Suite Teardown
     [Documentation]    Suite teardown steps after testing DS Projects. It Deletes
     ...                all the DS projects created by the tests and run RHOSi teardown
     Close All Browsers
-    # Delete All Data Science Projects From CLI
-    Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
+    Append To List    ${PROJECTS_TO_DELETE}    ${PRJ_TITLE}
+    Delete List Of Projects Via CLI   ocp_projects=${PROJECTS_TO_DELETE}
     RHOSi Teardown
 
 Check Name And Description Should Be Editable

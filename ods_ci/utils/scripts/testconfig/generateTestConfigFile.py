@@ -224,6 +224,7 @@ def generate_test_config_file(
     data["S3"]["BUCKET_5"]["ENDPOINT"] = config_data["S3"]["BUCKET_5"]["ENDPOINT"]
     data["ANACONDA_CE"]["ACTIVATION_KEY"] = config_data["ANACONDA_CE"]["ACTIVATION_KEY"]
     data["OCP_CONSOLE_URL"] = config_data["TEST_CLUSTERS"][test_cluster]["OCP_CONSOLE_URL"]
+    data["OCP_API_URL"] = config_data["TEST_CLUSTERS"][test_cluster]["OCP_API_URL"]
     data["ODH_DASHBOARD_URL"] = config_data["TEST_CLUSTERS"][test_cluster]["ODH_DASHBOARD_URL"]
     data["TEST_USER"]["AUTH_TYPE"] = config_data["TEST_CLUSTERS"][test_cluster]["TEST_USER"]["AUTH_TYPE"]
     data["TEST_USER"]["USERNAME"] = config_data["TEST_CLUSTERS"][test_cluster]["TEST_USER"]["USERNAME"]
@@ -275,6 +276,20 @@ def generate_test_config_file(
     if config_data.get("GIT_HTTPS_CA_BUNDLE"):
         data["GIT_HTTPS_CA_BUNDLE"] = config_data["GIT_HTTPS_CA_BUNDLE"]
 
+    # MariaDB details (optional)
+    if config_data.get("MARIADB_HOST"):
+        data["MARIADB_HOST"] = config_data["MARIADB_HOST"]
+    if config_data.get("MARIADB_PORT"):
+        data["MARIADB_PORT"] = config_data["MARIADB_PORT"]
+    if config_data.get("MARIADB_USER"):
+        data["MARIADB_USER"] = config_data["MARIADB_USER"]
+    if config_data.get("MARIADB_PASSWORD"):
+        data["MARIADB_PASSWORD"] = config_data["MARIADB_PASSWORD"]
+    if config_data.get("MARIADB_DATABASE"):
+        data["MARIADB_DATABASE"] = config_data["MARIADB_DATABASE"]
+    if config_data.get("MARIADB_CA_BUNDLE"):
+        data["MARIADB_CA_BUNDLE"] = config_data["MARIADB_CA_BUNDLE"]
+
     if components:
         print("Setting components")
         print(components)
@@ -287,7 +302,7 @@ def generate_test_config_file(
 
     # Login to test cluster using oc command
     oc_login(
-        data["OCP_CONSOLE_URL"],
+        data["OCP_API_URL"],
         data["OCP_ADMIN_USER"]["USERNAME"],
         data["OCP_ADMIN_USER"]["PASSWORD"],
     )

@@ -151,6 +151,6 @@ Non-Admin Setup Kserve UI Test
 Non-Admin Teardown Kserve UI Test
     Delete Data Science Project   project_title=${TEST_NS}
     # if UI deletion fails it will try deleting from CLI
-    Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
+    Delete List Of Projects Via CLI   ocp_projects=${PROJECTS_TO_DELETE}
     SeleniumLibrary.Close All Browsers
     RHOSi Teardown

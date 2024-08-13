@@ -19,6 +19,7 @@ Resource           ../../Resources/Page/OCPDashboard/Builds/Builds.robot
 Resource           ../../Resources/Page/HybridCloudConsole/OCM.robot
 Resource           ../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 Resource           ../../Resources/Page/DistributedWorkloads/WorkloadMetricsUI.resource
+Resource           ../../Resources/CLI/MustGather/MustGather.resource
 
 *** Variables ***
 ${S_SIZE}       25
@@ -196,6 +197,17 @@ Run Training Operator ODH Run Sleep PyTorchJob Test Use Case
     [Setup]            Prepare Training Operator E2E Upgrade Test Suite
     Run Training Operator ODH Upgrade Test    TestVerifySleepPytorchjob
     [Teardown]         Teardown Training Operator E2E Upgrade Test Suite
+
+Verify that the must-gather image provides RHODS logs and info
+    [Documentation]   Tests the must-gather image for ODH/RHOAI after upgrading
+    [Tags]   Upgrade
+    Get must-gather Logs
+    Verify logs for ${APPLICATIONS_NAMESPACE}
+    IF  "${PRODUCT}" == "RHODS"
+        Verify Logs For ${OPERATOR_NAMESPACE}
+        Run Keyword If RHODS Is Managed    Verify logs for ${MONITORING_NAMESPACE}
+    END
+    [Teardown]  Cleanup must-gather Logs
 
 
 *** Keywords ***

@@ -89,7 +89,7 @@ Model Serving Suite Teardown
     IF    ${MODEL_CREATED}
         Run Keyword And Continue On Failure    Delete Model Via UI    ${MODEL_NAME}
         ${projects}=    Create List    ${PRJ_TITLE}
-        Delete Data Science Projects From CLI   ocp_projects=${projects}
+        Delete List Of Projects Via CLI   ocp_projects=${projects}
     ELSE
         Log    Model not deployed, skipping deletion step during teardown    console=true
     END

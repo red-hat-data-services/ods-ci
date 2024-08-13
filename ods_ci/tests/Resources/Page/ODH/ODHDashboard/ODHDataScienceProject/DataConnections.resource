@@ -32,7 +32,6 @@ Create S3 Data Connection
     ...            ${S3_DC_ADD_BTN}    aws_s3_endpoint=${aws_s3_endpoint}    aws_region=${aws_region}
     ...            connected_workbench=${connected_workbench}    press_cancel=${press_cancel}
     ...            aws_bucket_name=${aws_bucket_name}
-    Wait Until Project Is Open    project_title=${project_title}
 
 Edit S3 Data Connection
     [Documentation]    Edits a S3 Data Connection from DS Project details page
@@ -44,7 +43,6 @@ Edit S3 Data Connection
     ...            ${S3_DC_EDIT_BTN}    aws_s3_endpoint=${aws_s3_endpoint}    aws_region=${aws_region}
     ...            connected_workbench=${connected_workbench}    press_cancel=${press_cancel}
     ...            aws_bucket_name=${aws_bucket_name}
-    Wait Until Project Is Open    project_title=${project_title}
 
 Set Connection Between Data Connection And Workbench
     [Documentation]    Connects a DataConnection to an existent workbench

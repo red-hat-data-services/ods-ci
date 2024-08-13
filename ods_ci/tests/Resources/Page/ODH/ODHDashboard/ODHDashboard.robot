@@ -76,7 +76,7 @@ Authorize rhods-dashboard service account
 Login To RHODS Dashboard
    [Arguments]  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
    # Wait until we are in the OpenShift auth page or already in Dashboard
-   ${expected_text_list}=    Create List    Log in with
+   ${expected_text_list}=    Create List    Log in with    Data Science Projects
    Wait Until Page Contains A String In List    ${expected_text_list}
    ${oauth_prompt_visible}=  Is OpenShift OAuth Login Prompt Visible
    IF  ${oauth_prompt_visible}  Click Button  Log in with OpenShift
@@ -84,7 +84,7 @@ Login To RHODS Dashboard
    IF  ${login-required}  Login To Openshift  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
    ${authorize_service_account}=  Is rhods-dashboard Service Account Authorization Required
    IF  ${authorize_service_account}  Authorize rhods-dashboard service account
-   Navigate To Page    Applications    Enabled
+   Navigate To Page    Applications    Enabled    timeout=10s
 
 Logout From RHODS Dashboard
     [Documentation]  Logs out from the current user in the RHODS dashboard

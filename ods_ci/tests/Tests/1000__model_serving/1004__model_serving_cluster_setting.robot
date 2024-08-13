@@ -90,7 +90,7 @@ Model Serving Cluster Setting Test Setup
 
 Model Serving Cluster Setting Suite Teardown
     [Documentation]    Delete DS project and select both model serving options
-    Delete Data Science Project                 ${project_title}
+    Delete Project Via CLI By Display Name                 ${project_title}
     Wait Until Data Science Project Is Deleted  ${project_title}
     Open Dashboard Settings    settings_page=Cluster settings
     Wait Until Page Contains Element    //*[contains(text(), "Model serving platforms")]  timeout=20

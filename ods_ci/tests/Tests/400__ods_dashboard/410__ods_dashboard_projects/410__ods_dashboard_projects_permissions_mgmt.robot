@@ -25,16 +25,10 @@ ${PRJ_USER_C_TITLE}=            ${PRJ_BASE_TITLE}-${TEST_USER_4.USERNAME}
 
 
 *** Test Cases ***
-Verify User Can Access Permission Tab In Their Owned DS Project
-    [Documentation]    Verify user has access to "Permissions" tab in their DS Projects
-    [Tags]    Tier1    Smoke    OpenDataHub
-    ...       ODS-2194
-    Pass Execution    The Test is executed as part of Suite Setup
-
 Verify User Can Make Their Owned DS Project Accessible To Other Users    # robocop: disable
     [Documentation]    Verify user can give access permissions for their DS Projects to other users
-    [Tags]    Tier1    Sanity
-    ...       ODS-2201
+    [Tags]    Tier1    Smoke
+    ...       ODS-2194    ODS-2201
     Switch To User    ${USER_B}
     Move To Tab    Permissions
     Assign Contributor Permissions To User ${USER_C}
@@ -109,7 +103,8 @@ Project Permissions Mgmt Suite Setup    # robocop: disable
     RHOSi Setup
     Set Standard RHODS Groups Variables
     Set Default Access Groups Settings
-    Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
+    Delete List Of Projects Via CLI   ocp_projects=${PROJECTS_TO_DELETE}
+    Close All Browsers
     Launch RHODS Dashboard Session With User A
     Launch RHODS Dashboard Session And Create A DS Project With User B
     Launch RHODS Dashboard Session With User C
@@ -120,7 +115,7 @@ Project Permissions Mgmt Suite Teardown
     [Documentation]    Suite teardown steps after testing DSG. It Deletes
     ...                all the DS projects created by the tests and run RHOSi teardown
     Close All Browsers
-    Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
+    Delete List Of Projects Via CLI   ocp_projects=${PROJECTS_TO_DELETE}
     RHOSi Teardown
     Remove User From Group    username=${USER_A}
     ...    group_name=rhods-users
@@ -217,6 +212,7 @@ Refresh Pages
 Reload Page If Project ${project_title} Is Not Listed
     ${is_listed} =    Set Variable    ${FALSE}
     WHILE   not ${is_listed}    limit=3m    on_limit_message=Timeout exceeded waiting for project ${project_title} to be listed    # robotcode: ignore
+        Filter Projects By Name    ${project_title}
         ${is_listed}=    Run Keyword And Return Status
         ...    Project Should Be Listed    project_title=${project_title}
         IF    ${is_listed} == ${FALSE}

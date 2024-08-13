@@ -20,7 +20,7 @@ ${LOG_OUTPUT_FILE}                    drift_test.txt
 *** Test Cases ***
 Run Drift Metrics Tests
     [Documentation]    Verifies that the Drift metrics are available for a deployed model
-    [Tags]    RHOAIENG-8163     Smoke
+    [Tags]    RHOAIENG-8163     Smoke     ExcludeOnDisconnected
     Run Drift Pytest Framework
 
 

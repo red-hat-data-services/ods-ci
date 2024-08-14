@@ -276,6 +276,20 @@ def generate_test_config_file(
     if config_data.get("GIT_HTTPS_CA_BUNDLE"):
         data["GIT_HTTPS_CA_BUNDLE"] = config_data["GIT_HTTPS_CA_BUNDLE"]
 
+    # MariaDB details (optional)
+    if config_data.get("MARIADB_HOST"):
+        data["MARIADB_HOST"] = config_data["MARIADB_HOST"]
+    if config_data.get("MARIADB_PORT"):
+        data["MARIADB_PORT"] = config_data["MARIADB_PORT"]
+    if config_data.get("MARIADB_USER"):
+        data["MARIADB_USER"] = config_data["MARIADB_USER"]
+    if config_data.get("MARIADB_PASSWORD"):
+        data["MARIADB_PASSWORD"] = config_data["MARIADB_PASSWORD"]
+    if config_data.get("MARIADB_DATABASE"):
+        data["MARIADB_DATABASE"] = config_data["MARIADB_DATABASE"]
+    if config_data.get("MARIADB_CA_BUNDLE"):
+        data["MARIADB_CA_BUNDLE"] = config_data["MARIADB_CA_BUNDLE"]
+
     if components:
         print("Setting components")
         print(components)

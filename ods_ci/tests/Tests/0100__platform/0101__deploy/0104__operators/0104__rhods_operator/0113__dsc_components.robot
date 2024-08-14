@@ -29,6 +29,8 @@ ${ETCD_LABEL_SELECTOR}                     component=model-mesh-etcd
 ${ETCD_DEPLOYMENT_NAME}                    etcd
 ${ODH_MODEL_CONTROLLER_LABEL_SELECTOR}     app=odh-model-controller
 ${ODH_MODEL_CONTROLLER_DEPLOYMENT_NAME}    odh-model-controller
+${MODELREGISTRY_CONTROLLER_LABEL_SELECTOR}     control-plane=model-registry-operator
+${MODELREGISTRY_CONTROLLER_DEPLOYMENT_NAME}    model-registry-operator-controller-manager
 ${IS_PRESENT}        0
 ${IS_NOT_PRESENT}    1
 &{SAVED_MANAGEMENT_STATES}
@@ -39,6 +41,7 @@ ${IS_NOT_PRESENT}    1
 ...  DASHBOARD=${EMPTY}
 ...  DATASCIENCEPIPELINES=${EMPTY}
 ...  MODELMESHERVING=${EMPTY}
+...  MODELREGISTRY=${EMPTY}
 
 @{CONTROLLERS_LIST}    kserve-controller-manager    odh-model-controller    modelmesh-controller
 
@@ -178,6 +181,23 @@ Validate Modelmeshserving Removed State
 
     [Teardown]     Restore DSC Component State    modelmeshserving    ${MODELMESH_CONTROLLER_DEPLOYMENT_NAME}    ${MODELMESH_CONTROLLER_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.MODELMESHERVING}
 
+Validate ModelRegistry Managed State
+    [Documentation]    Validate that the DSC ModelRegistry component Managed state creates the expected resources,
+    ...    check that ModelRegistry deployment is created and pod is in Ready state
+    [Tags]    Operator    Tier1    RHOAIENG-10404    modelregistry-managed
+
+    Set DSC Component Managed State And Wait For Completion   modelregistry    ${MODELREGISTRY_CONTROLLER__DEPLOYMENT_NAME}    ${MODELREGISTRY_CONTROLLER__LABEL_SELECTOR}
+
+    [Teardown]     Restore DSC Component State    modelregistry    ${MODELREGISTRY_CONTROLLER__DEPLOYMENT_NAME}    ${MODELREGISTRY_CONTROLLER__LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.MODELREGISTRY}
+
+Validate ModelRegistry Removed State
+    [Documentation]    Validate that ModelRegistry management state Removed does remove relevant resources.
+    [Tags]    Operator    Tier1    RHOAIENG-10404    modelregistry-removed
+
+    Set DSC Component Removed State And Wait For Completion   modelregistry    ${MODELREGISTRY_CONTROLLER__DEPLOYMENT_NAME}    ${MODELREGISTRY_CONTROLLER__LABEL_SELECTOR}
+
+    [Teardown]     Restore DSC Component State    modelregistry    ${MODELREGISTRY_CONTROLLER__DEPLOYMENT_NAME}    ${MODELREGISTRY_CONTROLLER__LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.MODELREGISTRY}
+
 Validate Support For Configuration Of Controller Resources
     [Documentation]    Validate support for configuration of controller resources in component deployments
     [Tags]    Operator    Tier1    ODS-2664
@@ -217,6 +237,7 @@ Suite Setup
     ${SAVED_MANAGEMENT_STATES.DASHBOARD}=     Get DSC Component State    ${DSC_NAME}    dashboard    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.DATASCIENCEPIPELINES}=     Get DSC Component State    ${DSC_NAME}    datasciencepipelines    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.MODELMESHERVING}=     Get DSC Component State    ${DSC_NAME}    modelmeshserving    ${OPERATOR_NS}
+    ${SAVED_MANAGEMENT_STATES.MODELREGISTRY}=     Get DSC Component State    ${DSC_NAME}    modelregistry    ${OPERATOR_NS}
     Set Suite Variable    ${SAVED_MANAGEMENT_STATES}
 
 Suite Teardown

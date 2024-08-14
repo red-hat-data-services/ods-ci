@@ -10,6 +10,12 @@ Resource         ../../Common.robot
 Get must-gather Logs
     [Documentation]    Runs the must-gather image and obtains the ODH/RHOAI logs
     ${output}=    Run process    tests/Resources/CLI/MustGather/get-must-gather-logs.sh     shell=yes
+    IF  "${output.rc}" == "{0}"
+        Log To Console     ${output.stdout}
+    ELSE
+        Log To Console     ${output.stderr}
+    END
+    Should Be Equal As Integers	  ${output.rc}	 0
     Should Not Contain    ${output.stdout}    FAIL
     ${must-gather-dir}=  Run     ls -d must-gather.local.*
     ${namespaces-log-dir}=      Run     ls -d ${must-gather-dir}/quay-io-modh-must-gather-sha256-*/namespaces

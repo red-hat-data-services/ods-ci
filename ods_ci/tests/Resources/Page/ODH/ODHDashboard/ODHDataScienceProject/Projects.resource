@@ -8,7 +8,7 @@ Resource       ./Workbenches.resource
 ${DS_PROJECT_TITLE}=    Data Science Projects
 ${TITLE_INPUT_XP}=    xpath=//input[@id="manage-project-modal-name"]
 ${DESCR_INPUT_XP}=    xpath=//textarea[@id="manage-project-modal-description"]
-${RESOURCE_INPUT_XP}=    xpath=//input[@id="resource-manage-project-modal-name"]
+${RESOURCE_INPUT_XP}=    xpath=//input[@data-testid="resource-manage-project-modal-name"]
 ${GENERIC_CREATE_BTN_XP}=     xpath=//button[text()="Create"]
 ${GENERIC_CANCEL_BTN_XP}=     xpath=//button[text()="Cancel"]
 ${PROJECT_CREATE_BTN_XP}=     xpath=//button[text()="Create data science project"]
@@ -104,7 +104,8 @@ Project Should Be Listed
 
 Wait Until Project Is Listed
     [Documentation]    Waits until the DS projects appears in the list in DS project Home Page
-    [Arguments]     ${project_title}    ${timeout}=30s
+    [Arguments]     ${project_title}    ${timeout}=5s
+    Filter Projects By Name    ${project_title}
     Wait Until Page Contains Element    xpath=//div//a[text()="${project_title}"]
     ...    timeout=${timeout}
 
@@ -140,10 +141,11 @@ Create Data Science Project
         Input Text    ${TITLE_INPUT_XP}    ${title}
         Input Text    ${DESCR_INPUT_XP}    ${description}
         Run Keyword And Continue On Failure    Validate Generated Resource Name    project_title=${title}
-        IF    "${resource_name}" != "${NONE}"
-            Clear Element Text    ${RESOURCE_INPUT_XP}
-            Input Text    ${RESOURCE_INPUT_XP}    ${resource_name}
+        IF    "${resource_name}" == "${NONE}"
+            ${resource_name}=    Get Value  ${RESOURCE_INPUT_XP}
+            ${resource_name}=    Generate Unique Namespace    ${resource_name}
         END
+        Input Text    ${RESOURCE_INPUT_XP}    ${resource_name}
         Wait Until Element Is Enabled    ${GENERIC_CREATE_BTN_XP}
         Click Button    ${GENERIC_CREATE_BTN_XP}
         Wait Until Generic Modal Disappears
@@ -158,6 +160,18 @@ Create Data Science Project
             Fail
         END
     END
+
+Generate Unique Namespace
+    [Documentation]    If DS Project Namespace '${namespace}' already exists - Return the Namespace + Random Suffix.
+    ...                (DS Project Display Name does not need to be unique, but DS Project Namespace does).
+    [Arguments]    ${namespace}
+    ${rc}=    Run And Return Rc    oc get namespace ${namespace}
+    IF    "${rc}" == "${0}" and len("${namespace}") < 60
+        # Add unique string to Project resource name (max length is 63 chars)
+        ${suffix}=    Generate Random String    3   [LOWER]
+        ${namespace}=    Set Variable    ${namespace}-${suffix}
+    END
+    RETURN    ${namespace}
 
 Create Data Science Project From CLI
     [Documentation]    Creates a Data Science Project, adding the needed labels to be recognized by Dashboard.
@@ -214,34 +228,37 @@ Get Openshift Namespace From Data Science Project
     ${k8s_name}=    Replace String    ${k8s_name}    "    ${EMPTY}
     RETURN    ${k8s_name}
 
-Delete Data Science Projects From CLI
-    [Documentation]     Deletes the Openshift Projects using OpenshiftLibrary.
-    ...                 It expects to receive a list of project (i.e,${ocp_projects}) as argument
+Delete List Of Projects Via CLI
+    [Documentation]     Loop over the Project list and Delete all projects using OC command.
+    ...                 It expects to receive a list of projects (i.e. ${ocp_projects}) as argument
     [Arguments]     ${ocp_projects}
     FOR   ${displayed_name}    IN  @{ocp_projects}
-        Delete Data Science Project From CLI    displayed_name=${displayed_name}
+        Delete Project Via CLI By Display Name    displayed_name=${displayed_name}
     END
 
-Delete Data Science Project From CLI
-    [Documentation]    Deletes a single DS project usig CLI command by project display-name
+#robocop: disable: line-too-long
+Delete Project Via CLI By Display Name
+    [Documentation]    Find and delete namespaces by DS Project display name '${displayed_name}' using OC command.
+    ...                If specifying "ALL" - All Data Science user-defined projects will be deleted.
     [Arguments]     ${displayed_name}
-    ${project_k8s_name}=     Run     oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.labels."opendatahub.io/dashboard"=="true") and (.metadata.annotations."openshift.io/display-name"=="${displayed_name}")) | .metadata.name'    # robocop: disable
-    ${project_k8s_name}=    Replace String    ${project_k8s_name}    "    ${EMPTY}
-    IF    "${project_k8s_name}" == "${EMPTY}"
-        Log    msg=There are probably no DS Projects with Display Name equal to ${displayed_name}
+    # DS Project Display name is not unique (i.e. multiple projects with same display name), but Project namespace is unique
+    IF    "${displayed_name}"=="ALL"
+        ${display_query}=    Set Variable   "openshift.io/display-name"!\=null
+    ELSE
+        ${display_query}=    Set Variable   "openshift.io/display-name"\=\="${displayed_name}"
+    END
+    ${project_k8s_name}=     Run     oc get projects -o json | jq -r '.items[] | select((.metadata.labels."opendatahub.io/dashboard"\=\="true") and (.metadata.annotations.${display_query})) | .metadata.name'
+    IF    """${project_k8s_name}""" == """${EMPTY}"""
+        Log    msg=Project '${displayed_name}' not found, or not a user-defined Data Science project
         ...    level=WARN
     ELSE
-        Delete Data Science Project From CLI By Name    name=${project_k8s_name}
-    END
-
-Delete Data Science Project From CLI By Name
-    [Documentation]    Deletes a single DS project usig CLI command by project resource name
-    [Arguments]     ${name}
-    Oc Delete    kind=Project   name=${name}
-    WHILE    ${TRUE}
-        ${exists}=    Run And Return Rc    oc get project ${name}
-        IF    "${exists}" == "1"    BREAK
-        Sleep    5s    reason=let's not overload the API
+        ${project_k8s_name}=    Replace String    ${project_k8s_name}    \n    ${SPACE}
+        ${project_names}=    Split String    string=${project_k8s_name}
+        ${counter}=    Get Length    ${project_names}
+        ${counter}=  Evaluate  ${counter} * 20
+        ${rc}=    Wait Until Keyword Succeeds    ${counter}s    5s
+        ...    Run And Return Rc    oc delete namespace ${project_k8s_name}
+        Should Be Equal As Integers    ${rc}    ${0}
     END
 
 #robocop: disable: line-too-long

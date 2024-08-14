@@ -938,4 +938,4 @@ Create User Test Projects
 
 Delete User Test Projects
     ${projects_to_delete}=    Create List    ${BASIC_USER_PRJ}    ${ADMIN_USER_PRJ}
-    Delete Data Science Projects From CLI   ocp_projects=${projects_to_delete}
+    Delete List Of Projects Via CLI   ocp_projects=${projects_to_delete}

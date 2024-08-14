@@ -77,5 +77,5 @@ Project Suite Teardown
     [Documentation]    Suite teardown steps after testing DS Projects. It Deletes
     ...                all the DS projects created by the tests and run RHOSi teardown
     Close All Browsers
-    Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
+    Delete List Of Projects Via CLI   ocp_projects=${PROJECTS_TO_DELETE}
     RHOSi Teardown

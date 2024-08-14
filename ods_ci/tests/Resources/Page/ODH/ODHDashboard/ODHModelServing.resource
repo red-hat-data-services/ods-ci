@@ -587,8 +587,7 @@ Clean Up DSP Page
         Click Element    //button[@aria-label="Close"]
     END
     Open Data Science Projects Home Page
-    ${projects}=    Get All Displayed Projects
-    Delete Data Science Projects From CLI    ${projects}
+    Delete Project Via CLI By Display Name    ALL
     Reload Page
     Wait For Dashboard Page Title    Data Science Projects    timeout=30s
 
@@ -598,9 +597,9 @@ Clean All Models Of Current User
     ...    controls how many retries are made.
     [Arguments]    ${retries}=5
     Open Model Serving Home Page
-    ${projects_empty}=    Run Keyword And Return Status    Page Should Contain    No data science projects
+    ${projects_empty}=    Run Keyword And Return Status    Page Should Contain    No deployed models
     IF    ${projects_empty}
-        Log    No Data Sciense projects exist, skipping cleanup    console=True
+        Log    No Models Deployed, Skipping Cleanup    console=True
     ELSE
         FOR    ${try}    IN RANGE    0    ${retries}
             ${status}=    Run Keyword And Return Status    Page Should Contain    Select a project

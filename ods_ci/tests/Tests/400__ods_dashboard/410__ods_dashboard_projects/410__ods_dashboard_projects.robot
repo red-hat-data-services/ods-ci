@@ -517,7 +517,7 @@ Verify User Can Access Only Its Owned Projects
     [Setup]    Run Keywords
     ...    SeleniumLibrary.Close All Browsers
     ...    AND
-    ...    Delete Data Science Project From CLI    displayed_name=${PRJ_TITLE}
+    ...    Delete Project Via CLI By Display Name    displayed_name=${PRJ_TITLE}
     Launch Data Science Project Main Page    username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_1_USER3}    description=${EMPTY}
@@ -573,7 +573,7 @@ Project Suite Setup
     Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}
     Set Variables For User Access Test
     RHOSi Setup
-    Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
+    Delete List Of Projects Via CLI   ocp_projects=${PROJECTS_TO_DELETE}
     Launch Data Science Project Main Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    resource_name=${PRJ_RESOURCE_NAME}
@@ -582,7 +582,7 @@ Project Suite Teardown
     [Documentation]    Suite teardown steps after testing DS Projects. It Deletes
     ...                all the DS projects created by the tests and run RHOSi teardown
     SeleniumLibrary.Close All Browsers
-    Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
+    Delete List Of Projects Via CLI   ocp_projects=${PROJECTS_TO_DELETE}
     RHOSi Teardown
 
 Set Variables For User Access Test

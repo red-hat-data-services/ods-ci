@@ -260,17 +260,18 @@ Select Workbench Container Size
 
 Workbench Should Be Listed
     [Documentation]    Checks a workbench is listed in the DS Project details page
-    [Arguments]     ${workbench_title}    ${timeout}=5s
+    [Arguments]     ${workbench_title}    ${timeout}=10s
     Run keyword And Continue On Failure
     ...    Wait Until Page Contains Element
     ...    ${WORKBENCH_SECTION_XP}//td[@data-label="Name"]/*[div[text()="${workbench_title}"]]    timeout=${timeout}
 
 Workbench With Description Should Be Listed
     [Documentation]    Checks a workbench with particular name and description is listed in the DS Project details page
-    [Arguments]     ${workbench_title}  ${workbench_description}
+    [Arguments]     ${workbench_title}  ${workbench_description}    ${timeout}=10s
     Run keyword And Continue On Failure
     ...    Wait Until Page Contains Element
-    ...        ${WORKBENCH_SECTION_XP}//td[@data-label="Name"][//div[text()="${workbench_title}"] and //p[text()="${workbench_description}"]]
+    ...    ${WORKBENCH_SECTION_XP}//td[@data-label="Name"][//div[text()="${workbench_title}"] and //p[text()="${workbench_description}"]]
+    ...    timeout=${timeout}
 
 Workbench Should Not Be Listed
     [Documentation]    Checks a workbench is not listed in the DS Project details page

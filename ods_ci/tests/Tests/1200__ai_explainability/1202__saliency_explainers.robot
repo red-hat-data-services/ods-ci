@@ -79,7 +79,7 @@ Explainers Suite Setup
 Explainers Suite Teardown
     [Documentation]     Explainers Suite Teardown
     Set Library Search Order    SeleniumLibrary
-    Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
+    Delete List Of Projects Via CLI   ocp_projects=${PROJECTS_TO_DELETE}
     RHOSi Teardown
 
 Set Project And Serving Runtime

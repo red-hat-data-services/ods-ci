@@ -72,7 +72,7 @@ Verify User Can Create, Run and Delete A DS Pipeline From DS Project Details Pag
 
     ODHDataSciencePipelines.Delete Pipeline           ${PIPELINE_TEST_NAME}
     ODHDataSciencePipelines.Delete Pipeline Server    ${PRJ_TITLE}
-    [Teardown]    Delete Data Science Project         ${PRJ_TITLE}
+    [Teardown]    Delete Project Via CLI By Display Name         ${PRJ_TITLE}
 
 
 *** Keywords ***
@@ -98,7 +98,7 @@ Pipelines Suite Setup
 Pipelines Suite Teardown
     [Documentation]    Deletes the test project which automatically triggers the
     ...                deletion of any pipeline resource contained in it
-    Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
+    Delete List Of Projects Via CLI   ocp_projects=${PROJECTS_TO_DELETE}
     RHOSi Teardown
 
 # robocop: disable:too-many-calls-in-keyword

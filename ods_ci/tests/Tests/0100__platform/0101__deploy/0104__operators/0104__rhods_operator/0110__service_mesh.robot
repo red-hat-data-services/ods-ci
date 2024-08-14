@@ -30,6 +30,9 @@ Validate Service Mesh State Managed
     Is Resource Present    ServiceMeshControlPlane    ${SERVICE_MESH_CR_NAME}    ${SERVICE_MESH_CR_NS}    ${IS_PRESENT}
     Check If Pod Exists    ${SERVICE_MESH_CR_NS}    app=istiod    ${FALSE}
 
+    [Teardown]    Set Service Mesh State To Managed And Wait For CR Ready    ${SERVICE_MESH_CR_NAME}    ${SERVICE_MESH_CR_NS}    ${OPERATOR_NS}
+
+
 Validate Service Mesh State Unmanaged
     [Documentation]    The purpose of this Test Case is to validate Service Mesh state 'Unmanaged'.
     ...                The operator will not recreate/update the Service Mesh CR if removed or changed.
@@ -37,7 +40,7 @@ Validate Service Mesh State Unmanaged
 
     Set Service Mesh Management State    Unmanaged    ${OPERATOR_NS}
     Delete Service Mesh Control Plane    ${SERVICE_MESH_CR_NS}
-    Wait Until Keyword Succeeds    5 min    0 sec
+    Wait Until Keyword Succeeds    2 min    0 sec
     ...    Is Resource Present    ServiceMeshControlPlane    ${SERVICE_MESH_CR_NAME}     ${SERVICE_MESH_CR_NS}    ${IS_NOT_PRESENT}
 
     [Teardown]    Set Service Mesh State To Managed And Wait For CR Ready    ${SERVICE_MESH_CR_NAME}    ${SERVICE_MESH_CR_NS}    ${OPERATOR_NS}

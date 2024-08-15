@@ -432,6 +432,13 @@ Extract URLs From Text
     ${urls}=     Get Regexp Matches   ${text}   (?:(?:(?:ftp|http)[s]*:\/\/|www\.)[^\.]+\.[^ \n]+)
     RETURN    ${urls}
 
+Run And Verify Command
+    [Documentation]    Run an oc delete command and log the output and errors
+    [Arguments]    ${command}
+    ${result}=    Run Process    ${command}    shell=yes
+    Log    ${result.stdout}\n${result.stderr}     console=True
+    Should Be True    ${result.rc} == 0
+
 Run And Watch Command
   [Documentation]    Run any shell command (including args) with optional:
   ...    Timeout: 10 minutes by default.

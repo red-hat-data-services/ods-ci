@@ -9,6 +9,7 @@ Resource          ../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Resource          ../../Resources/OCP.resource
+Resource          ../../Resources/Common.robot
 
 
 *** Variables ***
@@ -253,18 +254,11 @@ Run Update Notebook Script
 
 Remove Model Registry
     [Documentation]    Run multiple oc delete commands to remove model registry components
-    Run OC Delete Command    oc delete smm default -n ${NAMESPACE_MODEL-REGISTRY}
-    Run OC Delete Command    oc delete -k ${MODELREGISTRY_BASE_FOLDER}/samples/secure-db/mysql-tls
-    Run OC Delete Command    oc delete secret modelregistry-sample-grpc-credential -n ${NAMESPACE_ISTIO}
-    Run OC Delete Command    oc delete secret modelregistry-sample-rest-credential -n ${NAMESPACE_ISTIO}
-    Run OC Delete Command    oc delete namespace ${NAMESPACE_MODEL-REGISTRY} --force
-
-Run OC Delete Command
-    [Documentation]    Run an oc delete command and log the output and errors
-    [Arguments]    ${command}
-    ${result}=    Run Process    ${command}    shell=yes
-    Log    ${result.stdout}\n${result.stderr}     console=True
-    Should Be True    ${result.rc} == 0
+    Run And Verify Command    oc delete smm default -n ${NAMESPACE_MODEL-REGISTRY}
+    Run And Verify Command    oc delete -k ${MODELREGISTRY_BASE_FOLDER}/samples/secure-db/mysql-tls
+    Run And Verify Command    oc delete secret modelregistry-sample-grpc-credential -n ${NAMESPACE_ISTIO}
+    Run And Verify Command    oc delete secret modelregistry-sample-rest-credential -n ${NAMESPACE_ISTIO}
+    Run And Verify Command    oc delete namespace ${NAMESPACE_MODEL-REGISTRY} --force
 
 Remove Certificates
     [Documentation]    Remove all files from the certificates directory

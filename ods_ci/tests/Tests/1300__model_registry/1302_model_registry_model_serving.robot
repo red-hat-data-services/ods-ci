@@ -262,9 +262,9 @@ Remove Model Registry
 Run OC Delete Command
     [Documentation]    Run an oc delete command and log the output and errors
     [Arguments]    ${command}
-    ${result}=    Run Process    ${command}    shell=True    stdout=PIPE    stderr=PIPE
-    Log    ${result.stdout}
-    Log    ${result.stderr}
+    ${result}=    Run Process    ${command}    shell=yes
+    Log    ${result.stdout}\n${result.stderr}     console=True
+    Should Be True    ${result.rc} == 0
 
 Remove Certificates
     [Documentation]    Remove all files from the certificates directory

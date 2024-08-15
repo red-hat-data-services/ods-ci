@@ -9,6 +9,7 @@ Resource          ../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Resource          ../../Resources/OCP.resource
+Resource          ../../Resources/Common.robot
 
 
 *** Variables ***
@@ -93,6 +94,8 @@ Teardown Model Registry Test Setup
     ...    oc delete project ${PRJ_TITLE} --force --grace-period=0
     Should Be Equal As Integers	  ${return_code}	 0
     Log    ${output}
+    Remove Model Registry
+    Remove Certificates
     RHOSi Teardown
 
 Get Cluster Domain And Token
@@ -248,3 +251,18 @@ Run Update Notebook Script
     Log    ${result.stdout}
     Log    ${result.stderr}
     Should Contain    ${result.stdout}    Modified notebook saved
+
+Remove Model Registry
+    [Documentation]    Run multiple oc delete commands to remove model registry components
+    Run And Verify Command    oc delete smm default -n ${NAMESPACE_MODEL-REGISTRY}
+    Run And Verify Command    oc delete -k ${MODELREGISTRY_BASE_FOLDER}/samples/secure-db/mysql-tls
+    Run And Verify Command    oc delete secret modelregistry-sample-grpc-credential -n ${NAMESPACE_ISTIO}
+    Run And Verify Command    oc delete secret modelregistry-sample-rest-credential -n ${NAMESPACE_ISTIO}
+    Run And Verify Command    oc delete namespace ${NAMESPACE_MODEL-REGISTRY} --force
+
+Remove Certificates
+    [Documentation]    Remove all files from the certificates directory
+    ${files}=    List Files In Directory    ${CERTS_DIRECTORY}
+    FOR    ${file}    IN    @{files}
+        Run Process    rm    -f    ${CERTS_DIRECTORY}/${file}
+    END

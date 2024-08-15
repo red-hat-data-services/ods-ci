@@ -1,6 +1,7 @@
 *** Settings ***
 Documentation    Test Suite for Sandbox Test cases
 Resource        ../../Resources/Common.robot
+Resource        ../../Resources/Page/Components/Components.resource
 Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
 Resource        ../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
 Library         String
@@ -22,7 +23,7 @@ Verify ISV Integration Enablement Is Disabled
     ...   components are disabled in the Dashboard
     [Tags]     ODS-530
     ...        Sandbox
-    Click Link    Explore
+    Menu.Navigate To Page    Applications    Explore
     Capture Page Screenshot   explor.png
     Wait Until Cards Are Loaded
     Sleep    5s

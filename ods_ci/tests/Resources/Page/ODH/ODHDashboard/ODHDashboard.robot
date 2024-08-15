@@ -61,7 +61,7 @@ ${LOGOUT_BTN}=    //button[.="Log out"]
 *** Keywords ***
 Launch Dashboard
   [Arguments]  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}  ${dashboard_url}  ${browser}  ${browser_options}
-  ...          ${expected_page}=Enabled    ${wait_for_cards}=${TRUE}    ${browser_alias}=${NONE}
+  ...          ${expected_page}=${NONE}    ${wait_for_cards}=${TRUE}    ${browser_alias}=${NONE}
   Open Browser  ${dashboard_url}  browser=${browser}  options=${browser_options}
   ...    alias=${browser_alias}
   Login To RHODS Dashboard  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
@@ -84,7 +84,6 @@ Login To RHODS Dashboard
    IF  ${login-required}  Login To Openshift  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
    ${authorize_service_account}=  Is rhods-dashboard Service Account Authorization Required
    IF  ${authorize_service_account}  Authorize rhods-dashboard service account
-   Navigate To Page    Applications    Enabled    timeout=10s
 
 Logout From RHODS Dashboard
     [Documentation]  Logs out from the current user in the RHODS dashboard
@@ -97,11 +96,13 @@ Logout From RHODS Dashboard
 
 Wait For RHODS Dashboard To Load
     [Arguments]  ${dashboard_title}="${ODH_DASHBOARD_PROJECT_NAME}"    ${wait_for_cards}=${TRUE}
-    ...          ${expected_page}=Enabled    ${timeout}=60
+    ...          ${expected_page}=${NONE}    ${timeout}=60
     ${half_timeout}=   Evaluate    int(${timeout}) / 2
     Wait For Condition    return document.title == ${dashboard_title}    timeout=${half_timeout}
     Wait Until Page Contains Element    xpath:${RHODS_LOGO_XPATH}    timeout=${half_timeout}
-    IF    "${expected_page}" != "${NONE}"
+    IF    "${expected_page}" == "${NONE}"
+        Wait Until Page Contains Element    //div[@data-testid="home-page"]    timeout=${half_timeout}
+    ELSE
         Wait For Dashboard Page Title    ${expected_page}    timeout=${timeout}
     END
     IF    ${wait_for_cards} == ${TRUE}
@@ -816,7 +817,7 @@ Maybe Wait For Dashboard Loading Spinner Page
 Reload RHODS Dashboard Page
     [Documentation]    Reload the web page and wait for RHODS Dashboard
     ...    to be loaded
-    [Arguments]    ${expected_page}=Enabled    ${wait_for_cards}=${TRUE}
+    [Arguments]    ${expected_page}=${NONE}    ${wait_for_cards}=${TRUE}
     Reload Page
     Wait For RHODS Dashboard To Load    expected_page=${expected_page}
     ...    wait_for_cards=${wait_for_cards}

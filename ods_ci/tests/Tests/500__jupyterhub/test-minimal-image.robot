@@ -78,7 +78,7 @@ Can Launch Python3 Smoke Test Notebook
     ${output} =   Get Text    (//div[contains(@class,"jp-OutputArea-output")])[last()]
     Should Not Match    ${output}    ERROR*
     Should Be Equal As Strings    ${output}
-    ...    [0.40201256371442895, 0.8875, 0.846875, 0.875, 0.896875, 0.9116818405511811]
+    ...    [0.40201256371442895, 0.8875, 0.846875, 0.875, 0.896875, np.float64(0.9116818405511811)]
 
 Verify Tensorflow Can Be Installed In The Minimal Python Image Via Pip
     [Documentation]    Verify Tensorflow Can Be Installed In The Minimal Python image via pip

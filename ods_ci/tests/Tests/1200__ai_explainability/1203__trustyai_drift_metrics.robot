@@ -28,6 +28,8 @@ Run Drift Metrics Tests
 Prepare TrustyAi-tests Test Suite
     [Documentation]    Prepare trustyai-tests E2E Test Suite
     Log To Console    "Prepare Test Suite"
+    ${TRUSTY} =    Is Component Enabled    trustyai    ${DSC_NAME}
+    IF    "${TRUSTY}" == "false"    Enable Component    trustyai
     Drift Setup
     RHOSi Setup
 

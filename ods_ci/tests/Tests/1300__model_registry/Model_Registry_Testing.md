@@ -20,6 +20,8 @@ To review and run it locally you will need the following:
   ```bash
   ./odstest --install-identity-providers
   ```
+  Note: once you install the identity providers in might take up to 5 mins to become active.
+
 
 - Create and prepare the test-variables.yml file by using the template file test-variables.yml.example file. The following will need to be set.
 
@@ -33,8 +35,21 @@ To review and run it locally you will need the following:
   oc get ingresses.config/cluster -o jsonpath='{.spec.domain}'
   ```
 
-- run the following command from directory ods-ci/ods_ci 
+- Run the following command from directory ods-ci/ods_ci 
 
   ```bash
   sh run_robot_test.sh --no-output-subfolder true --test-variable PRODUCT:ODH --test-variable APPLICATIONS_NAMESPACE:opendatahub --test-variable MONITORING_NAMESPACE:opendatahub --test-variable OPERATOR_NAMESPACE:openshift-operators --test-variable NOTEBOOKS_NAMESPACE:opendatahub --extra-robot-args '--variablefile test-variables-odh-overwrite.yml' --include MRMS1302 --skip-oclogin
+  ```
+- Running the test and leaving all components active and running.
+
+  If you want to keep all components active and running on completion of the test you can comment out line 4 
+  
+  ```bash
+  Suite Teardown    Teardown Model Registry Test Setup
+  ```
+
+  If you want to develop further tests for post setup you can also comment out line 3 
+  
+  ```bash
+  Suite Setup       Prepare Model Registry Test Setup
   ```

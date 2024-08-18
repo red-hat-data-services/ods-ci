@@ -482,15 +482,10 @@ Re-validate License For Disabled Application From Enabled Page
 
 Get Question Mark Links
     [Documentation]      It returns the link elements from the question mark
-    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.21.0
-    IF  ${version_check}==True
-        Click Button  id:help-icon-toggle
-    ELSE
-        Click Element    xpath=//*[@id="toggle-id"]
-    END
+    Click Button  id:help-icon-toggle
     @{links_list}=  Create List
     @{link_elements}=  Get WebElements
-    ...    //a[contains(@class,"pf-v5-c-dropdown__menu-item")]
+    ...    //button[@id="help-icon-toggle"]/following-sibling::div//a
     FOR  ${link}  IN  @{link_elements}
          ${href}=    Get Element Attribute    ${link}    href
          Append To List    ${links_list}    ${href}

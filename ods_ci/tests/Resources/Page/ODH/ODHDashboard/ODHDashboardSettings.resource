@@ -99,7 +99,7 @@ AdminGroups In OdhDashboardConfig CRD Should Be
     ${dashnoardConfig}   Oc Get   kind=OdhDashboardConfig   namespace=${APPLICATIONS_NAMESPACE}  field_selector=metadata.name=odh-dashboard-config
     ${adminGroups}  Set Variable  ${dashnoardConfig[0]["spec"]["groupsConfig"]["adminGroups"]}
     @{adminGroupsList}  Split String  ${adminGroups}  ,
-    Lists Should Contain Same Items    ${UIadminGroupsList}  ${adminGroupsList}
+    Lists Should Be Equal    ${UIadminGroupsList}  ${adminGroupsList}    ignore_order=True
 
 AllowedGroups In OdhDashboardConfig CRD Should Be
     [Documentation]  Verify Expect Changes Are Present In CRD
@@ -107,7 +107,7 @@ AllowedGroups In OdhDashboardConfig CRD Should Be
     ${dashnoardConfig}   Oc Get   kind=OdhDashboardConfig   namespace=${APPLICATIONS_NAMESPACE}  field_selector=metadata.name=odh-dashboard-config
     ${allowedGroups}  Set Variable  ${dashnoardConfig[0]["spec"]["groupsConfig"]["allowedGroups"]}
     @{allowedGroupsList}  Split String  ${allowedGroups}  ,
-    Lists Should Contain Same Items    ${UIallowedGroupList}  ${allowedGroupsList}
+    Lists Should Be Equal    ${UIadminGroupsList}  ${adminGroupsList}    ignore_order=True
 
 Clear User Management Settings
     [Documentation]  Clear all groups from User Management Settings

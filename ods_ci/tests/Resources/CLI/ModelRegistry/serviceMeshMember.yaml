@@ -2,6 +2,7 @@ apiVersion: maistra.io/v1
 kind: ServiceMeshMember
 metadata:
   name: default
+  namespace: odh-model-registries
 spec:
   controlPlaneRef:
     name: data-science-smcp

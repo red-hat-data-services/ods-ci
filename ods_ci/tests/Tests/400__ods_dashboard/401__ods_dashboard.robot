@@ -1,5 +1,6 @@
 *** Settings ***
 Library           OpenShiftLibrary
+Resource          ../../Resources/Page/Components/Components.resource
 Resource          ../../Resources/Page/OCPDashboard/OperatorHub/InstallODH.robot
 Resource          ../../Resources/RHOSi.resource
 Resource          ../../Resources/ODS.robot
@@ -59,7 +60,7 @@ Verify Content In RHODS Explore Section
     # TODO: In ODH there are only 2 Apps, we excpect 7 Apps according to:
     # tests/Resources/Files/AppsInfoDictionary_latest.json
     ${EXP_DATA_DICT}=    Load Expected Data Of RHODS Explore Section
-    Click Link    Explore
+    Menu.Navigate To Page    Applications    Explore
     Wait For RHODS Dashboard To Load    expected_page=Explore
     Check Number Of Displayed Cards Is Correct    expected_data=${EXP_DATA_DICT}
     Check Cards Details Are Correct    expected_data=${EXP_DATA_DICT}
@@ -73,7 +74,7 @@ Verify RHODS Explore Section Contains Only Expected ISVs
     # TODO: In ODH there are only 2 Apps, we excpect 7 Apps according to:
     # tests/Resources/Files/AppsInfoDictionary_latest.json
     ${EXP_DATA_DICT}=    Load Expected Data Of RHODS Explore Section
-    Click Link    Explore
+    Menu.Navigate To Page    Applications    Explore
     Wait For RHODS Dashboard To Load    expected_page=Explore
     Check Number Of Displayed Cards Is Correct    expected_data=${EXP_DATA_DICT}
     Check Dashboard Diplayes Expected ISVs    expected_data=${EXP_DATA_DICT}
@@ -121,7 +122,7 @@ Verify CSS Style Of Getting Started Descriptions
     [Documentation]    Verifies the CSS style is not changed. It uses JupyterHub card as sample
     [Tags]    Tier1
     ...       ODS-1165
-    Click Link    Explore
+    Menu.Navigate To Page    Applications    Explore
     Wait For RHODS Dashboard To Load    expected_page=Explore
     ${status}=    Open Get Started Sidebar And Return Status    card_locator=${JUPYTER_CARD_XP}
     Should Be Equal    ${status}    ${TRUE}

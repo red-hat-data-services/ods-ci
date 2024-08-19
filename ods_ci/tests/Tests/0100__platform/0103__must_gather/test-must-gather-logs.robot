@@ -14,6 +14,7 @@ Verify that the must-gather image provides RHODS logs and info
     ...      Tier1
     ...      ODS-505
     ...      Operator
+    ...      MustGather
     Get must-gather Logs
     Verify logs for ${APPLICATIONS_NAMESPACE}
     IF  "${PRODUCT}" == "RHODS"

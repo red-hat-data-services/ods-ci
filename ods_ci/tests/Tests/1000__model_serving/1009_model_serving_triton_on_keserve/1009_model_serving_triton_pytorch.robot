@@ -30,7 +30,7 @@ ${EXPECTED_INFERENCE_REST_OUTPUT_PYTORCH}=        {"model_name":"resnet50","mode
 
 Test PYTORCH Model Inference Via UI (Triton on Kserve)
     [Documentation]    Test the deployment of an pytorch model in Kserve using Triton
-    [Tags]    Sanity    Tier1       RunThisTest
+    [Tags]    Sanity    Tier1       RHOAIENG-9066
 
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}

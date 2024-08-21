@@ -37,7 +37,7 @@ Test PYTORCH Model Inference Via UI (Triton on Kserve)
     ...    existing_project=${FALSE}
     Open Dashboard Settings    settings_page=Serving runtimes
     Upload Serving Runtime Template    runtime_filepath=${TRITON_RUNTIME_FILEPATH}
-    ...    serving_platform=single    api_protocol=REST
+    ...    serving_platform=single    runtime_protocol=REST
     Serving Runtime Template Should Be Listed    displayed_name=${RUNTIME_NAME}
     ...    serving_platform=single
     Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection

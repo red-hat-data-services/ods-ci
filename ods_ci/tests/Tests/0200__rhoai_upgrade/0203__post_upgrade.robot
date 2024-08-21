@@ -242,6 +242,7 @@ Delete OOTB Image
    IF    not ${IS_SELF_MANAGED}    Managed RHOAI Upgrade Test Teardown
 
 Managed RHOAI Upgrade Test Teardown
+    [Documentation]    Check rhods_aggregate_availability metric when RHOAI is installed as managed
     ${expression} =    Set Variable    rhods_aggregate_availability&step=1
     ${resp} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    ${expression}
     Log    rhods_aggregate_availability: ${resp.json()["data"]["result"][0]["value"][-1]}
@@ -259,5 +260,6 @@ Managed RHOAI Upgrade Test Teardown
     Run Keyword And Warn On Failure    Should Contain    ${list_values}    ${resp.json()["data"]["result"][0]["value"][-1]}
 
 Upgrade Suite Setup
+    [Documentation]    Set of action to run as Suite setup
     ${IS_SELF_MANAGED}=    Is RHODS Self-Managed
     Set Suite Variable    ${IS_SELF_MANAGED}

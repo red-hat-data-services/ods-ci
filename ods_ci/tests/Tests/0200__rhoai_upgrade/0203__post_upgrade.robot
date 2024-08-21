@@ -20,6 +20,8 @@ Resource           ../../Resources/Page/HybridCloudConsole/OCM.robot
 Resource           ../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 Resource           ../../Resources/Page/DistributedWorkloads/WorkloadMetricsUI.resource
 Resource           ../../Resources/CLI/MustGather/MustGather.resource
+Suite Setup    Upgrade Suite Setup
+
 
 *** Variables ***
 ${S_SIZE}       25
@@ -218,7 +220,7 @@ Dashboard Suite Setup
 
 Dashboard Test Teardown
     [Documentation]  Basic suite Teradown
-    Upgrade Test Teardown
+    IF    not ${IS_SELF_MANAGED}    Managed RHOAI Upgrade Test Teardown
     Close All Browsers
 
 Get Dashboard Config Data
@@ -231,16 +233,16 @@ Set Default Users
     [Documentation]  Set Default user settings
     Set Standard RHODS Groups Variables
     Set Default Access Groups Settings
-    Upgrade Test Teardown
+    IF    not ${IS_SELF_MANAGED}    Managed RHOAI Upgrade Test Teardown
 
 Delete OOTB Image
    [Documentation]  Delete the Custom notbook create
    ${status}  Run Keyword And Return Status     Oc Delete  kind=ImageStream  name=byon-upgrade  namespace=${APPLICATIONS_NAMESPACE}  #robocop:disable
    IF    not ${status}   Fail    Notebook image is deleted after the upgrade
-   Upgrade Test Teardown
+   IF    not ${IS_SELF_MANAGED}    Managed RHOAI Upgrade Test Teardown
 
-Upgrade Test Teardown
-    Skip If RHODS Is Self-Managed
+Managed RHOAI Upgrade Test Teardown
+    [Documentation]    Check rhods_aggregate_availability metric when RHOAI is installed as managed
     ${expression} =    Set Variable    rhods_aggregate_availability&step=1
     ${resp} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    ${expression}
     Log    rhods_aggregate_availability: ${resp.json()["data"]["result"][0]["value"][-1]}
@@ -256,3 +258,8 @@ Upgrade Test Teardown
     Log    rhods_aggregate_availability: ${resp.json()["data"]["result"][0]["value"][-1]}
     @{list_values} =    Create List    1
     Run Keyword And Warn On Failure    Should Contain    ${list_values}    ${resp.json()["data"]["result"][0]["value"][-1]}
+
+Upgrade Suite Setup
+    [Documentation]    Set of action to run as Suite setup
+    ${IS_SELF_MANAGED}=    Is RHODS Self-Managed
+    Set Suite Variable    ${IS_SELF_MANAGED}

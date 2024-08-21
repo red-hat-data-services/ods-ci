@@ -8,6 +8,7 @@ Resource       ../../../CLI/ModelServing/llm.resource
 Library        ../../../../../libs/Helpers.py
 
 
+
 *** Variables ***
 ${MS_HEADER_XP}=     xpath=//h1[text()="Model Serving"]
 ${S3_NAME_DC_INPUT_XP}=          xpath=//input[@aria-label="Field list Name"]
@@ -434,8 +435,8 @@ Deploy Kserve Model Via UI  #robocop: disable
     ...    ${token}=${FALSE}    ${multi_token}=${FALSE}    ${multi_service_account_name}=default-name2
     ...    ${public_endpoint}=${TRUE}
     Move To Tab    Models
-    Click Button    ${DEPLOY_MODEL_BTN}
-    Wait Until Page Contains Element    xpath=${KSERVE_MODAL_HEADER}
+    SeleniumLibrary.Click Button    ${DEPLOY_MODEL_BTN}
+    SeleniumLibrary.Wait Until Page Contains Element    xpath=${KSERVE_MODAL_HEADER}
     Set Model Name   ${model_name}
     Set Model Server Runtime    ${serving_runtime}
     Select Framework    ${model_framework}

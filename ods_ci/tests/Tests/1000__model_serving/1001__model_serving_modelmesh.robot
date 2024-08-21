@@ -1,6 +1,6 @@
 *** Settings ***
 Library           OperatingSystem
-Library           ../../../libs/Helpers.py
+Library           ../../../../libs/Helpers.py
 Resource          ../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource

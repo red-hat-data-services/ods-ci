@@ -59,11 +59,12 @@ Validate DSC creates all Serverless CRs
     Wait For Pods Numbers  2    namespace=${KNATIVESERVING_NS}
     ...    label_selector=${KNATIVE_SERVING_CONTROLLER_LABEL_SELECTOR}    timeout=300
 
-    #${pod_names}=    Get Pod Names    ${KNATIVESERVING_NS}    ${KNATIVE_SERVING_CONTROLLER_LABEL_SELECTOR}    Verify Containers Have Zero Restarts    ${pod_names}    ${KNATIVESERVING_NS}
+    ${pod_names}=    Get Pod Names    ${KNATIVESERVING_NS}    ${KNATIVE_SERVING_CONTROLLER_LABEL_SELECTOR}
+    Verify Containers Have Zero Restarts    ${pod_names}    ${KNATIVESERVING_NS}
     #${podname}=    Get Pod Name   ${OPERATOR_NAMESPACE}    ${OPERATOR_LABEL_SELECTOR}
     #Verify Pod Logs Do Not Contain    ${podname}    ${OPERATOR_NAMESPACE}    ${regex_pattern}    rhods-operator
 
-Validate DSC Knative Serving Removed State
+Validate DSC Kserve Serving Removed State
     [Documentation]    Validate that KServe Serving state Removed does remove relevant resources.
     [Tags]  Operator    RHOAIENG-7217    Tier2    kserve-serving-removed
 

@@ -23,7 +23,7 @@ Verify RHODS Admins Can Import A Custom Serving Runtime Template By Uploading A 
     [Tags]    Smoke    ODS-2276
     Open Dashboard Settings    settings_page=Serving runtimes
     Upload Serving Runtime Template    runtime_filepath=${OVMS_RUNTIME_FILEPATH}
-    ...    serving_platform=multi
+    ...    serving_platform=multi      runtime_protocol=gRPC
     Serving Runtime Template Should Be Listed    displayed_name=${UPLOADED_OVMS_DISPLAYED_NAME}
     ...    serving_platform=multi
 
@@ -43,11 +43,11 @@ Verify RHODS Admins Can Import A Custom Serving Runtime Template For Each Servin
     ${RUNTIME_SINGLE_FILEPATH}=    Set Variable    ${RESOURCES_DIRPATH}/csr_single_model.yaml
     ${RUNTIME_MULTI_FILEPATH}=    Set Variable    ${RESOURCES_DIRPATH}/csr_multi_model.yaml
     Upload Serving Runtime Template    runtime_filepath=${RUNTIME_SINGLE_FILEPATH}
-    ...    serving_platform=single
+    ...    serving_platform=single     runtime_protocol=gRPC
     Serving Runtime Template Should Be Listed    displayed_name=${RUNTIME_SINGLE_DISPLAYED_NAME}
     ...    serving_platform=single
     Upload Serving Runtime Template    runtime_filepath=${RUNTIME_MULTI_FILEPATH}
-    ...    serving_platform=multi
+    ...    serving_platform=multi      runtime_protocol=gRPC
     Serving Runtime Template Should Be Listed    displayed_name=${RUNTIME_MULTI_DISPLAYED_NAME}
     ...    serving_platform=multi
     [Teardown]    Run Keywords
@@ -112,7 +112,7 @@ Create Test Serving Runtime Template If Not Exists
         Log    message=Creating the necessary Serving Runtime as part of Test Setup.
         Open Dashboard Settings    settings_page=Serving runtimes
         Upload Serving Runtime Template    runtime_filepath=${OVMS_RUNTIME_FILEPATH}
-        ...    serving_platform=multi
+        ...    serving_platform=multi      runtime_protocol=gRPC
         Serving Runtime Template Should Be Listed    displayed_name=${UPLOADED_OVMS_DISPLAYED_NAME}
         ...    serving_platform=multi
     END

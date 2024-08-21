@@ -28,7 +28,6 @@ Verify User Can Create A Workbench Using Intel AiKit Image
     Check And Install Operator in Openshift    ${INTEL_AIKIT_OPERATOR_NAME}    ${INTEL_AIKIT_APPNAME}
     Create Tabname Instance For Installed Operator        ${INTEL_AIKIT_OPERATOR_NAME}
     ...    AIKitContainer    ${APPLICATIONS_NAMESPACE}
-    Go To RHODS Dashboard
     Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=workbench for testing
     ...        prj_title=${PRJ_TITLE}    image_name=${IMG_NAME}  version=${NONE}    deployment_size=Small
     ...        storage=Persistent  pv_name=aikitpv  pv_existent=${FALSE}
@@ -48,7 +47,6 @@ Verify User Can Create A Workbench Using Code Server Image
     Set Test Variable   ${WORKBENCH_TITLE}    codeServer
     Set Test Variable   ${PV_NAME}    codeServerPv
     Set Test Variable   ${PV_DESCRIPTION}    PV for codeServer
-    Go To RHODS Dashboard
     Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=workbench for testing
     ...        prj_title=${PRJ_TITLE}    image_name=${IMG_NAME}  version=${NONE}    deployment_size=Small
     ...        storage=Persistent  pv_name=${PV_NAME}  pv_existent=${FALSE}
@@ -73,11 +71,11 @@ Project Suite Setup
     RHOSi Setup
     Launch Data Science Project Main Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
-    ...    resource_name=${PRJ_RESOURCE_NAME}
+    ...    resource_name=${PRJ_RESOURCE_NAME}    existing_project=${TRUE}
 
 Project Suite Teardown
     [Documentation]    Suite teardown steps after testing DS Projects. It Deletes
     ...                all the DS projects created by the tests and run RHOSi teardown
     Close All Browsers
-    Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
+    Delete List Of Projects Via CLI   ocp_projects=${PROJECTS_TO_DELETE}
     RHOSi Teardown

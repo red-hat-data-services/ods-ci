@@ -1,5 +1,6 @@
 *** Settings ***
 Library           OpenShiftLibrary
+Resource          ../../Resources/Page/Components/Components.resource
 Resource          ../../Resources/Page/OCPDashboard/OperatorHub/InstallODH.robot
 Resource          ../../Resources/RHOSi.resource
 Resource          ../../Resources/ODS.robot
@@ -53,15 +54,14 @@ Verify Content In RHODS Explore Section
     ...    It compares the actual data with the one registered in a JSON file. The checks are about:
     ...    - Card's details (text, badges, images)
     ...    - Sidebar (titles, links text, links status)
-    ...    ProducBug: RHOAIENG-935
+    ...    ProductBug: RHOAIENG-10901, RHOAIENG-10875, RHOAIENG-1087
     [Tags]    Sanity    Tier1
     ...       ODS-488    ODS-993    ODS-749    ODS-352    ODS-282
-    ...       ProductBug
-    ...       AutomationBugOnODH
+    ...       AutomationBugOnODH    ProductBug
     # TODO: In ODH there are only 2 Apps, we excpect 7 Apps according to:
     # tests/Resources/Files/AppsInfoDictionary_latest.json
     ${EXP_DATA_DICT}=    Load Expected Data Of RHODS Explore Section
-    Click Link    Explore
+    Menu.Navigate To Page    Applications    Explore
     Wait For RHODS Dashboard To Load    expected_page=Explore
     Check Number Of Displayed Cards Is Correct    expected_data=${EXP_DATA_DICT}
     Check Cards Details Are Correct    expected_data=${EXP_DATA_DICT}
@@ -75,7 +75,7 @@ Verify RHODS Explore Section Contains Only Expected ISVs
     # TODO: In ODH there are only 2 Apps, we excpect 7 Apps according to:
     # tests/Resources/Files/AppsInfoDictionary_latest.json
     ${EXP_DATA_DICT}=    Load Expected Data Of RHODS Explore Section
-    Click Link    Explore
+    Menu.Navigate To Page    Applications    Explore
     Wait For RHODS Dashboard To Load    expected_page=Explore
     Check Number Of Displayed Cards Is Correct    expected_data=${EXP_DATA_DICT}
     Check Dashboard Diplayes Expected ISVs    expected_data=${EXP_DATA_DICT}
@@ -123,24 +123,22 @@ Verify CSS Style Of Getting Started Descriptions
     [Documentation]    Verifies the CSS style is not changed. It uses JupyterHub card as sample
     [Tags]    Tier1
     ...       ODS-1165
-    Click Link    Explore
+    Menu.Navigate To Page    Applications    Explore
     Wait For RHODS Dashboard To Load    expected_page=Explore
     ${status}=    Open Get Started Sidebar And Return Status    card_locator=${JUPYTER_CARD_XP}
     Should Be Equal    ${status}    ${TRUE}
     Capture Page Screenshot    get_started_sidebar.png
     Verify Jupyter Card CSS Style
 
-Verify Documentation Link HTTP Status Code
-    [Documentation]    It verifies the documentation link present in question mark and
+Verify Documentation Links HTTP Status Code
+    [Documentation]    It verifies the documentation links present in question mark and
     ...    also checks the RHODS dcoumentation link present in resource page.
+    ...    ProductBug: RHOAIENG-11451 (on ODH only)
     [Tags]    Sanity    Tier1
     ...       ODS-327    ODS-492
-    ...       AutomationBugOnODH
-    # TODO: In ODH the expected Docs links are:
-    # https://opendatahub.io/community
-    # https://opendatahub.io/docs
     ${links}=  Get RHODS Documentation Links From Dashboard
-    Documentation Links Should Be Equal To The Expected Ones   actual_links=${links}  expected_links=${DOC_LINKS_EXP}
+    # Compare Doc Links only by number, since ODH and RHOAI have diffrent URLs (but same count)
+    Lists Size Should Be Equal    ${links}    ${DOC_LINKS_EXP}
     Check External Links Status     links=${links}
 
 Verify Logged In Users Are Displayed In The Dashboard
@@ -648,7 +646,3 @@ Check Application Switcher Links To Openshift Console
     Should Be Equal    ${list_of_links}[0]    ${OCP_CONSOLE_URL}/
     Should Be Equal    ${status}    ${200}
 
-Documentation Links Should Be Equal To The Expected Ones
-    [Documentation]   Compare the fetched links from Dashboard with the expected ones
-    [Arguments]     ${actual_links}     ${expected_links}
-    Lists Should Be Equal   ${actual_links}    ${expected_links}    ignore_order=True

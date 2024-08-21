@@ -4,7 +4,9 @@ Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboardSettings.resou
 Resource        ../../Resources/ODS.robot
 Suite Setup     Setup Admin UI
 Suite Teardown  Teardown Admin UI
-Test Tags        Dashboard
+Test Setup      Revert Changes To Access Configuration
+Test Teardown   Close All Browsers
+Test Tags       Dashboard
 
 
 *** Test Cases ***
@@ -13,38 +15,52 @@ Verify RHODS Accept Multiple Admin Groups And CRD Gets Updates
     ...                check OdhDashboardConfig CRD gets updated according to Admin UI
     [Tags]  ODS-1661    ODS-1555
     ...     Tier1
-    Launch Dashboard And Check User Management Option Is Available For The User   ${TEST_USER.USERNAME}   ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+    # Login with RHOAI regular user (Settings should not be avaiable)
+    Launch Dashboard And Check User Management Option Is Available For The User
+    ...  ${TEST_USER_3.USERNAME}  ${TEST_USER_3.PASSWORD}  ${TEST_USER_3.AUTH_TYPE}  settings_should_be=${FALSE}
+    # Login with RHOAI Admin user (Settings should be avaiable)
+    Launch Dashboard And Check User Management Option Is Available For The User
+    ...  ${TEST_USER.USERNAME}   ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     Clear User Management Settings
     Add OpenShift Groups To Data Science Administrators   rhods-admins  rhods-users
     Add OpenShift Groups To Data Science User Groups    system:authenticated
     Save Changes In User Management Setting
     AdminGroups In OdhDashboardConfig CRD Should Be     rhods-admins  rhods-users
     AllowedGroups In OdhDashboardConfig CRD Should Be   system:authenticated
-    Launch Dashboard And Check User Management Option Is Available For The User   ${TEST_USER.USERNAME}   ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-    Launch Dashboard And Check User Management Option Is Available For The User   ${TEST_USER_3.USERNAME}   ${TEST_USER_3.PASSWORD}  ${TEST_USER_3.AUTH_TYPE}
-
+    Launch Dashboard And Check User Management Option Is Available For The User
+    ...  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
 
 Verify If Unauthorized User Can Not Change The Permission
     [Documentation]  Verify If Unauthorized User Can Not Change the Permission even if the UI is visible in browser cache,
-    ...    if the unauthorized user has saved, the changes should not reflect In CRD file
-    ...    Product Bug:    RHODS-6282
+    ...    if the unauthorized user has saved, the changes should not reflect In CRD file.
+    ...    ProductBug: RHOAIENG-11116
     [Tags]  ODS-1660
     ...     Tier1
     ...     Sanity
-    ...     ProductBug
+    # Login with an RHOAI Admin user and add RHOAI permissions to non-admin user (TEST_USER_3)
     Launch Dashboard And Check User Management Option Is Available For The User
-    ...    ${TEST_USER_3.USERNAME}   ${TEST_USER_3.PASSWORD}  ${TEST_USER_3.AUTH_TYPE}
-    Remove OpenShift Groups From Data Science Administrator Groups     rhods-admins
-    Save Changes In User Management Setting
-    Switch Browser  1
-    Add OpenShift Groups To Data Science Administrators    rhods-noaccess
+    ...  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+    Add OpenShift Groups To Data Science Administrators    rhods-users
     Add OpenShift Groups To Data Science User Groups       rhods-noaccess
-    AdminGroups In OdhDashboardConfig CRD Should Be        rhods-users
-    AllowedGroups In OdhDashboardConfig CRD Should Be      system:authenticated
     Save Changes In User Management Setting
-    Page Should Contain  Unable to load user and group settings
-    Switch Browser  2
-    [Teardown]  Revert Changes To Access Configuration
+    AdminGroups In OdhDashboardConfig CRD Should Be    rhods-admins    rhods-users
+    AllowedGroups In OdhDashboardConfig CRD Should Be      system:authenticated    rhods-noaccess
+    @{admin_session} =  Get Browser Ids
+    # Login with TEST_USER_3 and verify new permissions
+    Launch Dashboard And Check User Management Option Is Available For The User
+    ...  ${TEST_USER_3.USERNAME}  ${TEST_USER_3.PASSWORD}  ${TEST_USER_3.AUTH_TYPE}
+    @{non_admin_session} =  Get Browser Ids
+    # Switch back to RHOAI Admin session, and remove TEST_USER_3 permissions
+    Switch Browser  ${admin_session}[0]
+    Menu.Navigate To Page    Settings    User management
+    Remove OpenShift Groups From Data Science Administrator Groups     rhods-users
+    Save Changes In User Management Setting
+    AdminGroups In OdhDashboardConfig CRD Should Be    rhods-admins
+    Close Browser
+    # Switch to TEST_USER_3 session and verify permissions removed (Settings page not accessible)
+    Switch Browser  ${non_admin_session}[1]
+    Settings Page Should Be Unavailable    2m    # 2 minutes duration is a workaround for bug RHOAIENG-11116
+    [Teardown]    Capture Page Screenshot
 
 Verify Unauthorized User Is Not Able To Spawn Jupyter Notebook
     [Documentation]    Verify unauthorized User Is Not Able To Spawn Jupyter
@@ -64,7 +80,8 @@ Verify Unauthorized User Is Not Able To Spawn Jupyter Notebook
     AdminGroups In OdhDashboardConfig CRD Should Be        rhods-admins
     AllowedGroups In OdhDashboardConfig CRD Should Be      rhods-admins
     Logout From RHODS Dashboard
-    Login To RHODS Dashboard    ${TEST_USER_4.USERNAME}    ${TEST_USER_4.PASSWORD}    ${TEST_USER_4.AUTH_TYPE}
+    Run Keyword And Ignore Error
+    ...    Login To RHODS Dashboard    ${TEST_USER_4.USERNAME}    ${TEST_USER_4.PASSWORD}    ${TEST_USER_4.AUTH_TYPE}
     Wait For RHODS Dashboard To Load    expected_page=${NONE}    wait_for_cards=${FALSE}
     Run Keyword And Continue On Failure    Page Should Contain    Access permissions needed
     Run Keyword And Continue On Failure    Page Should Contain    ask your administrator to adjust your permissions.
@@ -73,7 +90,6 @@ Verify Unauthorized User Is Not Able To Spawn Jupyter Notebook
     Wait For RHODS Dashboard To Load    expected_page=${NONE}    wait_for_cards=${FALSE}
     Run Keyword And Continue On Failure    Page Should Contain    Access permissions needed
     Run Keyword And Continue On Failure    Page Should Contain    ask your administrator to adjust your permissions.
-    [Teardown]  Revert Changes To Access Configuration
 
 Verify Automatically Detects a Group Selected Is Removed and Notify the User
     [Documentation]  Verify if the group is deleted the user should get the

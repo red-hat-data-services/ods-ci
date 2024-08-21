@@ -25,10 +25,11 @@ Verify Model Is Registered With TrustyAI Service
     ...                value is the TrustyAI service route
     [Arguments]        ${namespace}=${PRJ_TITLE}
     IF  "${PRODUCT}" == "ODH"
-        ${MM_PAYLOAD_PROCESSORS_Expected}=    Set Variable    http://trustyai-service.${namespace}.svc.cluster.local/consumer/kserve/v2
+        ${MM_PAYLOAD_PROCESSORS_Expected}=    Set Variable    https://trustyai-service.${namespace}.svc.cluster.local/consumer/kserve/v2
     ELSE
-        ${MM_PAYLOAD_PROCESSORS_Expected}=    Set Variable    http://trustyai-service.${namespace}.svc/consumer/kserve/v2
+        ${MM_PAYLOAD_PROCESSORS_Expected}=    Set Variable    https://trustyai-service.${namespace}.svc/consumer/kserve/v2
     END
+    Sleep  60s  msg=Time For pods to be registered with TrustyAI Service
     Wait Until Keyword Succeeds  3 min  20 sec  Verify Model Serving Pod Exists   ${namespace}
     ...    label_selector=modelmesh-service=modelmesh-serving
     ${podname}=    Get Pod Name   ${namespace}    label_selector=${MODELMESH_SERVING_LABEL}

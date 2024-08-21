@@ -7,6 +7,10 @@ Resource       ./Projects.resource
 ${SAVE_BUTTON}=    xpath://button[@data-id="save-rolebinding-button"]
 ${PERMISSIONS_DROPDOWN}=    xpath://td[@data-label="Permission"]//button[@aria-label="Options menu"]
 ${IS_CLUSTER_ADMIN}=    ${FALSE}
+${USERS_TABLE}=    //table[@data-testid="role-binding-table User"]
+${INPUT_USER}=    ${USERS_TABLE}//input[@data-testid="role-binding-name-input "]
+${GROUPS_TABLE}=    //table[@data-testid="role-binding-table Group"]
+${INPUT_GROUP}=    ${GROUPS_TABLE}//input[@data-testid="role-binding-name-input "]
 
 
 *** Keywords ***
@@ -16,11 +20,11 @@ Assign ${permission_type} Permissions To User ${username}
     Log     ${username} - ${permission_type}
     Click Element    xpath://button[text()="Add user"]
     Element Should Be Disabled    ${SAVE_BUTTON}
-    Input Text    css:input[aria-label="project-sharing-name-input"]    ${username}
+    Input Text    xpath:${INPUT_USER}    ${username}
     Select Permission Type    permission_type=${permission_type}
     Save Permission
 
-Assign ${permission_type} Permissions To User ${username} in Project ${project_title}
+Assign ${permission_type} Permissions To User ${username} In Project ${project_title}
     Open Data Science Projects Home Page
     Wait Until Project Is Listed    project_title=${project_title}
     Open Data Science Project Details Page    ${project_title}    tab_id=permissions
@@ -46,7 +50,7 @@ Select Permission Type
     ...    to the given value ${permission_type} in the currently open DS Project in UI
     [Arguments]    ${permission_type}
     Click Element    ${PERMISSIONS_DROPDOWN}
-    Click Element    xpath://ul/li/button/span[text()="${permission_type}"]
+    Click Element    xpath://button[@role="option"]//*[.="${permission_type}"]
 
 Save Permission
     Element Should Be Enabled    ${SAVE_BUTTON}
@@ -60,7 +64,7 @@ Assign ${permission_type} Permissions To Group ${group_name}
     Click Element    xpath://button[text()="Add group"]
     Element Should Be Disabled    ${SAVE_BUTTON}
     IF    ${IS_CLUSTER_ADMIN} == ${FALSE}
-        Input Text    css:input[aria-label="project-sharing-name-input"]    ${group_name}
+        Input Text    xpath:${INPUT_GROUP}    ${group_name}
     ELSE
         Click Element    css:input[aria-label="Name selection"]
         Wait Until Page Contains Element    xpath://li/button[text()="${group_name}"]

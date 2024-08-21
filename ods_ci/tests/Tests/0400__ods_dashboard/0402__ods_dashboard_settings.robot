@@ -18,7 +18,6 @@ Verify That Administrators Can Access "Cluster Settings"
     ...    can access to "Cluster Settings"
     [Tags]    Smoke
     ...       ODS-1216
-
     Open ODS Dashboard With Admin User
     Verify Cluster Settings Is Available
     [Teardown]    Dashboard Settings Test Teardown
@@ -29,7 +28,6 @@ Verify That Not Admin Users Can Not Access "Cluster Settings"
     [Tags]    Tier1
     ...       Sanity
     ...       ODS-1217
-
     Open ODS Dashboard With Non Admin User
     Capture Page Screenshot
     Verify Cluster Settings Is Not Available

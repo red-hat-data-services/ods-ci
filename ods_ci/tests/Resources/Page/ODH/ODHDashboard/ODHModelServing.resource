@@ -350,7 +350,7 @@ Verify Model Inference With Retries
     ...                endpoint exposed.
     ...                This is a temporary mitigation meanwhile we find a better way to check the model
     [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}=${FALSE}
-    ...            ${project_title}=${NONE}    ${retries}=${5}     ${deployment_mode}=UI    ${kserve_mode}=Serverless
+    ...            ${project_title}=${NONE}    ${retries}=${5}     ${deployment_mode}='UI'    ${kserve_mode}=Serverless
     ...            ${service_port}=${NONE}   ${end_point}=${NONE}
     ${status}=    Run Keyword And Return Status    Verify Model Inference
     ...    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}    ${project_title}
@@ -587,8 +587,7 @@ Clean Up DSP Page
         Click Element    //button[@aria-label="Close"]
     END
     Open Data Science Projects Home Page
-    ${projects}=    Get All Displayed Projects
-    Delete Data Science Projects From CLI    ${projects}
+    Delete Project Via CLI By Display Name    ALL
     Reload Page
     Wait For Dashboard Page Title    Data Science Projects    timeout=30s
 
@@ -598,9 +597,9 @@ Clean All Models Of Current User
     ...    controls how many retries are made.
     [Arguments]    ${retries}=5
     Open Model Serving Home Page
-    ${projects_empty}=    Run Keyword And Return Status    Page Should Contain    No data science projects
+    ${projects_empty}=    Run Keyword And Return Status    Page Should Contain    No deployed models
     IF    ${projects_empty}
-        Log    No Data Sciense projects exist, skipping cleanup    console=True
+        Log    No Models Deployed, Skipping Cleanup    console=True
     ELSE
         FOR    ${try}    IN RANGE    0    ${retries}
             ${status}=    Run Keyword And Return Status    Page Should Contain    Select a project

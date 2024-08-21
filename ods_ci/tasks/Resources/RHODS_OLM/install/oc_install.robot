@@ -22,6 +22,7 @@ ${DSCI_NAME} =    default-dsci
 ${SERVERLESS_OP_NAME}=     serverless-operator
 ${SERVERLESS_SUB_NAME}=    serverless-operator
 ${SERVERLESS_NS}=    openshift-serverless
+${OPENSHIFT_OPERATORS_NS}=    openshift-operators
 ${SERVICEMESH_OP_NAME}=     servicemeshoperator
 ${SERVICEMESH_SUB_NAME}=    servicemeshoperator
 ${AUTHORINO_OP_NAME}=     authorino-operator
@@ -407,6 +408,10 @@ Install Authorino Operator Via Cli
           ...    type=CatalogSourcesUnhealthy    status=False
           ...    reason=AllCatalogSourcesHealthy    subcription_name=${AUTHORINO_SUB_NAME}
           ...    retry=150
+    Wait For Pods To Be Ready    label_selector=control-plane=authorino-operator
+          ...    namespace=${OPENSHIFT_OPERATORS_NS}
+    Wait For Pods To Be Ready    label_selector=authorino-component=authorino-webhooks
+          ...    namespace=${OPENSHIFT_OPERATORS_NS}
 
 Install Service Mesh Operator Via Cli
     [Documentation]    Install Service Mesh Operator Via CLI
@@ -417,6 +422,8 @@ Install Service Mesh Operator Via Cli
           ...    type=CatalogSourcesUnhealthy    status=False
           ...    reason=AllCatalogSourcesHealthy    subcription_name=${SERVICEMESH_SUB_NAME}
           ...    retry=150
+    Wait For Pods To Be Ready    label_selector=name=istio-operator
+          ...    namespace=${OPENSHIFT_OPERATORS_NS}
 
 Install Serverless Operator Via Cli
     [Documentation]    Install Serverless Operator Via CLI

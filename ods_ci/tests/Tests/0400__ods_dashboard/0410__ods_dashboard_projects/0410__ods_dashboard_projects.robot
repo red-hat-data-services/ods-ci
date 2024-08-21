@@ -356,7 +356,7 @@ Verify User Can Log Out And Return To Project From Jupyter Notebook    # robocop
     Workbench Status Should Be      workbench_title=${WORKBENCH_TITLE}
     ...    status=${WORKBENCH_STATUS_RUNNING}
     Open Workbench    workbench_title=${WORKBENCH_TITLE}
-    Run Keyword And Continue On Failure
+    Run Keyword And Ignore Error
     ...    Log In Should Be Requested
     [Teardown]    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_TITLE}
     ...    project_title=${PRJ_TITLE}
@@ -517,7 +517,7 @@ Verify User Can Access Only Its Owned Projects
     [Setup]    Run Keywords
     ...    SeleniumLibrary.Close All Browsers
     ...    AND
-    ...    Delete Data Science Project From CLI    displayed_name=${PRJ_TITLE}
+    ...    Delete Project Via CLI By Display Name    displayed_name=${PRJ_TITLE}
     Launch Data Science Project Main Page    username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_1_USER3}    description=${EMPTY}
@@ -532,6 +532,7 @@ Verify User Can Access Only Its Owned Projects
     Launch Data Science Project Main Page    username=${TEST_USER_4.USERNAME}    password=${TEST_USER_4.PASSWORD}
     Create Data Science Project    title=${PRJ_A_USER4}    description=${EMPTY}
     Open Data Science Projects Home Page
+    Filter Projects By Name    ${PRJ_TITLE}
     Number Of Displayed Projects Should Be    expected_number=1
     Project Should Be Listed    project_title=${PRJ_A_USER4}
     Project's Owner Should Be   expected_username=${TEST_USER_4.USERNAME}   project_title=${PRJ_A_USER4}
@@ -539,6 +540,7 @@ Verify User Can Access Only Its Owned Projects
     Project Should Not Be Listed    project_title=${PRJ_2_USER3}
     Switch Browser    1
     Open Data Science Projects Home Page
+    Filter Projects By Name    ${PRJ_TITLE}
     Number Of Displayed Projects Should Be    expected_number=2
     Project Should Not Be Listed    project_title=${PRJ_A_USER4}
     Project Should Be Listed    project_title=${PRJ_1_USER3}
@@ -546,6 +548,7 @@ Verify User Can Access Only Its Owned Projects
     Launch Data Science Project Main Page    username=${TEST_USER.USERNAME}    password=${TEST_USER.PASSWORD}
     Capture Page Screenshot
     # User ldap admin should be able to see all 3 projects
+    Filter Projects By Name    ${PRJ_TITLE}
     Number Of Displayed Projects Should Be    expected_number=3
     Project Should Be Listed    project_title=${PRJ_1_USER3}
     Project Should Be Listed    project_title=${PRJ_2_USER3}
@@ -554,6 +557,7 @@ Verify User Can Access Only Its Owned Projects
     ...    ocp_user_auth_type=${OCP_ADMIN_USER.AUTH_TYPE}
     Capture Page Screenshot
     # User cluster admin should be able to see all 3 projects
+    Filter Projects By Name    ${PRJ_TITLE}
     Number Of Displayed Projects Should Be    expected_number=3
     Project Should Be Listed    project_title=${PRJ_1_USER3}
     Project Should Be Listed    project_title=${PRJ_2_USER3}
@@ -569,7 +573,7 @@ Project Suite Setup
     Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}
     Set Variables For User Access Test
     RHOSi Setup
-    Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
+    Delete List Of Projects Via CLI   ocp_projects=${PROJECTS_TO_DELETE}
     Launch Data Science Project Main Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    resource_name=${PRJ_RESOURCE_NAME}
@@ -578,7 +582,7 @@ Project Suite Teardown
     [Documentation]    Suite teardown steps after testing DS Projects. It Deletes
     ...                all the DS projects created by the tests and run RHOSi teardown
     SeleniumLibrary.Close All Browsers
-    Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
+    Delete List Of Projects Via CLI   ocp_projects=${PROJECTS_TO_DELETE}
     RHOSi Teardown
 
 Set Variables For User Access Test

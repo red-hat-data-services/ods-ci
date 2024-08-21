@@ -7,70 +7,91 @@ Resource        ../../../ODS.robot
 
 *** Variables ***
 ${TOLERATION_CHECKBOX}=    //input[@id="tolerations-enabled-checkbox"]
-${GROUP_BTN_XP}=    //button[@data-ouia-component-id="Remove"]
+${GROUP_BTN_XP}=    //button[@aria-label="Clear input value"]
 ${SINGLE_MODE_SERVING_CHECK_BOX}=   //input[@id="single-model-serving-platform-enabled-checkbox"]
 ${MULTI_MODEL_SERVING_CHECK_BOX}=   //input[@id="multi-model-serving-platform-enabled-checkbox"]
 ${CUSTOM_EMPTY_GROUP}=    empty-group
+${ADMIN_GROUPS_SECTION}=    //div[@data-testid="data-science-administrator-groups"]
+${ADMIN_GROUPS_LIST}=    ${ADMIN_GROUPS_SECTION}//div[@role="group" and @aria-label="Current selections"]
+${USER_GROUPS_SECTION}=    //div[@data-testid="data-science-user-groups"]
+${USER_GROUPS_LIST}=    ${USER_GROUPS_SECTION}//div[@role="group" and @aria-label="Current selections"]
+${SAVE_BUTTON}=    //button[@data-testid="save-button"]
 
 *** Keywords ***
 Add OpenShift Groups To Data Science Administrators
     [Documentation]  Add OpenShift Groups to Data Science administrators From RHODS Dashboard
     [Arguments]     @{admin_groups}
-    Click Button   (//button[@aria-label="Options menu"])[${1}]
-    FOR    ${admin_group}    IN    @{admin_groups}
-             ${present}=  Run Keyword And Return Status    Element Should Be Visible   //button[@role="option" and text()="${admin_group}" and @aria-selected="true"]
-            IF  ${present} != True
-                Click Button    //button[@role="option" and text()="${admin_group}"]
-            END
+    Click Button   ${ADMIN_GROUPS_SECTION}//button[@aria-label="Options menu"]
+    FOR    ${group}    IN    @{admin_groups}
+        ${present}=    Run Keyword And Return Status    Element Should Be Visible
+        ...    ${ADMIN_GROUPS_LIST}//*[text()="${group}"]
+        IF    not ${present}
+            Click Element    ${ADMIN_GROUPS_SECTION}//*[text()="${group}"]
+        END
     END
     Press Keys    None    ESC
 
 Add OpenShift Groups To Data Science User Groups
     [Documentation]  Add OpenShift Groups to Data Science User From RHODS Dashboard
     [Arguments]     @{user_groups}
-    Click Button    (//button[@aria-label="Options menu"])[${2}]
-
-    FOR    ${user_group}    IN    @{user_groups}
-            ${present}=  Run Keyword And Return Status
-               ...  Element Should Be Visible   //button[@role="option" and text()="${user_group}" and @aria-selected="true"]
-             IF  ${present} != True
-                Click Element    //button[@role="option" and text()="${user_group}"]
-             END
+    Click Button   ${USER_GROUPS_SECTION}//button[@aria-label="Options menu"]
+    FOR    ${group}    IN    @{user_groups}
+        ${present}=    Run Keyword And Return Status    Element Should Be Visible
+        ...    ${USER_GROUPS_LIST}//*[text()="${group}"]
+        IF    not ${present}
+            Click Element    ${USER_GROUPS_SECTION}//*[text()="${group}"]
+        END
     END
     Press Keys    None    ESC
 
 Launch Dashboard And Check User Management Option Is Available For The User
-    [Documentation]  Launch Dashboard And Check User Management Option Is
-     ...    Available For The User logged in
-    [Arguments]   ${username}  ${password}  ${auth_type}
-    Launch Dashboard  ocp_user_name=${username}  ocp_user_pw=${password}  ocp_user_auth_type=${auth_type}
-    ...               dashboard_url=${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
-    ${authorization_required} =  Is Service Account Authorization Required
-    IF  ${authorization_required}  Authorize jupyterhub service account
-    Menu.Navigate To Page    Settings    User management
-    Wait Until Element Is Visible   //button[@aria-label="Options menu"]  timeout=20
+    [Documentation]  Login To Dashboard And Check User Management Option Availablity.
+    ...   For Non-Admin Users The 'Menu > Settings' Should Be Unavailable (${FALSE}).
+    [Arguments]    ${username}  ${password}  ${auth_type}  ${settings_should_be}=${TRUE}
+    Launch Dashboard    ocp_user_name=${username}  ocp_user_pw=${password}  ocp_user_auth_type=${auth_type}
+    ...    dashboard_url=${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
+    ${authorization_required}=  Is Service Account Authorization Required
+    IF    ${authorization_required}    Authorize jupyterhub service account
+    IF    ${settings_should_be}
+        # Wait up to 2 minutes as a workaround for bug RHOAIENG-11116
+        Menu.Navigate To Page    Settings    User management    timeout=2m
+        Wait Until Element Is Visible    //button[@aria-label="Options menu"]    timeout=10s
+    ELSE
+        Verify Cluster Settings Is Not Available
+    END
 
 Remove OpenShift Groups From Data Science User Groups
     [Documentation]   Remove OpenShift Groups From Data Science User Groups From Dashboard
     [Arguments]   @{user_groups}
-    FOR    ${user_group}    IN    @{user_groups}
-            Click Element     (//*[@class="pf-c-chip-group"])[${2}]//*[@class="pf-c-chip__text" and contains(text(),"${user_groups}")]//following-sibling::button[${1}]
+    FOR    ${group}    IN    @{user_groups}
+        ${group_exists}=    Run Keyword And Return Status
+        ...    Wait Until Element Is Visible    ${USER_GROUPS_LIST}//*[.="${group}"]    timeout=10s
+        IF    ${group_exists}    Click Button
+        ...    ${USER_GROUPS_LIST}//*[.="${group}"]/following::button[@aria-label="close"]
     END
     Press Keys    None    ESC
 
 Remove OpenShift Groups From Data Science Administrator Groups
     [Documentation]  Remove OpenShift Groups From Data Science Administrator Groups From Dashboard
     [Arguments]     @{admin_groups}
-    FOR    ${admin_group}    IN    @{admin_groups}
-            Click Button    (//*[@class="pf-c-chip-group"])[${1}]//*[@class="pf-c-chip__text" and contains(text(),"${admin_group}")]//following-sibling::button[${1}]
+    FOR    ${group}    IN    @{admin_groups}
+        ${group_exists}=    Run Keyword And Return Status
+        ...    Wait Until Element Is Visible    ${ADMIN_GROUPS_LIST}//*[.="${group}"]    timeout=10s
+        IF    ${group_exists}    Click Button
+        ...    ${ADMIN_GROUPS_LIST}//*[.="${group}"]/following::button[@aria-label="close"]
     END
     Press Keys    None    ESC
 
 Save Changes In User Management Setting
     [Documentation]  Save User Management Settings In Dashboard
+    [Arguments]    ${timeout}=3s
     Press Keys    None    ESC
-    Click Button    Save changes
-    Sleep    120s    reason=Wait for Dashboard to apply the updated configuration...
+    ${button_enabled}=    Run Keyword And Return Status
+    ...    Wait Until Element Is Enabled   ${SAVE_BUTTON}
+    IF    ${button_enabled}
+        Click Button    ${SAVE_BUTTON}
+        Sleep    ${timeout}    reason=Wait for Dashboard to apply the updated configuration...
+    END
 
 AdminGroups In OdhDashboardConfig CRD Should Be
     [Documentation]  Verify Expect Changes Are Present In CRD
@@ -78,7 +99,7 @@ AdminGroups In OdhDashboardConfig CRD Should Be
     ${dashnoardConfig}   Oc Get   kind=OdhDashboardConfig   namespace=${APPLICATIONS_NAMESPACE}  field_selector=metadata.name=odh-dashboard-config
     ${adminGroups}  Set Variable  ${dashnoardConfig[0]["spec"]["groupsConfig"]["adminGroups"]}
     @{adminGroupsList}  Split String  ${adminGroups}  ,
-    Lists Should Be Equal      ${UIadminGroupsList}  ${adminGroupsList}
+    Lists Should Be Equal    ${UIadminGroupsList}  ${adminGroupsList}    ignore_order=True
 
 AllowedGroups In OdhDashboardConfig CRD Should Be
     [Documentation]  Verify Expect Changes Are Present In CRD
@@ -86,7 +107,7 @@ AllowedGroups In OdhDashboardConfig CRD Should Be
     ${dashnoardConfig}   Oc Get   kind=OdhDashboardConfig   namespace=${APPLICATIONS_NAMESPACE}  field_selector=metadata.name=odh-dashboard-config
     ${allowedGroups}  Set Variable  ${dashnoardConfig[0]["spec"]["groupsConfig"]["allowedGroups"]}
     @{allowedGroupsList}  Split String  ${allowedGroups}  ,
-    Lists Should Be Equal      ${UIallowedGroupList}  ${allowedGroupsList}
+    Lists Should Be Equal    ${UIadminGroupsList}  ${adminGroupsList}    ignore_order=True
 
 Clear User Management Settings
     [Documentation]  Clear all groups from User Management Settings
@@ -134,6 +155,18 @@ Save Changes In Cluster Settings
     # New setting applies after a few seconds, empirically >15s.
     # Sleep here to make sure it is applied.
     Sleep  30s
+
+Settings Page Should Be Unavailable
+    [Documentation]    Wait up to ${timeout} for the Setting Page to become Unavailable (for non-Admin RHOAI users)
+    [Arguments]    ${timeout}=30s
+    ${setting_disapeared}=    Set Variable    ${FALSE}
+    WHILE   not ${setting_disapeared}    limit=${timeout}
+    ...    on_limit_message=Timeout exceeded waiting for Setting Page to become Unavailable
+        Reload Page
+        Sleep   5s
+        ${setting_disapeared}=    Run Keyword And Return Status
+        ...    Page Should Contain Element    //div[@data-testid="not-found-page-title"]
+    END
 
 Enable "Usage Data Collection"
     [Documentation]    Once in Settings > Cluster settings, enables "Usage Data Collection"

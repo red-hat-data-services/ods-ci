@@ -20,6 +20,7 @@ ${PRJ_RESOURCE_NAME}=          odscidsprojectedit
 ${PRJ_DESCRIPTION}=            ${PRJ_TITLE} is a test project for validating edit scenarios in DS Projects feature and shared by multiple tests    #robocop: disable
 ${NEW_PRJ_TITLE}=              ODS-CI DS Project Updated
 ${NEW_PRJ_DESCRIPTION}=        ${NEW_PRJ_TITLE} is a New edited test project for validating DS Projects feature
+@{PROJECTS_TO_DELETE}=         ${PRJ_TITLE_2}    ${NEW_PRJ_TITLE}
 ${NB_IMAGE}=                   Minimal Python
 ${WORKBENCH_TITLE}=            ODS-CI Workbench 1
 ${WORKBENCH_TITLE_UPDATED}=    ${WORKBENCH_TITLE} Updated
@@ -40,8 +41,7 @@ Verify User Can Edit A Data Science Project
     [Tags]    Sanity    Tier1    ODS-2112
     [Documentation]    Verifies users can edit a DS project
     [Setup]   Create Data Science Project    title=${PRJ_TITLE_2}    description=${PRJ_DESCRIPTION}
-    ...    resource_name=${NONE}
-    [Teardown]    Delete Data Science Project    project_title=${NEW_PRJ_TITLE}
+    ...    resource_name=${NONE}    existing_project=${TRUE}
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE_2}
     Open Data Science Projects Home Page
     Project Should Be Listed    project_title=${PRJ_TITLE_2}
@@ -50,6 +50,7 @@ Verify User Can Edit A Data Science Project
     ...    project_title=${PRJ_TITLE_2}    new_title=${NEW_PRJ_TITLE}    new_description=${NEW_PRJ_DESCRIPTION}
     ${ns_newname}=    Get Openshift Namespace From Data Science Project   project_title=${NEW_PRJ_TITLE}
     Should Be Equal As Strings  ${ns_name}  ${ns_newname}
+    [Teardown]     Delete List Of Projects Via CLI    ${PROJECTS_TO_DELETE}
 
 Verify User Can Edit A Workbench
     [Documentation]    Verifies users can edit a workbench name and description
@@ -59,7 +60,7 @@ Verify User Can Edit A Workbench
     [Setup]    Open Data Science Project Details Page    project_title=${PRJ_TITLE}    tab_id=workbenches
     Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
     ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
-    ...                 storage=Persistent  pv_existent=${FALSE}
+    ...                 storage=Persistent  pv_existent=${NONE}
     ...                 pv_name=${PV_BASENAME}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
     Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
     Workbench Status Should Be      workbench_title=${WORKBENCH_TITLE}      status=${WORKBENCH_STATUS_STARTING}
@@ -104,18 +105,17 @@ Project Suite Setup
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
     Launch Data Science Project Main Page
+    Delete List Of Projects Via CLI    ${PROJECTS_TO_DELETE}
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
-    ...    resource_name=${PRJ_RESOURCE_NAME}
+    ...    resource_name=${PRJ_RESOURCE_NAME}    existing_project=${TRUE}
     Open Data Science Projects Home Page
-    ${to_delete}=    Create List    ${PRJ_TITLE}
-    Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}
 
 Project Suite Teardown
     [Documentation]    Suite teardown steps after testing DS Projects. It Deletes
     ...                all the DS projects created by the tests and run RHOSi teardown
     Close All Browsers
-    # Delete All Data Science Projects From CLI
-    Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
+    Append To List    ${PROJECTS_TO_DELETE}    ${PRJ_TITLE}
+    Delete List Of Projects Via CLI   ocp_projects=${PROJECTS_TO_DELETE}
     RHOSi Teardown
 
 Check Name And Description Should Be Editable

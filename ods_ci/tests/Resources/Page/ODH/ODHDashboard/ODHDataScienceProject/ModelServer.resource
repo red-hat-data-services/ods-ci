@@ -25,6 +25,7 @@ ${TOKEN_AUTH_CHECKBOX_XP}=    xpath://input[@id="alt-form-checkbox-auth"]
 ${ADD_SERVICE_ACCOUNT_BUTTON}=    xpath://button[text()='Add a service account']
 ${SERVICE_ACCOUNT_INPUT}=    xpath://input[@data-testid='service-account-form-name']
 ${REPLICAS_COUNT_XP}=     xpath://section[@class='pf-v5-c-form__section']//span[@class='pf-v5-c-form-control']/input
+${PROJECT_SELECTOR_XP}=     xpath://main[contains(@id, 'dashboard-page-main')]//*[@data-testid="project-selector-dropdown"]
 
 
 *** Keywords ***
@@ -310,8 +311,8 @@ Switch Model Serving Project
     IF    "${project_name}" == "${NONE}"
         ${project_name}=    Set Variable    All projects
     END
-    Wait Until Element Is Visible  //main[contains(@id, 'dashboard-page-main')]//button[contains(@id, 'dropdown-toggle')]
-    Click Element  //main[contains(@id, 'dashboard-page-main')]//button[contains(@id, 'dropdown-toggle')]
-    Wait Until Element Is Visible     //ul//a[contains(., '${project_name}')]
-    Click Element     //ul//a[contains(., '${project_name}')]
+    Wait Until Element Is Visible  ${PROJECT_SELECTOR_XP}
+    Click Element  ${PROJECT_SELECTOR_XP}
+    Wait Until Element Is Visible     //ul//li[contains(., '${project_name}')]
+    Click Element     //ul//li[contains(., '${project_name}')]
     ODHDashboard.Maybe Wait For Dashboard Loading Spinner Page

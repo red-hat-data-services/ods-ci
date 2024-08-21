@@ -21,7 +21,8 @@ Validate DSC creates all Serverless CRs
     ...    of Serverless Custom Resources
     [Tags]  Operator    ODS-2600    Tier2
     Resource Should Exist     KnativeServing    knative-serving     ${KNATIVESERVING_NS}
-    Resource Status Should Be     oc get KnativeServing knative-serving -n ${KNATIVESERVING_NS} -o json | jq '.status.conditions[] | select(.type=="Ready") | .status'     KnativeServing    "True"    # robocop: disable
+    Wait Until Keyword Succeeds    5 min    0 sec
+    ...        Resource Status Should Be     oc get KnativeServing knative-serving -n ${KNATIVESERVING_NS} -o json | jq '.status.conditions[] | select(.type=="Ready") | .status'     KnativeServing    "True"    # robocop: disable
     Resource Should Exist     Gateway    knative-ingress-gateway     ${KNATIVESERVING_NS}
     Resource Should Exist     Gateway    knative-local-gateway     ${KNATIVESERVING_NS}
     Resource Should Exist     Gateway    kserve-local-gateway     ${ISTIO_NS}

@@ -21,24 +21,19 @@ ${USER_B}=                      ${TEST_USER_3.USERNAME}
 ${PRJ_USER_B_TITLE}=            ${PRJ_BASE_TITLE}-${TEST_USER_3.USERNAME}
 ${USER_C}=                      ${TEST_USER_4.USERNAME}
 ${PRJ_USER_C_TITLE}=            ${PRJ_BASE_TITLE}-${TEST_USER_4.USERNAME}
+@{PROJECTS_TO_DELETE}=          ${PRJ_USER_B_TITLE}    ${PRJ_USER_C_TITLE}
 
 
 *** Test Cases ***
-Verify User Can Access Permission Tab In Their Owned DS Project
-    [Documentation]    Verify user has access to "Permissions" tab in their DS Projects
-    [Tags]    Tier1    Smoke    OpenDataHub
-    ...       ODS-2194
-    Pass Execution    The Test is executed as part of Suite Setup
-
 Verify User Can Make Their Owned DS Project Accessible To Other Users    # robocop: disable
     [Documentation]    Verify user can give access permissions for their DS Projects to other users
-    [Tags]    Tier1    Sanity
-    ...       ODS-2201
+    [Tags]    Tier1    Smoke
+    ...       ODS-2194    ODS-2201
     Switch To User    ${USER_B}
     Move To Tab    Permissions
-    Assign Edit Permissions To User ${USER_C}
+    Assign Contributor Permissions To User ${USER_C}
     Assign Admin Permissions To User ${USER_A}
-    ${USER_C} Should Have Edit Access To ${PRJ_USER_B_TITLE}
+    ${USER_C} Should Have Contributor Access To ${PRJ_USER_B_TITLE}
     ${USER_A} Should Have Admin Access To ${PRJ_USER_B_TITLE}
 
 Verify User Can Modify And Revoke Access To DS Projects From Other Users    # robocop: disable
@@ -48,10 +43,10 @@ Verify User Can Modify And Revoke Access To DS Projects From Other Users    # ro
     Switch To User    ${USER_B}
     Move To Tab    Permissions
     Change ${USER_C} Permissions To Admin
-    Change ${USER_A} Permissions To Edit
+    Change ${USER_A} Permissions To Contributor
     Refresh Pages
     ${USER_C} Should Have Admin Access To ${PRJ_USER_B_TITLE}
-    ${USER_A} Should Have Edit Access To ${PRJ_USER_B_TITLE}
+    ${USER_A} Should Have Contributor Access To ${PRJ_USER_B_TITLE}
     Switch To User    ${USER_B}
     Move To Tab    Permissions
     Remove ${USER_C} Permissions
@@ -62,7 +57,7 @@ Verify User Can Assign Access Permissions To User Groups
     ...       ODS-2208
     [Setup]    Restore Permissions Of The Project
     Switch To User    ${USER_B}
-    Assign Edit Permissions To Group ${USER_GROUP_1}
+    Assign Contributor Permissions To Group ${USER_GROUP_1}
     Assign Admin Permissions To Group ${USER_GROUP_2}
     RoleBinding Should Exist    project_title=${PRJ_USER_B_TITLE}
     ...    subject_name=${USER_GROUP_1}
@@ -70,14 +65,14 @@ Verify User Can Assign Access Permissions To User Groups
     RoleBinding Should Exist    project_title=${PRJ_USER_B_TITLE}
     ...    subject_name=${USER_GROUP_2}
     Sleep   5s
-    ${USER_A} Should Have Edit Access To ${PRJ_USER_B_TITLE}
+    ${USER_A} Should Have Contributor Access To ${PRJ_USER_B_TITLE}
     ${USER_C} Should Have Admin Access To ${PRJ_USER_B_TITLE}
     Switch To User    ${USER_B}
     Change ${USER_GROUP_1} Permissions To Admin
-    Change ${USER_GROUP_2} Permissions To Edit
+    Change ${USER_GROUP_2} Permissions To Contributor
     Sleep   5s
     ${USER_A} Should Have Admin Access To ${PRJ_USER_B_TITLE}
-    ${USER_C} Should Have Edit Access To ${PRJ_USER_B_TITLE}
+    ${USER_C} Should Have Contributor Access To ${PRJ_USER_B_TITLE}
     Switch To User    ${USER_B}
     Remove ${USER_GROUP_2} Permissions
     Sleep   5s
@@ -88,8 +83,8 @@ Verify Project Sharing Does Not Override Dashboard Permissions
     [Setup]                 Set RHODS Users Group To rhods-users
     Launch Data Science Project Main Page    username=${OCP_ADMIN_USER.USERNAME}    password=${OCP_ADMIN_USER.PASSWORD}
     ...    ocp_user_auth_type=${OCP_ADMIN_USER.AUTH_TYPE}
-    Assign Admin Permissions To User ${USER_B} in Project ${PRJ_USER_B_TITLE}
-    Assign Edit Permissions To User ${USER_C} in Project ${PRJ_USER_C_TITLE}
+    Assign Admin Permissions To User ${USER_B} In Project ${PRJ_USER_B_TITLE}
+    Assign Contributor Permissions To User ${USER_C} In Project ${PRJ_USER_C_TITLE}
     Remove User From Group    username=${USER_B}    group_name=rhods-users
     Remove User From Group    username=${USER_B}    group_name=rhods-admins
     Remove User From Group    username=${USER_C}    group_name=rhods-users
@@ -108,8 +103,8 @@ Project Permissions Mgmt Suite Setup    # robocop: disable
     RHOSi Setup
     Set Standard RHODS Groups Variables
     Set Default Access Groups Settings
-    ${to_delete}=    Create List
-    Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}
+    Delete List Of Projects Via CLI   ocp_projects=${PROJECTS_TO_DELETE}
+    Close All Browsers
     Launch RHODS Dashboard Session With User A
     Launch RHODS Dashboard Session And Create A DS Project With User B
     Launch RHODS Dashboard Session With User C
@@ -120,7 +115,7 @@ Project Permissions Mgmt Suite Teardown
     [Documentation]    Suite teardown steps after testing DSG. It Deletes
     ...                all the DS projects created by the tests and run RHOSi teardown
     Close All Browsers
-    Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
+    Delete List Of Projects Via CLI   ocp_projects=${PROJECTS_TO_DELETE}
     RHOSi Teardown
     Remove User From Group    username=${USER_A}
     ...    group_name=rhods-users
@@ -151,24 +146,22 @@ Launch RHODS Dashboard Session With User A
     ...    browser_alias=${TEST_USER_2.USERNAME}-session
 
 Launch RHODS Dashboard Session And Create A DS Project With User B
-    Append To List    ${PROJECTS_TO_DELETE}    ${PRJ_USER_B_TITLE}
     Launch Data Science Project Main Page    username=${TEST_USER_3.USERNAME}
     ...    password=${TEST_USER_3.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER_3.AUTH_TYPE}
     ...    browser_alias=${TEST_USER_3.USERNAME}-session
     Create Data Science Project    title=${PRJ_USER_B_TITLE}
-    ...    description=${PRJ_DESCRIPTION}
+    ...    description=${PRJ_DESCRIPTION}    existing_project=${TRUE}
     Permissions Tab Should Be Accessible
     Overview Tab Should Be Accessible
 
 Launch RHODS Dashboard Session With User C
-    Append To List    ${PROJECTS_TO_DELETE}    ${PRJ_USER_C_TITLE}
     Launch Data Science Project Main Page    username=${TEST_USER_4.USERNAME}
     ...    password=${TEST_USER_4.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER_4.AUTH_TYPE}
     ...    browser_alias=${TEST_USER_4.USERNAME}-session
     Create Data Science Project    title=${PRJ_USER_C_TITLE}
-    ...    description=${PRJ_DESCRIPTION}
+    ...    description=${PRJ_DESCRIPTION}    existing_project=${TRUE}
     Permissions Tab Should Be Accessible
     Overview Tab Should Be Accessible
 
@@ -219,6 +212,7 @@ Refresh Pages
 Reload Page If Project ${project_title} Is Not Listed
     ${is_listed} =    Set Variable    ${FALSE}
     WHILE   not ${is_listed}    limit=3m    on_limit_message=Timeout exceeded waiting for project ${project_title} to be listed    # robotcode: ignore
+        Filter Projects By Name    ${project_title}
         ${is_listed}=    Run Keyword And Return Status
         ...    Project Should Be Listed    project_title=${project_title}
         IF    ${is_listed} == ${FALSE}
@@ -244,7 +238,7 @@ Reload Page If Project ${project_title} Is Listed
     END
     [Teardown]    Capture Page Screenshot
 
-${username} Should Have Edit Access To ${project_title}
+${username} Should Have Contributor Access To ${project_title}
     Switch To User    ${username}
     Open Data Science Projects Home Page
     Reload Page If Project ${project_title} Is Not Listed

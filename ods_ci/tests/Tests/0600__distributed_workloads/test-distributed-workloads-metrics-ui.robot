@@ -81,7 +81,7 @@ Verify That Not Admin Users Can Access Distributed workload metrics default page
     [Teardown]    Run Keywords
     ...    Cleanup Kueue Resources    ${PRJ_TITLE_NONADMIN}    cluster-queue-user    resource-flavor-user    local-queue-user
     ...    AND
-    ...    Delete Data Science Project   ${PRJ_TITLE_NONADMIN}
+    ...    Delete Project Via CLI By Display Name   ${PRJ_TITLE_NONADMIN}
     ...    AND
     ...    Wait Until Data Science Project Is Deleted  ${PRJ_TITLE_NONADMIN}
     ...    AND
@@ -223,7 +223,7 @@ Project Suite Teardown
     [Documentation]    Suite teardown steps after testing Distributed Workload metrics .
     Cleanup Kueue Resources    ${PRJ_TITLE}    ${CLUSTER_QUEUE_NAME}    ${RESOURCE_FLAVOR_NAME}    ${LOCAL_QUEUE_NAME}
     IF  ${project_created} == True    Run Keywords
-    ...    Delete Data Science Project   ${PRJ_TITLE}    AND
+    ...    Delete Project Via CLI By Display Name   ${PRJ_TITLE}    AND
     ...    Wait Until Data Science Project Is Deleted  ${PRJ_TITLE}
     SeleniumLibrary.Close All Browsers
     RHOSi Teardown

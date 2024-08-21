@@ -1,6 +1,7 @@
 *** Settings ***
 Library             SeleniumLibrary
 Resource            ../../../Resources/ODS.robot
+Resource            ../../../Resources/Page/Components/Components.resource
 Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Resource            ../../../Resources/RHOSi.resource
 
@@ -20,7 +21,7 @@ Verify if the Starburst Beta text has been removed from Getting Started
     [Tags]  Tier2
     ...     ODS-1158    ODS-605
 
-    Click Link    Explore
+    Menu.Navigate To Page    Applications    Explore
     Wait Until Cards Are Loaded
     Open Get Started Sidebar And Return Status    card_locator=${SB_CARDS_XP}
     Check Beta Description

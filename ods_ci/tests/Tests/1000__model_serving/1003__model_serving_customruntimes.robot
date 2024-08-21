@@ -100,7 +100,7 @@ Custom Serving Runtime Suite Setup
     Fetch CA Certificate If RHODS Is Self-Managed
 
 Custom Serving Runtime Suite Teardown
-    Delete Data Science Project From CLI    displayed_name=${PRJ_TITLE}
+    Delete Project Via CLI By Display Name    displayed_name=${PRJ_TITLE}
     Delete Serving Runtime Template From CLI    displayed_name=${UPLOADED_OVMS_DISPLAYED_NAME}
     SeleniumLibrary.Close All Browsers
     Remove File    openshift_ca.crt

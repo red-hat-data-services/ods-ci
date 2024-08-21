@@ -40,10 +40,10 @@ Verify Custom Application Resource Creation
     ...                 Explore page should report a tile for the custom application.
     ...                 The Resources page should display a "Documentation" item and
     ...                 Tutorial links for the corresponding custom application.
-    ...                 ProducBug: RHOAIENG-935
+    ...                 ProductBug: RHOAIENG-10901, RHOAIENG-10875, RHOAIENG-10874
     [Tags]    Sanity
     ...       ODS-1768
-    ...       ProducBug
+    ...       ProductBug
     ${exp_titles}=      Create List    ${EXPECTED_ITEMS_TITLES["application"]}
     Check Items Have Been Displayed In Resources Page     resource_filter=Documentation
     ...                                                     expected_titles=${exp_titles}

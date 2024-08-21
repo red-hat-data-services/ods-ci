@@ -83,7 +83,7 @@ Elyra Pipelines Suite Setup    # robocop: off=too-many-calls-in-keyword
 
 Elyra Pipelines Suite Teardown
     [Documentation]    Closes the browser and performs RHOSi Teardown
-    Delete Data Science Project From CLI By Name    name=${PROJECT_TO_DELETE}
+    Delete Project Via CLI By Display Name    displayed_name=${PROJECT_TO_DELETE}
     Close All Browsers
     RHOSi Teardown
 

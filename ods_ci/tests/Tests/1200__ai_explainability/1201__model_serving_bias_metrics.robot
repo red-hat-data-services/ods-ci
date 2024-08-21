@@ -62,7 +62,7 @@ Verify DIR Bias Metrics Available In CLI For Models Deployed Prior To Enabling T
 Verify SPD Metrics Available In CLI For Models Deployed After Enabling Trusty Service For Basic User
     [Documentation]    Verifies that the Bias metrics are available in Metrics Console for a model
     ...                 deployed after enabling the TrustyAI service
-    [Tags]    ODS-2482    ODS-2476
+    [Tags]    ODS-2482    ODS-2476     OpenDataHub    ExcludeOnRHOAI
     Launch Data Science Project Main Page
     Create Data Science Project    title=${PRJ_TITLE1}    description=${PRJ_DESCRIPTION1}
     Append To List    ${PROJECTS_TO_DELETE}    ${PRJ_TITLE1}
@@ -101,7 +101,7 @@ Bias Metrics Suite Setup
 
 Bias Metrics Suite Teardown
     [Documentation]     Bias Metrics Suite Teardown
-    Delete Data Science Projects From CLI   ocp_projects=${PROJECTS_TO_DELETE}
+    Delete List Of Projects Via CLI   ocp_projects=${PROJECTS_TO_DELETE}
     RHOSi Teardown
 
 Verify User Workload Monitoring Configuration

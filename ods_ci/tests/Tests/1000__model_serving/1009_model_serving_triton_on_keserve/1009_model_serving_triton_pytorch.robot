@@ -37,12 +37,12 @@ Test PYTORCH Model Inference Via UI (Triton on Kserve)
     ...    existing_project=${FALSE}
     Open Dashboard Settings    settings_page=Serving runtimes
     Upload Serving Runtime Template    runtime_filepath=${TRITON_RUNTIME_FILEPATH}
-    ...    serving_platform=single    runtime_protocol=REST
+    ...    serving_platform=single     runtime_protocol=REST
     Serving Runtime Template Should Be Listed    displayed_name=${RUNTIME_NAME}
     ...    serving_platform=single
     Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
-    ...            aws_bucket_name=mytritonbucket
+    ...            aws_bucket_name=ods-ci-s3
     Deploy Kserve Model Via UI    model_name=${MODEL_NAME}    serving_runtime=kserve-tritonserver-pytorch-rest
     ...    data_connection=model-serving-connection    path=triton/model_repository/    model_framework=pytorch - 1
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${MODEL_NAME}

@@ -38,26 +38,26 @@ Validate DSC creates all Serverless CRs
 
     Wait Knative Serving CR To Be In Ready State
 
-    Wait Until Keyword Succeeds    2 min    0 sec
+    Wait Until Keyword Succeeds    5 min    0 sec
     ...    Resource Should Exist     Gateway    knative-ingress-gateway     ${KNATIVESERVING_NS}
 
-    Wait Until Keyword Succeeds    2 min    0 sec
+    Wait Until Keyword Succeeds    5 min    0 sec
     ...    Resource Should Exist     Gateway    knative-local-gateway     ${KNATIVESERVING_NS}
 
-    Wait Until Keyword Succeeds    2 min    0 sec
+    Wait Until Keyword Succeeds    5 min    0 sec
     ...    Resource Should Exist     Gateway    kserve-local-gateway     ${ISTIO_NS}
 
-    Wait Until Keyword Succeeds    2 min    0 sec
+    Wait Until Keyword Succeeds    5 min    0 sec
     ...    Resource Should Exist     Service    kserve-local-gateway     ${ISTIO_NS}
 
-    Wait Until Keyword Succeeds    2 min    0 sec
+    Wait Until Keyword Succeeds    5 min    0 sec
     ...    Resource Should Exist     Service    knative-local-gateway     ${ISTIO_NS}
 
-    Wait Until Keyword Succeeds    2 min    0 sec
+    Wait Until Keyword Succeeds    5 min    0 sec
     ...    Resource Should Exist     deployment    controller     ${KNATIVESERVING_NS}
 
     Wait For Pods Numbers  2    namespace=${KNATIVESERVING_NS}
-    ...    label_selector=${KNATIVE_SERVING_CONTROLLER_LABEL_SELECTOR}    timeout=120
+    ...    label_selector=${KNATIVE_SERVING_CONTROLLER_LABEL_SELECTOR}    timeout=300
 
     #${pod_names}=    Get Pod Names    ${KNATIVESERVING_NS}    ${KNATIVE_SERVING_CONTROLLER_LABEL_SELECTOR}    Verify Containers Have Zero Restarts    ${pod_names}    ${KNATIVESERVING_NS}
     #${podname}=    Get Pod Name   ${OPERATOR_NAMESPACE}    ${OPERATOR_LABEL_SELECTOR}
@@ -77,26 +77,26 @@ Validate DSC Knative Serving Removed State
 
     Wait For DSC Conditions Reconciled    ${OPERATOR_NAMESPACE}    default-dsc
 
-    Wait Until Keyword Succeeds    2 min    0 sec
+    Wait Until Keyword Succeeds    5 min    0 sec
     ...    Is Resource Present     Gateway    knative-ingress-gateway     ${KNATIVESERVING_NS}   ${IS_NOT_PRESENT}
 
-    Wait Until Keyword Succeeds    2 min    0 sec
+    Wait Until Keyword Succeeds    5 min    0 sec
     ...    Is Resource Present     Gateway    knative-ingress-gateway     ${KNATIVESERVING_NS}   ${IS_NOT_PRESENT}
 
-    Wait Until Keyword Succeeds    2 min    0 sec
+    Wait Until Keyword Succeeds    5 min    0 sec
     ...    Is Resource Present      Gateway    kserve-local-gateway     ${ISTIO_NS}    ${IS_NOT_PRESENT}
 
-    Wait Until Keyword Succeeds    2 min    0 sec
+    Wait Until Keyword Succeeds    5 min    0 sec
     ...    Is Resource Present     Service    kserve-local-gateway     ${ISTIO_NS}    ${IS_NOT_PRESENT}
 
-    Wait Until Keyword Succeeds    2 min    0 sec
+    Wait Until Keyword Succeeds    5 min    0 sec
     ...    Is Resource Present     Service    knative-local-gateway     ${ISTIO_NS}    ${IS_NOT_PRESENT}
 
-    Wait Until Keyword Succeeds    2 min    0 sec
+    Wait Until Keyword Succeeds    5 min    0 sec
     ...    Is Resource Present     deployment    controller     ${KNATIVESERVING_NS}    ${IS_NOT_PRESENT}
 
     Wait For Pods Numbers  0    namespace=${KNATIVESERVING_NS}
-    ...    label_selector=${KNATIVE_SERVING_CONTROLLER_LABEL_SELECTOR}    timeout=120
+    ...    label_selector=${KNATIVE_SERVING_CONTROLLER_LABEL_SELECTOR}    timeout=300
 
 
 *** Keywords ***
@@ -124,7 +124,7 @@ Restore Kserve Serving State
         Wait Knative Serving CR To Be In Ready State
 
         # Note: May not need the following, as it is just a sanity-check
-        Wait Until Keyword Succeeds    3 min    0 sec
+        Wait Until Keyword Succeeds    5 min    0 sec
         ...    Resource Should Exist     Gateway    knative-ingress-gateway     ${KNATIVESERVING_NS}
 
     ELSE

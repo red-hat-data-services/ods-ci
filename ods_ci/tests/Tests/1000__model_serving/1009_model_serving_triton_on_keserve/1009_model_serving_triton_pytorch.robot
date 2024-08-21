@@ -1,7 +1,7 @@
 *** Settings ***
 Documentation     Suite of test cases for OVMS in Kserve
 Library           OperatingSystem
-Library           ../../../../../libs/Helpers.py
+Library           ../../../libs/Helpers.py
 Resource          ../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
@@ -30,7 +30,7 @@ ${EXPECTED_INFERENCE_REST_OUTPUT_PYTORCH}=        {"model_name":"resnet50","mode
 
 Test PYTORCH Model Inference Via UI (Triton on Kserve)
     [Documentation]    Test the deployment of an pytorch model in Kserve using Triton
-    [Tags]    Sanity    Tier1       RHOAIENG-9066
+    [Tags]    Sanity    Tier1       RHOAIENG_9066
 
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}

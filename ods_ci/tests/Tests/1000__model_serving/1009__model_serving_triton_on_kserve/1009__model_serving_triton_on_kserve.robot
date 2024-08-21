@@ -82,7 +82,7 @@ Triton On Kserve Suite Teardown
        Log    Model not deployed, skipping deletion step during teardown    console=true
     END
     ${projects}=    Create List    ${PRJ_TITLE}
-    Delete Data Science Projects From CLI   ocp_projects=${projects}
+    Delete List Of Projects Via CLI   ocp_projects=${projects}
     # Will only be present on SM cluster runs, but keyword passes
     # if file does not exist
     Remove File    openshift_ca_istio_knative.crt

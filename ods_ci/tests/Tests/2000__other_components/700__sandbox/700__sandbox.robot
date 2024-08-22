@@ -1,9 +1,9 @@
 *** Settings ***
 Documentation    Test Suite for Sandbox Test cases
-Resource        ../../Resources/Common.robot
-Resource        ../../Resources/Page/Components/Components.resource
-Resource        ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
-Resource        ../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
+Resource        ../../../Resources/Common.robot
+Resource        ../../../Resources/Page/Components/Components.resource
+Resource        ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
+Resource        ../../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
 Library         String
 Library         SeleniumLibrary
 Suite Setup     Begin Web Test

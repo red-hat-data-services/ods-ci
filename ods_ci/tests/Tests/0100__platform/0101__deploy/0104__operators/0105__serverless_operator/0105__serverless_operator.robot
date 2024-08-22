@@ -105,9 +105,9 @@ Suite Setup
     [Documentation]    Suite Setup
     RHOSi Setup
     Wait For DSC Conditions Reconciled    ${OPERATOR_NAMESPACE}    default-dsc
-    ${KSERVE_STATE}=    Get DSC Component State    ${DSC_NAME}    kserve    ${OPERATOR_NAMESPACE}
-    Log To Console    "KServe State: ${KSERVE_STATE}"
     ${KSERVE_SERVING_STATE}=    Get DSC Component State    ${DSC_NAME}    kserve.serving    ${OPERATOR_NAMESPACE}
+    Log To Console    "KServe.serving State: ${KSERVE_SERVING_STATE}"
+    Should Not Be Empty  ${KSERVE_SERVING_STATE}
     Set Suite Variable    ${KSERVE_SERVING_STATE}
 
 Suite Teardown
@@ -118,8 +118,8 @@ Suite Teardown
 Restore Kserve Serving State
     [Documentation]    Restore Kserve Serving state to original value (Managed or Removed)
 
+    Log To Console    "Restore saved Kserve.serving state: ${KSERVE_SERVING_STATE}"
     Set Component State    kserve/serving     ${KSERVE_SERVING_STATE}
-    Log To Console    "Restored Saved State: ${KSERVE_SERVING_STATE}"
 
     IF    "${KSERVE_SERVING_STATE}" == "Managed"
         Wait Knative Serving CR To Be In Ready State

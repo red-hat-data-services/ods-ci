@@ -1,9 +1,9 @@
 *** Settings ***
 Library             SeleniumLibrary
-Resource            ../../../Resources/Page/OCPLogin/OCPLogin.resource
-Resource            ../../../Resources/OCP.resource
-Resource            ../../../Resources/Page/ODH/AiApps/AiApps.resource
-Resource            ../../../Resources/RHOSi.resource
+Resource            ../../../../Resources/Page/OCPLogin/OCPLogin.resource
+Resource            ../../../../Resources/OCP.resource
+Resource            ../../../../Resources/Page/ODH/AiApps/AiApps.resource
+Resource            ../../../../Resources/RHOSi.resource
 
 Suite Setup         Pachyderm Suite Setup
 Suite Teardown      Pachyderm Suite Teardown

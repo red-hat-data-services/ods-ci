@@ -1,9 +1,9 @@
 *** Settings ***
 Library             SeleniumLibrary
-Resource            ../../../Resources/ODS.robot
-Resource            ../../../Resources/Page/Components/Components.resource
-Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
-Resource            ../../../Resources/RHOSi.resource
+Resource            ../../../../Resources/ODS.robot
+Resource            ../../../../Resources/Page/Components/Components.resource
+Resource            ../../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
+Resource            ../../../../Resources/RHOSi.resource
 
 Test Setup          Dashboard Test Setup
 Test Teardown       Dashboard Test Teardown

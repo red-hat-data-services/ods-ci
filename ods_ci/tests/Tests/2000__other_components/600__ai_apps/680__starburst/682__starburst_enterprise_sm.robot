@@ -1,10 +1,10 @@
 *** Settings ***
 Documentation       Test suite to test integration with Starburst Enterprise operator in RHODS SM
 Library             SeleniumLibrary
-Resource            ../../../Resources/RHOSi.resource
-Resource            ../../../Resources/Page/Operators/ISVs.resource
-Resource            ../../../Resources/Page/ODH/AiApps/ManagedStarburst.resource
-Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
+Resource            ../../../../Resources/RHOSi.resource
+Resource            ../../../../Resources/Page/Operators/ISVs.resource
+Resource            ../../../../Resources/Page/ODH/AiApps/ManagedStarburst.resource
+Resource            ../../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Suite Setup          Starburst Enterprise Suite Setup
 Suite Teardown       Starburst Enterprise Suite Teardown
 Test Tags            ExcludeOnODH

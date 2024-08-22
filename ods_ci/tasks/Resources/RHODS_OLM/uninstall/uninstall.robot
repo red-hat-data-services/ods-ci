@@ -175,6 +175,10 @@ Uninstall Serverless Operator CLI
     END
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete subscription serverless-operator -n openshift-serverless
+    Log To Console    message=Deleting Serverless Operator Group From Cluster
+    ${return_code}    ${output}    Run And Return Rc And Output
+    ...    oc delete operatorgroup --all -n openshift-serverless --ignore-not-found
+    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting Serverless operator group
 
 Check Number Of Resource Instances Equals To
     [Documentation]    Keyword to check if the amount of instances of a specific CRD in a given namespace

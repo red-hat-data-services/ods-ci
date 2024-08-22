@@ -95,8 +95,14 @@ End To End Pipeline Workflow Using Kfp
     IF    ${ray} == ${TRUE}
         Setup Kueue Resources    ${project}    cluster-queue-user    resource-flavor-user    local-queue-user
     END
+    # The run_robot_test.sh is sending the --variablefile ${TEST_VARIABLES_FILE} which may contain the `PIP_INDEX_URL`
+    # and `PIP_TRUSTED_HOST` variables, e.g. for disconnected testing.
+    ${pip_index_url} =    Get Variable Value    ${PIP_INDEX_URL}    ${NONE}
+    ${pip_trusted_host} =    Get Variable Value    ${PIP_TRUSTED_HOST}    ${NONE}
+    Log    pip_index_url = ${pip_index_url} / pip_trusted_host = ${pip_trusted_host}
     ${run_id}    Create Run From Pipeline Func    ${username}    ${password}    ${project}
-    ...    ${python_file}    ${method_name}    pipeline_params=${pipeline_params}
+    ...    ${python_file}    ${method_name}    pipeline_params=${pipeline_params}    pip_index_url=${pip_index_url}
+    ...    pip_trusted_host=${pip_trusted_host}
     ${run_status}    Check Run Status    ${run_id}    timeout=500
     Should Be Equal As Strings    ${run_status}    SUCCEEDED    Pipeline run doesn't have a status that means success. Check the logs
     Remove Pipeline Project    ${project}

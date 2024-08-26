@@ -175,7 +175,7 @@ Set Model Server Name
 
 Enable External Serving Route
     [Documentation]    Enables the serving route to be accessed externally
-    SeleniumLibrary.Select Checkbox    xpath://input[@id="alt-form-checkbox-auth"]
+    SeleniumLibrary.Select Checkbox    xpath://input[@id="alt-form-checkbox-route"]
 
 Enable Token Authentication
     [Documentation]    Enables Token authentication to serving route

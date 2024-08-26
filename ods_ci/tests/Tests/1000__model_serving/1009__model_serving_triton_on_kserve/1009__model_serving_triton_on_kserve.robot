@@ -31,7 +31,7 @@ ${EXPECTED_INFERENCE_REST_OUTPUT_FILE}=      tests/Resources/Files/triton/kserve
 *** Test Cases ***
 Test Onnx Model Inference Via UI (Triton on Kserve)
     [Documentation]    Test the deployment of an onnx model in Kserve using Triton
-    [Tags]    Sanity    RHOAIENG-11565      RunThisTest
+    [Tags]    Sanity    RHOAIENG-11565
 
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}

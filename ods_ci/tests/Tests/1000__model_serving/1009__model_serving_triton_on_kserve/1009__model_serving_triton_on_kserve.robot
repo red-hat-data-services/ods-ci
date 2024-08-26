@@ -11,6 +11,7 @@ Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDashboardSettingsR
 Resource          ../../../Resources/Page/ODH/Monitoring/Monitoring.resource
 Resource          ../../../Resources/OCP.resource
 Resource          ../../../Resources/CLI/ModelServing/modelmesh.resource
+Resource          ../../../Resources/Common.robot
 Suite Setup       Triton On Kserve Suite Setup
 Suite Teardown    Triton On Kserve Suite Teardown
 Test Tags         Kserve
@@ -25,7 +26,7 @@ ${ONNX_MODEL_LABEL}=     densenetonnx
 ${ONNX_RUNTIME_NAME}=    triton-kserve-rest
 ${RESOURCES_DIRPATH}=        tests/Resources/Files/triton
 ${ONNX_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_onnx_rest_servingruntime.yaml
-${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}=      @tests/Resources/Files/triton/kserve-triton-onnx-rest-output.json
+${EXPECTED_INFERENCE_REST_OUTPUT_FILE}=      tests/Resources/Files/triton/kserve-triton-onnx-rest-output.json
 
 *** Test Cases ***
 Test Onnx Model Inference Via UI (Triton on Kserve)
@@ -47,12 +48,12 @@ Test Onnx Model Inference Via UI (Triton on Kserve)
     ...    data_connection=model-serving-connection    path=triton/model_repository/    model_framework=onnx - 1
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${ONNX_MODEL_LABEL}
     ...    namespace=${PRJ_TITLE}
+    ${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}=     Load Json File     file_path=${EXPECTED_INFERENCE_REST_OUTPUT_FILE}     double_quotes=$TRUE
     Run Keyword And Continue On Failure    Verify Model Inference With Retries
     ...    ${ONNX_MODEL_NAME}    ${INFERENCE_REST_INPUT_ONNX}    ${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}    token_auth=${FALSE}
     ...    project_title=${PRJ_TITLE}
-    [Teardown]    Run Keywords    Clean All Models Of Current User    AND
-    ...    Run Keyword If Test Failed    Get Kserve Events And Logs
-    ...    model_name=${ONNX_MODEL_NAME}    project_title=${PRJ_TITLE}
+    [Teardown]    Run Keyword If Test Failed    Get Kserve Events And Logs      model_name=${ONNX_MODEL_NAME}    project_title=${PRJ_TITLE}
+    Run Keywords    Clean All Models Of Current User
 
 *** Keywords ***
 Triton On Kserve Suite Setup

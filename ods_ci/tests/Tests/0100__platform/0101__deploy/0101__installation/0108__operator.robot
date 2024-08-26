@@ -4,11 +4,66 @@ Documentation       Post install test cases that verify OCP operator resources a
 Library           OpenShiftLibrary
 Resource          ../../../../Resources/ODS.robot
 Resource          ../../../../Resources/RHOSi.resource
+Resource          ../../../../Resources/OCP.resource
+Resource          ../../../../Resources/Common.robot
+Resource          ../../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 Suite Setup       RHOSi Setup
 Suite Teardown    RHOSi Teardown
 
 
+*** Variables ***
+${ODH_RELEASE_NAME}=     Open Data Hub
+${RHOAI_SELFMANAGED_RELEASE_NAME}=      OpenShift AI Self-Managed
+${RHOAI_MANAGED_RELEASE_NAME}=      OpenShift AI Cloud Service
+${RELEASE_NAME_ATTRIBUTE_PATH}=      .status.release.name
+${RELEASE_VERSION_ATTRIBUTE_PATH}=      .status.release.version
+
+
 *** Test Cases ***
+Verify That DSC And DSCI Release.Name Attribute matches required value
+    [Documentation]    Tests the release.name attribute from the DSC and DSCI matches the desired value.
+    ...                ODH: Open Data Hub
+    ...                RHOAI managed: OpenShift AI Cloud Service
+    ...                RHOAI selfmanaged: OpenShift AI Self-Managed
+    [Tags]    Smoke
+    ...       Operator
+    ...       RHOAIENG-9760
+    ${DSC_RELEASE_NAME}=     Get Resource Attribute      ${OPERATOR_NAMESPACE}
+    ...                      DataScienceCluster       ${DSC_NAME}        ${RELEASE_NAME_ATTRIBUTE_PATH}
+    ${DSCI_RELEASE_NAME}=     Get Resource Attribute      ${OPERATOR_NAMESPACE}
+    ...                      DSCInitialization      ${DSCI_NAME}        ${RELEASE_NAME_ATTRIBUTE_PATH}
+
+    IF    "${PRODUCT}" == "RHODS"
+             Run Keyword If RHODS Is Self-Managed      Should Be Equal As Strings    ${DSC_RELEASE_NAME}     ${RHOAI_SELFMANAGED_RELEASE_NAME}
+             Run Keyword If RHODS Is Self-Managed      Should Be Equal As Strings    ${DSCI_RELEASE_NAME}    ${RHOAI_SELFMANAGED_RELEASE_NAME}
+             Run Keyword If RHODS Is Managed        Should Be Equal As Strings    ${DSC_RELEASE_NAME}     ${RHOAI_MANAGED_RELEASE_NAME}
+             Run Keyword If RHODS Is Managed        Should Be Equal As Strings    ${DSCI_RELEASE_NAME}    ${RHOAI_MANAGED_RELEASE_NAME}
+    ELSE IF    "${PRODUCT}" == "ODH"
+        Should Be Equal As Strings    ${DSC_RELEASE_NAME}     ${ODH_RELEASE_NAME}
+        Should Be Equal As Strings    ${DSCI_RELEASE_NAME}    ${ODH_RELEASE_NAME}
+    END
+
+Verify That DSC And DSCI Release.Version Attribute matches the value in the subscription
+    [Documentation]    Tests the release.version attribute from the DSC and DSCI matches the value in the subscription.
+    [Tags]    Smoke
+    ...       Operator
+    ...       RHOAIENG-8082
+    ${DSC_RELEASE_VERSION}=     Get Resource Attribute      ${OPERATOR_NAMESPACE}
+    ...                         DataScienceCluster       ${DSC_NAME}        ${RELEASE_VERSION_ATTRIBUTE_PATH}
+    ${DSCI_RELEASE_VERSION}=    Get Resource Attribute      ${OPERATOR_NAMESPACE}
+    ...                         DSCInitialization      ${DSCI_NAME}        ${RELEASE_VERSION_ATTRIBUTE_PATH}
+
+    ${rc}    ${csv_name}=    Run And Return Rc And Output
+    ...    oc get subscription -n ${OPERATOR_NAMESPACE} -l ${OPERATOR_SUBSCRIPTION_LABEL} -ojson | jq '.items[0].status.currentCSV' | tr -d '"'
+
+    Should Be Equal As Integers    ${rc}    ${0}    ${rc}
+
+    ${csv_version}=     Get Resource Attribute      ${OPERATOR_NAMESPACE}
+    ...                 ClusterServiceVersion      ${csv_name}        .spec.version
+
+    Should Be Equal As Strings    ${DSC_RELEASE_VERSION}    ${csv_version}
+    Should Be Equal As Strings    ${DSCI_RELEASE_VERSION}    ${csv_version}
+
 Verify Odh-deployer Checks Cluster Platform Type
     [Documentation]    Verifies if odh-deployer checks the platform type of the cluster before installing
     [Tags]    Sanity
@@ -48,6 +103,7 @@ Verify That The Operator Pod Does Not Get Stuck After Upgrade
             Log Error And Fail Pods When Pods Were Terminated    ${operator_pod_info}    Opertator Pod Stuck
         END
     END
+
 Verify Clean Up ODS Deployer Post-Migration
     [Documentation]    Verifies that resources unused are cleaned up after migration
     [Tags]    Tier1

@@ -3,6 +3,8 @@ Documentation       Test Suite for Upgrade testing,to be run after the upgrade
 Library            OpenShiftLibrary
 Resource           ../../Resources/RHOSi.resource
 Resource           ../../Resources/ODS.robot
+Resource           ../../Resources/OCP.resource
+Resource           ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
 Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDashboardResources.resource
 Resource           ../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
@@ -35,6 +37,11 @@ ${MODEL_NAME}=    test-model
 ${MODEL_CREATED}=    ${FALSE}
 ${RUNTIME_NAME}=    Model Serving Test
 ${DW_PROJECT_CREATED}=    False
+${ODH_RELEASE_NAME}=     Open Data Hub
+${RHOAI_SELFMANAGED_RELEASE_NAME}=      OpenShift AI Self-Managed
+${RHOAI_MANAGED_RELEASE_NAME}=      OpenShift AI Cloud Service
+${RELEASE_NAME_ATTRIBUTE_PATH}=      .status.release.name
+${RELEASE_VERSION_ATTRIBUTE_PATH}=      .status.release.version
 
 
 *** Test Cases ***
@@ -212,6 +219,30 @@ Verify that the must-gather image provides RHODS logs and info
     [Teardown]  Cleanup must-gather Logs
 
 
+Verify That DSC And DSCI Release.Name Attribute matches ${expected_release_name}
+    [Documentation]    Tests the release.name attribute from the DSC and DSCI matches the desired value.
+    ...                ODH: Open Data Hub
+    ...                RHOAI managed: OpenShift AI Cloud Service
+    ...                RHOAI selfmanaged: OpenShift AI Self-Managed
+    [Tags]    Upgrade
+    Should Be Equal As Strings    ${DSC_RELEASE_NAME}     ${expected_release_name}
+    Should Be Equal As Strings    ${DSCI_RELEASE_NAME}    ${expected_release_name}
+
+Verify That DSC And DSCI Release.Version Attribute matches the value in the subscription
+    [Documentation]    Tests the release.version attribute from the DSC and DSCI matches the value in the subscription.
+    [Tags]    Upgrade
+    ${rc}    ${csv_name}=    Run And Return Rc And Output
+    ...    oc get subscription -n ${OPERATOR_NAMESPACE} -l ${OPERATOR_SUBSCRIPTION_LABEL} -ojson | jq '.items[0].status.currentCSV' | tr -d '"'
+
+    Should Be Equal As Integers    ${rc}    ${0}    ${rc}
+
+    ${csv_version}=     Get Resource Attribute      ${OPERATOR_NAMESPACE}
+    ...                 ClusterServiceVersion      ${csv_name}        .spec.version
+
+    Should Be Equal As Strings    ${DSC_RELEASE_VERSION}    ${csv_version}
+    Should Be Equal As Strings    ${DSCI_RELEASE_VERSION}    ${csv_version}
+
+
 *** Keywords ***
 Dashboard Suite Setup
     [Documentation]  Basic suite setup
@@ -259,7 +290,42 @@ Managed RHOAI Upgrade Test Teardown
     @{list_values} =    Create List    1
     Run Keyword And Warn On Failure    Should Contain    ${list_values}    ${resp.json()["data"]["result"][0]["value"][-1]}
 
+Gather Release Attributes From DSC And DSCI
+    [Documentation]    Gathers the release.name and release.value attributes from the dsc and dsci
+    ${DSC_RELEASE_NAME}=     Get Resource Attribute      ${OPERATOR_NAMESPACE}
+    ...                      DataScienceCluster       ${DSC_NAME}        ${RELEASE_NAME_ATTRIBUTE_PATH}
+    ${DSCI_RELEASE_NAME}=     Get Resource Attribute      ${OPERATOR_NAMESPACE}
+    ...                      DSCInitialization      ${DSCI_NAME}        ${RELEASE_NAME_ATTRIBUTE_PATH}
+    ${DSC_RELEASE_VERSION}=     Get Resource Attribute      ${OPERATOR_NAMESPACE}
+    ...                         DataScienceCluster       ${DSC_NAME}        ${RELEASE_VERSION_ATTRIBUTE_PATH}
+    ${DSCI_RELEASE_VERSION}=    Get Resource Attribute      ${OPERATOR_NAMESPACE}
+    ...                         DSCInitialization      ${DSCI_NAME}        ${RELEASE_VERSION_ATTRIBUTE_PATH}
+
+    Set Suite Variable    ${DSC_RELEASE_NAME}
+    Set Suite Variable    ${DSCI_RELEASE_NAME}
+    Set Suite Variable    ${DSC_RELEASE_VERSION}
+    Set Suite Variable    ${DSCI_RELEASE_VERSION}
+
+Set Expected Value For Release Name
+    [Documentation]    Sets the expected value for release.name attribute from the DSC and DSCI.
+    ...                ODH: Open Data Hub
+    ...                RHOAI managed: OpenShift AI Cloud Service
+    ...                RHOAI selfmanaged: OpenShift AI Self-Managed
+    IF    "${PRODUCT}" == "RHODS"
+        IF     ${IS_SELF_MANAGED}
+             ${expected_release_name}=    Set Variable     ${RHOAI_SELFMANAGED_RELEASE_NAME}
+        ELSE
+             ${expected_release_name}=    Set Variable     ${RHOAI_MANAGED_RELEASE_NAME}
+        END
+    ELSE IF    "${PRODUCT}" == "ODH"
+        ${expected_release_name}=    Set Variable     ${ODH_RELEASE_NAME}
+    END
+
+    Set Suite Variable    ${expected_release_name}
+
 Upgrade Suite Setup
     [Documentation]    Set of action to run as Suite setup
     ${IS_SELF_MANAGED}=    Is RHODS Self-Managed
     Set Suite Variable    ${IS_SELF_MANAGED}
+    Gather Release Attributes From DSC And DSCI
+    Set Expected Value For Release Name

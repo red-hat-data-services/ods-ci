@@ -17,7 +17,7 @@ Test Tags         Kserve
 
 *** Variables ***
 ${INFERENCE_REST_INPUT_ONNX}=    @tests/Resources/Files/triton/kserve-triton-onnx-gRPC-input.json
-${PRJ_TITLE}=    model-serving-triton-project
+${PRJ_TITLE}=    model-serving-triton-project1
 ${PRJ_DESCRIPTION}=    project used for model serving triton runtime tests
 ${MODEL_CREATED}=    ${FALSE}
 ${MODEL_NAME}=    densenet_onnx

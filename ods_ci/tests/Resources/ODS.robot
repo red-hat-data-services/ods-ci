@@ -403,6 +403,7 @@ Wait For DSCI Ready State
     ${rc}   ${output}=    Run And Return Rc And Output
     ...    oc wait --timeout=${wait_time} --for jsonpath='{.status.conditions[].reason}'=ReconcileCompleted -n ${namespace} dsci ${dsci}
     Should Be Equal    "${rc}"    "0"     msg=${output}
+
 Wait For DSC Conditions Reconciled
     [Documentation]    Checks all DSC conditions to be successfully reconciled
     [Arguments]    ${namespace}    ${dsc_name}    ${wait_time}=3m

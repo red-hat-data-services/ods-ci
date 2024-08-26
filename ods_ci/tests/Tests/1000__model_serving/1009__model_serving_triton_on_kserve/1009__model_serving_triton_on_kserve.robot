@@ -29,7 +29,7 @@ ${ONNX_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_onnx_rest_servingruntim
 ${EXPECTED_INFERENCE_REST_OUTPUT_FILE}=      tests/Resources/Files/triton/kserve-triton-onnx-rest-output.json
 
 *** Test Cases ***
-Test Onnx Model Inference Via UI (Triton on Kserve)
+Test Onnx Model Rest Inference Via UI (Triton on Kserve)
     [Documentation]    Test the deployment of an onnx model in Kserve using Triton
     [Tags]    Sanity    RHOAIENG-11565
 

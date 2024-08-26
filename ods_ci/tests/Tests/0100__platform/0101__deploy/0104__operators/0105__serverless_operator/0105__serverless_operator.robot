@@ -105,10 +105,11 @@ Suite Setup
     [Documentation]    Suite Setup
     RHOSi Setup
     Wait For DSC Conditions Reconciled    ${OPERATOR_NAMESPACE}    default-dsc
-    ${KSERVE_STATE}=    Get DSC Component State    ${DSC_NAME}    kserve    ${OPERATOR_NAMESPACE}
-    Log To Console    "KServe State: ${KSERVE_STATE}"
     ${KSERVE_SERVING_STATE}=    Get DSC Component State    ${DSC_NAME}    kserve.serving    ${OPERATOR_NAMESPACE}
     Set Suite Variable    ${KSERVE_SERVING_STATE}
+    Log To Console    "Suite Setup: KServe.serving state: ${KSERVE_SERVING_STATE}"
+    ${STATE_LENGTH}=    Get Length    "${KSERVE_SERVING_STATE}"
+    Should Be True     ${STATE_LENGTH} > 0
 
 Suite Teardown
     [Documentation]    Suite Teardown

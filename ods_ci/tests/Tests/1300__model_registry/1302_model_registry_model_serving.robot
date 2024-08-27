@@ -22,6 +22,8 @@ ${MODELREGISTRY_BASE_FOLDER}=        tests/Resources/CLI/ModelRegistry
 ${EXAMPLE_ISTIO_ENV}=                ${MODELREGISTRY_BASE_FOLDER}/samples/istio/components/example_istio.env
 ${ISTIO_ENV}=                        ${MODELREGISTRY_BASE_FOLDER}/samples/istio/components/istio.env
 ${SAMPLE_ONNX_MODEL}=                ${MODELREGISTRY_BASE_FOLDER}/mnist.onnx
+${MR_PYTHON_CLIENT_FILES}=           ${MODELREGISTRY_BASE_FOLDER}/Python_Dependencies
+${MR_PYTHON_CLIENT_WHL}=             ${MODELREGISTRY_BASE_FOLDER}/model_registry-0.2.5a1-py3-none-any.whl
 ${SERVICE_MESH_MEMBER}=              ${MODELREGISTRY_BASE_FOLDER}/serviceMeshMember.yaml
 ${ENABLE_REST_API}=                  ${MODELREGISTRY_BASE_FOLDER}/enable_rest_api_route.yaml
 ${IPYNB_UPDATE_SCRIPT}=              ${MODELREGISTRY_BASE_FOLDER}/updateIPYNB.py
@@ -58,6 +60,9 @@ Verify Model Registry Integration With Secured-DB
     ...         workbench_namespace=${PRJ_TITLE}
     Upload File In The Workbench     filepath=${JUPYTER_NOTEBOOK_FILEPATH}    workbench_title=${WORKBENCH_TITLE}
     ...         workbench_namespace=${PRJ_TITLE}
+    Upload File In The Workbench     filepath=${MR_PYTHON_CLIENT_WHL}    workbench_title=${WORKBENCH_TITLE}
+    ...         workbench_namespace=${PRJ_TITLE}
+    Upload Python Client Files In The Workbench
     Launch And Access Workbench    workbench_title=${WORKBENCH_TITLE}
     ...    username=${TEST_USER.USERNAME}     password=${TEST_USER.PASSWORD}
     ...    auth_type=${TEST_USER.AUTH_TYPE}
@@ -265,4 +270,13 @@ Remove Certificates
     ${files}=    List Files In Directory    ${CERTS_DIRECTORY}
     FOR    ${file}    IN    @{files}
         Run Process    rm    -f    ${CERTS_DIRECTORY}/${file}
+    END
+
+Upload Python Client Files In The Workbench
+    [Documentation]    Uploads the dependency files for python client installation
+    ${files}=  List Files In Directory  ${MR_PYTHON_CLIENT_FILES}
+    FOR  ${file}  IN  @{files}
+        Upload File In The Workbench
+        ...    filepath=${MR_PYTHON_CLIENT_FILES}/${file}    workbench_title=${WORKBENCH_TITLE}
+        ...    workbench_namespace=${PRJ_TITLE}
     END

@@ -162,8 +162,10 @@ Watch Hive Install Log
     # ${logs_cmd} =     Set Variable    oc logs -f -l ${label_selector} -n ${namespace} --pod-running-timeout=5m
     ${logs_cmd} =     Set Variable    oc logs -f -l ${label_selector} -n ${namespace}
     TRY
-        Wait Until Keyword Succeeds    5 min    5 sec
-        ...    Run And Verify Command    ${logs_cmd}
+        # Wait Until Keyword Succeeds    5 min    5 sec
+        # ...    Run And Verify Command    ${logs_cmd}
+        Wait For Pods To Be Ready    label_selector=${label_selector}    namespace=${namespace}    ${timeout}=5m
+        # Run And Verify Command    oc wait --for=condition=ready pod -l ${label_selector} -n ${namespace} --timeout=5m
         ${return_code}=    Run and Watch Command    ${logs_cmd}    timeout=${hive_timeout}
         # ${new_log_data} =    Oc Get Pod Logs    name=${pod[0]['metadata']['name']}    container=installer   namespace=${namespace}
     EXCEPT

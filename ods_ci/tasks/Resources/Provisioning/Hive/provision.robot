@@ -150,7 +150,7 @@ Create Floating IPs
     Export Variables From File    ${fips_file_to_export}
 
 Watch Hive Install Log
-    [Arguments]    ${pool_name}    ${namespace}    ${install_log_file}    ${hive_timeout}=50m
+    [Arguments]    ${pool_name}    ${namespace}    ${hive_timeout}=60m
     ${label_selector}=    Set Variable    hive.openshift.io/cluster-deployment-name=${cluster_name}
     IF    ${use_cluster_pool}
         ${label_selector}=    Set Variable    hive.openshift.io/clusterpool-name=${pool_name}        
@@ -182,14 +182,16 @@ Wait For Cluster To Be Ready
     END
     ${install_log_file} =    Set Variable    ${artifacts_dir}/${cluster_name}_install.log
     Create File    ${install_log_file}
-    Run Keyword And Continue On Failure    Watch Hive Install Log    ${pool_name}    ${pool_namespace}    ${install_log_file}
+    Run Keyword And Continue On Failure    Watch Hive Install Log    ${pool_name}    ${pool_namespace}
     Log    Verifying that Cluster '${cluster_name}' has been provisioned and is running according to Hive Pool namespace '${pool_namespace}'      console=True    # robocop: disable:line-too-long
     ${provision_status} =    Run Process
     ...    oc -n ${pool_namespace} wait --for\=condition\=ProvisionFailed\=False cd ${clusterdeployment_name} --timeout\=15m    # robocop: disable:line-too-long
     ...    shell=yes
+    Run Keyword And Continue On Failure    Log    ${provision_status.stdout}
     ${web_access} =    Run Process
     ...    oc -n ${pool_namespace} get cd ${clusterdeployment_name} -o json | jq -r '.status.webConsoleURL' --exit-status    # robocop: disable:line-too-long
     ...    shell=yes
+    Run Keyword And Continue On Failure    Log    ${web_access.stdout}
     IF    ${use_cluster_pool}
         ${custer_status} =    Run Process
         ...    oc -n ${hive_namespace} wait --for\=condition\=ClusterRunning\=True clusterclaim ${claim_name} --timeout\=15m    shell=yes    # robocop: disable:line-too-long
@@ -203,6 +205,7 @@ Wait For Cluster To Be Ready
         ${custer_status} =    Run Process
         ...	oc -n ${hive_namespace} get clusterclaim ${claim_name} -o json | jq '.status.conditions[] | select(.type\=\="ClusterRunning" and (.reason\=\="Resuming" or .reason\=\="Running"))' --exit-status    shell=yes    # robocop: disable:line-too-long
     END
+    Run Keyword And Continue On Failure    Log    ${custer_status.stdout}
     IF    ${provision_status.rc} != 0 or ${web_access.rc} != 0 or ${custer_status.rc} != 0
         ${provision_status} =    Run Process    oc -n ${pool_namespace} get cd ${clusterdeployment_name} -o json    shell=yes    # robocop: disable:line-too-long
         ${custer_status} =    Run Process    oc -n ${hive_namespace} get clusterclaim ${claim_name} -o json    shell=yes

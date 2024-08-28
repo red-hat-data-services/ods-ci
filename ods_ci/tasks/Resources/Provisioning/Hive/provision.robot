@@ -151,9 +151,8 @@ Create Floating IPs
 
 Watch Hive Install Log
     [Arguments]    ${pool_name}    ${namespace}    ${install_log_file}    ${hive_timeout}=50m
-    # WHILE   True    limit=${hive_timeout}    on_limit_message=Hive Install ${hive_timeout} Timeout Exceeded    # robotcode: ignore
-    # ${old_log_data} = 	Get File 	${install_log_file}
-    # ${last_line_index} =    Get Line Count    ${old_log_data}
+    Wait Until Keyword Succeeds    5 min    5 sec
+    ...    Run And Verify Command    oc get namespace ${namespace}
     IF    ${use_cluster_pool}
         # ${pod} =    Oc Get    kind=Pod    namespace=${namespace}
         ${label_selector}=    Set Variable    hive.openshift.io/clusterpool-name=${pool_name}
@@ -173,7 +172,7 @@ Watch Hive Install Log
         # Sleep   10s
         # CONTINUE
     END
-    Run Keyword And Continue On Failure    ${return_code}    ${0}
+    Run Keyword And Continue On Failure    Should Be Equal As Integers    ${return_code}    ${0}
     ${hive_pods_status} =    Run And Return Rc    oc get pod -n ${namespace} --no-headers | awk '{print $3}' | grep -v 'Completed'
     IF    ${hive_pods_status} != 0
         Log    All Hive pods in ${namespace} have completed    console=True
@@ -214,7 +213,7 @@ Wait For Cluster To Be Ready
     END
     ${install_log_file} =    Set Variable    ${artifacts_dir}/${cluster_name}_install.log
     Create File    ${install_log_file}
-    Run Keyword And Ignore Error    Watch Hive Install Log    ${pool_name}    ${pool_namespace}    ${install_log_file}
+    Run Keyword And Continue On Failure    Watch Hive Install Log    ${pool_name}    ${pool_namespace}    ${install_log_file}
     Log    Verifying that Cluster '${cluster_name}' has been provisioned and is running according to Hive Pool namespace '${pool_namespace}'      console=True    # robocop: disable:line-too-long
     ${provision_status} =    Run Process
     ...    oc -n ${pool_namespace} wait --for\=condition\=ProvisionFailed\=False cd ${clusterdeployment_name} --timeout\=15m    # robocop: disable:line-too-long

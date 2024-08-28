@@ -477,7 +477,7 @@ Run And Watch Command
 Check Process Output and Status
   [Documentation]    Helper keyward for 'Run And Watch Command', to tail proccess and check its status
   [Arguments]    ${process_id}    ${process_log}    ${temp_log}
-  Log To Console    .    no_newline=true
+  # Log To Console    .    no_newline=true
   ${log_data} = 	Get File 	${process_log}
   ${temp_log_data} = 	Get File 	${temp_log}
   ${last_line_index} =    Get Line Count    ${temp_log_data}

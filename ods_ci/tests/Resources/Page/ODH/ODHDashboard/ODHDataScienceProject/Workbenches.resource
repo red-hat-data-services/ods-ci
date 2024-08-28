@@ -193,9 +193,9 @@ Select An Existent PV
     Run Keyword And Continue On Failure
     ...    Wait Until Element Is Enabled    xpath=//input[@placeholder="Select a persistent storage"]
     Click Element    xpath=//input[@placeholder="Select a persistent storage"]
-    Wait Until Page Contains Element    xpath=//ul/li/button[text()="${name}"]
-    Wait Until Page Contains Element    xpath=//ul[@aria-label="Persistent storage select"]//button[text()="${name}"]
-    Click Element   xpath=//ul/li/button[text()="${name}"]
+    ${existing_pv_xpath}=    Set Variable    xpath=//ul/li/button[string()="${name}"]
+    Wait Until Page Contains Element    ${existing_pv_xpath}
+    Click Element   ${existing_pv_xpath}
 
 Select Workbench Jupyter Image
     [Documentation]    Selects a Jupyter image in the workbench creation page
@@ -255,8 +255,9 @@ Select Workbench Container Size
     Click Element    ${WORKBENCH_SIZE_SIDE_MENU_BTN}
     Wait Until Page Contains Element    ${WORKBENCH_SIZE_MENU_BTN_XP}
     Click Element    ${WORKBENCH_SIZE_MENU_BTN_XP}
-    Wait Until Page Contains Element    ${WORKBENCH_SIZE_ITEM_BTN_XP}/span[text()="${size_name}"]
-    Click Element    ${WORKBENCH_SIZE_ITEM_BTN_XP}/span[text()="${size_name}"]
+    ${workbench_size_button_click}=    Set Variable    ${WORKBENCH_SIZE_ITEM_BTN_XP}//span[text()="${size_name}"]
+    Wait Until Page Contains Element    ${workbench_size_button_click}
+    Click Element    ${workbench_size_button_click}
 
 Workbench Should Be Listed
     [Documentation]    Checks a workbench is listed in the DS Project details page

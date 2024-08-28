@@ -150,43 +150,56 @@ Create Floating IPs
     Export Variables From File    ${fips_file_to_export}
 
 Watch Hive Install Log
-    [Arguments]    ${namespace}    ${install_log_file}    ${hive_timeout}=50m
-    WHILE   True    limit=${hive_timeout}    on_limit_message=Hive Install ${hive_timeout} Timeout Exceeded    # robotcode: ignore
-        ${old_log_data} = 	Get File 	${install_log_file}
-        ${last_line_index} =    Get Line Count    ${old_log_data}
-        IF    ${use_cluster_pool}
-            ${pod} =    Oc Get    kind=Pod    namespace=${namespace}
-        ELSE
-            ${pod} =    Oc Get    kind=Pod    namespace=${namespace}
-            ...    label_selector=hive.openshift.io/cluster-deployment-name=${cluster_name}
-        END
-        TRY
-            ${new_log_data} =    Oc Get Pod Logs    name=${pod[0]['metadata']['name']}    container=installer   namespace=${namespace}
-        EXCEPT
-            # Hive container (OCP installer log) is not ready yet
-            Log To Console    .    no_newline=true
-            Sleep   10s
-            CONTINUE
-        END
-        # Print the new lines that were added to the installer log
-        @{new_lines} =    Split To Lines    ${new_log_data}    ${last_line_index}
-        ${lines_count} =    Get length    ${new_lines}
-        IF  ${lines_count} > 0
-            Create File    ${install_log_file}    ${new_log_data}
-            FOR    ${line}    IN    @{new_lines}
-                Log To Console    ${line}
-            END
-        ELSE
-            ${hive_pods_status} =    Run And Return Rc    oc get pod -n ${namespace} --no-headers | awk '{print $3}' | grep -v 'Completed'
-            IF    ${hive_pods_status} != 0
-                Log    All Hive pods in ${namespace} have completed    console=True
-                BREAK
-            END
-            Log To Console    .    no_newline=true
-            Sleep   10s
-        END
+    [Arguments]    ${pool_name}    ${namespace}    ${install_log_file}    ${hive_timeout}=50m
+    # WHILE   True    limit=${hive_timeout}    on_limit_message=Hive Install ${hive_timeout} Timeout Exceeded    # robotcode: ignore
+    # ${old_log_data} = 	Get File 	${install_log_file}
+    # ${last_line_index} =    Get Line Count    ${old_log_data}
+    IF    ${use_cluster_pool}
+        # ${pod} =    Oc Get    kind=Pod    namespace=${namespace}
+        ${label_selector}=    Set Variable    hive.openshift.io/clusterpool-name=${pool_name}
+    ELSE
+        # ${pod} =    Oc Get    kind=Pod    namespace=${namespace}
+        # ...    label_selector=hive.openshift.io/cluster-deployment-name=${cluster_name}
+        ${label_selector}=    Set Variable    hive.openshift.io/cluster-deployment-name=${cluster_name}
     END
-    Should Contain    ${new_log_data}    install completed successfully
+    ${logs_cmd} =     Set Variable    oc logs -f -l ${label_selector} -n ${namespace} --pod-running-timeout=5m
+    TRY
+        ${return_code}=    Run and Watch Command    ${logs_cmd}    timeout=${hive_timeout}
+        # ${new_log_data} =    Oc Get Pod Logs    name=${pod[0]['metadata']['name']}    container=installer   namespace=${namespace}
+    EXCEPT
+        # Hive container (OCP installer log) is not ready yet
+        Log To Console    ERROR: Fail to capture Hive pod logs.
+        # Log To Console    .    no_newline=true
+        # Sleep   10s
+        # CONTINUE
+    END
+    Run Keyword And Continue On Failure    ${return_code}    ${0}
+    ${hive_pods_status} =    Run And Return Rc    oc get pod -n ${namespace} --no-headers | awk '{print $3}' | grep -v 'Completed'
+    IF    ${hive_pods_status} != 0
+        Log    All Hive pods in ${namespace} have completed    console=True
+        #BREAK
+    END
+    # Log To Console    .    no_newline=true
+    Sleep   10s
+    # Print the new lines that were added to the installer log
+    # @{new_lines} =    Split To Lines    ${new_log_data}    ${last_line_index}
+    # ${lines_count} =    Get length    ${new_lines}
+    # IF  ${lines_count} > 0
+    #     Create File    ${install_log_file}    ${new_log_data}
+    #     FOR    ${line}    IN    @{new_lines}
+    #         Log To Console    ${line}
+    #     END
+    # ELSE
+    #     ${hive_pods_status} =    Run And Return Rc    oc get pod -n ${namespace} --no-headers | awk '{print $3}' | grep -v 'Completed'
+    #     IF    ${hive_pods_status} != 0
+    #         Log    All Hive pods in ${namespace} have completed    console=True
+    #         #BREAK
+    #     END
+    #     Log To Console    .    no_newline=true
+    #     Sleep   10s
+    # END
+    # END
+    # Should Contain    ${new_log_data}    install completed successfully
 
 Wait For Cluster To Be Ready
     IF    ${use_cluster_pool}
@@ -201,7 +214,7 @@ Wait For Cluster To Be Ready
     END
     ${install_log_file} =    Set Variable    ${artifacts_dir}/${cluster_name}_install.log
     Create File    ${install_log_file}
-    Run Keyword And Ignore Error    Watch Hive Install Log    ${pool_namespace}    ${install_log_file}
+    Run Keyword And Ignore Error    Watch Hive Install Log    ${pool_name}    ${pool_namespace}    ${install_log_file}
     Log    Verifying that Cluster '${cluster_name}' has been provisioned and is running according to Hive Pool namespace '${pool_namespace}'      console=True    # robocop: disable:line-too-long
     ${provision_status} =    Run Process
     ...    oc -n ${pool_namespace} wait --for\=condition\=ProvisionFailed\=False cd ${clusterdeployment_name} --timeout\=15m    # robocop: disable:line-too-long

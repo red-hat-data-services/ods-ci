@@ -151,8 +151,6 @@ Create Floating IPs
 
 Watch Hive Install Log
     [Arguments]    ${pool_name}    ${namespace}    ${install_log_file}    ${hive_timeout}=50m
-    Wait Until Keyword Succeeds    5 min    5 sec
-    ...    Run And Verify Command    oc get namespace ${namespace}
     IF    ${use_cluster_pool}
         # ${pod} =    Oc Get    kind=Pod    namespace=${namespace}
         ${label_selector}=    Set Variable    hive.openshift.io/clusterpool-name=${pool_name}
@@ -161,8 +159,11 @@ Watch Hive Install Log
         # ...    label_selector=hive.openshift.io/cluster-deployment-name=${cluster_name}
         ${label_selector}=    Set Variable    hive.openshift.io/cluster-deployment-name=${cluster_name}
     END
-    ${logs_cmd} =     Set Variable    oc logs -f -l ${label_selector} -n ${namespace} --pod-running-timeout=5m
+    # ${logs_cmd} =     Set Variable    oc logs -f -l ${label_selector} -n ${namespace} --pod-running-timeout=5m
+    ${logs_cmd} =     Set Variable    oc logs -f -l ${label_selector} -n ${namespace}
     TRY
+        Wait Until Keyword Succeeds    5 min    5 sec
+        ...    Run And Verify Command    ${logs_cmd}
         ${return_code}=    Run and Watch Command    ${logs_cmd}    timeout=${hive_timeout}
         # ${new_log_data} =    Oc Get Pod Logs    name=${pod[0]['metadata']['name']}    container=installer   namespace=${namespace}
     EXCEPT

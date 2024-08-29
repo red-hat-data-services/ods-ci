@@ -11,14 +11,6 @@ Suite Setup       RHOSi Setup
 Suite Teardown    RHOSi Teardown
 
 
-*** Variables ***
-${ODH_RELEASE_NAME}=     Open Data Hub
-${RHOAI_SELFMANAGED_RELEASE_NAME}=      OpenShift AI Self-Managed
-${RHOAI_MANAGED_RELEASE_NAME}=      OpenShift AI Cloud Service
-${RELEASE_NAME_ATTRIBUTE_PATH}=      .status.release.name
-${RELEASE_VERSION_ATTRIBUTE_PATH}=      .status.release.version
-
-
 *** Test Cases ***
 Verify That DSC And DSCI Release.Name Attribute matches required value
     [Documentation]    Tests the release.name attribute from the DSC and DSCI matches the desired value.
@@ -30,7 +22,7 @@ Verify That DSC And DSCI Release.Name Attribute matches required value
     ...       RHOAIENG-9760
     ${DSC_RELEASE_NAME}=     Get Resource Attribute      ${OPERATOR_NAMESPACE}
     ...                      DataScienceCluster       ${DSC_NAME}        ${RELEASE_NAME_ATTRIBUTE_PATH}
-    ${DSCI_RELEASE_NAME}=     Get Resource Attribute      ${OPERATOR_NAMESPACE}
+    ${DSCI_RELEASE_NAME}=    Get Resource Attribute      ${OPERATOR_NAMESPACE}
     ...                      DSCInitialization      ${DSCI_NAME}        ${RELEASE_NAME_ATTRIBUTE_PATH}
 
     IF    "${PRODUCT}" == "RHODS"

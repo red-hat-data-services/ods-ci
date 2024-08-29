@@ -23,7 +23,7 @@ ${EXAMPLE_ISTIO_ENV}=                ${MODELREGISTRY_BASE_FOLDER}/samples/istio/
 ${ISTIO_ENV}=                        ${MODELREGISTRY_BASE_FOLDER}/samples/istio/components/istio.env
 ${SAMPLE_ONNX_MODEL}=                ${MODELREGISTRY_BASE_FOLDER}/mnist.onnx
 ${MR_PYTHON_CLIENT_FILES}=           ${MODELREGISTRY_BASE_FOLDER}/Python_Dependencies
-${MR_PYTHON_CLIENT_WHL}=             ${MODELREGISTRY_BASE_FOLDER}/model_registry-0.2.5a1-py3-none-any.whl
+${MR_PYTHON_CLIENT_WHL_VERSION}=     model_registry==0.2.5a1      
 ${SERVICE_MESH_MEMBER}=              ${MODELREGISTRY_BASE_FOLDER}/serviceMeshMember.yaml
 ${ENABLE_REST_API}=                  ${MODELREGISTRY_BASE_FOLDER}/enable_rest_api_route.yaml
 ${IPYNB_UPDATE_SCRIPT}=              ${MODELREGISTRY_BASE_FOLDER}/updateIPYNB.py
@@ -55,14 +55,13 @@ Verify Model Registry Integration With Secured-DB
     ...            aws_bucket_name=${AWS_BUCKET}    connected_workbench=${workbenches}
     Data Connection Should Be Listed    name=${DC_S3_NAME}    type=${DC_S3_TYPE}    connected_workbench=${workbenches}
     Open Data Science Project Details Page       project_title=${prj_title}    tab_id=workbenches
-    Wait Until Workbench Is Started     workbench_title=registry-wb
+    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}
     Upload File In The Workbench     filepath=${SAMPLE_ONNX_MODEL}    workbench_title=${WORKBENCH_TITLE}
     ...         workbench_namespace=${PRJ_TITLE}
     Upload File In The Workbench     filepath=${JUPYTER_NOTEBOOK_FILEPATH}    workbench_title=${WORKBENCH_TITLE}
     ...         workbench_namespace=${PRJ_TITLE}
-    Upload File In The Workbench     filepath=${MR_PYTHON_CLIENT_WHL}    workbench_title=${WORKBENCH_TITLE}
-    ...         workbench_namespace=${PRJ_TITLE}
-    Upload Python Client Files In The Workbench
+    Download Python Client Dependencies    ${MR_PYTHON_CLIENT_FILES}    ${MR_PYTHON_CLIENT_WHL_VERSION}
+    Upload Python Client Files In The Workbench    ${MR_PYTHON_CLIENT_FILES}
     Launch And Access Workbench    workbench_title=${WORKBENCH_TITLE}
     ...    username=${TEST_USER.USERNAME}     password=${TEST_USER.PASSWORD}
     ...    auth_type=${TEST_USER.AUTH_TYPE}
@@ -100,7 +99,8 @@ Teardown Model Registry Test Setup
     Should Be Equal As Integers	  ${return_code}	 0
     Log    ${output}
     Remove Model Registry
-    Remove Certificates
+    Remove Deployment Files    ${CERTS_DIRECTORY}
+    Remove Deployment Files    ${MODELREGISTRY_BASE_FOLDER}/Python_Dependencies
     RHOSi Teardown
 
 Get Cluster Domain And Token
@@ -265,18 +265,29 @@ Remove Model Registry
     Run And Verify Command    oc delete secret modelregistry-sample-rest-credential -n ${NAMESPACE_ISTIO}
     Run And Verify Command    oc delete namespace ${NAMESPACE_MODEL-REGISTRY} --force
 
-Remove Certificates
-    [Documentation]    Remove all files from the certificates directory
-    ${files}=    List Files In Directory    ${CERTS_DIRECTORY}
+Remove Deployment Files
+    [Documentation]    Remove all files from the given directory
+    [Arguments]  ${directory}
+    Log    ${directory}
+    ${files}    List Files In Directory    ${directory}
     FOR    ${file}    IN    @{files}
-        Run Process    rm    -f    ${CERTS_DIRECTORY}/${file}
+        Remove Files  ${directory}/${file}
     END
+
+Download Python Client Dependencies
+    [Documentation]  Download the model-registry package for a specific platform
+    [Arguments]  ${destination}  ${package_version}
+    ${result}=    Run Process    command=pip download --platform=manylinux2014_x86_64 --python-version=3.9 --abi=cp39 --only-binary=:all: --dest=${destination} ${package_version}    # robocop: disable:line-too-long
+    ...    shell=yes
+    Set Log Level    INFO
+    Should Be True    ${result.rc} == 0    msg=${result.stderr}
 
 Upload Python Client Files In The Workbench
     [Documentation]    Uploads the dependency files for python client installation
-    ${files}=  List Files In Directory  ${MR_PYTHON_CLIENT_FILES}
+    [Arguments]  ${file_location}
+    ${files}=  List Files In Directory  ${file_location}
     FOR  ${file}  IN  @{files}
         Upload File In The Workbench
-        ...    filepath=${MR_PYTHON_CLIENT_FILES}/${file}    workbench_title=${WORKBENCH_TITLE}
+        ...    filepath=${file_location}/${file}    workbench_title=${WORKBENCH_TITLE}
         ...    workbench_namespace=${PRJ_TITLE}
     END

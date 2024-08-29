@@ -155,7 +155,7 @@ Watch Hive Install Log
     IF    ${use_cluster_pool}
         ${label_selector} =    Set Variable    hive.openshift.io/clusterpool-name=${pool_name}
     END
-    ${label_selector}=    Catenate    SEPARATOR=    ${label_selector}    ,hive.openshift.io/job-type=provision
+    ${label_selector} =    Catenate    SEPARATOR=    ${label_selector}    ,hive.openshift.io/job-type=provision
     ${logs_cmd} =     Set Variable    oc logs -f -l ${label_selector} -n ${namespace}
     Wait For Pods To Be Ready    label_selector=${label_selector}    namespace=${namespace}    timeout=5m
     TRY

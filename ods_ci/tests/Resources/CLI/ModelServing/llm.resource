@@ -534,9 +534,9 @@ Check Query Response Values    # robocop:disable
             Log    message=Metrics source namespaced succesfully checked. Going to next step.
         END
         IF    "${exp_model_name}" != "${EMPTY}"
-            ${source_model}=    Set Variable    ${result["metric"]["job"]}
-            ${checked}=    Run Keyword And Return Status    Should Be Equal As Strings    ${source_model}
-            ...    ${exp_model_name}-metrics
+            ${source_pod}=    Set Variable    ${result["metric"]["pod"]}
+            ${checked}=    Run Keyword And Return Status    Should Start With    ${source_pod}
+            ...    ${exp_model_name}
             IF    ${checked} == ${FALSE}
                 Continue For Loop
             ELSE

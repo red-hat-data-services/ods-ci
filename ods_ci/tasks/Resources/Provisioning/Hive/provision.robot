@@ -151,10 +151,11 @@ Create Floating IPs
 
 Watch Hive Install Log
     [Arguments]    ${pool_name}    ${namespace}    ${hive_timeout}=60m
-    ${label_selector}=    Set Variable    hive.openshift.io/cluster-deployment-name=${cluster_name},hive.openshift.io/job-type=provision
+    ${label_selector}=    Set Variable    hive.openshift.io/cluster-deployment-name=${cluster_name}
     IF    ${use_cluster_pool}
         ${label_selector}=    Set Variable    hive.openshift.io/clusterpool-name=${pool_name}        
     END
+    ${label_selector}=    Catenate    ${label_selector}    ,hive.openshift.io/job-type=provision
     ${logs_cmd} =     Set Variable    oc logs -f -l ${label_selector} -n ${namespace}
     TRY
         Wait For Pods To Be Ready    label_selector=${label_selector}    namespace=${namespace}    timeout=5m

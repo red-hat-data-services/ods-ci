@@ -160,6 +160,7 @@ Watch Hive Install Log
     Wait For Pods To Be Ready    label_selector=${label_selector}    namespace=${namespace}    timeout=5m
     TRY
         ${return_code}    ${output}    ${err} =    Run And Watch Command    ${logs_cmd}    timeout=${hive_timeout}
+        ...    output_should_contain=install completed successfully
     EXCEPT
         Log To Console    ERROR: Check Hive Logs if present or you may have hit timeout ${hive_timeout}.
     END

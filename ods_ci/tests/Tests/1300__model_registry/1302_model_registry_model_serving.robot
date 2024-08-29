@@ -23,7 +23,7 @@ ${EXAMPLE_ISTIO_ENV}=                ${MODELREGISTRY_BASE_FOLDER}/samples/istio/
 ${ISTIO_ENV}=                        ${MODELREGISTRY_BASE_FOLDER}/samples/istio/components/istio.env
 ${SAMPLE_ONNX_MODEL}=                ${MODELREGISTRY_BASE_FOLDER}/mnist.onnx
 ${MR_PYTHON_CLIENT_FILES}=           ${MODELREGISTRY_BASE_FOLDER}/Python_Dependencies
-${MR_PYTHON_CLIENT_WHL_VERSION}=     model_registry==0.2.5a1      
+${MR_PYTHON_CLIENT_WHL_VERSION}=     model_registry==0.2.5a1
 ${SERVICE_MESH_MEMBER}=              ${MODELREGISTRY_BASE_FOLDER}/serviceMeshMember.yaml
 ${ENABLE_REST_API}=                  ${MODELREGISTRY_BASE_FOLDER}/enable_rest_api_route.yaml
 ${IPYNB_UPDATE_SCRIPT}=              ${MODELREGISTRY_BASE_FOLDER}/updateIPYNB.py
@@ -40,6 +40,7 @@ ${SECRET_PART_NAME_3}=               model-registry-db
 
 
 *** Test Cases ***
+# robocop: disable:line-too-long
 Verify Model Registry Integration With Secured-DB
     [Documentation]    Verifies the Integartion of Model Registry operator with Jupyter Notebook
     [Tags]    OpenDataHub    MRMS1302
@@ -170,7 +171,7 @@ Create Generic Secret
     [Arguments]    ${namespace}    ${secret_name}    ${key_file}    ${crt_file}    ${ca_file}
     Log    This is the secret name ${secret_name}
     ${command}=    Set Variable
-    ...    oc create secret -n ${namespace} generic ${secret_name} --from-file=tls.key=${key_file} --from-file=tls.crt=${crt_file} --from-file=ca.crt=${ca_file}
+    ...    oc create secret -n ${namespace} generic ${secret_name} --from-file=tls.key=${key_file} --from-file=tls.crt=${crt_file} --from-file=ca.crt=${ca_file}    # robocop: disable:line-too-long
     Run Process    ${command}    shell=True
     Log    Secret ${secret_name}, namespace ${namespace}
     ${output}=    Run Process    oc get secret ${secret_name} -n ${namespace}    shell=True
@@ -268,8 +269,7 @@ Remove Model Registry
 Remove Deployment Files
     [Documentation]    Remove all files from the given directory
     [Arguments]  ${directory}
-    Log    ${directory}
-    ${files}    List Files In Directory    ${directory}
+    ${files}=    List Files In Directory    ${directory}
     FOR    ${file}    IN    @{files}
         Remove Files  ${directory}/${file}
     END
@@ -279,8 +279,7 @@ Download Python Client Dependencies
     [Arguments]  ${destination}  ${package_version}
     ${result}=    Run Process    command=pip download --platform=manylinux2014_x86_64 --python-version=3.9 --abi=cp39 --only-binary=:all: --dest=${destination} ${package_version}    # robocop: disable:line-too-long
     ...    shell=yes
-    Set Log Level    INFO
-    Should Be True    ${result.rc} == 0    msg=${result.stderr}
+    Should Be Equal As Numbers  ${result.rc}  0  ${result.stderr}
 
 Upload Python Client Files In The Workbench
     [Documentation]    Uploads the dependency files for python client installation

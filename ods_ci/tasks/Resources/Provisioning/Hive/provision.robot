@@ -151,7 +151,7 @@ Create Floating IPs
 
 Watch Hive Install Log
     [Arguments]    ${pool_name}    ${namespace}    ${hive_timeout}=60m
-    ${label_selector}=    Set Variable    hive.openshift.io/cluster-deployment-name=${cluster_name}
+    ${label_selector}=    Set Variable    hive.openshift.io/cluster-deployment-name=${cluster_name},hive.openshift.io/job-type=provision
     IF    ${use_cluster_pool}
         ${label_selector}=    Set Variable    hive.openshift.io/clusterpool-name=${pool_name}        
     END

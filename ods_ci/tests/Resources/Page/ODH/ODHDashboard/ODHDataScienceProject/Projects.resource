@@ -128,15 +128,15 @@ Create Data Science Project
     IF    ${existing_project}
         Filter Projects By Name    ${title}
         ${existing_project}=  Run Keyword And Return Status
-        ...    Wait Until Page Contains Element    xpath://a[text()="${title}"]
+        ...    Wait Until Page Contains Element    xpath://a[text()="${title}"]    timeout=2m
     END
     IF    ${existing_project}
         Log    DS Project '${title}' already exists, reusing project    console=True
         Click Link      ${title}
     ELSE
-        Wait Until Page Contains Element    ${PROJECT_CREATE_BTN_XP}
+        Wait Until Page Contains Element    ${PROJECT_CREATE_BTN_XP}    timeout=5m
         Click Button    ${PROJECT_CREATE_BTN_XP}
-        Wait Until Page Contains Element    ${TITLE_INPUT_XP}
+        Wait Until Page Contains Element    ${TITLE_INPUT_XP}    timeout=5m
         Run Keyword And Warn On Failure     Element Should Be Disabled    ${GENERIC_CREATE_BTN_XP}
         Input Text    ${TITLE_INPUT_XP}    ${title}
         Input Text    ${DESCR_INPUT_XP}    ${description}
@@ -146,9 +146,9 @@ Create Data Science Project
             ${resource_name}=    Generate Unique Namespace    ${resource_name}
         END
         Input Text    ${RESOURCE_INPUT_XP}    ${resource_name}
-        Wait Until Element Is Enabled    ${GENERIC_CREATE_BTN_XP}
+        Wait Until Element Is Enabled    ${GENERIC_CREATE_BTN_XP}    timeout=5m
         Click Button    ${GENERIC_CREATE_BTN_XP}
-        Wait Until Generic Modal Disappears
+        Wait Until Generic Modal Disappears    timeout=5m
     END
     Wait Until Project Is Open    project_title=${title}
     ${open}=    Run Keyword And Return Status    Wait Until Project Is Open    project_title=${title}

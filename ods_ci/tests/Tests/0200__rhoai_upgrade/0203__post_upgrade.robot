@@ -37,11 +37,6 @@ ${MODEL_NAME}=    test-model
 ${MODEL_CREATED}=    ${FALSE}
 ${RUNTIME_NAME}=    Model Serving Test
 ${DW_PROJECT_CREATED}=    False
-${ODH_RELEASE_NAME}=     Open Data Hub
-${RHOAI_SELFMANAGED_RELEASE_NAME}=      OpenShift AI Self-Managed
-${RHOAI_MANAGED_RELEASE_NAME}=      OpenShift AI Cloud Service
-${RELEASE_NAME_ATTRIBUTE_PATH}=      .status.release.name
-${RELEASE_VERSION_ATTRIBUTE_PATH}=      .status.release.version
 
 
 *** Test Cases ***

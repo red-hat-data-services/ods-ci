@@ -151,20 +151,21 @@ Create Floating IPs
 
 Watch Hive Install Log
     [Arguments]    ${pool_name}    ${namespace}    ${hive_timeout}=60m
-    ${label_selector}=    Set Variable    hive.openshift.io/cluster-deployment-name=${cluster_name}
+    ${label_selector} =    Set Variable    hive.openshift.io/cluster-deployment-name=${cluster_name}
     IF    ${use_cluster_pool}
-        ${label_selector}=    Set Variable    hive.openshift.io/clusterpool-name=${pool_name}        
+        ${label_selector} =    Set Variable    hive.openshift.io/clusterpool-name=${pool_name}
     END
     ${label_selector}=    Catenate    SEPARATOR=    ${label_selector}    ,hive.openshift.io/job-type=provision
     ${logs_cmd} =     Set Variable    oc logs -f -l ${label_selector} -n ${namespace}
     TRY
         Wait For Pods To Be Ready    label_selector=${label_selector}    namespace=${namespace}    timeout=5m
-        ${return_code}=    Run and Watch Command    ${logs_cmd}    timeout=${hive_timeout}
+        ${return_code} =    Run And Watch Command    ${logs_cmd}    timeout=${hive_timeout}
     EXCEPT
         Log To Console    ERROR: Fail to capture Hive pod logs.
     END
     Run Keyword And Continue On Failure    Should Be Equal As Integers    ${return_code}    ${0}
-    ${hive_pods_status} =    Run And Return Rc    oc get pod -n ${namespace} --no-headers | awk '{print $3}' | grep -v 'Completed'
+    ${hive_pods_status} =    Run And Return Rc
+    ...    oc get pod -n ${namespace} --no-headers | awk '{print $3}' | grep -v 'Completed'
     IF    ${hive_pods_status} != 0
         Log    All Hive pods in ${namespace} have completed    console=True
     END

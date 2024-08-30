@@ -59,10 +59,10 @@ End Non JupyterLab Web Test
     Close Browser
 
 Load Json File
-    [Arguments]   ${file_path}      ${double_quotes}=${FALSE}
+    [Arguments]   ${file_path}      ${as_string}=${FALSE}
     ${j_file}=    Get File    ${file_path}
     ${obj}=    Evaluate    json.loads(r'''${j_file}''')    json
-    IF  ${double_quotes}
+    IF  ${as_string}
        ${obj}=    Evaluate    json.dumps(${obj})    json
     END
     RETURN    ${obj}

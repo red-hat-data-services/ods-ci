@@ -48,7 +48,8 @@ Test Onnx Model Rest Inference Via UI (Triton on Kserve)
     ...    data_connection=model-serving-connection    path=triton/model_repository/    model_framework=onnx - 1
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${ONNX_MODEL_LABEL}
     ...    namespace=${PRJ_TITLE}
-    ${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}=     Load Json File     file_path=${EXPECTED_INFERENCE_REST_OUTPUT_FILE}     as_string=${TRUE}
+    ${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}=     Load Json File     file_path=${EXPECTED_INFERENCE_REST_OUTPUT_FILE}
+    ...     as_string=${TRUE}
     Run Keyword And Continue On Failure    Verify Model Inference With Retries
     ...    ${ONNX_MODEL_NAME}    ${INFERENCE_REST_INPUT_ONNX}    ${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}    token_auth=${FALSE}
     ...    project_title=${PRJ_TITLE}

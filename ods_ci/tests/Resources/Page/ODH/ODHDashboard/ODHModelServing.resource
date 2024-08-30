@@ -8,7 +8,6 @@ Resource       ../../../CLI/ModelServing/llm.resource
 Library        ../../../../../libs/Helpers.py
 
 
-
 *** Variables ***
 ${MS_HEADER_XP}=     xpath=//h1[text()="Model Serving"]
 ${S3_NAME_DC_INPUT_XP}=          xpath=//input[@aria-label="Field list Name"]

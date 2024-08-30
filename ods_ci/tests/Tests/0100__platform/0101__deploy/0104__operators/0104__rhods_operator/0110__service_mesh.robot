@@ -18,6 +18,7 @@ ${SERVICE_MESH_OPERATOR_DEPLOYMENT_NAME}    istio-operator
 ${SERVICE_MESH_CR_NS}                       istio-system
 ${SERVICE_MESH_CR_NAME}                     data-science-smcp
 ${OLM_DIR}                                  olm
+${RHODS_OSD_INSTALL_REPO}                   https://gitlab.cee.redhat.com/data-hub/olminstall.git
 ${INSTALL_TYPE}                             CLi
 ${TEST_ENV}                                 PSI
 ${IS_PRESENT}                               0

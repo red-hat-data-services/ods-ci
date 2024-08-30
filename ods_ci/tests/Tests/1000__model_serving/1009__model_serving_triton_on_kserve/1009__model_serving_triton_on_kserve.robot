@@ -70,8 +70,6 @@ Triton On Kserve Suite Setup
     Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
     Clean All Models Of Current User
 
-
-
 Triton On Kserve Suite Teardown
     [Documentation]    Suite teardown steps after testing DSG. It Deletes
     ...                all the DS projects created by the tests and run RHOSi teardown

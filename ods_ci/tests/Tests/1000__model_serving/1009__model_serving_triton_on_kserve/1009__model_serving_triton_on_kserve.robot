@@ -52,9 +52,10 @@ Test Onnx Model Rest Inference Via UI (Triton on Kserve)
     Run Keyword And Continue On Failure    Verify Model Inference With Retries
     ...    ${ONNX_MODEL_NAME}    ${INFERENCE_REST_INPUT_ONNX}    ${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}    token_auth=${FALSE}
     ...    project_title=${PRJ_TITLE}
-    [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${ONNX_MODEL_NAME}   project_title=${PRJ_TITLE}
-...  AND
-...  Clean All Models Of Current User
+    [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${ONNX_MODEL_NAME}
+    ...  project_title=${PRJ_TITLE}
+    ...  AND
+    ...  Clean All Models Of Current User
 
 *** Keywords ***
 Triton On Kserve Suite Setup

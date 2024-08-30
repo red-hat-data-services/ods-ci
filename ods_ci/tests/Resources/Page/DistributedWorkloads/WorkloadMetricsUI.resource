@@ -61,7 +61,7 @@ Select Refresh Interval
     [Arguments]    ${refresh_interval}
     Wait Until Element Is Visible  ${REFRESH_INTERVAL_XP}    timeout=20
     Click Element     ${REFRESH_INTERNAL_MENU_XP}
-    Click Element     xpath=//button[text()="${refresh_interval}"]
+    Click Element     xpath=//button[@role="option" and contains(., "${refresh_interval}")]
 
 Get Current CPU Usage
     [Documentation]    Returns value of current cpu usage

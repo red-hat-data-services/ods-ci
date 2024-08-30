@@ -41,6 +41,11 @@ Resource            Common.robot
 ...                         Generate Minio Random Credentials
 ...                         Get Minio Credentials
 ...                         Create Inference Access Token
+${ODH_RELEASE_NAME}=     Open Data Hub
+${RHOAI_SELFMANAGED_RELEASE_NAME}=      OpenShift AI Self-Managed
+${RHOAI_MANAGED_RELEASE_NAME}=      OpenShift AI Cloud Service
+${RELEASE_NAME_ATTRIBUTE_PATH}=      .status.release.name
+${RELEASE_VERSION_ATTRIBUTE_PATH}=      .status.release.version
 
 
 *** Keywords ***
@@ -93,6 +98,7 @@ Assign Vars According To Product
         Set Suite Variable    ${OPERATOR_DEPLOYMENT_NAME}    rhods-operator
         Set Suite Variable    ${OPERATOR_POD_CONTAINER_NAME}  rhods-operator
         Set Suite Variable    ${OPERATOR_LABEL_SELECTOR}    name=rhods-operator
+        Set Suite Variable    ${OPERATOR_SUBSCRIPTION_LABEL}     operators.coreos.com/rhods-operator.redhat-ods-operator
         Set Suite Variable    ${AUTHORINO_CR_NS}    redhat-ods-applications-auth-provider
         Set Suite Variable    ${DASHBOARD_DEPLOYMENT_NAME}    rhods-dashboard
         Set Suite Variable    ${DASHBOARD_LABEL_SELECTOR}     app.kubernetes.io/part-of=rhods-dashboard
@@ -103,6 +109,7 @@ Assign Vars According To Product
         Set Suite Variable    ${OPERATOR_DEPLOYMENT_NAME}    opendatahub-operator-controller-manager
         Set Suite Variable    ${OPERATOR_POD_CONTAINER_NAME}  manager
         Set Suite Variable    ${OPERATOR_LABEL_SELECTOR}    control-plane=controller-manager
+        Set Suite Variable    ${OPERATOR_SUBSCRIPTION_LABEL}     operators.coreos.com/rhods-operator.opendatahub-operators
         Set Suite Variable    ${AUTHORINO_CR_NS}    opendatahub-auth-provider
         Set Suite Variable    ${DASHBOARD_DEPLOYMENT_NAME}    odh-dashboard
         Set Suite Variable    ${DASHBOARD_LABEL_SELECTOR}     app.kubernetes.io/part-of=dashboard

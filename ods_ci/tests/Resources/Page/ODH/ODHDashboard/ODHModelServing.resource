@@ -330,7 +330,6 @@ Verify Model Inference
     END
     ${inference_output}=    Get Model Inference    model_name=${model_name}    inference_input=${inference_input}   token_auth=${token_auth}    kserve_mode=${kserve_mode}
     ...    project_title=${project_title}   deployment_mode=${deployment_mode}   service_port=${service_port}   end_point=${end_point}
-
     ${result}    ${list}=    Inference Comparison    ${expected_inference_output}    ${inference_output}
     Log    ${result}
     Log    ${list}
@@ -434,8 +433,8 @@ Deploy Kserve Model Via UI  #robocop: disable
     ...    ${token}=${FALSE}    ${multi_token}=${FALSE}    ${multi_service_account_name}=default-name2
     ...    ${public_endpoint}=${TRUE}
     Move To Tab    Models
-    Click Button    ${DEPLOY_MODEL_BTN}
-    Wait Until Page Contains Element    xpath=${KSERVE_MODAL_HEADER}
+    SeleniumLibrary.Click Button    ${DEPLOY_MODEL_BTN}
+    SeleniumLibrary.Wait Until Page Contains Element    xpath=${KSERVE_MODAL_HEADER}
     Set Model Name   ${model_name}
     Set Model Server Runtime    ${serving_runtime}
     Select Framework    ${model_framework}

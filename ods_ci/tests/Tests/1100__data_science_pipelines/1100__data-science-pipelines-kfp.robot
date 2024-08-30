@@ -47,7 +47,7 @@ Verify Ods Users Can Create And Run A Data Science Pipeline Using The kfp Python
     ...    method_name=my_pipeline
     ...    status_check_timeout=180
     ...    pipeline_params=${emtpy_dict}
-    [Teardown]    Remove Pipeline Project    ${PROJECT_NAME}
+    [Teardown]    Delete Data Science Project From CLI By Name    name=${PROJECT_NAME}
 
 Verify Upload Download In Data Science Pipelines Using The kfp Python Package
     [Documentation]    Creates, runs pipelines with regular user. Double check the pipeline result and clean
@@ -64,8 +64,7 @@ Verify Upload Download In Data Science Pipelines Using The kfp Python Package
     ...    method_name=wire_up_pipeline
     ...    status_check_timeout=180
     ...    pipeline_params=${upload_download_dict}
-    [Teardown]    Remove Pipeline Project    ${PROJECT_NAME}
-
+    [Teardown]    Delete Data Science Project From CLI By Name    name=${PROJECT_NAME}
 
 
 Verify Ods Users Can Create And Run A Data Science Pipeline With Ray Using The kfp Python Package
@@ -86,7 +85,7 @@ Verify Ods Users Can Create And Run A Data Science Pipeline With Ray Using The k
     ...    status_check_timeout=600
     ...    pipeline_params=${ray_dict}
     ...    ray=${TRUE}
-    [Teardown]    Remove Pipeline Project    ${PROJECT_NAME}
+    [Teardown]    Delete Data Science Project From CLI By Name    name=${PROJECT_NAME}
 
 
 *** Keywords ***
@@ -96,7 +95,8 @@ End To End Pipeline Workflow Using Kfp
     ...    clean the pipeline resources.
     [Arguments]    ${username}    ${password}    ${admin_username}    ${admin_password}    ${project}    ${python_file}
     ...    ${method_name}    ${pipeline_params}    ${status_check_timeout}=160    ${ray}=${FALSE}
-    Remove Pipeline Project    ${project}
+
+    Delete Data Science Project From CLI By Name    name=${project}
     Projects.Create Data Science Project From CLI    name=${project}
 
     DataSciencePipelinesBackend.Create PipelineServer Using Custom DSPA    ${project}
@@ -118,7 +118,8 @@ End To End Pipeline Workflow Using Kfp
     ...    pip_trusted_host=${pip_trusted_host}
     ${run_status}    Check Run Status    ${run_id}    timeout=${status_check_timeout}
     Should Be Equal As Strings    ${run_status}    SUCCEEDED    Pipeline run doesn't have a status that means success. Check the logs
-    Remove Pipeline Project    ${project}
+    Should Be Equal As Strings    ${run_status}    SUCCEEDED    Pipeline run doesn't have a status that means success. Check the logs
+    Delete Data Science Project From CLI By Name    name=${project}
 
 Data Science Pipelines Suite Setup
     [Documentation]    Data Science Pipelines Suite Setup

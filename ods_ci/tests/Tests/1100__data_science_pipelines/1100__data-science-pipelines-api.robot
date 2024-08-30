@@ -23,16 +23,12 @@ ${URL_TEST_PIPELINE_RUN_YAML}=                 https://raw.githubusercontent.com
 Verify Pipeline Server Creation With S3 Object Storage
     [Documentation]    Creates a pipeline server using S3 object storage and verifies that all components are running
     [Tags]    Smoke    Tier1
-
     Create Data Science Project From CLI    name=dsp-s3
-
     DataSciencePipelinesBackend.Create Pipeline Server    namespace=dsp-s3
     ...    object_storage_access_key=${S3.AWS_ACCESS_KEY_ID}
     ...    object_storage_secret_key=${S3.AWS_SECRET_ACCESS_KEY}
     ...    dsp_version=v2
-
     DataSciencePipelinesBackend.Wait Until Pipeline Server Is Deployed    namespace=dsp-s3
-
     [Teardown]    Delete Data Science Project From CLI By Name    name=dsp-s3
 
 Verify Admin Users Can Create And Run a Data Science Pipeline Using The Api
@@ -50,21 +46,22 @@ Verify Regular Users Can Create And Run a Data Science Pipeline Using The Api
 Verify Ods Users Can Do Http Request That Must Be Redirected to Https
     [Documentation]    Verify Ods Users Can Do Http Request That Must Be Redirected to Https
     [Tags]        Tier1    ODS-2234
-    New Project    project-redirect-http
+    Create Data Science Project From CLI    name=project-redirect-http
     DataSciencePipelinesBackend.Create PipelineServer Using Custom DSPA    project-redirect-http
     ${status}    Login And Wait Dsp Route    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
     ...         project-redirect-http
     Should Be True    ${status} == 200    Could not login to the Data Science Pipelines Rest API OR DSP routing is not working    # robocop: disable:line-too-long
     ${url}    Do Http Request    apis/v2beta1/runs
     Should Start With    ${url}    https
-    [Teardown]    Remove Pipeline Project    project-redirect-http
+    [Teardown]    Delete Data Science Project From CLI By Name    name=project-redirect-http
 
 Verify DSPO Operator Reconciliation Retry
     [Documentation]    Verify DSPO Operator is able to recover from missing components during the initialization
     [Tags]      Sanity    Tier1    ODS-2477
 
     ${local_project_name} =    Set Variable    recon-test
-    New Project    ${local_project_name}
+    Create Data Science Project From CLI    name=${local_project_name}
+
     DataSciencePipelinesBackend.Create PipelineServer Using Custom DSPA
     ...    ${local_project_name}    data-science-pipelines-reconciliation.yaml    False
     Wait Until Keyword Succeeds    15 times    1s
@@ -74,16 +71,15 @@ Verify DSPO Operator Reconciliation Retry
     IF    ${rc}!=0    Fail
     # one pod is good when reconciliation finished
     Wait For Pods Number  1    namespace=${local_project_name}    timeout=60
-    [Teardown]    Remove Pipeline Project    ${local_project_name}
-
+    [Teardown]    Delete Data Science Project From CLI By Name    name=${local_project_name}
 
 *** Keywords ***
 End To End Pipeline Workflow Via Api
     [Documentation]    Create, run and double check the pipeline result using API.
     ...    In the end, clean the pipeline resources.
     [Arguments]     ${username}    ${password}    ${project}
-    Remove Pipeline Project    ${project}
-    New Project    ${project}
+    Delete Data Science Project From CLI By Name    name=${project}
+    Create Data Science Project From CLI    name=${project}
     Create PipelineServer Using Custom DSPA    ${project}
     ${status}    Login And Wait Dsp Route    ${username}    ${password}    ${project}
     Should Be True    ${status} == 200    Could not login to the Data Science Pipelines Rest API OR DSP routing is not working    # robocop: disable:line-too-long
@@ -93,7 +89,7 @@ End To End Pipeline Workflow Via Api
     ${run_status}    Check Run Status    ${run_id}
     Should Be Equal As Strings    ${run_status}    SUCCEEDED    Pipeline run doesn't have a status that means success. Check the logs
     DataSciencePipelinesKfp.Delete Run    ${run_id}
-    [Teardown]    Remove Pipeline Project    ${project}
+    [Teardown]    Delete Data Science Project From CLI By Name    name=${project}
 
 Double Check If DSPA Was Created
     [Documentation]    Double check if DSPA was created

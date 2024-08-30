@@ -70,6 +70,7 @@ class DataSciencePipelinesAPI:
 
     @keyword
     def remove_pipeline_project(self, project):
+        """# Deprecated: replaced by keyword "Delete Data Science Project From CLI By Name"""
         print(f"We are removing the project({project}) because we could run the test multiple times")
         self.run_command(f"oc delete project {project} --wait=true --force=true")
         print("Wait because it could be in Terminating status")

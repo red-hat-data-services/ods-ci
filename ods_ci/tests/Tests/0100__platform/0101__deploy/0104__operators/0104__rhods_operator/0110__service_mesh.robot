@@ -119,7 +119,7 @@ Fetch Cluster Type By Domain
 
 Create Smcp From Template
     [Documentation]    Create a default ServiceMeshControlPlane from a template
-    ${file_path}=    Set Variable    ~/work/ods-ci/ods_ci/tasks/Resources/Files/
+    ${file_path}=    Set Variable    ./tasks/Resources/Files/
     ${return_code}=    Run And Return Rc    oc apply -f ${file_path}smcp_template.yml
     Should Be Equal As Integers    ${return_code}    0
 

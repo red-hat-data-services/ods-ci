@@ -6,6 +6,7 @@ Resource            ../../Resources/ODS.robot
 Resource            ../../Resources/Common.robot
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipelines.resource
+Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Permissions.resource
 Library             DateTime
 Library             ../../../libs/DataSciencePipelinesAPI.py
 Library             ../../../libs/DataSciencePipelinesKfp.py
@@ -26,16 +27,20 @@ Verify Ods Users Can Create And Run A Data Science Pipeline Using The kfp Python
     [Tags]      Smoke    Tier1    ODS-2203
     ${emtpy_dict}=    Create Dictionary
     End To End Pipeline Workflow Using Kfp
-    ...    username=${TEST_USER.USERNAME}
-    ...    password=${TEST_USER.PASSWORD}
+    ...    admin_username=${TEST_USER.USERNAME}
+    ...    admin_password=${TEST_USER.PASSWORD}
+    ...    username=${TEST_USER_3.USERNAME}
+    ...    password=${TEST_USER_3.PASSWORD}
     ...    project=${PROJECT_NAME}
     ...    python_file=flip_coin.py
     ...    method_name=flipcoin_pipeline
     ...    status_check_timeout=440
     ...    pipeline_params=${emtpy_dict}
     End To End Pipeline Workflow Using Kfp
-    ...    username=${TEST_USER.USERNAME}
-    ...    password=${TEST_USER.PASSWORD}
+    ...    admin_username=${TEST_USER.USERNAME}
+    ...    admin_password=${TEST_USER.PASSWORD}
+    ...    username=${TEST_USER_3.USERNAME}
+    ...    password=${TEST_USER_3.PASSWORD}
     ...    project=${PROJECT_NAME}
     ...    python_file=iris_pipeline.py
     ...    method_name=my_pipeline
@@ -49,8 +54,10 @@ Verify Upload Download In Data Science Pipelines Using The kfp Python Package
     [Tags]    Sanity    Tier1    ODS-2683
     ${upload_download_dict}=    Create Dictionary    mlpipeline_minio_artifact_secret=value    bucket_name=value
     End To End Pipeline Workflow Using Kfp
-    ...    username=${TEST_USER.USERNAME}
-    ...    password=${TEST_USER.PASSWORD}
+    ...    admin_username=${TEST_USER.USERNAME}
+    ...    admin_password=${TEST_USER.PASSWORD}
+    ...    username=${TEST_USER_3.USERNAME}
+    ...    password=${TEST_USER_3.PASSWORD}
     ...    project=${PROJECT_NAME}
     ...    python_file=upload_download.py
     ...    method_name=wire_up_pipeline
@@ -68,8 +75,10 @@ Verify Ods Users Can Create And Run A Data Science Pipeline With Ray Using The k
     Skip If Component Is Not Enabled    codeflare
     ${ray_dict}=    Create Dictionary
     End To End Pipeline Workflow Using Kfp
-    ...    username=${TEST_USER.USERNAME}
-    ...    password=${TEST_USER.PASSWORD}
+    ...    admin_username=${TEST_USER.USERNAME}
+    ...    admin_password=${TEST_USER.PASSWORD}
+    ...    username=${TEST_USER_3.USERNAME}
+    ...    password=${TEST_USER_3.PASSWORD}
     ...    project=${PROJECT_NAME}
     ...    python_file=ray_integration.py
     ...    method_name=ray_integration
@@ -84,12 +93,12 @@ Verify Ods Users Can Create And Run A Data Science Pipeline With Ray Using The k
 End To End Pipeline Workflow Using Kfp
     [Documentation]    Create, run and double check the pipeline result using Kfp python package. In the end,
     ...    clean the pipeline resources.
-    [Arguments]    ${username}    ${password}    ${project}    ${python_file}    ${method_name}
-    ...    ${pipeline_params}    ${status_check_timeout}=160    ${ray}=${FALSE}
+    [Arguments]    ${username}    ${password}    ${admin_username}    ${admin_password}    ${project}    ${python_file}
+    ...    ${method_name}    ${pipeline_params}    ${status_check_timeout}=160    ${ray}=${FALSE}
     Remove Pipeline Project    ${project}
     New Project    ${project}
     Install DataSciencePipelinesApplication CR    ${project}
-    ${status}    Login And Wait Dsp Route    ${username}    ${password}    ${project}
+    ${status}    Login And Wait Dsp Route    ${admin_username}    ${admin_password}    ${project}
     Should Be True    ${status} == 200    Could not login to the Data Science Pipelines Rest API OR DSP routing is not working
     # we remove and add a new project for sanity. LocalQueue is  per namespace
     IF    ${ray} == ${TRUE}
@@ -97,6 +106,8 @@ End To End Pipeline Workflow Using Kfp
     END
     # The run_robot_test.sh is sending the --variablefile ${TEST_VARIABLES_FILE} which may contain the `PIP_INDEX_URL`
     # and `PIP_TRUSTED_HOST` variables, e.g. for disconnected testing.
+    Launch Data Science Project Main Page    username=${admin_username}    password=${admin_password}
+    Assign Contributor Permissions To User ${username} in Project ${project}
     ${pip_index_url} =    Get Variable Value    ${PIP_INDEX_URL}    ${NONE}
     ${pip_trusted_host} =    Get Variable Value    ${PIP_TRUSTED_HOST}    ${NONE}
     Log    pip_index_url = ${pip_index_url} / pip_trusted_host = ${pip_trusted_host}

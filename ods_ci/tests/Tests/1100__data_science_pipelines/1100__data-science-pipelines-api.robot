@@ -64,8 +64,9 @@ Verify DSPO Operator Reconciliation Retry
 
     DataSciencePipelinesBackend.Create PipelineServer Using Custom DSPA
     ...    ${local_project_name}    data-science-pipelines-reconciliation.yaml    False
-    Wait Until Keyword Succeeds    15 times    1s
-    ...    Double Check If DSPA Was Created    ${local_project_name}
+    DataSciencePipelinesBackend.Wait Until Pipeline Server Is Deployed    namespace=${local_project_name}
+
+
     DSPA Should Reconcile
     ${rc}  ${out} =    Run And Return Rc And Output   oc apply -f ${DSPA_PATH}/dummy-storage-creds.yaml -n ${local_project_name}
     IF    ${rc}!=0    Fail
@@ -90,13 +91,7 @@ End To End Pipeline Workflow Via Api
     Should Be Equal As Strings    ${run_status}    SUCCEEDED    Pipeline run doesn't have a status that means success. Check the logs
     DataSciencePipelinesKfp.Delete Run    ${run_id}
     [Teardown]    Delete Data Science Project From CLI By Name    name=${project}
-
-Double Check If DSPA Was Created
-    [Documentation]    Double check if DSPA was created
-    [Arguments]     ${local_project_name}
-    ${rc}  ${out} =    Run And Return Rc And Output   oc get datasciencepipelinesapplications -n ${local_project_name}
-    IF    ${rc}!=0    Fail
-
+    
 DSPA Should Reconcile
     [Documentation]    DSPA must find an error because not all components were deployed
     ${stopped} =    Set Variable    ${False}

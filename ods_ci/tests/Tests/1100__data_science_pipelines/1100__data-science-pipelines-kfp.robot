@@ -6,8 +6,9 @@ Resource            ../../Resources/ODS.robot
 Resource            ../../Resources/Common.robot
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipelines.resource
-Resource            ../../Resources/CLI/DataSciencePipelines/DataSciencePipelinesBackend.resource
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Permissions.resource
+Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
+Resource            ../../Resources/CLI/DataSciencePipelines/DataSciencePipelinesBackend.resource
 Library             DateTime
 Library             ../../../libs/DataSciencePipelinesAPI.py
 Library             ../../../libs/DataSciencePipelinesKfp.py
@@ -98,7 +99,7 @@ End To End Pipeline Workflow Using Kfp
 
     Delete Data Science Project From CLI By Name    name=${project}
     Projects.Create Data Science Project From CLI    name=${project}
-
+    
     DataSciencePipelinesBackend.Create PipelineServer Using Custom DSPA    ${project}
     ${status}    Login And Wait Dsp Route    ${admin_username}    ${admin_password}    ${project}
     Should Be True    ${status} == 200    Could not login to the Data Science Pipelines Rest API OR DSP routing is not working

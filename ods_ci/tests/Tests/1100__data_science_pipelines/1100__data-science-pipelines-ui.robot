@@ -5,7 +5,7 @@ Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/P
 Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Pipelines.resource
 Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipelines.resource
-Test Tags          DataSciencePipelines
+Test Tags          DataSciencePipelines-Dashboard
 Suite Setup        Pipelines Suite Setup
 Suite Teardown     Pipelines Suite Teardown
 

@@ -7,10 +7,12 @@ Resource            ../../Resources/Common.robot
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipelines.resource
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Permissions.resource
+Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
+Resource            ../../Resources/CLI/DataSciencePipelines/DataSciencePipelinesBackend.resource
 Library             DateTime
 Library             ../../../libs/DataSciencePipelinesAPI.py
 Library             ../../../libs/DataSciencePipelinesKfp.py
-Test Tags           DataSciencePipelines
+Test Tags           DataSciencePipelines-Backend
 Suite Setup         Data Science Pipelines Suite Setup
 Suite Teardown      RHOSi Teardown
 
@@ -34,7 +36,7 @@ Verify Ods Users Can Create And Run A Data Science Pipeline Using The kfp Python
     ...    project=${PROJECT_NAME}
     ...    python_file=flip_coin.py
     ...    method_name=flipcoin_pipeline
-    ...    status_check_timeout=440
+    ...    status_check_timeout=180
     ...    pipeline_params=${emtpy_dict}
     End To End Pipeline Workflow Using Kfp
     ...    admin_username=${TEST_USER.USERNAME}
@@ -44,9 +46,9 @@ Verify Ods Users Can Create And Run A Data Science Pipeline Using The kfp Python
     ...    project=${PROJECT_NAME}
     ...    python_file=iris_pipeline.py
     ...    method_name=my_pipeline
-    ...    status_check_timeout=440
+    ...    status_check_timeout=180
     ...    pipeline_params=${emtpy_dict}
-    [Teardown]    Remove Pipeline Project    ${PROJECT_NAME}
+    [Teardown]    Projects.Delete Project Via CLI By Display Name    ${PROJECT_NAME}
 
 Verify Upload Download In Data Science Pipelines Using The kfp Python Package
     [Documentation]    Creates, runs pipelines with regular user. Double check the pipeline result and clean
@@ -61,10 +63,9 @@ Verify Upload Download In Data Science Pipelines Using The kfp Python Package
     ...    project=${PROJECT_NAME}
     ...    python_file=upload_download.py
     ...    method_name=wire_up_pipeline
-    ...    status_check_timeout=440
+    ...    status_check_timeout=180
     ...    pipeline_params=${upload_download_dict}
-    [Teardown]    Remove Pipeline Project    ${PROJECT_NAME}
-
+    [Teardown]    Projects.Delete Project Via CLI By Display Name    ${PROJECT_NAME}
 
 
 Verify Ods Users Can Create And Run A Data Science Pipeline With Ray Using The kfp Python Package
@@ -82,10 +83,10 @@ Verify Ods Users Can Create And Run A Data Science Pipeline With Ray Using The k
     ...    project=${PROJECT_NAME}
     ...    python_file=ray_integration.py
     ...    method_name=ray_integration
-    ...    status_check_timeout=440
+    ...    status_check_timeout=600
     ...    pipeline_params=${ray_dict}
     ...    ray=${TRUE}
-    [Teardown]    Remove Pipeline Project    ${PROJECT_NAME}
+    [Teardown]    Projects.Delete Project Via CLI By Display Name    ${PROJECT_NAME}
 
 
 *** Keywords ***
@@ -95,9 +96,11 @@ End To End Pipeline Workflow Using Kfp
     ...    clean the pipeline resources.
     [Arguments]    ${username}    ${password}    ${admin_username}    ${admin_password}    ${project}    ${python_file}
     ...    ${method_name}    ${pipeline_params}    ${status_check_timeout}=160    ${ray}=${FALSE}
-    Remove Pipeline Project    ${project}
-    New Project    ${project}
-    Install DataSciencePipelinesApplication CR    ${project}
+
+    Projects.Delete Project Via CLI By Display Name    ${project}
+    Projects.Create Data Science Project From CLI    name=${project}
+
+    DataSciencePipelinesBackend.Create PipelineServer Using Custom DSPA    ${project}
     ${status}    Login And Wait Dsp Route    ${admin_username}    ${admin_password}    ${project}
     Should Be True    ${status} == 200    Could not login to the Data Science Pipelines Rest API OR DSP routing is not working
     # we remove and add a new project for sanity. LocalQueue is  per namespace
@@ -114,9 +117,10 @@ End To End Pipeline Workflow Using Kfp
     ${run_id}    Create Run From Pipeline Func    ${username}    ${password}    ${project}
     ...    ${python_file}    ${method_name}    pipeline_params=${pipeline_params}    pip_index_url=${pip_index_url}
     ...    pip_trusted_host=${pip_trusted_host}
-    ${run_status}    Check Run Status    ${run_id}    timeout=500
+    ${run_status}    Check Run Status    ${run_id}    timeout=${status_check_timeout}
     Should Be Equal As Strings    ${run_status}    SUCCEEDED    Pipeline run doesn't have a status that means success. Check the logs
-    Remove Pipeline Project    ${project}
+    Should Be Equal As Strings    ${run_status}    SUCCEEDED    Pipeline run doesn't have a status that means success. Check the logs
+    Projects.Delete Project Via CLI By Display Name    ${project}
 
 Data Science Pipelines Suite Setup
     [Documentation]    Data Science Pipelines Suite Setup

@@ -53,15 +53,15 @@ General Suite Setup
 
 General Suite Teardown
     [Documentation]    General Suite Teardown
-    Delete Data Science Project From CLI By Name    name=${PROJECT_USER3}
-    Delete Data Science Project From CLI By Name    name=${PROJECT_USER4}
+    Projects.Delete Project Via CLI By Display Name    ${PROJECT_USER3}
+    Projects.Delete Project Via CLI By Display Name    ${PROJECT_USER4}
     RHOSi Teardown
 
 Create A Pipeline Server And Wait For Dsp Route
     [Documentation]    Create A Pipeline Server And Wait For Dsp Route
     [Arguments]     ${user}    ${password}    ${auth_type}    ${project}
 
-    Create Data Science Project From CLI    name=${project}   as_user=${user}
+    Projects.Create Data Science Project From CLI    name=${project}   as_user=${user}
 
     DataSciencePipelinesBackend.Create Pipeline Server    namespace=${project}
     ...    object_storage_access_key=${S3.AWS_ACCESS_KEY_ID}

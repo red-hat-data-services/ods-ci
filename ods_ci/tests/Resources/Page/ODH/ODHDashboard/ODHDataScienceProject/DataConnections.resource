@@ -50,8 +50,10 @@ Set Connection Between Data Connection And Workbench
     Log    ${workbench_title}
     Wait Until Element Is Enabled    xpath=//span[contains(@class, "pf-v5-c-text-input-group__text")]
     Click Element    xpath=//span[contains(@class, "pf-v5-c-text-input-group__text")]
-    Wait Until Page Contains Element    xpath=//span[contains(@class, "pf-v5-c-menu__item-text") and text()="registry-wb"]  
-    Click Element                       xpath=//span[contains(@class, "pf-v5-c-menu__item-text") and text()="registry-wb"]
+    Wait Until Page Contains Element
+    ...    xpath=//span[contains(@class, "pf-v5-c-menu__item-text") and text()="registry-wb"]
+    Click Element
+    ...    xpath=//span[contains(@class, "pf-v5-c-menu__item-text") and text()="registry-wb"]
     
 Data Connection Should Be Listed
     [Documentation]    Checks a Data Connection is listed in DS Project details page

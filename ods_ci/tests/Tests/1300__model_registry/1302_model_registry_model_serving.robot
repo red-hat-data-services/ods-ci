@@ -1,7 +1,7 @@
 *** Settings ***
 Documentation     Test suite for Model Registry Integration
 Suite Setup       Prepare Model Registry Test Setup
-Suite Teardown    Teardown Model Registry Test Setup
+# Suite Teardown    Teardown Model Registry Test Setup
 Library           OperatingSystem
 Library           Process
 Library           OpenShiftLibrary
@@ -13,7 +13,7 @@ Resource          ../../Resources/Common.robot
 
 
 *** Variables ***
-${PRJ_TITLE}=                        model-registry-project-tony
+${PRJ_TITLE}=                        model-registry-project-e2e
 ${PRJ_DESCRIPTION}=                  model resgistry test project
 ${AWS_BUCKET}=                       ${S3.BUCKET_2.NAME}
 ${WORKBENCH_TITLE}=                  registry-wb

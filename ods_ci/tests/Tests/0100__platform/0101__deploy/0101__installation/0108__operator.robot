@@ -41,8 +41,7 @@ Verify That DSC And DSCI Release.Version Attribute matches the value in the subs
 
 Verify Odh-deployer Checks Cluster Platform Type
     [Documentation]    Verifies if odh-deployer checks the platform type of the cluster before installing
-    [Tags]    Sanity
-    ...       Tier1
+    [Tags]    Tier1
     ...       ODS-1316
     ...       AutomationBug
     ...       Operator
@@ -68,8 +67,7 @@ Verify Odh-deployer Checks Cluster Platform Type
 
 Verify That The Operator Pod Does Not Get Stuck After Upgrade
     [Documentation]    Verifies that the operator pod doesn't get stuck after an upgrade
-    [Tags]    Sanity
-    ...       Tier1
+    [Tags]    Tier1
     ...       ODS-818
     ...       Operator
     ${operator_pod_info}=    Fetch operator Pod Info
@@ -85,7 +83,6 @@ Verify Clean Up ODS Deployer Post-Migration
     [Documentation]    Verifies that resources unused are cleaned up after migration
     [Tags]    Tier1
     ...       ODS-1767
-    ...       Sanity
     ...       AutomationBug
     ...       Operator
     ${version_check} =    Is RHODS Version Greater Or Equal Than    1.17.0
@@ -144,6 +141,8 @@ Verify Clean Up ODS Deployer Post-Migration
 Operator Setup
     [Documentation]  Setup for the Operator tests
     RHOSi Setup
+    ${IS_SELF_MANAGED}=    Is RHODS Self-Managed
+    Set Suite Variable    ${IS_SELF_MANAGED}
     Gather Release Attributes From DSC And DSCI
     Set Expected Value For Release Name
 
@@ -153,7 +152,7 @@ Fetch Odh-deployer Pod Info
     ...        None
     ...    Returns:
     ...        odhdeployer_pod_info(dict): Dictionary containing the information of the odhdeployer pod
-    @{resources_info_list}=    Oc Get    kind=Pod    api_version=v1    label_selector=name=rhods-operator
+    @{resources_info_list}=    Oc Get    kind=Pod    api_version=v1    label_selector=${OPERATOR_LABEL_SELECTOR}
     &{odhdeployer_pod_info}=    Set Variable    ${resources_info_list}[0]
     RETURN    &{odhdeployer_pod_info}
 
@@ -176,7 +175,7 @@ Fetch Operator Pod Info
     ...        None
     ...    Returns:
     ...        operator_pod_info(dict): Dictionary containing the information of the operator pod
-    @{operator_pod_info}=    Oc Get    kind=Pod    api_version=v1    label_selector=name=rhods-operator
+    @{operator_pod_info}=    Oc Get    kind=Pod    api_version=v1    label_selector=${OPERATOR_LABEL_SELECTOR}
     RETURN    @{operator_pod_info}
 
 Verify Operator Pods Have CrashLoopBackOff Status After Upgrade

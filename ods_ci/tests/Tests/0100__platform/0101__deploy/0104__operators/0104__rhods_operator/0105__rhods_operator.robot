@@ -18,7 +18,7 @@ ${commercial_url}              https://www.redhat.com/en/technologies/cloud-comp
 Verify RHODS operator information
   [Documentation]  This TC verfiy if the text present in
   ...   RHODS opeartor Details section.ProductBug:RHODS-4993
-  [Tags]  ODS-498   ODS-624   Sanity   ProductBug    Tier1
+  [Tags]  ODS-498   ODS-624   Sanity   Operator   ProductBug
   Open Installed Operators Page
   #Select All Projects
   Wait Until Keyword Succeeds    10 times  5s    Click On Searched Operator      Red Hat OpenShift AI   #robocop: disable

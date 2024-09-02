@@ -54,7 +54,7 @@ Set Connection Between Data Connection And Workbench
     ...    xpath=//span[contains(@class, "pf-v5-c-menu__item-text") and text()="registry-wb"]
     Click Element
     ...    xpath=//span[contains(@class, "pf-v5-c-menu__item-text") and text()="registry-wb"]
-    
+
 Data Connection Should Be Listed
     [Documentation]    Checks a Data Connection is listed in DS Project details page
     [Arguments]     ${name}   ${type}   ${connected_workbench}

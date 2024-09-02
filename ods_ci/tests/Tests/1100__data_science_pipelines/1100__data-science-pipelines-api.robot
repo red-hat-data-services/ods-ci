@@ -22,7 +22,7 @@ ${URL_TEST_PIPELINE_RUN_YAML}=                 https://raw.githubusercontent.com
 *** Test Cases ***
 Verify Pipeline Server Creation With S3 Object Storage
     [Documentation]    Creates a pipeline server using S3 object storage and verifies that all components are running
-    [Tags]    Smoke    Tier1
+    [Tags]    Smoke
     Projects.Create Data Science Project From CLI    name=dsp-s3
     DataSciencePipelinesBackend.Create Pipeline Server    namespace=dsp-s3
     ...    object_storage_access_key=${S3.AWS_ACCESS_KEY_ID}
@@ -34,7 +34,7 @@ Verify Pipeline Server Creation With S3 Object Storage
 Verify Admin Users Can Create And Run a Data Science Pipeline Using The Api
     [Documentation]    Creates, runs pipelines with admin user. Double check the pipeline result and clean
     ...    the pipeline resources.
-    [Tags]      Sanity    Tier1    ODS-2083
+    [Tags]      Sanity    ODS-2083
     End To End Pipeline Workflow Via Api    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}    pipelinesapi1
 
 Verify Regular Users Can Create And Run a Data Science Pipeline Using The Api
@@ -57,7 +57,7 @@ Verify Ods Users Can Do Http Request That Must Be Redirected to Https
 
 Verify DSPO Operator Reconciliation Retry
     [Documentation]    Verify DSPO Operator is able to recover from missing components during the initialization
-    [Tags]      Sanity    Tier1    ODS-2477
+    [Tags]      Sanity    ODS-2477
 
     ${local_project_name} =    Set Variable    dsp-reconciliation-test
     Projects.Create Data Science Project From CLI    name=${local_project_name}

@@ -16,7 +16,7 @@ Library          Screenshot
 Library          String
 Library          DebugLibrary
 Library          JupyterLibrary
-Test Tags        DataSciencePipelines
+Test Tags        DataSciencePipelines-IDE
 Suite Setup      Elyra Pipelines Suite Setup
 Suite Teardown   Elyra Pipelines Suite Teardown
 
@@ -39,8 +39,7 @@ ${DC_NAME} =    elyra-s3
 Verify Pipelines Integration With Elyra When Using Standard Data Science Image
     [Documentation]    Verifies that a workbench using the Standard Data Science Image can be used to
     ...    create and run a Data Science Pipeline
-    [Tags]    Sanity    Tier1
-    ...       ODS-2197
+    [Tags]    Sanity    ODS-2197
     [Timeout]    10m
     Verify Pipelines Integration With Elyra Running Hello World Pipeline Test
     ...    img=Standard Data Science

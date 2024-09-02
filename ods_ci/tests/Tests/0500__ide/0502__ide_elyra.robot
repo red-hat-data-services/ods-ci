@@ -96,7 +96,7 @@ Verify Pipelines Integration With Elyra Running Hello World Pipeline Test     # 
     ...                 storage=Persistent  pv_existent=${FALSE}
     ...                 pv_name=${PV_NAME}_${img}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
     ...                 envs=${ENVS_LIST}
-    Start Workbench     workbench_title=elyra_${img}    timeout=600s
+    Start Workbench     workbench_title=elyra_${img}    timeout=300s
     Launch And Access Workbench    workbench_title=elyra_${img}
     Clone Git Repository And Open    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main
     ...    ods-ci-notebooks-main/notebooks/500__jupyterhub/pipelines/v2/elyra/run-pipelines-on-data-science-pipelines/hello-generic-world.pipeline  # robocop: disable

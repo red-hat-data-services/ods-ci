@@ -1,7 +1,7 @@
 *** Settings ***
 Documentation     Test suite for Model Registry Integration
 Suite Setup       Prepare Model Registry Test Setup
-# Suite Teardown    Teardown Model Registry Test Setup
+Suite Teardown    Teardown Model Registry Test Setup
 Library           OperatingSystem
 Library           Process
 Library           OpenShiftLibrary

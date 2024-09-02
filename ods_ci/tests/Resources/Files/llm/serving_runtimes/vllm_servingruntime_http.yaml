@@ -11,7 +11,7 @@ spec:
         - '--model=/mnt/models'
         - '--served-model-name={{.Name}}'
         - '--distributed-executor-backend=mp'
-      image: quay.io/modh/vllm@sha256:b51fde66f162f1a78e8c027320dddf214732d5345953b1599a84fe0f0168c619
+      image: quay.io/modh/vllm@sha256:a2593489ee20b8e5f01358a9aa984fc90618c6335f4c8e138e94ce635ffb112a
       name: kserve-container
       command:
         - python3

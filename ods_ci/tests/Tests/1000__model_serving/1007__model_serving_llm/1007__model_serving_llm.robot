@@ -575,10 +575,10 @@ Verify User Can Serve And Query A Model With Token
     Sleep    600s
     Query Model Multiple Times    model_name=${flan_model_name}
     ...    inference_type=all-tokens    n_times=1
-    ...    namespace=${test_namespace}   token=${inf_token}    protocol=http
+    ...    namespace=${test_namespace}   token=${inf_token}
     Query Model Multiple Times    model_name=${flan_model_name}
     ...    inference_type=streaming    n_times=1
-    ...    namespace=${test_namespace}   token=${inf_token}    protocol=http
+    ...    namespace=${test_namespace}   token=${inf_token}
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 

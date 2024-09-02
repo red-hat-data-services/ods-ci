@@ -630,7 +630,7 @@ Verify User Can Query A Model Using HTTP Calls
 Verify User Can Serve And Query A Model With Token
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                With Token using Kserve and Caikit+TGIS runtime
-    [Tags]    RHOAIENG-6306
+    [Tags]      
     ...       Tier1    AutomationBug
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${TEST_NS}-cli
     ${test_namespace}=    Set Variable     ${TEST_NS}-cli
@@ -653,7 +653,7 @@ Verify User Can Serve And Query A Model With Token
     ...    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
-    ...    inference_type=all-tokens    n_times=1    protocol=http
+    ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}   token=${inf_token}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
      ...    inference_type=tokenize    n_times=1    port_forwarding=${IS_KSERVE_RAW}

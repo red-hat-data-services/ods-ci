@@ -33,7 +33,6 @@ Verify User Can Create, Run and Delete A DS Pipeline From DS Project Details Pag
     ...    AutomationBug: RHOAIENG-10941
     [Tags]    Smoke
     ...       ODS-2206    ODS-2226    ODS-2633
-    ...       AutomationBug
 
     Open Data Science Project Details Page    ${PRJ_TITLE}
 
@@ -52,6 +51,7 @@ Verify User Can Create, Run and Delete A DS Pipeline From DS Project Details Pag
     # Pipeline Context Menu Should Be Working    pipeline_name=${PIPELINE_TEST_NAME}
     # Pipeline Yaml Should Be Readonly    pipeline_name=${PIPELINE_TEST_NAME}
 
+    Open Data Science Project Details Page    ${PRJ_TITLE}    tab_id=pipelines-projects
     Pipeline Should Be Listed    pipeline_name=${PIPELINE_TEST_NAME}
     ...    pipeline_description=${PIPELINE_TEST_DESC}
 

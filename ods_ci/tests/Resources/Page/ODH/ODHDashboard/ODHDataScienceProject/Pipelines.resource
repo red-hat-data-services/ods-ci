@@ -71,7 +71,8 @@ Import Pipeline
         Click Button    ${PIPELINES_IMPORT_BTN_FORM_XP}
     END
     Wait Until Generic Modal Disappears
-    Wait Until Project Is Open    project_title=${project_title}
+    Maybe Wait For Dashboard Loading Spinner Page     timeout=45s
+    Wait For Dashboard Page Title    ${name}    timeout=30s
 
 Create Pipeline Run
     [Documentation]    Create a pipeline run from DS Project details page.

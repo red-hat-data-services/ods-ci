@@ -139,7 +139,7 @@ Validate Dashboard Removed State
 Validate Datasciencepipelines Managed State
     [Documentation]    Validate that the DSC Datasciencepipelines component Managed state creates the expected resources,
     ...    check that Datasciencepipelines deployment is created and pod is in Ready state
-    [Tags]    Operator    Tier1    RHOAIENG-7298    datasciencepipelines-managed
+    [Tags]    Operator    Tier1    RHOAIENG-7298    operator-datasciencepipelines-managed
 
     Set DSC Component Managed State And Wait For Completion   datasciencepipelines    ${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}    ${DATASCIENCEPIPELINES_LABEL_SELECTOR}
 
@@ -147,7 +147,7 @@ Validate Datasciencepipelines Managed State
 
 Validate Datasciencepipelines Removed State
     [Documentation]    Validate that Datasciencepipelines management state Removed does remove relevant resources.
-    [Tags]    Operator    Tier1    RHOAIENG-7298    datasciencepipelines-removed
+    [Tags]    Operator    Tier1    RHOAIENG-7298    operator-datasciencepipelines-removed
 
     Set DSC Component Removed State And Wait For Completion   datasciencepipelines    ${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}    ${DATASCIENCEPIPELINES_LABEL_SELECTOR}
 

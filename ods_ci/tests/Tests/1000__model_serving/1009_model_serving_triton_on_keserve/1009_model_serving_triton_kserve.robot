@@ -50,11 +50,11 @@ Test PYTORCH Model Inference Via UI(Triton on Kserve)
     ...    data_connection=model-serving-connection    path=triton/model_repository/    model_framework=pytorch - 1
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${PYTORCH_MODEL_NAME}
     ...    namespace=${PRJ_TITLE}
-    ${EXPECTED_INFERENCE_REST_OUTPUT_PYTORCH}=     Load Json File     
+    ${EXPECTED_INFERENCE_REST_OUTPUT_PYTORCH}=     Load Json File
     ...    file_path=${EXPECTED_INFERENCE_REST_OUTPUT_FILE_PYTORCH}    as_string=${TRUE}
     Log    ${EXPECTED_INFERENCE_REST_OUTPUT_PYTORCH}    
     Run Keyword And Continue On Failure    Verify Model Inference With Retries
-    ...    ${PYTORCH_MODEL_NAME}    ${INFERENCE_REST_INPUT_PYTORCH}    ${EXPECTED_INFERENCE_REST_OUTPUT_PYTORCH}    
+    ...    ${PYTORCH_MODEL_NAME}    ${INFERENCE_REST_INPUT_PYTORCH}    ${EXPECTED_INFERENCE_REST_OUTPUT_PYTORCH}
     ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}
     [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${PYTORCH_MODEL_NAME}
     ...  project_title=${PRJ_TITLE}

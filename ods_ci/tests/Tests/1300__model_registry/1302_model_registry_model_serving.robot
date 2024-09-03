@@ -255,7 +255,7 @@ Run Update Notebook Script
 Remove Model Registry
     [Documentation]    Run multiple oc delete commands to remove model registry components
     Run And Verify Command    oc delete smm default -n ${NAMESPACE_MODEL-REGISTRY}
-    Run And Verify Command    oc delete -k ${MODELREGISTRY_BASE_FOLDER}/samples/secure-db/mysql-tls
+    Run And Verify Command    oc delete -k ${MODELREGISTRY_BASE_FOLDER}/samples/secure-db/mysql-tls -n ${NAMESPACE_MODEL-REGISTRY}
     Run And Verify Command    oc delete secret modelregistry-sample-grpc-credential -n ${NAMESPACE_ISTIO}
     Run And Verify Command    oc delete secret modelregistry-sample-rest-credential -n ${NAMESPACE_ISTIO}
     Run And Verify Command    oc delete namespace ${NAMESPACE_MODEL-REGISTRY} --force

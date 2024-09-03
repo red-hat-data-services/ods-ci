@@ -361,7 +361,11 @@ Query Model Multiple Times
     ...    inference_type=${inference_type}    model_name=${model_name}    body_params=${body_params}
     ...    query_text=${EXP_RESPONSES}[queries][${query_idx}][query_text]
     IF    "${token}" != "${None}"
-        Set To Dictionary    ${header}    Authorization    Bearer ${token}
+        IF    "${protocol}" == "grpc"
+            ${header}=   Set Variable   "Authorization: Bearer ${token}" -H ${header}
+            ELSE
+                Set To Dictionary    ${header}    Authorization    Bearer ${token}
+        END
     END
     ${runtime_details}=    Set Variable    ${RUNTIME_FORMATS}[${runtime}][endpoints][${inference_type}][${protocol}]
     ${endpoint}=    Set Variable    ${runtime_details}[endpoint]

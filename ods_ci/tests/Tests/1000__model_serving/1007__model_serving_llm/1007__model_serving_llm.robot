@@ -571,16 +571,14 @@ Verify User Can Serve And Query A Model With Token
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
     Create Role Binding For Authorino   name=${DEFAULT_BUCKET_PREFIX}   namespace=${test_namespace}
-    # TODO: The token created from this keyword does not work to query the model, it will result in a 401 Unauthorized
-    # error being sent back. Investigate and figure out why, fix the logic.
     ${inf_token}=    Create Inference Access Token   ${test_namespace}   ${DEFAULT_BUCKET_SA_NAME}
     Sleep    600s
     Query Model Multiple Times    model_name=${flan_model_name}
     ...    inference_type=all-tokens    n_times=1
-    ...    namespace=${test_namespace}   token=${inf_token}    protocol=http
+    ...    namespace=${test_namespace}   token=${inf_token}
     Query Model Multiple Times    model_name=${flan_model_name}
     ...    inference_type=streaming    n_times=1
-    ...    namespace=${test_namespace}   token=${inf_token}    protocol=http
+    ...    namespace=${test_namespace}   token=${inf_token}
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 

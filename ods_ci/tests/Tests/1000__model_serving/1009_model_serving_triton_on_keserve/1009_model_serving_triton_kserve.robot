@@ -31,7 +31,7 @@ ${EXPECTED_INFERENCE_REST_OUTPUT_FILE_PYTORCH}=        tests/Resources/Files/tri
 
 Test PYTORCH Model Inference Via UI (Triton on Kserve)
     [Documentation]    Test the deployment of an pytorch model in Kserve using Triton
-    [Tags]    Sanity           RunThisTest
+    [Tags]    Sanity           RHOAIENG-11561
 
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
@@ -71,7 +71,7 @@ Triton On Kserve Suite Setup
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
 
     Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
-    # Clean All Models Of Current User
+    Clean All Models Of Current User
 
 
 

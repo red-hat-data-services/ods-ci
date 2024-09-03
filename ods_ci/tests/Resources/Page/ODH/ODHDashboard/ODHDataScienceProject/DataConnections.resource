@@ -47,13 +47,10 @@ Edit S3 Data Connection
 Set Connection Between Data Connection And Workbench
     [Documentation]    Connects a DataConnection to an existent workbench
     [Arguments]    ${workbench_title}
-    Log    ${workbench_title}
-    Wait Until Element Is Enabled    xpath=//span[contains(@class, "pf-v5-c-text-input-group__text")]
-    Click Element    xpath=//span[contains(@class, "pf-v5-c-text-input-group__text")]
-    Wait Until Page Contains Element
-    ...    xpath=//span[contains(@class, "pf-v5-c-menu__item-text") and text()="registry-wb"]
-    Click Element
-    ...    xpath=//span[contains(@class, "pf-v5-c-menu__item-text") and text()="registry-wb"]
+    Wait Until Element Is Enabled    xpath=//button[@aria-label="Notebook select"]
+    Click Element    xpath=//button[@aria-label="Notebook select"]
+    Wait Until Page Contains Element    xpath=//ul/li/button//*[text()="${workbench_title}"]
+    Click Element                       xpath=//ul/li/button//*[text()="${workbench_title}"]
 
 Data Connection Should Be Listed
     [Documentation]    Checks a Data Connection is listed in DS Project details page
@@ -106,7 +103,7 @@ Fill Data Connection Form
         Log    msg=you are not connecting any workbenchs to ${dc_name} DataConnection
     ELSE
         Run Keyword And Continue On Failure
-        ...    Element Should Be Enabled    xpath=//span[contains(@class, "pf-v5-c-text-input-group__text")]
+        ...    Element Should Be Enabled    xpath=//input[@aria-label="Type to filter"]
         FOR    ${workbench_title}    IN    @{connected_workbench}
             Set Connection Between Data Connection And Workbench    ${workbench_title}
             Run Keyword And Continue On Failure     Element Should Be Enabled    ${S3_DC_ADD_BTN}

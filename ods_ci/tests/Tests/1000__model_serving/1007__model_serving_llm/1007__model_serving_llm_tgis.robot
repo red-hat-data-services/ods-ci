@@ -648,27 +648,25 @@ Verify User Can Serve And Query A Model With Token
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
     Create Role Binding For Authorino   name=${DEFAULT_BUCKET_PREFIX}   namespace=tgis-standalone-cli
-    # TODO: The token created from this keyword does not work to query the model, it will result in a 401 Unauthorized
-    # error being sent back. Investigate and figure out why, fix the logic.
     ${inf_token}=     Create Inference Access Token   ${test_namespace}    ${DEFAULT_BUCKET_SA_NAME}
     ${pod_name}=  Get Pod Name    namespace=${test_namespace}    
     ...    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
-    ...    inference_type=all-tokens    n_times=1    protocol=http
+    ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}   token=${inf_token}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
      ...    inference_type=tokenize    n_times=1    port_forwarding=${IS_KSERVE_RAW}
      ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
-     ...    token=${inf_token}    protocol=http
+     ...    token=${inf_token}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=model-info    n_times=1    port_forwarding=${IS_KSERVE_RAW}
     ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
-    ...    token=${inf_token}    protocol=http
+    ...    token=${inf_token}
    Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=streaming    n_times=1    port_forwarding=${IS_KSERVE_RAW}
     ...    namespace=${test_namespace}    validate_response=${FALSE}
-    ...    token=${inf_token}    protocol=http
+    ...    token=${inf_token}
     [Teardown]    Run Keywords
     ...    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}

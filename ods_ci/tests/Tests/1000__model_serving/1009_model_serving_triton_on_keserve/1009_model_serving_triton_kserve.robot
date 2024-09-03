@@ -25,7 +25,7 @@ ${PYTORCH_MODEL_NAME}=    resnet50
 ${PYTORCH_RUNTIME_NAME}=    kserve-triton-pytorch-rest
 ${RESOURCES_DIRPATH}=        tests/Resources/Files/triton
 ${PYTORCH_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_pytorch_rest_servingruntime.yaml
-${EXPECTED_INFERENCE_REST_OUTPUT_FILE_PYTORCH}=        tests/Resources/Files/triton/kserve-tritonrest-resnet-output.json
+${EXPECTED_INFERENCE_REST_OUTPUT_FILE_PYTORCH}=        tests/Resources/Files/triton/kserve-triton-resnet-rest-output.json
 
 *** Test Cases ***
 

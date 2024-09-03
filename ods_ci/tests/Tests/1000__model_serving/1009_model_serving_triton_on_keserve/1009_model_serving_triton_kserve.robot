@@ -73,7 +73,7 @@ Triton On Kserve Suite Setup
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
 
     Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
-    Clean All Models Of Current User
+    # Clean All Models Of Current User
 
 
 

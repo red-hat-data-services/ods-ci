@@ -27,7 +27,7 @@ Verify RHODS Operator OOM Kill Behaviour
     [Documentation]    Create multiple namespace and verify
     ...    if the rhods operator pod is running without any
     ...    issue and perfrom some basic validation with RHODS
-    [Tags]    ODS-1091    Tier3
+    [Tags]    ODS-1091    Tier3    Operator     AutomationBug
     ${dfeault_np_count}    Run    oc get namespace | wc -l
     Create Namespace In Openshift
     Verify Operator Pod Status    ${NAMESPACE}    name=rhods-operator

@@ -6,6 +6,7 @@ Resource            Page/ODH/Monitoring/Monitoring.resource
 Resource            Page/OCPDashboard/InstalledOperators/InstalledOperators.robot
 Resource            Page/OCPLogin/OCPLogin.resource
 Resource            Common.robot
+Resource            OCP.resource
 
 
 *** Variables ***
@@ -137,6 +138,7 @@ Set Expected Value For Release Name
     ...                ODH: Open Data Hub
     ...                RHOAI managed: OpenShift AI Cloud Service
     ...                RHOAI selfmanaged: OpenShift AI Self-Managed
+
     IF    "${PRODUCT}" == "RHODS"
         IF     ${IS_SELF_MANAGED}
              ${expected_release_name}=    Set Variable     ${RHOAI_SELFMANAGED_RELEASE_NAME}

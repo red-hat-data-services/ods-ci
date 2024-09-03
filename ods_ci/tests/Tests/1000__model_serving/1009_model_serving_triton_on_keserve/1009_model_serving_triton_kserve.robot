@@ -50,6 +50,7 @@ Test PYTORCH Model Inference Via UI (Triton on Kserve)
     ...    namespace=${PRJ_TITLE}
     ${EXPECTED_INFERENCE_REST_OUTPUT_PYTORCH}=     Load Json File     file_path=${EXPECTED_INFERENCE_REST_OUTPUT_FILE_PYTORCH}
     ...    as_string=${TRUE}
+    Log    ${EXPECTED_INFERENCE_REST_OUTPUT_PYTORCH}    
     Run Keyword And Continue On Failure    Verify Model Inference With Retries
     ...    ${PYTORCH_MODEL_NAME}    ${INFERENCE_REST_INPUT_PYTORCH}    ${EXPECTED_INFERENCE_REST_OUTPUT_PYTORCH}    token_auth=${FALSE}
     ...    project_title=${PRJ_TITLE}

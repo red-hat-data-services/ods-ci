@@ -16,6 +16,7 @@ Suite Setup       Triton On Kserve Suite Setup
 Suite Teardown    Triton On Kserve Suite Teardown
 Test Tags         Kserve
 
+
 *** Variables ***
 ${INFERENCE_REST_INPUT_PYTORCH}=    @tests/Resources/Files/triton/kserve-triton-resnet-rest-input.json
 ${PRJ_TITLE}=    ms-triton-project
@@ -25,11 +26,12 @@ ${PYTORCH_MODEL_NAME}=    resnet50
 ${PYTORCH_RUNTIME_NAME}=    kserve-triton-pytorch-rest
 ${RESOURCES_DIRPATH}=        tests/Resources/Files/triton
 ${PYTORCH_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_pytorch_rest_servingruntime.yaml
-${EXPECTED_INFERENCE_REST_OUTPUT_FILE_PYTORCH}=        tests/Resources/Files/triton/kserve-triton-resnet-rest-output.json
+${EXPECTED_INFERENCE_REST_OUTPUT_FILE_PYTORCH}=       tests/Resources/Files/triton/kserve-triton-resnet-rest-output.json
+
 
 *** Test Cases ***
 
-Test PYTORCH Model Inference Via UI (Triton on Kserve)
+Test PYTORCH Model Inference Via UI(Triton on Kserve)
     [Documentation]    Test the deployment of an pytorch model in Kserve using Triton
     [Tags]    Sanity           RHOAIENG-11561
 
@@ -48,12 +50,12 @@ Test PYTORCH Model Inference Via UI (Triton on Kserve)
     ...    data_connection=model-serving-connection    path=triton/model_repository/    model_framework=pytorch - 1
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${PYTORCH_MODEL_NAME}
     ...    namespace=${PRJ_TITLE}
-    ${EXPECTED_INFERENCE_REST_OUTPUT_PYTORCH}=     Load Json File     file_path=${EXPECTED_INFERENCE_REST_OUTPUT_FILE_PYTORCH}
-    ...    as_string=${TRUE}
+    ${EXPECTED_INFERENCE_REST_OUTPUT_PYTORCH}=     Load Json File     
+    ...    file_path=${EXPECTED_INFERENCE_REST_OUTPUT_FILE_PYTORCH}    as_string=${TRUE}
     Log    ${EXPECTED_INFERENCE_REST_OUTPUT_PYTORCH}    
     Run Keyword And Continue On Failure    Verify Model Inference With Retries
-    ...    ${PYTORCH_MODEL_NAME}    ${INFERENCE_REST_INPUT_PYTORCH}    ${EXPECTED_INFERENCE_REST_OUTPUT_PYTORCH}    token_auth=${FALSE}
-    ...    project_title=${PRJ_TITLE}
+    ...    ${PYTORCH_MODEL_NAME}    ${INFERENCE_REST_INPUT_PYTORCH}    ${EXPECTED_INFERENCE_REST_OUTPUT_PYTORCH}    
+    ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}
     [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${PYTORCH_MODEL_NAME}
     ...  project_title=${PRJ_TITLE}
     ...  AND

@@ -263,12 +263,13 @@ Get Model Inference
     ...    model endpoint. If token authentication is needed for the model, ${token_auth} should be
     ...    set to ${TRUE}.
     [Arguments]    ${model_name}    ${inference_input}    ${token_auth}=${FALSE}   ${project_title}=${NONE}
-    ...    ${kserve_mode}=Serverless   ${deployment_mode}='UI'   ${service_port}=8888   ${end_point}=${NONE}
+    ...    ${kserve_mode}=Serverless   ${deployment_mode}=UI   ${service_port}=8888   ${end_point}=${NONE}
     ${curl_cmd}=     Set Variable    ${NONE}
     ${self_managed}=    Is RHODS Self-Managed
-    IF  ${deployment_mode} == 'UI'
+    IF  $deployment_mode == 'UI'
         ${url}=    Get Model Route Via UI    ${model_name}
-        ${kserve}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain    Single-model serving enabled
+        ${kserve}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain
+        ...    Single-model serving enabled
         ${curl_cmd}=     Set Variable    curl -s ${url} -d ${inference_input}
         IF    ${token_auth}
             IF    "${project_title}" == "${NONE}"
@@ -289,18 +290,18 @@ Get Model Inference
         ${rc}   ${cmd_op}   Run And Return Rc And Output
         ...    oc get isvc ${model_name} -o jsonpath='{.metadata.annotations.serving\.kserve\.io/deploymentMode}' -n ${project_title}
         Should Be Equal As Integers    ${rc}    0
-         IF  "${cmd_op}" != "ModelMesh"
+        IF  "${cmd_op}" != "ModelMesh"
             Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
             ${cert}=    Set Variable    --cacert openshift_ca_istio_knative.crt
-         ELSE IF  ${self_managed}
+        ELSE IF  ${self_managed}
             Fetch Openshift CA Bundle
             ${cert}=   Set Variable   --cacert openshift_ca.crt
         END
         IF    '${kserve_mode}' == 'Serverless'
-               ${rc}    ${url}=    Run And Return Rc And Output    oc get ksvc ${model_name}-predictor -n ${project_title} -o jsonpath='{.status.url}'
-               Should Be Equal As Integers    ${rc}    0
-               ${curl_cmd}=    Set Variable    curl -s ${url}${end_point} -d ${inference_input}
-
+            ${rc}    ${url}=    Run And Return Rc And Output
+            ...    oc get ksvc ${model_name}-predictor -n ${project_title} -o jsonpath='{.status.url}'
+            Should Be Equal As Integers    ${rc}    0
+            ${curl_cmd}=    Set Variable    curl -s ${url}${end_point} -d ${inference_input}
         ELSE IF    '${kserve_mode}' == 'RawDeployment'
             ${url}=   Set Variable    http://localhost:${service_port}${end_point}
             ${curl_cmd}=    Set Variable    curl -s ${url} -d ${inference_input} --cacert openshift_ca_istio_knative.crt
@@ -308,8 +309,8 @@ Get Model Inference
             Log    "Modelmesh CLI mode only"
         END
         IF    ${token_auth}
-              ${token}=    Create Inference Access Token    ${project_title}    ${DEFAULT_BUCKET_SA_NAME}
-              ${curl_cmd}=    Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
+            ${token}=    Create Inference Access Token    ${project_title}    ${DEFAULT_BUCKET_SA_NAME}
+            ${curl_cmd}=    Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
         END
     END
 

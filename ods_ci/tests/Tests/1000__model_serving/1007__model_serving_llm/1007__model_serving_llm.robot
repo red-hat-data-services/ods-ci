@@ -1,4 +1,4 @@
-# robocop: off=variable-overwritten-before-usage,unused-variable
+# robocop: off=variable-overwritten-before-usage,unused-variable,file-too-long
 *** Settings ***
 Documentation     Collection of CLI tests to validate the model serving stack for Large Language Models (LLM).
 ...               These tests leverage on Caikit+TGIS combined Serving Runtime
@@ -790,4 +790,4 @@ Run Install Script
     ELSE
         ${rc}=    Run And Watch Command    DEPLOY_ODH_OPERATOR=false TARGET_OPERATOR=${SCRIPT_TARGET_OPERATOR} CHECK_UWM=false ./scripts/install/kserve-install.sh    cwd=caikit-tgis-serving/demo/kserve    # robocop: off=line-too-long
     END
-    Should Be Equal As Integers    ${rc}    ${0}    # robocop: off=file-too-long
+    Should Be Equal As Integers    ${rc}    ${0}

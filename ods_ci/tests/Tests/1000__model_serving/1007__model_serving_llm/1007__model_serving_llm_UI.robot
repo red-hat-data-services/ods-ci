@@ -1,3 +1,4 @@
+# robocop: off=unused-variable,file-too-long
 *** Settings ***
 Documentation     Collection of UI tests to validate the model serving stack for Large Language Models (LLM).
 ...               These tests leverage on Caikit+TGIS combined Serving Runtime
@@ -482,4 +483,4 @@ Setup Kserve UI Test
         Set Suite Variable    ${IS_KSERVE_RAW}    ${TRUE}
     ELSE
         Set Suite Variable    ${IS_KSERVE_RAW}    ${FALSE}
-    END    # robocop: off=file-too-long
+    END

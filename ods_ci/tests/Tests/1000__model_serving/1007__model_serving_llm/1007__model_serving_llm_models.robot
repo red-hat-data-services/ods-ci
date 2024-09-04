@@ -1,4 +1,4 @@
-# robocop: off=non-local-variables-should-be-uppercase,unnecessary-string-conversion
+# robocop: off=non-local-variables-should-be-uppercase,unnecessary-string-conversion,mixed-tabs-and-spaces,file-too-long
 *** Settings ***    # robocop: off=mixed-tabs-and-spaces
 Documentation     Collection of CLI tests to validate the model serving stack for different Large Language Models (LLM).
 ...               These tests leverage on TGIS Standalone Serving Runtime
@@ -1339,4 +1339,4 @@ Setup Test Variables    # robocop: off=too-many-calls-in-keyword
     Set Test Variable    ${access_key}    ${S3.AWS_SECRET_ACCESS_KEY}
     Set Test Variable    ${endpoint}    ${MODELS_BUCKET.ENDPOINT}
     Set Test Variable    ${region}    ${MODELS_BUCKET.REGION}
-    Set Log Level    INFO    # robocop: off=file-too-long
+    Set Log Level    INFO

@@ -1,9 +1,10 @@
+# robocop: off=unused-variable,file-too-long
 *** Settings ***
 Documentation     Collection of CLI tests to validate the model serving stack for Large Language Models (LLM).
 ...               These tests leverage on TGIS Standalone Serving Runtime
 Resource          ../../../Resources/OCP.resource
 Resource          ../../../Resources/CLI/ModelServing/llm.resource
-Library            OpenShiftLibrary
+Library           OpenShiftLibrary
 Suite Setup       Suite Setup
 Suite Teardown    RHOSi Teardown
 Test Tags         KServe
@@ -741,4 +742,4 @@ Wait For New Replica Set To Be Ready
     END
     Wait Until Keyword Succeeds    5 times    5s    Wait For Model KServe Deployment To Be Ready
     ...    label_selector=serving.kserve.io/inferenceservice=${model_name}    namespace=${namespace}
-    ...    runtime=${TGIS_RUNTIME_NAME}    exp_replicas=${new_exp_replicas}    # robocop: off=file-too-long
+    ...    runtime=${TGIS_RUNTIME_NAME}    exp_replicas=${new_exp_replicas}

@@ -1,3 +1,4 @@
+# robocop: off=unused-variable
 *** Settings ***
 Documentation    Test suite to validate caikit-nlp-client library usage with Kserve models.
 ...              These tests leverage on Caikit+TGIS combined Serving Runtime

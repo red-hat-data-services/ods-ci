@@ -15,7 +15,7 @@ ${ADMIN_GROUPS_SECTION}=    //div[@data-testid="data-science-administrator-group
 ${ADMIN_GROUPS_LIST}=    ${ADMIN_GROUPS_SECTION}//div[@role="group" and @aria-label="Current selections"]
 ${USER_GROUPS_SECTION}=    //div[@data-testid="data-science-user-groups"]
 ${USER_GROUPS_LIST}=    ${USER_GROUPS_SECTION}//div[@role="group" and @aria-label="Current selections"]
-${SAVE_BUTTON}=    //button[@data-testid="save-button"]
+${SAVE_BUTTON}=    //button[@data-testid="save-new-button"]
 
 *** Keywords ***
 Add OpenShift Groups To Data Science Administrators

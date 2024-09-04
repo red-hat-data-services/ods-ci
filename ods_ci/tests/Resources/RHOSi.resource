@@ -6,6 +6,7 @@ Resource            Page/ODH/Monitoring/Monitoring.resource
 Resource            Page/OCPDashboard/InstalledOperators/InstalledOperators.robot
 Resource            Page/OCPLogin/OCPLogin.resource
 Resource            Common.robot
+Resource            OCP.resource
 
 
 *** Variables ***
@@ -115,3 +116,37 @@ Assign Vars According To Product
         Set Suite Variable    ${DASHBOARD_LABEL_SELECTOR}     app.kubernetes.io/part-of=dashboard
         Set Suite Variable    ${APPLICATIONS_NAMESPACE}    opendatahub
     END
+
+Gather Release Attributes From DSC And DSCI
+    [Documentation]    Gathers the release.name and release.value attributes from the dsc and dsci
+    ${DSC_RELEASE_NAME}=     Get Resource Attribute      ${OPERATOR_NAMESPACE}
+    ...                      DataScienceCluster       ${DSC_NAME}        ${RELEASE_NAME_ATTRIBUTE_PATH}
+    ${DSCI_RELEASE_NAME}=     Get Resource Attribute      ${OPERATOR_NAMESPACE}
+    ...                      DSCInitialization      ${DSCI_NAME}        ${RELEASE_NAME_ATTRIBUTE_PATH}
+    ${DSC_RELEASE_VERSION}=     Get Resource Attribute      ${OPERATOR_NAMESPACE}
+    ...                         DataScienceCluster       ${DSC_NAME}        ${RELEASE_VERSION_ATTRIBUTE_PATH}
+    ${DSCI_RELEASE_VERSION}=    Get Resource Attribute      ${OPERATOR_NAMESPACE}
+    ...                         DSCInitialization      ${DSCI_NAME}        ${RELEASE_VERSION_ATTRIBUTE_PATH}
+
+    Set Suite Variable    ${DSC_RELEASE_NAME}
+    Set Suite Variable    ${DSCI_RELEASE_NAME}
+    Set Suite Variable    ${DSC_RELEASE_VERSION}
+    Set Suite Variable    ${DSCI_RELEASE_VERSION}
+
+Set Expected Value For Release Name
+    [Documentation]    Sets the expected value for release.name attribute from the DSC and DSCI.
+    ...                ODH: Open Data Hub
+    ...                RHOAI managed: OpenShift AI Cloud Service
+    ...                RHOAI selfmanaged: OpenShift AI Self-Managed
+
+    IF    "${PRODUCT}" == "RHODS"
+        IF     ${IS_SELF_MANAGED}
+             ${expected_release_name}=    Set Variable     ${RHOAI_SELFMANAGED_RELEASE_NAME}
+        ELSE
+             ${expected_release_name}=    Set Variable     ${RHOAI_MANAGED_RELEASE_NAME}
+        END
+    ELSE IF    "${PRODUCT}" == "ODH"
+        ${expected_release_name}=    Set Variable     ${ODH_RELEASE_NAME}
+    END
+
+    Set Suite Variable    ${expected_release_name}

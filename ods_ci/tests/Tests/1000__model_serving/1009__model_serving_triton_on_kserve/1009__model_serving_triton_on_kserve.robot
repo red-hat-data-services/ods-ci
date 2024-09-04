@@ -30,7 +30,6 @@ ${EXPECTED_INFERENCE_REST_OUTPUT_FILE}=      tests/Resources/Files/triton/kserve
 ${INFERENCE_REST_INPUT_PYTORCH}=    @tests/Resources/Files/triton/kserve-triton-resnet-rest-input.json
 ${PYTORCH_MODEL_NAME}=    resnet50
 ${PYTORCH_RUNTIME_NAME}=    kserve-triton-pytorch-rest
-${RESOURCES_DIRPATH}=        tests/Resources/Files/triton
 ${PYTORCH_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_pytorch_rest_servingruntime.yaml
 ${EXPECTED_INFERENCE_REST_OUTPUT_FILE_PYTORCH}=       tests/Resources/Files/triton/kserve-triton-resnet-rest-output.json
 
@@ -87,7 +86,7 @@ Test PYTORCH Model Inference Via UI(Triton on Kserve)
     ...    namespace=${PRJ_TITLE}
     ${EXPECTED_INFERENCE_REST_OUTPUT_PYTORCH}=     Load Json File
     ...    file_path=${EXPECTED_INFERENCE_REST_OUTPUT_FILE_PYTORCH}    as_string=${TRUE}
-    Log    ${EXPECTED_INFERENCE_REST_OUTPUT_PYTORCH}    
+    Log    ${EXPECTED_INFERENCE_REST_OUTPUT_PYTORCH}
     Run Keyword And Continue On Failure    Verify Model Inference With Retries
     ...    ${PYTORCH_MODEL_NAME}    ${INFERENCE_REST_INPUT_PYTORCH}    ${EXPECTED_INFERENCE_REST_OUTPUT_PYTORCH}
     ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}
@@ -95,6 +94,7 @@ Test PYTORCH Model Inference Via UI(Triton on Kserve)
     ...  project_title=${PRJ_TITLE}
     ...  AND
     ...  Clean All Models Of Current User
+    ...  Delete Serving Runtime Template    displayed_name=kserve-triton-pytorch-rest   
 
 
 *** Keywords ***

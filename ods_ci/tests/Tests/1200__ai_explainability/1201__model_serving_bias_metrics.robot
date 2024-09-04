@@ -50,10 +50,9 @@ Verify DIR Bias Metrics Available In CLI For Models Deployed Prior To Enabling T
     Wait Until Keyword Succeeds  5 min  10 sec  Verify Model Is Registered With TrustyAI Service     namespace=${PRJ_TITLE}
     Send Batch Inference Data to Model     model_name=${MODEL_ALPHA}     project_name=${PRJ_TITLE}
     ${token}=    Generate Thanos Token
-    ${modelId}=   Get ModelId For A Deployed Model    modelId=${MODEL_ALPHA}     token=${token}
-    ${modelId}    Replace String    ${modelId}    "    ${EMPTY}
-    Schedule Bias Metrics request via CLI     metricsType=dir   modelId=${modelId}  token=${token}  protectedAttribute="customer_data_input-3"
-    ...       favorableOutcome=0   outcomeName="predict"    privilegedAttribute=1.0    unprivilegedAttribute=0.0
+    Schedule Bias Metrics request via CLI     metricsType=dir   modelId=${MODEL_ALPHA}  token=${token}
+    ...     protectedAttribute="customer_data_input-3"     favorableOutcome=0   outcomeName="predict"
+    ...     privilegedAttribute=1.0    unprivilegedAttribute=0.0     trusty_route=${TRUSTY_ROUTE}
     Sleep    60s    msg=Wait for Trusty Metrics to be calculated and prometheus scraping to be done
     Verify TrustyAI Metrics Exists In Observe Metrics    trustyai_dir    retry_attempts=2   username=${OCP_ADMIN_USER.USERNAME}
     ...    password=${OCP_ADMIN_USER.PASSWORD}    auth_type=${OCP_ADMIN_USER.AUTH_TYPE}
@@ -80,10 +79,9 @@ Verify SPD Metrics Available In CLI For Models Deployed After Enabling Trusty Se
     Wait Until Keyword Succeeds  5 min  10 sec  Verify Model Is Registered With TrustyAI Service     namespace=${PRJ_TITLE1}
     Send Batch Inference Data to Model     lower_range=6   upper_range=11    model_name=${MODEL_BETA}     project_name=${PRJ_TITLE1}
     ${token}=    Generate Thanos Token
-    ${modelId}=   Get ModelId For A Deployed Model    modelId=${MODEL_BETA}    ${token}
-    ${modelId}    Replace String    ${modelId}    "    ${EMPTY}
-    Schedule Bias Metrics request via CLI     metricsType=spd   modelId=${modelId}   token=${token}  protectedAttribute="customer_data_input-3"
-    ...       favorableOutcome=0   outcomeName="predict"    privilegedAttribute=1.0    unprivilegedAttribute=0.0
+    Schedule Bias Metrics request via CLI     metricsType=spd   modelId=${MODEL_BETA}   token=${token}
+    ...     protectedAttribute="customer_data_input-3"     favorableOutcome=0   outcomeName="predict"
+    ...       privilegedAttribute=1.0    unprivilegedAttribute=0.0    trusty_route=${TRUSTY_ROUTE}
     Verify TrustyAI Metrics Exists In Observe Metrics    trustyai_spd    retry_attempts=2    username=${TEST_USER.USERNAME}
     ...    password=${TEST_USER.PASSWORD}   auth_type=${TEST_USER.AUTH_TYPE}
 
@@ -125,20 +123,11 @@ Send Batch Inference Data to Model
         Should Contain    ${inference_output}    model_name
     END
 
-Get ModelId For A Deployed Model
-    [Documentation]   Curl command to get modelid of the model. The sufffix gets changed by modelmesh
-    ...               https://github.com/trustyai-explainability/trustyai-explainability/issues/395
-    [Arguments]       ${model_name}    ${token}
-    ${curl_cmd}=     Set Variable    curl -H "Authorization: Bearer ${token}" -sk --location ${TRUSTY_ROUTE}/info | jq '.[0].data.modelId'
-    ${rc}  ${output}=     Run And Return Rc And Output    ${curl_cmd}
-    ${model_id}=    Set Variable If    '${output}'=='${EMPTY}'    ${model_name}    ${output}
-    RETURN    ${model_id}
-
 Schedule Bias Metrics request via CLI
     [Documentation]    Schedule a SPD or DIR metrics via CLI
     [Arguments]        ${metricsType}   ${modelId}    ${protectedAttribute}   ${favorableOutcome}    ${outcomeName}
-    ...                ${privilegedAttribute}    ${unprivilegedAttribute}    ${token}
-    ${curl_cmd}=     Set Variable    curl -k -H "Authorization: Bearer ${token}" ${TRUSTY_ROUTE}/metrics/${metricsType}/request --header
+    ...                ${privilegedAttribute}    ${unprivilegedAttribute}    ${token}    ${trusty_route}
+    ${curl_cmd}=     Set Variable    curl -k -H "Authorization: Bearer ${token}" ${trusty_route}/metrics/${metricsType}/request --header
     ${curl_cmd}=     Catenate    ${curl_cmd}    'Content-Type: application/json'
     ${curl_cmd}=     Catenate    ${curl_cmd}    --data '{"modelId":"${modelId}","protectedAttribute": ${protectedAttribute},"favorableOutcome":  ${favorableOutcome},"outcomeName": ${outcomeName},"privilegedAttribute": ${privilegedAttribute},"unprivilegedAttribute": ${unprivilegedAttribute}}'
     ${rc}  ${output}=     Run And Return Rc And Output    ${curl_cmd}
@@ -154,4 +143,3 @@ Verify TrustyAI Metrics Exists In Observe Metrics
     IF    ${metrics_query_results_contain_data}
         Log To Console    Current Fairness Value: ${metrics_value}
     END
-

@@ -45,7 +45,7 @@ Verify Lime And SHAP Explainers Are Availble For A Model Deployed Via CLI
 
 Verify Lime And SHAP Explainers Are Availble For A Model Deployed Via UI
     [Documentation]    Verifies that the lime and shap Explainers are available on sending a request
-    [Tags]    OpenDataHub     Sanity    RHOAIENG-9628     ExcludeOnRHOAI       test2
+    [Tags]    OpenDataHub     Sanity    RHOAIENG-9628     ExcludeOnRHOAI
     Launch Data Science Project Main Page
     Create Data Science Project    title=${PRJ_TITLE1}    description=${PRJ_DESCRIPTION1}
     Create S3 Data Connection    project_title=${PRJ_TITLE1}    dc_name=model-serving-connection

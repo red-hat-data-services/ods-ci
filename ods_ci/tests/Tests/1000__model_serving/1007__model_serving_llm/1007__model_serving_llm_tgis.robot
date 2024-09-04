@@ -723,4 +723,4 @@ Wait For New Replica Set To Be Ready
     END
     Wait Until Keyword Succeeds    5 times    5s
     ...    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}    exp_replicas=${new_exp_replicas}
+    ...    namespace=${namespace}    runtime=${TGIS_RUNTIME_NAME}    exp_replicas=${new_exp_replicas}

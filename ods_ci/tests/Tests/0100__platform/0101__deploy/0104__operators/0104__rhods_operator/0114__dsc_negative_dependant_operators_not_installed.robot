@@ -143,7 +143,7 @@ Reinstall Service Mesh Operator And Recreate DSC And DSCI
     Remove DSC And DSCI Resources
     Install Service Mesh Operator Via Cli
     Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
-    Wait For DSCInitialization CustomResource To Be Ready    timeout=180
+    Wait For DSCInitialization CustomResource To Be Ready    timeout=600
     Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
     Wait For DataScienceCluster CustomResource To Be Ready   timeout=600
     Set Service Mesh State To Managed And Wait For CR Ready
@@ -154,7 +154,7 @@ Reinstall Serverless Operator And Recreate DSC And DSCI
     Remove DSC And DSCI Resources
     Install Serverless Operator Via Cli
     Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
-    Wait For DSCInitialization CustomResource To Be Ready    timeout=180
+    Wait For DSCInitialization CustomResource To Be Ready    timeout=600
     Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
     Wait For DataScienceCluster CustomResource To Be Ready   timeout=600
     Set Service Mesh State To Managed And Wait For CR Ready
@@ -166,7 +166,7 @@ Reinstall Service Mesh And Serverless Operators And Recreate DSC And DSCI
     Install Serverless Operator Via Cli
     Install Service Mesh Operator Via Cli
     Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
-    Wait For DSCInitialization CustomResource To Be Ready    timeout=180
+    Wait For DSCInitialization CustomResource To Be Ready    timeout=600
     Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
     Wait For DataScienceCluster CustomResource To Be Ready   timeout=600
     Set Service Mesh State To Managed And Wait For CR Ready

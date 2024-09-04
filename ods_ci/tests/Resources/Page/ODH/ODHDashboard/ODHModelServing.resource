@@ -350,7 +350,7 @@ Verify Model Inference With Retries
     ...                endpoint exposed.
     ...                This is a temporary mitigation meanwhile we find a better way to check the model
     [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}=${FALSE}
-    ...            ${project_title}=${NONE}    ${retries}=${5}     ${deployment_mode}='UI'    ${kserve_mode}=Serverless
+    ...            ${project_title}=${NONE}    ${retries}=${5}     ${deployment_mode}=UI    ${kserve_mode}=Serverless
     ...            ${service_port}=${NONE}   ${end_point}=${NONE}
     ${status}=    Run Keyword And Return Status    Verify Model Inference
     ...    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}    ${project_title}

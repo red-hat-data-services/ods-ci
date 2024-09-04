@@ -266,7 +266,7 @@ Get Model Inference
     ...    ${kserve_mode}=Serverless   ${deployment_mode}=UI   ${service_port}=8888   ${end_point}=${NONE}
     ${curl_cmd}=     Set Variable    ${NONE}
     ${self_managed}=    Is RHODS Self-Managed
-    IF  $deployment_mode == 'UI'
+    IF    $deployment_mode == 'UI'
         ${url}=    Get Model Route Via UI    ${model_name}
         ${kserve}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain
         ...    Single-model serving enabled
@@ -285,10 +285,9 @@ Get Model Inference
             Fetch Openshift CA Bundle
             ${curl_cmd}=     Catenate    ${curl_cmd}    --cacert openshift_ca.crt
         END
-    END
-    IF  ${deployment_mode} == 'Cli'
+    ELSE IF    $deployment_mode == 'Cli'
         ${rc}   ${cmd_op}   Run And Return Rc And Output
-        ...    oc get isvc ${model_name} -o jsonpath='{.metadata.annotations.serving\.kserve\.io/deploymentMode}' -n ${project_title}
+        ...    oc get isvc ${model_name} -o jsonpath='{.metadata.annotations.serving\.kserve\.io/deploymentMode}' -n ${project_title}    # robocop: disable
         Should Be Equal As Integers    ${rc}    0
         IF  "${cmd_op}" != "ModelMesh"
             Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
@@ -329,8 +328,9 @@ Verify Model Inference
          Open Model Serving Home Page
          Switch Model Serving Project    ${project_title}
     END
-    ${inference_output}=    Get Model Inference    model_name=${model_name}    inference_input=${inference_input}   token_auth=${token_auth}    kserve_mode=${kserve_mode}
-    ...    project_title=${project_title}   deployment_mode=${deployment_mode}   service_port=${service_port}   end_point=${end_point}
+    ${inference_output}=    Get Model Inference    model_name=${model_name}   inference_input=${inference_input}
+    ...    token_auth=${token_auth}    kserve_mode=${kserve_mode}    project_title=${project_title}
+    ...    deployment_mode=${deployment_mode}    service_port=${service_port}    end_point=${end_point}    # robocop: disable
     ${result}    ${list}=    Inference Comparison    ${expected_inference_output}    ${inference_output}
     Log    ${result}
     Log    ${list}

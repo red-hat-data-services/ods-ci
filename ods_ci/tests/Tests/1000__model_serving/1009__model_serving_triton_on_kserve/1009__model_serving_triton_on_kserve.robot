@@ -90,11 +90,11 @@ Test PYTORCH Model Inference Via UI(Triton on Kserve)
     Run Keyword And Continue On Failure    Verify Model Inference With Retries
     ...    ${PYTORCH_MODEL_NAME}    ${INFERENCE_REST_INPUT_PYTORCH}    ${EXPECTED_INFERENCE_REST_OUTPUT_PYTORCH}
     ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}
+    Delete Serving Runtime Template    displayed_name=kserve-triton-pytorch-rest
     [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${PYTORCH_MODEL_NAME}
     ...  project_title=${PRJ_TITLE}
     ...  AND
     ...  Clean All Models Of Current User
-    ...  Delete Serving Runtime Template    displayed_name=kserve-triton-pytorch-rest
 
 
 *** Keywords ***

@@ -13,8 +13,9 @@ Resource          ../../../Resources/OCP.resource
 Resource          ../../../Resources/CLI/ModelServing/modelmesh.resource
 Resource          ../../../Resources/Common.robot
 Suite Setup       Triton On Kserve Suite Setup
-#Suite Teardown    Triton On Kserve Suite Teardown
+Suite Teardown    Triton On Kserve Suite Teardown
 Test Tags         Kserve
+
 
 *** Variables ***
 ${INFERENCE_REST_INPUT_ONNX_FILE}=    tests/Resources/Files/triton/kserve-triton-onnx-rest-input.json

@@ -5,7 +5,8 @@ Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/P
 Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Pipelines.resource
 Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipelines.resource
-Test Tags          DataSciencePipelines
+Resource           ../../Resources/CLI/DataSciencePipelines/DataSciencePipelinesBackend.resource
+Test Tags          DataSciencePipelines-Dashboard
 Suite Setup        Pipelines Suite Setup
 Suite Teardown     Pipelines Suite Teardown
 
@@ -32,14 +33,13 @@ Verify User Can Create, Run and Delete A DS Pipeline From DS Project Details Pag
     ...    AutomationBug: RHOAIENG-10941
     [Tags]    Smoke
     ...       ODS-2206    ODS-2226    ODS-2633
-    ...       AutomationBug
 
     Open Data Science Project Details Page    ${PRJ_TITLE}
 
-    Create Pipeline Server    dc_name=${DC_NAME}    project_title=${PRJ_TITLE}
+    Pipelines.Create Pipeline Server    dc_name=${DC_NAME}    project_title=${PRJ_TITLE}
     Verify There Is No "Error Displaying Pipelines" After Creating Pipeline Server
     Verify That There Are No Sample Pipelines After Creating Pipeline Server
-    Wait Until Pipeline Server Is Deployed    project_title=${PRJ_TITLE}
+    DataSciencePipelinesBackend.Wait Until Pipeline Server Is Deployed    namespace=${PRJ_TITLE}
 
     Import Pipeline    name=${PIPELINE_TEST_NAME}
     ...    description=${PIPELINE_TEST_DESC}
@@ -51,6 +51,7 @@ Verify User Can Create, Run and Delete A DS Pipeline From DS Project Details Pag
     # Pipeline Context Menu Should Be Working    pipeline_name=${PIPELINE_TEST_NAME}
     # Pipeline Yaml Should Be Readonly    pipeline_name=${PIPELINE_TEST_NAME}
 
+    Open Data Science Project Details Page    ${PRJ_TITLE}    tab_id=pipelines-projects
     Pipeline Should Be Listed    pipeline_name=${PIPELINE_TEST_NAME}
     ...    pipeline_description=${PIPELINE_TEST_DESC}
 

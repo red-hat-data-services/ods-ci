@@ -12,6 +12,7 @@ Suite Teardown      Suite Teardown
 *** Variables ***
 ${OPERATOR_NS}                  ${OPERATOR_NAMESPACE}
 ${APPLICATIONS_NS}              ${APPLICATIONS_NAMESPACE}
+${KNATIVE_SERVING_NS}           knative-serving
 ${DSC_NAME}                     default-dsc
 ${KUEUE_LABEL_SELECTOR}         app.kubernetes.io/name=kueue
 ${KUEUE_DEPLOYMENT_NAME}        kueue-controller-manager
@@ -31,6 +32,8 @@ ${ODH_MODEL_CONTROLLER_LABEL_SELECTOR}     app=odh-model-controller
 ${ODH_MODEL_CONTROLLER_DEPLOYMENT_NAME}    odh-model-controller
 ${MODELREGISTRY_CONTROLLER_LABEL_SELECTOR}     control-plane=model-registry-operator
 ${MODELREGISTRY_CONTROLLER_DEPLOYMENT_NAME}    model-registry-operator-controller-manager
+${KSERVE_CONTROLLER_MANAGER_LABEL_SELECTOR}    control-plane=kserve-controller-manager
+${KSERVE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}   kserve-controller-manager
 ${IS_PRESENT}        0
 ${IS_NOT_PRESENT}    1
 &{SAVED_MANAGEMENT_STATES}
@@ -42,6 +45,7 @@ ${IS_NOT_PRESENT}    1
 ...  DATASCIENCEPIPELINES=${EMPTY}
 ...  MODELMESHERVING=${EMPTY}
 ...  MODELREGISTRY=${EMPTY}
+...  KSERVE=${EMPTY}
 
 @{CONTROLLERS_LIST}    kserve-controller-manager    odh-model-controller    modelmesh-controller
 
@@ -135,7 +139,7 @@ Validate Dashboard Removed State
 Validate Datasciencepipelines Managed State
     [Documentation]    Validate that the DSC Datasciencepipelines component Managed state creates the expected resources,
     ...    check that Datasciencepipelines deployment is created and pod is in Ready state
-    [Tags]    Operator    Tier1    RHOAIENG-7298    datasciencepipelines-managed
+    [Tags]    Operator    Tier1    RHOAIENG-7298    operator-datasciencepipelines-managed
 
     Set DSC Component Managed State And Wait For Completion   datasciencepipelines    ${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}    ${DATASCIENCEPIPELINES_LABEL_SELECTOR}
 
@@ -143,7 +147,7 @@ Validate Datasciencepipelines Managed State
 
 Validate Datasciencepipelines Removed State
     [Documentation]    Validate that Datasciencepipelines management state Removed does remove relevant resources.
-    [Tags]    Operator    Tier1    RHOAIENG-7298    datasciencepipelines-removed
+    [Tags]    Operator    Tier1    RHOAIENG-7298    operator-datasciencepipelines-removed
 
     Set DSC Component Removed State And Wait For Completion   datasciencepipelines    ${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}    ${DATASCIENCEPIPELINES_LABEL_SELECTOR}
 
@@ -184,7 +188,7 @@ Validate Modelmeshserving Removed State
 Validate ModelRegistry Managed State
     [Documentation]    Validate that the DSC ModelRegistry component Managed state creates the expected resources,
     ...    check that ModelRegistry deployment is created and pod is in Ready state
-    [Tags]    Operator    Tier1    RHOAIENG-10404    modelregistry-managed
+    [Tags]    Operator    Tier1    RHOAIENG-10404    modelregistry-managed    ExcludeOnRHOAI
 
     Set DSC Component Managed State And Wait For Completion   modelregistry    ${MODELREGISTRY_CONTROLLER__DEPLOYMENT_NAME}    ${MODELREGISTRY_CONTROLLER__LABEL_SELECTOR}
 
@@ -192,11 +196,32 @@ Validate ModelRegistry Managed State
 
 Validate ModelRegistry Removed State
     [Documentation]    Validate that ModelRegistry management state Removed does remove relevant resources.
-    [Tags]    Operator    Tier1    RHOAIENG-10404    modelregistry-removed
+    [Tags]    Operator    Tier1    RHOAIENG-10404    modelregistry-removed    ExcludeOnRHOAI
 
     Set DSC Component Removed State And Wait For Completion   modelregistry    ${MODELREGISTRY_CONTROLLER__DEPLOYMENT_NAME}    ${MODELREGISTRY_CONTROLLER__LABEL_SELECTOR}
 
     [Teardown]     Restore DSC Component State    modelregistry    ${MODELREGISTRY_CONTROLLER__DEPLOYMENT_NAME}    ${MODELREGISTRY_CONTROLLER__LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.MODELREGISTRY}
+
+Validate KServe Controller Manager Managed State
+    [Documentation]    Validate that the DSC KServe Controller Manager component Managed state creates the expected resources,
+    ...    check that KServe Controller Manager deployment is created and pod is in Ready state
+    [Tags]    Operator    Tier1    RHOAIENG-7217    kserve-controller-manager-managed
+
+    Set DSC Component Managed State And Wait For Completion   kserve    ${KSERVE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${KSERVE_CONTROLLER_MANAGER_LABEL_SELECTOR}
+
+    [Teardown]     Restore DSC Component State    kserve    ${KSERVE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${KSERVE_CONTROLLER_MANAGER_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.KSERVE}
+
+Validate KServe Controller Manager Removed State
+    [Documentation]    Validate that KServe Controller Manager management state Removed does remove relevant resources.
+    [Tags]    Operator    Tier1   RHOAIENG-7217    kserve-controller-manager-removed
+
+    Set DSC Component Removed State And Wait For Completion   kserve    ${KSERVE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${KSERVE_CONTROLLER_MANAGER_LABEL_SELECTOR}
+
+    # With KServe Removed, KNative-Serving CR will not exist regardless of the kserve.serving management state
+    Wait Until Keyword Succeeds    5 min    0 sec
+    ...    Is Resource Present     KnativeServing    knative-serving    ${KNATIVE_SERVING_NS}   ${IS_NOT_PRESENT}
+
+    [Teardown]     Restore DSC Component State    kserve    ${KSERVE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${KSERVE_CONTROLLER_MANAGER_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.KSERVE}
 
 Validate Support For Configuration Of Controller Resources
     [Documentation]    Validate support for configuration of controller resources in component deployments
@@ -238,6 +263,7 @@ Suite Setup
     ${SAVED_MANAGEMENT_STATES.DATASCIENCEPIPELINES}=     Get DSC Component State    ${DSC_NAME}    datasciencepipelines    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.MODELMESHERVING}=     Get DSC Component State    ${DSC_NAME}    modelmeshserving    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.MODELREGISTRY}=     Get DSC Component State    ${DSC_NAME}    modelregistry    ${OPERATOR_NS}
+    ${SAVED_MANAGEMENT_STATES.KSERVE}=     Get DSC Component State    ${DSC_NAME}    kserve    ${OPERATOR_NS}
     Set Suite Variable    ${SAVED_MANAGEMENT_STATES}
 
 Suite Teardown

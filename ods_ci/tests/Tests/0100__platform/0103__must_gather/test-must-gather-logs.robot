@@ -11,10 +11,10 @@ Resource         ../../../Resources/CLI/MustGather/MustGather.resource
 Verify that the must-gather image provides RHODS logs and info
     [Documentation]   Tests the must-gather image for ODH/RHOAI
     [Tags]   Smoke
-    ...      Tier1
     ...      ODS-505
     ...      Operator
     ...      MustGather
+    ...      ExcludeOnODH
     Get must-gather Logs
     Verify logs for ${APPLICATIONS_NAMESPACE}
     IF  "${PRODUCT}" == "RHODS"

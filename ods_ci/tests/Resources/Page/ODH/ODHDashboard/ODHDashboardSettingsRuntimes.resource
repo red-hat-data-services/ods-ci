@@ -26,7 +26,7 @@ Click Add Serving Runtime Template Button
 
 Upload Serving Runtime Template
     [Documentation]    Uploads via UI a YAML file containing a custom Serving Runtime definition
-    [Arguments]    ${runtime_filepath}    ${serving_platform}    ${runtime_protocol}
+    [Arguments]    ${runtime_filepath}    ${serving_platform}       ${runtime_protocol}
     Click Add Serving Runtime Template Button
     Element Should Be Enabled   ${UPLOAD_RUNTIME_BTN_XP}
     ${rc}    ${pwd}=    Run And Return Rc And Output    echo $PWD

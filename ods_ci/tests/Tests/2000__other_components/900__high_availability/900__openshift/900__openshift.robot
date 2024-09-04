@@ -6,8 +6,8 @@ Library          OpenShiftLibrary
 Library          DateTime
 Library          RequestsLibrary
 
-Resource         ../../../Resources/ODS.robot
-Resource         ../../../Resources/Page/ODH/Prometheus/Prometheus.robot
+Resource         ../../../../Resources/ODS.robot
+Resource         ../../../../Resources/Page/ODH/Prometheus/Prometheus.robot
 
 
 *** Test Cases ***

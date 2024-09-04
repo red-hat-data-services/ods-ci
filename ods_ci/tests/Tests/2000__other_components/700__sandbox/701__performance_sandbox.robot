@@ -5,8 +5,8 @@ Library         Collections
 Library         Process
 Library         String
 Library         OpenShiftLibrary
-Library         ../../../libs/Helpers.py
-Resource        ../../Resources/Page/OCPDashboard/OCPDashboard.resource
+Library         ../../../../libs/Helpers.py
+Resource        ../../../Resources/Page/OCPDashboard/OCPDashboard.resource
 Suite Setup     Performance Suite Setup
 
 *** Variables ***
@@ -83,7 +83,7 @@ Performance Suite Setup
      FOR    ${isv}    IN    @{ISV_DATA.values()}
            Install ISV By Name    ${isv[0]}      ${isv[1]}
      END
-     Oc Apply    kind=OLMConfig    src=tests/Tests/700__sandbox/olm.yaml
+     Oc Apply    kind=OLMConfig    src=tests/Tests/2000__other_components/700__sandbox/olm.yaml
      Run    git clone https://github.com/codeready-toolchain/toolchain-e2e.git
      ${return_code}    ${output}    Run And Return Rc And Output    sed -i'' -e 's/"rhods\.yaml"\,//g' ${EXECDIR}/toolchain-e2e/setup/operators/operators.go    #robocop:disable
      Should Be Equal As Integers	 ${return_code}	 0

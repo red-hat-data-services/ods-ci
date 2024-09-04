@@ -3,6 +3,8 @@ Documentation       Test Suite for Upgrade testing,to be run after the upgrade
 Library            OpenShiftLibrary
 Resource           ../../Resources/RHOSi.resource
 Resource           ../../Resources/ODS.robot
+Resource           ../../Resources/OCP.resource
+Resource           ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
 Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDashboardResources.resource
 Resource           ../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
@@ -20,6 +22,8 @@ Resource           ../../Resources/Page/HybridCloudConsole/OCM.robot
 Resource           ../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 Resource           ../../Resources/Page/DistributedWorkloads/WorkloadMetricsUI.resource
 Resource           ../../Resources/CLI/MustGather/MustGather.resource
+Suite Setup    Upgrade Suite Setup
+
 
 *** Variables ***
 ${S_SIZE}       25
@@ -210,6 +214,30 @@ Verify that the must-gather image provides RHODS logs and info
     [Teardown]  Cleanup must-gather Logs
 
 
+Verify That DSC And DSCI Release.Name Attribute matches ${expected_release_name}
+    [Documentation]    Tests the release.name attribute from the DSC and DSCI matches the desired value.
+    ...                ODH: Open Data Hub
+    ...                RHOAI managed: OpenShift AI Cloud Service
+    ...                RHOAI selfmanaged: OpenShift AI Self-Managed
+    [Tags]    Upgrade
+    Should Be Equal As Strings    ${DSC_RELEASE_NAME}     ${expected_release_name}
+    Should Be Equal As Strings    ${DSCI_RELEASE_NAME}    ${expected_release_name}
+
+Verify That DSC And DSCI Release.Version Attribute matches the value in the subscription
+    [Documentation]    Tests the release.version attribute from the DSC and DSCI matches the value in the subscription.
+    [Tags]    Upgrade
+    ${rc}    ${csv_name}=    Run And Return Rc And Output
+    ...    oc get subscription -n ${OPERATOR_NAMESPACE} -l ${OPERATOR_SUBSCRIPTION_LABEL} -ojson | jq '.items[0].status.currentCSV' | tr -d '"'
+
+    Should Be Equal As Integers    ${rc}    ${0}    ${rc}
+
+    ${csv_version}=     Get Resource Attribute      ${OPERATOR_NAMESPACE}
+    ...                 ClusterServiceVersion      ${csv_name}        .spec.version
+
+    Should Be Equal As Strings    ${DSC_RELEASE_VERSION}    ${csv_version}
+    Should Be Equal As Strings    ${DSCI_RELEASE_VERSION}    ${csv_version}
+
+
 *** Keywords ***
 Dashboard Suite Setup
     [Documentation]  Basic suite setup
@@ -218,7 +246,7 @@ Dashboard Suite Setup
 
 Dashboard Test Teardown
     [Documentation]  Basic suite Teradown
-    Upgrade Test Teardown
+    IF    not ${IS_SELF_MANAGED}    Managed RHOAI Upgrade Test Teardown
     Close All Browsers
 
 Get Dashboard Config Data
@@ -231,16 +259,16 @@ Set Default Users
     [Documentation]  Set Default user settings
     Set Standard RHODS Groups Variables
     Set Default Access Groups Settings
-    Upgrade Test Teardown
+    IF    not ${IS_SELF_MANAGED}    Managed RHOAI Upgrade Test Teardown
 
 Delete OOTB Image
    [Documentation]  Delete the Custom notbook create
    ${status}  Run Keyword And Return Status     Oc Delete  kind=ImageStream  name=byon-upgrade  namespace=${APPLICATIONS_NAMESPACE}  #robocop:disable
    IF    not ${status}   Fail    Notebook image is deleted after the upgrade
-   Upgrade Test Teardown
+   IF    not ${IS_SELF_MANAGED}    Managed RHOAI Upgrade Test Teardown
 
-Upgrade Test Teardown
-    Skip If RHODS Is Self-Managed
+Managed RHOAI Upgrade Test Teardown
+    [Documentation]    Check rhods_aggregate_availability metric when RHOAI is installed as managed
     ${expression} =    Set Variable    rhods_aggregate_availability&step=1
     ${resp} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    ${expression}
     Log    rhods_aggregate_availability: ${resp.json()["data"]["result"][0]["value"][-1]}
@@ -256,3 +284,10 @@ Upgrade Test Teardown
     Log    rhods_aggregate_availability: ${resp.json()["data"]["result"][0]["value"][-1]}
     @{list_values} =    Create List    1
     Run Keyword And Warn On Failure    Should Contain    ${list_values}    ${resp.json()["data"]["result"][0]["value"][-1]}
+
+Upgrade Suite Setup
+    [Documentation]    Set of action to run as Suite setup
+    ${IS_SELF_MANAGED}=    Is RHODS Self-Managed
+    Set Suite Variable    ${IS_SELF_MANAGED}
+    Gather Release Attributes From DSC And DSCI
+    Set Expected Value For Release Name

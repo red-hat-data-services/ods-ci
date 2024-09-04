@@ -21,10 +21,10 @@ ${MODEL_S3_DIR}=   e5-mistral-7b-instruct
 
 
 *** Test Cases ***
-Verify Non Admin Can Serve And Query A Model Using The UI  # robocop: disable
+Verify Non Admin Can Serve And Query A Model Using The UI
     [Documentation]    Basic tests leveraging on a non-admin user for preparing, deploying and querying a LLM model
     ...                using Single-model platform and TGIS Standalone runtime.
-    [Tags]    Sanity    Tier1    ODS-2611
+    [Tags]    Sanity    ODS-2611
     [Setup]    Run Keywords
     ...    Run    git clone https://github.com/IBM/text-generation-inference/
     ...    AND
@@ -54,10 +54,10 @@ Verify Non Admin Can Serve And Query A Model Using The UI  # robocop: disable
     ...    model_name=${model_name}    query_kind=single    namespace=${test_namespace}    period=5m    exp_value=1
     Delete Model Via UI    ${model_name}
 
-Verify Model Can Be Served And Query On A GPU Node Using The UI  # robocop: disable
+Verify Model Can Be Served And Query On A GPU Node Using The UI
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
     ...                using Single-model platform and TGIS Standalone runtime.
-    [Tags]    Sanity    Tier1    ODS-2612   Resources-GPU
+    [Tags]    Sanity    ODS-2612   Resources-GPU
     [Setup]    Run    git clone https://github.com/IBM/text-generation-inference/
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${isvc__name}=    Set Variable    flan-t5-small-hf-gpu
@@ -80,10 +80,10 @@ Verify Model Can Be Served And Query On A GPU Node Using The UI  # robocop: disa
     ...    namespace=${test_namespace}    protocol=grpc    validate_response=${FALSE}
     Delete Model Via UI    ${isvc__name}
 
-Verify Model Can Be Served And Query On A GPU Node Using The UI For VLMM  # robocop: disable
+Verify Model Can Be Served And Query On A GPU Node Using The UI For VLMM
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
     ...                using Single-model platform with vllm runtime.
-    [Tags]    Sanity    Tier1    RHOAIENG-6344   Resources-GPU
+    [Tags]    Sanity    RHOAIENG-6344   Resources-GPU
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${isvc__name}=    Set Variable    gpt2-gpu
     ${model_name}=    Set Variable    gpt2
@@ -102,10 +102,10 @@ Verify Model Can Be Served And Query On A GPU Node Using The UI For VLMM  # robo
     ...    namespace=${test_namespace}    string_check_only=${TRUE}    validate_response=${FALSE}
     Delete Model Via UI    ${isvc__name}
 
-Verify Embeddings Model Can Be Served And Query On A GPU Node Using The UI For VLMM  # robocop: disable
+Verify Embeddings Model Can Be Served And Query On A GPU Node Using The UI For VLMM
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
     ...                using Single-model platform with vllm runtime.
-    [Tags]    Sanity    Tier1    RHOAIENG-8832  Resources-GPU
+    [Tags]    Sanity    RHOAIENG-8832  Resources-GPU
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${isvc__name}=    Set Variable    e5-mistral-7b-gpu
     ${model_name}=    Set Variable    e5-mistral-7b
@@ -149,6 +149,7 @@ Non-Admin Setup Kserve UI Test
     END
 
 Non-Admin Teardown Kserve UI Test
+    [Documentation]    Teardown for the Suite
     Delete Data Science Project   project_title=${TEST_NS}
     # if UI deletion fails it will try deleting from CLI
     Delete List Of Projects Via CLI   ocp_projects=${PROJECTS_TO_DELETE}

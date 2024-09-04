@@ -25,10 +25,10 @@ ${USE_GPU}=    ${FALSE}
 
 
 *** Test Cases ***
-Verify User Can Serve And Query A Model
+Verify User Can Serve And Query A Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and TGIS runtime
-    [Tags]    Sanity    Tier1    ODS-2341
+    [Tags]    Sanity    ODS-2341
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${TEST_NS}-cli
     ${test_namespace}=    Set Variable     ${TEST_NS}-cli
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -42,7 +42,8 @@ Verify User Can Serve And Query A Model
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1
@@ -62,7 +63,7 @@ Verify User Can Serve And Query A Model
     ...    AND
     ...    Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-query-process    kill=true
 
-Verify User Can Deploy Multiple Models In The Same Namespace
+Verify User Can Deploy Multiple Models In The Same Namespace    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Checks if user can deploy and query multiple models in the same namespace
     [Tags]    Tier1    ODS-2371
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${TEST_NS}-multisame
@@ -88,17 +89,21 @@ Verify User Can Deploy Multiple Models In The Same Namespace
     ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
     ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
-    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
-    ...    process_alias=llm-one
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
+    IF    ${IS_KSERVE_RAW}
+        Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}    process_alias=llm-one
+    END
     Query Model Multiple Times    model_name=${model_one_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    n_times=5    namespace=${test_namespace}     port_forwarding=${IS_KSERVE_RAW}
     Query Model Multiple Times    model_name=${model_one_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    n_times=5    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
     IF    ${IS_KSERVE_RAW}    Terminate Process    llm-one    kill=true
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
-    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
-    ...    process_alias=llm-two
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
+    IF    ${IS_KSERVE_RAW}
+        Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}    process_alias=llm-two
+    END
     Query Model Multiple Times    model_name=${model_two_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    n_times=10    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
     Query Model Multiple Times    model_name=${model_two_name}    runtime=${TGIS_RUNTIME_NAME}
@@ -111,7 +116,7 @@ Verify User Can Deploy Multiple Models In The Same Namespace
     ...    AND
     ...    Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-two    kill=true
 
-Verify User Can Deploy Multiple Models In Different Namespaces
+Verify User Can Deploy Multiple Models In Different Namespaces    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Checks if user can deploy and query multiple models in the different namespaces
     [Tags]    Tier1    ODS-2378
     [Setup]    Run Keywords    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=singlemodel-multi1
@@ -139,19 +144,23 @@ Verify User Can Deploy Multiple Models In Different Namespaces
     ...    namespace=singlemodel-multi1    runtime=${TGIS_RUNTIME_NAME}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
     ...    namespace=singlemodel-multi2    runtime=${TGIS_RUNTIME_NAME}
-    ${pod_name}=  Get Pod Name    namespace=singlemodel-multi1    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
-    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
-    ...    process_alias=llm-one
+    ${pod_name}=  Get Pod Name    namespace=singlemodel-multi1
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
+    IF    ${IS_KSERVE_RAW}
+        Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}    process_alias=llm-one
+    END
     Query Model Multiple Times    model_name=${model_one_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    n_times=2    namespace=singlemodel-multi1    port_forwarding=${IS_KSERVE_RAW}
     IF    ${IS_KSERVE_RAW}    Terminate Process    llm-one    kill=true
-    ${pod_name}=  Get Pod Name    namespace=singlemodel-multi2    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
-    IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
-    ...    process_alias=llm-two
+    ${pod_name}=  Get Pod Name    namespace=singlemodel-multi2
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
+    IF    ${IS_KSERVE_RAW}
+        Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}    process_alias=llm-two
+    END
     Query Model Multiple Times    model_name=${model_two_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    n_times=2    namespace=singlemodel-multi2    port_forwarding=${IS_KSERVE_RAW}
     [Teardown]    Run Keywords
-    ...            Clean Up Test Project    test_ns=singlemodel-multi1    isvc_names=${models_names_ns_1}
+    ...           Clean Up Test Project    test_ns=singlemodel-multi1    isvc_names=${models_names_ns_1}
     ...           wait_prj_deletion=${FALSE}
     ...           AND
     ...           Clean Up Test Project    test_ns=singlemodel-multi2    isvc_names=${models_names_ns_2}
@@ -161,7 +170,7 @@ Verify User Can Deploy Multiple Models In Different Namespaces
     ...           AND
     ...           Run Keyword If    ${IS_KSERVE_RAW}     Terminate Process    llm-two    kill=true
 
-Verify Model Upgrade Using Canaray Rollout
+Verify Model Upgrade Using Canaray Rollout    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Checks if user can apply Canary Rollout as deployment strategy
     [Tags]    Tier1    ODS-2372    ServerlessOnly
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=canary-model-upgrade
@@ -170,7 +179,7 @@ Verify Model Upgrade Using Canaray Rollout
     ${model_name}=    Set Variable    flan-t5-small-caikit
     ${isvcs_names}=    Create List    ${isvc_name}
     ${canary_percentage}=    Set Variable    ${30}
-    Compile Deploy And Query LLM model   isvc_name=${isvc_name}
+    Compile Deploy And Query LLM model   isvc_name=${isvc_name}    # robocop: off=wrong-case-in-keyword-name
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     ...    model_name=${model_name}
@@ -180,7 +189,7 @@ Verify Model Upgrade Using Canaray Rollout
     ...    limits_dict=${GPU_LIMITS}
     Log To Console    Applying Canary Tarffic for Model Upgrade
     ${model_name}=    Set Variable    bloom-560m-caikit
-    Compile Deploy And Query LLM model   isvc_name=${isvc_name}
+    Compile Deploy And Query LLM model   isvc_name=${isvc_name}    # robocop: off=wrong-case-in-keyword-name
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${BLOOM_STORAGE_URI}
     ...    model_name=${model_name}
@@ -194,7 +203,7 @@ Verify Model Upgrade Using Canaray Rollout
     ...    isvc_name=${isvc_name}    model_name=${model_name}    namespace=${test_namespace}
     ...    runtime=${TGIS_RUNTIME_NAME}
     Log To Console    Remove Canary Tarffic For Model Upgrade
-    Compile Deploy And Query LLM model    isvc_name=${isvc_name}
+    Compile Deploy And Query LLM model    isvc_name=${isvc_name}    # robocop: off=wrong-case-in-keyword-name
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_name=${model_name}
     ...    model_storage_uri=${BLOOM_STORAGE_URI}
@@ -206,7 +215,7 @@ Verify Model Upgrade Using Canaray Rollout
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${isvcs_names}    wait_prj_deletion=${FALSE}
 
-Verify Model Pods Are Deleted When No Inference Service Is Present
+Verify Model Pods Are Deleted When No Inference Service Is Present    # robocop: off=too-long-test-case
     [Documentation]    Checks if model pods gets successfully deleted after
     ...                deleting the KServe InferenceService object
     [Tags]    Tier2    ODS-2373
@@ -214,7 +223,7 @@ Verify Model Pods Are Deleted When No Inference Service Is Present
     ${flan_isvc_name}=    Set Variable    flan-t5-small-caikit
     ${model_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${model_name}
-    Compile Deploy And Query LLM model   isvc_name=${flan_isvc_name}
+    Compile Deploy And Query LLM model   isvc_name=${flan_isvc_name}    # robocop: off=wrong-case-in-keyword-name
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     ...    model_name=${model_name}
@@ -222,7 +231,7 @@ Verify Model Pods Are Deleted When No Inference Service Is Present
     ...    model_format=pytorch    runtime=${TGIS_RUNTIME_NAME}
     ...    limits_dict=${GPU_LIMITS}    port_forwarding=${IS_KSERVE_RAW}
     Delete InfereceService    isvc_name=${flan_isvc_name}    namespace=no-infer-kserve
-    ${rc}    ${out}=    Run And Return Rc And Output    oc wait pod -l serving.kserve.io/inferenceservice=${flan_isvc_name} -n no-infer-kserve --for=delete --timeout=200s
+    ${rc}    ${out}=    Run And Return Rc And Output    oc wait pod -l serving.kserve.io/inferenceservice=${flan_isvc_name} -n no-infer-kserve --for=delete --timeout=200s    # robocop: off=line-too-long
     Should Be Equal As Integers    ${rc}    ${0}
     [Teardown]   Run Keywords
     ...    Clean Up Test Project    test_ns=no-infer-kserve
@@ -231,7 +240,7 @@ Verify Model Pods Are Deleted When No Inference Service Is Present
     ...    AND
     ...    Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-query-process    kill=true
 
-Verify User Can Change The Minimum Number Of Replicas For A Model
+Verify User Can Change The Minimum Number Of Replicas For A Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Checks if user can change the minimum number of replicas
     ...                of a deployed model.
     ...                Affected by:  https://issues.redhat.com/browse/SRVKS-1175
@@ -251,7 +260,8 @@ Verify User Can Change The Minimum Number Of Replicas For A Model
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}    exp_replicas=${1}
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
     IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}    n_times=3
     ...    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
@@ -273,7 +283,7 @@ Verify User Can Change The Minimum Number Of Replicas For A Model
     ...    AND
     ...    Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-query-process    kill=true
 
-Verify User Can Autoscale Using Concurrency
+Verify User Can Autoscale Using Concurrency    # robocop: off=too-long-test-case
     [Documentation]    Checks if model successfully scale up based on concurrency metrics (KPA)
     [Tags]    Tier1    ODS-2377    ServerlessOnly
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=autoscale-con
@@ -300,7 +310,7 @@ Verify User Can Autoscale Using Concurrency
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
-Verify User Can Validate Scale To Zero
+Verify User Can Validate Scale To Zero    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Checks if model successfully scale down to 0 if there's no traffic
     [Tags]    Tier1    ODS-2379    ServerlessOnly
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=autoscale-zero
@@ -333,7 +343,7 @@ Verify User Can Validate Scale To Zero
     [Teardown]   Clean Up Test Project    test_ns=autoscale-zero
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
-Verify User Can Set Requests And Limits For A Model
+Verify User Can Set Requests And Limits For A Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Checks if user can set HW request and limits on their inference service object
     [Tags]    Tier1    ODS-2380
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=hw-res
@@ -351,7 +361,8 @@ Verify User Can Set Requests And Limits For A Model
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     ${rev_id}=    Get Current Revision ID    model_name=${flan_model_name}
     ...    namespace=${test_namespace}
@@ -378,7 +389,7 @@ Verify User Can Set Requests And Limits For A Model
     ...    AND
     ...    Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-query-process    kill=true
 
-Verify Model Can Be Served And Query On A GPU Node
+Verify Model Can Be Served And Query On A GPU Node    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
     ...                using Kserve and Caikit+TGIS runtime
     [Tags]    Tier1    ODS-2381    Resources-GPU
@@ -402,7 +413,8 @@ Verify Model Can Be Served And Query On A GPU Node
     ...    namespace=${test_namespace}    exp_requests=${requests}    exp_limits=${limits}
     Model Pod Should Be Scheduled On A GPU Node    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
     IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     Query Model Multiple Times    model_name=${model_name}    runtime=${TGIS_RUNTIME_NAME}    n_times=10
     ...    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}
@@ -415,7 +427,7 @@ Verify Model Can Be Served And Query On A GPU Node
     ...    AND
     ...    Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-query-process    kill=true
 
-Verify Non Admin Can Serve And Query A Model
+Verify Non Admin Can Serve And Query A Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Basic tests leveraging on a non-admin user for preparing, deploying and querying a LLM model
     ...                using Kserve and Caikit+TGIS runtime
     [Tags]    Tier1    ODS-2326
@@ -436,7 +448,8 @@ Verify Non Admin Can Serve And Query A Model
     ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_model_name}   namespace=${test_namespace}
     ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][0][query_text]"}'
     ${header}=    Set Variable    'mm-model-id: ${flan_model_name}'
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1
@@ -450,7 +463,7 @@ Verify Non Admin Can Serve And Query A Model
     ...        AND
     ...        Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-query-process    kill=true
 
-Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector
+Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector    # robocop: off=too-long-test-case
     [Documentation]    Deploys and queries flan-t5-large-grammar-synthesis model
     [Tags]    Tier2    ODS-2441
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=grammar-model
@@ -466,7 +479,8 @@ Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1
@@ -480,7 +494,7 @@ Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector
     ...    AND
     ...    Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-query-process    kill=true
 
-Verify User Can Serve And Query Flan-t5 Large
+Verify User Can Serve And Query Flan-t5 Large    # robocop: off=too-long-test-case
     [Documentation]    Deploys and queries flan-t5-large model
     [Tags]    Tier2    ODS-2434
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=flan-t5-large3
@@ -496,7 +510,8 @@ Verify User Can Serve And Query Flan-t5 Large
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1
@@ -509,7 +524,7 @@ Verify User Can Serve And Query Flan-t5 Large
     ...    AND
     ...    Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-query-process    kill=true
 
-Verify Runtime Upgrade Does Not Affect Deployed Models
+Verify Runtime Upgrade Does Not Affect Deployed Models    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Upgrades the caikit runtime inthe same NS where a model
     ...                is already deployed. The expecation is that the current model
     ...                must remain unchanged after the runtime upgrade.
@@ -529,7 +544,8 @@ Verify Runtime Upgrade Does Not Affect Deployed Models
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1
@@ -542,8 +558,8 @@ Verify Runtime Upgrade Does Not Affect Deployed Models
     Sleep    5s    reason=Sleep, in case the runtime upgrade takes some time to start performing actions on the pods...
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}
-    ${created_at_after}    ${caikitsha_after}=    Get Model Pods Creation Date And Image URL    model_name=${flan_model_name}
-    ...    namespace=${test_namespace}    container=kserve-container
+    ${created_at_after}    ${caikitsha_after}=    Get Model Pods Creation Date And Image URL
+    ...    model_name=${flan_model_name}    namespace=${test_namespace}    container=kserve-container
     Should Be Equal    ${created_at}    ${created_at_after}
     Should Be Equal As Strings    ${caikitsha}    ${caikitsha_after}
     [Teardown]    Run Keywords
@@ -552,7 +568,7 @@ Verify Runtime Upgrade Does Not Affect Deployed Models
     ...    AND
     ...    Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-query-process    kill=true
 
-Verify User Can Access Model Metrics From UWM
+Verify User Can Access Model Metrics From UWM    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Verifies that model metrics are available for users in the
     ...                OpenShift monitoring system (UserWorkloadMonitoring)
     ...                PARTIALLY DONE: it is checking number of requests, number of successful requests
@@ -560,7 +576,8 @@ Verify User Can Access Model Metrics From UWM
     ...                derived metrics.
     ...                ProductBug: RHOAIENG-3236
     [Tags]    Tier1    ODS-2401    ServerlessOnly    ProductBug
-    [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=singlemodel-metrics    enable_metrics=${TRUE}
+    [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=singlemodel-metrics
+    ...    enable_metrics=${TRUE}
     ${test_namespace}=    Set Variable     singlemodel-metrics
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${flan_model_name}
@@ -586,8 +603,9 @@ Verify User Can Access Model Metrics From UWM
     ...    User Can Fetch Number Of Requests Over Defined Time    thanos_url=${thanos_url}    thanos_token=${token}
     ...    model_name=${flan_model_name}    query_kind=single    namespace=${test_namespace}    period=5m    exp_value=3
     Wait Until Keyword Succeeds    20 times    5s
-    ...    User Can Fetch Number Of Successful Requests Over Defined Time    thanos_url=${thanos_url}    thanos_token=${token}
-    ...    model_name=${flan_model_name}    namespace=${test_namespace}    period=5m    exp_value=3
+    ...    User Can Fetch Number Of Successful Requests Over Defined Time    thanos_url=${thanos_url}
+    ...    thanos_token=${token}    model_name=${flan_model_name}    namespace=${test_namespace}    period=5m
+    ...    exp_value=3
     Wait Until Keyword Succeeds    20 times    5s
     ...    User Can Fetch CPU Utilization    thanos_url=${thanos_url}    thanos_token=${token}
     ...    model_name=${flan_model_name}    namespace=${test_namespace}    period=5m
@@ -600,7 +618,7 @@ Verify User Can Access Model Metrics From UWM
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
-Verify User Can Query A Model Using HTTP Calls
+Verify User Can Query A Model Using HTTP Calls    # robocop: off=too-long-test-case
     [Documentation]    From RHOAI 2.5 HTTP is allowed and default querying protocol.
     ...                This tests deploys the runtime enabling HTTP port and send queries to the model
     [Tags]    ODS-2501    Tier1    ProductBug
@@ -627,7 +645,7 @@ Verify User Can Query A Model Using HTTP Calls
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
-Verify User Can Serve And Query A Model With Token
+Verify User Can Serve And Query A Model With Token    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                With Token using Kserve and Caikit+TGIS runtime
     [Tags]    RHOAIENG-6306
@@ -649,21 +667,21 @@ Verify User Can Serve And Query A Model With Token
     ...    namespace=${test_namespace}
     Create Role Binding For Authorino   name=${DEFAULT_BUCKET_PREFIX}   namespace=tgis-standalone-cli
     ${inf_token}=     Create Inference Access Token   ${test_namespace}    ${DEFAULT_BUCKET_SA_NAME}
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
     ...    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1
     ...    namespace=${test_namespace}    port_forwarding=${IS_KSERVE_RAW}   token=${inf_token}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
-     ...    inference_type=tokenize    n_times=1    port_forwarding=${IS_KSERVE_RAW}
-     ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
-     ...    token=${inf_token}
+    ...    inference_type=tokenize    n_times=1    port_forwarding=${IS_KSERVE_RAW}
+    ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
+    ...    token=${inf_token}
     Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=model-info    n_times=1    port_forwarding=${IS_KSERVE_RAW}
     ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
     ...    token=${inf_token}
-   Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
+    Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}
     ...    inference_type=streaming    n_times=1    port_forwarding=${IS_KSERVE_RAW}
     ...    namespace=${test_namespace}    validate_response=${FALSE}
     ...    token=${inf_token}
@@ -675,8 +693,8 @@ Verify User Can Serve And Query A Model With Token
 
 
 *** Keywords ***
-Suite Setup
-    [Documentation]
+Suite Setup    # robocop: off=too-many-calls-in-keyword
+    [Documentation]    Suite Setup Keyword
     Skip If Component Is Not Enabled    kserve
     RHOSi Setup
     Load Expected Responses
@@ -689,7 +707,7 @@ Suite Setup
     END
     ${dsc_kserve_mode}=    Get KServe Default Deployment Mode From DSC
     Set Suite Variable    ${DSC_KSERVE_MODE}    ${dsc_kserve_mode}
-    IF    "${dsc_kserve_mode}" == "RawDeployment"
+    IF    "${dsc_kserve_mode}" == "RawDeployment"    # robocop: off=inconsistent-variable-name,unnecessary-string-conversion,line-too-long
         Set Suite Variable    ${IS_KSERVE_RAW}    ${TRUE}
     ELSE
         Set Suite Variable    ${IS_KSERVE_RAW}    ${FALSE}
@@ -703,7 +721,7 @@ Get Model Pod Label Selector
     [Arguments]    ${model_name}    ${namespace}
     IF    ${IS_KSERVE_RAW}
         ${rc}  ${hash}=    Run And Return Rc And Output
-        ...    oc get pod -l serving.kserve.io/inferenceservice=${model_name} -ojsonpath='{.items[0].metadata.labels.pod-template-hash}'
+        ...    oc get pod -l serving.kserve.io/inferenceservice=${model_name} -ojsonpath='{.items[0].metadata.labels.pod-template-hash}'    # robocop: off=line-too-long
         Should Be Equal As Integers    ${rc}    ${0}    msg=${hash}
         ${label_selector}=    Set Variable    pod-template-hash=${hash}
     ELSE
@@ -721,6 +739,6 @@ Wait For New Replica Set To Be Ready
         Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${old_rev_id}
         ...    namespace=${namespace}    timeout=360s
     END
-    Wait Until Keyword Succeeds    5 times    5s
-    ...    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${namespace}    runtime=${TGIS_RUNTIME_NAME}    exp_replicas=${new_exp_replicas}
+    Wait Until Keyword Succeeds    5 times    5s    Wait For Model KServe Deployment To Be Ready
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_name}    namespace=${namespace}
+    ...    runtime=${TGIS_RUNTIME_NAME}    exp_replicas=${new_exp_replicas}    # robocop: off=file-too-long

@@ -5,57 +5,60 @@ Resource         ../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
 Suite Setup      Model Serving Cluster Setting Suite Setup
 Suite Teardown   Model Serving Cluster Setting Suite Teardown
 Test Setup       Model Serving Cluster Setting Test Setup
-Test Tags        modelservingsetting  ODS-2574  Tier1  Sanity
+Test Tags        modelservingsetting    ODS-2574    Sanity
+
 
 *** Variables ***
-${project_title}=  BLANKPROJ
-${models_tab}=  //button[@role="tab" and @aria-controls="model-server"]
+${PROJECT_TITLE}=  BLANKPROJ
+${MODELS_TAB}=  //button[@role="tab" and @aria-controls="model-server"]
+
 
 *** Test Cases ***
 Verify Correct Value in DS Project after Enabling Both Model Serving Platforms
-    [Documentation]    Verifies that correct values are present in the DS project after enabling both model serving platforms
-    [Tags]  ODS-2574
+    [Documentation]    Verifies that correct values are present in the DS project after enabling
+    ...    both model serving platforms
     Select CheckBox Multi Model Serving Platforms
     Select CheckBox Single Model Serving Platforms
-    Capture Page Screenshot
+    SeleniumLibrary.Capture Page Screenshot
     Save Changes In Cluster Settings
-    Open Data Science Project Details Page      ${project_title}    tab_id=model-server
-    Click Button     xpath:${models_tab}
-    Wait Until Page Contains Element    //*[@data-testid="single-serving-platform-card"]
-    Wait Until Page Contains Element    //*[@data-testid="multi-serving-platform-card"]
+    Open Data Science Project Details Page      ${PROJECT_TITLE}    tab_id=model-server
+    SeleniumLibrary.Click Button     xpath:${MODELS_TAB}
+    SeleniumLibrary.Wait Until Page Contains Element    //*[@data-testid="single-serving-platform-card"]
+    SeleniumLibrary.Wait Until Page Contains Element    //*[@data-testid="multi-serving-platform-card"]
 
 Verify Correct Value in DS Project after Enabling Multi Model Serving Platforms Only
-    [Documentation]    Verifies that correct values are present in the DS project after enabling Multi Model serving platforms only
-    [Tags]  ODS-2574
+    [Documentation]    Verifies that correct values are present in the DS project after enabling
+    ...    Multi Model serving platforms only
     Select CheckBox Multi Model Serving Platforms
-    Capture Page Screenshot
+    SeleniumLibrary.Capture Page Screenshot
     Save Changes In Cluster Settings
-    Open Data Science Project Details Page      ${project_title}    tab_id=model-server
-    Click Button     xpath:${models_tab}
-    Wait Until Page Contains Element    //*[contains(text(), "Multi-model serving enabled")]
-    Wait Until Page Contains Element     //button[contains(text(), 'Add model server')]
-    Page Should Not Contain Element    //button[contains(text(), 'Deploy model')]
+    Open Data Science Project Details Page      ${PROJECT_TITLE}    tab_id=model-server
+    SeleniumLibrary.Click Button     xpath:${MODELS_TAB}
+    SeleniumLibrary.Wait Until Page Contains Element    //*[contains(text(), "Multi-model serving enabled")]
+    SeleniumLibrary.Wait Until Page Contains Element     //button[contains(text(), 'Add model server')]
+    SeleniumLibrary.Page Should Not Contain Element    //button[contains(text(), 'Deploy model')]
 
 Verify Correct Value in DS Project after Enabling Single Model Serving Platforms Only
-    [Documentation]    Verifies that correct values are present in the DS project after enabling Single Model model serving platforms only
-    [Tags]  ODS-2574
+    [Documentation]    Verifies that correct values are present in the DS project after enabling
+    ...    Single Model model serving platforms only
     Select CheckBox Single Model Serving Platforms
-    Capture Page Screenshot
+    SeleniumLibrary.Capture Page Screenshot
     Save Changes In Cluster Settings
-    Open Data Science Project Details Page      ${project_title}    tab_id=model-server
-    Click Button     xpath:${models_tab}
-    Wait Until Page Contains Element    //button[contains(text(), 'Deploy model')]
-    Wait Until Page Contains Element    //*[contains(text(), "Single-model serving enabled")]
-    Page Should Not Contain Element     /button[contains(text(), 'Add model server')]
+    Open Data Science Project Details Page      ${PROJECT_TITLE}    tab_id=model-server
+    SeleniumLibrary.Click Button     xpath:${MODELS_TAB}
+    SeleniumLibrary.Wait Until Page Contains Element    //button[contains(text(), 'Deploy model')]
+    SeleniumLibrary.Wait Until Page Contains Element    //*[contains(text(), "Single-model serving enabled")]
+    SeleniumLibrary.Page Should Not Contain Element     /button[contains(text(), 'Add model server')]
 
 Verify Correct Value in DS Project after Disabling Both Model Serving Platforms
-    [Documentation]    Verifies that correct values are present in the DS project after disabling both model serving platforms
-    [Tags]  ODS-2574
-    Open Data Science Project Details Page      ${project_title}    tab_id=model-server
-    Click Button     xpath:${models_tab}
-    Wait Until Page Contains Element    //*[contains(text(), "No model serving platform selected")]
-    Page Should Not Contain Element     /button[contains(text(), 'Add model server')]
-    Page Should Not Contain Element    //button[contains(text(), 'Deploy model')]
+    [Documentation]    Verifies that correct values are present in the DS project after disabling
+    ...    both model serving platforms
+    Open Data Science Project Details Page      ${PROJECT_TITLE}    tab_id=model-server
+    SeleniumLibrary.Click Button     xpath:${MODELS_TAB}
+    SeleniumLibrary.Wait Until Page Contains Element    //*[contains(text(), "No model serving platform selected")]
+    SeleniumLibrary.Page Should Not Contain Element     /button[contains(text(), 'Add model server')]
+    SeleniumLibrary.Page Should Not Contain Element    //button[contains(text(), 'Deploy model')]
+
 
 *** Keywords ***
 Model Serving Cluster Setting Suite Setup
@@ -66,34 +69,34 @@ Model Serving Cluster Setting Suite Setup
     ...    browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
     ...    expected_page=${NONE}    wait_for_cards=${FALSE}
     Open Data Science Projects Home Page
-    Create Data Science Project    title=${project_title}    description=test project
+    Create Data Science Project    title=${PROJECT_TITLE}    description=test project
 
-Model Serving Cluster Setting Test Setup
+Model Serving Cluster Setting Test Setup    # robocop: off=too-many-calls-in-keyword
     [Documentation]    Opens the Dashboard Settings Deselect all the model serving.
     Open Dashboard Settings    settings_page=Cluster settings
-    Wait Until Element Is Visible    ${SINGLE_MODE_SERVING_CHECK_BOX}  timeout=300s
-    ${status_single_model}=  Get Checkbox State Of Single Modelserving platforms
+    SeleniumLibrary.Wait Until Element Is Visible    ${SINGLE_MODE_SERVING_CHECK_BOX}  timeout=300s
+    ${status_single_model}=  Get Checkbox State Of Single Modelserving platforms    # robocop: off=wrong-case-in-keyword-name,line-too-long
     IF  "${status_single_model}"=="True"
-        Unselect Checkbox   ${SINGLE_MODE_SERVING_CHECK_BOX}
+        SeleniumLibrary.Unselect Checkbox   ${SINGLE_MODE_SERVING_CHECK_BOX}
     END
 
-    ${status_multi_model}=  Get Checkbox State Of Multi Modelserving platforms
+    ${status_multi_model}=  Get Checkbox State Of Multi Modelserving platforms    # robocop: off=wrong-case-in-keyword-name,line-too-long
     IF  "${status_multi_model}"=="True"
-        Unselect Checkbox   ${MULTI_MODEL_SERVING_CHECK_BOX}
+        SeleniumLibrary.Unselect Checkbox   ${MULTI_MODEL_SERVING_CHECK_BOX}
     END
-    Capture Page Screenshot
-    ${status} =   Evaluate    '${status_single_model}' == 'True' or '${status_multi_model}' == 'True'
-    Run Keyword If    '${status}' == 'True'    Save Changes In Cluster Settings
-    Reload Page
-    Wait Until Page Contains Element    //input[@id="multi-model-serving-platform-enabled-checkbox"]  timeout=20
-
+    SeleniumLibrary.Capture Page Screenshot
+    ${status}=   Evaluate    '${status_single_model}' == 'True' or '${status_multi_model}' == 'True'
+    IF    '${status}' == 'True'    Save Changes In Cluster Settings
+    SeleniumLibrary.Reload Page
+    SeleniumLibrary.Wait Until Page Contains Element    //input[@id="multi-model-serving-platform-enabled-checkbox"]
+    ...    timeout=20
 
 Model Serving Cluster Setting Suite Teardown
     [Documentation]    Delete DS project and select both model serving options
-    Delete Project Via CLI By Display Name                 ${project_title}
-    Wait Until Data Science Project Is Deleted  ${project_title}
+    Delete Project Via CLI By Display Name                 ${PROJECT_TITLE}
+    Wait Until Data Science Project Is Deleted  ${PROJECT_TITLE}
     Open Dashboard Settings    settings_page=Cluster settings
-    Wait Until Page Contains Element    //*[contains(text(), "Model serving platforms")]  timeout=20
+    SeleniumLibrary.Wait Until Page Contains Element    //*[contains(text(), "Model serving platforms")]  timeout=20
     Select Both Model Serving Platforms
     Save Changes In Cluster Settings
-    Close Browser
+    SeleniumLibrary.Close Browser

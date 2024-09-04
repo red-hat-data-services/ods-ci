@@ -1,4 +1,5 @@
-*** Settings ***
+# robocop: off=non-local-variables-should-be-uppercase,unnecessary-string-conversion
+*** Settings ***    # robocop: off=mixed-tabs-and-spaces
 Documentation     Collection of CLI tests to validate the model serving stack for different Large Language Models (LLM).
 ...               These tests leverage on TGIS Standalone Serving Runtime
 Resource          ../../../Resources/OCP.resource
@@ -11,21 +12,22 @@ Test Tags         KServe-LLM
 
 *** Variables ***
 ${TEST_NS}=    tgismodel
-${RUNTIME_NAME}=  tgis-runtime   #vllm-runtime
+${RUNTIME_NAME}=  tgis-runtime   # vllm-runtime
 ${USE_PVC}=    ${TRUE}
 ${DOWNLOAD_IN_PVC}=    ${TRUE}
 ${USE_GPU}=    ${FALSE}
-${KSERVE_MODE}=    RawDeployment   #Serverless
-${MODEL_FORMAT}=   pytorch       #vLLM
-${PROTOCOL}=     grpc         #http
-${OVERLAY}=      ${EMPTY}               #vllm
+${KSERVE_MODE}=    RawDeployment   # Serverless
+${MODEL_FORMAT}=   pytorch       # vLLM
+${PROTOCOL}=     grpc         # http
+${OVERLAY}=      ${EMPTY}               # vllm
 ${GPU_TYPE}=     NVIDIA
 
+
 *** Test Cases ***
-Verify User Can Serve And Query A bigscience/mt0-xxl Model
+Verify User Can Serve And Query A bigscience/mt0-xxl Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and TGIS runtime
-    [Tags]    RHOAIENG-3477
+    [Tags]    RHOAIENG-3477    Tier2    Resources-GPU
     Setup Test Variables    model_name=mt0-xxl-hf    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
@@ -41,9 +43,11 @@ Verify User Can Serve And Query A bigscience/mt0-xxl Model
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    runtime=${RUNTIME_NAME}    timeout=900s
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
-    ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    IF   "${KSERVE_MODE}"=="RawDeployment"
+        Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    END
     Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1    protocol=${PROTOCOL}
     ...    namespace=${test_namespace}   query_idx=2    validate_response=${TRUE}    # temp
@@ -67,10 +71,10 @@ Verify User Can Serve And Query A bigscience/mt0-xxl Model
     ...    AND
     ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
 
-Verify User Can Serve And Query A google/flan-t5-xl Model
+Verify User Can Serve And Query A google/flan-t5-xl Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and TGIS runtime
-    [Tags]    RHOAIENG-3480
+    [Tags]    RHOAIENG-3480    Tier2    Resources-GPU
     Setup Test Variables    model_name=flan-t5-xl-hf    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}
     ${test_namespace}=   Set Variable    flant5xl-google
@@ -87,9 +91,11 @@ Verify User Can Serve And Query A google/flan-t5-xl Model
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    runtime=${RUNTIME_NAME}    timeout=900s
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
-    ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    IF    "${KSERVE_MODE}"=="RawDeployment"
+        Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    END
     Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1    protocol=${PROTOCOL}
     ...    namespace=${test_namespace}   query_idx=3   validate_response=${TRUE}
@@ -113,10 +119,10 @@ Verify User Can Serve And Query A google/flan-t5-xl Model
     ...    AND
     ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
 
-Verify User Can Serve And Query A google/flan-t5-xxl Model
+Verify User Can Serve And Query A google/flan-t5-xxl Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and TGIS runtime
-    [Tags]    RHOAIENG-3481
+    [Tags]    RHOAIENG-3481    Tier2    Resources-GPU
     Setup Test Variables    model_name=flan-t5-xxl-hf    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}
     ${test_namespace}=   Set Variable    flant5xxl-google
@@ -133,9 +139,11 @@ Verify User Can Serve And Query A google/flan-t5-xxl Model
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    runtime=${RUNTIME_NAME}    timeout=900s
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
-    ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    IF    "${KSERVE_MODE}"=="RawDeployment"
+        Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    END
     Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1    protocol=${PROTOCOL}
     ...    namespace=${test_namespace}   query_idx=3   validate_response=${TRUE}
@@ -159,10 +167,10 @@ Verify User Can Serve And Query A google/flan-t5-xxl Model
     ...    AND
     ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
 
-Verify User Can Serve And Query A elyza/elyza-japanese-llama-2-7b-instruct Model
+Verify User Can Serve And Query A elyza/elyza-japanese-llama-2-7b-instruct Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and TGIS standalone or vllm runtime
-    [Tags]    RHOAIENG-3479     VLLM
+    [Tags]    RHOAIENG-3479     VLLM    Tier2    Resources-GPU
     Setup Test Variables    model_name=elyza-japanese    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=ELYZA-japanese-Llama-2-7b-instruct-hf
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
@@ -184,9 +192,11 @@ Verify User Can Serve And Query A elyza/elyza-japanese-llama-2-7b-instruct Model
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    runtime=${RUNTIME_NAME}    timeout=900s
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
-    ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    IF    "${KSERVE_MODE}"=="RawDeployment"
+        Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    END
     IF     "${RUNTIME_NAME}" == "tgis-runtime" or "${KSERVE_MODE}" == "RawDeployment"
             Set Test Variable    ${RUNTIME_NAME}    tgis-runtime
             Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
@@ -220,10 +230,10 @@ Verify User Can Serve And Query A elyza/elyza-japanese-llama-2-7b-instruct Model
     ...    AND
     ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
 
-Verify User Can Serve And Query A ibm/mpt-7b-instruct2 Model
+Verify User Can Serve And Query A ibm/mpt-7b-instruct2 Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                (mpt-7b-instruct2) using Kserve and TGIS runtime
-    [Tags]    RHOAIENG-4201
+    [Tags]    RHOAIENG-4201    Tier2    Resources-GPU
     Setup Test Variables    model_name=mpt-7b-instruct2    use_pvc=${USE_PVC}    use_gpu=${FALSE}
     ...    kserve_mode=${KSERVE_MODE}
     ${test_namespace}=   Set Variable    mpt-7b-instruct2-ibm
@@ -240,9 +250,11 @@ Verify User Can Serve And Query A ibm/mpt-7b-instruct2 Model
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    runtime=${RUNTIME_NAME}    timeout=900s
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
-    ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    IF    "${KSERVE_MODE}"=="RawDeployment"
+        Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    END
     Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1    protocol=${PROTOCOL}
     ...    namespace=${test_namespace}   query_idx=0   validate_response=${TRUE}
@@ -266,10 +278,10 @@ Verify User Can Serve And Query A ibm/mpt-7b-instruct2 Model
     ...    AND
     ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
 
-Verify User Can Serve And Query A google/flan-ul-2 Model
+Verify User Can Serve And Query A google/flan-ul-2 Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and TGIS runtime
-    [Tags]    RHOAIENG-3482
+    [Tags]    RHOAIENG-3482    Tier2    Resources-GPU
     Setup Test Variables    model_name=flan-ul2-hf    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}   model_path=flan-ul2-hf
     ${test_namespace}=   Set Variable    flan-ul2-google
@@ -286,9 +298,11 @@ Verify User Can Serve And Query A google/flan-ul-2 Model
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    runtime=${RUNTIME_NAME}    timeout=900s
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
-    ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    IF    "${KSERVE_MODE}"=="RawDeployment"
+        Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    END
     Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1    protocol=${PROTOCOL}
     ...    namespace=${test_namespace}   query_idx=3   validate_response=${TRUE}
@@ -312,10 +326,10 @@ Verify User Can Serve And Query A google/flan-ul-2 Model
     ...    AND
     ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
 
-Verify User Can Serve And Query A codellama/codellama-34b-instruct-hf Model
+Verify User Can Serve And Query A codellama/codellama-34b-instruct-hf Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and TGIS runtime
-    [Tags]    RHOAIENG-4200
+    [Tags]    RHOAIENG-4200    Tier2    Resources-GPU
     Setup Test Variables    model_name=codellama-34b-instruct-hf    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}   model_path=codellama-34b-instruct-hf
     ${test_namespace}=   Set Variable    codellama-34b
@@ -332,9 +346,11 @@ Verify User Can Serve And Query A codellama/codellama-34b-instruct-hf Model
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    runtime=${RUNTIME_NAME}    timeout=3000s
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
-    ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    IF    "${KSERVE_MODE}"=="RawDeployment"
+        Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    END
     Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1    protocol=${PROTOCOL}
     ...    namespace=${test_namespace}   query_idx=5   validate_response=${TRUE}
@@ -350,10 +366,10 @@ Verify User Can Serve And Query A codellama/codellama-34b-instruct-hf Model
     ...    AND
     ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
 
-Verify User Can Serve And Query A meta-llama/llama-2-13b-chat Model
+Verify User Can Serve And Query A meta-llama/llama-2-13b-chat Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and TGIS standalone or vllm runtime
-    [Tags]    RHOAIENG-3483    VLLM
+    [Tags]    RHOAIENG-3483    VLLM    Tier2    Resources-GPU
     Setup Test Variables    model_name=llama-2-13b-chat    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=Llama-2-13b-chat-hf
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
@@ -375,9 +391,11 @@ Verify User Can Serve And Query A meta-llama/llama-2-13b-chat Model
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    runtime=${RUNTIME_NAME}    timeout=900s
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
-    ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    IF    "${KSERVE_MODE}"=="RawDeployment"
+        Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    END
     IF     "${RUNTIME_NAME}" == "tgis-runtime" or "${KSERVE_MODE}" == "RawDeployment"
             Set Test Variable    ${RUNTIME_NAME}    tgis-runtime
             Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
@@ -411,18 +429,18 @@ Verify User Can Serve And Query A meta-llama/llama-2-13b-chat Model
     ...    AND
     ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
 
-Verify User Can Serve And Query A google/flan-t5-xl Prompt Tuned Model
+Verify User Can Serve And Query A google/flan-t5-xl Prompt Tuned Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Tests for preparing, deploying and querying a prompt-tuned LLM model
     ...                using Kserve and TGIS runtime. It uses a google/flan-t5-xl prompt-tuned
     ...                to recognize customer complaints.
-    [Tags]    RHOAIENG-3494
+    [Tags]    RHOAIENG-3494    Tier2    Resources-GPU
     Setup Test Variables    model_name=flan-t5-xl-hf-ptuned    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=flan-t5-xl-hf
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}
     ...    storage_size=20Gi    model_path=${model_path}
-    Download Prompts Weights In PVC    prompts_path=flan-t5-xl-tuned    model_name=${model_name}    namespace=${test_namespace}
-    ...    bucket_name=${MODELS_BUCKET.NAME}    use_https=${USE_BUCKET_HTTPS}
+    Download Prompts Weights In PVC    prompts_path=flan-t5-xl-tuned    model_name=${model_name}
+    ...    namespace=${test_namespace}    bucket_name=${MODELS_BUCKET.NAME}    use_https=${USE_BUCKET_HTTPS}
     ...    storage_size=10Gi    model_path=${model_path}
     ${overlays}=    Create List    prompt-tuned
     ${requests}=    Create Dictionary    memory=40Gi
@@ -436,9 +454,11 @@ Verify User Can Serve And Query A google/flan-t5-xl Prompt Tuned Model
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    runtime=${RUNTIME_NAME}    timeout=300s
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
-    ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    IF    "${KSERVE_MODE}"=="RawDeployment"
+        Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    END
     ${prompt_tuned_params}=    Create Dictionary    prefix_id=flan-t5-xl-tuned
     Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
     ...    inference_type=all-tokens    n_times=1    protocol=${PROTOCOL}
@@ -471,10 +491,10 @@ Verify User Can Serve And Query A google/flan-t5-xl Prompt Tuned Model
     ...    AND
     ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
 
-Verify User Can Serve And Query A instructlab/merlinite-7b-lab Model
+Verify User Can Serve And Query A instructlab/merlinite-7b-lab Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve using TGIS standalone or vllm runtime
-    [Tags]    RHOAIENG-7690    VLLM
+    [Tags]    RHOAIENG-7690    VLLM    Tier2    Resources-GPU
     Setup Test Variables    model_name=merlinite-7b-lab    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=merlinite-7b-lab
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
@@ -496,9 +516,11 @@ Verify User Can Serve And Query A instructlab/merlinite-7b-lab Model
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    runtime=${RUNTIME_NAME}    timeout=900s
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
-    ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    IF    "${KSERVE_MODE}"=="RawDeployment"
+        Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    END
     IF     "${RUNTIME_NAME}" == "tgis-runtime" or "${KSERVE_MODE}" == "RawDeployment"
             Set Test Variable    ${RUNTIME_NAME}    tgis-runtime
             Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
@@ -532,10 +554,10 @@ Verify User Can Serve And Query A instructlab/merlinite-7b-lab Model
     ...    AND
     ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
 
-Verify User Can Serve And Query A ibm-granite/granite-8b-code-base Model
+Verify User Can Serve And Query A ibm-granite/granite-8b-code-base Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve using TGIS standalone or vllm runtime
-    [Tags]    RHOAIENG-7689    VLLM
+    [Tags]    RHOAIENG-7689    VLLM    Tier2    Resources-GPU
     Setup Test Variables    model_name=granite-8b-code   use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=granite-8b-code-base
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
@@ -557,9 +579,11 @@ Verify User Can Serve And Query A ibm-granite/granite-8b-code-base Model
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    runtime=${RUNTIME_NAME}    timeout=900s
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
-    ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    IF    "${KSERVE_MODE}"=="RawDeployment"
+        Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    END
     IF     "${RUNTIME_NAME}" == "tgis-runtime" or "${KSERVE_MODE}" == "RawDeployment"
             Set Test Variable    ${RUNTIME_NAME}    tgis-runtime
             Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
@@ -593,10 +617,10 @@ Verify User Can Serve And Query A ibm-granite/granite-8b-code-base Model
     ...    AND
     ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
 
-Verify User Can Serve And Query A intfloat/e5-mistral-7b-instruct Model
+Verify User Can Serve And Query A intfloat/e5-mistral-7b-instruct Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve using TGIS standalone or vllm runtime
-    [Tags]    RHOAIENG-7427    VLLM
+    [Tags]    RHOAIENG-7427    VLLM    Tier2    Resources-GPU
     Setup Test Variables    model_name=e5-mistral-7b   use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=e5-mistral-7b-instruct
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
@@ -618,9 +642,11 @@ Verify User Can Serve And Query A intfloat/e5-mistral-7b-instruct Model
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    runtime=${RUNTIME_NAME}    timeout=900s
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
-    ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    IF    "${KSERVE_MODE}"=="RawDeployment"
+        Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    END
     IF     "${RUNTIME_NAME}" == "tgis-runtime" or "${KSERVE_MODE}" == "RawDeployment"
             Skip   msg=Embedding endpoint is not supported for tgis as well as model architectures with "XXModel"
     ELSE IF    "${RUNTIME_NAME}" == "vllm-runtime" and "${KSERVE_MODE}" == "Serverless"
@@ -635,10 +661,10 @@ Verify User Can Serve And Query A intfloat/e5-mistral-7b-instruct Model
     ...    AND
     ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
 
-Verify User Can Serve And Query A meta-llama/llama-3-8B-Instruct Model
+Verify User Can Serve And Query A meta-llama/llama-3-8B-Instruct Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and TGIS standalone or vllm runtime
-    [Tags]    RHOAIENG-8831    VLLM
+    [Tags]    RHOAIENG-8831    VLLM    Tier2    Resources-GPU
     Setup Test Variables    model_name=llama-3-8b-chat    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=Meta-Llama-3-8B-Instruct
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
@@ -660,9 +686,11 @@ Verify User Can Serve And Query A meta-llama/llama-3-8B-Instruct Model
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    runtime=${RUNTIME_NAME}    timeout=900s
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
-    ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    IF    "${KSERVE_MODE}"=="RawDeployment"
+        Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    END
     IF     "${RUNTIME_NAME}" == "tgis-runtime" or "${KSERVE_MODE}" == "RawDeployment"
             Set Test Variable    ${RUNTIME_NAME}    tgis-runtime
             Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
@@ -696,10 +724,10 @@ Verify User Can Serve And Query A meta-llama/llama-3-8B-Instruct Model
     ...    AND
     ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
 
-Verify User Can Serve And Query A ibm-granite/granite-3b-code-instruct Model
+Verify User Can Serve And Query A ibm-granite/granite-3b-code-instruct Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve using TGIS standalone or vllm runtime
-    [Tags]    RHOAIENG-8819    VLLM
+    [Tags]    RHOAIENG-8819    VLLM    Tier2    Resources-GPU
     Setup Test Variables    model_name=granite-8b-code   use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=granite-3b-code-instruct
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
@@ -721,9 +749,11 @@ Verify User Can Serve And Query A ibm-granite/granite-3b-code-instruct Model
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    runtime=${RUNTIME_NAME}    timeout=900s
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
-    ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    IF    "${KSERVE_MODE}"=="RawDeployment"
+        Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    END
     IF     "${RUNTIME_NAME}" == "tgis-runtime" or "${KSERVE_MODE}" == "RawDeployment"
             Set Test Variable    ${RUNTIME_NAME}    tgis-runtime
             Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
@@ -757,10 +787,10 @@ Verify User Can Serve And Query A ibm-granite/granite-3b-code-instruct Model
     ...    AND
     ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
 
-Verify User Can Serve And Query A ibm-granite/granite-8b-code-instruct Model
+Verify User Can Serve And Query A ibm-granite/granite-8b-code-instruct Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve using TGIS standalone or vllm runtime
-    [Tags]    RHOAIENG-8830    VLLM
+    [Tags]    RHOAIENG-8830    VLLM    Tier2    Resources-GPU
     Setup Test Variables    model_name=granite-8b-code   use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=granite-8b-code-instruct
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
@@ -782,9 +812,11 @@ Verify User Can Serve And Query A ibm-granite/granite-8b-code-instruct Model
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    runtime=${RUNTIME_NAME}    timeout=900s
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
-    ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    IF    "${KSERVE_MODE}"=="RawDeployment"
+        Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    END
     IF     "${RUNTIME_NAME}" == "tgis-runtime" or "${KSERVE_MODE}" == "RawDeployment"
             Set Test Variable    ${RUNTIME_NAME}    tgis-runtime
             Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
@@ -818,10 +850,10 @@ Verify User Can Serve And Query A ibm-granite/granite-8b-code-instruct Model
     ...    AND
     ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
 
-Verify User Can Serve And Query A ibm-granite/granite-7b-lab Model
+Verify User Can Serve And Query A ibm-granite/granite-7b-lab Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve using TGIS standalone or vllm runtime
-    [Tags]    RHOAIENG-8830    VLLM
+    [Tags]    RHOAIENG-8830    VLLM    Tier2    Resources-GPU
     Setup Test Variables    model_name=granite-8b-code   use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=granite-7b-lab
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
@@ -843,9 +875,11 @@ Verify User Can Serve And Query A ibm-granite/granite-7b-lab Model
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    runtime=${RUNTIME_NAME}    timeout=900s
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
-    ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    IF    "${KSERVE_MODE}"=="RawDeployment"
+        Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    END
     IF     "${RUNTIME_NAME}" == "tgis-runtime" or "${KSERVE_MODE}" == "RawDeployment"
             Set Test Variable    ${RUNTIME_NAME}    tgis-runtime
             Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
@@ -879,7 +913,7 @@ Verify User Can Serve And Query A ibm-granite/granite-7b-lab Model
     ...    AND
     ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
 
-Verify User Can Serve And Query A ibm-granite/granite-7b-lab ngram speculative Model
+Verify User Can Serve And Query A ibm-granite/granite-7b-lab ngram speculative Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve using TGIS standalone or vllm runtime
     [Tags]    RHOAIENG-10162   VLLM
@@ -907,9 +941,11 @@ Verify User Can Serve And Query A ibm-granite/granite-7b-lab ngram speculative M
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    runtime=${RUNTIME_NAME}    timeout=900s
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
-    ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    IF    "${KSERVE_MODE}"=="RawDeployment"
+        Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    END
     IF     "${RUNTIME_NAME}" == "tgis-runtime" or "${KSERVE_MODE}" == "RawDeployment"
             Set Test Variable    ${RUNTIME_NAME}    tgis-runtime
             Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
@@ -943,10 +979,10 @@ Verify User Can Serve And Query A ibm-granite/granite-7b-lab ngram speculative M
     ...    AND
     ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
 
-Verify User Can Serve And Query A microsoft/Phi-3-vision-128k-instruct vision Model
+Verify User Can Serve And Query A microsoft/Phi-3-vision-128k-instruct vision Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve using TGIS standalone or vllm runtime
-    [Tags]    RHOAIENG-10164    VLLM
+    [Tags]    RHOAIENG-10164    VLLM    Tier2    Resources-GPU
     Setup Test Variables    model_name=phi-3-vision   use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=Phi-3-vision-128k-instruct
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
@@ -971,12 +1007,14 @@ Verify User Can Serve And Query A microsoft/Phi-3-vision-128k-instruct vision Mo
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    runtime=${RUNTIME_NAME}    timeout=900s
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
     IF     "${RUNTIME_NAME}" == "tgis-runtime" or "${KSERVE_MODE}" == "RawDeployment"
             Skip   msg=Vision model is not supported for tgis as of now
     END
-    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
-    ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    IF    "${KSERVE_MODE}"=="RawDeployment"
+        Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    END
     Query Model Multiple Times    model_name=${model_name}      runtime=${RUNTIME_NAME}    protocol=http
     ...    inference_type=chat-completions    n_times=1    query_idx=15
     ...    namespace=${test_namespace}   validate_response=${FALSE}
@@ -987,10 +1025,10 @@ Verify User Can Serve And Query A microsoft/Phi-3-vision-128k-instruct vision Mo
     ...    AND
     ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
 
-Verify User Can Serve And Query A meta-llama/llama-3.1-8B-Instruct Model
+Verify User Can Serve And Query A meta-llama/llama-31-8B-Instruct Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve for vllm runtime
-    [Tags]    RHOAIENG-10661    VLLM
+    [Tags]    RHOAIENG-10661    VLLM    Tier2    Resources-GPU
     Setup Test Variables    model_name=llama-3-8b-chat    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=Meta-Llama-3.1-8B
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
@@ -1015,9 +1053,11 @@ Verify User Can Serve And Query A meta-llama/llama-3.1-8B-Instruct Model
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    runtime=${RUNTIME_NAME}    timeout=900s
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
-    ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    IF    "${KSERVE_MODE}"=="RawDeployment"
+        Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    END
     IF     "${RUNTIME_NAME}" == "tgis-runtime" or "${KSERVE_MODE}" == "RawDeployment"
             Set Test Variable    ${RUNTIME_NAME}    tgis-runtime
             Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
@@ -1051,10 +1091,10 @@ Verify User Can Serve And Query A meta-llama/llama-3.1-8B-Instruct Model
     ...    AND
     ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
 
-Verify User Can Serve And Query RHAL AI granite-7b-starter Model
+Verify User Can Serve And Query RHAL AI granite-7b-starter Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve using TGIS standalone or vllm runtime
-    [Tags]    RHOAIENG-10154	    VLLM
+    [Tags]    RHOAIENG-10154	    VLLM    Tier2    Resources-GPU
     Setup Test Variables    model_name=granite-7b-lab   use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=granite-7b-starter
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
@@ -1076,9 +1116,11 @@ Verify User Can Serve And Query RHAL AI granite-7b-starter Model
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    runtime=${RUNTIME_NAME}    timeout=900s
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
-    ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    IF    "${KSERVE_MODE}"=="RawDeployment"
+        Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    END
     IF     "${RUNTIME_NAME}" == "tgis-runtime" or "${KSERVE_MODE}" == "RawDeployment"
             Set Test Variable    ${RUNTIME_NAME}    tgis-runtime
             Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
@@ -1112,10 +1154,10 @@ Verify User Can Serve And Query RHAL AI granite-7b-starter Model
     ...    AND
     ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
 
-Verify User Can Serve And Query Granite-7b Speculative Decoding Using Draft Model
+Verify User Can Serve And Query Granite-7b Speculative Decoding Using Draft Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve using  vllm runtime
-    [Tags]    RHOAIENG-10163	    VLLM
+    [Tags]    RHOAIENG-10163    VLLM    Tier2    Resources-GPU
     Setup Test Variables    model_name=granite-7b-lab   use_pvc=${FALSE}     use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=speculative_decoding
     IF     "${RUNTIME_NAME}" == "tgis-runtime"
@@ -1144,9 +1186,11 @@ Verify User Can Serve And Query Granite-7b Speculative Decoding Using Draft Mode
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    runtime=${RUNTIME_NAME}    timeout=1200s
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
-    ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    IF    "${KSERVE_MODE}"=="RawDeployment"
+        Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    END
     IF     "${RUNTIME_NAME}" == "tgis-runtime" or "${KSERVE_MODE}" == "RawDeployment"
             Set Test Variable    ${RUNTIME_NAME}    tgis-runtime
             Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
@@ -1180,10 +1224,10 @@ Verify User Can Serve And Query Granite-7b Speculative Decoding Using Draft Mode
     ...    AND
     ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
 
-Verify User Can Serve And Query RHAL AI Granite-7b-redhat-lab Model
+Verify User Can Serve And Query RHAL AI Granite-7b-redhat-lab Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve using vllm runtime
-    [Tags]    RHOAIENG-10155	    VLLM
+    [Tags]    RHOAIENG-10155    VLLM    Tier2    Resources-GPU
     Setup Test Variables    model_name=granite-7b-lab   use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=granite-7b-redhat-lab
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
@@ -1205,9 +1249,11 @@ Verify User Can Serve And Query RHAL AI Granite-7b-redhat-lab Model
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ...    namespace=${test_namespace}    runtime=${RUNTIME_NAME}    timeout=900s
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
-    ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    IF    "${KSERVE_MODE}"=="RawDeployment"
+        Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}
+    END
     IF     "${RUNTIME_NAME}" == "tgis-runtime" or "${KSERVE_MODE}" == "RawDeployment"
             Set Test Variable    ${RUNTIME_NAME}    tgis-runtime
             Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
@@ -1241,9 +1287,10 @@ Verify User Can Serve And Query RHAL AI Granite-7b-redhat-lab Model
     ...    AND
     ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    llm-query-process    kill=true
 
+
 *** Keywords ***
 Suite Setup
-    [Documentation]
+    [Documentation]    Suite Setup Keyword
     Skip If Component Is Not Enabled    kserve
     RHOSi Setup
     Load Expected Responses
@@ -1251,10 +1298,12 @@ Suite Setup
     Set Default Storage Class In GCP    default=ssd-csi
 
 Suite Teardown
+    [Documentation]    Suite Teardown Keyword
     Set Default Storage Class In GCP    default=standard-csi
     RHOSi Teardown
 
-Setup Test Variables
+Setup Test Variables    # robocop: off=too-many-calls-in-keyword
+    [Documentation]    Sets up variables for the Suite
     [Arguments]    ${model_name}    ${kserve_mode}=Serverless    ${use_pvc}=${FALSE}    ${use_gpu}=${FALSE}
     ...    ${model_path}=${model_name}
     Set Test Variable    ${model_name}
@@ -1270,9 +1319,9 @@ Setup Test Variables
     IF   ${use_gpu}
         ${supported_gpu_type}=   Convert To Lowercase         ${GPU_TYPE}
         IF  "${supported_gpu_type}" == "nvidia"
-             ${limits}=    Create Dictionary    nvidia.com/gpu=1
+            ${limits}=    Create Dictionary    nvidia.com/gpu=1
         ELSE IF    "${supported_gpu_type}" == "amd"
-             ${limits}=    Create Dictionary    amd.com/gpu=1
+            ${limits}=    Create Dictionary    amd.com/gpu=1
         ELSE
             FAIL   msg=Provided GPU type is not yet supported. Only nvidia and amd gpu type are supported
         END
@@ -1280,7 +1329,7 @@ Setup Test Variables
     ELSE
         Set Test Variable    ${limits}    &{EMPTY}
     END
-    IF    "${KSERVE_MODE}" == "RawDeployment"
+    IF    "${KSERVE_MODE}" == "RawDeployment"    # robocop: off=inconsistent-variable-name
         Set Test Variable    ${use_port_forwarding}    ${TRUE}
     ELSE
         Set Test Variable    ${use_port_forwarding}    ${FALSE}
@@ -1290,4 +1339,4 @@ Setup Test Variables
     Set Test Variable    ${access_key}    ${S3.AWS_SECRET_ACCESS_KEY}
     Set Test Variable    ${endpoint}    ${MODELS_BUCKET.ENDPOINT}
     Set Test Variable    ${region}    ${MODELS_BUCKET.REGION}
-    Set Log Level    INFO
+    Set Log Level    INFO    # robocop: off=file-too-long

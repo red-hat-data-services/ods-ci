@@ -55,7 +55,7 @@ Verify User Can Serve And Query A Model From Minio
 
 *** Keywords ***
 Suite Setup
-    [Documentation]
+    [Documentation]    Suite Setup Keyword
     Skip If Component Is Not Enabled    kserve
     RHOSi Setup
     Load Expected Responses

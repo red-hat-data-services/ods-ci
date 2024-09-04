@@ -1,3 +1,4 @@
+# robocop: off=variable-overwritten-before-usage,unused-variable
 *** Settings ***
 Documentation     Collection of CLI tests to validate the model serving stack for Large Language Models (LLM).
 ...               These tests leverage on Caikit+TGIS combined Serving Runtime
@@ -5,7 +6,7 @@ Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resou
 Resource          ../../../Resources/OCP.resource
 Resource          ../../../Resources/Page/Operators/ISVs.resource
 Resource          ../../../Resources/CLI/ModelServing/llm.resource
-Library            OpenShiftLibrary
+Library           OpenShiftLibrary
 Suite Setup       Install Model Serving Stack Dependencies
 Suite Teardown    RHOSi Teardown
 Test Tags         KServe
@@ -53,10 +54,10 @@ Verify External Dependency Operators Can Be Deployed
     [Tags]    ODS-2326
     Pass Execution    message=Installation done as part of Suite Setup.
 
-Verify User Can Serve And Query A Model
+Verify User Can Serve And Query A Model    # robocop: off=too-long-test-case
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    Sanity    Tier1    ODS-2341
+    [Tags]    Sanity    ODS-2341
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}-cli
     ${test_namespace}=    Set Variable     ${TEST_NS}-cli
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -77,9 +78,9 @@ Verify User Can Serve And Query A Model
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
-Verify User Can Deploy Multiple Models In The Same Namespace
+Verify User Can Deploy Multiple Models In The Same Namespace    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Checks if user can deploy and query multiple models in the same namespace
-    [Tags]    Sanity    Tier1    ODS-2371
+    [Tags]    Sanity    ODS-2371
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}-multisame
     ${test_namespace}=    Set Variable     ${TEST_NS}-multisame
     ${model_one_name}=    Set Variable    bloom-560m-caikit
@@ -110,9 +111,9 @@ Verify User Can Deploy Multiple Models In The Same Namespace
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
-Verify User Can Deploy Multiple Models In Different Namespaces
+Verify User Can Deploy Multiple Models In Different Namespaces    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Checks if user can deploy and query multiple models in the different namespaces
-    [Tags]    Sanity    Tier1    ODS-2378
+    [Tags]    Sanity    ODS-2378
     [Setup]    Run Keywords    Set Project And Runtime    namespace=singlemodel-multi1
     ...        AND
     ...        Set Project And Runtime    namespace=singlemodel-multi2
@@ -144,16 +145,16 @@ Verify User Can Deploy Multiple Models In Different Namespaces
     ...           Clean Up Test Project    test_ns=singlemodel-multi2    isvc_names=${models_names_ns_2}
     ...           wait_prj_deletion=${FALSE}
 
-Verify Model Upgrade Using Canaray Rollout
+Verify Model Upgrade Using Canaray Rollout    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Checks if user can apply Canary Rollout as deployment strategy
-    [Tags]    Sanity    Tier1    ODS-2372
+    [Tags]    Sanity    ODS-2372
     [Setup]    Set Project And Runtime    namespace=canary-model-upgrade
     ${test_namespace}=    Set Variable    canary-model-upgrade
     ${isvc_name}=    Set Variable    canary-caikit
     ${model_name}=    Set Variable    flan-t5-small-caikit
     ${isvcs_names}=    Create List    ${isvc_name}
     ${canary_percentage}=    Set Variable    ${30}
-    Compile Deploy And Query LLM model   isvc_name=${isvc_name}
+    Compile Deploy And Query LLM model   isvc_name=${isvc_name}    # robocop: off=wrong-case-in-keyword-name
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     ...    model_name=${model_name}
@@ -161,7 +162,7 @@ Verify Model Upgrade Using Canaray Rollout
     ...    validate_response=${FALSE}
     Log To Console    Applying Canary Tarffic for Model Upgrade
     ${model_name}=    Set Variable    bloom-560m-caikit
-    Compile Deploy And Query LLM model   isvc_name=${isvc_name}
+    Compile Deploy And Query LLM model   isvc_name=${isvc_name}    # robocop: off=wrong-case-in-keyword-name
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${BLOOM_STORAGE_URI}
     ...    model_name=${model_name}
@@ -173,7 +174,7 @@ Verify Model Upgrade Using Canaray Rollout
     ...    isvc_name=${isvc_name}    model_name=${model_name}    namespace=${test_namespace}
     ...    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Log To Console    Remove Canary Tarffic For Model Upgrade
-    Compile Deploy And Query LLM model    isvc_name=${isvc_name}
+    Compile Deploy And Query LLM model    isvc_name=${isvc_name}    # robocop: off=wrong-case-in-keyword-name
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_name=${model_name}
     ...    model_storage_uri=${BLOOM_STORAGE_URI}
@@ -192,23 +193,23 @@ Verify Model Pods Are Deleted When No Inference Service Is Present
     ${flan_isvc_name}=    Set Variable    flan-t5-small-caikit
     ${model_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${model_name}
-    Compile Deploy And Query LLM model   isvc_name=${flan_isvc_name}
+    Compile Deploy And Query LLM model   isvc_name=${flan_isvc_name}    # robocop: off=wrong-case-in-keyword-name
     ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
     ...    model_storage_uri=${FLAN_STORAGE_URI}
     ...    model_name=${model_name}
     ...    namespace=no-infer-kserve
     Delete InfereceService    isvc_name=${flan_isvc_name}    namespace=no-infer-kserve
-    ${rc}    ${out}=    Run And Return Rc And Output    oc wait pod -l serving.kserve.io/inferenceservice=${flan_isvc_name} -n no-infer-kserve --for=delete --timeout=200s
+    ${rc}    ${out}=    Run And Return Rc And Output    oc wait pod -l serving.kserve.io/inferenceservice=${flan_isvc_name} -n no-infer-kserve --for=delete --timeout=200s    # robocop: off=line-too-long
     Should Be Equal As Integers    ${rc}    ${0}
     [Teardown]   Clean Up Test Project    test_ns=no-infer-kserve
     ...    isvc_names=${models_names}   isvc_delete=${FALSE}
     ...    wait_prj_deletion=${FALSE}
 
-Verify User Can Change The Minimum Number Of Replicas For A Model
+Verify User Can Change The Minimum Number Of Replicas For A Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Checks if user can change the minimum number of replicas
     ...                of a deployed model.
     ...                Affected by:  https://issues.redhat.com/browse/SRVKS-1175
-    [Tags]    Sanity    Tier1    ODS-2376
+    [Tags]    Sanity    ODS-2376
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}-reps
     ${test_namespace}=    Set Variable     ${TEST_NS}-reps
     ${model_name}=    Set Variable    flan-t5-small-caikit
@@ -242,9 +243,9 @@ Verify User Can Change The Minimum Number Of Replicas For A Model
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
-Verify User Can Autoscale Using Concurrency
+Verify User Can Autoscale Using Concurrency    # robocop: off=too-long-test-case
     [Documentation]    Checks if model successfully scale up based on concurrency metrics (KPA)
-    [Tags]    Sanity    Tier1    ODS-2377
+    [Tags]    Sanity    ODS-2377
     [Setup]    Set Project And Runtime    namespace=autoscale-con
     ${test_namespace}=    Set Variable    autoscale-con
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -267,9 +268,9 @@ Verify User Can Autoscale Using Concurrency
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
-Verify User Can Validate Scale To Zero
+Verify User Can Validate Scale To Zero    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Checks if model successfully scale down to 0 if there's no traffic
-    [Tags]    Sanity    Tier1    ODS-2379
+    [Tags]    Sanity    ODS-2379
     [Setup]    Set Project And Runtime    namespace=autoscale-zero
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${flan_model_name}
@@ -305,9 +306,9 @@ Verify User Can Validate Scale To Zero
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
-Verify User Can Set Requests And Limits For A Model
+Verify User Can Set Requests And Limits For A Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Checks if user can set HW request and limits on their inference service object
-    [Tags]    Sanity    Tier1    ODS-2380
+    [Tags]    Sanity    ODS-2380
     [Setup]    Set Project And Runtime    namespace=hw-res
     ${test_namespace}=    Set Variable    hw-res
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -342,10 +343,10 @@ Verify User Can Set Requests And Limits For A Model
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
-Verify Model Can Be Served And Query On A GPU Node
+Verify Model Can Be Served And Query On A GPU Node    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
     ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    Sanity    Tier1    ODS-2381    Resources-GPU
+    [Tags]    Sanity    ODS-2381    Resources-GPU
     [Setup]    Set Project And Runtime    namespace=singlemodel-gpu
     ${test_namespace}=    Set Variable    singlemodel-gpu
     ${model_name}=    Set Variable    flan-t5-small-caikit
@@ -372,10 +373,10 @@ Verify Model Can Be Served And Query On A GPU Node
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${model_name}    wait_prj_deletion=${FALSE}
 
-Verify Non Admin Can Serve And Query A Model
+Verify Non Admin Can Serve And Query A Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Basic tests leveraging on a non-admin user for preparing, deploying and querying a LLM model
     ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    Sanity    Tier1    ODS-2326
+    [Tags]    Sanity    ODS-2326
     [Setup]    Run Keywords   Login To OCP Using API    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}  AND
     ...        Set Project And Runtime    namespace=non-admin-test
     ${test_namespace}=    Set Variable     non-admin-test
@@ -402,7 +403,7 @@ Verify Non Admin Can Serve And Query A Model
     ...        Clean Up Test Project    test_ns=${test_namespace}   isvc_names=${models_names}
     ...        wait_prj_deletion=${FALSE}    kserve_mode=${DSC_KSERVE_MODE}
 
-Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector
+Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector    # robocop: off=too-long-test-case
     [Documentation]    Deploys and queries flan-t5-large-grammar-synthesis model
     [Tags]    Tier2    ODS-2441
     [Setup]    Set Project And Runtime    namespace=grammar-model
@@ -425,7 +426,7 @@ Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
-Verify User Can Serve And Query Flan-t5 Large
+Verify User Can Serve And Query Flan-t5 Large    # robocop: off=too-long-test-case
     [Documentation]    Deploys and queries flan-t5-large model
     [Tags]    Tier2    ODS-2434
     [Setup]    Set Project And Runtime    namespace=flan-t5-large3
@@ -448,13 +449,13 @@ Verify User Can Serve And Query Flan-t5 Large
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
-Verify Runtime Upgrade Does Not Affect Deployed Models
+Verify Runtime Upgrade Does Not Affect Deployed Models    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Upgrades the caikit runtime inthe same NS where a model
     ...                is already deployed. The expecation is that the current model
     ...                must remain unchanged after the runtime upgrade.
     ...                ATTENTION: this is an approximation of the runtime upgrade scenario, however
     ...                the real case scenario will be defined once RHODS actually ships the Caikit runtime.
-    [Tags]    Sanity    Tier1    ODS-2404
+    [Tags]    Sanity    ODS-2404
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}-up
     ${test_namespace}=    Set Variable     ${TEST_NS}-up
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -476,20 +477,20 @@ Verify Runtime Upgrade Does Not Affect Deployed Models
     Sleep    5s    reason=Sleep, in case the runtime upgrade takes some time to start performing actions on the pods...
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
-    ${created_at_after}    ${caikitsha_after}=    Get Model Pods Creation Date And Image URL    model_name=${flan_model_name}
-    ...    namespace=${test_namespace}    container=transformer-container
+    ${created_at_after}    ${caikitsha_after}=    Get Model Pods Creation Date And Image URL
+    ...    model_name=${flan_model_name}    namespace=${test_namespace}    container=transformer-container
     Should Be Equal    ${created_at}    ${created_at_after}
     Should Be Equal As Strings    ${caikitsha}    ${caikitsha_after}
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
-Verify User Can Access Model Metrics From UWM
+Verify User Can Access Model Metrics From UWM    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Verifies that model metrics are available for users in the
     ...                OpenShift monitoring system (UserWorkloadMonitoring)
     ...                PARTIALLY DONE: it is checking number of requests, number of successful requests
     ...                and model pod cpu usage. Waiting for a complete list of expected metrics and
     ...                derived metrics.
-    [Tags]    Sanity    Tier1    ODS-2401
+    [Tags]    Sanity    ODS-2401
     [Setup]    Set Project And Runtime    namespace=singlemodel-metrics    enable_metrics=${TRUE}
     ${test_namespace}=    Set Variable     singlemodel-metrics
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -512,8 +513,9 @@ Verify User Can Access Model Metrics From UWM
     ...    User Can Fetch Number Of Requests Over Defined Time    thanos_url=${thanos_url}    thanos_token=${token}
     ...    model_name=${flan_model_name}    query_kind=single    namespace=${test_namespace}    period=5m    exp_value=3
     Wait Until Keyword Succeeds    20 times    5s
-    ...    User Can Fetch Number Of Successful Requests Over Defined Time    thanos_url=${thanos_url}    thanos_token=${token}
-    ...    model_name=${flan_model_name}    namespace=${test_namespace}    period=5m    exp_value=3
+    ...    User Can Fetch Number Of Successful Requests Over Defined Time    thanos_url=${thanos_url}
+    ...    thanos_token=${token}    model_name=${flan_model_name}    namespace=${test_namespace}    period=5m
+    ...    exp_value=3
     Wait Until Keyword Succeeds    20 times    5s
     ...    User Can Fetch CPU Utilization    thanos_url=${thanos_url}    thanos_token=${token}
     ...    model_name=${flan_model_name}    namespace=${test_namespace}    period=5m
@@ -526,10 +528,10 @@ Verify User Can Access Model Metrics From UWM
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
-Verify User Can Query A Model Using HTTP Calls
+Verify User Can Query A Model Using HTTP Calls    # robocop: off=too-long-test-case
     [Documentation]    From RHOAI 2.5 HTTP is allowed and default querying protocol.
     ...                This tests deploys the runtime enabling HTTP port and send queries to the model
-    [Tags]    ODS-2501    Sanity    Tier1
+    [Tags]    ODS-2501    Sanity
     [Setup]    Set Project And Runtime    namespace=kserve-http    protocol=http
     ${test_namespace}=    Set Variable     kserve-http
     ${model_name}=    Set Variable    flan-t5-small-caikit
@@ -552,7 +554,7 @@ Verify User Can Query A Model Using HTTP Calls
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
-Verify User Can Serve And Query A Model With Token
+Verify User Can Serve And Query A Model With Token    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                With Token using Kserve and Caikit+TGIS runtime
     [Tags]    RHOAIENG-6333
@@ -582,15 +584,16 @@ Verify User Can Serve And Query A Model With Token
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
+
 *** Keywords ***
-Install Model Serving Stack Dependencies
+Install Model Serving Stack Dependencies    # robocop: off=too-many-calls-in-keyword
     [Documentation]    Instaling And Configuring dependency operators: Service Mesh and Serverless.
     ...                This is likely going to change in the future and it will include a way to skip installation.
     ...                Caikit runtime will be shipped Out-of-the-box and will be removed from here.
     Skip If Component Is Not Enabled    kserve
     RHOSi Setup
-    IF    ${SKIP_PREREQS_INSTALL} == ${FALSE}
-        IF    ${SCRIPT_BASED_INSTALL} == ${FALSE}
+    IF    ${SKIP_PREREQS_INSTALL} == ${FALSE}    # robocop: off=expression-can-be-simplified
+        IF    ${SCRIPT_BASED_INSTALL} == ${FALSE}    # robocop: off=expression-can-be-simplified
             Install Service Mesh Stack
             Deploy Service Mesh CRs
             Install Serverless Stack
@@ -603,7 +606,7 @@ Install Model Serving Stack Dependencies
     Load Expected Responses
     ${dsc_kserve_mode}=    Get KServe Default Deployment Mode From DSC
     Set Suite Variable    ${DSC_KSERVE_MODE}    ${dsc_kserve_mode}
-    IF    "${dsc_kserve_mode}" == "RawDeployment"
+    IF    "${dsc_kserve_mode}" == "RawDeployment"    # robocop: off=inconsistent-variable-name,unnecessary-string-conversion,line-too-long
         Set Suite Variable    ${IS_KSERVE_RAW}    ${TRUE}
     ELSE
         Set Suite Variable    ${IS_KSERVE_RAW}    ${FALSE}
@@ -637,7 +640,7 @@ Install Service Mesh Stack
     Wait For Pods To Be Ready    label_selector=name=kiali-operator
     ...    namespace=${DEFAULT_OP_NS}
 
-Deploy Service Mesh CRs
+Deploy Service Mesh CRs    # robocop: off=too-long-keyword
     [Documentation]    Deploys CustomResources for ServiceMesh operator
     ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${SERVICEMESH_CR_NS}
     # Should Be Equal As Integers    ${rc}    ${0}
@@ -718,14 +721,13 @@ Install Serverless Stack
     Wait For Pods To Be Ready    label_selector=name=knative-operator
     ...    namespace=${SERVERLESS_NS}
 
-Deploy Serverless CRs
+Deploy Serverless CRs    # robocop: off=too-many-calls-in-keyword
     [Documentation]    Deploys the CustomResources for Serverless operator
     ${rc}    ${out}=    Run And Return Rc And Output    oc new-project ${SERVERLESS_CR_NS}
     Add Peer Authentication    namespace=${SERVERLESS_CR_NS}
     Add Namespace To ServiceMeshMemberRoll    namespace=${SERVERLESS_CR_NS}
     Copy File     ${SERVERLESS_KNATIVECR_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/knativeserving_istio_filled.yaml
-    ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i'' -e 's/{{SERVERLESS_CR_NS}}/${SERVERLESS_CR_NS}/g' ${LLM_RESOURCES_DIRPATH}/knativeserving_istio_filled.yaml
+    ${rc}    ${out}=    Run And Return Rc And Output    sed -i'' -e 's/{{SERVERLESS_CR_NS}}/${SERVERLESS_CR_NS}/g' ${LLM_RESOURCES_DIRPATH}/knativeserving_istio_filled.yaml    # robocop: off=line-too-long
     Should Be Equal As Integers    ${rc}    ${0}
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc apply -f ${LLM_RESOURCES_DIRPATH}/knativeserving_istio_filled.yaml
@@ -749,12 +751,12 @@ Deploy Serverless CRs
     ...    namespace=${SERVERLESS_CR_NS}
     Enable Toleration Feature In KNativeServing    knative_serving_ns=${SERVERLESS_CR_NS}
 
-Configure KNative Gateways
+Configure KNative Gateways    # robocop: off=too-many-calls-in-keyword
     [Documentation]    Sets up the KNative (Serverless) Gateways
     ${base_dir}=    Set Variable    tmp/certs
     ${exists}=    Run Keyword And Return Status
     ...    Directory Should Exist    ${base_dir}
-    IF    ${exists} == ${FALSE}
+    IF    ${exists} == ${FALSE}    # robocop: off=inline-if-can-be-used,expression-can-be-simplified
         Create Directory    ${base_dir}
     END
     ${rc}    ${domain_name}=    Run And Return Rc And Output
@@ -763,10 +765,10 @@ Configure KNative Gateways
     ${rc}    ${common_name}=    Run And Return Rc And Output
     ...    oc get ingresses.config.openshift.io cluster -o jsonpath='{.spec.domain}'|sed 's/apps.//'
     Should Be Equal As Integers    ${rc}    ${0}
-    ${rc}    ${out}=    Run And Return Rc And Output    ./${WILDCARD_GEN_SCRIPT_FILEPATH} ${base_dir} ${domain_name} ${common_name}
-    Should Be Equal As Integers    ${rc}    ${0}
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc create secret tls wildcard-certs --cert=${base_dir}/wildcard.crt --key=${base_dir}/wildcard.key -n ${SERVICEMESH_CR_NS}
+    ...    ./${WILDCARD_GEN_SCRIPT_FILEPATH} ${base_dir} ${domain_name} ${common_name}
+    Should Be Equal As Integers    ${rc}    ${0}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc create secret tls wildcard-certs --cert=${base_dir}/wildcard.crt --key=${base_dir}/wildcard.key -n ${SERVICEMESH_CR_NS}    # robocop: off=line-too-long
     Copy File     ${SERVERLESS_GATEWAYS_FILEPATH}    ${LLM_RESOURCES_DIRPATH}/gateways_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    sed -i'' -e 's/{{SERVICEMESH_CR_NS}}/${SERVICEMESH_CR_NS}/g' ${LLM_RESOURCES_DIRPATH}/gateways_filled.yaml
@@ -783,11 +785,9 @@ Run Install Script
     ...                https://github.com/opendatahub-io/caikit-tgis-serving/blob/main/demo/kserve/scripts/README.md
     ${rc}=    Run And Return Rc    git clone https://github.com/opendatahub-io/caikit-tgis-serving
     Should Be Equal As Integers    ${rc}    ${0}
-    IF    "${SCRIPT_TARGET_OPERATOR}" == "brew"
-        ${rc}=    Run And Watch Command    TARGET_OPERATOR=${SCRIPT_TARGET_OPERATOR} BREW_TAG=${SCRIPT_BREW_TAG} CHECK_UWM=false ./scripts/install/kserve-install.sh
-        ...    cwd=caikit-tgis-serving/demo/kserve
+    IF    "${SCRIPT_TARGET_OPERATOR}" == "brew"    # robocop: off=unnecessary-string-conversion
+        ${rc}=    Run And Watch Command    TARGET_OPERATOR=${SCRIPT_TARGET_OPERATOR} BREW_TAG=${SCRIPT_BREW_TAG} CHECK_UWM=false ./scripts/install/kserve-install.sh    cwd=caikit-tgis-serving/demo/kserve    # robocop: off=line-too-long
     ELSE
-        ${rc}=    Run And Watch Command    DEPLOY_ODH_OPERATOR=false TARGET_OPERATOR=${SCRIPT_TARGET_OPERATOR} CHECK_UWM=false ./scripts/install/kserve-install.sh
-        ...    cwd=caikit-tgis-serving/demo/kserve
+        ${rc}=    Run And Watch Command    DEPLOY_ODH_OPERATOR=false TARGET_OPERATOR=${SCRIPT_TARGET_OPERATOR} CHECK_UWM=false ./scripts/install/kserve-install.sh    cwd=caikit-tgis-serving/demo/kserve    # robocop: off=line-too-long
     END
-    Should Be Equal As Integers    ${rc}    ${0}
+    Should Be Equal As Integers    ${rc}    ${0}    # robocop: off=file-too-long

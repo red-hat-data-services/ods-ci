@@ -9,7 +9,7 @@ Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Resource          ../../../Resources/CLI/ModelServing/llm.resource
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Permissions.resource
-Library            OpenShiftLibrary
+Library           OpenShiftLibrary
 Suite Setup       Setup Kserve UI Test
 Suite Teardown    RHOSi Teardown
 Test Tags         KServe
@@ -31,7 +31,7 @@ Verify User Can Serve And Query A Model Using The UI
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and Caikit runtime
     ...                Intermittently failing: RHOAIENG-3148
-    [Tags]    Smoke    Tier1    ODS-2519    ODS-2522    FlakyTest
+    [Tags]    Smoke    ODS-2519    ODS-2522    FlakyTest
     [Setup]    Set Up Project    namespace=${TEST_NS}
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -48,9 +48,9 @@ Verify User Can Serve And Query A Model Using The UI
     Delete Model Via UI    ${flan_model_name}
     [Teardown]    Clean Up DSP Page
 
-Verify User Can Deploy Multiple Models In The Same Namespace Using The UI  # robocop: disable
+Verify User Can Deploy Multiple Models In The Same Namespace Using The UI    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Checks if user can deploy and query multiple models in the same namespace
-    [Tags]    Sanity    Tier1    ODS-2548
+    [Tags]    Sanity    ODS-2548
     [Setup]    Set Up Project    namespace=${TEST_NS}-multisame
     ${test_namespace}=    Set Variable     ${TEST_NS}-multisame
     ${model_one_name}=    Set Variable    bloom-560m-caikit
@@ -73,9 +73,9 @@ Verify User Can Deploy Multiple Models In The Same Namespace Using The UI  # rob
     ...    n_times=10    namespace=${test_namespace}    protocol=http    validate_response=${FALSE}
     [Teardown]    Clean Up DSP Page
 
-Verify User Can Deploy Multiple Models In Different Namespaces Using The UI  # robocop: disable
+Verify User Can Deploy Multiple Models In Different Namespaces Using The UI
     [Documentation]    Checks if user can deploy and query multiple models in the different namespaces
-    [Tags]    Sanity    Tier1    ODS-2549
+    [Tags]    Sanity    ODS-2549
     [Setup]    Set Up Project    namespace=singlemodel-multi1
     ${model_one_name}=    Set Variable    bloom-560m-caikit
     ${model_two_name}=    Set Variable    flan-t5-small-caikit
@@ -95,7 +95,7 @@ Verify User Can Deploy Multiple Models In Different Namespaces Using The UI  # r
     ...    n_times=2    namespace=singlemodel-multi2    protocol=http
     [Teardown]    Clean Up DSP Page
 
-Verify Model Pods Are Deleted When No Inference Service Is Present Using The UI  # robocop: disable
+Verify Model Pods Are Deleted When No Inference Service Is Present Using The UI
     [Documentation]    Checks if model pods gets successfully deleted after
     ...                deleting the KServe InferenceService object
     [Tags]    Tier2    ODS-2550
@@ -105,13 +105,13 @@ Verify Model Pods Are Deleted When No Inference Service Is Present Using The UI 
     Deploy Kserve Model Via UI    ${model_name}    serving_runtime=Caikit TGIS    data_connection=kserve-connection
     ...    path=flan-t5-small/${model_name}
     Delete InfereceService    isvc_name=${flan_isvc_name}    namespace=no-infer-kserve
-    ${rc}    ${out}=    Run And Return Rc And Output    oc wait pod -l serving.kserve.io/inferenceservice=${flan_isvc_name} -n no-infer-kserve --for=delete --timeout=200s  #robocop: disable
+    ${rc}    ${out}=    Run And Return Rc And Output    oc wait pod -l serving.kserve.io/inferenceservice=${flan_isvc_name} -n no-infer-kserve --for=delete --timeout=200s    # robocop: off=line-too-long
     Should Be Equal As Integers    ${rc}    ${0}
     [Teardown]   Clean Up DSP Page
 
-Verify User Can Set Requests And Limits For A Model Using The UI  # robocop: disable
+Verify User Can Set Requests And Limits For A Model Using The UI    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Checks if user can set HW request and limits on their inference service object
-    [Tags]    Sanity    Tier1    ODS-2551
+    [Tags]    Sanity    ODS-2551
     [Setup]    Set Up Project    namespace=hw-res
     ${test_namespace}=    Set Variable    hw-res
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -147,10 +147,10 @@ Verify User Can Set Requests And Limits For A Model Using The UI  # robocop: dis
     ...    namespace=${test_namespace}    exp_requests=${new_requests}    exp_limits=${new_limits}
     [Teardown]   Clean Up DSP Page
 
-Verify Model Can Be Served And Query On A GPU Node Using The UI  # robocop: disable
+Verify Model Can Be Served And Query On A GPU Node Using The UI    # robocop: off=too-long-test-case
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
     ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    Sanity    Tier1    ODS-2523   Resources-GPU
+    [Tags]    Sanity    ODS-2523   Resources-GPU
     [Setup]    Set Up Project    namespace=singlemodel-gpu
     ${test_namespace}=    Set Variable    singlemodel-gpu
     ${model_name}=    Set Variable    flan-t5-small-caikit
@@ -172,10 +172,10 @@ Verify Model Can Be Served And Query On A GPU Node Using The UI  # robocop: disa
     ...    validate_response=${FALSE}    protocol=http
     [Teardown]   Clean Up DSP Page
 
-Verify Non Admin Can Serve And Query A Model Using The UI  # robocop: disable
+Verify Non Admin Can Serve And Query A Model Using The UI    # robocop: off=too-long-test-case
     [Documentation]    Basic tests leveraging on a non-admin user for preparing, deploying and querying a LLM model
     ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    Smoke    Tier1    ODS-2552
+    [Tags]    Smoke    ODS-2552
     [Setup]    Run Keywords    Setup Kserve UI Test    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}  AND
     ...        Set Up Project    namespace=non-admin-test    single_prj=${FALSE}
     ${test_namespace}=    Set Variable     non-admin-test
@@ -232,7 +232,7 @@ Verify User Can Serve But Can't Query A Token Protected Model Without The Token
     Delete Model Via UI    ${flan_model_name}
     [Teardown]    Clean Up DSP Page
 
-Verify User Can Serve And Query A Model Using The UI Protected With Multiple Tokens
+Verify User Can Serve And Query A Model Using The UI Protected With Multiple Tokens    # robocop: off=too-long-test-case
     [Documentation]    Deploying and querying a Token Protected LLM model
     ...                using Kserve and Caikit runtime, using multiple tokens
     [Tags]    Tier1    RHOAIENG-4603
@@ -258,7 +258,7 @@ Verify User Can Serve And Query A Model Using The UI Protected With Multiple Tok
     Delete Model Via UI    ${flan_model_name}
     [Teardown]    Clean Up DSP Page
 
-Verify User Can not Query A Token Protected Model With A Disabled Token Using The UI
+Verify User Can not Query A Token Protected Model With A Disabled Token Using The UI    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Deploy an LLM (using Kserve and Caikit runtime) protected by different Tokens
     ...                and try to query it using a disabled token
     [Tags]    Tier1    RHOAIENG-4603
@@ -273,22 +273,20 @@ Verify User Can not Query A Token Protected Model With A Disabled Token Using Th
     ...    single_model=${TRUE}    model_name=${flan_model_name}
     Open Model Edit Modal    ${flan_model_name}
     Disable Token Authentication    service_account_name=default-name
-    Click Button    Deploy
+    SeleniumLibrary.Click Button    Deploy
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Run Keyword And Expect Error    *Expected status: 401 != 200*
-    ...    Query Model Multiple Times    model_name=${flan_model_name}
-    ...        inference_type=all-tokens    n_times=1
-    ...        namespace=${test_namespace}    protocol=http
-    ...        token=${model_token_1}
+    ...    Query Model Multiple Times    model_name=${flan_model_name}   inference_type=all-tokens    n_times=1
+    ...    namespace=${test_namespace}    protocol=http    token=${model_token_1}
     Delete Model Via UI    ${flan_model_name}
     [Teardown]    Clean Up DSP Page
 
-Verify User Can Query A Token Protected Model Using The UI Without Token After Disabling Token Protection
+Verify User Can Query A Token Protected Model Using The UI Without Token After Disabling Token Protection    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Deploying and querying a Token Protected LLM model using Kserve and Caikit runtime.
     ...                Verify the token Works and without Token it Does not Work.
     ...                Disable the token authentication and verify that the model can be queried without token.
-    [Tags]    Sanity    Tier1    RHOAIENG-4603
+    [Tags]    Sanity    RHOAIENG-4603
     [Setup]    Set Up Project    namespace=${TEST_NS}
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -303,18 +301,15 @@ Verify User Can Query A Token Protected Model Using The UI Without Token After D
     ...    namespace=${test_namespace}    protocol=http
     ...    token=${model_token}
     Run Keyword And Expect Error    *Expected status: 401 != 200*
-    ...    Query Model Multiple Times    model_name=${flan_model_name}
-    ...        inference_type=all-tokens    n_times=1
-    ...        namespace=${test_namespace}    protocol=http
+    ...    Query Model Multiple Times    model_name=${flan_model_name}    inference_type=all-tokens    n_times=1
+    ...    namespace=${test_namespace}    protocol=http
     Open Model Edit Modal    ${flan_model_name}
     Disable Token Authentication
-    Click Button    Deploy
+    SeleniumLibrary.Click Button    Deploy
     # The verification will fail due to a temporary duplication of the replicas while the model is restarted
     Sleep    60s    msg=Wait for the model pod replicas to scale down
-    Wait For Pods Numbers    1
-        ...                   namespace=${test_namespace}
-        ...                   label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
-        ...                   timeout=1200
+    Wait For Pods Numbers    1    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}    timeout=1200
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Query Model Multiple Times    model_name=${flan_model_name}
@@ -323,7 +318,7 @@ Verify User Can Query A Token Protected Model Using The UI Without Token After D
     Delete Model Via UI    ${flan_model_name}
     [Teardown]    Clean Up DSP Page
 
-Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector Using The UI  # robocop: disable
+Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector Using The UI
     [Documentation]    Deploys and queries flan-t5-large-grammar-synthesis model
     [Tags]    Tier2    ODS-2553
     [Setup]    Set Up Project    namespace=grammar-model
@@ -341,7 +336,7 @@ Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector Using The UI  #
     ...    namespace=${test_namespace}    query_idx=${1}    validate_response=${FALSE}
     [Teardown]    Clean Up DSP Page
 
-Verify User Can Serve And Query Flan-t5 Large Using The UI  # robocop: disable
+Verify User Can Serve And Query Flan-t5 Large Using The UI
     [Documentation]    Deploys and queries flan-t5-large model
     [Tags]    Tier2    ODS-2554
     [Setup]    Set Up Project    namespace=flan-t5-large3
@@ -360,14 +355,14 @@ Verify User Can Serve And Query Flan-t5 Large Using The UI  # robocop: disable
     ...    namespace=${test_namespace}    query_idx=${0}    protocol=http    validate_response=${FALSE}
     [Teardown]    Clean Up DSP Page
 
-Verify User Can Access Model Metrics From UWM Using The UI  # robocop: disable
+Verify User Can Access Model Metrics From UWM Using The UI    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Verifies that model metrics are available for users in the
     ...                OpenShift monitoring system (UserWorkloadMonitoring)
     ...                PARTIALLY DONE: it is checking number of requests, number of successful requests
     ...                and model pod cpu usage. Waiting for a complete list of expected metrics and
     ...                derived metrics.
     ...                ProductBug: RHOAIENG-3236
-    [Tags]    Smoke    Tier1    ODS-2555    ProductBug
+    [Tags]    Smoke    ODS-2555    ProductBug
     [Setup]    Set Up Project   namespace=singlemodel-metrics    enable_metrics=${TRUE}
     ${test_namespace}=    Set Variable     singlemodel-metrics
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -400,11 +395,11 @@ Verify User Can Access Model Metrics From UWM Using The UI  # robocop: disable
     ...    model_name=${flan_model_name}    query_kind=stream    namespace=${test_namespace}    period=5m    exp_value=1
     [Teardown]    Clean Up DSP Page
 
-Verify User With Edit Permission Can Deploy Query And Delete A LLM
+Verify User With Edit Permission Can Deploy Query And Delete A LLM    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    This test case verifies that a user with Edit permission on a DS Project can still deploy, query
     ...    and delete a LLM served with caikit
     ...    Issue reported for this test in the past: https://issues.redhat.com/browse/RHOAIENG-548
-    [Tags]    Sanity    Tier1    ODS-2581
+    [Tags]    Sanity    ODS-2581
     [Setup]    Set Up Project    namespace=${TEST_NS}-edit-permission
     ${test_namespace}=    Set Variable     ${TEST_NS}-edit-permission
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -418,9 +413,10 @@ Verify User With Edit Permission Can Deploy Query And Delete A LLM
     Run Keyword And Continue On Failure    Deploy Kserve Model Via UI    ${flan_model_name}
     ...    serving_runtime=Caikit TGIS    data_connection=kserve-connection    path=flan-t5-small/${flan_model_name}
     # Needed because of ProductBug
-    ${modal}=    Run Keyword And Return Status    Page Should Contain Element    xpath=${KSERVE_MODAL_HEADER}
-    IF  ${modal}==${TRUE}
-        Click Element    //button[@aria-label="Close"]
+    ${modal}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain Element
+    ...    xpath=${KSERVE_MODAL_HEADER}
+    IF  ${modal}
+        SeleniumLibrary.Click Element    //button[@aria-label="Close"]
     END
     Run Keyword And Continue On Failure    Wait For Model KServe Deployment To Be Ready
     ...    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
@@ -437,7 +433,7 @@ Verify User With Edit Permission Can Deploy Query And Delete A LLM
     Wait For RHODS Dashboard To Load
     [Teardown]    Clean Up DSP Page
 
-Verify User With Admin Permission Can Deploy Query And Delete A LLM
+Verify User With Admin Permission Can Deploy Query And Delete A LLM    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    This test case verifies that a user with Admin permission on a DS Project can still deploy, query
     ...    and delete a LLM served with caikit
     [Tags]    Sanity    Tier1    ODS-2582
@@ -482,8 +478,8 @@ Setup Kserve UI Test
     Fetch CA Certificate If RHODS Is Self-Managed
     ${dsc_kserve_mode}=    Get KServe Default Deployment Mode From DSC
     Set Suite Variable    ${DSC_KSERVE_MODE}    ${dsc_kserve_mode}
-    IF    "${dsc_kserve_mode}" == "RawDeployment"
+    IF    "${dsc_kserve_mode}" == "RawDeployment"    # robocop: off=inconsistent-variable-name,unnecessary-string-conversion,line-too-long
         Set Suite Variable    ${IS_KSERVE_RAW}    ${TRUE}
     ELSE
         Set Suite Variable    ${IS_KSERVE_RAW}    ${FALSE}
-    END
+    END    # robocop: off=file-too-long

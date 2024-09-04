@@ -14,7 +14,7 @@ ${RUNTIME_NAME}=  ovms-runtime
 ${USE_PVC}=    ${TRUE}
 ${DOWNLOAD_IN_PVC}=    ${TRUE}
 ${USE_GPU}=    ${FALSE}
-${KSERVE_MODE}=    RawDeployment    #RawDeployment   #Serverless
+${KSERVE_MODE}=    RawDeployment    # RawDeployment   # Serverless
 ${MODEL_FORMAT}=   onnx
 ${PROTOCOL}=     http
 ${MODEL_NAME}=    test-dir
@@ -23,12 +23,12 @@ ${OVERLAY}=      ${EMPTY}
 ${MODELS_BUCKET}=    ${S3.BUCKET_1}
 ${INFERENCE_INPUT}=    @tests/Resources/Files/modelmesh-mnist-input.json
 
+
 *** Test Cases ***
-Verify User Can Serve And Query ovms Model
+Verify User Can Serve And Query ovms Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Basic tests for preparing, deploying and querying model
     ...                using Kserve and ovms runtime
     [Tags]    OVMS
-    ...       Tier1
     ...       Smoke
     ...       OpenDataHub
     ...       RHOAIENG-9045
@@ -53,24 +53,24 @@ Verify User Can Serve And Query ovms Model
     ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ${service_port}=    Extract Service Port    service_name=${model_name}-predictor    protocol=TCP
     ...    namespace=${test_namespace}
-    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"
-    ...    Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}  local_port=${service_port}
-    ...    remote_port=${service_port}    process_alias=ovms-process
+    IF   "${KSERVE_MODE}"=="RawDeployment"
+        Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}  local_port=${service_port}
+        ...    remote_port=${service_port}    process_alias=ovms-process
+    END
     Verify Model Inference With Retries   model_name=${model_name}    inference_input=${INFERENCE_INPUT}
     ...    expected_inference_output=${EXPECTED_INFERENCE_OUTPUT}   project_title=${test_namespace}
     ...    deployment_mode="Cli"  kserve_mode=${KSERVE_MODE}    service_port=${service_port}
     ...    end_point=/v2/models/${model_name}/infer  retries=10
-
-   [Teardown]    Run Keywords
-   ...    Clean Up Test Project    test_ns=${test_namespace}
-   ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}    kserve_mode=${KSERVE_MODE}
-   ...    AND
-   ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    ovms-process    kill=true
+    [Teardown]    Run Keywords
+    ...    Clean Up Test Project    test_ns=${test_namespace}
+    ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}    kserve_mode=${KSERVE_MODE}
+    ...    AND
+    ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    ovms-process    kill=true
 
 
 *** Keywords ***
 Suite Setup
-    [Documentation]
+    [Documentation]    Suite setup keyword
     Set Library Search Order  SeleniumLibrary
     Skip If Component Is Not Enabled    kserve
     RHOSi Setup
@@ -78,10 +78,12 @@ Suite Setup
     Set Default Storage Class In GCP    default=ssd-csi
 
 Suite Teardown
+    [Documentation]    Suite teardown keyword
     Set Default Storage Class In GCP    default=standard-csi
     RHOSi Teardown
 
-Setup Test Variables
+Setup Test Variables    # robocop: off=too-many-calls-in-keyword
+    [Documentation]    Sets variables for the Suite
     [Arguments]    ${model_name}    ${kserve_mode}=Serverless    ${use_pvc}=${FALSE}    ${use_gpu}=${FALSE}
     ...    ${model_path}=${model_name}
     Set Test Variable    ${model_name}

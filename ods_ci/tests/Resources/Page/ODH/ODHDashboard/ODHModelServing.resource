@@ -330,6 +330,7 @@ Verify Model Inference
     END
     ${inference_output}=    Get Model Inference    model_name=${model_name}    inference_input=${inference_input}   token_auth=${token_auth}    kserve_mode=${kserve_mode}
     ...    project_title=${project_title}   deployment_mode=${deployment_mode}   service_port=${service_port}   end_point=${end_point}
+    Log    ${inference_output}
     ${result}    ${list}=    Inference Comparison    ${expected_inference_output}    ${inference_output}
     Log    ${result}
     Log    ${list}
@@ -353,7 +354,6 @@ Verify Model Inference With Retries
     ...            ${service_port}=${NONE}   ${end_point}=${NONE}
     ${status}=    Run Keyword And Return Status    Verify Model Inference
     ...    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}    ${project_title}
-    Log    ${inference_input}
     IF    not ${status}
         ${retry}=    Set Variable    ${0}
         WHILE    ${retry} < ${retries}

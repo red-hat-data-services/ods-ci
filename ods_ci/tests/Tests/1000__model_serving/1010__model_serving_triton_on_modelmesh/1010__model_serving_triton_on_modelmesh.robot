@@ -17,8 +17,8 @@ Suite Setup       Triton On Kserve Suite Setup
 Test Tags         Kserve
 
 *** Variables ***
-${INFERENCE_REST_INPUT_ONNX}=    @tests/Resources/Files/triton/kserve-triton-onnx-rest-input.json
-${PRJ_TITLE}=    ms-triton-project-mm0
+${INFERENCE_REST_INPUT_ONNX_FILE}=    tests/Resources/Files/triton/kserve-triton-onnx-rest-input.json
+${PRJ_TITLE}=    ms-triton-project-mm1
 ${PRJ_DESCRIPTION}=    project used for model serving triton runtime tests
 ${MODEL_CREATED}=    ${FALSE}
 ${ONNX_MODEL_NAME}=    densenet_onnx
@@ -26,7 +26,7 @@ ${ONNX_MODEL_LABEL}=     densenetonnx
 ${ONNX_RUNTIME_NAME}=    modelmesh-triton
 ${RESOURCES_DIRPATH}=        tests/Resources/Files/triton
 ${ONNX_MODELMESH_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_onnx_modelmesh_runtime.yaml
-${EXPECTED_INFERENCE_REST_OUTPUT_FILE}=      tests/Resources/Files/triton/kserve-triton-onnx-rest-output.json
+${EXPECTED_INFERENCE_REST_OUTPUT_FILE}=      tests/Resources/Files/triton/modelmesh-triton-onnx-rest-output.json
 
 *** Test Cases ***
 Test Onnx Model Rest Inference Via UI (Triton on Modelmesh)
@@ -44,8 +44,6 @@ Test Onnx Model Rest Inference Via UI (Triton on Modelmesh)
     Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
-    #Deploy Kserve Model Via UI    model_name=${ONNX_MODEL_NAME}    serving_runtime=modelmesh-triton
-    #...    data_connection=model-serving-connection    path=triton/model_repository/densenet_onnx/    model_framework=onnx - 1
     Create Model Server    token=${TRUE}    runtime=${ONNX_RUNTIME_NAME}    server_name=${ONNX_RUNTIME_NAME}    existing_server=${TRUE}
     Sleep    10s
     Serve Model    project_name=${PRJ_TITLE}    model_name=${ONNX_MODEL_NAME}    framework=onnx - 1
@@ -56,24 +54,11 @@ Test Onnx Model Rest Inference Via UI (Triton on Modelmesh)
     Verify Model Status    ${ONNX_MODEL_NAME}    success
     ${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}=     Load Json File      file_path=${EXPECTED_INFERENCE_REST_OUTPUT_FILE}
     Log     ${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}
+    ${INFERENCE_REST_INPUT_ONNX}=     Load Json File      file_path=${INFERENCE_REST_INPUT_ONNX_FILE}
+    Log     ${INFERENCE_REST_INPUT_ONNX}
     Verify Model Inference With Retries    ${ONNX_MODEL_NAME}    ${INFERENCE_REST_INPUT_ONNX}    ${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}
     ...    token_auth=${TRUE}
     ...    project_title=${PRJ_TITLE}
-    #${runtime_pod_name}=    Replace String Using Regexp    string=${ONNX_RUNTIME_NAME}    pattern=\\s    replace_with=-
-    #${runtime_pod_name}=    Convert To Lower Case    ${runtime_pod_name}
-    #Wait Until Keyword Succeeds    5 min  10 sec  Verify Openvino Deployment    runtime_name=${runtime_pod_name}
-    #...    project_name=${PRJ_TITLE}
-    #Wait Until Keyword Succeeds    5 min  10 sec  Verify Serving Service    ${PRJ_TITLE}
-    #Verify Model Status    ${ONNX_MODEL_NAME}    success
-    #Run Keyword And Continue On Failure    Verify Model Inference    ${ONNX_MODEL_NAME}    ${INFERENCE_REST_INPUT_ONNX}
-    #...    ${EXPECTED_INFERENCE_REST_OUTPUT_FILE}    token_auth=${FALSE}
-    #Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${ONNX_MODEL_LABEL}
-    #...    namespace=${PRJ_TITLE}
-    #${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}=     Load Json File     file_path=${EXPECTED_INFERENCE_REST_OUTPUT_FILE}
-    #...     as_string=${TRUE}
-    #Run Keyword And Continue On Failure    Verify Model Inference With Retries
-    #...    ${ONNX_MODEL_NAME}    ${INFERENCE_REST_INPUT_ONNX}    ${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}    token_auth=${FALSE}
-    #...    project_title=${PRJ_TITLE}
     #[Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${ONNX_MODEL_NAME}
     #...  project_title=${PRJ_TITLE}
     #...  AND

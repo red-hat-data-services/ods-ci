@@ -12,21 +12,21 @@ Get must-gather Logs
     ${output}=    Run process    tests/Resources/CLI/MustGather/get-must-gather-logs.sh     shell=yes
     Should Be Equal As Integers	  ${output.rc}	 0
     Should Not Contain    ${output.stdout}    FAIL
-    ${must-gather-dir}=  Run     ls -d must-gather.local.*
-    ${namespaces-log-dir}=      Run     ls -d ${must-gather-dir}/quay-io-modh-must-gather-sha256-*/namespaces
-    Set Suite Variable      ${must-gather-dir}
-    Set Suite Variable      ${namespaces-log-dir}
-    Directory Should Exist    ${must-gather-dir}
-    Directory Should Not Be Empty   ${must-gather-dir}
+    ${must_gather_dir}=  Run     ls -d must-gather.local.*
+    ${namespaces_log_dir}=      Run     ls -d ${must_gather_dir}/quay-io-modh-must-gather-sha256-*/namespaces
+    Set Suite Variable      ${must_gather_dir}
+    Set Suite Variable      ${namespaces_log_dir}
+    Directory Should Exist    ${must_gather_dir}
+    Directory Should Not Be Empty   ${must_gather_dir}
 
 Verify Logs For ${namespace}
     [Documentation]    Verifies the must-gather logs related to a namespace
-    Directory Should Exist    ${namespaces-log-dir}/${namespace}
-    Directory Should Not Be Empty    ${namespaces-log-dir}/${namespace}
-    Directory Should Not Be Empty    ${namespaces-log-dir}/${namespace}/pods
-    ${log-files}=     Run   find ${namespaces-log-dir}/${namespace}/pods -type f -name "*.log"
-    Should Not Be Equal    ${log-files}  ${EMPTY}
+    Directory Should Exist    ${namespaces_log_dir}/${namespace}
+    Directory Should Not Be Empty    ${namespaces_log_dir}/${namespace}
+    Directory Should Not Be Empty    ${namespaces_log_dir}/${namespace}/pods
+    ${log_files}=     Run   find ${namespaces_log_dir}/${namespace}/pods -type f -name "*.log"
+    Should Not Be Equal    ${log_files}  ${EMPTY}
 
 Cleanup must-gather Logs
     [Documentation]    Deletes the folder with the must-gather logs
-    Remove Directory   ${must-gather-dir}    recursive=True
+    Run Keyword If      "${must_gather_dir}" != "${EMPTY}"      Remove Directory   ${must_gather_dir}    recursive=True

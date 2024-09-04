@@ -48,21 +48,16 @@ Verify Model Registry Integration With Secured-DB
     ...                 prj_title=${PRJ_TITLE}    image_name=Minimal Python  deployment_size=Small
     ...                 storage=Persistent   pv_existent=${NONE}
     ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}
-    Workbench Should Be Listed      workbench_title=registry-wb
+    Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     ${workbenches}=    Create List    ${WORKBENCH_TITLE}
+    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}
     # Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME}
     # ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     # ...            aws_bucket_name=${AWS_BUCKET}    connected_workbench=${workbenches}
     # Data Connection Should Be Listed    name=${DC_S3_NAME}    type=${DC_S3_TYPE}    connected_workbench=${workbenches}
     # Open Data Science Project Details Page       project_title=${prj_title}    tab_id=workbenches
-    Wait Until Workbench Is Started     workbench_title=registry-wb
-    Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME}
-    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
-    ...            aws_bucket_name=${AWS_BUCKET}    connected_workbench=${workbenches}
-    Data Connection Should Be Listed    name=${DC_S3_NAME}    type=${DC_S3_TYPE}    connected_workbench=${workbenches}
-    Open Data Science Project Details Page       project_title=${prj_title}    tab_id=workbenches
-    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}
+    # Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}
     Upload File In The Workbench     filepath=${SAMPLE_ONNX_MODEL}    workbench_title=${WORKBENCH_TITLE}
     ...         workbench_namespace=${PRJ_TITLE}
     Upload File In The Workbench     filepath=${JUPYTER_NOTEBOOK_FILEPATH}    workbench_title=${WORKBENCH_TITLE}

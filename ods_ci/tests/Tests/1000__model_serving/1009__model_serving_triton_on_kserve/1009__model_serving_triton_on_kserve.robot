@@ -94,7 +94,7 @@ Test PYTORCH Model Inference Via UI(Triton on Kserve)
     ...  project_title=${PRJ_TITLE}
     ...  AND
     ...  Clean All Models Of Current User
-    ...  Delete Serving Runtime Template    displayed_name=kserve-triton-pytorch-rest 
+    ...  Delete Serving Runtime Template    displayed_name=kserve-triton-pytorch-rest
 
 
 *** Keywords ***

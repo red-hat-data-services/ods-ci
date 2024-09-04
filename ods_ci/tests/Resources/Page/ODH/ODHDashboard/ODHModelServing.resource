@@ -323,9 +323,9 @@ Get Model Inference
 Verify Model Inference
     [Documentation]    Verifies that the inference result of a model is equal to an expected output
     [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}=${FALSE}
-    ...    ${project_title}=${NONE}    ${deployment_mode}='UI'   ${kserve_mode}=Serverless
+    ...    ${project_title}=${NONE}    ${deployment_mode}=UI    ${kserve_mode}=Serverless
     ...    ${service_port}=${NONE}   ${end_point}=${NONE}
-    IF   ${deployment_mode} == 'UI'
+    IF   $deployment_mode == 'UI'
          Open Model Serving Home Page
          Switch Model Serving Project    ${project_title}
     END

@@ -241,6 +241,7 @@ Delete Project Via CLI
     [Arguments]     ${namespace}
     ${return_code}    ${output}     Run And Return Rc And Output    oc delete project ${namespace} --force --grace-period=0
     Log    ${output}
+    Should Be Equal As Integers    ${return_code}    ${0}
 
 #robocop: disable: line-too-long
 Delete Project Via CLI By Display Name

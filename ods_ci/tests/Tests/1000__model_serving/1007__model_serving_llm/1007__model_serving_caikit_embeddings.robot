@@ -31,7 +31,6 @@ Verify User Can Serve And Query An Embeddings Model On Raw Kserve Via CLI     # 
     ...                caikit-standalone runtime
     [Tags]    Sanity     RHOAIENG-11749
     [Setup]    Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${TEST_NS}     protocol=${PROTOCOL}
-    [Teardown]    Delete Project Via CLI    namespace=${TEST_NS}
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${model_id}=       Set Variable   bge-large-en-v1.5-caikit
     Compile Inference Service YAML    isvc_name=${BGE_MODEL_NAME}
@@ -49,13 +48,13 @@ Verify User Can Serve And Query An Embeddings Model On Raw Kserve Via CLI     # 
     END
     IF    ${IS_KSERVE_RAW}     Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}    local_port=8080    remote_port=8080      # robocop: disable
     Query Model With Raw Kserve     model_id=${model_id}
+    [Teardown]    Delete Project Via CLI    namespace=${TEST_NS}
 
 Verify User Can Serve And Query An Embeddings Model On Serverless Kserve Using GRPC     # robocop: disable
     [Documentation]    Basic tests for preparing, deploying and querying an embeddings LLM model
     ...                using Kserve and Caikit standalone runtime
     [Tags]    Smoke     RHOAIENG-11749
     [Setup]    Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${TEST_NS1}    protocol=grpc
-    [Teardown]    Delete Project Via CLI    namespace=${TEST_NS1}
     ${test_namespace}=    Set Variable     ${TEST_NS1}
     ${model_id}=       Set Variable   all-MiniLM-L12-v2-caikit
     Compile Inference Service YAML    isvc_name=${MINILM_MODEL_NAME}
@@ -82,6 +81,7 @@ Verify User Can Serve And Query An Embeddings Model On Serverless Kserve Using G
     ...    endpoint="caikit.runtime.Nlp.NlpService/SentenceSimilarityTaskPredict"
     ...    json_body=${SIMILAR_QUERY_BODY}    json_header=${header}
     ...    insecure=${TRUE}
+    [Teardown]    Delete Project Via CLI    namespace=${TEST_NS1}
 
 
 *** Keywords ***

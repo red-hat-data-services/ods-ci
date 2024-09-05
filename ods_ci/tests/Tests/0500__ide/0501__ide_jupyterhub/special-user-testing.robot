@@ -1,5 +1,5 @@
 *** Settings ***
-Test Tags       J../upyterHub
+Test Tags        JupyterHub
 Resource         ../../../Resources/ODS.robot
 Resource         ../../../Resources/Common.robot
 Resource         ../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot

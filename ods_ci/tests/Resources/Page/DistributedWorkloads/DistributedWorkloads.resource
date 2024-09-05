@@ -9,7 +9,7 @@ ${VIRTUAL_ENV_NAME}                      venv3.9
 ${CODEFLARE-SDK-API_URL}                 %{CODEFLARE-SDK-API_URL=https://api.github.com/repos/project-codeflare/codeflare-sdk/releases/latest}
 ${CODEFLARE-SDK_DIR}                     codeflare-sdk
 ${CODEFLARE-SDK_REPO_URL}                %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
-${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}  https://github.com/opendatahub-io/distributed-workloads/releases/latest/download
+${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}  https://github.com/opendatahub-io/distributed-workloads/releases/download/v2.12.0-RC1
 ${FMS_HF_TUNING_IMAGE}                   quay.io/modh/fms-hf-tuning@sha256:2985c259c66e227417ed69365bb23ab92ed5022650672771e56070326b21d5f4
 ${KFTO_CORE_BINARY_NAME}                 kfto
 ${KFTO_UPGRADE_BINARY_NAME}              kfto-upgrade

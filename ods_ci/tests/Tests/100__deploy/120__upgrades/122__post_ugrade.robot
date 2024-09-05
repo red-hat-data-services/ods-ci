@@ -17,6 +17,7 @@ Resource           ../../../Resources/Common.robot
 Resource           ../../../Resources/Page/OCPDashboard/Pods/Pods.robot
 Resource           ../../../Resources/Page/OCPDashboard/Builds/Builds.robot
 Resource           ../../../Resources/Page/HybridCloudConsole/OCM.robot
+Resource           ../../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 
 
 *** Variables ***
@@ -144,6 +145,20 @@ Verify Custom Runtime Exists After Upgrade
     Page Should Contain Element  //tr[@id='caikit-runtime']
     Delete Serving Runtime Template From CLI By Runtime Name OR Display Name  runtime_name=caikit-runtime
     [Teardown]   Dashboard Test Teardown
+
+Run Training Operator ODH Run PyTorchJob Test Use Case
+    [Documentation]    Run Training Operator ODH Run PyTorchJob Test Use Case
+    [Tags]             Upgrade
+    [Setup]            Prepare Training Operator E2E Upgrade Test Suite
+    Run Training Operator ODH Upgrade Test    TestRunPytorchjob
+    [Teardown]         Teardown Training Operator E2E Upgrade Test Suite
+
+Run Training Operator ODH Run Sleep PyTorchJob Test Use Case
+    [Documentation]    Verify that running PyTorchJob Pod wasn't restarted
+    [Tags]             Upgrade
+    [Setup]            Prepare Training Operator E2E Upgrade Test Suite
+    Run Training Operator ODH Upgrade Test    TestVerifySleepPytorchjob
+    [Teardown]         Teardown Training Operator E2E Upgrade Test Suite
 
 *** Keywords ***
 Dashboard Suite Setup

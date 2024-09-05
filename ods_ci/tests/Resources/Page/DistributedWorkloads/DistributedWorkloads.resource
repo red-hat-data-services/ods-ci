@@ -9,6 +9,11 @@ ${CODEFLARE_TEST_TIMEOUT_LONG}    20m
 ${GO_TEST_TIMEOUT}    1h
 ${JOB_GO_BIN}    %{WORKSPACE=.}/go-bin
 ${GO_JUNIT_REPORT_TOOL}    github.com/jstemmer/go-junit-report/v2@latest
+# Using DISTRIBUTED_WORKLOADS_RELEASE_ASSETS from 2.12 as 2.10 version doesn't contain sleep upgrade test.
+# Using newer release asset is ok as the binary contains just test resources
+${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}  https://github.com/opendatahub-io/distributed-workloads/releases/download/v2.12.0-RC1
+${FMS_HF_TUNING_IMAGE}                   quay.io/modh/fms-hf-tuning@sha256:31489be603af448a6e5d25d558ba9ae1d93038d16c08a8500595e63abd54c216
+${KFTO_UPGRADE_BINARY_NAME}              kfto-upgrade
 
 
 *** Keywords ***
@@ -52,4 +57,63 @@ Convert Go Test Results To Junit
     Log To Console    ${result.stdout}
     IF    ${result.rc} != 0
         FAIL    Failed to convert Go test results to Junit
+    END
+
+Restart Kueue
+    [Documentation]    Restart Kueue to be able to monitor PyTorchJob CRs
+    Log To Console    "Rollout restart kueue-controller-manager"
+    ${result} =    Run Process    oc rollout restart deployment/kueue-controller-manager -n ${APPLICATIONS_NAMESPACE}
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Failed to restart Kueue
+    END
+
+    Log To Console    "Wait for kueue-controller-manager rollout to finish"
+    ${result} =    Run Process    oc rollout status deployment/kueue-controller-manager -w -n ${APPLICATIONS_NAMESPACE}
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Failed to finish Kueue rollout
+    END
+
+Prepare Training Operator E2E Upgrade Test Suite
+    [Documentation]    Prepare Training Operator E2E Upgrade Test Suite
+    Log To Console    "Downloading compiled test binary ${KFTO_UPGRADE_BINARY_NAME}"
+    ${result} =    Run Process    curl --location --silent --output ${KFTO_UPGRADE_BINARY_NAME} ${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}/${KFTO_UPGRADE_BINARY_NAME} && chmod +x ${KFTO_UPGRADE_BINARY_NAME}
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Unable to retrieve ${KFTO_UPGRADE_BINARY_NAME} compiled binary
+    END
+    Create Directory    %{WORKSPACE}/codeflare-${KFTO_UPGRADE_BINARY_NAME}-logs
+    Enable Component    trainingoperator
+    Wait Component Ready    trainingoperator
+    Log To Console    "Restarting kueue"
+    Restart Kueue
+
+Teardown Training Operator E2E Upgrade Test Suite
+    [Documentation]    Prepare Training Operator E2E Upgrade Test Suite
+    Log To Console     "Removing test binaries"
+    Remove File        ${KFTO_UPGRADE_BINARY_NAME}
+    Disable Component    trainingoperator
+
+Run Training Operator ODH Upgrade Test
+    [Documentation]    Run Training Operator ODH Upgrade Test
+    [Arguments]    ${TEST_NAME}
+    Log To Console    "Running test: ${TEST_NAME}"
+    ${result} =    Run Process    ./${KFTO_UPGRADE_BINARY_NAME} -test.run ${TEST_NAME}
+    ...    shell=true
+    ...    stderr=STDOUT
+    ...    env:CODEFLARE_TEST_TIMEOUT_SHORT=5m
+    ...    env:CODEFLARE_TEST_TIMEOUT_MEDIUM=10m
+    ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
+    ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-${KFTO_UPGRADE_BINARY_NAME}-logs
+    ...    env:FMS_HF_TUNING_IMAGE=${FMS_HF_TUNING_IMAGE}
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    ${TEST_NAME} failed
     END

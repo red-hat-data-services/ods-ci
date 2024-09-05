@@ -18,6 +18,7 @@ Resource           ../../../Resources/Page/OCPDashboard/Pods/Pods.robot
 Resource           ../../../Resources/Page/OCPDashboard/Builds/Builds.robot
 Resource           ../../../Resources/Page/HybridCloudConsole/OCM.robot
 Resource           ../../../Resources/CLI/ModelServing/modelmesh.resource
+Resource           ../../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 Suite Setup        Dashboard Suite Setup
 Suite Teardown     RHOSi Teardown
 
@@ -118,6 +119,20 @@ Verify User Can Deploy Custom Runtime For Upgrade
     Wait Until Page Contains   Add serving runtime    timeout=15s
     Page Should Contain Element  //tr[@id='caikit-runtime']
     [Teardown]   Dashboard Test Teardown
+
+Run Training Operator ODH Setup PyTorchJob Test Use Case
+    [Documentation]    Run Training Operator ODH Setup PyTorchJob Test Use Case
+    [Tags]             Upgrade
+    [Setup]            Prepare Training Operator E2E Upgrade Test Suite
+    Run Training Operator ODH Upgrade Test    TestSetupPytorchjob
+    [Teardown]         Teardown Training Operator E2E Upgrade Test Suite
+
+Run Training Operator ODH Setup Sleep PyTorchJob Test Use Case
+    [Documentation]    Setup PyTorchJob which is kept running for 24 hours
+    [Tags]             Upgrade
+    [Setup]            Prepare Training Operator E2E Upgrade Test Suite
+    Run Training Operator ODH Upgrade Test    TestSetupSleepPytorchjob
+    [Teardown]         Teardown Training Operator E2E Upgrade Test Suite
 
 *** Keywords ***
 Dashboard Suite Setup

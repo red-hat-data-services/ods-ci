@@ -126,7 +126,7 @@ class DataSciencePipelinesKfp:
             pipeline_params["openshift_server"] = self.api.get_openshift_server()
         if "openshift_token" in pipeline_params:
             pipeline_params["openshift_token"] = self.api.get_openshift_token()
-        print(f"pipeline_params modified with dynamic values: {pipeline_params}")
+        print(f"pipeline_params modified with dynamic values")
 
         # create_run_from_pipeline_func will compile the code
         # if you need to see the yaml, for debugging purpose, call: TektonCompiler().compile(pipeline, f'{fn}.yaml')

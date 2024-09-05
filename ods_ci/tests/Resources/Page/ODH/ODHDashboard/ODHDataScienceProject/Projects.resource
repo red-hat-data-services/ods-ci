@@ -403,7 +403,7 @@ Filter Projects By ${Type}
     ...    Page Should Contain Element    xpath:${PROJECT_SEARCH_BAR}
     IF    ${searchbar_exists}
         Click Element    xpath:${PROJECT_FILTER_TYPE}
-        Click Element    xpath:${PROJECT_SEARCH_BAR}//li[@data-testid="dropdown-item ${Type}"]
+        Click Element    xpath:${PROJECT_SEARCH_BAR}//li[@data-testid="${Type}"]
         Input Text    ${PROJECT_SEARCH_INPUT}    ${text}
     ELSE
         Log    No projects are listed

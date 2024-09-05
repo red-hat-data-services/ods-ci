@@ -1,6 +1,6 @@
 *** Settings ***
 Library           OperatingSystem
-Library           ../../../libs/Helpers.py
+Library           ../../../../libs/Helpers.py
 Resource          ../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
@@ -122,7 +122,8 @@ Test Inference With Token Authentication
     [Tags]    Sanity    Tier1
     ...       ODS-1920
     Open Data Science Projects Home Page
-    Create Data Science Project    title=${SECOND_PROJECT}    description=${PRJ_DESCRIPTION}    existing_project=${FALSE}
+    Create Data Science Project    title=${SECOND_PROJECT}    description=${PRJ_DESCRIPTION}
+    ...    existing_project=${FALSE}
     Recreate S3 Data Connection    project_title=${SECOND_PROJECT}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
@@ -130,7 +131,6 @@ Test Inference With Token Authentication
     Serve Model    project_name=${SECOND_PROJECT}    model_name=${SECURED_MODEL}    model_server=${SECURED_RUNTIME}
     ...    existing_data_connection=${TRUE}    data_connection_name=model-serving-connection    existing_model=${TRUE}
     ...    framework=onnx    model_path=mnist-8.onnx
-    # Run Keyword And Continue On Failure    Verify Model Inference    ${SECURED_MODEL}    ${INFERENCE_INPUT}    ${EXPECTED_INFERENCE_SECURED_OUTPUT}    token_auth=${TRUE}    # robocop: disable
     Run Keyword And Continue On Failure    Verify Model Inference With Retries
     ...    ${SECURED_MODEL}    ${INFERENCE_INPUT}    ${EXPECTED_INFERENCE_SECURED_OUTPUT}    token_auth=${TRUE}
     ...    project_title=${SECOND_PROJECT}

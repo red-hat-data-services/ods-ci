@@ -71,7 +71,8 @@ Import Pipeline
         Click Button    ${PIPELINES_IMPORT_BTN_FORM_XP}
     END
     Wait Until Generic Modal Disappears
-    Wait Until Project Is Open    project_title=${project_title}
+    Maybe Wait For Dashboard Loading Spinner Page     timeout=45s
+    Wait For Dashboard Page Title    ${name}    timeout=30s
 
 Create Pipeline Run
     [Documentation]    Create a pipeline run from DS Project details page.
@@ -276,69 +277,6 @@ Wait Until Page Contains Run Topology Page
     ...    ${RUN_TOPOLOGY_DETAILS_BTN_XP}
     Run Keyword And Continue On Failure    Wait Until Page Contains Element
     ...    ${RUN_TOPOLOGY_XP}
-
-Verify Pipeline Server Deployments    # robocop: disable
-    [Documentation]    Verifies the correct deployment of DS Pipelines in the rhods namespace
-    [Arguments]    ${project_title}
-
-    ${namespace}=    Get Openshift Namespace From Data Science Project
-    ...    project_title=${project_title}
-
-    @{all_pods}=  Oc Get    kind=Pod    namespace=${namespace}
-    ...    label_selector=component=data-science-pipelines
-    Run Keyword And Continue On Failure    Length Should Be    ${all_pods}    7
-
-    @{pipeline_api_server}=  Oc Get    kind=Pod    namespace=${namespace}
-    ...    label_selector=app=ds-pipeline-dspa
-    ${containerNames}=  Create List  oauth-proxy    ds-pipeline-api-server
-    Verify Deployment    ${pipeline_api_server}  1  2  ${containerNames}
-
-    @{pipeline_metadata_envoy}=  Oc Get    kind=Pod    namespace=${namespace}
-    ...    label_selector=app=ds-pipeline-metadata-envoy-dspa
-    ${containerNames}=  Create List  container    oauth-proxy
-    Verify Deployment    ${pipeline_metadata_envoy}  1  2  ${containerNames}
-
-    @{pipeline_metadata_grpc}=  Oc Get    kind=Pod    namespace=${namespace}
-    ...    label_selector=app=ds-pipeline-metadata-grpc-dspa
-    ${containerNames}=  Create List  container
-    Verify Deployment    ${pipeline_metadata_grpc}  1  1  ${containerNames}
-
-    @{pipeline_persistenceagent}=  Oc Get    kind=Pod    namespace=${namespace}
-    ...    label_selector=app=ds-pipeline-persistenceagent-dspa
-    ${containerNames}=  Create List  ds-pipeline-persistenceagent
-    Verify Deployment    ${pipeline_persistenceagent}  1  1  ${containerNames}
-
-    @{pipeline_scheduledworkflow}=  Oc Get    kind=Pod    namespace=${namespace}
-    ...    label_selector=app=ds-pipeline-scheduledworkflow-dspa
-    ${containerNames}=  Create List  ds-pipeline-scheduledworkflow
-    Verify Deployment    ${pipeline_scheduledworkflow}  1  1  ${containerNames}
-
-    @{pipeline_workflow_controller}=  Oc Get    kind=Pod    namespace=${namespace}
-    ...    label_selector=app=ds-pipeline-workflow-controller-dspa
-    ${containerNames}=  Create List  ds-pipeline-workflow-controller
-    Verify Deployment    ${pipeline_workflow_controller}  1  1  ${containerNames}
-
-    @{mariadb}=  Oc Get    kind=Pod    namespace=${namespace}
-    ...    label_selector=app=mariadb-dspa
-    ${containerNames}=  Create List  mariadb
-    Verify Deployment    ${mariadb}  1  1  ${containerNames}
-
-Wait Until Pipeline Server Is Deployed
-    [Documentation]    Waits until all the expected pods of the pipeline server
-    ...                are running
-    [Arguments]    ${project_title}
-    Wait Until Keyword Succeeds    10 times    10s
-    ...    Verify Pipeline Server Deployments    project_title=${project_title}
-
-Wait Until Pipeline Server Is Deleted
-    [Documentation]    Waits until all pipeline server pods are deleted
-    [Arguments]    ${project_title}
-    # robocop: off=expression-can-be-simplified
-    FOR  ${_}  IN RANGE  0  30
-        ${pod_count}=    Run    oc get pods -n ${project_title} -l component=data-science-pipelines | wc -l
-        IF  ${pod_count}==0  BREAK
-        Sleep  1s
-    END
 
 # TODO: we need to replace this keyword for a similar one checking in Data Science Pipelines > Runs
 # Verify Successful Pipeline Run Via Project UI

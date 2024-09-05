@@ -80,7 +80,7 @@ Verify Upload Download In Data Science Pipelines Using The kfp Python Package
 Verify Ods Users Can Create And Run A Data Science Pipeline With Ray Using The kfp Python Package
     [Documentation]    Creates, runs pipelines with regular user. Double check the pipeline result and clean
     ...    the pipeline resources.
-    [Tags]      Tier1
+    [Tags]      Tier1    ExcludeOnDisconnected
     Skip If Component Is Not Enabled    ray
     Skip If Component Is Not Enabled    codeflare
     ${ray_dict}=    Create Dictionary

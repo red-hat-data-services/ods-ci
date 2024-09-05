@@ -77,10 +77,7 @@ Validate Service Mesh Control Plane Already Created
     Operator Deployment Should Be Ready
     # Go check the Operator logs for the error message: denied the request: only one service mesh may be installed per project/namespace
     Verify Pod Logs Contain Error
-    # Cleanup the SMCP
-    Delete Smcp
-    # Cleanup Olminstall dir
-    Cleanup Olm Install Dir
+    [Teardown]      Teardown Service Mesh Control Plane Already Created
 
 
 *** Keywords ***
@@ -88,12 +85,18 @@ Suite Setup
     [Documentation]    Suite Setup
     RHOSi Setup
     Wait Until Operator Ready    ${SERVICE_MESH_OPERATOR_DEPLOYMENT_NAME}    ${SERVICE_MESH_OPERATOR_NS}
-    Wait Until Operator Ready    ${OPERATOR_DEPLOYMENT_NAME}    ${OPERATOR_NS}
-    Wait For DSCI Ready State    ${DSCI_NAME}    ${OPERATOR_NS}
+    Wait Until Operator Ready    ${OPERATOR_DEPLOYMENT_NAME}    ${OPERATOR_NAMESPACE}
+    Wait For DSCI Ready State    ${DSCI_NAME}    ${OPERATOR_NAMESPACE}
 
 Suite Teardown
     [Documentation]    Suite Teardown
     RHOSi Teardown
+
+Teardown Service Mesh Control Plane Already Created
+    # Cleanup the SMCP
+    Delete Smcp
+    # Cleanup Olminstall dir
+    Cleanup Olm Install Dir
 
 Fetch Image Url And Update Channel
     [Documentation]    Fetch url for image and Update Channel
@@ -102,7 +105,7 @@ Fetch Image Url And Update Channel
     Should Be Equal As Integers    ${rc}    0
     Set Global Variable    ${IMAGE_URL}    ${out}
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc get subscription rhoai-operator-dev --namespace redhat-ods-operator -o jsonpath='{.spec.channel}'
+    ...    oc get subscription ${OPERATOR_SUBSCRIPTION_NAME} --namespace ${OPERATOR_NS} -o jsonpath='{.spec.channel}'
     Should Be Equal As Integers    ${rc}    0
     Set Global Variable    ${UPDATE_CHANNEL}    ${out}
 

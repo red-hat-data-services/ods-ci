@@ -11,8 +11,10 @@ spec:
     type: Istiod
   addons:
     prometheus:
-      enabled: true
+      enabled: false
     kiali:
-      enabled: true
+      enabled: false
     grafana:
-      enabled: true
+      enabled: false
+  tracing:
+    type: None

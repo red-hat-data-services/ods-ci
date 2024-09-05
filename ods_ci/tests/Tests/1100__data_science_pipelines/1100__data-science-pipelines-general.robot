@@ -66,6 +66,10 @@ Create A Pipeline Server And Wait For Dsp Route
     DataSciencePipelinesBackend.Create Pipeline Server    namespace=${project}
     ...    object_storage_access_key=${S3.AWS_ACCESS_KEY_ID}
     ...    object_storage_secret_key=${S3.AWS_SECRET_ACCESS_KEY}
+    ...    object_storage_endpoint=${S3.BUCKET_2.ENDPOINT}
+    ...    object_storage_region=${S3.BUCKET_2.REGION}
+    ...    object_storage_bucket_name=${S3.BUCKET_2.NAME}
+    ...    dsp_version=v2
 
     DataSciencePipelinesBackend.Wait Until Pipeline Server Is Deployed    namespace=${project}
 

@@ -1,6 +1,7 @@
 *** Settings ***
 Documentation    Collection of keywords to interact with Data Science Pipelines via CLI
 Library          OperatingSystem
+Library          String
 Resource         ../../../Resources/OCP.resource
 
 
@@ -15,8 +16,8 @@ Create Pipeline Server
     ...    enhanced to use them all
     [Arguments]    ${namespace}
     ...    ${object_storage_access_key}    ${object_storage_secret_key}
-#    ...    ${object_storage_endpoint}      ${object_storage_region}
-#    ...    ${object_storage_bucket_name}
+    ...    ${object_storage_endpoint}      ${object_storage_region}
+    ...    ${object_storage_bucket_name}
 #    ...    ${database_host}=${EMPTY}    ${database_port}=3306
 #    ...    ${database_username}=${EMPTY}    ${database_password}=${EMPTY}
 #    ...    ${database_db_name}=${EMPTY}
@@ -26,9 +27,15 @@ Create Pipeline Server
     ...    object_storage_access_key=${object_storage_access_key}
     ...    object_storage_secret_key=${object_storage_secret_key}
 
+    ${object_storage_endpoint}=    Remove String    ${object_storage_endpoint}    https://    http://
+
     # Process DSPA Template to create pipeline server
-    ${TEMPLATE_PARAMETERS}=    Set Variable    -p DSP_VERSION=${dsp_version}
-    Run      oc process -f ${DSPA_PATH}/dspa-template.yaml ${TEMPLATE_PARAMETERS} | oc apply -n ${namespace} -f -
+    ${template_parameters}=    Catenate    -p DSP_VERSION=${dsp_version}
+    ...    -p OBJECT_STORAGE_HOST=${object_storage_endpoint}
+    ...    -p OBJECT_STORAGE_REGION=${object_storage_region}
+    ...    -p OBJECT_STORAGE_BUCKET=${object_storage_bucket_name}
+
+    Run      oc process -f ${DSPA_PATH}/dspa-template.yaml ${template_parameters} | oc apply -n ${namespace} -f -
 
 # robocop: disable:line-too-long
 Create PipelineServer Using Custom DSPA

@@ -45,4 +45,4 @@ Verify Model Serving Pod Exists
     [Arguments]    ${PRJ_TITLE}     ${label_selector}
     ${return_code}    ${pod_number}    Run And Return Rc And Output   oc get pod -n ${PRJ_TITLE} -l ${label_selector} | tail -n +2 | wc -l       # robocop: disable
     ${pod_numbers}    Split String     ${pod_number}
-    Should Be Equal    ${pod_numbers}[0]   2
+    Should Be Equal    ${pod_numbers}[0]   1

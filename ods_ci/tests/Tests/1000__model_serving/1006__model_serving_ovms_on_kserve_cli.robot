@@ -58,7 +58,7 @@ Verify User Can Serve And Query ovms Model
     ...    remote_port=${service_port}    process_alias=ovms-process
     Verify Model Inference With Retries   model_name=${model_name}    inference_input=${INFERENCE_INPUT}
     ...    expected_inference_output=${EXPECTED_INFERENCE_OUTPUT}   project_title=${test_namespace}
-    ...    deployment_mode="Cli"  kserve_mode=${KSERVE_MODE}    service_port=${service_port}
+    ...    deployment_mode=Cli  kserve_mode=${KSERVE_MODE}    service_port=${service_port}
     ...    end_point=/v2/models/${model_name}/infer  retries=10
 
    [Teardown]    Run Keywords

@@ -12,6 +12,9 @@ ${DSPA_PATH}=      tests/Resources/Files/pipeline-samples/v2/dspa
 *** Keywords ***
 Create Pipeline Server
     [Documentation]    Creates a pipeline server providing object storage and database information
+    ...    When ${configure_pip_index}=${TRUE}, a configmap ds-pipeline-custom-env-vars is added to the
+    ...    project, storing the values for pip_index_url and pip_trusted_host
+    ...
     ...    Note: currently, only some of the parameters are used. In the future this keyword will be
     ...    enhanced to use them all
     [Arguments]    ${namespace}
@@ -22,6 +25,7 @@ Create Pipeline Server
 #    ...    ${database_username}=${EMPTY}    ${database_password}=${EMPTY}
 #    ...    ${database_db_name}=${EMPTY}
     ...    ${dsp_version}=v2
+    ...    ${configure_pip_index}=${TRUE}
 
     Create Secret With Pipelines Object Storage Information    namespace=${namespace}
     ...    object_storage_access_key=${object_storage_access_key}
@@ -37,16 +41,24 @@ Create Pipeline Server
 
     Run      oc process -f ${DSPA_PATH}/dspa-template.yaml ${template_parameters} | oc apply -n ${namespace} -f -
 
+    IF  ${configure_pip_index}   Create Pipelines ConfigMap With Custom Pip Index Url And Trusted Host  ${namespace}
+
 # robocop: disable:line-too-long
 Create PipelineServer Using Custom DSPA
     [Documentation]    Install and verifies that DataSciencePipelinesApplication CRD is installed and working
-    [Arguments]     ${namespace}    ${dspa_file}=data-science-pipelines-sample.yaml    ${assert_install}=True
+    ...    When ${configure_pip_index}=${TRUE}, a configmap ds-pipeline-custom-env-vars is added to the
+    ...    project, storing the values for pip_index_url and pip_trusted_host
+    ...
+    [Arguments]     ${namespace}    ${dspa_file}=data-science-pipelines-sample.yaml
+    ...    ${assert_install}=${TRUE}    ${configure_pip_index}=${TRUE}
 
     Run     oc apply -f "${DSPA_PATH}/${dspa_file}" -n ${namespace}
     IF    ${assert_install}==True
         ${generation_value}    Run    oc get datasciencepipelinesapplications -n ${namespace} -o json | jq '.items[0].metadata.generation'
         Should Be True    ${generation_value} == 2    DataSciencePipelinesApplication created
     END
+
+    IF  ${configure_pip_index}   Create Pipelines ConfigMap With Custom Pip Index Url And Trusted Host  ${namespace}
 
 Verify Pipeline Server Deployments    # robocop: disable
     [Documentation]    Verifies the correct deployment of DS Pipelines in the rhods namespace

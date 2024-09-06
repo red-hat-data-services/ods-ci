@@ -23,14 +23,12 @@ ${EXPECTED_CUDA_VERSION_N_1} =  11.8
 Verify PyTorch Image Can Be Spawned
     [Documentation]    Spawns pytorch image
     [Tags]  Tier1
-    ...     PLACEHOLDER  # category tags
     ...     ODS-1149
     Pass Execution    Passing tests, as suite setup ensures that image can be spawned
 
 PyTorch Image Workload Test
     [Documentation]    Runs a pytorch workload
     [Tags]  Tier1
-    ...     PLACEHOLDER  # category tags
     ...     ODS-1150
     Run Repo And Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/pytorch/PyTorch-MNIST-Minimal.ipynb
     Capture Page Screenshot
@@ -39,7 +37,6 @@ PyTorch Image Workload Test
 Verify Tensorboard Is Accessible
     [Documentation]  Verifies that tensorboard is accessible
     [Tags]  Tier1
-    ...     PLACEHOLDER
     ...     ODS-1414
     Close Previous Server
     Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Small

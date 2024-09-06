@@ -10,7 +10,7 @@ Library             ../../../../libs/Helpers.py
 Suite Setup         Begin Web Test
 Suite Teardown      End Web Test
 
-Test Tags          Sanity    JupyterHub      OpenDataHub    Tier1
+Test Tags          Sanity    JupyterHub      OpenDataHub
 
 
 *** Variables ***
@@ -83,7 +83,6 @@ Can Launch Python3 Smoke Test Notebook
 Verify Tensorflow Can Be Installed In The Minimal Python Image Via Pip
     [Documentation]    Verify Tensorflow Can Be Installed In The Minimal Python image via pip
     [Tags]    ODS-555    ODS-908    ODS-535
-    ...       Tier1
     Clone Git Repository And Open    ${RequirementsFileRepo}    ${RequirementsFilePath}
     Open New Notebook
     Close Other JupyterLab Tabs

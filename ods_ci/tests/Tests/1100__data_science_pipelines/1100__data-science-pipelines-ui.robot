@@ -31,11 +31,8 @@ Verify User Can Create, Run and Delete A DS Pipeline From DS Project Details Pag
     ...    The pipeline to run will be using the values for pip_index_url and pip_trusted_host
     ...    availables in a ConfigMap created in the SuiteSetup.
     ...    AutomationBug: RHOAIENG-10941
-    [Tags]    Smoke
-    ...       ODS-2206    ODS-2226    ODS-2633
-
+    [Tags]    SmokeODS-2206    ODS-2226    ODS-2633    DataSciencePipelines
     Open Data Science Project Details Page    ${PRJ_TITLE}
-
     Pipelines.Create Pipeline Server    dc_name=${DC_NAME}    project_title=${PRJ_TITLE}
     Verify There Is No "Error Displaying Pipelines" After Creating Pipeline Server
     Verify That There Are No Sample Pipelines After Creating Pipeline Server

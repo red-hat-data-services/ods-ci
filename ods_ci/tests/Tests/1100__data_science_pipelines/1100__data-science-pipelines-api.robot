@@ -22,7 +22,7 @@ ${URL_TEST_PIPELINE_RUN_YAML}=                 https://raw.githubusercontent.com
 *** Test Cases ***
 Verify Pipeline Server Creation With S3 Object Storage
     [Documentation]    Creates a pipeline server using S3 object storage and verifies that all components are running
-    [Tags]    Smoke
+    [Tags]    Smoke    DataSciencePipelines
     Projects.Create Data Science Project From CLI    name=dsp-s3
     DataSciencePipelinesBackend.Create Pipeline Server    namespace=dsp-s3
     ...    object_storage_access_key=${S3.AWS_ACCESS_KEY_ID}
@@ -37,18 +37,18 @@ Verify Pipeline Server Creation With S3 Object Storage
 Verify Admin Users Can Create And Run a Data Science Pipeline Using The Api
     [Documentation]    Creates, runs pipelines with admin user. Double check the pipeline result and clean
     ...    the pipeline resources.
-    [Tags]      Sanity    ODS-2083
+    [Tags]      Sanity    ODS-2083    DataSciencePipelines
     End To End Pipeline Workflow Via Api    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}    pipelinesapi1
 
 Verify Regular Users Can Create And Run a Data Science Pipeline Using The Api
     [Documentation]    Creates, runs pipelines with regular user. Double check the pipeline result and clean
     ...    the pipeline resources.
-    [Tags]      Tier1    ODS-2677
+    [Tags]      Tier1    ODS-2677    DataSciencePipelines
     End To End Pipeline Workflow Via Api    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    pipelinesapi2
 
 Verify Ods Users Can Do Http Request That Must Be Redirected to Https
     [Documentation]    Verify Ods Users Can Do Http Request That Must Be Redirected to Https
-    [Tags]        Tier1    ODS-2234
+    [Tags]        Tier1    ODS-2234    DataSciencePipelines
     Projects.Create Data Science Project From CLI    name=project-redirect-http
     DataSciencePipelinesBackend.Create PipelineServer Using Custom DSPA    project-redirect-http
     ${status}    Login And Wait Dsp Route    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
@@ -60,7 +60,7 @@ Verify Ods Users Can Do Http Request That Must Be Redirected to Https
 
 Verify DSPO Operator Reconciliation Retry
     [Documentation]    Verify DSPO Operator is able to recover from missing components during the initialization
-    [Tags]      Sanity    ODS-2477
+    [Tags]      Sanity    ODS-2477    DataSciencePipelines
 
     ${local_project_name} =    Set Variable    dsp-reconciliation-test
     Projects.Create Data Science Project From CLI    name=${local_project_name}

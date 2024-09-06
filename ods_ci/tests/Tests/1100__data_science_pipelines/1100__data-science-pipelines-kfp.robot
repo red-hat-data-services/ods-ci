@@ -25,7 +25,7 @@ ${KUEUE_RESOURCES_SETUP_FILEPATH}=    tests/Resources/Page/DistributedWorkloads/
 *** Test Cases ***
 Verify Users Can Create And Run A Pipeline That Uses Only Packages From Base Image Using The kfp Python Package
     [Documentation]    Creates and runs flip_coin pipeline as regular user, verifiying the run results
-    ...   Note: this is a simple pipeline, where the tasks doesn't have any packages_to_install and just needs
+    ...   This is a simple pipeline, where the tasks doesn't have any packages_to_install and just needs
     ...   the python packages included in the base_image
     [Tags]      Smoke    ODS-2203
     ${emtpy_dict}=    Create Dictionary
@@ -43,10 +43,10 @@ Verify Users Can Create And Run A Pipeline That Uses Only Packages From Base Ima
 
 Verify Users Can Create And Run A Pipeline That Uses Custom Python Packages To Install Using The kfp Python Package
     [Documentation]    Creates and runs iris_pipeline pipeline as regular user, verifiying the run results
-    ...   Note: this is a simple pipeline, where the tasks doesn't have any packages_to_install and just needs
-    ...   the python packages included in the base_image
-    ...    Note: excluded on disconnected because it needs RHOAIENG-6376 to be fixed
-    [Tags]      Smoke    ExcludeOnDisconnected
+    ...   In this pipeline there are tasks defining with packages_to_install some custom python packages to
+    ...   be installed at execution time
+    ...   ProductBugOnDisconnected: RHOAIENG-6376
+    [Tags]      Smoke    ProductBugOnDisconnected
     ${emtpy_dict}=    Create Dictionary
     End To End Pipeline Workflow Using Kfp
     ...    admin_username=${TEST_USER.USERNAME}
@@ -80,8 +80,8 @@ Verify Upload Download In Data Science Pipelines Using The kfp Python Package
 Verify Ods Users Can Create And Run A Data Science Pipeline With Ray Using The kfp Python Package
     [Documentation]    Creates, runs pipelines with regular user. Double check the pipeline result and clean
     ...    the pipeline resources.
-    [Tags]      Tier1
-    
+    ...    AutomationBugOnDisconnected: RHOAIENG-12514
+    [Tags]      Tier1    AutomationBugOnDisconnected
     Skip If Component Is Not Enabled    ray
     Skip If Component Is Not Enabled    codeflare
     ${ray_dict}=    Create Dictionary

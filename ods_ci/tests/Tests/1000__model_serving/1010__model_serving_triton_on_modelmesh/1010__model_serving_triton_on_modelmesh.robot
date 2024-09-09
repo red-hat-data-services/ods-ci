@@ -18,7 +18,7 @@ Test Tags         Kserve
 
 
 *** Variables ***
-${INFERENCE_REST_INPUT_ONNX_FILE}=    tests/Resources/Files/triton/kserve-triton-onnx-rest-input.json
+${INFERENCE_REST_INPUT_ONNX_FILE}=    @tests/Resources/Files/triton/kserve-triton-onnx-rest-input.json
 ${PRJ_TITLE}=    ms-triton-project-01
 ${PRJ_DESCRIPTION}=    project used for model serving triton runtime tests
 ${MODEL_CREATED}=    ${FALSE}
@@ -38,8 +38,8 @@ Test Onnx Model Rest Inference Via UI (Triton on Modelmesh)
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    existing_project=${FALSE}
     Open Dashboard Settings    settings_page=Serving runtimes
-    Upload Serving Runtime Template    runtime_filepath=${ONNX_MODELMESH_RUNTIME_FILEPATH}
-    ...    serving_platform=multi      runtime_protocol=REST
+    #Upload Serving Runtime Template    runtime_filepath=${ONNX_MODELMESH_RUNTIME_FILEPATH}
+    #...    serving_platform=multi      runtime_protocol=REST
     Serving Runtime Template Should Be Listed    displayed_name=${ONNX_RUNTIME_NAME}
     ...    serving_platform=multi
     Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
@@ -55,8 +55,8 @@ Test Onnx Model Rest Inference Via UI (Triton on Modelmesh)
     Verify Model Status    ${ONNX_MODEL_NAME}    success
     ${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}=     Load Json File      file_path=${EXPECTED_INFERENCE_REST_OUTPUT_FILE}
     Log     ${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}
-    ${INFERENCE_REST_INPUT_ONNX}=     Load Json File      file_path=${INFERENCE_REST_INPUT_ONNX_FILE}
-    Log     ${INFERENCE_REST_INPUT_ONNX}
+    #${INFERENCE_REST_INPUT_ONNX}=     Load Json File      file_path=${INFERENCE_REST_INPUT_ONNX_FILE}
+    #Log     ${INFERENCE_REST_INPUT_ONNX}
     Verify Model Inference With Retries    ${ONNX_MODEL_NAME}    ${INFERENCE_REST_INPUT_ONNX_FILE}    ${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}
     ...    token_auth=${TRUE}
     ...    project_title=${PRJ_TITLE}

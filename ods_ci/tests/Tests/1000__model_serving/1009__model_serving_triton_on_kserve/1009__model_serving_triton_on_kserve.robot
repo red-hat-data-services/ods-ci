@@ -16,6 +16,7 @@ Suite Setup       Triton On Kserve Suite Setup
 Suite Teardown    Triton On Kserve Suite Teardown
 Test Tags         Kserve
 
+
 *** Variables ***
 ${INFERENCE_REST_INPUT_ONNX}=    @tests/Resources/Files/triton/kserve-triton-onnx-rest-input.json
 ${PRJ_TITLE}=    ms-triton-project
@@ -28,11 +29,11 @@ ${RESOURCES_DIRPATH}=        tests/Resources/Files/triton
 ${ONNX_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_onnx_rest_servingruntime.yaml
 ${EXPECTED_INFERENCE_REST_OUTPUT_FILE}=      tests/Resources/Files/triton/kserve-triton-onnx-rest-output.json
 
+
 *** Test Cases ***
-Test Onnx Model Rest Inference Via UI (Triton on Kserve)
+Test Onnx Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of an onnx model in Kserve using Triton
     [Tags]    Sanity    RHOAIENG-11565
-
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    existing_project=${FALSE}
@@ -51,12 +52,13 @@ Test Onnx Model Rest Inference Via UI (Triton on Kserve)
     ${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}=     Load Json File     file_path=${EXPECTED_INFERENCE_REST_OUTPUT_FILE}
     ...     as_string=${TRUE}
     Run Keyword And Continue On Failure    Verify Model Inference With Retries
-    ...    ${ONNX_MODEL_NAME}    ${INFERENCE_REST_INPUT_ONNX}    ${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}    token_auth=${FALSE}
-    ...    project_title=${PRJ_TITLE}
+    ...    ${ONNX_MODEL_NAME}    ${INFERENCE_REST_INPUT_ONNX}    ${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}
+    ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}
     [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${ONNX_MODEL_NAME}
     ...  project_title=${PRJ_TITLE}
     ...  AND
     ...  Clean All Models Of Current User
+
 
 *** Keywords ***
 Triton On Kserve Suite Setup
@@ -65,10 +67,8 @@ Triton On Kserve Suite Setup
     Set Library Search Order    SeleniumLibrary
     Skip If Component Is Not Enabled    kserve
     RHOSi Setup
-
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
-
     Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
     Clean All Models Of Current User
 
@@ -80,7 +80,7 @@ Triton On Kserve Suite Teardown
     IF    ${MODEL_CREATED}
         Clean All Models Of Current User
     ELSE
-       Log    Model not deployed, skipping deletion step during teardown    console=true
+        Log    Model not deployed, skipping deletion step during teardown    console=true
     END
     ${projects}=    Create List    ${PRJ_TITLE}
     Delete List Of Projects Via CLI   ocp_projects=${projects}

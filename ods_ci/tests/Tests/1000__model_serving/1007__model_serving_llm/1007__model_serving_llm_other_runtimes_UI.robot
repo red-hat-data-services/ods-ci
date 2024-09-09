@@ -1,3 +1,4 @@
+# robocop: off=unused-variable
 *** Settings ***
 Documentation     Collection of UI tests to validate the model serving stack for Large Language Models (LLM)
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
@@ -21,10 +22,10 @@ ${MODEL_S3_DIR}=   e5-mistral-7b-instruct
 
 
 *** Test Cases ***
-Verify Non Admin Can Serve And Query A Model Using The UI  # robocop: disable
+Verify Non Admin Can Serve And Query A Model Using The UI    # robocop: off=too-long-test-case
     [Documentation]    Basic tests leveraging on a non-admin user for preparing, deploying and querying a LLM model
     ...                using Single-model platform and TGIS Standalone runtime.
-    [Tags]    Sanity    Tier1    ODS-2611
+    [Tags]    Sanity    ODS-2611
     [Setup]    Run Keywords
     ...    Run    git clone https://github.com/IBM/text-generation-inference/
     ...    AND
@@ -54,10 +55,10 @@ Verify Non Admin Can Serve And Query A Model Using The UI  # robocop: disable
     ...    model_name=${model_name}    query_kind=single    namespace=${test_namespace}    period=5m    exp_value=1
     Delete Model Via UI    ${model_name}
 
-Verify Model Can Be Served And Query On A GPU Node Using The UI  # robocop: disable
+Verify Model Can Be Served And Query On A GPU Node Using The UI    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
     ...                using Single-model platform and TGIS Standalone runtime.
-    [Tags]    Sanity    Tier1    ODS-2612   Resources-GPU
+    [Tags]    Sanity    ODS-2612   Resources-GPU
     [Setup]    Run    git clone https://github.com/IBM/text-generation-inference/
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${isvc__name}=    Set Variable    flan-t5-small-hf-gpu
@@ -80,10 +81,10 @@ Verify Model Can Be Served And Query On A GPU Node Using The UI  # robocop: disa
     ...    namespace=${test_namespace}    protocol=grpc    validate_response=${FALSE}
     Delete Model Via UI    ${isvc__name}
 
-Verify Model Can Be Served And Query On A GPU Node Using The UI For VLMM  # robocop: disable
+Verify Model Can Be Served And Query On A GPU Node Using The UI For VLMM
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
     ...                using Single-model platform with vllm runtime.
-    [Tags]    Sanity    Tier1    RHOAIENG-6344   Resources-GPU
+    [Tags]    Sanity    RHOAIENG-6344   Resources-GPU
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${isvc__name}=    Set Variable    gpt2-gpu
     ${model_name}=    Set Variable    gpt2
@@ -97,15 +98,15 @@ Verify Model Can Be Served And Query On A GPU Node Using The UI For VLMM  # robo
     Container Hardware Resources Should Match Expected    container_name=kserve-container
     ...    pod_label_selector=serving.kserve.io/inferenceservice=${isvc__name}
     ...    namespace=${test_namespace}    exp_requests=${requests}    exp_limits=${limits}
-    Query Model Multiple Times    model_name=${isvc__name}    isvc_name=${isvc__name}    runtime=${VLLM_RUNTIME_NAME}   protocol=http
-    ...    inference_type=chat-completions    n_times=3    query_idx=8
+    Query Model Multiple Times    model_name=${isvc__name}    isvc_name=${isvc__name}    runtime=${VLLM_RUNTIME_NAME}
+    ...    protocol=http    inference_type=chat-completions    n_times=3    query_idx=8
     ...    namespace=${test_namespace}    string_check_only=${TRUE}    validate_response=${FALSE}
     Delete Model Via UI    ${isvc__name}
 
-Verify Embeddings Model Can Be Served And Query On A GPU Node Using The UI For VLMM  # robocop: disable
+Verify Embeddings Model Can Be Served And Query On A GPU Node Using The UI For VLMM
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
     ...                using Single-model platform with vllm runtime.
-    [Tags]    Sanity    Tier1    RHOAIENG-8832  Resources-GPU
+    [Tags]    Sanity    RHOAIENG-8832  Resources-GPU
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${isvc__name}=    Set Variable    e5-mistral-7b-gpu
     ${model_name}=    Set Variable    e5-mistral-7b
@@ -124,8 +125,9 @@ Verify Embeddings Model Can Be Served And Query On A GPU Node Using The UI For V
     ...    n_times=4    query_idx=11       namespace=${test_namespace}    validate_response=${FALSE}
     Delete Model Via UI    ${isvc__name}
 
+
 *** Keywords ***
-Non-Admin Setup Kserve UI Test
+Non-Admin Setup Kserve UI Test    # robocop: off=too-many-calls-in-keyword
     [Documentation]    Instaling And Configuring dependency operators: Service Mesh and Serverless.
     ...                This is likely going to change in the future and it will include a way to skip installation.
     ...                Caikit runtime will be shipped Out-of-the-box and will be removed from here.
@@ -142,13 +144,14 @@ Non-Admin Setup Kserve UI Test
     Set Thanos Credentials Variables
     ${dsc_kserve_mode}=    Get KServe Default Deployment Mode From DSC
     Set Suite Variable    ${DSC_KSERVE_MODE}    ${dsc_kserve_mode}
-    IF    "${dsc_kserve_mode}" == "RawDeployment"
+    IF    "${dsc_kserve_mode}" == "RawDeployment"    # robocop: off=unnecessary-string-conversion,inconsistent-variable-name,line-too-long
         Set Suite Variable    ${IS_KSERVE_RAW}    ${TRUE}
     ELSE
         Set Suite Variable    ${IS_KSERVE_RAW}    ${FALSE}
     END
 
 Non-Admin Teardown Kserve UI Test
+    [Documentation]    Teardown for the Suite
     Delete Data Science Project   project_title=${TEST_NS}
     # if UI deletion fails it will try deleting from CLI
     Delete List Of Projects Via CLI   ocp_projects=${PROJECTS_TO_DELETE}

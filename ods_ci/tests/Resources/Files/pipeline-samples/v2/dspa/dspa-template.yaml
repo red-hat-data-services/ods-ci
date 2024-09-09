@@ -29,7 +29,7 @@ parameters:
   value: "v2"
   name: DSP_VERSION
 - description: Object Storage Bucket Name
-  value: "ods-ci-ds-pipelines"
+  value: "test-bucket"
   name: OBJECT_STORAGE_BUCKET
 - description: Object Storage Host
   value: "s3.amazonaws.com"

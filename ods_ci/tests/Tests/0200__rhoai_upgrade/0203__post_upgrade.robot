@@ -287,6 +287,7 @@ Managed RHOAI Upgrade Test Teardown
 
 Upgrade Suite Setup
     [Documentation]    Set of action to run as Suite setup
+    RHOSi Setup
     ${IS_SELF_MANAGED}=    Is RHODS Self-Managed
     Set Suite Variable    ${IS_SELF_MANAGED}
     Gather Release Attributes From DSC And DSCI

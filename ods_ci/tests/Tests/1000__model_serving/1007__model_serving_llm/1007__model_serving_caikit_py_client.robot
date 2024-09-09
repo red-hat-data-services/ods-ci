@@ -1,3 +1,4 @@
+# robocop: off=unused-variable
 *** Settings ***
 Documentation    Test suite to validate caikit-nlp-client library usage with Kserve models.
 ...              These tests leverage on Caikit+TGIS combined Serving Runtime
@@ -59,7 +60,8 @@ Caikit Client Suite Setup
     Set Library Search Order  SeleniumLibrary
     Load Expected Responses
     ${QUERY_TEXT}=    Set Variable    ${EXP_RESPONSES}[queries][0][query_text]
-    ${cleaned_exp_response_text}=    Replace String Using Regexp    ${EXP_RESPONSES}[queries][0][models][${ISVC_NAME}][response_text]    \\s+    ${SPACE}
+    ${cleaned_exp_response_text}=    Replace String Using Regexp
+    ...    ${EXP_RESPONSES}[queries][0][models][${ISVC_NAME}][response_text]    \\s+    ${SPACE}
     Set Suite Variable    ${QUERY_TEXT}
     Set Suite Variable    ${QUERY_EXP_RESPONSE}    ${cleaned_exp_response_text}
     Fetch Knative CA Certificate    filename=${CERTS_BASE_FOLDER}/openshift_ca_istio_knative.crt
@@ -101,7 +103,7 @@ GRPC Model Setup
     ${host}=    Get KServe Inference Host Via CLI    isvc_name=${ISVC_NAME}   namespace=${GRPC_MODEL_NS}
     Set Suite Variable    ${GRPC_HOST}    ${host}
 
-HTTP Model Setup
+HTTP Model Setup    # robocop: off=too-many-calls-in-keyword
     [Documentation]    Test setup for Caikit+TGIS model with HTTP protocol: deploy model and retrieve URL
     [Arguments]    ${user}=${TEST_USER_3.USERNAME}    ${pw}=${TEST_USER_3.PASSWORD}    ${auth}=${TEST_USER_3.AUTH_TYPE}
     Launch Dashboard    ${user}    ${pw}    ${auth}    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
@@ -154,7 +156,8 @@ Upload Files In The Workbench
     [Arguments]    ${workbench_title}    ${workbench_namespace}    ${filepaths}
     FOR    ${index}    ${filepath}    IN ENUMERATE    @{filepaths}
         Log    ${index}: ${filepath}
-        ${rc}    ${out}=    Run And Return Rc And Output    oc cp ${EXECDIR}/${filepath} ${workbench_title}-0:/opt/app-root/src -n ${workbench_namespace}
+        ${rc}    ${out}=    Run And Return Rc And Output
+        ...    oc cp ${EXECDIR}/${filepath} ${workbench_title}-0:/opt/app-root/src -n ${workbench_namespace}
         Should Be Equal As Integers    ${rc}    ${0}
     END
 

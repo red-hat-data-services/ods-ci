@@ -18,8 +18,8 @@ Test Tags         Kserve
 
 
 *** Variables ***
-${INFERENCE_REST_INPUT_ONNX_FILE}=    tests/Resources/Files/triton/kserve-triton-onnx-rest-input.json
-${PRJ_TITLE}=    ms-triton-project-mm1
+${INFERENCE_REST_INPUT_ONNX_FILE}=    @tests/Resources/Files/triton/kserve-triton-onnx-rest-input.json
+${PRJ_TITLE}=    ms-triton-project-01
 ${PRJ_DESCRIPTION}=    project used for model serving triton runtime tests
 ${MODEL_CREATED}=    ${FALSE}
 ${ONNX_MODEL_NAME}=    densenet_onnx
@@ -57,15 +57,15 @@ Test Onnx Model Rest Inference Via UI (Triton on Modelmesh)
     Log     ${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}
     ${INFERENCE_REST_INPUT_ONNX}=     Load Json File      file_path=${INFERENCE_REST_INPUT_ONNX_FILE}
     Log     ${INFERENCE_REST_INPUT_ONNX}
-    Verify Model Inference With Retries    ${ONNX_MODEL_NAME}    ${INFERENCE_REST_INPUT_ONNX}    ${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}
+    Verify Model Inference With Retries    ${ONNX_MODEL_NAME}    ${INFERENCE_REST_INPUT_ONNX_FILE}    ${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}
     ...    token_auth=${TRUE}
     ...    project_title=${PRJ_TITLE}
     Open Dashboard Settings    settings_page=Serving runtimes
     Delete Serving Runtime Template         displayed_name=modelmesh-triton
-    #[Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${ONNX_MODEL_NAME}
-    #...  project_title=${PRJ_TITLE}
-    #...  AND
-    #...  Clean All Models Of Current User
+    [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${ONNX_MODEL_NAME}
+    ...  project_title=${PRJ_TITLE}
+    ...  AND
+    ...  Clean All Models Of Current User
 
 *** Keywords ***
 Triton On Kserve Suite Setup

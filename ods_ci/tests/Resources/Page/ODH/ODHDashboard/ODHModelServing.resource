@@ -328,15 +328,10 @@ Verify Model Inference
          Open Model Serving Home Page
          Switch Model Serving Project    ${project_title}
     END
-<<<<<<< HEAD
-    ${inference_output}=    Get Model Inference    model_name=${model_name}    inference_input=${inference_input}   token_auth=${token_auth}    kserve_mode=${kserve_mode}
-    ...    project_title=${project_title}   deployment_mode=${deployment_mode}   service_port=${service_port}   end_point=${end_point}
-    Log    ${inference_output}
-=======
     ${inference_output}=    Get Model Inference    model_name=${model_name}   inference_input=${inference_input}
     ...    token_auth=${token_auth}    kserve_mode=${kserve_mode}    project_title=${project_title}
     ...    deployment_mode=${deployment_mode}    service_port=${service_port}    end_point=${end_point}    # robocop: disable
->>>>>>> master
+    Log    ${inference_output}
     ${result}    ${list}=    Inference Comparison    ${expected_inference_output}    ${inference_output}
     Log    ${result}
     Log    ${list}

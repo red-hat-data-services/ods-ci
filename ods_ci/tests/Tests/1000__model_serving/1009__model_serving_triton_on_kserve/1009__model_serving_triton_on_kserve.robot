@@ -15,6 +15,7 @@ Resource          ../../../Resources/Common.robot
 Suite Setup       Triton On Kserve Suite Setup
 Test Tags         Kserve
 
+
 *** Variables ***
 ${INFERENCE_GRPC_INPUT_ONNX}=    @tests/Resources/Files/triton/kserve-triton-onnx-gRPC-input.json
 ${INFERENCE_REST_INPUT_ONNX}=    @tests/Resources/Files/triton/kserve-triton-onnx-rest-input.json
@@ -24,11 +25,10 @@ ${MODEL_CREATED}=    ${FALSE}
 ${ONNX_MODEL_NAME}=    densenet_onnx
 ${ONNX_MODEL_LABEL}=     densenetonnx
 ${ONNX_GRPC_RUNTIME_NAME}=    triton-kserve-grpc
+${ONNX_RUNTIME_NAME}=    triton-kserve-rest
 ${RESOURCES_DIRPATH}=        tests/Resources/Files/triton
 ${ONNX_GRPC_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_onnx_gRPC_servingruntime.yaml
 ${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE}=     tests/Resources/Files/triton/kserve-triton-onnx-gRPC-output.json
-${ONNX_RUNTIME_NAME}=    triton-kserve-rest
-${RESOURCES_DIRPATH}=        tests/Resources/Files/triton
 ${ONNX_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_onnx_rest_servingruntime.yaml
 ${EXPECTED_INFERENCE_REST_OUTPUT_FILE}=      tests/Resources/Files/triton/kserve-triton-onnx-rest-output.json
 
@@ -56,6 +56,35 @@ Test Onnx Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-l
     ...     as_string=${TRUE}
     Run Keyword And Continue On Failure    Verify Model Inference With Retries
     ...    ${ONNX_MODEL_NAME}    ${INFERENCE_REST_INPUT_ONNX}    ${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}
+    ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}
+    [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${ONNX_MODEL_NAME}
+    ...  project_title=${PRJ_TITLE}
+    ...  AND
+    ...  Clean All Models Of Current User
+
+Test Onnx Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
+    [Documentation]    Test the deployment of an onnx model in Kserve using Triton
+    [Tags]    Sanity    RHOAIENG-11565      RunThisTest
+    Open Data Science Projects Home Page
+    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
+    ...    existing_project=${FALSE}
+    Open Dashboard Settings    settings_page=Serving runtimes
+    Upload Serving Runtime Template    runtime_filepath=${ONNX_GRPC_RUNTIME_FILEPATH}
+    ...    serving_platform=single      runtime_protocol=REST
+    Serving Runtime Template Should Be Listed    displayed_name=${ONNX_GRPC_RUNTIME_NAME}
+    ...    serving_platform=single
+    Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
+    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
+    ...            aws_bucket_name=ods-ci-s3
+    Deploy Kserve Model Via UI    model_name=${ONNX_MODEL_NAME}    serving_runtime=triton-kserve-grpc
+    ...    data_connection=model-serving-connection    path=triton/model_repository/    model_framework=onnx - 1
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${ONNX_MODEL_LABEL}
+    ...    namespace=${PRJ_TITLE}
+    ${EXPECTED_INFERENCE_GRPC_OUTPUT_ONNX}=     Load Json File     file_path=${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE}
+    ...     as_string=${TRUE}
+    Log     ${EXPECTED_INFERENCE_GRPC_OUTPUT_ONNX}
+    Run Keyword And Continue On Failure    Verify Model Inference With Retries
+    ...    ${ONNX_MODEL_NAME}    ${INFERENCE_GRPC_INPUT_ONNX}    ${EXPECTED_INFERENCE_GRPC_OUTPUT_ONNX}
     ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}
     [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${ONNX_MODEL_NAME}
     ...  project_title=${PRJ_TITLE}

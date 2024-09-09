@@ -63,7 +63,7 @@ Load Json File
     ${j_file}=    Get File    ${file_path}
     ${obj}=    Evaluate    json.loads(r'''${j_file}''')    json
     IF  ${as_string}
-       ${obj}=    Evaluate    json.dumps(${obj}, indent=4)    json
+       ${obj}=    Evaluate    json.dumps(${obj})    json
     END
     RETURN    ${obj}
 

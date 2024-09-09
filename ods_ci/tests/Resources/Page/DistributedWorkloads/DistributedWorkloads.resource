@@ -17,6 +17,7 @@ ${NOTEBOOK_USER_NAME}                    ${TEST_USER_3.USERNAME}
 ${NOTEBOOK_USER_PASSWORD}                ${TEST_USER_3.PASSWORD}
 ${KFTO_CORE_BINARY_NAME}                 kfto
 ${KFTO_UPGRADE_BINARY_NAME}              kfto-upgrade
+${ODH_BINARY_NAME}                       odh
 ${PIP_INDEX_URL}                         ${PIP_INDEX_URL}
 ${PIP_TRUSTED_HOST}                      ${PIP_TRUSTED_HOST}
 ${AWS_DEFAULT_ENDPOINT}                  ${S3.BUCKET_5.ENDPOINT}
@@ -183,11 +184,12 @@ Run Training Operator ODH Test
     END
 
 Prepare Codeflare E2E Test Suite
+    [Documentation]    Prepare Codeflare E2E Core Test Suite
     Log To Console    "Restarting kueue"
     Restart Kueue
 
-    Log To Console    "Downloading compiled test binary odh"
-    ${result} =    Run Process    curl --location --silent --output odh ${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}/odh && chmod +x odh
+    Log To Console    "Downloading compiled test binary ${ODH_BINARY_NAME}"
+    ${result} =    Run Process    curl --location --silent --output ${ODH_BINARY_NAME} ${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}/${ODH_BINARY_NAME} && chmod +x ${ODH_BINARY_NAME}
     ...    shell=true
     ...    stderr=STDOUT
     Log To Console    ${result.stdout}
@@ -203,16 +205,11 @@ Prepare Codeflare E2E Test Suite
     RHOSi Setup
 
 Teardown Codeflare E2E Test Suite
+    [Documentation]    Teardown Codeflare E2E Test Suite
     Log To Console    "Log back as cluster admin"
     Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
     Log To Console    "Removing test binaries"
-    ${result} =    Run Process    rm -f odh
-    ...    shell=true
-    ...    stderr=STDOUT
-    Log To Console    ${result.stdout}
-    IF    ${result.rc} != 0
-        FAIL    Unable to remove compiled binaries
-    END
+    Remove File        ${ODH_BINARY_NAME}
     RHOSi Teardown
 
 Generate User Token
@@ -224,9 +221,10 @@ Generate User Token
     RETURN    ${out}
 
 Run Codeflare ODH Test
+    [Documentation]    Run Codeflare ODH Test
     [Arguments]    ${TEST_NAME}
     Log To Console    "Running test: ${TEST_NAME}"
-    ${result} =    Run Process    ./odh -test.run ${TEST_NAME}
+    ${result} =    Run Process    ./${ODH_BINARY_NAME} -test.run ${TEST_NAME}
     ...    shell=true
     ...    stderr=STDOUT
     ...    env:CODEFLARE_TEST_TIMEOUT_SHORT=5m

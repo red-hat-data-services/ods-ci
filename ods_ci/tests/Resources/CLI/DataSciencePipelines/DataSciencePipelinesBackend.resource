@@ -31,7 +31,9 @@ Create Pipeline Server
     ...    object_storage_access_key=${object_storage_access_key}
     ...    object_storage_secret_key=${object_storage_secret_key}
 
+    # Pipeline Server creation fails if object storage url starts with https:// or http:// or if it ends with /
     ${object_storage_endpoint}=    Remove String    ${object_storage_endpoint}    https://    http://
+    ${object_storage_endpoint}=    Strip String     ${object_storage_endpoint}    characters=/
 
     # Process DSPA Template to create pipeline server
     ${template_parameters}=    Catenate    -p DSP_VERSION=${dsp_version}

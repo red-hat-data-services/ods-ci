@@ -12,7 +12,6 @@ Verify IBM Watsonx AI Is Available In RHODS Dashboard Explore Page
   [Documentation]  Very simple test to check that the Watsonx.ai tile/card is present
   ...    in the list of applications on the Applications -> Explore page.
   [Tags]  Smoke
-  ...     Tier1
   ...     ODS-267
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}

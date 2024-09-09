@@ -18,7 +18,6 @@ Suite Teardown   End Web Test
 *** Test Cases ***
 Test Special Usernames
     [Tags]  Smoke
-    ...     Tier1
     ...     OpenDataHub
     ...     ODS-257  ODS-532
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}

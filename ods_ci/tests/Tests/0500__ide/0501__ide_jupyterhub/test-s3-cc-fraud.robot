@@ -13,15 +13,15 @@ Test Tags       JupyterHub
 
 *** Test Cases ***
 Open RHODS Dashboard
-  [Tags]  Sanity    Tier1
+  [Tags]  Sanity
   Wait For RHODS Dashboard To Load
 
 Can Launch Jupyterhub
-  [Tags]  Sanity    Tier1
+  [Tags]  Sanity
   Launch Jupyter From RHODS Dashboard Link
 
 Can Login to Jupyterhub
-  [Tags]  Sanity    Tier1
+  [Tags]  Sanity
   Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   ${authorization_required} =  Is Service Account Authorization Required
   IF  ${authorization_required}  Authorize jupyterhub service account
@@ -29,12 +29,12 @@ Can Login to Jupyterhub
   Wait Until Page Contains  Start a notebook server
 
 Can Spawn Notebook
-  [Tags]  Sanity  ODS-902  ODS-904    Tier1
+  [Tags]  Sanity  ODS-902  ODS-904
   Fix Spawner Status
   Spawn Notebooks And Set S3 Credentials    image=science-notebook
 
 Can Launch Python3 Smoke Test Notebook
-  [Tags]  Sanity  Tier1    ODS-910  ODS-911  ODS-921  ODS-924  ODS-929  ODS-931  ODS-333
+  [Tags]  Sanity  ODS-910  ODS-911  ODS-921  ODS-924  ODS-929  ODS-931  ODS-333
   Navigate Home (Root folder) In JupyterLab Sidebar File Browser
   Open With JupyterLab Menu  Git  Clone a Repository
   Input Text  //div[.="Clone a repo"]/../div[contains(@class, "jp-Dialog-body")]//input  https://github.com/lugi0/clustering-notebook

@@ -53,7 +53,7 @@ Test Onnx Model Rest Inference Via UI (Triton on Modelmesh)
     Wait Until Runtime Pod Is Running    server_name=${ONNX_RUNTIME_NAME}
     ...    project_title=${PRJ_TITLE}    timeout=5m
     Verify Model Status    ${ONNX_MODEL_NAME}    success
-    ${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}=     Load Json File      file_path=${EXPECTED_INFERENCE_REST_OUTPUT_FILE}
+    ${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}=     Load Json File      file_path=${EXPECTED_INFERENCE_REST_OUTPUT_FILE}    as_string=${TRUE}
     Log     ${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}
     #${INFERENCE_REST_INPUT_ONNX}=     Load Json File      file_path=${INFERENCE_REST_INPUT_ONNX_FILE}
     #Log     ${INFERENCE_REST_INPUT_ONNX}

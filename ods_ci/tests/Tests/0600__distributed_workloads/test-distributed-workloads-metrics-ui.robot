@@ -39,7 +39,7 @@ Verify Workload Metrics Home page Contents
     Page Should Contain Element     ${PROJECT_METRICS_TAB_XP}
     Page Should Contain Element     ${WORKLOAD_STATUS_TAB_XP}
     Click Element    ${REFRESH_INTERNAL_MENU_XP}
-    ${get_refresh_interval_list}=    Get All Text Under Element   xpath=//*[starts-with(@id, "select-option-")]
+    ${get_refresh_interval_list}=    Get All Text Under Element   xpath=//button[@role="option"]
     Lists Should Be Equal    ${REFRESH_INTERNAL_LIST}    ${get_refresh_interval_list}
 
 Verify Project Metrics Default Page contents
@@ -114,6 +114,8 @@ Verify The Workload Metrics By Submitting Kueue Batch Workload
     Wait For Job With Status    ${JOB_NAME_QUEUE}    Succeeded    180
     Select Refresh Interval    15 seconds
     Page Should Not Contain Element    xpath=//*[text()="Running"]
+    Page Should Contain Element    xpath=//*[text()="Succeeded"]
+    Select Refresh Interval    15 seconds
     Check Requested Resources    ${PRJ_TITLE}    ${CPU_SHARED_QUOTA}    ${MEMEORY_SHARED_QUOTA}    0    0    Job
     Check Distributed Workload Resource Metrics Status    ${JOB_NAME_QUEUE}    Succeeded
     # Once fixed  https://issues.redhat.com/browse/RHOAIENG-9092 update Job success message
@@ -185,14 +187,14 @@ Verify Requested resources When Multiple Local Queue Exists
     ${memory_requested} =    Evaluate    ${memory_requested_1} + ${memory_requested_2}
     Check Requested Resources    ${PRJ_TITLE}    ${CPU_SHARED_QUOTA}    ${MEMEORY_SHARED_QUOTA}    ${cpu_requested}    ${memory_requested}    Job
 
-    Wait Until Element Is Visible    xpath=//*[@id="topResourceConsumingCPU-ChartLabel-title"]    timeout=120
-    Wait Until Element Is Visible    xpath=//*[@id="topResourceConsumingCPU-ChartLegend-ChartLabel-0"]   timeout=120
+    Wait Until Element Is Visible    xpath=//*[@id="topResourceConsumingCPU-ChartLabel-title"]    timeout=180
+    Wait Until Element Is Visible    xpath=//*[@id="topResourceConsumingCPU-ChartLegend-ChartLabel-0"]   timeout=180
     ${cpu_usage} =    Get Current CPU Usage    ${PRJ_TITLE}    Job
     ${cpu_consuming} =    Get Text    xpath:(//*[@style[contains(., 'var(--pf-v5-chart-donut--label--title--Fill')]])[1]
     Check Resource Consuming Usage    ${cpu_usage}    ${cpu_consuming}    CPU
 
-    Wait Until Element Is Visible    xpath=//*[@id="topResourceConsumingMemory-ChartLabel-title"]    timeout=120
-    Wait Until Element Is Visible    xpath=//*[@id="topResourceConsumingMemory-ChartLegend-ChartLabel-0"]    timeout=120
+    Wait Until Element Is Visible    xpath=//*[@id="topResourceConsumingMemory-ChartLabel-title"]    timeout=180
+    Wait Until Element Is Visible    xpath=//*[@id="topResourceConsumingMemory-ChartLegend-ChartLabel-0"]    timeout=180
     ${memory_usage} =    Get Current Memory Usage    ${PRJ_TITLE}    Job
     ${memory_consuming} =    Get Text    xpath:(//*[@style[contains(., 'var(--pf-v5-chart-donut--label--title--Fill')]])[2]
     Check Resource Consuming Usage    ${memory_usage}    ${memory_consuming}    Memory

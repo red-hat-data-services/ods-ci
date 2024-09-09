@@ -11,12 +11,13 @@ Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Wor
 Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Storages.resource
 Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Pipelines.resource
+Resource         ../../Resources/CLI/DataSciencePipelines/DataSciencePipelinesBackend.resource
 Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipelines.resource
 Library          Screenshot
 Library          String
 Library          DebugLibrary
 Library          JupyterLibrary
-Test Tags        DataSciencePipelines
+Test Tags        DataSciencePipelines-IDE
 Suite Setup      Elyra Pipelines Suite Setup
 Suite Teardown   Elyra Pipelines Suite Teardown
 
@@ -39,8 +40,7 @@ ${DC_NAME} =    elyra-s3
 Verify Pipelines Integration With Elyra When Using Standard Data Science Image
     [Documentation]    Verifies that a workbench using the Standard Data Science Image can be used to
     ...    create and run a Data Science Pipeline
-    [Tags]    Sanity    Tier1
-    ...       ODS-2197
+    [Tags]    Sanity    ODS-2197
     [Timeout]    10m
     Verify Pipelines Integration With Elyra Running Hello World Pipeline Test
     ...    img=Standard Data Science
@@ -76,9 +76,9 @@ Elyra Pipelines Suite Setup    # robocop: off=too-many-calls-in-keyword
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_NAME}
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-ds-pipelines
-    Create Pipeline Server    dc_name=${DC_NAME}
+    Pipelines.Create Pipeline Server    dc_name=${DC_NAME}
     ...    project_title=${PRJ_TITLE}
-    Wait Until Pipeline Server Is Deployed    project_title=${PRJ_TITLE}
+    DataSciencePipelinesBackend.Wait Until Pipeline Server Is Deployed    namespace=${PRJ_TITLE}
     Sleep    15s    reason=Wait until pipeline server is detected by dashboard
 
 Elyra Pipelines Suite Teardown
@@ -135,7 +135,7 @@ Verify Hello World Pipeline Elements
 Select Pipeline Project By Name
     [Documentation]    Select the project by project name
     [Arguments]    ${project_name}
-    ${project_menu}=    Set Variable    xpath://div[@data-testid="project-selector-dropdown"]
+    ${project_menu}=    Set Variable    xpath://*[@data-testid="project-selector-dropdown"]
     Wait until Element is Visible    ${project_menu}   timeout=20
     Click Element    ${project_menu}
-    Click Element    xpath://a[@role="menuitem" and text()="${project_name}"]
+    Click Element    xpath://*[@role="menuitem" and string()="${project_name}"]

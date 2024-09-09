@@ -18,20 +18,20 @@ Suite Teardown    RHOSi Teardown
 
 
 *** Variables ***
-${namespace}           ${OPERATOR_NAMESPACE}
 ${regex_pattern}       level=([Ee]rror).*|([Ff]ailed) to list .*
 
 
 *** Test Cases ***
 Verify RHODS Operator log
-   [Tags]  Sanity    Tier1
+   [Tags]  Sanity
    ...     ODS-1007
+   ...     Operator
    #Get the POD name
-   ${data}       Run keyword   Oc Get   kind=Pod     namespace=${namespace}   label_selector=name=rhods-operator
+   ${data}       Run Keyword   Oc Get   kind=Pod     namespace=${OPERATOR_NAMESPACE}   label_selector=${OPERATOR_LABEL_SELECTOR}
    #Capture the logs based on containers
-   ${val}        Run   oc logs --tail=1000000 ${data[0]['metadata']['name']} -n ${namespace} -c rhods-operator
-   #To check if command has been suessfully executed and the logs has been captured
-   IF    len($val)==${0} or "error:" in $val     FAIL   Either OC command has not been executed sucessfully or Logs is not present
+   ${val}        Run   oc logs --tail=1000000 ${data[0]['metadata']['name']} -n ${OPERATOR_NAMESPACE} -c ${OPERATOR_POD_CONTAINER_NAME}
+   #To check if command has been successfully executed and the logs have been captured
+   IF    len($val)==${0} or "error:" in $val     FAIL   Either OC command has not been executed successfully or Logs are not present
    #Filter the error msg from the log captured
    ${match_list} 	 Get Regexp Matches   ${val}     ${regex_pattern}
    #Remove if any duplicate entry are present

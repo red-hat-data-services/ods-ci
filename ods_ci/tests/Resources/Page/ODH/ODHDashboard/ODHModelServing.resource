@@ -263,12 +263,13 @@ Get Model Inference
     ...    model endpoint. If token authentication is needed for the model, ${token_auth} should be
     ...    set to ${TRUE}.
     [Arguments]    ${model_name}    ${inference_input}    ${token_auth}=${FALSE}   ${project_title}=${NONE}
-    ...    ${kserve_mode}=Serverless   ${deployment_mode}='UI'   ${service_port}=8888   ${end_point}=${NONE}
+    ...    ${kserve_mode}=Serverless   ${deployment_mode}=UI   ${service_port}=8888   ${end_point}=${NONE}
     ${curl_cmd}=     Set Variable    ${NONE}
     ${self_managed}=    Is RHODS Self-Managed
-    IF  ${deployment_mode} == 'UI'
+    IF    $deployment_mode == 'UI'
         ${url}=    Get Model Route Via UI    ${model_name}
-        ${kserve}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain    Single-model serving enabled
+        ${kserve}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain
+        ...    Single-model serving enabled
         ${curl_cmd}=     Set Variable    curl -s ${url} -d ${inference_input}
         IF    ${token_auth}
             IF    "${project_title}" == "${NONE}"
@@ -284,23 +285,22 @@ Get Model Inference
             Fetch Openshift CA Bundle
             ${curl_cmd}=     Catenate    ${curl_cmd}    --cacert openshift_ca.crt
         END
-    END
-    IF  ${deployment_mode} == 'Cli'
+    ELSE IF    $deployment_mode == 'Cli'
         ${rc}   ${cmd_op}   Run And Return Rc And Output
-        ...    oc get isvc ${model_name} -o jsonpath='{.metadata.annotations.serving\.kserve\.io/deploymentMode}' -n ${project_title}
+        ...    oc get isvc ${model_name} -o jsonpath='{.metadata.annotations.serving\.kserve\.io/deploymentMode}' -n ${project_title}    # robocop: disable
         Should Be Equal As Integers    ${rc}    0
-         IF  "${cmd_op}" != "ModelMesh"
+        IF  "${cmd_op}" != "ModelMesh"
             Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
             ${cert}=    Set Variable    --cacert openshift_ca_istio_knative.crt
-         ELSE IF  ${self_managed}
+        ELSE IF  ${self_managed}
             Fetch Openshift CA Bundle
             ${cert}=   Set Variable   --cacert openshift_ca.crt
         END
         IF    '${kserve_mode}' == 'Serverless'
-               ${rc}    ${url}=    Run And Return Rc And Output    oc get ksvc ${model_name}-predictor -n ${project_title} -o jsonpath='{.status.url}'
-               Should Be Equal As Integers    ${rc}    0
-               ${curl_cmd}=    Set Variable    curl -s ${url}${end_point} -d ${inference_input}
-
+            ${rc}    ${url}=    Run And Return Rc And Output
+            ...    oc get ksvc ${model_name}-predictor -n ${project_title} -o jsonpath='{.status.url}'
+            Should Be Equal As Integers    ${rc}    0
+            ${curl_cmd}=    Set Variable    curl -s ${url}${end_point} -d ${inference_input}
         ELSE IF    '${kserve_mode}' == 'RawDeployment'
             ${url}=   Set Variable    http://localhost:${service_port}${end_point}
             ${curl_cmd}=    Set Variable    curl -s ${url} -d ${inference_input} --cacert openshift_ca_istio_knative.crt
@@ -308,8 +308,8 @@ Get Model Inference
             Log    "Modelmesh CLI mode only"
         END
         IF    ${token_auth}
-              ${token}=    Create Inference Access Token    ${project_title}    ${DEFAULT_BUCKET_SA_NAME}
-              ${curl_cmd}=    Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
+            ${token}=    Create Inference Access Token    ${project_title}    ${DEFAULT_BUCKET_SA_NAME}
+            ${curl_cmd}=    Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
         END
     END
 
@@ -322,15 +322,21 @@ Get Model Inference
 Verify Model Inference
     [Documentation]    Verifies that the inference result of a model is equal to an expected output
     [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}=${FALSE}
-    ...    ${project_title}=${NONE}    ${deployment_mode}='UI'   ${kserve_mode}=Serverless
+    ...    ${project_title}=${NONE}    ${deployment_mode}=UI    ${kserve_mode}=Serverless
     ...    ${service_port}=${NONE}   ${end_point}=${NONE}
-    IF   ${deployment_mode} == 'UI'
+    IF   $deployment_mode == 'UI'
          Open Model Serving Home Page
          Switch Model Serving Project    ${project_title}
     END
+<<<<<<< HEAD
     ${inference_output}=    Get Model Inference    model_name=${model_name}    inference_input=${inference_input}   token_auth=${token_auth}    kserve_mode=${kserve_mode}
     ...    project_title=${project_title}   deployment_mode=${deployment_mode}   service_port=${service_port}   end_point=${end_point}
     Log    ${inference_output}
+=======
+    ${inference_output}=    Get Model Inference    model_name=${model_name}   inference_input=${inference_input}
+    ...    token_auth=${token_auth}    kserve_mode=${kserve_mode}    project_title=${project_title}
+    ...    deployment_mode=${deployment_mode}    service_port=${service_port}    end_point=${end_point}    # robocop: disable
+>>>>>>> master
     ${result}    ${list}=    Inference Comparison    ${expected_inference_output}    ${inference_output}
     Log    ${result}
     Log    ${list}
@@ -350,10 +356,10 @@ Verify Model Inference With Retries
     ...                endpoint exposed.
     ...                This is a temporary mitigation meanwhile we find a better way to check the model
     [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}=${FALSE}
-    ...            ${project_title}=${NONE}    ${retries}=${5}     ${deployment_mode}='UI'    ${kserve_mode}=Serverless
+    ...            ${project_title}=${NONE}    ${retries}=${5}     ${deployment_mode}=UI    ${kserve_mode}=Serverless
     ...            ${service_port}=${NONE}   ${end_point}=${NONE}
-    ${status}=    Run Keyword And Return Status    Verify Model Inference
-    ...    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}    ${project_title}
+    ${status}=    Run Keyword And Return Status    Verify Model Inference    ${model_name}    ${inference_input}
+    ...    ${expected_inference_output}    ${token_auth}    ${project_title}    ${deployment_mode}
     IF    not ${status}
         ${retry}=    Set Variable    ${0}
         WHILE    ${retry} < ${retries}
@@ -434,8 +440,8 @@ Deploy Kserve Model Via UI  #robocop: disable
     ...    ${token}=${FALSE}    ${multi_token}=${FALSE}    ${multi_service_account_name}=default-name2
     ...    ${public_endpoint}=${TRUE}
     Move To Tab    Models
-    Click Button    ${DEPLOY_MODEL_BTN}
-    Wait Until Page Contains Element    xpath=${KSERVE_MODAL_HEADER}
+    SeleniumLibrary.Click Button    ${DEPLOY_MODEL_BTN}
+    SeleniumLibrary.Wait Until Page Contains Element    xpath=${KSERVE_MODAL_HEADER}
     Set Model Name   ${model_name}
     Set Model Server Runtime    ${serving_runtime}
     Select Framework    ${model_framework}

@@ -8,17 +8,19 @@ Resource          ../../../Resources/CLI/ModelServing/llm.resource
 Library           OpenShiftLibrary
 Suite Setup       Suite Setup
 
+
 *** Variables ***
 ${TEST_NS}=    singlemodel
 ${FLAN_MODEL_S3_DIR}=    flan-t5-small/flan-t5-small-caikit
 ${FLAN_STORAGE_URI}=    s3://${S3.BUCKET_3.NAME}/${FLAN_MODEL_S3_DIR}/
 ${CAIKIT_TGIS_RUNTIME_NAME}=    caikit-tgis-runtime
 
+
 *** Test Cases ***
 Verify User Can Serve And Query A Model
     [Documentation]    Basic tests for chekcing configmapby deploying and querying a LLM model
     ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    Sanity    Tier1   RHOAIENG-10372
+    [Tags]    Sanity   RHOAIENG-10372
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -37,6 +39,7 @@ Verify User Can Serve And Query A Model
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
+
 *** Keywords ***
 Suite Setup
     [Documentation]    Suite Setup for model deployment
@@ -50,6 +53,7 @@ Suite Setup
 
 Verify Metrics Dashboard Is Present
     [Documentation]    Check if Metrics Dashboard Is Present
-    ${rc}    ${output}=    Run And Return Rc And Output    oc get cm -n ${TEST_NS} ${MODEL_NAME}-metrics-dashboard -o jsonpath='{.data.supported}'
+    ${rc}    ${output}=    Run And Return Rc And Output
+    ...    oc get cm -n ${TEST_NS} ${MODEL_NAME}-metrics-dashboard -o jsonpath='{.data.supported}'
     Should Be Equal As Numbers    ${rc}    0
     Should Be Equal    true    ${output}

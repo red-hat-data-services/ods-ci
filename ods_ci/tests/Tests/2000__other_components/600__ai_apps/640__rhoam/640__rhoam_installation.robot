@@ -1,10 +1,10 @@
 *** Settings ***
-Resource        ../../../Resources/Page/LoginPage.robot
-Resource        ../../../Resources/Common.robot
-Resource        ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
-Resource        ../../../Resources/Page/ODH/AiApps/Rhoam.resource
-Resource        ../../../Resources/ODS.robot
-Library         ../../../../libs/Helpers.py
+Resource        ../../../../Resources/Page/LoginPage.robot
+Resource        ../../../../Resources/Common.robot
+Resource        ../../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
+Resource        ../../../../Resources/Page/ODH/AiApps/Rhoam.resource
+Resource        ../../../../Resources/ODS.robot
+Library         ../../../../../libs/Helpers.py
 Library         SeleniumLibrary
 Library         OpenShiftLibrary
 Suite Setup     RHOAM Install Suite Setup

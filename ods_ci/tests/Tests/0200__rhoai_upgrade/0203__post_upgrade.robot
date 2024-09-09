@@ -3,6 +3,8 @@ Documentation       Test Suite for Upgrade testing,to be run after the upgrade
 Library            OpenShiftLibrary
 Resource           ../../Resources/RHOSi.resource
 Resource           ../../Resources/ODS.robot
+Resource           ../../Resources/OCP.resource
+Resource           ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
 Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDashboardResources.resource
 Resource           ../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
@@ -212,6 +214,30 @@ Verify that the must-gather image provides RHODS logs and info
     [Teardown]  Cleanup must-gather Logs
 
 
+Verify That DSC And DSCI Release.Name Attribute matches ${expected_release_name}
+    [Documentation]    Tests the release.name attribute from the DSC and DSCI matches the desired value.
+    ...                ODH: Open Data Hub
+    ...                RHOAI managed: OpenShift AI Cloud Service
+    ...                RHOAI selfmanaged: OpenShift AI Self-Managed
+    [Tags]    Upgrade
+    Should Be Equal As Strings    ${DSC_RELEASE_NAME}     ${expected_release_name}
+    Should Be Equal As Strings    ${DSCI_RELEASE_NAME}    ${expected_release_name}
+
+Verify That DSC And DSCI Release.Version Attribute matches the value in the subscription
+    [Documentation]    Tests the release.version attribute from the DSC and DSCI matches the value in the subscription.
+    [Tags]    Upgrade
+    ${rc}    ${csv_name}=    Run And Return Rc And Output
+    ...    oc get subscription -n ${OPERATOR_NAMESPACE} -l ${OPERATOR_SUBSCRIPTION_LABEL} -ojson | jq '.items[0].status.currentCSV' | tr -d '"'
+
+    Should Be Equal As Integers    ${rc}    ${0}    ${rc}
+
+    ${csv_version}=     Get Resource Attribute      ${OPERATOR_NAMESPACE}
+    ...                 ClusterServiceVersion      ${csv_name}        .spec.version
+
+    Should Be Equal As Strings    ${DSC_RELEASE_VERSION}    ${csv_version}
+    Should Be Equal As Strings    ${DSCI_RELEASE_VERSION}    ${csv_version}
+
+
 *** Keywords ***
 Dashboard Suite Setup
     [Documentation]  Basic suite setup
@@ -261,5 +287,8 @@ Managed RHOAI Upgrade Test Teardown
 
 Upgrade Suite Setup
     [Documentation]    Set of action to run as Suite setup
+    RHOSi Setup
     ${IS_SELF_MANAGED}=    Is RHODS Self-Managed
     Set Suite Variable    ${IS_SELF_MANAGED}
+    Gather Release Attributes From DSC And DSCI
+    Set Expected Value For Release Name

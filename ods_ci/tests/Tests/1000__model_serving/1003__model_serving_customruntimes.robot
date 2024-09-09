@@ -20,6 +20,7 @@ ${MODEL_SERVER_NAME}=    ODS-CI CustomServingRuntime Server
 
 *** Test Cases ***
 Verify RHODS Admins Can Import A Custom Serving Runtime Template By Uploading A YAML file
+    [Documentation]    Verifies an admin user can import custom runtimes via upload function
     [Tags]    Smoke    ODS-2276
     Open Dashboard Settings    settings_page=Serving runtimes
     Upload Serving Runtime Template    runtime_filepath=${OVMS_RUNTIME_FILEPATH}
@@ -28,6 +29,7 @@ Verify RHODS Admins Can Import A Custom Serving Runtime Template By Uploading A 
     ...    serving_platform=multi
 
 Verify RHODS Admins Can Delete A Custom Serving Runtime Template
+    [Documentation]    Verifies an admin user can delete a custom serving runtime
     [Tags]    Smoke    ODS-2279
     [Setup]    Create Test Serving Runtime Template If Not Exists
     Open Dashboard Settings    settings_page=Serving runtimes
@@ -37,7 +39,7 @@ Verify RHODS Admins Can Delete A Custom Serving Runtime Template
 
 Verify RHODS Admins Can Import A Custom Serving Runtime Template For Each Serving Platform
     [Documentation]    Imports a Custom Serving Runtime for each supported serving platform
-    [Tags]    Sanity    ODS-2542    Tier1
+    [Tags]    Sanity    ODS-2542
     [Setup]    Generate Runtime YAMLs
     Open Dashboard Settings    settings_page=Serving runtimes
     ${RUNTIME_SINGLE_FILEPATH}=    Set Variable    ${RESOURCES_DIRPATH}/csr_single_model.yaml
@@ -55,7 +57,7 @@ Verify RHODS Admins Can Import A Custom Serving Runtime Template For Each Servin
     ...    AND
     ...    Delete Serving Runtime Template From CLI    displayed_name=${RUNTIME_MULTI_DISPLAYED_NAME}
 
-Verify RHODS Users Can Deploy A Model Using A Custom Serving Runtime
+Verify RHODS Users Can Deploy A Model Using A Custom Serving Runtime    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Verifies that a model can be deployed using only the UI.
     ...    At the end of the process, verifies the correct resources have been deployed.
     [Tags]    Tier1    ODS-2281    ModelMesh
@@ -68,7 +70,7 @@ Verify RHODS Users Can Deploy A Model Using A Custom Serving Runtime
     ...    description=${PRJ_DESCRIPTION}
     ${model_name}=    Set Variable    test-model-csr
     ${inference_input}=    Set Variable    @tests/Resources/Files/modelmesh-mnist-input.json
-    ${exp_inference_output}=    Set Variable    {"model_name":"test-model-csr__isvc-85fe09502b","model_version":"1","outputs":[{"name":"Plus214_Output_0","datatype":"FP32","shape":[1,10],"data":[-8.233053,-7.7497034,-3.4236815,12.3630295,-12.079103,17.266596,-10.570976,0.7130762,3.321715,1.3621228]}]}
+    ${exp_inference_output}=    Set Variable    {"model_name":"test-model-csr__isvc-85fe09502b","model_version":"1","outputs":[{"name":"Plus214_Output_0","datatype":"FP32","shape":[1,10],"data":[-8.233053,-7.7497034,-3.4236815,12.3630295,-12.079103,17.266596,-10.570976,0.7130762,3.321715,1.3621228]}]}    # robocop: off=line-too-long
     Open Data Science Project Details Page    project_title=${PRJ_TITLE}    tab_id=data-connections
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
@@ -94,12 +96,13 @@ Custom Serving Runtime Suite Setup
     ...                and runs RHOSi setup
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
-    ${runtime_pod_name} =    Replace String Using Regexp    string=${MODEL_SERVER_NAME}    pattern=\\s    replace_with=-
-    ${runtime_pod_name} =    Convert To Lower Case    ${runtime_pod_name}
+    ${runtime_pod_name}=    Replace String Using Regexp    string=${MODEL_SERVER_NAME}    pattern=\\s    replace_with=-
+    ${runtime_pod_name}=    Convert To Lower Case    ${runtime_pod_name}
     Set Suite Variable    ${RUNTIME_POD_NAME}    ${runtime_pod_name}
     Fetch CA Certificate If RHODS Is Self-Managed
 
 Custom Serving Runtime Suite Teardown
+    [Documentation]    Suite teardown keyword
     Delete Project Via CLI By Display Name    displayed_name=${PRJ_TITLE}
     Delete Serving Runtime Template From CLI    displayed_name=${UPLOADED_OVMS_DISPLAYED_NAME}
     SeleniumLibrary.Close All Browsers
@@ -107,7 +110,9 @@ Custom Serving Runtime Suite Teardown
     RHOSi Teardown
 
 Create Test Serving Runtime Template If Not Exists
-    ${resource_name}=    Get OpenShift Template Resource Name By Displayed Name    displayed_name=${UPLOADED_OVMS_DISPLAYED_NAME}
+    [Documentation]    Creates a Serving Runtime template if it doesn't exist already
+    ${resource_name}=    Get OpenShift Template Resource Name By Displayed Name
+    ...    displayed_name=${UPLOADED_OVMS_DISPLAYED_NAME}
     IF    "${resource_name}" == "${EMPTY}"
         Log    message=Creating the necessary Serving Runtime as part of Test Setup.
         Open Dashboard Settings    settings_page=Serving runtimes
@@ -117,7 +122,7 @@ Create Test Serving Runtime Template If Not Exists
         ...    serving_platform=multi
     END
 
-Generate Runtime YAMLs
+Generate Runtime YAMLs    # robocop: off=too-many-calls-in-keyword
     [Documentation]    Generates three different Custom Serving Runtime YAML files
     ...                starting from OVMS one. Each YAML will be used for a different
     ...                supported serving platform (single model, multi model)
@@ -128,14 +133,13 @@ Generate Runtime YAMLs
     Copy File    ${OVMS_RUNTIME_FILEPATH}    ${RUNTIME_SINGLE_FILEPATH}
     Copy File    ${OVMS_RUNTIME_FILEPATH}    ${RUNTIME_MULTI_FILEPATH}
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    yq -i '.metadata.annotations."openshift.io/display-name" = "${RUNTIME_SINGLE_DISPLAYED_NAME}"' ${RUNTIME_SINGLE_FILEPATH}
+    ...    yq -i '.metadata.annotations."openshift.io/display-name" = "${RUNTIME_SINGLE_DISPLAYED_NAME}"' ${RUNTIME_SINGLE_FILEPATH}    # robocop: off=line-too-long
     Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    yq -i '.metadata.name = "ods-ci-single"' ${RUNTIME_SINGLE_FILEPATH}
-        ${rc}    ${out}=    Run And Return Rc And Output
-    ...    yq -i '.metadata.annotations."openshift.io/display-name" = "${RUNTIME_MULTI_DISPLAYED_NAME}"' ${RUNTIME_MULTI_FILEPATH}
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    yq -i '.metadata.annotations."openshift.io/display-name" = "${RUNTIME_MULTI_DISPLAYED_NAME}"' ${RUNTIME_MULTI_FILEPATH}    # robocop: off=line-too-long
     Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    yq -i '.metadata.name = "ods-ci-multi"' ${RUNTIME_MULTI_FILEPATH}
     Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
-

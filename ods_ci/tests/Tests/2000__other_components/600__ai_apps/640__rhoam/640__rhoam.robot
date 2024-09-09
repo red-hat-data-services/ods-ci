@@ -1,8 +1,8 @@
 *** Settings ***
-Resource        ../../../Resources/Page/LoginPage.robot
-Resource        ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
-Resource        ../../../Resources/RHOSi.resource
-Resource        ../../../Resources/Page/ODH/AiApps/Rhoam.resource
+Resource        ../../../../Resources/Page/LoginPage.robot
+Resource        ../../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
+Resource        ../../../../Resources/RHOSi.resource
+Resource        ../../../../Resources/Page/ODH/AiApps/Rhoam.resource
 Library         SeleniumLibrary
 Suite Setup     RHOAM Suite Setup
 Suite Teardown  RHOAM Suite Teardown

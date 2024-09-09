@@ -41,8 +41,8 @@ Select Distributed Workload Project By Name
     [Documentation]    Select the project in distributed workload metrics page by project name
     [Arguments]    ${project_name}
     Wait Until Element Is Visible    ${PROJECT_XP}   timeout=20
-    Click Element    xpath://div[@data-testid="project-selector-dropdown"]
-    Click Element    xpath://a[@role="menuitem" and text()="${project_name}"]
+    Click Element    xpath://*[@data-testid="project-selector-dropdown"]
+    Click Element    xpath://*[@role="menuitem" and string()="${project_name}"]
 
 Check Expected String Contains
     [Documentation]    Check Expected String Contains with the xpath prvoided get text
@@ -61,7 +61,7 @@ Select Refresh Interval
     [Arguments]    ${refresh_interval}
     Wait Until Element Is Visible  ${REFRESH_INTERVAL_XP}    timeout=20
     Click Element     ${REFRESH_INTERNAL_MENU_XP}
-    Click Element     xpath=//button[text()="${refresh_interval}"]
+    Click Element     xpath=//button[@role="option" and contains(., "${refresh_interval}")]
 
 Get Current CPU Usage
     [Documentation]    Returns value of current cpu usage

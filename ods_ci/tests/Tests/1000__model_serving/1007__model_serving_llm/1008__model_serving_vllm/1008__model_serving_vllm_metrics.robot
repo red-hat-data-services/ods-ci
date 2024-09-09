@@ -57,16 +57,16 @@ ${TEST_NS}=                   vllm-gpt2
 *** Test Cases ***
 Verify User Can Deploy A Model With Vllm Via CLI
     [Documentation]    Deploy a model (gpt2) using the vllm runtime and confirm that it's running
-    [Tags]    Tier1    Sanity    Resources-GPU    RHOAIENG-6264   VLLM
+    [Tags]    Sanity    Resources-GPU    RHOAIENG-6264   VLLM
     ${rc}    ${out}=    Run And Return Rc And Output    oc apply -f ${DL_POD_FILEPATH}
     Should Be Equal As Integers    ${rc}    ${0}
     Wait For Pods To Succeed    label_selector=gpt-download-pod=true    namespace=${TEST_NS}
     ${rc}    ${out}=    Run And Return Rc And Output    oc apply -f ${SR_FILEPATH}
     Should Be Equal As Integers    ${rc}    ${0}
-    #TODO: Switch to common keyword for model DL and SR deploy
-    #Set Project And Runtime    runtime=vllm     namespace=${TEST_NS}
-    #...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=gpt2
-    #...    storage_size=10Gi
+    # TODO: Switch to common keyword for model DL and SR deploy
+    # Set Project And Runtime    runtime=vllm     namespace=${TEST_NS}
+    # ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=gpt2
+    # ...    storage_size=10Gi
     Deploy Model Via CLI    ${IS_FILEPATH}    ${TEST_NS}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=vllm-gpt2-openai
     ...    namespace=${TEST_NS}
@@ -77,7 +77,7 @@ Verify User Can Deploy A Model With Vllm Via CLI
 
 Verify Vllm Metrics Are Present
     [Documentation]    Confirm vLLM metrics are exposed in OpenShift metrics
-    [Tags]    Tier1    Sanity    Resources-GPU    RHOAIENG-6264    VLLM
+    [Tags]    Sanity    Resources-GPU    RHOAIENG-6264    VLLM
     Depends On Test    Verify User Can Deploy A Model With Vllm Via CLI
     ${host}=    llm.Get KServe Inference Host Via CLI    isvc_name=vllm-gpt2-openai    namespace=${TEST_NS}
     ${rc}    ${out}=    Run And Return Rc And Output    curl -ks https://${host}/metrics/
@@ -91,15 +91,15 @@ Verify Vllm Metrics Are Present
 
 Verify Vllm Metrics Values Match Between UWM And Endpoint
     [Documentation]  Confirm the values returned by UWM and by the model endpoint match for each metric
-    [Tags]    Tier1    Sanity    Resources-GPU    RHOAIENG-6264    RHOAIENG-7687    VLLM
+    [Tags]    Sanity    Resources-GPU    RHOAIENG-6264    RHOAIENG-7687    VLLM
     Depends On Test    Verify User Can Deploy A Model With Vllm Via CLI
     Depends On Test    Verify Vllm Metrics Are Present
     ${host}=    llm.Get KServe Inference Host Via CLI    isvc_name=vllm-gpt2-openai    namespace=${TEST_NS}
     ${metrics_endpoint}=    Get Vllm Metrics And Values    https://${host}/metrics/
     FOR    ${index}    ${item}    IN ENUMERATE    @{metrics_endpoint}
-        ${metric} =    Set Variable    ${item}[0]
-        ${value} =    Set Variable    ${item}[1]
-        ${resp} =    Prometheus.Run Query    https://${thanos_url}    ${token}    ${metric}
+        ${metric}=    Set Variable    ${item}[0]
+        ${value}=    Set Variable    ${item}[1]
+        ${resp}=    Prometheus.Run Query    https://${thanos_url}    ${token}    ${metric}
         Log    ${resp.json()["data"]}
         Run Keyword And Warn On Failure
         ...    Should Be Equal As Numbers    ${value}    ${resp.json()["data"]["result"][0]["value"][1]}
@@ -108,6 +108,7 @@ Verify Vllm Metrics Values Match Between UWM And Endpoint
 
 *** Keywords ***
 Suite Setup
+    [Documentation]    Suite Setup keyword
     Skip If Component Is Not Enabled    kserve
     RHOSi Setup
     Set Default Storage Class In GCP    default=ssd-csi
@@ -115,12 +116,13 @@ Suite Setup
     IF    ${is_self_managed}
         Configure User Workload Monitoring
         Enable User Workload Monitoring
-        #TODO: Find reliable signal for UWM being ready
-        #Sleep    10m
+        # TODO: Find reliable signal for UWM being ready
+        # Sleep    10m
     END
     Load Expected Responses
 
 Suite Teardown
+    [Documentation]    Suite Teardown keyword
     Set Default Storage Class In GCP    default=standard-csi
     ${rc}=    Run And Return Rc    oc delete inferenceservice -n ${TEST_NS} --all
     Should Be Equal As Integers    ${rc}    ${0}

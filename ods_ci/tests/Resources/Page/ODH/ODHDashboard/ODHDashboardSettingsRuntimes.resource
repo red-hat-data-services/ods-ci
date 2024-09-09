@@ -36,7 +36,7 @@ Upload Serving Runtime Template
     Run Keyword And Continue On Failure    Wait Until Page Contains Element    //span[text()="kind"]
     Run Keyword And Continue On Failure    Wait Until Page Contains Element    //span[text()="ServingRuntime"]
     Select Model Serving Platform    platform=${serving_platform}
-    IF    '${serving_platform}'=='single'    Select Runtime API Protocol        protocol=${runtime_protocol}
+    IF    '${serving_platform}'=='single'    Select Runtime API Protocol    protocol=${runtime_protocol}
     Click Element    ${SUBMIT_RUNTIME_BTN_XP}
     Wait Until Element Is Not Visible   ${SUBMIT_RUNTIME_BTN_XP}
     Wait For RHODS Dashboard To Load    expected_page=Serving runtimes

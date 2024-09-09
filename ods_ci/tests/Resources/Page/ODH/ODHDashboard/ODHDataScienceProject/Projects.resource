@@ -236,6 +236,13 @@ Delete List Of Projects Via CLI
         Delete Project Via CLI By Display Name    displayed_name=${displayed_name}
     END
 
+Delete Project Via CLI
+    [Documentation]    Find and delete namespaces by '${name}' using OC command.
+    [Arguments]     ${namespace}
+    ${return_code}    ${output}     Run And Return Rc And Output    oc delete project ${namespace} --force --grace-period=0
+    Log    ${output}
+    Should Be Equal As Integers    ${return_code}    ${0}
+
 #robocop: disable: line-too-long
 Delete Project Via CLI By Display Name
     [Documentation]    Find and delete namespaces by DS Project display name '${displayed_name}' using OC command.
@@ -403,7 +410,7 @@ Filter Projects By ${Type}
     ...    Page Should Contain Element    xpath:${PROJECT_SEARCH_BAR}
     IF    ${searchbar_exists}
         Click Element    xpath:${PROJECT_FILTER_TYPE}
-        Click Element    xpath:${PROJECT_SEARCH_BAR}//li[@data-testid="dropdown-item ${Type}"]
+        Click Element    xpath:${PROJECT_SEARCH_BAR}//li[@data-testid="${Type}"]
         Input Text    ${PROJECT_SEARCH_INPUT}    ${text}
     ELSE
         Log    No projects are listed

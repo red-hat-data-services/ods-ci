@@ -4,11 +4,13 @@ Resource            ../../Resources/RHOSi.resource
 Resource            ../../Resources/ODS.robot
 Resource            ../../Resources/Common.robot
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
+Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
+Resource            ../../Resources/CLI/DataSciencePipelines/DataSciencePipelinesBackend.resource
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipelines.resource
 Library             DateTime
 Library             ../../../libs/DataSciencePipelinesAPI.py
 Library             ../../../libs/DataSciencePipelinesKfp.py
-Test Tags           DataSciencePipelines
+Test Tags           DataSciencePipelines-Backend
 Suite Setup         Data Science Pipelines Suite Setup
 Suite Teardown      RHOSi Teardown
 
@@ -18,10 +20,24 @@ ${URL_TEST_PIPELINE_RUN_YAML}=                 https://raw.githubusercontent.com
 
 
 *** Test Cases ***
+Verify Pipeline Server Creation With S3 Object Storage
+    [Documentation]    Creates a pipeline server using S3 object storage and verifies that all components are running
+    [Tags]    Smoke
+    Projects.Create Data Science Project From CLI    name=dsp-s3
+    DataSciencePipelinesBackend.Create Pipeline Server    namespace=dsp-s3
+    ...    object_storage_access_key=${S3.AWS_ACCESS_KEY_ID}
+    ...    object_storage_secret_key=${S3.AWS_SECRET_ACCESS_KEY}
+    ...    object_storage_endpoint=${S3.BUCKET_2.ENDPOINT}
+    ...    object_storage_region=${S3.BUCKET_2.REGION}
+    ...    object_storage_bucket_name=${S3.BUCKET_2.NAME}
+    ...    dsp_version=v2
+    DataSciencePipelinesBackend.Wait Until Pipeline Server Is Deployed    namespace=dsp-s3
+    [Teardown]    Projects.Delete Project Via CLI By Display Name    dsp-s3
+
 Verify Admin Users Can Create And Run a Data Science Pipeline Using The Api
     [Documentation]    Creates, runs pipelines with admin user. Double check the pipeline result and clean
     ...    the pipeline resources.
-    [Tags]      Sanity    Tier1    ODS-2083
+    [Tags]      Sanity    ODS-2083
     End To End Pipeline Workflow Via Api    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}    pipelinesapi1
 
 Verify Regular Users Can Create And Run a Data Science Pipeline Using The Api
@@ -33,39 +49,49 @@ Verify Regular Users Can Create And Run a Data Science Pipeline Using The Api
 Verify Ods Users Can Do Http Request That Must Be Redirected to Https
     [Documentation]    Verify Ods Users Can Do Http Request That Must Be Redirected to Https
     [Tags]        Tier1    ODS-2234
-    New Project    project-redirect-http
-    Install DataSciencePipelinesApplication CR    project-redirect-http
+    Projects.Create Data Science Project From CLI    name=project-redirect-http
+    DataSciencePipelinesBackend.Create PipelineServer Using Custom DSPA    project-redirect-http
     ${status}    Login And Wait Dsp Route    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
     ...         project-redirect-http
     Should Be True    ${status} == 200    Could not login to the Data Science Pipelines Rest API OR DSP routing is not working    # robocop: disable:line-too-long
     ${url}    Do Http Request    apis/v2beta1/runs
     Should Start With    ${url}    https
-    [Teardown]    Remove Pipeline Project    project-redirect-http
+    [Teardown]    Projects.Delete Project Via CLI By Display Name    project-redirect-http
 
 Verify DSPO Operator Reconciliation Retry
     [Documentation]    Verify DSPO Operator is able to recover from missing components during the initialization
-    [Tags]      Sanity    Tier1    ODS-2477
-    ${local_project_name} =    Set Variable    recon-test
-    New Project    ${local_project_name}
-    Install DataSciencePipelinesApplication CR    ${local_project_name}    data-science-pipelines-reconciliation.yaml    False
+    [Tags]      Sanity    ODS-2477
+
+    ${local_project_name} =    Set Variable    dsp-reconciliation-test
+    Projects.Create Data Science Project From CLI    name=${local_project_name}
+
+    # Atempt to create a pipeline server with a custom DSPA. It should fail because there is a missing
+    # secret with storage credentials (that's why, after, we don't use "Wait Until Pipeline Server Is Deployed"
+    DataSciencePipelinesBackend.Create PipelineServer Using Custom DSPA
+    ...    ${local_project_name}    data-science-pipelines-reconciliation.yaml    False
     Wait Until Keyword Succeeds    15 times    1s
     ...    Double Check If DSPA Was Created    ${local_project_name}
-    DSPA Should Reconcile
-    ${rc}  ${out} =    Run And Return Rc And Output   oc apply -f tests/Resources/Files/dummy-storage-creds.yaml -n ${local_project_name}
-    IF    ${rc}!=0    Fail
-    # one pod is good when reconciliation finished
-    Wait For Pods Number  1    namespace=${local_project_name}    timeout=60
-    [Teardown]    Remove Pipeline Project    ${local_project_name}
+    Verify DSPO Logs Show Error Encountered When Parsing DSPA
 
+    # Add the missing secret with storage credentials. The DSPO will reconcile and start the pipeline server pods
+    # Note: as the credentials are dummy, the DSPA status won't be ready, but it's ok because in this test
+    # we are just testing the DSPO reconciliation
+    ${rc}  ${out} =    Run And Return Rc And Output   oc apply -f ${DSPA_PATH}/dummy-storage-creds.yaml -n ${local_project_name}
+    IF    ${rc}!=0    Fail
+
+    # After reconciliation, the project should have at least one pod running
+    Wait For Pods Number  1    namespace=${local_project_name}    timeout=60
+
+    [Teardown]   Projects.Delete Project Via CLI By Display Name    ${local_project_name}
 
 *** Keywords ***
 End To End Pipeline Workflow Via Api
     [Documentation]    Create, run and double check the pipeline result using API.
     ...    In the end, clean the pipeline resources.
     [Arguments]     ${username}    ${password}    ${project}
-    Remove Pipeline Project    ${project}
-    New Project    ${project}
-    Install DataSciencePipelinesApplication CR    ${project}
+    Projects.Delete Project Via CLI By Display Name    ${project}
+    Projects.Create Data Science Project From CLI    name=${project}
+    Create PipelineServer Using Custom DSPA    ${project}
     ${status}    Login And Wait Dsp Route    ${username}    ${password}    ${project}
     Should Be True    ${status} == 200    Could not login to the Data Science Pipelines Rest API OR DSP routing is not working    # robocop: disable:line-too-long
     Setup Client    ${username}    ${password}    ${project}
@@ -74,7 +100,7 @@ End To End Pipeline Workflow Via Api
     ${run_status}    Check Run Status    ${run_id}
     Should Be Equal As Strings    ${run_status}    SUCCEEDED    Pipeline run doesn't have a status that means success. Check the logs
     DataSciencePipelinesKfp.Delete Run    ${run_id}
-    [Teardown]    Remove Pipeline Project    ${project}
+    [Teardown]    Projects.Delete Project Via CLI By Display Name    ${project}
 
 Double Check If DSPA Was Created
     [Documentation]    Double check if DSPA was created
@@ -82,7 +108,7 @@ Double Check If DSPA Was Created
     ${rc}  ${out} =    Run And Return Rc And Output   oc get datasciencepipelinesapplications -n ${local_project_name}
     IF    ${rc}!=0    Fail
 
-DSPA Should Reconcile
+Verify DSPO Logs Show Error Encountered When Parsing DSPA
     [Documentation]    DSPA must find an error because not all components were deployed
     ${stopped} =    Set Variable    ${False}
     # limit is 180 because the reconciliation run every 2 minutes
@@ -92,9 +118,7 @@ DSPA Should Reconcile
     TRY
         WHILE    not ${stopped}    limit=${timeout}
             Sleep    1s
-            ${logs}=    Oc Get Pod Logs
-            ...    name=${pod_name}
-            ...    namespace=${APPLICATIONS_NAMESPACE}
+            ${logs}        Run   oc logs --tail=1000000 ${pod_name} -n ${APPLICATIONS_NAMESPACE}
             ${stopped} =    Set Variable If    "Encountered error when parsing CR" in """${logs}"""    True    False
         END
     EXCEPT    WHILE loop was aborted    type=start

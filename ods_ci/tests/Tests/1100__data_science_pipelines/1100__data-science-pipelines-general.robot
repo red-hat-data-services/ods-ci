@@ -9,9 +9,10 @@ Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipeline
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Pipelines.resource
+Resource            ../../Resources/CLI/DataSciencePipelines/DataSciencePipelinesBackend.resource
 Library             DateTime
 Library             ../../../libs/DataSciencePipelinesAPI.py
-Test Tags           DataSciencePipelines
+Test Tags           DataSciencePipelines-Backend
 Suite Setup         General Suite Setup
 Suite Teardown      General Suite Teardown
 
@@ -48,31 +49,29 @@ Verify Ods User Can Bind The Route Role
 General Suite Setup
     [Documentation]    Suite setup steps for testing DSG. It creates some test variables
     ...                and runs RHOSi setup
-    Set Library Search Order    SeleniumLibrary
     RHOSi Setup
 
 General Suite Teardown
     [Documentation]    General Suite Teardown
-    Remove Pipeline Project    ${PROJECT_USER3}
-    Remove Pipeline Project    ${PROJECT_USER4}
+    Projects.Delete Project Via CLI By Display Name    ${PROJECT_USER3}
+    Projects.Delete Project Via CLI By Display Name    ${PROJECT_USER4}
     RHOSi Teardown
 
 Create A Pipeline Server And Wait For Dsp Route
     [Documentation]    Create A Pipeline Server And Wait For Dsp Route
     [Arguments]     ${user}    ${password}    ${auth_type}    ${project}
-    Launch Data Science Project Main Page    username=${user}
-    ...    password=${password}
-    ...    ocp_user_auth_type=${auth_type}
-    ...    browser_alias=${user}-session
-    Remove Pipeline Project    ${project}
-    Create Data Science Project    title=${project}    description=
-    Projects.Move To Tab    Data connections
-    Create S3 Data Connection    project_title=${project}    dc_name=${project}-dc
-    ...                          aws_access_key=${S3.AWS_ACCESS_KEY_ID}
-    ...                          aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
-    ...                          aws_s3_endpoint=${S3.AWS_DEFAULT_ENDPOINT}    aws_region=${S3.AWS_DEFAULT_REGION}
-    ...                          aws_bucket_name=${S3_BUCKET}
-    Create Pipeline Server    dc_name=${project}-dc    project_title=${project}
-    Wait Until Pipeline Server Is Deployed    project_title=${project}
+
+    Projects.Create Data Science Project From CLI    name=${project}   as_user=${user}
+
+    DataSciencePipelinesBackend.Create Pipeline Server    namespace=${project}
+    ...    object_storage_access_key=${S3.AWS_ACCESS_KEY_ID}
+    ...    object_storage_secret_key=${S3.AWS_SECRET_ACCESS_KEY}
+    ...    object_storage_endpoint=${S3.BUCKET_2.ENDPOINT}
+    ...    object_storage_region=${S3.BUCKET_2.REGION}
+    ...    object_storage_bucket_name=${S3.BUCKET_2.NAME}
+    ...    dsp_version=v2
+
+    DataSciencePipelinesBackend.Wait Until Pipeline Server Is Deployed    namespace=${project}
+
     ${status}    Login And Wait Dsp Route    ${user}    ${password}    ${project}
     Should Be True    ${status} == 200    Could not login to the Data Science Pipelines Rest API OR DSP routing is not working    # robocop: disable:line-too-long

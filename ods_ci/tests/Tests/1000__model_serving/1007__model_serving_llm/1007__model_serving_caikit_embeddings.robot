@@ -53,7 +53,7 @@ Verify User Can Serve And Query An Embeddings Model On Raw Kserve Via CLI     # 
 Verify User Can Serve And Query An Embeddings Model On Serverless Kserve Using GRPC     # robocop: disable
     [Documentation]    Basic tests for preparing, deploying and querying an embeddings LLM model
     ...                using Kserve and Caikit standalone runtime
-    [Tags]    Smoke     RHOAIENG-11749
+    [Tags]    Tier1     RHOAIENG-11749
     [Setup]    Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${TEST_NS1}    protocol=grpc
     ${test_namespace}=    Set Variable     ${TEST_NS1}
     ${model_id}=       Set Variable   all-MiniLM-L12-v2-caikit

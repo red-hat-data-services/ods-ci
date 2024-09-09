@@ -8,21 +8,6 @@ Resource          ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 Resource          ../../../tests/Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 
 
-*** Variables ***
-${CODEFLARE_RELEASE_ASSETS}         %{CODEFLARE_RELEASE_ASSETS=https://github.com/opendatahub-io/distributed-workloads/releases/latest/download}
-${NOTEBOOK_IMAGE}                   quay.io/modh/odh-generic-data-science-notebook@sha256:9d7f80080a453bcf7dee01b986df9ee811ee74f6f433c601a8b67d283c160547
-${NOTEBOOK_USER_NAME}               ${TEST_USER_3.USERNAME}
-${NOTEBOOK_USER_PASSWORD}           ${TEST_USER_3.PASSWORD}
-${CODEFLARE_TEST_RAY_IMAGE}         quay.io/rhoai/ray@sha256:859f5c41d41bad1935bce455ad3732dff9d4d4c342b7155a7cd23809e85698ab
-${PIP_INDEX_URL}                    ${PIP_INDEX_URL}
-${PIP_TRUSTED_HOST}                 ${PIP_TRUSTED_HOST}
-${AWS_DEFAULT_ENDPOINT}             ${S3.BUCKET_5.ENDPOINT}
-${AWS_STORAGE_BUCKET}               ${S3.BUCKET_5.NAME}
-${AWS_ACCESS_KEY_ID}                ${S3.AWS_ACCESS_KEY_ID}
-${AWS_SECRET_ACCESS_KEY}            ${S3.AWS_SECRET_ACCESS_KEY}
-${AWS_STORAGE_BUCKET_MNIST_DIR}     mnist-datasets
-
-
 *** Test Cases ***
 Run TestKueueRayCpu ODH test
     [Documentation]    Run Go ODH test: TestKueueRayCpu
@@ -55,72 +40,3 @@ Run TestRayTuneHPOGpu ODH test
     ...     DistributedWorkloads
     ...     CodeflareOperator
     Run Codeflare ODH Test    TestMnistRayTuneHpoGpu
-
-*** Keywords ***
-Prepare Codeflare E2E Test Suite
-    Log To Console    "Restarting kueue"
-    Restart Kueue
-
-    Log To Console    "Downloading compiled test binary odh"
-    ${result} =    Run Process    curl --location --silent --output odh ${CODEFLARE_RELEASE_ASSETS}/odh && chmod +x odh
-    ...    shell=true
-    ...    stderr=STDOUT
-    Log To Console    ${result.stdout}
-    IF    ${result.rc} != 0
-        FAIL    Unable to retrieve odh compiled binary
-    END
-    Create Directory    %{WORKSPACE}/codeflare-odh-logs
-    Log To Console    "Retrieving user tokens"
-    ${common_user_token} =    Generate User Token    ${NOTEBOOK_USER_NAME}    ${NOTEBOOK_USER_PASSWORD}
-    Set Suite Variable    ${NOTEBOOK_USER_TOKEN}   ${common_user_token}
-    Log To Console    "Log back as cluster admin"
-    Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
-    RHOSi Setup
-
-Teardown Codeflare E2E Test Suite
-    Log To Console    "Log back as cluster admin"
-    Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
-    Log To Console    "Removing test binaries"
-    ${result} =    Run Process    rm -f odh
-    ...    shell=true
-    ...    stderr=STDOUT
-    Log To Console    ${result.stdout}
-    IF    ${result.rc} != 0
-        FAIL    Unable to remove compiled binaries
-    END
-    RHOSi Teardown
-
-Generate User Token
-    [Documentation]    Authenticate as a user and return user token.
-    [Arguments]    ${username}    ${password}
-    Login To OCP Using API    ${username}    ${password}
-    ${rc}    ${out} =    Run And Return Rc And Output    oc whoami -t
-    Should Be Equal As Integers    ${rc}    ${0}
-    RETURN    ${out}
-
-Run Codeflare ODH Test
-    [Arguments]    ${TEST_NAME}
-    Log To Console    "Running test: ${TEST_NAME}"
-    ${result} =    Run Process    ./odh -test.run ${TEST_NAME}
-    ...    shell=true
-    ...    stderr=STDOUT
-    ...    env:CODEFLARE_TEST_TIMEOUT_SHORT=5m
-    ...    env:CODEFLARE_TEST_TIMEOUT_MEDIUM=10m
-    ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
-    ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-odh-logs
-    ...    env:CODEFLARE_TEST_RAY_IMAGE=${CODEFLARE_TEST_RAY_IMAGE}
-    ...    env:ODH_NAMESPACE=${APPLICATIONS_NAMESPACE}
-    ...    env:NOTEBOOK_USER_NAME=${NOTEBOOK_USER_NAME}
-    ...    env:NOTEBOOK_USER_TOKEN=${NOTEBOOK_USER_TOKEN}
-    ...    env:NOTEBOOK_IMAGE=${NOTEBOOK_IMAGE}
-    ...    env:AWS_DEFAULT_ENDPOINT=${AWS_DEFAULT_ENDPOINT}
-    ...    env:AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-    ...    env:AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-    ...    env:AWS_STORAGE_BUCKET=${AWS_STORAGE_BUCKET}
-    ...    env:AWS_STORAGE_BUCKET_MNIST_DIR=${AWS_STORAGE_BUCKET_MNIST_DIR}
-    ...    env:PIP_INDEX_URL=${PIP_INDEX_URL}
-    ...    env:PIP_TRUSTED_HOST=${PIP_TRUSTED_HOST}
-    Log To Console    ${result.stdout}
-    IF    ${result.rc} != 0
-        FAIL    ${TEST_NAME} failed
-    END

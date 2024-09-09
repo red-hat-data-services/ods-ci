@@ -112,7 +112,7 @@ Triton On Kserve Suite Teardown
     IF    ${MODEL_CREATED}
         Clean All Models Of Current User
     ELSE
-       Log    Model not deployed, skipping deletion step during teardown    console=true
+        Log    Model not deployed, skipping deletion step during teardown    console=true
     END
     ${projects}=    Create List    ${PRJ_TITLE}
     Delete List Of Projects Via CLI   ocp_projects=${projects}

@@ -18,7 +18,7 @@ Test Tags         Kserve
 
 
 *** Variables ***
-${INFERENCE_REST_INPUT_ONNX_FILE}=    @tests/Resources/Files/triton/kserve-triton-onnx-rest-input.json
+${INFERENCE_REST_INPUT_ONNX_FILE}=    tests/Resources/Files/triton/kserve-triton-onnx-rest-input.json
 ${PRJ_TITLE}=    ms-triton-project-01
 ${PRJ_DESCRIPTION}=    project used for model serving triton runtime tests
 ${MODEL_CREATED}=    ${FALSE}

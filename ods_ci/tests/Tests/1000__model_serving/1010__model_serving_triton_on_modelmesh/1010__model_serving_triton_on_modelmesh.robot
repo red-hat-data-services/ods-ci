@@ -60,6 +60,8 @@ Test Onnx Model Rest Inference Via UI (Triton on Modelmesh)
     Verify Model Inference With Retries    ${ONNX_MODEL_NAME}    ${INFERENCE_REST_INPUT_ONNX}    ${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}
     ...    token_auth=${TRUE}
     ...    project_title=${PRJ_TITLE}
+    Open Dashboard Settings    settings_page=Serving runtimes
+    Delete Serving Runtime Template         displayed_name=modelmesh-triton
     #[Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${ONNX_MODEL_NAME}
     #...  project_title=${PRJ_TITLE}
     #...  AND
@@ -70,7 +72,7 @@ Triton On Kserve Suite Setup
     [Documentation]    Suite setup steps for testing Triton. It creates some test variables
     ...                and runs RHOSi setup
     Set Library Search Order    SeleniumLibrary
-    #Skip If Component Is Not Enabled    kserve
+    Skip If Component Is Not Enabled    kserve
     RHOSi Setup
 
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}

@@ -37,6 +37,5 @@ sed -i'' -e "s/INSTANCE_TYPE/$INSTANCE_TYPE/g" $KUSTOMIZE_PATH/overlays/$PROVIDE
 
 # create the new MachineSet using kustomize
 oc apply --kustomize $KUSTOMIZE_PATH/overlays/$PROVIDER_OVERLAY_DIR
-# oc kustomize $KUSTOMIZE_PATH/overlays/$PROVIDER_OVERLAY_DIR
 # Add GPU label to the new machine-set
 oc patch machinesets -n openshift-machine-api "$NEW_MACHINESET_NAME" -p '{"metadata":{"labels":{"gpu-machineset":"true"}}}' --type=merge

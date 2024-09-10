@@ -152,4 +152,6 @@ def my_pipeline(
     )
 
 
-compiler.Compiler().compile(pipeline_func=my_pipeline, package_path=__file__.replace(".py", "_compiled.yaml"))
+if __name__ == "__main__":
+    compiler.Compiler().compile(my_pipeline, package_path=__file__.replace(".py", "_compiled.yaml"))
+

@@ -59,7 +59,7 @@ deploymentSpec:
         - -c
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
-          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.7.0'\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.9.0'\
           \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
           $0\" \"$@\"\n"
         - sh
@@ -73,8 +73,8 @@ deploymentSpec:
 
           '
         - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
-          \ *\n\ndef receive_file(\n    incomingfile: kfp.dsl.InputPath(),\n    saveartifact:\
-          \ kfp.dsl.OutputPath(),\n):\n    import os\n    import shutil\n\n    print(\"\
+          \ *\n\ndef receive_file(\n    incomingfile: dsl.InputPath(),\n    saveartifact:\
+          \ dsl.OutputPath(),\n):\n    import os\n    import shutil\n\n    print(\"\
           reading %s, size is %s\" % (incomingfile, os.path.getsize(incomingfile)))\n\
           \n    with open(incomingfile, \"rb\") as f:\n        b = f.read(1)\n   \
           \     print(\"read byte: %s\" % b)\n        f.close()\n\n    print(\"copying\
@@ -93,7 +93,7 @@ deploymentSpec:
         - -c
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
-          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.7.0'\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.9.0'\
           \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
           $0\" \"$@\"\n"
         - sh
@@ -107,7 +107,7 @@ deploymentSpec:
 
           '
         - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
-          \ *\n\ndef send_file(\n    file_size_bytes: int,\n    outgoingfile: kfp.dsl.OutputPath(),\n\
+          \ *\n\ndef send_file(\n    file_size_bytes: int,\n    outgoingfile: dsl.OutputPath(),\n\
           ):\n    import os\n    import zipfile\n\n    def create_large_file(file_path,\
           \ size_in_bytes):\n        with open(file_path, \"wb\") as f:\n        \
           \    f.write(os.urandom(size_in_bytes))\n\n    def zip_file(input_file_path,\
@@ -130,7 +130,7 @@ deploymentSpec:
         - -c
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
-          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.7.0'\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.9.0'\
           \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"'  &&\
           \  python3 -m pip install --quiet --no-warn-script-location 'minio' && \"\
           $0\" \"$@\"\n"
@@ -145,7 +145,7 @@ deploymentSpec:
 
           '
         - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
-          \ *\n\ndef test_uploaded_artifact(\n    previous_step: kfp.dsl.InputPath(),\n\
+          \ *\n\ndef test_uploaded_artifact(\n    previous_step: dsl.InputPath(),\n\
           \    file_size_bytes: int,\n    mlpipeline_minio_artifact_secret: str,\n\
           \    bucket_name: str,\n):\n    import base64\n    import json\n\n    from\
           \ minio import Minio\n\n    def inner_decode(my_str):\n        return base64.b64decode(my_str).decode(\"\
@@ -228,4 +228,4 @@ root:
       mlpipeline_minio_artifact_secret:
         parameterType: STRING
 schemaVersion: 2.1.0
-sdkVersion: kfp-2.7.0
+sdkVersion: kfp-2.9.0

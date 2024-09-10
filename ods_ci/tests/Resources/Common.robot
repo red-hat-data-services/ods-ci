@@ -155,7 +155,7 @@ Get RHODS Version
             ${RHODS_VERSION}=  Run  oc get csv -n ${OPERATOR_NAMESPACE} | grep "opendatahub" | awk -F ' {2,}' '{print $3}'
         END
     END
-    Log  Product:${PRODUCT} Version:${RHODS_VERSION}
+    Log To Console    Product:${PRODUCT} Version:${RHODS_VERSION}
     RETURN  ${RHODS_VERSION}
 
 #robocop: disable: line-too-long
@@ -176,16 +176,32 @@ Get CodeFlare Version
 #robocop: disable: line-too-long
 Wait Until Csv Is Ready
   [Documentation]   Waits ${timeout} for Operators CSV '${display_name}' to have status phase 'Succeeded'
-  [Arguments]    ${display_name}    ${timeout}=10m    ${operators_namespace}=openshift-operators
+  [Arguments]    ${display_name}    ${timeout}=10m    ${operators_namespace}=openshift-operators    ${check_interval}=5s
   Log    Waiting ${timeout} for Operator CSV '${display_name}' in ${operators_namespace} to have status phase 'Succeeded'    console=yes
   WHILE   True    limit=${timeout}
   ...    on_limit_message=${timeout} Timeout exceeded waiting for CSV '${display_name}' to be created
+    Sleep  ${check_interval}
     ${csv_created}=    Run Process    oc get csv --no-headers -n ${operators_namespace} | awk '/${display_name}/ {print \$1}'    shell=yes
-    IF    "${csv_created.stdout}" == "${EMPTY}"    CONTINUE
+    Log To Console    The Result of csv_created Output is: ${csv_created.stdout} RC: ${csv_created.rc}
+    IF  '${csv_created.stdout}' == '${EMPTY}'    CONTINUE
+    #  In case of upgrade there are 2 operators, we need to wait until only one will be available
+    ${lines}=     Split String    ${csv_created.stdout}    \n
+    ${line_count}=    Get Length    ${lines}
+    IF  ${line_count} > 1    CONTINUE
     ${csv_ready}=    Run Process
     ...    oc wait --timeout\=${timeout} --for jsonpath\='{.status.phase}'\=Succeeded csv -n ${operators_namespace} ${csv_created.stdout}    shell=yes
+    Log To Console    The Result of csv_ready Output is: ${csv_ready.stdout} RC: ${csv_ready.rc}
     IF    ${csv_ready.rc} == ${0}    BREAK
   END
+
+Check If Resource Exists By Command Output
+    [Documentation]     Check if resource exists with specific command,
+    ...    Fail if the output is empty or contains the string 'No resources found'
+    [Arguments]    ${command}
+    ${result}=    Run Process    ${command}    shell=True    stdout=PIPE
+    Log To Console    The Result of Check If Resource Exists By Command Output is: ${result.stdout} RC: ${result.rc}
+    Should Not Be Empty    ${result.stdout}
+    Should Not Contain    ${result.stdout}    'No resources found'
 
 Get Cluster ID
     [Documentation]     Retrieves the ID of the currently connected cluster

@@ -38,6 +38,7 @@ Install ISV Operator From OperatorHub Via CLI    # robocop: disable
     Oc Apply    kind=Subscription    src=${operator_sub_filepath}
     Wait Until Keyword Succeeds    1 min    0 sec
     ...    Is Resource Present    Subscription    ${subscription_name}     ${namespace}    ${IS_PRESENT}
+#    Wait For Installplan And Approve It    ${namespace}    ${operator_name}
     WHILE   "${installplan_name}" == "${EMPTY}"     limit=5m
         ${installplan_name}=       Get Resource Attribute      ${namespace}
         ...      Subscription       ${subscription_name}        .status.installPlanRef.name
@@ -49,6 +50,7 @@ Install ISV Operator From OperatorHub Via CLI    # robocop: disable
           ${return_code}    ${out}=     Run And Return Rc And Output   oc patch installplan ${installplan_name} -n ${namespace} --type='json' -p '[{"op": "replace", "path": "/spec/approved", "value": true}]'  #robocop:disable
           Should Be Equal As Integers    ${return_code}     0   msg=Error while approving installplan
     END
+#   until here
 
 Create Operator Group
     [Documentation]    Creates the Operator Group object which might be needed by an operator.
@@ -83,7 +85,7 @@ Wait Until Operator Subscription Last Condition Is    # robocop: disable
     [Arguments]    ${type}    ${status}    ${reason}
     ...    ${subcription_name}    ${namespace}=openshift-operators
     ...    ${retry}=60
-    ...    ${retry_interval}=3s
+    ...    ${retry_interval}=5s
     Wait Until Keyword Succeeds    ${retry} times    ${retry_interval}    Operator Subscription Last Condition Should Be    # robocop: disable
     ...    type=${type}     status=${status}
     ...    reason=${reason}    subcription_name=${subcription_name}

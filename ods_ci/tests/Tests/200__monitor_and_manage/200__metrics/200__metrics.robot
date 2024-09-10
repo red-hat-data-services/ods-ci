@@ -23,6 +23,11 @@ Test Tags           ExcludeOnODH
 
 
 *** Test Cases ***
+Test Smoke
+    [Documentation]    Test for smoke
+    [Tags]  SmokeKobi
+    Log To Console    This is test of SmokeKobi
+
 Test Existence of Prometheus Alerting Rules
     [Documentation]    Verifies the prometheus alerting rules
     [Tags]    Smoke

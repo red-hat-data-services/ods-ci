@@ -90,6 +90,7 @@ Assign Vars According To Product
     IF    "${PRODUCT}" == "RHODS"
         Set Suite Variable    ${OPERATOR_APPNAME}     Red Hat OpenShift AI
         Set Suite Variable    ${OPERATOR_NAME}    Red Hat OpenShift AI
+        Set Suite Variable    ${CATALOG_SOURCE}    redhat-operators
         Set Suite Variable    ${OPERATOR_DEPLOYMENT_NAME}    rhods-operator
         Set Suite Variable    ${OPERATOR_LABEL_SELECTOR}    name=rhods-operator
         Set Suite Variable    ${AUTHORINO_CR_NS}    redhat-ods-applications-auth-provider
@@ -99,6 +100,7 @@ Assign Vars According To Product
     ELSE IF    "${PRODUCT}" == "ODH"
         Set Suite Variable    ${OPERATOR_APPNAME}  Open Data Hub Operator
         Set Suite Variable    ${OPERATOR_NAME}    Open Data Hub Operator
+        Set Suite Variable    ${CATALOG_SOURCE}    community-operators
         Set Suite Variable    ${OPERATOR_DEPLOYMENT_NAME}    opendatahub-operator-controller-manager
         Set Suite Variable    ${OPERATOR_LABEL_SELECTOR}    control-plane=controller-manager
         Set Suite Variable    ${AUTHORINO_CR_NS}    opendatahub-auth-provider

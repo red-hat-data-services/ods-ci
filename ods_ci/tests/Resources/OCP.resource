@@ -284,7 +284,32 @@ Get Resource Attribute
     Should Be Equal    "${rc}"    "0"    msg=${value}
     IF    "${value}" != "${EMPTY}"
         Log To Console    ${resource_type} ${resource_name} in the namespace ${namespace} attribute ${attribute_path} value is ${value}
-    ELSE 
+    ELSE
         Log To Console    ${resource_type} ${resource_name} in the namespace ${namespace} attribute ${attribute_path} value is EMPTY
     END
     RETURN    ${value}
+
+Wait For Installplan And Approve It
+    [Documentation]    Wait for the operator's installplan to appear then approve it in case of Manual installplan approval
+    [Arguments]    ${namespace}    ${operator_name}    ${operator_version}=${EMPTY}
+    Wait Until Keyword Succeeds    10m    5s    Check If Resource Exists By Command Output    oc get installplans -n ${namespace} -o yaml | grep "${operator_name}"
+    ${installplan_name}=    Run   oc get subscription ${operator_name} -n ${namespace} -o json | jq '.status.installplan.name'
+    IF    "${operator_version}" != "${EMPTY}"
+        ${installplan_version_exist}=    Run And Return Rc   oc get installplan -n ${namespace} | grep "${operator_version}"
+        IF    ${installplan_version_exist} != 0
+            ${installplans}=    Run   oc get installplan -n ${namespace}
+            FAIL    Failed to find installplan for operator: ${operator_name} version: ${operator_version}\nExisting installplans:\n${installplans}
+        END
+    END
+    ${installplan_approval}=     Get Resource Attribute      ${namespace}
+    ...      InstallPlan       ${installplan_name}        .spec.approval
+    Log To Console    The installplan approval for: ${installplan_name} is ${installplan_approval}
+    IF    "${installplan_approval}" == "Manual"
+        Log To Console    Start approving the installplan: ${installplan_name}...
+        ${patch_status} =    Run And Return Rc    oc patch installplan ${installplan_name} -n ${namespace} -p '{"spec":{"approved": true}}' --type=merge
+        IF    ${patch_status} == 0
+          Log To Console    Approving the installplan ${installplan_name} successfully!!
+        ELSE
+          Log To Console    Failed to approving the installplan ${installplan_name}
+        END
+    END

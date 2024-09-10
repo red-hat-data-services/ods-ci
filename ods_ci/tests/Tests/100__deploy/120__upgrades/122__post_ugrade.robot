@@ -18,7 +18,7 @@ Resource           ../../../Resources/Page/OCPDashboard/Pods/Pods.robot
 Resource           ../../../Resources/Page/OCPDashboard/Builds/Builds.robot
 Resource           ../../../Resources/Page/HybridCloudConsole/OCM.robot
 Resource           ../../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
-Test Tags          PostUpgrade
+Test Tags          PostUpgradeKobi
 
 
 *** Variables ***
@@ -35,6 +35,11 @@ ${RUNTIME_NAME}=    Model Serving Test
 
 
 *** Test Cases ***
+Test PostUpgrade
+    [Documentation]    Test for post upgrade
+    [Tags]  PostUpgrade
+    Log To Console    This is test of PostUpgrade
+
 Verify PVC Size
     [Documentation]    Verify PVC Size after the upgrade
     [Tags]  Upgrade

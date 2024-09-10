@@ -27,36 +27,49 @@ ${SERVICEMESH_SUB_NAME}=    servicemeshoperator
 ${AUTHORINO_OP_NAME}=     authorino-operator
 ${AUTHORINO_SUB_NAME}=    authorino-operator
 ${AUTHORINO_CHANNEL_NAME}=  tech-preview-v1
-${RHODS_CSV_DISPLAY}=    Red Hat OpenShift AI
-${ODH_CSV_DISPLAY}=    Open Data Hub Operator
 ${CUSTOM_MANIFESTS}=    ${EMPTY}
+${RHODS_OSD_INSTALL_REPO}       ${EMPTY}
+${OLM_DIR}                      rhodsolm
+@{SUPPORTED_TEST_ENV}           AWS   AWS_DIS   GCP   PSI   PSI_DIS   ROSA   IBM_CLOUD   CRC    AZURE	ROSA_HCP
+${install_plan_approval}        Manual
+${rhoai_version}                ${EMPTY}
 
 *** Keywords ***
 Install RHODS
-  [Arguments]  ${cluster_type}     ${image_url}
+  [Arguments]  ${cluster_type}     ${image_url}     ${install_plan_approval}    ${rhoai_version}=${EMPTY}    ${is_upgrade}=False
+  Log To Console    Start installing RHOAI with:\n\- cluster type: ${cluster_type}\n\- image_url: ${image_url}\n\- update_channel: ${UPDATE_CHANNEL}
+  Log To Console    \- rhoai_version: ${rhoai_version}\n\- is_upgrade: ${is_upgrade}\n\- install_plan_approval: ${install_plan_approval}
+  Assign Vars According To Product
   Install Kserve Dependencies
   Clone OLM Install Repo
-  IF  "${PRODUCT}" == "ODH"
-      ${csv_display_name} =    Set Variable    ${ODH_CSV_DISPLAY}
-  ELSE
-      ${csv_display_name} =    Set Variable    ${RHODS_CSV_DISPLAY}
-  END
   IF  "${cluster_type}" == "selfmanaged"
       IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "CLi"
              Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
       ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "OperatorHub"
-          ${file_path} =    Set Variable    tasks/Resources/RHODS_OLM/install/
-          Copy File    source=${file_path}cs_template.yaml    destination=${file_path}cs_apply.yaml
-          IF  "${PRODUCT}" == "ODH"
-              Run    sed -i'' -e 's/<CATALOG_SOURCE>/community-operators/' ${file_path}cs_apply.yaml
+          IF  "${is_upgrade}" == "False"
+              ${file_path} =    Set Variable    tasks/Resources/RHODS_OLM/install/
+              ${starting_csv} =  Set Variable    ""
+              IF  "${rhoai_version}" != "${EMPTY}"
+                  Log To Console    Start installing "${OPERATOR_NAME}" with version: ${rhoai_version}
+                  ${starting_csv} =  Set Variable    ${OPERATOR_DEPLOYMENT_NAME}.${rhoai_version}
+              END
+              Copy File    source=${file_path}cs_template.yaml    destination=${file_path}cs_apply.yaml
+              Run    sed -i'' -e 's/<CATALOG_SOURCE>/${CATALOG_SOURCE}/' ${file_path}cs_apply.yaml
+              Run    sed -i'' -e 's/<OPERATOR_NAME>/${OPERATOR_DEPLOYMENT_NAME}/' ${file_path}cs_apply.yaml
+              Run    sed -i'' -e 's/<OPERATOR_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}cs_apply.yaml
+              Run    sed -i'' -e 's/<UPDATE_CHANNEL>/${UPDATE_CHANNEL}/' ${file_path}cs_apply.yaml
+              Run    sed -i'' -e 's/<STARTING_CSV>/${starting_csv}/' ${file_path}cs_apply.yaml
+              Run    sed -i'' -e 's/<INSTALL_PLAN_APPROVAL>/${install_plan_approval}/' ${file_path}cs_apply.yaml
+              Oc Apply   kind=List   src=${file_path}cs_apply.yaml
+              Remove File    ${file_path}cs_apply.yml
           ELSE
-              Run    sed -i'' -e 's/<CATALOG_SOURCE>/redhat-operators/' ${file_path}cs_apply.yaml
+              ${patch_update_channel_status} =    Run And Return Rc   oc patch subscription ${OPERATOR_DEPLOYMENT_NAME} -n ${OPERATOR_NAMESPACE} --type='json' -p='[{"op": "replace", "path": "/spec/channel", "value": ${UPDATE_CHANNEL}}]'    #robocop:disable
+              Should Be Equal As Integers    ${patch_update_channel_status}     0   msg=Error while changing the UPDATE_CHANNEL
+              Sleep  30s      reason=wait for thirty seconds until old CSV is removed and new one is ready
           END
-          Run    sed -i'' -e 's/<OPERATOR_NAME>/${OPERATOR_NAME}/' ${file_path}cs_apply.yaml
-          Run    sed -i'' -e 's/<OPERATOR_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}cs_apply.yaml
-          Run    sed -i'' -e 's/<UPDATE_CHANNEL>/${UPDATE_CHANNEL}/' ${file_path}cs_apply.yaml
-          Oc Apply   kind=List   src=${file_path}cs_apply.yaml
-          Remove File    ${file_path}cs_apply.yml
+          IF  "${rhoai_version}" != "${EMPTY}"
+              Wait For Installplan And Approve It    ${OPERATOR_NAMESPACE}    ${OPERATOR_DEPLOYMENT_NAME}    ${rhoai_version}
+          END
       ELSE
            FAIL    Provided test environment and install type is not supported
       END
@@ -71,7 +84,7 @@ Install RHODS
           FAIL    Provided test environment is not supported
       END
   END
-  Wait Until Csv Is Ready    display_name=${csv_display_name}    operators_namespace=${OPERATOR_NAMESPACE}
+  Wait Until Csv Is Ready    display_name=${OPERATOR_NAME}    operators_namespace=${OPERATOR_NAMESPACE}
 
 Verify RHODS Installation
   Set Global Variable    ${DASHBOARD_APP_NAME}    ${PRODUCT.lower()}-dashboard
@@ -79,7 +92,7 @@ Verify RHODS Installation
   Log To Console    Waiting for all RHODS resources to be up and running
   Wait For Pods Numbers  1
   ...                   namespace=${OPERATOR_NAMESPACE}
-  ...                   label_selector=name=${OPERATOR_NAME}
+  ...                   label_selector=name=${OPERATOR_DEPLOYMENT_NAME}
   ...                   timeout=2000
   Wait For Pods Status  namespace=${OPERATOR_NAMESPACE}  timeout=1200
   Log  Verified ${OPERATOR_NAMESPACE}  console=yes
@@ -190,9 +203,14 @@ Verify Builds In redhat-ods-applications
 
 Clone OLM Install Repo
   [Documentation]   Clone OLM git repo
-  ${return_code}    ${output}     Run And Return Rc And Output    git clone ${RHODS_OSD_INSTALL_REPO} ${EXECDIR}/${OLM_DIR}
-  Log To Console    ${output}
-  Should Be Equal As Integers   ${return_code}   0
+  ${status} =   Run Keyword And Return Status    Directory Should Exist   ${EXECDIR}/${OLM_DIR}
+  IF    ${status}
+      Log To Console     "The directory ${EXECDIR}/${OLM_DIR} already exist, skipping clone of the repo."
+  ELSE
+      ${return_code}    ${output}     Run And Return Rc And Output    git clone ${RHODS_OSD_INSTALL_REPO} ${EXECDIR}/${OLM_DIR}
+      Log To Console    ${output}
+      Should Be Equal As Integers   ${return_code}   0
+  END
 
 Install RHODS In Self Managed Cluster Using CLI
   [Documentation]   Install rhods on self managed cluster using cli
@@ -213,6 +231,7 @@ Wait For Pods Numbers
   ${status}   Set Variable   False
   FOR    ${counter}    IN RANGE   ${timeout}
          ${return_code}    ${output}    Run And Return Rc And Output   oc get pod -n ${namespace} -l ${label_selector} | tail -n +2 | wc -l
+         Log To Console    Output: ${output} RC: ${return_code} counter: ${counter} timeout: ${timeout} NS: ${namespace} label: ${label_selector}
          IF    ${output} == ${count}
                ${status}  Set Variable  True
                Log To Console  pods ${label_selector} created

@@ -9,14 +9,20 @@ Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDashboardSetting
 Resource            ../../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
 Library             DebugLibrary
 Library             JupyterLibrary
-Test Tags           DuringUpgrade
+Test Tags           DuringUpgradeKobi
 
 
 *** Variables ***
 ${CODE}         while True: import time ; time.sleep(10); print ("Hello")
+${UPGRADE_TO_IIB}=    ${EMPTY}
 
 
 *** Test Cases ***
+Test DuringUpgrade
+    [Documentation]    Test for during upgrade
+    [Tags]  DuringUpgrade
+    Log To Console    This is test of DuringUpgrade
+
 Long Running Jupyter Notebook
     [Documentation]    Launch a long running notebook before the upgrade
     [Tags]  Upgrade
@@ -31,11 +37,11 @@ Upgrade RHODS
     [Documentation]    Approve the install plan for the upgrade and make sure that upgrade has completed
     [Tags]  ODS-1766
     ...     Upgrade
+    ...     DuringUpgrade
     ${initial_version} =  Get RHODS Version
     ${initial_creation_date} =  Get Operator Pod Creation Date
-    ${return_code}    ${output}    Run And Return Rc And Output   oc patch installplan $(oc get installplans -n ${OPERATOR_NAMESPACE} | grep -v NAME | awk '{print $1}') -n ${OPERATOR_NAMESPACE} --type='json' -p '[{"op": "replace", "path": "/spec/approved", "value": true}]'   #robocop:disable
-    Should Be Equal As Integers    ${return_code}     0   msg=Error while upgrading RHODS
-    Sleep  30s      reason=wait for thirty seconds until old CSV is removed and new one is ready
+    Set Suite Variable    ${UPDATE_CHANNEL}    ${UPGRADE_TO_UPDATE_CHANNEL}
+    Install RHODS   ${CLUSTER_TYPE}    ${UPGRADE_TO_IIB}    Manual    ${UPGRADE_TO_VERSION}    True
     RHODS Version Should Be Greater Than    ${initial_version}
     Operator Pod Creation Date Should Be Updated    ${initial_creation_date}
     OpenShiftLibrary.Wait For Pods Status  namespace=${OPERATOR_NAMESPACE}  timeout=300
@@ -93,8 +99,9 @@ RHODS Version Should Be Greater Than
     [Documentation]    Checks if the RHODS version is greater than the given initial version.
     ...                Fails if the version is not greater.
     [Arguments]  ${initial_version}
-    ${ver} =  Get RHODS Version
+    ${ver} =  Get RHODS Version    True
     ${ver} =  Fetch From Left  ${ver}  -
+    Log To Console    The initial RHODS operator version is: ${initial_version} the current version is: ${ver}
     Should Be True    '${ver}' > '${initial_version}'    msg=Version wasn't greater than initial one ${initial_version}
 
 Get Operator Pod Creation Date
@@ -104,6 +111,7 @@ Get Operator Pod Creation Date
     ${return_code}    ${creation_date} =  Run And Return Rc And Output
     ...    oc get pod -n ${OPERATOR_NAMESPACE} -l name=rhods-operator --no-headers -o jsonpath='{.items[0].metadata.creationTimestamp}'
     Should Be Equal As Integers    ${return_code}     0   msg=Error while getting creation date of the operator pod
+    Log To Console    Creation date of the RHODS operator pod is: ${creation_date}
     RETURN    ${creation_date}
 
 Operator Pod Creation Date Should Be Updated
@@ -111,5 +119,6 @@ Operator Pod Creation Date Should Be Updated
     ...                Fails if the updated creation date is not more recent than the initial creation date.
     [Arguments]  ${initial_creation_date}
     ${updated_creation_date} =  Get Operator Pod Creation Date
+    Log To Console    The initial Creation date of the RHODS operator pod is: ${initial_creation_date} the updated date is: ${updated_creation_date}
     Should Be True    '${updated_creation_date}' > '${initial_creation_date}'
     ...    msg=Operator pod creation date was not updated after upgrade

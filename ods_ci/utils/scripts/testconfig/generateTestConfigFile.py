@@ -261,6 +261,17 @@ def generate_test_config_file(
     data["OPERATOR_NAMESPACE"] = config_data["OPERATOR_NAMESPACE"]
     data["NOTEBOOKS_NAMESPACE"] = config_data["NOTEBOOKS_NAMESPACE"]
     data["OPENSHIFT_PIPELINES_CHANNEL"] = config_data["OPENSHIFT_PIPELINES_CHANNEL"]
+
+    data["CLUSTER_TYPE"] = config_data["CLUSTER_TYPE"]
+    data["TEST_ENV"] = config_data["TEST_ENV"]
+    data["INSTALL_TYPE"] = config_data["INSTALL_TYPE"] if config_data.get("INSTALL_TYPE") else "OperatorHub"
+    data["UPDATE_CHANNEL"] = config_data["UPDATE_CHANNEL"]
+    if config_data.get("RHOAI_VERSION"):
+        data["RHOAI_VERSION"] = config_data["RHOAI_VERSION"]
+    if config_data.get("UPGRADE_TO_UPDATE_CHANNEL"):
+        data["UPGRADE_TO_UPDATE_CHANNEL"] = config_data["UPGRADE_TO_UPDATE_CHANNEL"]
+    if config_data.get("UPGRADE_TO_VERSION"):
+        data["UPGRADE_TO_VERSION"] = config_data["UPGRADE_TO_VERSION"]
     if config_data.get("PIP_INDEX_URL"):
         data["PIP_INDEX_URL"] = config_data["PIP_INDEX_URL"]
     if config_data.get("PIP_TRUSTED_HOST"):

@@ -70,6 +70,25 @@ Validate Trusted CA Bundles State Removed
 
     [Teardown]     Restore DSCI Trusted CA Bundle Settings    ${SAVED_CUSTOM_CA_BUNDLE}
 
+Validate Trusted CA Bundles Exclude Namespace
+    [Documentation]  The purpose of this test case is to validate Trusted CA Bundles can be excluded from a namespace.
+    [Tags]    Operator    ODS-2638    TrustedCABundle-Exclude-Namespace
+
+    Set Trusted CA Bundle Management State    ${DSCI_NAME}    Managed    ${OPERATOR_NS}
+
+    # Check that namespace does contain Trusted CA Bundle ConfigMap prior to excluding.
+    Wait Until Keyword Succeeds    5 min    0 sec
+    ...    Is Resource Present     ConfigMap    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    ${TEST_NS}    ${IS_PRESENT}
+
+    # Exclude the namespace
+    Trusted CA Bundle Include Namespace    ${TEST_NS}    False
+
+    # Trusted CA Bundle ConfigMap should not exist in namespace
+    Wait Until Keyword Succeeds    5 min    0 sec
+    ...    Is Resource Present     ConfigMap    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    ${TEST_NS}    ${IS_NOT_PRESENT}
+
+    [Teardown]     Restore DSCI Trusted CA Bundle Settings    ${SAVED_CUSTOM_CA_BUNDLE}
+
 
 *** Keywords ***
 Suite Setup
@@ -92,6 +111,7 @@ Restore DSCI Trusted CA Bundle Settings
 
     Set Trusted CA Bundle Management State    ${DSCI_NAME}    Managed    ${OPERATOR_NS}
     Set Custom CA Bundle Value In DSCI    ${DSCI_NAME}    ${custom_ca_value}    ${OPERATOR_NS}
+    Trusted CA Bundle Include Namespace    ${TEST_NS}    True
 
 Is CA Bundle Value Present
     [Documentation]    Check if the ConfigtMap contains Custom CA Bundle value
@@ -141,3 +161,11 @@ Get Custom CA Bundle Value In DSCI
     Should Be Equal    "${rc}"    "0"   msg=${value}
 
     RETURN    ${value}
+
+Trusted CA Bundle Include Namespace
+    [Documentation]    Include/Exclude specific namespace from containing the Trusted CA Bundle ConfigMap
+    [Arguments]    ${namespace}    ${include}
+
+    ${rc}   ${value}=    Run And Return Rc And Output
+    ...    oc annotate ns ${namespace} security.opendatahub.io/inject-trusted-ca-bundle=${include} --overwrite
+    Should Be Equal    "${rc}"    "0"   msg=${value}

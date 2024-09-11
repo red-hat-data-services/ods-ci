@@ -56,7 +56,7 @@ Verify Model Registry Integration With Secured-DB
     # ...            aws_bucket_name=${AWS_BUCKET}    connected_workbench=${workbenches}
     # Data Connection Should Be Listed    name=${DC_S3_NAME}    type=${DC_S3_TYPE}    connected_workbench=${workbenches}
     # Open Data Science Project Details Page       project_title=${prj_title}    tab_id=workbenches
-    Wait Until Workbench Is Started     workbench_title=registry-wb
+    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}
     Upload File In The Workbench     filepath=${SAMPLE_ONNX_MODEL}    workbench_title=${WORKBENCH_TITLE}
     ...         workbench_namespace=${PRJ_TITLE}
     Upload File In The Workbench     filepath=${JUPYTER_NOTEBOOK_FILEPATH}    workbench_title=${WORKBENCH_TITLE}

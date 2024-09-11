@@ -217,10 +217,10 @@ Verify User Can Serve And Query A elyza/elyza-japanese-llama-2-7b-instruct Model
             ...    port_forwarding=${use_port_forwarding}
     ELSE IF    "${RUNTIME_NAME}" == "vllm-runtime" and "${KSERVE_MODE}" == "Serverless"
             Query Model Multiple Times    model_name=${model_name}      runtime=${RUNTIME_NAME}    protocol=http
-            ...    inference_type=chat-completions    n_times=1    query_idx=9
+            ...    inference_type=completions    n_times=1    query_idx=10
             ...    namespace=${test_namespace}    string_check_only=${TRUE}
             Query Model Multiple Times    model_name=${model_name}      runtime=${RUNTIME_NAME}    protocol=http
-            ...    inference_type=completions    n_times=1    query_idx=10
+            ...    inference_type=chat-completions    n_times=1    query_idx=9
             ...    namespace=${test_namespace}    string_check_only=${TRUE}
     END
     [Teardown]    Run Keywords

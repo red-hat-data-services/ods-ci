@@ -7,7 +7,7 @@ PROVIDER=${2:-"AWS"}
 GPU_COUNT=${3:-"1"}
 KUSTOMIZE_PATH="$PWD/tasks/Resources/Provisioning/Hive/GPU"
 MACHINESET_PATH="$KUSTOMIZE_PATH/base/source-machineset.yaml"
-PROVIDER_OVERLAY_DIR=$PROVIDER
+PROVIDER_OVERLAY_DIR=$KUSTOMIZE_PATH/overlays/$PROVIDER
 # Check if existing machineset GPU already exists
 EXISTING_GPU_MACHINESET="$(oc get machineset -n openshift-machine-api -o jsonpath="{.items[?(@.metadata.annotations['machine\.openshift\.io/GPU']>'0')].metadata.name}")"
 if [[ -n "$EXISTING_GPU_MACHINESET" ]] ; then
@@ -28,14 +28,14 @@ sed -i'' -e "s/$OLD_MACHINESET_NAME/$NEW_MACHINESET_NAME/g" $MACHINESET_PATH
 if [[ "$PROVIDER" == "GCP" && "$INSTANCE_TYPE" == *"nvidia-"*  ]] ; then
   GPU_TYPE=$INSTANCE_TYPE
   INSTANCE_TYPE="n1-standard-4"
-  sed -i'' -e "s/GPU_TYPE/$GPU_TYPE/g" $KUSTOMIZE_PATH/overlays/$PROVIDER/attach-gpu-to-n1/gpu.yaml
-  sed -i'' -e "s/GPU_COUNT/$GPU_COUNT/g" $KUSTOMIZE_PATH/overlays/$PROVIDER/attach-gpu-to-n1/gpu.yaml
-  PROVIDER_OVERLAY_DIR="$PROVIDER/attach-gpu-to-n1"
+  PROVIDER_OVERLAY_DIR="$PROVIDER_OVERLAY_DIR/attach-gpu-to-n1"
+  sed -i'' -e "s/GPU_TYPE/$GPU_TYPE/g" $PROVIDER_OVERLAY_DIR/gpu.yaml
+  sed -i'' -e "s/GPU_COUNT/$GPU_COUNT/g" $PROVIDER_OVERLAY_DIR/gpu.yaml
 fi
 # set the desired node flavor in the kustomize overlay
-sed -i'' -e "s/INSTANCE_TYPE/$INSTANCE_TYPE/g" $KUSTOMIZE_PATH/overlays/$PROVIDER_OVERLAY_DIR/gpu.yaml
+sed -i'' -e "s/INSTANCE_TYPE/$INSTANCE_TYPE/g" $PROVIDER_OVERLAY_DIR/gpu.yaml
 
 # create the new MachineSet using kustomize
-oc apply --kustomize $KUSTOMIZE_PATH/overlays/$PROVIDER_OVERLAY_DIR
+oc apply --kustomize $PROVIDER_OVERLAY_DIR
 # Add GPU label to the new machine-set
 oc patch machinesets -n openshift-machine-api "$NEW_MACHINESET_NAME" -p '{"metadata":{"labels":{"gpu-machineset":"true"}}}' --type=merge

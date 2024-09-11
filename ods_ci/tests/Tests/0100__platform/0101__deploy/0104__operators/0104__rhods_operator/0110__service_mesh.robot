@@ -49,7 +49,7 @@ Validate Service Mesh State Removed
     [Documentation]    The purpose of this Test Case is to validate Service Mesh state 'Removed'.
     ...                The operator will Delete the Service Mesh CR, when state is Removed.
     ...                Test will fail until RHOAIENG-2209 is fixed
-    [Tags]    ServiceMesh-Removed
+    [Tags]    Operator    Tier1    ODS-2526     ServiceMesh-Removed     ProductBug
 
     Set Service Mesh Management State    Removed    ${OPERATOR_NS}
     Wait Until Keyword Succeeds    2 min    0 sec

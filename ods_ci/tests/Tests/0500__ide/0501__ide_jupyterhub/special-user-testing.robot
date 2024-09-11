@@ -1,5 +1,5 @@
 *** Settings ***
-Test Tags       J../upyterHub
+Test Tags        JupyterHub
 Resource         ../../../Resources/ODS.robot
 Resource         ../../../Resources/Common.robot
 Resource         ../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
@@ -18,7 +18,6 @@ Suite Teardown   End Web Test
 *** Test Cases ***
 Test Special Usernames
     [Tags]  Smoke
-    ...     Tier1
     ...     OpenDataHub
     ...     ODS-257  ODS-532
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}

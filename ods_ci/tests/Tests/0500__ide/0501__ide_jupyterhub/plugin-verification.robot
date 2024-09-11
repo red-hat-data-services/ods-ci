@@ -22,7 +22,7 @@ Test Tags       JupyterHub
 
 *** Test Cases ***
 Test User Notebook Plugin in JupyterLab
-    [Tags]  Sanity    Tier1
+    [Tags]  Sanity
     ...     ODS-486
     ...     ProductBug
     Gather Notebook data

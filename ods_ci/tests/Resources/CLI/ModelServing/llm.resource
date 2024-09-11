@@ -26,6 +26,7 @@ ${SERVICEMESH_CR_NS}=    istio-system
 ...                      tgis-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/tgis_servingruntime_{{protocol}}.yaml
 ...                      vllm-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/vllm_servingruntime_{{protocol}}.yaml
 ...                      ovms-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/ovms_servingruntime_{{protocol}}.yaml
+...                      caikit-standalone-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/caikit_standalone_servingruntime_{{protocol}}.yaml     # robocop: disable
 ${DOWNLOAD_PVC_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_model_in_pvc.yaml
 ${DOWNLOAD_PVC_FILLED_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_model_in_pvc_filled.yaml
 

@@ -24,7 +24,6 @@ ${EXPECTED_CUDA_VERSION_N_1} =  11.8
 Verify Tensorflow Image Can Be Spawned
     [Documentation]    Spawns tensorflow image
     [Tags]  Tier1
-    ...     PLACEHOLDER  # Category tags
     ...     ODS-1155
     Pass Execution    Passing tests, as suite setup ensures that image can be spawned
 

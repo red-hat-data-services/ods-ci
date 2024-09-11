@@ -5,6 +5,14 @@ Resource   ../../../../tests/Resources/Common.robot
 Resource   oc_uninstall.robot
 Library    Process
 
+*** Variables ***
+${SERVERLESS_NS}=    openshift-serverless
+${OPENSHIFT_OPERATORS_NS}=    openshift-operators
+${KNATIVE_SERVING_NS}=      knative-serving
+${KNATIVE_EVENTING_NS}=       knative-eventing
+${ISTIO_SYSTEM_NS}=       istio-system
+
+
 *** Keywords ***
 Uninstalling RHODS Operator
   ${is_operator_installed} =  Is RHODS Installed
@@ -119,31 +127,29 @@ Uninstall Service Mesh Operator CLI
     ...    oc delete ServiceMeshControlPlane --all --ignore-not-found
     Should Be Equal As Integers  ${return_code}   0   msg=Error deleting ServiceMeshControlPlane CR
     Wait Until Keyword Succeeds    2 min    0 sec
-    ...        Check Number Of Resource Instances Equals To      ServiceMeshControlPlane    istio-system    0
+    ...        Check Number Of Resource Instances Equals To      ServiceMeshControlPlane    ${ISTIO_SYSTEM_NS}    0
     Log To Console    message=Deleting ServiceMeshMember CR From Cluster
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete ServiceMeshMember --all --ignore-not-found
     Should Be Equal As Integers  ${return_code}   0   msg=Error deleting ServiceMeshMember CR
     Wait Until Keyword Succeeds    2 min    0 sec
-    ...        Check Number Of Resource Instances Equals To      ServiceMeshMember     istio-system     0
+    ...        Check Number Of Resource Instances Equals To      ServiceMeshMember     ${ISTIO_SYSTEM_NS}     0
     Log To Console    message=Deleting ServiceMeshMemberRoll CR From Cluster
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete ServiceMeshMemberRoll --all --ignore-not-found
     Should Be Equal As Integers  ${return_code}   0   msg=Error deleting ServiceMeshMemberRoll CR
     Wait Until Keyword Succeeds    2 min    0 sec
-    ...        Check Number Of Resource Instances Equals To      ServiceMeshMemberRoll     knative-serving      0
-    Wait Until Keyword Succeeds    2 min    0 sec
-    ...        Check Number Of Resource Instances Equals To      ServiceMeshMemberRoll     redhat-ods-applications-auth-provider      0        # robocop: disable
+    ...        Check Number Of Resource Instances Equals To      ServiceMeshMemberRoll     ${KNATIVE_SERVING_NS}      0
     Log To Console    message=Deleting Service Mesh Operator Subscription From Cluster
     ${return_code}    ${csv_name}    Run And Return Rc And Output
-    ...    oc get subscription servicemeshoperator -n openshift-operators -o json | jq '.status.currentCSV' | tr -d '"'
+    ...    oc get subscription servicemeshoperator -n ${OPENSHIFT_OPERATORS_NS} -o json | jq '.status.currentCSV' | tr -d '"'
     IF  "${return_code}" == "0" and "${csv_name}" != "${EMPTY}"
        ${return_code}    ${output}    Run And Return Rc And Output
-       ...    oc delete clusterserviceversion ${csv_name} -n openshift-operators
+       ...    oc delete clusterserviceversion ${csv_name} -n ${OPENSHIFT_OPERATORS_NS}
        Should Be Equal As Integers  ${return_code}   0   msg=Error deleting ServiceMesh CSV ${csv_name}
     END
     ${return_code}    ${output}    Run And Return Rc And Output
-    ...    oc delete subscription servicemeshoperator -n openshift-operators
+    ...    oc delete subscription servicemeshoperator -n ${OPENSHIFT_OPERATORS_NS}
 
 Uninstall Serverless Operator CLI
     [Documentation]    Keyword to uninstall the Serverless Operator
@@ -152,29 +158,33 @@ Uninstall Serverless Operator CLI
     ...    oc delete KnativeServing --all --ignore-not-found
     Should Be Equal As Integers  ${return_code}   0   msg=Error deleting KnativeServing CR
     Wait Until Keyword Succeeds    2 min    0 sec
-    ...        Check Number Of Resource Instances Equals To      KnativeServing     knative-serving      0
+    ...        Check Number Of Resource Instances Equals To      KnativeServing     ${KNATIVE_SERVING_NS}      0
     Log To Console    message=Deleting KnativeEventing CR From Cluster
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete KnativeEventing --all --ignore-not-found
     Should Be Equal As Integers  ${return_code}   0   msg=Error deleting KnativeEventing CR
     Wait Until Keyword Succeeds    2 min    0 sec
-    ...        Check Number Of Resource Instances Equals To      KnativeEventing     knative-eventing      0
+    ...        Check Number Of Resource Instances Equals To      KnativeEventing     ${KNATIVE_EVENTING_NS}      0
     Log To Console    message=Deleting KnativeKafka CR From Cluster
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete KnativeKafka --all --ignore-not-found
     Should Be Equal As Integers  ${return_code}   0   msg=Error deleting KnativeKafka CR
     Wait Until Keyword Succeeds    2 min    0 sec
-    ...        Check Number Of Resource Instances Equals To      KnativeKafka     knative-eventing      0
+    ...        Check Number Of Resource Instances Equals To      KnativeKafka     ${KNATIVE_EVENTING_NS}      0
     Log To Console    message=Deleting Serverless Operator Subscription From Cluster
     ${return_code}    ${csv_name}    Run And Return Rc And Output
-    ...    oc get subscription serverless-operator -n openshift-serverless -o json | jq '.status.currentCSV' | tr -d '"'
+    ...    oc get subscription serverless-operator -n ${SERVERLESS_NS} -o json | jq '.status.currentCSV' | tr -d '"'
     IF  "${return_code}" == "0" and "${csv_name}" != "${EMPTY}"
        ${return_code}    ${output}    Run And Return Rc And Output
-       ...    oc delete clusterserviceversion ${csv_name} -n openshift-serverless
+       ...    oc delete clusterserviceversion ${csv_name} -n ${SERVERLESS_NS}
        Should Be Equal As Integers  ${return_code}   0   msg=Error deleting Serverless CSV ${csv_name}
     END
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete subscription serverless-operator -n openshift-serverless
+    Log To Console    message=Deleting Serverless Operator Group From Cluster
+    ${return_code}    ${output}    Run And Return Rc And Output
+    ...    oc delete operatorgroup --all -n ${SERVERLESS_NS} --ignore-not-found
+    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting Serverless operator group
 
 Check Number Of Resource Instances Equals To
     [Documentation]    Keyword to check if the amount of instances of a specific CRD in a given namespace

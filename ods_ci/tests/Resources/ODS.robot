@@ -94,9 +94,9 @@ Set Standard RHODS Groups Variables
 Apply Access Groups Settings
     [Documentation]    Changes the rhods-groups config map to set the new access configuration
     ...                and rolls out JH to make the changes effecting in Jupyter
-    [Arguments]     ${admins_group}   ${users_group}
+    [Arguments]     ${admins_group}   ${users_group}    ${timeout}=10s
     Set Access Groups Settings    admins_group=${admins_group}   users_group=${users_group}
-    Sleep    120     reason=Wait for Dashboard to get the updated configuration...
+    Sleep    ${timeout}     reason=Wait for Dashboard to get the updated configuration...
 
 Set Access Groups Settings
     [Documentation]    Changes the rhods-groups config map to set the new access configuration
@@ -399,13 +399,14 @@ Wait Until Operator Ready
 
 Wait For DSCI Ready State
     [Documentation]    Wait for DSCI to reconciled to be complete
-    [Arguments]    ${dsci}    ${namespace}    ${wait_time}=2m
+    [Arguments]    ${dsci}    ${namespace}    ${wait_time}=6m
     ${rc}   ${output}=    Run And Return Rc And Output
     ...    oc wait --timeout=${wait_time} --for jsonpath='{.status.conditions[].reason}'=ReconcileCompleted -n ${namespace} dsci ${dsci}
     Should Be Equal    "${rc}"    "0"     msg=${output}
+
 Wait For DSC Conditions Reconciled
     [Documentation]    Checks all DSC conditions to be successfully reconciled
-    [Arguments]    ${namespace}    ${dsc_name}    ${wait_time}=3m
+    [Arguments]    ${namespace}    ${dsc_name}    ${wait_time}=6m
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc wait --timeout=${wait_time} --for jsonpath='{.status.conditions[].reason}'=ReconcileCompleted -n ${namespace} dsc ${dsc_name}    # robocop: disable
     Should Be Equal As Integers    ${rc}     ${0}

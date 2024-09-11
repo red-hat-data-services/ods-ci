@@ -229,9 +229,9 @@ Verify Pod Logs Do Not Contain
 Is Resource Present
     [Documentation]    Check If Resource Is Present In Namespace
     [Arguments]    ${resource}    ${resource_name}    ${namespace}    ${expected_result}
-    ${rc}=    Run And Return Rc
+    ${rc}   ${output}=    Run And Return Rc And Output
     ...    oc get ${resource} ${resource_name} -n ${namespace}
-    Should Be Equal    "${rc}"    "${expected_result}"    msg=${resource} does not exist in ${namespace}
+    Should Be Equal    "${rc}"    "${expected_result}"    msg=${resource} does not exist in ${namespace}, ${output}
 
 Create Namespace In Openshift
     [Documentation]    Create a new namespace if it does not already exist
@@ -275,3 +275,20 @@ Set Default Storage Class In GCP
     ELSE
         Log    Proceeding with default storage class because we're not in GCP
     END
+
+Apply OpenShift Configuration
+    [Documentation]    Apply the provided OpenShift configuration using oc apply -f -.
+    [Arguments]    ${config}
+    ${command}=    Set Variable    oc apply -f ${config}
+    ${result}=    Run Process    ${command}    stdin=${config}    shell=True    stdout=PIPE    stderr=PIPE
+    Should Be Equal As Strings    ${result.rc}    0    The oc apply command failed
+    Log    ${result.stdout}
+
+Get Resource Attribute
+    [Documentation]    Gets the value of an attribute of a specific resource
+    [Arguments]    ${namespace}    ${resource_type}    ${resource_name}    ${attribute_path}
+    ${rc}   ${value}=    Run And Return Rc And Output
+    ...    oc get ${resource_type}/${resource_name} -n ${namespace} -o 'jsonpath={${attribute_path}}'
+    Should Be Equal    "${rc}"    "0"    msg=${value}
+    Log To Console    ${resource_type} ${resource_name} in the namespace ${namespace} attribute ${attribute_path} value is ${value}
+    RETURN    ${value}

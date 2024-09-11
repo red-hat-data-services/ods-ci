@@ -11,7 +11,8 @@ spec:
         - '--model=/mnt/models'
         - '--served-model-name={{.Name}}'
         - '--distributed-executor-backend=mp'
-      image: quay.io/modh/vllm@sha256:54bc037a5ea8f29b44674d496cbf58fab76a622bc47be030b32afcb735f98a38
+        - '--chat-template=/app/data/template/template_chatml.jinja'
+      image: quay.io/modh/vllm@sha256:2e7f97b69d6e0aa7366ee6a841a7e709829136a143608bee859b1fe700c36d31
       name: kserve-container
       command:
         - python3

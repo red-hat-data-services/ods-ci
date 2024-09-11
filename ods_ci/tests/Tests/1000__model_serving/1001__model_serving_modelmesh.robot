@@ -13,6 +13,7 @@ Suite Setup       Model Serving Suite Setup
 Suite Teardown    Model Serving Suite Teardown
 Test Tags         ModelMesh
 
+
 *** Variables ***
 ${INFERENCE_INPUT}=    @tests/Resources/Files/modelmesh-mnist-input.json
 ${INFERENCE_INPUT_OPENVINO}=    @tests/Resources/Files/openvino-example-input.json
@@ -33,11 +34,10 @@ Verify Model Serving Installation
     [Documentation]    Verifies that the core components of model serving have been
     ...    deployed in the ${APPLICATIONS_NAMESPACE} namespace
     [Tags]    Smoke
-    ...       Tier1
     ...       OpenDataHub
     ...       ODS-1919
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec
-    ...    Verify odh-model-controller Deployment
+    ...    Verify odh-model-controller Deployment    # robocop: disable
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify ModelMesh Deployment
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify Etcd Pod
 
@@ -64,9 +64,9 @@ Test Inference Without Token Authentication
     [Teardown]   Run Keyword If Test Failed    Get Modelmesh Events And Logs
     ...    server_name=${RUNTIME_NAME}    project_title=${PRJ_TITLE}
 
-Verify Tensorflow Model Via UI
+Verify Tensorflow Model Via UI    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Test the deployment of a tensorflow (.pb) model
-    [Tags]    Sanity    Tier1
+    [Tags]    Sanity
     ...       ODS-2268
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}-2268    description=${PRJ_DESCRIPTION}
@@ -92,10 +92,10 @@ Verify Tensorflow Model Via UI
     ...    AND
     ...    Model Serving Test Teardown
 
-Verify Secure Model Can Be Deployed In Same Project
+Verify Secure Model Can Be Deployed In Same Project    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Verifies that a model can be deployed in a secured server (with token) using only the UI.
     ...    At the end of the process, verifies the correct resources have been deployed.
-    [Tags]    Sanity    Tier1
+    [Tags]    Tier1
     ...       ODS-1921    ProductBug    RHOAIENG-2759
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}    existing_project=${TRUE}
@@ -117,12 +117,13 @@ Verify Secure Model Can Be Deployed In Same Project
     ...    AND
     ...    Model Serving Test Teardown
 
-Test Inference With Token Authentication
+Test Inference With Token Authentication    # robocop: off=too-long-test-case
     [Documentation]    Test the inference result after having deployed a model that requires Token Authentication
-    [Tags]    Sanity    Tier1
+    [Tags]    Sanity
     ...       ODS-1920
     Open Data Science Projects Home Page
-    Create Data Science Project    title=${SECOND_PROJECT}    description=${PRJ_DESCRIPTION}    existing_project=${FALSE}
+    Create Data Science Project    title=${SECOND_PROJECT}    description=${PRJ_DESCRIPTION}
+    ...    existing_project=${FALSE}
     Recreate S3 Data Connection    project_title=${SECOND_PROJECT}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
@@ -130,7 +131,6 @@ Test Inference With Token Authentication
     Serve Model    project_name=${SECOND_PROJECT}    model_name=${SECURED_MODEL}    model_server=${SECURED_RUNTIME}
     ...    existing_data_connection=${TRUE}    data_connection_name=model-serving-connection    existing_model=${TRUE}
     ...    framework=onnx    model_path=mnist-8.onnx
-    # Run Keyword And Continue On Failure    Verify Model Inference    ${SECURED_MODEL}    ${INFERENCE_INPUT}    ${EXPECTED_INFERENCE_SECURED_OUTPUT}    token_auth=${TRUE}    # robocop: disable
     Run Keyword And Continue On Failure    Verify Model Inference With Retries
     ...    ${SECURED_MODEL}    ${INFERENCE_INPUT}    ${EXPECTED_INFERENCE_SECURED_OUTPUT}    token_auth=${TRUE}
     ...    project_title=${SECOND_PROJECT}
@@ -145,16 +145,16 @@ Test Inference With Token Authentication
 
 Verify Multiple Projects With Same Model
     [Documentation]    Test the deployment of multiple DS project with same openvino_ir model
-    [Tags]    Sanity    Tier1
+    [Tags]    Tier1
     ...       RHOAIENG-549    RHOAIENG-2724
     Create Openvino Models    server_name=${RUNTIME_NAME}    model_name=${MODEL_NAME}    project_name=${PRJ_TITLE}
     ...    num_projects=4
     [Teardown]   Run Keyword If Test Failed    Get Modelmesh Events And Logs
     ...    server_name=${RUNTIME_NAME}    project_title=${PRJ_TITLE}
 
-Verify Editing Existing Model Deployment
+Verify Editing Existing Model Deployment    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Tries editing an existing model deployment to see if the underlying deployment is updated
-    [Tags]    Sanity    Tier1
+    [Tags]    Tier1
     ...       RHOAIENG-2869
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}-2869    description=${PRJ_DESCRIPTION}
@@ -191,6 +191,7 @@ Verify Editing Existing Model Deployment
     ...    AND
     ...    Model Serving Test Teardown
 
+
 *** Keywords ***
 Model Serving Suite Setup
     [Documentation]    Suite setup steps for testing DSG. It creates some test variables
@@ -203,7 +204,7 @@ Model Serving Suite Setup
     Fetch CA Certificate If RHODS Is Self-Managed
     Clean All Models Of Current User
 
-Create Openvino Models
+Create Openvino Models    # robocop: off=too-many-calls-in-keyword
     [Documentation]    Create Openvino model in N projects (more than 1 will add index to project name)
     [Arguments]    ${server_name}=${RUNTIME_NAME}    ${model_name}=${MODEL_NAME}    ${project_name}=${PRJ_TITLE}
     ...    ${num_projects}=1    ${token}=${FALSE}
@@ -212,16 +213,19 @@ Create Openvino Models
         ${new_project}=    Set Variable    ${project_name}${project_postfix}
         Log To Console    Creating new DS Project '${new_project}' with Model '${model_name}'
         Open Data Science Projects Home Page
-        Create Data Science Project    title=${new_project}    description=${PRJ_DESCRIPTION}    existing_project=${TRUE}
+        Create Data Science Project    title=${new_project}    description=${PRJ_DESCRIPTION}
+        ...    existing_project=${TRUE}
         Recreate S3 Data Connection    project_title=${new_project}    dc_name=model-serving-connection
         ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
         ...            aws_bucket_name=ods-ci-s3
         Create Model Server    token=${FALSE}    server_name=${server_name}    existing_server=${TRUE}
-        Serve Model    project_name=${new_project}    model_name=${model_name}    framework=openvino_ir    existing_data_connection=${TRUE}
-        ...    data_connection_name=model-serving-connection    model_path=openvino-example-model    existing_model=${TRUE}
+        Serve Model    project_name=${new_project}    model_name=${model_name}    framework=openvino_ir
+        ...    existing_data_connection=${TRUE}    data_connection_name=model-serving-connection
+        ...    model_path=openvino-example-model    existing_model=${TRUE}
         ${runtime_pod_name}=    Replace String Using Regexp    string=${server_name}    pattern=\\s    replace_with=-
         ${runtime_pod_name}=    Convert To Lower Case    ${runtime_pod_name}
-        Wait Until Keyword Succeeds    5 min  10 sec  Verify Openvino Deployment    runtime_name=${runtime_pod_name}    project_name=${new_project}
+        Wait Until Keyword Succeeds    5 min  10 sec  Verify Openvino Deployment    runtime_name=${runtime_pod_name}
+        ...    project_name=${new_project}
         Wait Until Keyword Succeeds    5 min  10 sec  Verify Serving Service    ${new_project}
         Verify Model Status    ${model_name}    success
         ${project_postfix}=    Evaluate  ${idx}+1
@@ -231,7 +235,7 @@ Create Openvino Models
 Model Serving Suite Teardown
     [Documentation]    Teardown steps after testing the suite.
     Remove File    openshift_ca.crt
-    Close All Browsers
+    SeleniumLibrary.Close All Browsers
     RHOSi Teardown
 
 Model Serving Test Teardown

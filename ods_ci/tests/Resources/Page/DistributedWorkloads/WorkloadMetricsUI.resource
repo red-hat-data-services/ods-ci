@@ -41,8 +41,8 @@ Select Distributed Workload Project By Name
     [Documentation]    Select the project in distributed workload metrics page by project name
     [Arguments]    ${project_name}
     Wait Until Element Is Visible    ${PROJECT_XP}   timeout=20
-    Click Element    xpath://div[@data-testid="project-selector-dropdown"]
-    Click Element    xpath://a[@role="menuitem" and text()="${project_name}"]
+    Click Element    xpath://*[@data-testid="project-selector-dropdown"]
+    Click Element    xpath://*[@role="menuitem" and string()="${project_name}"]
 
 Check Expected String Contains
     [Documentation]    Check Expected String Contains with the xpath prvoided get text
@@ -61,7 +61,7 @@ Select Refresh Interval
     [Arguments]    ${refresh_interval}
     Wait Until Element Is Visible  ${REFRESH_INTERVAL_XP}    timeout=20
     Click Element     ${REFRESH_INTERNAL_MENU_XP}
-    Click Element     xpath=//button[text()="${refresh_interval}"]
+    Click Element     xpath=//button[@role="option" and contains(., "${refresh_interval}")]
 
 Get Current CPU Usage
     [Documentation]    Returns value of current cpu usage
@@ -130,7 +130,16 @@ Get CPU Requested
     [Arguments]    ${project}    ${local_queue_name}
     ${result}  ${output}=    Run And Return Rc And Output
     ...    oc get LocalQueue ${local_queue_name} -n ${project} -o=jsonpath='{.status.flavorsReservation[0].resources[?(@.name=="cpu")].total}'
-    RETURN   ${output}
+    # If CPU match millicores regex then convert value to cores, otherwise treat it as cores
+    ${cpu_requested_array}=          Get Regexp Matches    ${output}      (\\d+)m      1
+    ${cpu_requested_array_length}=   Get Length      ${cpu_requested_array}
+    IF    ${cpu_requested_array_length} == 0
+        ${cpu_requested}=    Evaluate    ${output}
+    ELSE
+        ${cpu_requested_millicores}=     Convert To Number    ${cpu_requested_array}[0]
+        ${cpu_requested}=    Evaluate    ${cpu_requested_millicores} / 1000
+    END
+    RETURN   ${cpu_requested}
 
 Get Memory Requested
     [Documentation]    get Memory requested from LocalQueue  flavorsReservation
@@ -165,9 +174,9 @@ Get Memory Requested Tooltip Text
     @{memory_usage_list}    Split To Lines    ${memory_usage_hover_data}
     ${memory_usage_line}    Set Variable    ${memory_usage_list}[0]
     ${memory_requested_line}    Set Variable    ${memory_usage_list}[1]
-    ${memory_usage_value}     Set Variable    ${memory_usage_line}[14:19]
-    ${memory_requested_value}     Set Variable    ${memory_requested_line}[18:23]
-    RETURN    ${memory_usage_value}     ${memory_requested_value}
+    ${memory_usage_value_array}=       Get Regexp Matches    ${memory_usage_line}      \\d+\\.?\\d*
+    ${memory_requested_value_array}=   Get Regexp Matches    ${memory_requested_line}  \\d+\\.?\\d*
+    RETURN    ${memory_usage_value_array}[0]     ${memory_requested_value_array}[0]
 
 Get CPU Requested Tooltip Text
     [Documentation]    retuns tooltip text of CPU requested chart
@@ -177,9 +186,9 @@ Get CPU Requested Tooltip Text
     @{cpu_usage_list}    Split To Lines    ${cpu_usage_hover_data}
     ${cpu_usage_line}    Set Variable    ${cpu_usage_list}[0]
     ${cpu_requested_line}    Set Variable    ${cpu_usage_list}[1]
-    ${cpu_usage_value}     Set Variable    ${cpu_usage_line}[11:16]
-    ${cpu_requested_value}     Set Variable    ${cpu_requested_line}[15:16]
-    RETURN    ${cpu_usage_value}    ${cpu_requested_value}
+    ${cpu_usage_value_array}=       Get Regexp Matches    ${cpu_usage_line}      \\d+\\.?\\d*
+    ${cpu_requested_value_array}=   Get Regexp Matches    ${cpu_requested_line}  \\d+\\.?\\d*
+    RETURN    ${cpu_usage_value_array}[0]    ${cpu_requested_value_array}[0]
 
 Create Ray Cluster Workload
     [Documentation]    Creates Ray cluster

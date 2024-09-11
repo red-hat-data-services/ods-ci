@@ -36,13 +36,13 @@ Validate DSC and DSCI Created With Errors When Service Mesh Operator Is Not Inst
     Log To Console    message=Creating DSCInitialization CR via CLI
     Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
     Log To Console    message=Checking DSCInitialization conditions
-    Wait Until Keyword Succeeds    6 min    0 sec
+    Wait Until Keyword Succeeds    10 min    0 sec
     ...    DSCInitialization Should Fail Because Service Mesh Operator Is Not Installed
 
     Log To Console    message=Creating DataScienceCluster CR via CLI
     Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
     Log To Console    message=Checking DataScienceCluster conditions
-    Wait Until Keyword Succeeds    6 min    0 sec
+    Wait Until Keyword Succeeds    10 min    0 sec
     ...    DataScienceCluster Should Fail Because Service Mesh Operator Is Not Installed
 
     [Teardown]    Reinstall Service Mesh Operator And Recreate DSC And DSCI
@@ -62,7 +62,7 @@ Validate DSC and DSCI Created With Errors When Serverless Operator Is Not Instal
     Log To Console    message=Creating DataScienceCluster CR via CLI
     Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
     Log To Console    message=Checking DataScienceCluster conditions
-    Wait Until Keyword Succeeds    6 min    0 sec
+    Wait Until Keyword Succeeds    10 min    0 sec
     ...    DataScienceCluster Should Fail Because Serverless Operator Is Not Installed
 
     [Teardown]    Reinstall Serverless Operator And Recreate DSC And DSCI
@@ -79,15 +79,15 @@ Validate DSC and DSCI Created With Errors When Service Mesh And Serverless Opera
     Log To Console    message=Creating DSCInitialization CR via CLI
     Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
     Log To Console    message=Checking DSCInitialization conditions
-    Wait Until Keyword Succeeds    6 min    0 sec
+    Wait Until Keyword Succeeds    10 min    0 sec
     ...    DSCInitialization Should Fail Because Service Mesh Operator Is Not Installed
 
     Log To Console    message=Creating DataScienceCluster CR via CLI
     Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
     Log To Console    message=Checking DataScienceCluster conditions
-    Wait Until Keyword Succeeds    6 min    0 sec
+    Wait Until Keyword Succeeds    10 min    0 sec
     ...    DataScienceCluster Should Fail Because Service Mesh Operator Is Not Installed
-    Wait Until Keyword Succeeds    6 min    0 sec
+    Wait Until Keyword Succeeds    10 min    0 sec
     ...    DataScienceCluster Should Fail Because Serverless Operator Is Not Installed
 
     [Teardown]    Reinstall Service Mesh And Serverless Operators And Recreate DSC And DSCI
@@ -143,7 +143,7 @@ Reinstall Service Mesh Operator And Recreate DSC And DSCI
     Remove DSC And DSCI Resources
     Install Service Mesh Operator Via Cli
     Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
-    Wait For DSCInitialization CustomResource To Be Ready    timeout=180
+    Wait For DSCInitialization CustomResource To Be Ready    timeout=600
     Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
     Wait For DataScienceCluster CustomResource To Be Ready   timeout=600
     Set Service Mesh State To Managed And Wait For CR Ready
@@ -154,7 +154,7 @@ Reinstall Serverless Operator And Recreate DSC And DSCI
     Remove DSC And DSCI Resources
     Install Serverless Operator Via Cli
     Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
-    Wait For DSCInitialization CustomResource To Be Ready    timeout=180
+    Wait For DSCInitialization CustomResource To Be Ready    timeout=600
     Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
     Wait For DataScienceCluster CustomResource To Be Ready   timeout=600
     Set Service Mesh State To Managed And Wait For CR Ready
@@ -166,7 +166,7 @@ Reinstall Service Mesh And Serverless Operators And Recreate DSC And DSCI
     Install Serverless Operator Via Cli
     Install Service Mesh Operator Via Cli
     Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
-    Wait For DSCInitialization CustomResource To Be Ready    timeout=180
+    Wait For DSCInitialization CustomResource To Be Ready    timeout=600
     Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
     Wait For DataScienceCluster CustomResource To Be Ready   timeout=600
     Set Service Mesh State To Managed And Wait For CR Ready

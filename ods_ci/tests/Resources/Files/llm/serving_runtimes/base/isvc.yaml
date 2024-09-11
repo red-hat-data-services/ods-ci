@@ -5,6 +5,8 @@ metadata:
     serving.knative.openshift.io/enablePassthrough: "true"
     sidecar.istio.io/inject: "true"
     sidecar.istio.io/rewriteAppHTTPProbers: "true"
+    prometheus.io/path: /metrics
+    prometheus.io/port: "3000"
   name: ${isvc_name}
 spec:
   predictor:

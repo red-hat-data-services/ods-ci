@@ -39,7 +39,8 @@ Begin Web Test
 
 End Web Test
     [Arguments]    ${username}=${TEST_USER.USERNAME}
-    ${server}=  Run Keyword and Return Status  Page Should Contain Element  //div[@id='jp-top-panel']//div[contains(@class, 'p-MenuBar-itemLabel')][text() = 'File']
+    ${server}=    Run Keyword And Return Status    Page Should Contain Element
+    ...    //div[@id='jp-top-panel']//div[contains(@class, 'p-MenuBar-itemLabel')][text() = 'File']
     IF  ${server}==True
         Clean Up Server    username=${username}
         Stop JupyterLab Notebook Server
@@ -58,10 +59,14 @@ End Non JupyterLab Web Test
     Close Browser
 
 Load Json File
-    [Arguments]   ${file_path}
+    [Arguments]   ${file_path}      ${as_string}=${FALSE}
     ${j_file}=    Get File    ${file_path}
     ${obj}=    Evaluate    json.loads(r'''${j_file}''')    json
+    IF  ${as_string}
+       ${obj}=    Evaluate    json.dumps(${obj})    json
+    END
     RETURN    ${obj}
+
 
 Load Json String
     [Arguments]     ${json_string}
@@ -127,6 +132,13 @@ Get All Strings That Contain
         IF    "${substring_to_search}" in "${str}"    Append To List    ${matched_list}    ${str}
     END
     RETURN   ${matched_list}
+
+Lists Size Should Be Equal
+    [Documentation]  Verifies two lists have same number of items
+    [Arguments]   ${list_one}    ${list_two}
+    ${length_one}=  Get Length  ${list_one}
+    ${length_two}=  Get Length  ${list_two}
+    Should Be Equal As Integers  ${length_one}  ${length_two}
 
 Page Should Contain A String In List
     [Documentation]    Verifies that page contains at least one of the strings in text_list
@@ -213,10 +225,17 @@ Wait Until HTTP Status Code Is
 
 Check HTTP Status Code
     [Documentation]     Verifies Status Code of URL Matches Expected Status Code
-    [Arguments]  ${link_to_check}    ${expected}=200    ${timeout}=20   ${verify_ssl}=${True}
-    ${headers}=    Create Dictionary    User-Agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36
-    ${response}=    RequestsLibrary.GET  ${link_to_check}   expected_status=any    headers=${headers}   timeout=${timeout}  verify=${verify_ssl}
-    Run Keyword And Continue On Failure  Status Should Be  ${expected}
+    [Arguments]  ${link_to_check}    ${expected}=200    ${timeout}=20   ${verify_ssl}=${True}    ${allow_redirects}=${True}
+    ${headers}=    Create Dictionary    User-Agent="Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0"
+    ${response}=    RequestsLibrary.GET  ${link_to_check}   expected_status=any   headers=${headers}
+    ...    timeout=${timeout}  verify=${verify_ssl}    allow_redirects=${allow_redirects}
+    ${status_verified}=    Run Keyword And Return Status    Status Should Be    ${expected}    ${response}
+    IF    not ${status_verified}
+        Log    URL '${link_to_check}' returned '${response.status_code}' - Retrying with empty Headers    console=True
+        ${response}=    RequestsLibrary.GET  ${link_to_check}   expected_status=any
+        ...    timeout=${timeout}  verify=${verify_ssl}    allow_redirects=${allow_redirects}
+        Run Keyword And Continue On Failure    Status Should Be    ${expected}    ${response}
+    END
     RETURN  ${response.status_code}
 
 URLs HTTP Status Code Should Be Equal To
@@ -417,6 +436,13 @@ Extract URLs From Text
     ${urls}=     Get Regexp Matches   ${text}   (?:(?:(?:ftp|http)[s]*:\/\/|www\.)[^\.]+\.[^ \n]+)
     RETURN    ${urls}
 
+Run And Verify Command
+    [Documentation]    Run an oc delete command and log the output and errors
+    [Arguments]    ${command}
+    ${result}=    Run Process    ${command}    shell=yes
+    Log    ${result.stdout}\n${result.stderr}     console=True
+    Should Be True    ${result.rc} == 0
+
 Run And Watch Command
   [Documentation]    Run any shell command (including args) with optional:
   ...    Timeout: 10 minutes by default.
@@ -508,3 +534,13 @@ Clear Element And Input Text
     Clear Element Text    ${element_xpath}
     Sleep    0.5s
     Input Text    ${element_xpath}    ${new_text}
+
+Clone Git Repository
+    [Documentation]   Clone Git repository in local framework
+    [Arguments]    ${REPO_URL}    ${REPO_BRANCH}    ${DIR}
+    ${result} =    Run Process    git clone -b ${REPO_BRANCH} ${REPO_URL} ${DIR}
+    ...    shell=true    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Unable to clone DW repo ${REPO_URL}:${REPO_BRANCH}:${DIR}
+    END

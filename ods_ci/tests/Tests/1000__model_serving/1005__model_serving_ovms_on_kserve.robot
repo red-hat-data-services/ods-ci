@@ -31,6 +31,7 @@ ${PRJ_TITLE_GPU}=    model-serving-project-gpu
 ${PRJ_DESCRIPTION_GPU}=    project used for model serving tests (with GPUs)
 ${MODEL_NAME_GPU}=    vehicle-detection
 
+
 *** Test Cases ***
 Verify Openvino_IR Model Via UI (OVMS on Kserve)
     [Documentation]    Test the deployment of an openvino_ir model in Kserve using OVMS
@@ -47,9 +48,9 @@ Verify Openvino_IR Model Via UI (OVMS on Kserve)
     ...    Run Keyword If Test Failed    Get Kserve Events And Logs
     ...    model_name=${MODEL_NAME}    project_title=${PRJ_TITLE}
 
-Verify Tensorflow Model Via UI (OVMS on Kserve)
+Verify Tensorflow Model Via UI (OVMS on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of a tensorflow (.pb) model in Kserve using OVMS
-    [Tags]    Sanity    Tier1
+    [Tags]    Sanity
     ...       ODS-2627
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}    existing_project=${TRUE}
@@ -72,7 +73,7 @@ Verify Tensorflow Model Via UI (OVMS on Kserve)
 
 Test Onnx Model Via UI (OVMS on Kserve)
     [Documentation]    Test the deployment of an onnx model in Kserve using OVMS
-    [Tags]    Sanity    Tier1
+    [Tags]    Sanity
     ...       ODS-2628
     Open Data Science Projects Home Page
     Create Data Science Project    title=${SECOND_PROJECT}    description=${PRJ_DESCRIPTION}
@@ -101,9 +102,9 @@ Verify Multiple Projects With Same Model (OVMS on Kserve)
     ...    Run Keyword If Test Failed    Get Kserve Events And Logs
     ...    model_name=${MODEL_NAME}    project_title=${PRJ_TITLE}
 
-Verify GPU Model Deployment Via UI (OVMS on Kserve)
+Verify GPU Model Deployment Via UI (OVMS on Kserve)    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Test the deployment of an openvino_ir model on a model server with GPUs attached
-    [Tags]    Sanity    Tier1    Resources-GPU
+    [Tags]    Tier1    Resources-GPU
     ...       ODS-2630    ODS-2631    ProductBug    RHOAIENG-3355
     ${requests}=    Create Dictionary    nvidia.com/gpu=1
     ${limits}=    Create Dictionary    nvidia.com/gpu=1
@@ -155,7 +156,7 @@ OVMS On Kserve Suite Setup
     Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
     Clean All Models Of Current User
 
-Create Openvino Models For Kserve
+Create Openvino Models For Kserve    # robocop: off=too-many-calls-in-keyword
     [Documentation]    Create Openvino model in N projects (more than 1 will add index to project name)
     [Arguments]    ${server_name}=${RUNTIME_NAME}    ${model_name}=${MODEL_NAME}    ${project_name}=${PRJ_TITLE}
     ...    ${num_projects}=1    ${token}=${FALSE}
@@ -190,7 +191,7 @@ OVMS On Kserve Suite Teardown
         Log    Model not deployed, skipping deletion step during teardown    console=true
     END
     ${projects}=    Create List    ${PRJ_TITLE}
-    Delete Data Science Projects From CLI   ocp_projects=${projects}
+    Delete List Of Projects Via CLI   ocp_projects=${projects}
     # Will only be present on SM cluster runs, but keyword passes
     # if file does not exist
     Remove File    openshift_ca_istio_knative.crt

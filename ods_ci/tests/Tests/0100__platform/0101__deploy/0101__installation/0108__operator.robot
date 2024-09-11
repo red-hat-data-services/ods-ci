@@ -4,17 +4,47 @@ Documentation       Post install test cases that verify OCP operator resources a
 Library           OpenShiftLibrary
 Resource          ../../../../Resources/ODS.robot
 Resource          ../../../../Resources/RHOSi.resource
-Suite Setup       RHOSi Setup
+Resource          ../../../../Resources/OCP.resource
+Resource          ../../../../Resources/Common.robot
+Resource          ../../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
+Suite Setup       Operator Setup
 Suite Teardown    RHOSi Teardown
 
 
 *** Test Cases ***
+Verify That DSC And DSCI Release.Name Attribute matches ${expected_release_name}
+    [Documentation]    Tests the release.name attribute from the DSC and DSCI matches the desired value.
+    ...                ODH: Open Data Hub
+    ...                RHOAI managed: OpenShift AI Cloud Service
+    ...                RHOAI selfmanaged: OpenShift AI Self-Managed
+    [Tags]    Smoke
+    ...       Operator
+    ...       RHOAIENG-9760
+    Should Be Equal As Strings    ${DSC_RELEASE_NAME}     ${expected_release_name}
+    Should Be Equal As Strings    ${DSCI_RELEASE_NAME}    ${expected_release_name}
+
+Verify That DSC And DSCI Release.Version Attribute matches the value in the subscription
+    [Documentation]    Tests the release.version attribute from the DSC and DSCI matches the value in the subscription.
+    [Tags]    Smoke
+    ...       Operator
+    ...       RHOAIENG-8082
+    ${rc}    ${csv_name}=    Run And Return Rc And Output
+    ...    oc get subscription -n ${OPERATOR_NAMESPACE} -l ${OPERATOR_SUBSCRIPTION_LABEL} -ojson | jq '.items[0].status.currentCSV' | tr -d '"'
+
+    Should Be Equal As Integers    ${rc}    ${0}    ${rc}
+
+    ${csv_version}=     Get Resource Attribute      ${OPERATOR_NAMESPACE}
+    ...                 ClusterServiceVersion      ${csv_name}        .spec.version
+
+    Should Be Equal As Strings    ${DSC_RELEASE_VERSION}    ${csv_version}
+    Should Be Equal As Strings    ${DSCI_RELEASE_VERSION}    ${csv_version}
+
 Verify Odh-deployer Checks Cluster Platform Type
     [Documentation]    Verifies if odh-deployer checks the platform type of the cluster before installing
-    [Tags]    Sanity
-    ...       Tier1
+    [Tags]    Tier1
     ...       ODS-1316
     ...       AutomationBug
+    ...       Operator
     ${cluster_platform_type}=    Fetch Cluster Platform Type
     IF    "${cluster_platform_type}" == "AWS" or "${cluster_platform_type}" == "OpenStack"
         ${odhdeployer_logs_content}=     Set Variable
@@ -37,9 +67,9 @@ Verify Odh-deployer Checks Cluster Platform Type
 
 Verify That The Operator Pod Does Not Get Stuck After Upgrade
     [Documentation]    Verifies that the operator pod doesn't get stuck after an upgrade
-    [Tags]    Sanity
-    ...       Tier1
+    [Tags]    Tier1
     ...       ODS-818
+    ...       Operator
     ${operator_pod_info}=    Fetch operator Pod Info
     ${length}=    Get length    ${operator_pod_info}
     IF    ${length} == 2
@@ -48,12 +78,13 @@ Verify That The Operator Pod Does Not Get Stuck After Upgrade
             Log Error And Fail Pods When Pods Were Terminated    ${operator_pod_info}    Opertator Pod Stuck
         END
     END
+
 Verify Clean Up ODS Deployer Post-Migration
     [Documentation]    Verifies that resources unused are cleaned up after migration
     [Tags]    Tier1
     ...       ODS-1767
-    ...       Sanity
     ...       AutomationBug
+    ...       Operator
     ${version_check} =    Is RHODS Version Greater Or Equal Than    1.17.0
     IF    ${version_check} == False
         Log    Skipping test case as RHODS version is less than 1.17.0
@@ -107,13 +138,21 @@ Verify Clean Up ODS Deployer Post-Migration
     Should Be Equal   ${dashboardConfig[0]["spec"]["notebookController"]["pvcSize"]}    20Gi
 
 *** Keywords ***
+Operator Setup
+    [Documentation]  Setup for the Operator tests
+    RHOSi Setup
+    ${IS_SELF_MANAGED}=    Is RHODS Self-Managed
+    Set Suite Variable    ${IS_SELF_MANAGED}
+    Gather Release Attributes From DSC And DSCI
+    Set Expected Value For Release Name
+
 Fetch Odh-deployer Pod Info
     [Documentation]  Fetches information about odh-deployer pod
     ...    Args:
     ...        None
     ...    Returns:
     ...        odhdeployer_pod_info(dict): Dictionary containing the information of the odhdeployer pod
-    @{resources_info_list}=    Oc Get    kind=Pod    api_version=v1    label_selector=name=rhods-operator
+    @{resources_info_list}=    Oc Get    kind=Pod    api_version=v1    label_selector=${OPERATOR_LABEL_SELECTOR}
     &{odhdeployer_pod_info}=    Set Variable    ${resources_info_list}[0]
     RETURN    &{odhdeployer_pod_info}
 
@@ -136,7 +175,7 @@ Fetch Operator Pod Info
     ...        None
     ...    Returns:
     ...        operator_pod_info(dict): Dictionary containing the information of the operator pod
-    @{operator_pod_info}=    Oc Get    kind=Pod    api_version=v1    label_selector=name=rhods-operator
+    @{operator_pod_info}=    Oc Get    kind=Pod    api_version=v1    label_selector=${OPERATOR_LABEL_SELECTOR}
     RETURN    @{operator_pod_info}
 
 Verify Operator Pods Have CrashLoopBackOff Status After Upgrade

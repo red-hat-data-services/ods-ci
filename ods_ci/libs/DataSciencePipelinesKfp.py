@@ -2,9 +2,11 @@ import importlib
 import json
 import os
 import sys
+import tempfile
 import time
 
 from DataSciencePipelinesAPI import DataSciencePipelinesAPI
+from kfp import compiler
 from kfp.client import Client
 from robotlibcore import keyword
 
@@ -89,7 +91,17 @@ class DataSciencePipelinesKfp:
 
     @keyword
     def create_run_from_pipeline_func(
-        self, user, pwd, project, source_code, fn, pipeline_params={}, current_path=None, route_name="ds-pipeline-dspa"
+        self,
+        user,
+        pwd,
+        project,
+        source_code,
+        fn,
+        pipeline_params={},
+        current_path=None,
+        route_name="ds-pipeline-dspa",
+        pip_index_url=None,
+        pip_trusted_host=None,
     ):
         print(f"pipeline_params: {pipeline_params}")
         client, api = self.get_client(user, pwd, project, route_name)
@@ -101,7 +113,7 @@ class DataSciencePipelinesKfp:
         if current_path is None:
             current_path = os.getcwd()
         my_source = self.import_souce_code(f"{current_path}/tests/Resources/Files/pipeline-samples/v2/{source_code}")
-        pipeline = getattr(my_source, fn)
+        pipeline_func = getattr(my_source, fn)
 
         # pipeline_params
         # there are some special keys to retrieve argument values dynamically
@@ -114,11 +126,31 @@ class DataSciencePipelinesKfp:
             pipeline_params["openshift_server"] = self.api.get_openshift_server()
         if "openshift_token" in pipeline_params:
             pipeline_params["openshift_token"] = self.api.get_openshift_token()
-        print(f"pipeline_params modified with dynamic values: {pipeline_params}")
+        print(f"pipeline_params modified with dynamic values: {sorted(pipeline_params.keys())}")
 
         # create_run_from_pipeline_func will compile the code
         # if you need to see the yaml, for debugging purpose, call: TektonCompiler().compile(pipeline, f'{fn}.yaml')
-        result = client.create_run_from_pipeline_func(pipeline_func=pipeline, arguments=pipeline_params)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            pipeline_package_path = os.path.join(tmpdir, "pipeline.yaml")
+            compiler.Compiler().compile(
+                pipeline_func=pipeline_func,
+                package_path=pipeline_package_path,
+            )
+
+            if pip_index_url is not None:
+                assert pip_trusted_host is not None
+                with open(pipeline_package_path, "r") as file:
+                    file_content = file.read()
+                file_content = file_content.replace(
+                    "python3 -m pip install",
+                    f"python3 -m pip install --index-url {pip_index_url} --trusted-host {pip_trusted_host}",
+                )
+                with open(pipeline_package_path, "w") as file:
+                    file.write(file_content)
+
+            result = client.create_run_from_pipeline_package(
+                pipeline_file=pipeline_package_path, arguments=pipeline_params
+            )
         # easy to debug and double check failures
         print(result)
         return result.run_id

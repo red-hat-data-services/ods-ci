@@ -13,7 +13,7 @@ Resource          ../../Resources/Common.robot
 
 
 *** Variables ***
-${PRJ_TITLE}=                        model-registry-project-tony
+${PRJ_TITLE}=                        model-registry-project-e2e
 ${PRJ_DESCRIPTION}=                  model resgistry test project
 ${AWS_BUCKET}=                       ${S3.BUCKET_2.NAME}
 ${WORKBENCH_TITLE}=                  registry-wb
@@ -43,21 +43,20 @@ ${SECRET_PART_NAME_3}=               model-registry-db
 # robocop: disable:line-too-long
 Verify Model Registry Integration With Secured-DB
     [Documentation]    Verifies the Integartion of Model Registry operator with Jupyter Notebook
-    [Tags]    OpenDataHub    MRMS1302
+    [Tags]    OpenDataHub    MRMS1302    Smoke    ExcludeOnRhoai
     Create Workbench    workbench_title=${WORKBENCH_TITLE}    workbench_description=Registry test
-    ...                 prj_title=${PRJ_TITLE}    image_name=Minimal Python  deployment_size=Small
+    ...                 prj_title=${PRJ_TITLE}    image_name=Minimal Python  deployment_size=${NONE}
     ...                 storage=Persistent   pv_existent=${NONE}
     ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}
     Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     ${workbenches}=    Create List    ${WORKBENCH_TITLE}
-    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}
     # Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME}
     # ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     # ...            aws_bucket_name=${AWS_BUCKET}    connected_workbench=${workbenches}
     # Data Connection Should Be Listed    name=${DC_S3_NAME}    type=${DC_S3_TYPE}    connected_workbench=${workbenches}
     # Open Data Science Project Details Page       project_title=${prj_title}    tab_id=workbenches
-    # Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}
+    Wait Until Workbench Is Started     workbench_title=registry-wb
     Upload File In The Workbench     filepath=${SAMPLE_ONNX_MODEL}    workbench_title=${WORKBENCH_TITLE}
     ...         workbench_namespace=${PRJ_TITLE}
     Upload File In The Workbench     filepath=${JUPYTER_NOTEBOOK_FILEPATH}    workbench_title=${WORKBENCH_TITLE}
@@ -84,10 +83,6 @@ Prepare Model Registry Test Setup
     Apply ServiceMeshMember Configuration
     Get Cluster Domain And Token
     Run Update Notebook Script
-    Copy File    ${EXAMPLE_ISTIO_ENV}    ${ISTIO_ENV}
-    Append Key Value To Env File    ${ISTIO_ENV}    DOMAIN    ${DOMAIN}
-    File Should Exist    ${ISTIO_ENV}
-    Log File Content    ${ISTIO_ENV}
     Generate ModelRegistry Certificates
     Apply Db Config Samples    namespace=${NAMESPACE_MODEL-REGISTRY}
     Create Model Registry Secrets
@@ -261,7 +256,6 @@ Run Update Notebook Script
 
 Remove Model Registry
     [Documentation]    Run multiple oc delete commands to remove model registry components
-    Run And Verify Command    oc delete smm default -n ${NAMESPACE_MODEL-REGISTRY}
     Run And Verify Command    oc delete -k ${MODELREGISTRY_BASE_FOLDER}/samples/secure-db/mysql-tls
     Run And Verify Command    oc delete secret modelregistry-sample-grpc-credential -n ${NAMESPACE_ISTIO}
     Run And Verify Command    oc delete secret modelregistry-sample-rest-credential -n ${NAMESPACE_ISTIO}

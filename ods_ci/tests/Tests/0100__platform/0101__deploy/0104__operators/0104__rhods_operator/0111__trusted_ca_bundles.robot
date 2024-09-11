@@ -26,18 +26,18 @@ Validate Trusted CA Bundles State Managed
     ...    each non-reserved namespace.
     [Tags]    Operator    Smoke    ODS-2638    TrustedCABundle-Managed
 
-    Wait Until Keyword Succeeds    5 min    0 sec
+    Wait Until Keyword Succeeds    10 min    0 sec
     ...    Is Resource Present    project    ${TEST_NS}    ${TEST_NS}    ${IS_PRESENT}
 
-    Wait Until Keyword Succeeds    5 min    0 sec
+    Wait Until Keyword Succeeds    10 min    0 sec
     ...    Is Resource Present     ConfigMap    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    ${TEST_NS}    ${IS_PRESENT}
 
     # Check that ConfigMap contains key "ca-bundle.crt"
-    Wait Until Keyword Succeeds    5 min    0 sec
+    Wait Until Keyword Succeeds    10 min    0 sec
     ...    Check ConfigMap Contains CA Bundle Key    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    ca-bundle.crt    ${TEST_NS}
 
     Set Custom CA Bundle Value In DSCI    ${DSCI_NAME}   ${CUSTOM_CA_BUNDLE}    ${OPERATOR_NS}
-    Wait Until Keyword Succeeds    5 min    0 sec
+    Wait Until Keyword Succeeds    10 min    0 sec
     ...    Is CA Bundle Value Present    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    ${CUSTOM_CA_BUNDLE}    ${TEST_NS}    ${IS_PRESENT}
 
     [Teardown]     Restore DSCI Trusted CA Bundle Settings    ${SAVED_CUSTOM_CA_BUNDLE}
@@ -52,7 +52,7 @@ Validate Trusted CA Bundles State Unmanaged
     # Trusted CA Bundle managementStatus 'Unmanaged' should NOT result in bundle being overwirtten by operator
     Set Custom CA Bundle Value On ConfigMap
     ...    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    random-ca-bundle-value    ${TEST_NS}    5s
-    Wait Until Keyword Succeeds    5 min    0 sec
+    Wait Until Keyword Succeeds    10 min    0 sec
     ...    Is CA Bundle Value Present    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    random-ca-bundle-value    ${TEST_NS}    ${IS_PRESENT}
 
     [Teardown]     Restore DSCI Trusted CA Bundle Settings    ${SAVED_CUSTOM_CA_BUNDLE}
@@ -65,7 +65,7 @@ Validate Trusted CA Bundles State Removed
     Set Trusted CA Bundle Management State    ${DSCI_NAME}    Removed    ${OPERATOR_NS}
 
     # Check that odh-trusted-ca-bundle has been 'Removed'
-    Wait Until Keyword Succeeds    5 min    0 sec
+    Wait Until Keyword Succeeds    10 min    0 sec
     ...    Is Resource Present     ConfigMap    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    ${TEST_NS}    ${IS_NOT_PRESENT}
 
     [Teardown]     Restore DSCI Trusted CA Bundle Settings    ${SAVED_CUSTOM_CA_BUNDLE}

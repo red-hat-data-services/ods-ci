@@ -87,6 +87,11 @@ Validate Trusted CA Bundles Exclude Namespace
     Wait Until Keyword Succeeds    5 min    0 sec
     ...    Is Resource Present     ConfigMap    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    ${TEST_NS}    ${IS_NOT_PRESENT}
 
+
+    Trusted CA Bundle Include Namespace    ${TEST_NS}    True
+    Wait Until Keyword Succeeds    5 min    0 sec
+    ...    Is Resource Present     ConfigMap    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    ${TEST_NS}    ${IS_PRESENT}
+
     [Teardown]     Restore DSCI Trusted CA Bundle Settings    ${SAVED_CUSTOM_CA_BUNDLE}
 
 
@@ -111,7 +116,6 @@ Restore DSCI Trusted CA Bundle Settings
 
     Set Trusted CA Bundle Management State    ${DSCI_NAME}    Managed    ${OPERATOR_NS}
     Set Custom CA Bundle Value In DSCI    ${DSCI_NAME}    ${custom_ca_value}    ${OPERATOR_NS}
-    Trusted CA Bundle Include Namespace    ${TEST_NS}    True
 
 Is CA Bundle Value Present
     [Documentation]    Check if the ConfigtMap contains Custom CA Bundle value

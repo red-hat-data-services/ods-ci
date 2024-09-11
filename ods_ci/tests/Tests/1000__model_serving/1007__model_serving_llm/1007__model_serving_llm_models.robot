@@ -13,15 +13,15 @@ Test Tags         KServe-LLM
 *** Variables ***
 ${TEST_NS}=    tgismodel
 ${RUNTIME_NAME}=  tgis-runtime   # vllm-runtime
-${USE_PVC}=    ${TRUE}
-${DOWNLOAD_IN_PVC}=    ${TRUE}
+${USE_PVC}=    ${FALSE}
+${DOWNLOAD_IN_PVC}=    ${FALSE}
 ${USE_GPU}=    ${FALSE}
 ${KSERVE_MODE}=    RawDeployment   # Serverless
 ${MODEL_FORMAT}=   pytorch       # vLLM
 ${PROTOCOL}=     grpc         # http
 ${OVERLAY}=      ${EMPTY}               # vllm
-${GPU_TYPE}=     NVIDIA
-
+${GPU_TYPE}=     AMD
+${SA_NAME}=     models-bucket-sa
 
 *** Test Cases ***
 Verify User Can Serve And Query A bigscience/mt0-xxl Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
@@ -35,7 +35,7 @@ Verify User Can Serve And Query A bigscience/mt0-xxl Model    # robocop: off=too
     ...    storage_size=70Gi
     ${requests}=    Create Dictionary    memory=40Gi
     Compile Inference Service YAML    isvc_name=${model_name}
-    ...    sa_name=${EMPTY}
+    ...    sa_name=${SA_NAME}
     ...    model_storage_uri=${storage_uri}
     ...    model_format=${MODEL_FORMAT}    serving_runtime=${RUNTIME_NAME}
     ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
@@ -83,7 +83,7 @@ Verify User Can Serve And Query A google/flan-t5-xl Model    # robocop: off=too-
     ...    storage_size=70Gi
     ${requests}=    Create Dictionary    memory=40Gi
     Compile Inference Service YAML    isvc_name=${model_name}
-    ...    sa_name=${EMPTY}
+    ...    sa_name=${SA_NAME}
     ...    model_storage_uri=${storage_uri}
     ...    model_format=${MODEL_FORMAT}    serving_runtime=${RUNTIME_NAME}
     ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
@@ -131,7 +131,7 @@ Verify User Can Serve And Query A google/flan-t5-xxl Model    # robocop: off=too
     ...    storage_size=70Gi
     ${requests}=    Create Dictionary    memory=40Gi
     Compile Inference Service YAML    isvc_name=${model_name}
-    ...    sa_name=${EMPTY}
+    ...    sa_name=${SA_NAME}
     ...    model_storage_uri=${storage_uri}
     ...    model_format=${MODEL_FORMAT}    serving_runtime=${RUNTIME_NAME}
     ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
@@ -183,7 +183,7 @@ Verify User Can Serve And Query A elyza/elyza-japanese-llama-2-7b-instruct Model
           ${overlays}=   Create List
     END
     Compile Inference Service YAML    isvc_name=${model_name}
-    ...    sa_name=${EMPTY}
+    ...    sa_name=${SA_NAME}
     ...    model_storage_uri=${storage_uri}
     ...    model_format=${MODEL_FORMAT}    serving_runtime=${RUNTIME_NAME}
     ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
@@ -242,7 +242,7 @@ Verify User Can Serve And Query A ibm/mpt-7b-instruct2 Model    # robocop: off=t
     ...    storage_size=20Gi
     ${requests}=    Create Dictionary    memory=40Gi
     Compile Inference Service YAML    isvc_name=${model_name}
-    ...    sa_name=${EMPTY}
+    ...    sa_name=${SA_NAME}
     ...    model_storage_uri=${storage_uri}
     ...    model_format=${MODEL_FORMAT}    serving_runtime=${RUNTIME_NAME}
     ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
@@ -290,7 +290,7 @@ Verify User Can Serve And Query A google/flan-ul-2 Model    # robocop: off=too-l
     ...    storage_size=70Gi   model_path=${model_path}
     ${requests}=    Create Dictionary    memory=40Gi
     Compile Inference Service YAML    isvc_name=${model_name}
-    ...    sa_name=${EMPTY}
+    ...    sa_name=${SA_NAME}
     ...    model_storage_uri=${storage_uri}
     ...    model_format=${MODEL_FORMAT}    serving_runtime=${RUNTIME_NAME}
     ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
@@ -338,7 +338,7 @@ Verify User Can Serve And Query A codellama/codellama-34b-instruct-hf Model    #
     ...    storage_size=80Gi   model_path=${model_path}
     ${requests}=    Create Dictionary    memory=130Gi
     Compile Inference Service YAML    isvc_name=${model_name}
-    ...    sa_name=${EMPTY}
+    ...    sa_name=${SA_NAME}
     ...    model_storage_uri=${storage_uri}
     ...    model_format=${MODEL_FORMAT}    serving_runtime=${RUNTIME_NAME}
     ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
@@ -382,7 +382,7 @@ Verify User Can Serve And Query A meta-llama/llama-2-13b-chat Model    # robocop
           ${overlays}=   Create List
     END
     Compile Inference Service YAML    isvc_name=${model_name}
-    ...    sa_name=${EMPTY}
+    ...    sa_name=${SA_NAME}
     ...    model_storage_uri=${storage_uri}
     ...    model_format=${MODEL_FORMAT}    serving_runtime=${RUNTIME_NAME}
     ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
@@ -445,7 +445,7 @@ Verify User Can Serve And Query A google/flan-t5-xl Prompt Tuned Model    # robo
     ${overlays}=    Create List    prompt-tuned
     ${requests}=    Create Dictionary    memory=40Gi
     Compile Inference Service YAML    isvc_name=${model_name}
-    ...    sa_name=${EMPTY}
+    ...    sa_name=${SA_NAME}
     ...    model_storage_uri=${storage_uri}
     ...    model_format=${MODEL_FORMAT}    serving_runtime=${RUNTIME_NAME}
     ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
@@ -507,7 +507,7 @@ Verify User Can Serve And Query A instructlab/merlinite-7b-lab Model    # roboco
           ${overlays}=   Create List
     END
     Compile Inference Service YAML    isvc_name=${model_name}
-    ...    sa_name=${EMPTY}
+    ...    sa_name=${SA_NAME}
     ...    model_storage_uri=${storage_uri}
     ...    model_format=${MODEL_FORMAT}    serving_runtime=${RUNTIME_NAME}
     ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
@@ -570,7 +570,7 @@ Verify User Can Serve And Query A ibm-granite/granite-8b-code-base Model    # ro
           ${overlays}=   Create List
     END
     Compile Inference Service YAML    isvc_name=${model_name}
-    ...    sa_name=${EMPTY}
+    ...    sa_name=${SA_NAME}
     ...    model_storage_uri=${storage_uri}
     ...    model_format=${MODEL_FORMAT}    serving_runtime=${RUNTIME_NAME}
     ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
@@ -633,7 +633,7 @@ Verify User Can Serve And Query A intfloat/e5-mistral-7b-instruct Model    # rob
           ${overlays}=   Create List
     END
     Compile Inference Service YAML    isvc_name=${model_name}
-    ...    sa_name=${EMPTY}
+    ...    sa_name=${SA_NAME}
     ...    model_storage_uri=${storage_uri}
     ...    model_format=${MODEL_FORMAT}    serving_runtime=${RUNTIME_NAME}
     ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
@@ -677,7 +677,7 @@ Verify User Can Serve And Query A meta-llama/llama-3-8B-Instruct Model    # robo
           ${overlays}=   Create List
     END
     Compile Inference Service YAML    isvc_name=${model_name}
-    ...    sa_name=${EMPTY}
+    ...    sa_name=${SA_NAME}
     ...    model_storage_uri=${storage_uri}
     ...    model_format=${MODEL_FORMAT}    serving_runtime=${RUNTIME_NAME}
     ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
@@ -740,7 +740,7 @@ Verify User Can Serve And Query A ibm-granite/granite-3b-code-instruct Model    
           ${overlays}=   Create List
     END
     Compile Inference Service YAML    isvc_name=${model_name}
-    ...    sa_name=${EMPTY}
+    ...    sa_name=${SA_NAME}
     ...    model_storage_uri=${storage_uri}
     ...    model_format=${MODEL_FORMAT}    serving_runtime=${RUNTIME_NAME}
     ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
@@ -803,7 +803,7 @@ Verify User Can Serve And Query A ibm-granite/granite-8b-code-instruct Model    
           ${overlays}=   Create List
     END
     Compile Inference Service YAML    isvc_name=${model_name}
-    ...    sa_name=${EMPTY}
+    ...    sa_name=${SA_NAME}
     ...    model_storage_uri=${storage_uri}
     ...    model_format=${MODEL_FORMAT}    serving_runtime=${RUNTIME_NAME}
     ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
@@ -866,7 +866,7 @@ Verify User Can Serve And Query A ibm-granite/granite-7b-lab Model    # robocop:
           ${overlays}=   Create List
     END
     Compile Inference Service YAML    isvc_name=${model_name}
-    ...    sa_name=${EMPTY}
+    ...    sa_name=${SA_NAME}
     ...    model_storage_uri=${storage_uri}
     ...    model_format=${MODEL_FORMAT}    serving_runtime=${RUNTIME_NAME}
     ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
@@ -929,7 +929,7 @@ Verify User Can Serve And Query A ibm-granite/granite-7b-lab ngram speculative M
           ${overlays}=   Create List
     END
     Compile Inference Service YAML    isvc_name=${model_name}
-    ...    sa_name=${EMPTY}
+    ...    sa_name=${SA_NAME}
     ...    model_storage_uri=${storage_uri}
     ...    model_format=${MODEL_FORMAT}    serving_runtime=${RUNTIME_NAME}
     ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
@@ -995,7 +995,7 @@ Verify User Can Serve And Query A microsoft/Phi-3-vision-128k-instruct vision Mo
           ${overlays}=   Create List
     END
     Compile Inference Service YAML    isvc_name=${model_name}
-    ...    sa_name=${EMPTY}
+    ...    sa_name=${SA_NAME}
     ...    model_storage_uri=${storage_uri}
     ...    model_format=${MODEL_FORMAT}    serving_runtime=${RUNTIME_NAME}
     ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
@@ -1041,7 +1041,7 @@ Verify User Can Serve And Query A meta-llama/llama-31-8B-Instruct Model    # rob
           ${overlays}=   Create List
     END
     Compile Inference Service YAML    isvc_name=${model_name}
-    ...    sa_name=${EMPTY}
+    ...    sa_name=${SA_NAME}
     ...    model_storage_uri=${storage_uri}
     ...    model_format=${MODEL_FORMAT}    serving_runtime=${RUNTIME_NAME}
     ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
@@ -1107,7 +1107,7 @@ Verify User Can Serve And Query RHAL AI granite-7b-starter Model    # robocop: o
           ${overlays}=   Create List
     END
     Compile Inference Service YAML    isvc_name=${model_name}
-    ...    sa_name=${EMPTY}
+    ...    sa_name=${SA_NAME}
     ...    model_storage_uri=${storage_uri}
     ...    model_format=${MODEL_FORMAT}    serving_runtime=${RUNTIME_NAME}
     ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
@@ -1240,7 +1240,7 @@ Verify User Can Serve And Query RHAL AI Granite-7b-redhat-lab Model    # robocop
           ${overlays}=   Create List
     END
     Compile Inference Service YAML    isvc_name=${model_name}
-    ...    sa_name=${EMPTY}
+    ...    sa_name=${SA_NAME}
     ...    model_storage_uri=${storage_uri}
     ...    model_format=${MODEL_FORMAT}    serving_runtime=${RUNTIME_NAME}
     ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}

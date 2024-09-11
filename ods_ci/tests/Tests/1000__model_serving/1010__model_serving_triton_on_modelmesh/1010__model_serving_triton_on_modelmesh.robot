@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation     Suite of test cases for Triton in Kserve
+Documentation     Suite of test cases for Triton in Modelmesh
 Library           OperatingSystem
 Library           ../../../../libs/Helpers.py
 Resource          ../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
@@ -18,47 +18,55 @@ Test Tags         Kserve
 
 
 *** Variables ***
-${INFERENCE_REST_INPUT_ONNX}=    @tests/Resources/Files/triton/kserve-triton-onnx-rest-input.json
-${PRJ_TITLE}=    ms-triton-project
+${INFERENCE_REST_INPUT_ONNX_FILE}=    @${RESOURCES_DIRPATH}/kserve-triton-onnx-rest-input.json
+${PRJ_TITLE}=    ms-triton-project-mm
 ${PRJ_DESCRIPTION}=    project used for model serving triton runtime tests
 ${MODEL_CREATED}=    ${FALSE}
 ${ONNX_MODEL_NAME}=    densenet_onnx
 ${ONNX_MODEL_LABEL}=     densenetonnx
-${ONNX_RUNTIME_NAME}=    triton-kserve-rest
+${ONNX_RUNTIME_NAME}=    modelmesh-triton
 ${RESOURCES_DIRPATH}=        tests/Resources/Files/triton
-${ONNX_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_onnx_rest_servingruntime.yaml
-${EXPECTED_INFERENCE_REST_OUTPUT_FILE}=      tests/Resources/Files/triton/kserve-triton-onnx-rest-output.json
+${ONNX_MODELMESH_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_onnx_modelmesh_runtime.yaml
+${EXPECTED_INFERENCE_REST_OUTPUT_FILE}=      ${RESOURCES_DIRPATH}/modelmesh-triton-onnx-rest-output.json
 
 
 *** Test Cases ***
-Test Onnx Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
+Test Onnx Model Rest Inference Via UI (Triton on Modelmesh)
     [Documentation]    Test the deployment of an onnx model in Kserve using Triton
-    [Tags]    Sanity    RHOAIENG-11565
+    [Tags]    Sanity    RHOAIENG-9070
+
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    existing_project=${FALSE}
     Open Dashboard Settings    settings_page=Serving runtimes
-    Upload Serving Runtime Template    runtime_filepath=${ONNX_RUNTIME_FILEPATH}
-    ...    serving_platform=single      runtime_protocol=REST
+    Upload Serving Runtime Template    runtime_filepath=${ONNX_MODELMESH_RUNTIME_FILEPATH}
+    ...    serving_platform=multi      runtime_protocol=REST
     Serving Runtime Template Should Be Listed    displayed_name=${ONNX_RUNTIME_NAME}
-    ...    serving_platform=single
+    ...    serving_platform=multi
     Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
-    Deploy Kserve Model Via UI    model_name=${ONNX_MODEL_NAME}    serving_runtime=triton-kserve-rest
-    ...    data_connection=model-serving-connection    path=triton/model_repository/    model_framework=onnx - 1
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${ONNX_MODEL_LABEL}
-    ...    namespace=${PRJ_TITLE}
-    ${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}=     Load Json File     file_path=${EXPECTED_INFERENCE_REST_OUTPUT_FILE}
+    Create Model Server    token=${TRUE}    runtime=${ONNX_RUNTIME_NAME}    server_name=${ONNX_RUNTIME_NAME}    existing_server=${TRUE}
+    Sleep    10s
+    Serve Model    project_name=${PRJ_TITLE}    model_name=${ONNX_MODEL_NAME}    framework=onnx - 1
+    ...    existing_data_connection=${TRUE}    data_connection_name=model-serving-connection
+    ...    model_path=triton/model_repository/densenet_onnx/        model_server=${ONNX_RUNTIME_NAME}
+    Wait Until Runtime Pod Is Running    server_name=${ONNX_RUNTIME_NAME}
+    ...    project_title=${PRJ_TITLE}    timeout=5m
+    Verify Model Status    ${ONNX_MODEL_NAME}    success
+    ${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}=     Load Json File      file_path=${EXPECTED_INFERENCE_REST_OUTPUT_FILE}
     ...     as_string=${TRUE}
-    Run Keyword And Continue On Failure    Verify Model Inference With Retries
-    ...    ${ONNX_MODEL_NAME}    ${INFERENCE_REST_INPUT_ONNX}    ${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}
-    ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}
+    Log     ${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}
+    Verify Model Inference With Retries    ${ONNX_MODEL_NAME}    ${INFERENCE_REST_INPUT_ONNX_FILE}
+    ...    ${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}
+    ...    token_auth=${TRUE}
+    ...    project_title=${PRJ_TITLE}
+    Open Dashboard Settings    settings_page=Serving runtimes
+    Delete Serving Runtime Template         displayed_name=modelmesh-triton
     [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${ONNX_MODEL_NAME}
     ...  project_title=${PRJ_TITLE}
     ...  AND
     ...  Clean All Models Of Current User
-
 
 *** Keywords ***
 Triton On Kserve Suite Setup
@@ -67,8 +75,10 @@ Triton On Kserve Suite Setup
     Set Library Search Order    SeleniumLibrary
     Skip If Component Is Not Enabled    kserve
     RHOSi Setup
+
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
+
     Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
     Clean All Models Of Current User
 
@@ -80,7 +90,7 @@ Triton On Kserve Suite Teardown
     IF    ${MODEL_CREATED}
         Clean All Models Of Current User
     ELSE
-        Log    Model not deployed, skipping deletion step during teardown    console=true
+       Log    Model not deployed, skipping deletion step during teardown    console=true
     END
     ${projects}=    Create List    ${PRJ_TITLE}
     Delete List Of Projects Via CLI   ocp_projects=${projects}

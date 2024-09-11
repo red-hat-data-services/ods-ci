@@ -22,6 +22,8 @@ ${MODELREGISTRY_BASE_FOLDER}=        tests/Resources/CLI/ModelRegistry
 ${EXAMPLE_ISTIO_ENV}=                ${MODELREGISTRY_BASE_FOLDER}/samples/istio/components/example_istio.env
 ${ISTIO_ENV}=                        ${MODELREGISTRY_BASE_FOLDER}/samples/istio/components/istio.env
 ${SAMPLE_ONNX_MODEL}=                ${MODELREGISTRY_BASE_FOLDER}/mnist.onnx
+${MR_PYTHON_CLIENT_FILES}=           ${MODELREGISTRY_BASE_FOLDER}/Python_Dependencies
+${MR_PYTHON_CLIENT_WHL_VERSION}=     model_registry==0.2.5a1
 ${SERVICE_MESH_MEMBER}=              ${MODELREGISTRY_BASE_FOLDER}/serviceMeshMember.yaml
 ${ENABLE_REST_API}=                  ${MODELREGISTRY_BASE_FOLDER}/enable_rest_api_route.yaml
 ${IPYNB_UPDATE_SCRIPT}=              ${MODELREGISTRY_BASE_FOLDER}/updateIPYNB.py
@@ -38,6 +40,7 @@ ${SECRET_PART_NAME_3}=               model-registry-db
 
 
 *** Test Cases ***
+# robocop: disable:line-too-long
 Verify Model Registry Integration With Secured-DB
     [Documentation]    Verifies the Integartion of Model Registry operator with Jupyter Notebook
     [Tags]    OpenDataHub    MRMS1302
@@ -45,19 +48,22 @@ Verify Model Registry Integration With Secured-DB
     ...                 prj_title=${PRJ_TITLE}    image_name=Minimal Python  deployment_size=Small
     ...                 storage=Persistent   pv_existent=${NONE}
     ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}
-    Workbench Should Be Listed      workbench_title=registry-wb
+    Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     ${workbenches}=    Create List    ${WORKBENCH_TITLE}
-    Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME}
-    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
-    ...            aws_bucket_name=${AWS_BUCKET}    connected_workbench=${workbenches}
-    Data Connection Should Be Listed    name=${DC_S3_NAME}    type=${DC_S3_TYPE}    connected_workbench=${workbenches}
-    Open Data Science Project Details Page       project_title=${prj_title}    tab_id=workbenches
-    Wait Until Workbench Is Started     workbench_title=registry-wb
+    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}
+    # Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME}
+    # ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
+    # ...            aws_bucket_name=${AWS_BUCKET}    connected_workbench=${workbenches}
+    # Data Connection Should Be Listed    name=${DC_S3_NAME}    type=${DC_S3_TYPE}    connected_workbench=${workbenches}
+    # Open Data Science Project Details Page       project_title=${prj_title}    tab_id=workbenches
+    # Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}
     Upload File In The Workbench     filepath=${SAMPLE_ONNX_MODEL}    workbench_title=${WORKBENCH_TITLE}
     ...         workbench_namespace=${PRJ_TITLE}
     Upload File In The Workbench     filepath=${JUPYTER_NOTEBOOK_FILEPATH}    workbench_title=${WORKBENCH_TITLE}
     ...         workbench_namespace=${PRJ_TITLE}
+    Download Python Client Dependencies    ${MR_PYTHON_CLIENT_FILES}    ${MR_PYTHON_CLIENT_WHL_VERSION}
+    Upload Python Client Files In The Workbench    ${MR_PYTHON_CLIENT_FILES}
     Launch And Access Workbench    workbench_title=${WORKBENCH_TITLE}
     ...    username=${TEST_USER.USERNAME}     password=${TEST_USER.PASSWORD}
     ...    auth_type=${TEST_USER.AUTH_TYPE}
@@ -95,7 +101,8 @@ Teardown Model Registry Test Setup
     Should Be Equal As Integers	  ${return_code}	 0
     Log    ${output}
     Remove Model Registry
-    Remove Certificates
+    Remove Deployment Files    ${CERTS_DIRECTORY}
+    Remove Deployment Files    ${MODELREGISTRY_BASE_FOLDER}/Python_Dependencies
     RHOSi Teardown
 
 Get Cluster Domain And Token
@@ -165,7 +172,7 @@ Create Generic Secret
     [Arguments]    ${namespace}    ${secret_name}    ${key_file}    ${crt_file}    ${ca_file}
     Log    This is the secret name ${secret_name}
     ${command}=    Set Variable
-    ...    oc create secret -n ${namespace} generic ${secret_name} --from-file=tls.key=${key_file} --from-file=tls.crt=${crt_file} --from-file=ca.crt=${ca_file}
+    ...    oc create secret -n ${namespace} generic ${secret_name} --from-file=tls.key=${key_file} --from-file=tls.crt=${crt_file} --from-file=ca.crt=${ca_file}    # robocop: disable:line-too-long
     Run Process    ${command}    shell=True
     Log    Secret ${secret_name}, namespace ${namespace}
     ${output}=    Run Process    oc get secret ${secret_name} -n ${namespace}    shell=True
@@ -260,9 +267,27 @@ Remove Model Registry
     Run And Verify Command    oc delete secret modelregistry-sample-rest-credential -n ${NAMESPACE_ISTIO}
     Run And Verify Command    oc delete namespace ${NAMESPACE_MODEL-REGISTRY} --force
 
-Remove Certificates
-    [Documentation]    Remove all files from the certificates directory
-    ${files}=    List Files In Directory    ${CERTS_DIRECTORY}
+Remove Deployment Files
+    [Documentation]    Remove all files from the given directory
+    [Arguments]  ${directory}
+    ${files}=    List Files In Directory    ${directory}
     FOR    ${file}    IN    @{files}
-        Run Process    rm    -f    ${CERTS_DIRECTORY}/${file}
+        Remove Files  ${directory}/${file}
+    END
+
+Download Python Client Dependencies
+    [Documentation]  Download the model-registry package for a specific platform
+    [Arguments]  ${destination}  ${package_version}
+    ${result}=    Run Process    command=pip download --platform=manylinux2014_x86_64 --python-version=3.9 --abi=cp39 --only-binary=:all: --dest=${destination} ${package_version}    # robocop: disable:line-too-long
+    ...    shell=yes
+    Should Be Equal As Numbers  ${result.rc}  0  ${result.stderr}
+
+Upload Python Client Files In The Workbench
+    [Documentation]    Uploads the dependency files for python client installation
+    [Arguments]  ${file_location}
+    ${files}=  List Files In Directory  ${file_location}
+    FOR  ${file}  IN  @{files}
+        Upload File In The Workbench
+        ...    filepath=${file_location}/${file}    workbench_title=${WORKBENCH_TITLE}
+        ...    workbench_namespace=${PRJ_TITLE}
     END

@@ -7,7 +7,7 @@ Library           Process
 Resource          ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 
 *** Variables ***
-${KUBERAY_RELEASE_ASSETS}     %{KUBERAY_RELEASE_ASSETS=https://github.com/opendatahub-io/kuberay/releases/v1.1.1-08-14-2024/download}
+${KUBERAY_RELEASE_ASSETS}     %{KUBERAY_RELEASE_ASSETS=https://github.com/opendatahub-io/kuberay/releases/download/v1.1.1-08-14-2024}
 ${KUBERAY_TEST_RAY_IMAGE}     quay.io/rhoai/ray@sha256:859f5c41d41bad1935bce455ad3732dff9d4d4c342b7155a7cd23809e85698ab
 
 *** Test Cases ***

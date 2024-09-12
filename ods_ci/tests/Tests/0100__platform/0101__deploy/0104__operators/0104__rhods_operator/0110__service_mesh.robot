@@ -13,6 +13,7 @@ Suite Teardown      Suite Teardown
 *** Variables ***
 ${OPERATOR_NS}                              ${OPERATOR_NAMESPACE}
 ${DSCI_NAME}                                default-dsci
+${DSC_NAME}                                 default-dsc
 ${SERVICE_MESH_OPERATOR_NS}                 openshift-operators
 ${SERVICE_MESH_OPERATOR_DEPLOYMENT_NAME}    istio-operator
 ${SERVICE_MESH_CR_NS}                       istio-system
@@ -64,6 +65,7 @@ Validate Service Mesh Control Plane Already Created
     [Documentation]    This Test Case validates that only one ServiceMeshControlPlane is allowed to be installed per project/namespace
     [Tags]      Operator        Tier3       RHOAIENG-2517
     Fetch Image Url And Update Channel
+    Check Whether DSC Exists
     Fetch Cluster Type By Domain
     IF    "${CLUSTER_TYPE}" == "selfmanaged"
         Uninstall RHODS In Self Managed Cluster
@@ -97,6 +99,18 @@ Teardown Service Mesh Control Plane Already Created
     Delete Smcp
     # Cleanup Olminstall dir
     Cleanup Olm Install Dir
+    IF      ${DSC_EXISTS} == True
+        Apply DataScienceCluster CustomResource     ${DSC_NAME}
+    END
+
+Check Whether DSC Exists
+    ${rc}=    Run And Return Rc
+    ...    oc get datasciencecluster ${DSC_NAME}
+    IF  ${rc} == 0
+        Set Global Variable    ${DSC_EXISTS}    True
+    ELSE 
+        Set Global Variable    ${DSC_EXISTS}    False
+    END
 
 Fetch Image Url And Update Channel
     [Documentation]    Fetch url for image and Update Channel

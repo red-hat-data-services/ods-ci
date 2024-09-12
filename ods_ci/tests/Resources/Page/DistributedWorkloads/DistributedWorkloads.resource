@@ -6,11 +6,11 @@ Library          Process
 
 *** Variables ***
 ${VIRTUAL_ENV_NAME}                      venv3.9
-${CODEFLARE-SDK-API_URL}                 %{CODEFLARE-SDK-API_URL=https://api.github.com/repos/project-codeflare/codeflare-sdk/releases/latest}
+${CODEFLARE-SDK-API_URL}                 %{CODEFLARE-SDK-API_URL=https://api.github.com/repos/project-codeflare/codeflare-sdk/releases/170509674}
 ${CODEFLARE-SDK_DIR}                     codeflare-sdk
 ${CODEFLARE-SDK_REPO_URL}                %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
-${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}  https://github.com/opendatahub-io/distributed-workloads/releases/latest/download
-${FMS_HF_TUNING_IMAGE}                   quay.io/modh/fms-hf-tuning@sha256:8edea6f0f9c4c631cdca1e1c10abf0d4b994738fde78c40d48eda216fdd382f5
+${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}  https://github.com/opendatahub-io/distributed-workloads/releases/v2.13.1/download
+${FMS_HF_TUNING_IMAGE}                   quay.io/modh/fms-hf-tuning@sha256:eee08ba5bb14ead4e031408fcb2334d8da817dec3be7df8d2fc8b1a3d3bb9c1d
 ${KFTO_CORE_BINARY_NAME}                 kfto
 ${KFTO_UPGRADE_BINARY_NAME}              kfto-upgrade
 

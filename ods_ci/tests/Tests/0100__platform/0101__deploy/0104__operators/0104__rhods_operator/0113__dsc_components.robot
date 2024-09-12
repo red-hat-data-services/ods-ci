@@ -373,7 +373,7 @@ Check Image Pull Path Is Redhatio
     END
 
     ${rc}   ${image}=    Run And Return Rc And Output
-    ...    oc get deployment/${deployment_name} -n redhat-ods-applications -o jsonpath="{..image}"
+    ...    oc get deployment/${deployment_name} -n ${APPLICATIONS_NAMESPACE} -o jsonpath="{..image}"
     Should Be Equal As Integers    ${rc}    0    msg=${image}
 
     Log To Console    Check deployment ${deployment_name} pull path for image ${image}

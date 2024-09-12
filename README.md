@@ -1,5 +1,5 @@
 # ODS-CI
-ODS-CI is a framework to test [Red Hat Open Data Science](https://www.redhat.com/en/technologies/cloud-computing/openshift/openshift-data-science)
+ODS-CI is a framework to test [Red Hat OpenShift AI](https://www.redhat.com/en/technologies/cloud-computing/openshift/openshift-ai)
 and its upstream project, [Open Data Hub](https://opendatahub.io/).
 
 # Requirements

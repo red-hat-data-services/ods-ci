@@ -1,0 +1,11 @@
+- op: add
+  path: /spec/template/spec/providerSpec/value/gpus
+  value:
+   - count: GPU_COUNT
+     type: GPU_TYPE
+- op: add
+  path: /spec/template/spec/providerSpec/value/onHostMaintenance
+  value: Terminate
+- op: replace
+  path: /spec/template/spec/providerSpec/value/machineType
+  value: INSTANCE_TYPE

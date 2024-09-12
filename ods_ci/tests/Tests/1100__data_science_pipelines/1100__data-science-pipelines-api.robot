@@ -118,7 +118,7 @@ Verify DSPO Logs Show Error Encountered When Parsing DSPA
     TRY
         WHILE    not ${stopped}    limit=${timeout}
             Sleep    1s
-            ${logs}        Run   oc logs --tail=1000000 ${pod_name} -n ${APPLICATIONS_NAMESPACE}
+            ${logs}        Run   oc logs --tail=-1 ${pod_name} -n ${APPLICATIONS_NAMESPACE}
             ${stopped} =    Set Variable If    "Encountered error when parsing CR" in """${logs}"""    True    False
         END
     EXCEPT    WHILE loop was aborted    type=start

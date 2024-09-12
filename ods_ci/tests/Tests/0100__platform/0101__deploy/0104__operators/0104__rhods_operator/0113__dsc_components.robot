@@ -48,6 +48,7 @@ ${IS_NOT_PRESENT}    1
 ...  KSERVE=${EMPTY}
 
 @{CONTROLLERS_LIST}    kserve-controller-manager    odh-model-controller    modelmesh-controller
+@{REDHATIO_PATH_CHECK_EXCLUSTION_LIST}    kserve-controller-manager
 
 
 *** Test Cases ***
@@ -304,6 +305,8 @@ Set DSC Component Managed State And Wait For Completion
 
     Wait For Resources To Be Available    ${deployment_name}    ${label_selector}
 
+    Check Image Pull Path Is Redhatio    ${deployment_name}
+
 Wait For Resources To Be Available
     [Documentation]    Wait until Deployment and Pod(s) are Available
     [Arguments]    ${deployment_name}    ${label_selector}
@@ -358,3 +361,23 @@ Get DataScienceCluster Spec
     ...    oc get DataScienceCluster/${DSC_NAME} -n ${OPERATOR_NS} -o "jsonpath={".spec"}"
     Should Be Equal As Integers    ${rc}    0
     RETURN    ${output}
+
+Check Image Pull Path Is Redhatio
+    [Documentation]    Check that the Deployment Image Pull Path is registry.redhat.io
+    [Arguments]    ${deployment_name}
+
+    # Skep pull path check if deployment is in exclusion list
+    ${in_list}=    Get Regexp Matches    ${deployment_name}    @{REDHATIO_PATH_CHECK_EXCLUSTION_LIST}
+    ${length}=    Get Length    ${in_list}
+    IF  ${length} > 0    RETURN
+
+    ${rc}   ${image}=    Run And Return Rc And Output
+    ...    oc get deployment/${deployment_name} -n redhat-ods-applications -o jsonpath="{..image}"
+    Should Be Equal As Integers    ${rc}    0    msg=${image}
+
+    Log To Console    Check pull path for deployment ${image}
+    IF  "registry.redhat.io" in $image
+        Log To Console    Deployment ${deployment_name} image contains pull path registry.redhat.com
+    ELSE
+        Fail    Deployment image  ${deployment_name} does not contain pull path registry.redhat.com
+    END

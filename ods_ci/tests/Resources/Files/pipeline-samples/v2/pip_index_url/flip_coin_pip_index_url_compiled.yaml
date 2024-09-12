@@ -277,7 +277,7 @@ deploymentSpec:
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
           \ python3 -m pip install --quiet --no-warn-script-location --index-url $PIP_INDEX_URL\
-          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.7.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
+          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.9.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
           \ python_version<\"3.9\"' && \"$0\" \"$@\"\n"
         - sh
         - -ec
@@ -308,7 +308,7 @@ deploymentSpec:
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
           \ python3 -m pip install --quiet --no-warn-script-location --index-url $PIP_INDEX_URL\
-          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.7.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
+          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.9.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
           \ python_version<\"3.9\"' && \"$0\" \"$@\"\n"
         - sh
         - -ec
@@ -337,7 +337,7 @@ deploymentSpec:
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
           \ python3 -m pip install --quiet --no-warn-script-location --index-url $PIP_INDEX_URL\
-          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.7.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
+          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.9.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
           \ python_version<\"3.9\"' && \"$0\" \"$@\"\n"
         - sh
         - -ec
@@ -366,7 +366,7 @@ deploymentSpec:
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
           \ python3 -m pip install --quiet --no-warn-script-location --index-url $PIP_INDEX_URL\
-          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.7.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
+          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.9.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
           \ python_version<\"3.9\"' && \"$0\" \"$@\"\n"
         - sh
         - -ec
@@ -395,7 +395,7 @@ deploymentSpec:
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
           \ python3 -m pip install --quiet --no-warn-script-location --index-url $PIP_INDEX_URL\
-          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.7.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
+          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.9.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
           \ python_version<\"3.9\"' && \"$0\" \"$@\"\n"
         - sh
         - -ec
@@ -424,7 +424,7 @@ deploymentSpec:
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
           \ python3 -m pip install --quiet --no-warn-script-location --index-url $PIP_INDEX_URL\
-          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.7.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
+          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.9.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
           \ python_version<\"3.9\"' && \"$0\" \"$@\"\n"
         - sh
         - -ec
@@ -454,7 +454,7 @@ deploymentSpec:
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
           \ python3 -m pip install --quiet --no-warn-script-location --index-url $PIP_INDEX_URL\
-          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.7.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
+          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.9.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
           \ python_version<\"3.9\"' && \"$0\" \"$@\"\n"
         - sh
         - -ec
@@ -516,7 +516,7 @@ root:
         taskInfo:
           name: flip-coin
 schemaVersion: 2.1.0
-sdkVersion: kfp-2.7.0
+sdkVersion: kfp-2.9.0
 ---
 platforms:
   kubernetes:

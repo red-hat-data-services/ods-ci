@@ -12,10 +12,6 @@ from robotlibcore import keyword
 
 
 class DataSciencePipelinesKfp:
-    base_image = (
-        "registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61"
-    )
-
     # init should not have a call to external system, otherwise dry-run will fail
     def __init__(self):
         self.client = None

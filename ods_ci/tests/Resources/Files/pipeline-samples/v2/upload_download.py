@@ -1,14 +1,15 @@
 """Test pipeline to exercise various data flow mechanisms."""
 
-import kfp
-
-from ods_ci.libs.DataSciencePipelinesKfp import DataSciencePipelinesKfp
+from kfp import compiler, dsl
 
 
-@kfp.dsl.component(base_image=DataSciencePipelinesKfp.base_image)
+common_base_image = "registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61"
+
+
+@dsl.component(base_image=common_base_image)
 def send_file(
     file_size_bytes: int,
-    outgoingfile: kfp.dsl.OutputPath(),
+    outgoingfile: dsl.OutputPath(),
 ):
     import os
     import zipfile
@@ -28,10 +29,10 @@ def send_file(
     print(f"saved: {outgoingfile}")
 
 
-@kfp.dsl.component(base_image=DataSciencePipelinesKfp.base_image)
+@dsl.component(base_image=common_base_image)
 def receive_file(
-    incomingfile: kfp.dsl.InputPath(),
-    saveartifact: kfp.dsl.OutputPath(),
+    incomingfile: dsl.InputPath(),
+    saveartifact: dsl.OutputPath(),
 ):
     import os
     import shutil
@@ -47,9 +48,9 @@ def receive_file(
     shutil.copyfile(incomingfile, saveartifact)
 
 
-@kfp.dsl.component(packages_to_install=["minio"], base_image=DataSciencePipelinesKfp.base_image)
+@dsl.component(packages_to_install=["minio"], base_image=common_base_image)
 def test_uploaded_artifact(
-    previous_step: kfp.dsl.InputPath(),
+    previous_step: dsl.InputPath(),
     file_size_bytes: int,
     mlpipeline_minio_artifact_secret: str,
     bucket_name: str,
@@ -87,7 +88,7 @@ def test_uploaded_artifact(
     assert diff == 0
 
 
-@kfp.dsl.pipeline(
+@dsl.pipeline(
     name="Test Data Passing Pipeline 1",
 )
 def wire_up_pipeline(mlpipeline_minio_artifact_secret: str, bucket_name: str):
@@ -106,3 +107,8 @@ def wire_up_pipeline(mlpipeline_minio_artifact_secret: str, bucket_name: str):
         mlpipeline_minio_artifact_secret=mlpipeline_minio_artifact_secret,
         bucket_name=bucket_name,
     )
+
+
+if __name__ == "__main__":
+    compiler.Compiler().compile(wire_up_pipeline,
+                                package_path=__file__.replace(".py", "_compiled.yaml"))

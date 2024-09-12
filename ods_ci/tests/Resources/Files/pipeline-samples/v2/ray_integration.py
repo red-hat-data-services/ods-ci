@@ -1,10 +1,11 @@
-from kfp import dsl
+from kfp import dsl, compiler
 
-from ods_ci.libs.DataSciencePipelinesKfp import DataSciencePipelinesKfp
+
+common_base_image = "registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61"
 
 
 # image and the sdk has a fixed value because the version matters
-@dsl.component(packages_to_install=["codeflare-sdk==0.16.4"], base_image=DataSciencePipelinesKfp.base_image)
+@dsl.component(packages_to_install=["codeflare-sdk==0.16.4"], base_image=common_base_image)
 def ray_fn() -> int:
     import ray
     from codeflare_sdk.cluster.cluster import Cluster, ClusterConfiguration
@@ -67,3 +68,8 @@ def ray_fn() -> int:
 )
 def ray_integration():
     ray_fn()
+
+
+if __name__ == "__main__":
+    compiler.Compiler().compile(ray_integration, package_path=__file__.replace(".py", "_compiled.yaml"))
+

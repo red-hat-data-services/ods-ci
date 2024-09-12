@@ -12,7 +12,7 @@ Resource          ../../../tests/Resources/Page/OCPLogin/OCPLogin.robot
 *** Variables ***
 ${KUEUE_KUBECONFIG}         %{WORKSPACE=.}/kueue-kubeconfig
 ${WORKER_NODE}              ${EMPTY}
-${KUEUE_RELEASE_ASSETS}     %{KUEUE_RELEASE_ASSETS=https://github.com/opendatahub-io/kueue/releases/v0.7.0-odh-2/download}
+${KUEUE_RELEASE_ASSETS}     %{KUEUE_RELEASE_ASSETS=https://github.com/opendatahub-io/kueue/releases/download/v0.7.0-odh-2}
 
 
 *** Test Cases ***

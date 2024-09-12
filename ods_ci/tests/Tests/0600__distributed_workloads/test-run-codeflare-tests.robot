@@ -9,8 +9,8 @@ Resource          ../../../tests/Resources/Page/DistributedWorkloads/Distributed
 
 
 *** Variables ***
-${CODEFLARE_RELEASE_ASSETS}     %{CODEFLARE_RELEASE_ASSETS=https://github.com/opendatahub-io/distributed-workloads/releases/latest/download}
-${NOTEBOOK_IMAGE}               %{NOTEBOOK_IMAGE_STREAM_NAME=quay.io/modh/odh-generic-data-science-notebook@sha256:9d7f80080a453bcf7dee01b986df9ee811ee74f6f433c601a8b67d283c160547}
+${CODEFLARE_RELEASE_ASSETS}     %{CODEFLARE_RELEASE_ASSETS=https://github.com/opendatahub-io/distributed-workloads/releases/v2.13.1/download}
+${NOTEBOOK_IMAGE}               %{NOTEBOOK_IMAGE_STREAM_NAME=quay.io/modh/odh-generic-data-science-notebook@sha256:d81e47fa2f5656042748cf2cd1d97033f58d6dd707667ff0e25aa969959e56a7}
 ${NOTEBOOK_USER_NAME}           ${TEST_USER_3.USERNAME}
 ${NOTEBOOK_USER_PASSWORD}       ${TEST_USER_3.PASSWORD}
 

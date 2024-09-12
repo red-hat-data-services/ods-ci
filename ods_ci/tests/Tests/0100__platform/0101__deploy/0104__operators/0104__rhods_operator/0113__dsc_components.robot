@@ -366,18 +366,19 @@ Check Image Pull Path Is Redhatio
     [Documentation]    Check that the Deployment Image Pull Path is registry.redhat.io
     [Arguments]    ${deployment_name}
 
-    # Skep pull path check if deployment is in exclusion list
-    ${in_list}=    Get Regexp Matches    ${deployment_name}    @{REDHATIO_PATH_CHECK_EXCLUSTION_LIST}
-    ${length}=    Get Length    ${in_list}
-    IF  ${length} > 0    RETURN
+    # Skip pull path check if Deployment is in exclusion list
+    IF    $deployment_name in @{REDHATIO_PATH_CHECK_EXCLUSTION_LIST}
+        Log To Console    Skip image pull path check for Deployment ${deployment_name}
+        RETURN
+    END
 
     ${rc}   ${image}=    Run And Return Rc And Output
     ...    oc get deployment/${deployment_name} -n redhat-ods-applications -o jsonpath="{..image}"
     Should Be Equal As Integers    ${rc}    0    msg=${image}
 
-    Log To Console    Check pull path for deployment ${image}
+    Log To Console    Check deployment ${deployment_name} pull path for image ${image}
     IF  "registry.redhat.io" in $image
-        Log To Console    Deployment ${deployment_name} image contains pull path registry.redhat.com
+        Log To Console    Deployment ${deployment_name} image contains pull path registry.redhat.io
     ELSE
-        Fail    Deployment image  ${deployment_name} does not contain pull path registry.redhat.com
+        Fail    Deployment image  ${deployment_name} does not contain pull path registry.redhat.io
     END

@@ -104,7 +104,7 @@ Test Pytorch Model Rest Inference Via UI (Triton on Modelmesh)
     ...    project_title=${PRJ_TITLE}
     Open Dashboard Settings    settings_page=Serving runtimes
     Delete Serving Runtime Template         displayed_name=modelmesh-triton
-    [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${PYTORCH_MODEL_NAME}
+    [Teardown]  Run Keywords    Get Modelmesh Events And Logs      model_name=${PYTORCH_MODEL_NAME}
     ...  project_title=${PRJ_TITLE}
     ...  AND
     ...  Clean All Models Of Current User

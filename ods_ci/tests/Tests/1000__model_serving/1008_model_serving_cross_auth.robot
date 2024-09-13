@@ -11,8 +11,8 @@ Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Mo
 Resource          ../../Resources/Page/ODH/Monitoring/Monitoring.resource
 Resource          ../../Resources/OCP.resource
 Resource          ../../Resources/CLI/ModelServing/modelmesh.resource
-Suite Setup       OVMS On Kserve Suite Setup
-Suite Teardown    OVMS On Kserve Suite Teardown
+Suite Setup       Cross Auth On Kserve Suite Setup
+Suite Teardown    Cross Auth On Kserve Suite Teardown
 Test Tags         Kserve    Modelmesh
 
 
@@ -27,8 +27,9 @@ ${RUNTIME_NAME}=    Model Serving Test
 ${EXPECTED_INFERENCE_OUTPUT}=    {"model_name":"${MODEL_NAME}__isvc-83d6fab7bd","model_version":"1","outputs":[{"name":"Plus214_Output_0","datatype":"FP32","shape":[1,10],"data":[-8.233053,-7.7497034,-3.4236815,12.3630295,-12.079103,17.266596,-10.570976,0.7130762,3.321715,1.3621228]}]}  #robocop: disable
 ${SECOND_EXPECTED_INFERENCE_OUTPUT}=    {"model_name":"${SECOND_MODEL_NAME}__isvc-83d6fab7bd","model_version":"1","outputs":[{"name":"Plus214_Output_0","datatype":"FP32","shape":[1,10],"data":[-8.233053,-7.7497034,-3.4236815,12.3630295,-12.079103,17.266596,-10.570976,0.7130762,3.321715,1.3621228]}]}  #robocop: disable
 
+
 *** Test Cases ***
-Test Cross Auth CVE
+Test Cross Model Authentication On Kserve
     [Documentation]    Tests for the presence of CVE-2024-7557 when using Kserve
     [Tags]    Sanity    ProductBug
     ...       RHOAIENG-11007    RHOAIENG-12048
@@ -71,7 +72,7 @@ Test Cross Auth CVE
 
 
 *** Keywords ***
-OVMS On Kserve Suite Setup
+Cross Auth On Kserve Suite Setup
     [Documentation]    Suite setup steps for testing DSG. It creates some test variables
     ...                and runs RHOSi setup
     Set Library Search Order    SeleniumLibrary
@@ -82,7 +83,7 @@ OVMS On Kserve Suite Setup
     Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
     Clean All Models Of Current User
 
-OVMS On Kserve Suite Teardown
+Cross Auth On Kserve Suite Teardown
     [Documentation]    Suite teardown steps after testing DSG. It Deletes
     ...                all the DS projects created by the tests and run RHOSi teardown
     # Even if kw fails, deleting the whole project will also delete the model

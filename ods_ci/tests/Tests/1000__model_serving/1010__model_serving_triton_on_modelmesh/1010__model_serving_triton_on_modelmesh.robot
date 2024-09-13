@@ -89,7 +89,7 @@ Test Pytorch Model Rest Inference Via UI (Triton on Modelmesh)
     ...            aws_bucket_name=ods-ci-s3
     Create Model Server    token=${TRUE}    runtime=${ONNX_RUNTIME_NAME}    server_name=${ONNX_RUNTIME_NAME}    existing_server=${TRUE}
     Sleep    10s
-    Serve Model    project_name=${PRJ_TITLE}    model_name=${ONNX_MODEL_NAME}    framework=pytorch - 1
+    Serve Model    project_name=${PRJ_TITLE}    model_name=${PYTORCH_MODEL_NAME}    framework=pytorch - 1
     ...    existing_data_connection=${TRUE}    data_connection_name=model-serving-connection
     ...    model_path=triton/model_repository/resnet50/        model_server=${ONNX_RUNTIME_NAME}
     Wait Until Runtime Pod Is Running    server_name=${ONNX_RUNTIME_NAME}

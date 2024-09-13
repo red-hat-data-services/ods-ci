@@ -264,6 +264,7 @@ Get Model Inference
     ...    set to ${TRUE}.
     [Arguments]    ${model_name}    ${inference_input}    ${token_auth}=${FALSE}   ${project_title}=${NONE}
     ...    ${kserve_mode}=Serverless   ${deployment_mode}=UI   ${service_port}=8888   ${end_point}=${NONE}
+    ...    ${service_account_name}=${NONE}    ${token}=${NONE}
     ${curl_cmd}=     Set Variable    ${NONE}
     ${self_managed}=    Is RHODS Self-Managed
     IF    $deployment_mode == 'UI'
@@ -275,8 +276,13 @@ Get Model Inference
             IF    "${project_title}" == "${NONE}"
                 ${project_title}=    Get Model Project    ${model_name}
             END
-            ${token}=    Get Access Token via UI    ${project_title}
-            ${curl_cmd}=     Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
+            IF    $token == ${NONE}
+                ${token}=    Get Access Token via UI    ${project_title}    service_account_name=${service_account_name}
+                ...    single_model=${kserve}    model_name=${model_name}
+                ${curl_cmd}=     Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
+            ELSE
+                ${curl_cmd}=     Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
+            END
         END
         IF  ${kserve}
             Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
@@ -323,14 +329,15 @@ Verify Model Inference
     [Documentation]    Verifies that the inference result of a model is equal to an expected output
     [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}=${FALSE}
     ...    ${project_title}=${NONE}    ${deployment_mode}=UI    ${kserve_mode}=Serverless
-    ...    ${service_port}=${NONE}   ${end_point}=${NONE}
+    ...    ${service_port}=${NONE}   ${end_point}=${NONE}    ${token}=${NONE}
     IF   $deployment_mode == 'UI'
          Open Model Serving Home Page
          Switch Model Serving Project    ${project_title}
     END
     ${inference_output}=    Get Model Inference    model_name=${model_name}   inference_input=${inference_input}
     ...    token_auth=${token_auth}    kserve_mode=${kserve_mode}    project_title=${project_title}
-    ...    deployment_mode=${deployment_mode}    service_port=${service_port}    end_point=${end_point}    # robocop: disable
+    ...    deployment_mode=${deployment_mode}    service_port=${service_port}    end_point=${end_point}
+    ...    token=${token}    # robocop: disable
     Log    ${inference_output}
     ${result}    ${list}=    Inference Comparison    ${expected_inference_output}    ${inference_output}
     Log    ${result}
@@ -433,7 +440,7 @@ Deploy Kserve Model Via UI  #robocop: disable
     [Arguments]    ${model_name}    ${serving_runtime}    ${data_connection}    ${path}
     ...    ${model_framework}=caikit    ${replicas}=1    ${size}=Small    ${no_gpus}=${0}
     ...    ${token}=${FALSE}    ${multi_token}=${FALSE}    ${multi_service_account_name}=default-name2
-    ...    ${public_endpoint}=${TRUE}
+    ...    ${public_endpoint}=${TRUE}    ${service_account_name}=${NONE}
     Move To Tab    Models
     SeleniumLibrary.Click Button    ${DEPLOY_MODEL_BTN}
     SeleniumLibrary.Wait Until Page Contains Element    xpath=${KSERVE_MODAL_HEADER}
@@ -446,7 +453,7 @@ Deploy Kserve Model Via UI  #robocop: disable
         Enable External Serving Route
         # By default this also enables Token Authentication. Let's disable it and let it get re-enable by the next
         # IF block if needed.
-        ${token_enabled} =     Run Keyword And Return Status    SeleniumLibrary.Checkbox Should Be Selected
+        ${token_enabled}=     Run Keyword And Return Status    SeleniumLibrary.Checkbox Should Be Selected
         ...    ${TOKEN_AUTH_CHECKBOX_XP}
         IF    ${token_enabled}
             Disable Token Authentication
@@ -456,7 +463,7 @@ Deploy Kserve Model Via UI  #robocop: disable
         END
     END
     IF    ${token}
-        Enable Token Authentication
+        Enable Token Authentication    service_account_name=${service_account_name}
         IF    ${multi_token}
             Add Another Service Account    ${multi_service_account_name}
         END

@@ -244,6 +244,7 @@ Query Model With GRPCURL
     ...            ${port}
     ...            ${endpoint}
     ...            ${json_body}
+    ...            ${protobuf_file}=${NONE}
     ...            ${json_header}=${NONE}
     ...            ${insecure}=${FALSE}
     ...            ${plaintext}=${FALSE}
@@ -262,6 +263,9 @@ Query Model With GRPCURL
             Log    The call will fail because you have not provided a valid CA bundle file
         END
         ${cmd}=    Catenate    ${cmd}    -cacert ${cert}
+    END
+    IF    "${protobuf_file}" != "${NONE}"
+        ${cmd}=    Catenate    ${cmd}    -proto ${protobuf_file}
     END
     IF    ${plaintext}
         ${cmd}=    Catenate    ${cmd}    -plaintext

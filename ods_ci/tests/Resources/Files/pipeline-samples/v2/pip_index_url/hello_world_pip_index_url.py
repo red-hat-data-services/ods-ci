@@ -19,8 +19,7 @@ from kfp import kubernetes
 common_base_image = "registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61"
 
 
-@dsl.component(base_image=common_base_image,
-               pip_index_urls=['$PIP_INDEX_URL'])
+@dsl.component(base_image=common_base_image, pip_index_urls=['$PIP_INDEX_URL'], pip_trusted_hosts=['$PIP_TRUSTED_HOST'])
 def print_message(message: str):
     import os
     """Prints a message"""
@@ -43,5 +42,4 @@ def hello_world_pipeline(message: str = "Hello world"):
 
 
 if __name__ == "__main__":
-    compiler.Compiler().compile(hello_world_pipeline,
-                                package_path=__file__.replace(".py", "_compiled.yaml"))
+    compiler.Compiler().compile(hello_world_pipeline, package_path=__file__.replace(".py", "_compiled.yaml"))

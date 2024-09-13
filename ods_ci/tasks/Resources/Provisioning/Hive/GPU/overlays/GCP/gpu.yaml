@@ -1,0 +1,6 @@
+- op: replace
+  path: /spec/template/spec/providerSpec/value/machineType
+  value: INSTANCE_TYPE
+- op: add
+  path: /spec/template/spec/providerSpec/value/onHostMaintenance
+  value: Terminate

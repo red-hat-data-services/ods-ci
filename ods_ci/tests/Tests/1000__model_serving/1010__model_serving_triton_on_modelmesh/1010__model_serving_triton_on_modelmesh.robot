@@ -98,7 +98,7 @@ Test Pytorch Model Rest Inference Via UI (Triton on Modelmesh)
     ${EXPECTED_INFERENCE_REST_OUTPUT_PYTORCH}=     Load Json File      file_path=${EXPECTED_INFERENCE_REST_OUTPUT_FILE_PYTORCH}
     ...     as_string=${TRUE}
     Log     ${EXPECTED_INFERENCE_REST_OUTPUT_PYTORCH}
-    Verify Model Inference With Retries    ${PYTORCH_MODEL_NAME}    ${INFERENCE_REST_INPUT_PYTORCH_FILE}
+    Verify Model Inference With Retries    ${PYTORCH_MODEL_NAME}    ${INFERENCE_REST_INPUT_PYTORCH}
     ...    ${EXPECTED_INFERENCE_REST_OUTPUT_PYTORCH}
     ...    token_auth=${TRUE}
     ...    project_title=${PRJ_TITLE}

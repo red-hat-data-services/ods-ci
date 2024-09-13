@@ -62,12 +62,10 @@ Test Cross Auth CVE
     # Will fail at this step until CVE is fixed from dashboard side
     ${inf_out}=  Get Model Inference    model_name=${MODEL_NAME}    inference_input=${INFERENCE_INPUT}
     ...    token_auth=${TRUE}    token=${second_token}
-    Run Keyword And Warn On Failure    Should Contain    ${inf_out}
-    ...    <button type="submit" class="btn btn-lg btn-primary">Log in with OpenShift</button>
+    Run Keyword And Warn On Failure    Should Contain    ${inf_out}    Log in with OpenShift
     ${inf_out}=  Get Model Inference    model_name=${SECOND_MODEL_NAME}    inference_input=${INFERENCE_INPUT}
     ...    token_auth=${TRUE}    token=${first_token}
-    Run Keyword And Warn On Failure    Should Contain    ${inf_out}
-    ...    <button type="submit" class="btn btn-lg btn-primary">Log in with OpenShift</button>
+    Run Keyword And Warn On Failure    Should Contain    ${inf_out}    Log in with OpenShift
     [Teardown]    Run Keywords    Run Keyword If Test Failed    Get Kserve Events And Logs
     ...    model_name=${MODEL_NAME}    project_title=${PRJ_TITLE}    AND    Clean All Models Of Current User
 

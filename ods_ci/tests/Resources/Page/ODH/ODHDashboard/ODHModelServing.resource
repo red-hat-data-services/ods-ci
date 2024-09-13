@@ -1,3 +1,4 @@
+# robocop: off=wrong-case-in-keyword-name,too-many-arguments,too-long-keyword
 *** Settings ***
 Documentation    Collection of keywords to interact with Model Serving
 Resource       ../../../Page/Components/Components.resource
@@ -279,10 +280,8 @@ Get Model Inference
             IF    $token == ${NONE}
                 ${token}=    Get Access Token via UI    ${project_title}    service_account_name=${service_account_name}
                 ...    single_model=${kserve}    model_name=${model_name}
-                ${curl_cmd}=     Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
-            ELSE
-                ${curl_cmd}=     Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
             END
+            ${curl_cmd}=     Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
         END
         IF  ${kserve}
             Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
@@ -292,7 +291,7 @@ Get Model Inference
             ${curl_cmd}=     Catenate    ${curl_cmd}    --cacert openshift_ca.crt
         END
     ELSE IF    $deployment_mode == 'Cli'
-        ${rc}   ${cmd_op}   Run And Return Rc And Output
+        ${rc}   ${cmd_op}=  Run And Return Rc And Output
         ...    oc get isvc ${model_name} -o jsonpath='{.metadata.annotations.serving\.kserve\.io/deploymentMode}' -n ${project_title}    # robocop: disable
         Should Be Equal As Integers    ${rc}    0
         IF  "${cmd_op}" != "ModelMesh"

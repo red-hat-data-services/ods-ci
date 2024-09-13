@@ -29,7 +29,7 @@ ${EMBEDDINGS_QUERY_BODY}=             '{"text":"At what temperature does liquid 
 Verify User Can Serve And Query An Embeddings Model On Raw Kserve Via CLI     # robocop: disable
     [Documentation]    Basic tests for deploying a model and verifying endpoints to verify embeddings model using
     ...                caikit-standalone runtime
-    [Tags]    Sanity     RHOAIENG-11749
+    [Tags]    Smoke     RHOAIENG-11749
     [Setup]    Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${TEST_NS}     protocol=${PROTOCOL}
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${model_id}=       Set Variable   bge-large-en-v1.5-caikit

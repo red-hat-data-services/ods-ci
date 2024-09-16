@@ -4,9 +4,9 @@ Suite Setup       Prepare Codeflare-sdk E2E Test Suite
 Suite Teardown    Teardown Codeflare-sdk E2E Test Suite
 Library           OperatingSystem
 Library           Process
-Resource          ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
-Resource          ../../Resources/RHOSi.resource
-Resource          ../../../tests/Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
+Resource          ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
+Resource          ../../../Resources/RHOSi.resource
+Resource          ../../../../tests/Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 
 
 *** Test Cases ***
@@ -15,6 +15,7 @@ Run TestRayClusterSDKOauth test
     [Tags]
     ...     Tier1
     ...     DistributedWorkloads
+    ...     WorkloadsOrchestration
     ...     Codeflare-sdk
     Run Codeflare-SDK Test    e2e    mnist_raycluster_sdk_oauth_test.py
 
@@ -23,6 +24,7 @@ Run TestRayLocalInteractiveOauth test
     [Tags]
     ...     Tier1
     ...     DistributedWorkloads
+    ...     WorkloadsOrchestration
     ...     Codeflare-sdk
     Run Codeflare-SDK Test    e2e    local_interactive_sdk_oauth_test.py
 

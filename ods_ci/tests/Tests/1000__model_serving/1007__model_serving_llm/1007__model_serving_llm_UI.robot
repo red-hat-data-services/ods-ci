@@ -32,7 +32,7 @@ Verify User Can Serve And Query A Model Using The UI
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and Caikit runtime
     ...                Intermittently failing: RHOAIENG-3148
-    [Tags]    Smoke    ODS-2519    ODS-2522    FlakyTest
+    [Tags]    Sanity    ODS-2519    ODS-2522    FlakyTest
     [Setup]    Set Up Project    namespace=${TEST_NS}
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit

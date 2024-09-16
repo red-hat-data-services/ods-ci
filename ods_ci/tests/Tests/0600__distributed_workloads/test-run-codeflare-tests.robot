@@ -9,7 +9,7 @@ Resource          ../../../tests/Resources/Page/DistributedWorkloads/Distributed
 
 
 *** Variables ***
-${CODEFLARE_RELEASE_ASSETS}     %{CODEFLARE_RELEASE_ASSETS=https://github.com/opendatahub-io/distributed-workloads/releases/v2.13.1/download}
+${CODEFLARE_RELEASE_ASSETS}     %{CODEFLARE_RELEASE_ASSETS=https://github.com/opendatahub-io/distributed-workloads/releases/download/v2.13.1}
 ${NOTEBOOK_IMAGE}               %{NOTEBOOK_IMAGE_STREAM_NAME=quay.io/modh/odh-generic-data-science-notebook@sha256:d81e47fa2f5656042748cf2cd1d97033f58d6dd707667ff0e25aa969959e56a7}
 ${NOTEBOOK_USER_NAME}           ${TEST_USER_3.USERNAME}
 ${NOTEBOOK_USER_PASSWORD}       ${TEST_USER_3.PASSWORD}

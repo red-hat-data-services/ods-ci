@@ -4,8 +4,8 @@ Suite Setup       Prepare Codeflare E2E Test Suite
 Suite Teardown    Teardown Codeflare E2E Test Suite
 Library           OperatingSystem
 Library           Process
-Resource          ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
-Resource          ../../../tests/Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
+Resource          ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
+Resource          ../../../../tests/Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 
 
 *** Test Cases ***
@@ -14,6 +14,7 @@ Run TestKueueRayCpu ODH test
     [Tags]  ODS-2514
     ...     Tier1
     ...     DistributedWorkloads
+    ...     Training
     ...     CodeflareOperator
     Run Codeflare ODH Test    TestMnistRayCpu
 
@@ -22,6 +23,7 @@ Run TestKueueRayGpu ODH test
     [Tags]  Resources-GPU
     ...     Tier1
     ...     DistributedWorkloads
+    ...     Training
     ...     CodeflareOperator
     Run Codeflare ODH Test    TestMnistRayGpu
 
@@ -30,6 +32,7 @@ Run TestRayTuneHPOCpu ODH test
     [Tags]  RHOAIENG-10004
     ...     Tier1
     ...     DistributedWorkloads
+    ...     Training
     ...     CodeflareOperator
     Run Codeflare ODH Test    TestMnistRayTuneHpoCpu
 
@@ -38,5 +41,6 @@ Run TestRayTuneHPOGpu ODH test
     [Tags]  Resources-GPU
     ...     Tier1
     ...     DistributedWorkloads
+    ...     Training
     ...     CodeflareOperator
     Run Codeflare ODH Test    TestMnistRayTuneHpoGpu

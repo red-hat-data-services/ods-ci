@@ -94,7 +94,7 @@ Test PYTORCH Model Inference Via UI(Triton on Kserve)
     ...  AND
     ...  Clean All Models Of Current User
     ...  AND
-    ...  Delete Serving Runtime Template From CLI    displayed_name=modelmesh-triton   
+    ...  Delete Serving Runtime Template From CLI    displayed_name=modelmesh-triton
 
 *** Keywords ***
 Triton On Kserve Suite Setup

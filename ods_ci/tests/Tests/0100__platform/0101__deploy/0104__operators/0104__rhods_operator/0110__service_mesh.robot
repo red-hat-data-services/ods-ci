@@ -114,8 +114,18 @@ Check Whether DSC Exists
 
 Fetch Image Url And Update Channel
     [Documentation]    Fetch url for image and Update Channel
+    # Fetch subscription first
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc get catalogsource rhoai-catalog-dev --namespace openshift-marketplace -o jsonpath='{.spec.image}'
+    ...    oc get subscription ${OPERATOR_SUBSCRIPTION_NAME} -o jsonpath='{.spec.source}'
+    Should Be Equal As Integers    ${rc}    0
+    Set Global Variable    ${CS_NAME}    ${out}
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc get subscription ${OPERATOR_SUBSCRIPTION_NAME} -o jsonpath='{.spec.sourceNamespace}'
+    Should Be Equal As Integers    ${rc}    0
+    Set Global Variable    ${CS_NAMESPACE}    ${out}
+    # Get CatalogSource
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc get catalogsource ${CS_NAME} --namespace ${CS_NAMESPACE} -o jsonpath='{.spec.image}'
     Should Be Equal As Integers    ${rc}    0
     Set Global Variable    ${IMAGE_URL}    ${out}
     ${rc}    ${out}=    Run And Return Rc And Output

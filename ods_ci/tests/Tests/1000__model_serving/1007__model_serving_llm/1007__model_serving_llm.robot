@@ -282,23 +282,16 @@ Verify User Can Validate Scale To Zero    # robocop: off=too-long-test-case,too-
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
-    ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_model_name}   namespace=${test_namespace}
-    ${body}=    Set Variable    '{"text": "At what temperature does liquid Nitrogen boil?"}'
-    ${header}=    Set Variable    'mm-model-id: ${flan_model_name}'
-    Query Model With GRPCURL   host=${host}    port=443
-    ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
-    ...    json_body=${body}    json_header=${header}
-    ...    insecure=${TRUE}
+    Query Model Multiple Times    model_name=${flan_model_name}    n_times=1    connect_timeout=300
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Set Minimum Replicas Number    n_replicas=0    model_name=${flan_model_name}
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}    exp_replicas=${2}
     Wait For Pods To Be Terminated    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
-    Query Model With GRPCURL   host=${host}    port=443
-    ...    endpoint="caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict"
-    ...    json_body=${body}    json_header=${header}
-    ...    insecure=${TRUE}
+    Query Model Multiple Times    model_name=${flan_model_name}    n_times=1    connect_timeout=300
+    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Wait For Pods To Be Terminated    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}

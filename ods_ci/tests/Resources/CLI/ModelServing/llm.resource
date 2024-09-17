@@ -332,6 +332,7 @@ Query Model Multiple Times
     ...            ${validate_response}=${TRUE}
     ...            ${string_check_only}=${FALSE}
     ...            ${protocol}=grpc
+    ...            ${connect_timeout}=10
     ...            ${port_forwarding}=${FALSE}
     ...            ${port}=443
     ...            ${body_params}=&{EMPTY}
@@ -378,7 +379,7 @@ Query Model Multiple Times
             ...    endpoint=${endpoint}
             ...    json_body=${body}    json_header=${header}
             ...    insecure=${insecure}    plaintext=${plaintext}    skip_res_json=${skip_json_load_response}
-            ...    cert=${cert}    &{args}
+            ...    cert=${cert}    connect_timeout=${connect_timeout}    &{args}
          ELSE IF    "${protocol}" == "http"
             ${payload}=     ODHDashboardAPI.Prepare Payload     body=${body}    str_to_json=${TRUE}
             Log Dictionary    ${args}

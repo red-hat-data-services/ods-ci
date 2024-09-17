@@ -20,10 +20,9 @@ from kfp import kubernetes
 common_base_image = "registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61"
 
 
-@dsl.component(base_image=common_base_image,
-               packages_to_install=["pandas==2.2.0"],
-               pip_index_urls=['$PIP_INDEX_URL']
-               )
+@dsl.component(base_image=common_base_image, packages_to_install=["pandas==2.2.0"],
+               pip_index_urls=['$PIP_INDEX_URL'], pip_trusted_hosts=['$PIP_TRUSTED_HOST']
+)
 def create_dataset(iris_dataset: Output[Dataset]):
     import pandas as pd
     from io import StringIO
@@ -90,10 +89,8 @@ def create_dataset(iris_dataset: Output[Dataset]):
         df.to_csv(f)
 
 
-@dsl.component(
-    base_image=common_base_image,
-    packages_to_install=["pandas==2.2.0", "scikit-learn==1.4.0"],
-    pip_index_urls=['$PIP_INDEX_URL']
+@dsl.component(base_image=common_base_image, packages_to_install=["pandas==2.2.0", "scikit-learn==1.4.0"],
+    pip_index_urls=['$PIP_INDEX_URL'], pip_trusted_hosts=['$PIP_TRUSTED_HOST']
 )
 def normalize_dataset(
     input_iris_dataset: Input[Dataset],
@@ -116,10 +113,8 @@ def normalize_dataset(
         df.to_csv(f)
 
 
-@dsl.component(
-    base_image=common_base_image,
-    packages_to_install=["pandas==2.2.0", "scikit-learn==1.4.0"],
-    pip_index_urls=['$PIP_INDEX_URL']
+@dsl.component(base_image=common_base_image, packages_to_install=["pandas==2.2.0", "scikit-learn==1.4.0"],
+    pip_index_urls=['$PIP_INDEX_URL'], pip_trusted_hosts=['$PIP_TRUSTED_HOST']
 )
 def train_model(
     normalized_iris_dataset: Input[Dataset],
@@ -190,4 +185,5 @@ def my_pipeline(
     )
 
 
-compiler.Compiler().compile(pipeline_func=my_pipeline, package_path=__file__.replace(".py", "_compiled.yaml"))
+if __name__ == "__main__":
+    compiler.Compiler().compile(pipeline_func=my_pipeline, package_path=__file__.replace(".py", "_compiled.yaml"))

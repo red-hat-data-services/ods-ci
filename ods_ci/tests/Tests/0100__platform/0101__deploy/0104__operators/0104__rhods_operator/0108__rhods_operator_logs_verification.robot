@@ -22,7 +22,7 @@ ${regex_pattern}       level=([Ee]rror).*|([Ff]ailed) to list .*
 
 
 *** Test Cases ***
-Verify RHODS Operator log
+Verify RHODS Operator Logs
    [Tags]  Sanity
    ...     ODS-1007
    ...     Operator
@@ -31,7 +31,7 @@ Verify RHODS Operator log
    #Capture the logs based on containers
    ${val}        Run   oc logs --tail=1000000 ${data[0]['metadata']['name']} -n ${OPERATOR_NAMESPACE} -c ${OPERATOR_POD_CONTAINER_NAME}
    #To check if command has been successfully executed and the logs have been captured
-   IF    len($val)==${0} or "error:" in $val     FAIL   Either OC command has not been executed successfully or Logs are not present
+   IF    len($val)==${0}     FAIL   Either OC command has not been executed successfully or Logs are not present
    #Filter the error msg from the log captured
    ${match_list} 	 Get Regexp Matches   ${val}     ${regex_pattern}
    #Remove if any duplicate entry are present

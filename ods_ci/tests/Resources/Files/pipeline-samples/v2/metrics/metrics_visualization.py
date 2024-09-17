@@ -22,10 +22,13 @@ from kfp.dsl import (component, Output, ClassificationMetrics, Metrics, HTML,
 _KFP_PACKAGE_PATH = os.getenv('KFP_PACKAGE_PATH')
 
 
+common_base_image = "registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61"
+
+
 @component(
+    base_image=common_base_image,
     packages_to_install=['scikit-learn'],
-    base_image='registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61',
-    kfp_package_path=_KFP_PACKAGE_PATH,
+    kfp_package_path=_KFP_PACKAGE_PATH
 )
 def digit_classification(metrics: Output[Metrics]):
     from sklearn import model_selection
@@ -67,9 +70,9 @@ def digit_classification(metrics: Output[Metrics]):
 
 
 @component(
+    base_image=common_base_image,
     packages_to_install=['scikit-learn'],
-    base_image='python:3.9',
-    kfp_package_path=_KFP_PACKAGE_PATH,
+    kfp_package_path=_KFP_PACKAGE_PATH
 )
 def wine_classification(metrics: Output[ClassificationMetrics]):
     from sklearn.ensemble import RandomForestClassifier
@@ -98,9 +101,9 @@ def wine_classification(metrics: Output[ClassificationMetrics]):
 
 
 @component(
+    base_image=common_base_image,
     packages_to_install=['scikit-learn'],
-    base_image='python:3.9',
-    kfp_package_path=_KFP_PACKAGE_PATH,
+    kfp_package_path=_KFP_PACKAGE_PATH
 )
 def iris_sgdclassifier(test_samples_fraction: float,
                        metrics: Output[ClassificationMetrics]):
@@ -127,7 +130,8 @@ def iris_sgdclassifier(test_samples_fraction: float,
 
 
 @component(
-    kfp_package_path=_KFP_PACKAGE_PATH,)
+    base_image=common_base_image,
+    kfp_package_path=_KFP_PACKAGE_PATH)
 def html_visualization(html_artifact: Output[HTML]):
     html_content = '<!DOCTYPE html><html><body><h1>Hello world</h1></body></html>'
     with open(html_artifact.path, 'w') as f:
@@ -135,7 +139,8 @@ def html_visualization(html_artifact: Output[HTML]):
 
 
 @component(
-    kfp_package_path=_KFP_PACKAGE_PATH,)
+    base_image=common_base_image,
+    kfp_package_path=_KFP_PACKAGE_PATH)
 def markdown_visualization(markdown_artifact: Output[Markdown]):
     markdown_content = '## Hello world \n\n Markdown content'
     with open(markdown_artifact.path, 'w') as f:
@@ -150,4 +155,6 @@ def metrics_visualization_pipeline():
     html_visualization_op = html_visualization()
     markdown_visualization_op = markdown_visualization()
 
-compiler.Compiler().compile(pipeline_func=metrics_visualization_pipeline, package_path=__file__.replace(".py", "_compiled.yaml"))
+
+if __name__ == "__main__":
+    compiler.Compiler().compile(pipeline_func=metrics_visualization_pipeline, package_path=__file__.replace(".py", "_compiled.yaml"))

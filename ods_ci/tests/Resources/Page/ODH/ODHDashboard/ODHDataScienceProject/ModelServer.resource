@@ -214,12 +214,12 @@ Get Model Serving Access Token via UI
     [Arguments]    ${service_account_name}=default-name    ${single_model}=${FALSE}    ${model_name}=${NONE}
     IF    ${single_model}
         # Expand the model
-        SeleniumLibrary.Click Button    xpath: //div[text()='${model_name}']/parent::td[@data-label='Name']/preceding-sibling::td/button
+        SeleniumLibrary.Click Button    xpath: //a[text()='${model_name}']/parent::div/parent::td[@data-label='Name']/preceding-sibling::td/button  # robocop: off=line-too-long
         ${token}=    Get Single Model Token    ${service_account_name}
     ELSE
-        Wait Until Page Contains Element    xpath://td[@data-label="Tokens"]/button
-        Click Element    xpath://td[@data-label="Tokens"]/button
-        ${token}=    Get Element Attribute
+        SeleniumLibrary.Wait Until Page Contains Element    xpath://td[@data-label="Tokens"]/button
+        SeleniumLibrary.Click Element    xpath://td[@data-label="Tokens"]/button
+        ${token}=    SeleniumLibrary.Get Element Attribute
         ...    xpath://div[.="${service_account_name} "]/../../td[@data-label="Token Secret"]//input    value
     END
     RETURN    ${token}

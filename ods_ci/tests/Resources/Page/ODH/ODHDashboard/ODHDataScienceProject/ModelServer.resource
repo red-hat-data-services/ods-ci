@@ -285,7 +285,7 @@ Query Model With GRPCURL
           # Run Keyword And Continue On Failure    Should Be Equal As Integers    ${query_process.rc}    ${0}
           ${rc}=    Set Variable    ${query_process.rc}
           Run Keyword And Continue On Failure    Should Be Equal As Integers    ${rc}    ${0}
-          # Log    ${query_process.stdout}    console=yes
+          Log    ${query_process.stdout}    console=yes
           ${response}=    Set Variable    ${query_process.stdout}
           Log    ${response}    console=yes
           # ${json_res}=    Load Json String    ${query_process.stdout}

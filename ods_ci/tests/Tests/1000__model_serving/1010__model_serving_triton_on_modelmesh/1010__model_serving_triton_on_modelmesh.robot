@@ -28,6 +28,10 @@ ${ONNX_RUNTIME_NAME}=    modelmesh-triton
 ${RESOURCES_DIRPATH}=        tests/Resources/Files/triton
 ${ONNX_MODELMESH_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_onnx_modelmesh_runtime.yaml
 ${EXPECTED_INFERENCE_REST_OUTPUT_FILE}=      ${RESOURCES_DIRPATH}/modelmesh-triton-onnx-rest-output.json
+${INFERENCE_REST_INPUT_PYTORCH}=    @tests/Resources/Files/triton/modelmesh-triton-pytorch-rest-input.json
+${PYTORCH_MODEL_NAME}=    resnet50
+${PYTORCH_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_pytorch_modelmesh_runtime.yaml
+${EXPECTED_INFERENCE_REST_OUTPUT_FILE_PYTORCH}=       tests/Resources/Files/triton/modelmesh-triton-pytorch-rest-output.json
 
 
 *** Test Cases ***
@@ -63,10 +67,48 @@ Test Onnx Model Rest Inference Via UI (Triton on Modelmesh)
     ...    project_title=${PRJ_TITLE}
     Open Dashboard Settings    settings_page=Serving runtimes
     Delete Serving Runtime Template         displayed_name=modelmesh-triton
-    [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${ONNX_MODEL_NAME}
+    [Teardown]  Run Keywords    Get Modelmesh Events And Logs      model_name=${ONNX_MODEL_NAME}
     ...  project_title=${PRJ_TITLE}
     ...  AND
     ...  Clean All Models Of Current User
+    
+Test Pytorch Model Rest Inference Via UI (Triton on Modelmesh)
+    [Documentation]    Test the deployment of an onnx model in Kserve using Triton
+    [Tags]    Sanity    RHOAIENG-11561
+
+    Open Data Science Projects Home Page
+    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
+    ...    existing_project=${FALSE}
+    Open Dashboard Settings    settings_page=Serving runtimes
+    Upload Serving Runtime Template    runtime_filepath=${PYTORCH_RUNTIME_FILEPATH}
+    ...    serving_platform=multi      runtime_protocol=REST
+    Serving Runtime Template Should Be Listed    displayed_name=${ONNX_RUNTIME_NAME}
+    ...    serving_platform=multi
+    Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
+    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
+    ...            aws_bucket_name=ods-ci-s3
+    Create Model Server    token=${TRUE}    runtime=${ONNX_RUNTIME_NAME}    server_name=${ONNX_RUNTIME_NAME}    existing_server=${TRUE}
+    Sleep    10s
+    Serve Model    project_name=${PRJ_TITLE}    model_name=${PYTORCH_MODEL_NAME}    framework=pytorch - 1
+    ...    existing_data_connection=${TRUE}    data_connection_name=model-serving-connection
+    ...    model_path=triton/model_repository/resnet50/        model_server=${ONNX_RUNTIME_NAME}
+    Wait Until Runtime Pod Is Running    server_name=${ONNX_RUNTIME_NAME}
+    ...    project_title=${PRJ_TITLE}    timeout=5m
+    Verify Model Status    ${PYTORCH_MODEL_NAME}    success
+    ${EXPECTED_INFERENCE_REST_OUTPUT_PYTORCH}=     Load Json File      file_path=${EXPECTED_INFERENCE_REST_OUTPUT_FILE_PYTORCH}
+    ...     as_string=${TRUE}
+    Log     ${EXPECTED_INFERENCE_REST_OUTPUT_PYTORCH}
+    Verify Model Inference With Retries    ${PYTORCH_MODEL_NAME}    ${INFERENCE_REST_INPUT_PYTORCH}
+    ...    ${EXPECTED_INFERENCE_REST_OUTPUT_PYTORCH}
+    ...    token_auth=${TRUE}
+    ...    project_title=${PRJ_TITLE}
+    Open Dashboard Settings    settings_page=Serving runtimes
+    [Teardown]  Run Keywords    Get Modelmesh Events And Logs      model_name=${PYTORCH_MODEL_NAME}
+    ...  project_title=${PRJ_TITLE}
+    ...  AND
+    ...  Clean All Models Of Current User
+    ...  AND
+    ...  Delete Serving Runtime Template From CLI    displayed_name=modelmesh-triton
 
 *** Keywords ***
 Triton On Kserve Suite Setup

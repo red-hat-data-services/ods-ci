@@ -28,6 +28,11 @@ ${ONNX_RUNTIME_NAME}=    triton-kserve-rest
 ${RESOURCES_DIRPATH}=        tests/Resources/Files/triton
 ${ONNX_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_onnx_rest_servingruntime.yaml
 ${EXPECTED_INFERENCE_REST_OUTPUT_FILE}=      tests/Resources/Files/triton/kserve-triton-onnx-rest-output.json
+${INFERENCE_REST_INPUT_PYTORCH}=    @tests/Resources/Files/triton/kserve-triton-resnet-rest-input.json
+${PYTORCH_MODEL_NAME}=    resnet50
+${PYTORCH_RUNTIME_NAME}=    triton-kserve-rest
+${PYTORCH_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_onnx_rest_servingruntime.yaml
+${EXPECTED_INFERENCE_REST_OUTPUT_FILE_PYTORCH}=       tests/Resources/Files/triton/kserve-triton-resnet-rest-output.json
 
 
 *** Test Cases ***
@@ -59,6 +64,37 @@ Test Onnx Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-l
     ...  AND
     ...  Clean All Models Of Current User
 
+Test PYTORCH Model Inference Via UI(Triton on Kserve)
+    [Documentation]    Test the deployment of an pytorch model in Kserve using Triton
+    [Tags]    Sanity           RHOAIENG-11561
+
+    Open Data Science Projects Home Page
+    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
+    ...    existing_project=${FALSE}
+    Open Dashboard Settings    settings_page=Serving runtimes
+    Upload Serving Runtime Template    runtime_filepath=${PYTORCH_RUNTIME_FILEPATH}
+    ...    serving_platform=single     runtime_protocol=REST
+    Serving Runtime Template Should Be Listed    displayed_name=${PYTORCH_RUNTIME_NAME}
+    ...    serving_platform=single
+    Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
+    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
+    ...            aws_bucket_name=ods-ci-s3
+    Deploy Kserve Model Via UI    model_name=${PYTORCH_MODEL_NAME}    serving_runtime=triton-kserve-rest
+    ...    data_connection=model-serving-connection    path=triton/model_repository/    model_framework=pytorch - 1
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${PYTORCH_MODEL_NAME}
+    ...    namespace=${PRJ_TITLE}
+    ${EXPECTED_INFERENCE_REST_OUTPUT_PYTORCH}=     Load Json File
+    ...    file_path=${EXPECTED_INFERENCE_REST_OUTPUT_FILE_PYTORCH}    as_string=${TRUE}
+    Log    ${EXPECTED_INFERENCE_REST_OUTPUT_PYTORCH}
+    Run Keyword And Continue On Failure    Verify Model Inference With Retries
+    ...    ${PYTORCH_MODEL_NAME}    ${INFERENCE_REST_INPUT_PYTORCH}    ${EXPECTED_INFERENCE_REST_OUTPUT_PYTORCH}
+    ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}
+    [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${PYTORCH_MODEL_NAME}
+    ...  project_title=${PRJ_TITLE}
+    ...  AND
+    ...  Clean All Models Of Current User
+    ...  AND
+    ...  Delete Serving Runtime Template From CLI    displayed_name=triton-kserve-rest
 
 *** Keywords ***
 Triton On Kserve Suite Setup

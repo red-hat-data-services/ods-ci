@@ -21,7 +21,7 @@ Test Tags         Kserve
 ${INFERENCE_GRPC_INPUT_ONNX}=    tests/Resources/Files/triton/kserve-triton-onnx-gRPC-input.json
 ${INFERENCE_REST_INPUT_ONNX}=    @tests/Resources/Files/triton/kserve-triton-onnx-rest-input.json
 ${PROTOBUFF_FILE}=      tests/Resources/Files/triton/grpc_predict_v2.proto
-${PRJ_TITLE}=    ms-triton-project4
+${PRJ_TITLE}=    ms-triton-project-v6
 ${PRJ_DESCRIPTION}=    project used for model serving triton runtime tests
 ${MODEL_CREATED}=    ${FALSE}
 ${ONNX_MODEL_NAME}=    densenet_onnx
@@ -125,6 +125,7 @@ Test Onnx Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-l
     ...    namespace=${PRJ_TITLE}
     ${EXPECTED_INFERENCE_GRPC_OUTPUT_ONNX}=     Load Json File     file_path=${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE}
     ...     as_string=${TRUE}
+    ${EXPECTED_INFERENCE_GRPC_OUTPUT_ONNX}=     Load Json String    ${EXPECTED_INFERENCE_GRPC_OUTPUT_ONNX}
     Log     ${EXPECTED_INFERENCE_GRPC_OUTPUT_ONNX}
     Open Model Serving Home Page
     ${host_url}=    Get Model Route Via UI       model_name=${ONNX_MODEL_NAME}
@@ -132,13 +133,14 @@ Test Onnx Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-l
     Log    ${host}
     Sleep    5s
     ${token}=   Get Access Token Via UI    single_model=${TRUE}      model_name=densenet_onnx   project_name=${PRJ_TITLE}
-    Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
-    ${cert}=    Set Variable    --cacert    openshift_ca_istio_knative.crt
-    #Sleep    10s
-    Run Keyword And Continue On Failure      Query Model With GRPCURL   host=${host}    port=443
+    ${inference_output}=    Run Keyword And Continue On Failure      Query Model With GRPCURL   host=${host}    port=443
     ...    endpoint=inference.GRPCInferenceService/ModelInfer
-    ...    json_body=${INFERENCE_GRPC_INPUT_ONNX}
-    ...    cert=${cert}    protobuf_file=${PROTOBUFF_FILE}      json_header=${token}
+    ...    json_body=@      input_filepath=${INFERENCE_GRPC_INPUT_ONNX}
+    ...    insecure=${True}    protobuf_file=${PROTOBUFF_FILE}      json_header="Authorization: Bearer ${token}"
+    Log    ${inference_output}
+    ${result}    ${list}=    Inference Comparison    ${EXPECTED_INFERENCE_GRPC_OUTPUT_ONNX}    ${inference_output}
+    Log    ${result}
+    Log    ${list}
     #[Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${ONNX_MODEL_NAME}
     #...  project_title=${PRJ_TITLE}
     #...  AND

@@ -245,6 +245,7 @@ Query Model With GRPCURL
     ...            ${endpoint}
     ...            ${json_body}
     ...            ${protobuf_file}=${NONE}
+    ...            ${input_filepath}=${NONE}
     ...            ${json_header}=${NONE}
     ...            ${insecure}=${FALSE}
     ...            ${plaintext}=${FALSE}
@@ -270,9 +271,9 @@ Query Model With GRPCURL
     IF    ${plaintext}
         ${cmd}=    Catenate    ${cmd}    -plaintext
     END
-    # IF    "${proto_filepath}" != "${NONE}"
-    #     ${cmd}=    Catenate    ${cmd}    -proto ${proto_filepath}
-    # END
+    IF    "${input_filepath}" != "${NONE}"
+         ${cmd}=    Catenate    ${cmd}    < ${input_filepath}
+     END
     FOR    ${index}    ${option}    IN ENUMERATE    @{args}
         Log    ${index}: ${option}: ${args}[${option}]
         ${cmd}=    Catenate    ${cmd}    -${option} ${args}[${option}]

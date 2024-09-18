@@ -19,6 +19,9 @@ items:
           name: azure-creds
     installConfigSecretTemplateRef:
       name: azure-sno-install-config
+    installerEnv:
+      - name: OPENSHIFT_INSTALL_SKIP_HOSTCRYPT_VALIDATION
+        value: 'true'
     size: 0
     skipMachinePools: true
 - apiVersion: v1

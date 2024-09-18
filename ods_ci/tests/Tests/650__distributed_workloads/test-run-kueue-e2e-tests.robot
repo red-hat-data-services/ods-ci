@@ -12,7 +12,9 @@ Resource          ../../../tests/Resources/Page/OCPLogin/OCPLogin.robot
 *** Variables ***
 ${KUEUE_KUBECONFIG}         %{WORKSPACE=.}/kueue-kubeconfig
 ${WORKER_NODE}              ${EMPTY}
-${KUEUE_RELEASE_ASSETS}     %{KUEUE_RELEASE_ASSETS=https://github.com/opendatahub-io/kueue/releases/latest/download}
+# Supported kueue version for 2.10 release is "v0.6.2"
+${KUEUE_RELEASE_ASSETS}     %{KUEUE_RELEASE_ASSETS=https://github.com/opendatahub-io/kueue/releases/download/v0.6.2-odh}
+
 
 *** Test Cases ***
 Run Kueue E2E test

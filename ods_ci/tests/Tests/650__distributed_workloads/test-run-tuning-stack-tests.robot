@@ -8,8 +8,9 @@ Resource          ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 
 
 *** Variables ***
-${TRAINING_OPERATOR_RELEASE_ASSETS}     %{TRAINING_OPERATOR_RELEASE_ASSETS=https://github.com/opendatahub-io/distributed-workloads/releases/latest/download}
-${FMS_HF_TUNING_IMAGE}                  quay.io/modh/fms-hf-tuning:84b0337b7baee119e909d4e901b6dadfe34c1f9a
+# Supported Training Operator version for 2.10 release is "v1-855e096"
+${TRAINING_OPERATOR_RELEASE_ASSETS}     %{TRAINING_OPERATOR_RELEASE_ASSETS=https://github.com/opendatahub-io/distributed-workloads/releases/download/v2.10.0-prerc1}
+${FMS_HF_TUNING_IMAGE}                   quay.io/modh/fms-hf-tuning@sha256:31489be603af448a6e5d25d558ba9ae1d93038d16c08a8500595e63abd54c216
 
 
 *** Test Cases ***

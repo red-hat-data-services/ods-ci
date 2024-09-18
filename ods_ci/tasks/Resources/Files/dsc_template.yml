@@ -35,4 +35,8 @@ spec:
     workbenches:
       devFlags: <workbenches_devflags>
       managementState: <workbenches_value>
+    modelregistry:
+      devFlags: <modelregistry_devflags>
+      managementState: <modelregistry_value>
+      registriesNamespace: <modelregistry_namespace>
 

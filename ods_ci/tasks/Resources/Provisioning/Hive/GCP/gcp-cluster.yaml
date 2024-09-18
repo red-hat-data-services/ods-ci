@@ -17,6 +17,9 @@ items:
           name: gcp-creds
     installConfigSecretTemplateRef:
       name: gcp-sno-install-config
+    installerEnv:
+      - name: OPENSHIFT_INSTALL_SKIP_HOSTCRYPT_VALIDATION
+        value: 'true'
     size: 0
     skipMachinePools: true
 - apiVersion: v1

@@ -13,7 +13,7 @@ Resource          ../../../Resources/OCP.resource
 Resource          ../../../Resources/CLI/ModelServing/modelmesh.resource
 Resource          ../../../Resources/Common.robot
 Suite Setup       Triton On Kserve Suite Setup
-#Suite Teardown    Triton On Kserve Suite Teardown
+Suite Teardown    Triton On Kserve Suite Teardown
 Test Tags         Kserve
 
 
@@ -21,7 +21,7 @@ Test Tags         Kserve
 ${INFERENCE_GRPC_INPUT_ONNX}=    tests/Resources/Files/triton/kserve-triton-onnx-gRPC-input.json
 ${INFERENCE_REST_INPUT_ONNX}=    @tests/Resources/Files/triton/kserve-triton-onnx-rest-input.json
 ${PROTOBUFF_FILE}=      tests/Resources/Files/triton/grpc_predict_v2.proto
-${PRJ_TITLE}=    ms-triton-project-v6
+${PRJ_TITLE}=    ms-triton-project
 ${PRJ_DESCRIPTION}=    project used for model serving triton runtime tests
 ${MODEL_CREATED}=    ${FALSE}
 ${ONNX_MODEL_NAME}=    densenet_onnx
@@ -70,6 +70,8 @@ Test Onnx Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-l
     ...  project_title=${PRJ_TITLE}
     ...  AND
     ...  Clean All Models Of Current User
+    ...  AND
+    ...  Delete Serving Runtime Template From CLI    displayed_name=triton-kserve-rest
 
 
 Test PYTORCH Model Inference Via UI(Triton on Kserve)
@@ -111,8 +113,8 @@ Test Onnx Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-l
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    existing_project=${FALSE}
     Open Dashboard Settings    settings_page=Serving runtimes
-    #Upload Serving Runtime Template    runtime_filepath=${ONNX_GRPC_RUNTIME_FILEPATH}
-    #...    serving_platform=single      runtime_protocol=gRPC
+    Upload Serving Runtime Template    runtime_filepath=${ONNX_GRPC_RUNTIME_FILEPATH}
+    ...    serving_platform=single      runtime_protocol=gRPC
     Serving Runtime Template Should Be Listed    displayed_name=${ONNX_GRPC_RUNTIME_NAME}
     ...    serving_platform=single
     Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
@@ -126,25 +128,28 @@ Test Onnx Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-l
     ${EXPECTED_INFERENCE_GRPC_OUTPUT_ONNX}=     Load Json File     file_path=${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE}
     ...     as_string=${TRUE}
     ${EXPECTED_INFERENCE_GRPC_OUTPUT_ONNX}=     Load Json String    ${EXPECTED_INFERENCE_GRPC_OUTPUT_ONNX}
+    ${EXPECTED_INFERENCE_GRPC_OUTPUT_ONNX}=     Evaluate    json.dumps(${EXPECTED_INFERENCE_GRPC_OUTPUT_ONNX})
     Log     ${EXPECTED_INFERENCE_GRPC_OUTPUT_ONNX}
     Open Model Serving Home Page
     ${host_url}=    Get Model Route Via UI       model_name=${ONNX_MODEL_NAME}
     ${host}=    Evaluate    re.search(r"${PATTERN}", r"${host_url}").group(1)    re
     Log    ${host}
-    Sleep    5s
     ${token}=   Get Access Token Via UI    single_model=${TRUE}      model_name=densenet_onnx   project_name=${PRJ_TITLE}
-    ${inference_output}=    Run Keyword And Continue On Failure      Query Model With GRPCURL   host=${host}    port=443
+    ${inference_output}=    Query Model With GRPCURL   host=${host}    port=443
     ...    endpoint=inference.GRPCInferenceService/ModelInfer
     ...    json_body=@      input_filepath=${INFERENCE_GRPC_INPUT_ONNX}
     ...    insecure=${True}    protobuf_file=${PROTOBUFF_FILE}      json_header="Authorization: Bearer ${token}"
+    ${inference_output}=    Evaluate    json.dumps(${inference_output})
     Log    ${inference_output}
     ${result}    ${list}=    Inference Comparison    ${EXPECTED_INFERENCE_GRPC_OUTPUT_ONNX}    ${inference_output}
     Log    ${result}
     Log    ${list}
-    #[Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${ONNX_MODEL_NAME}
-    #...  project_title=${PRJ_TITLE}
-    #...  AND
-    #...  Clean All Models Of Current User
+    [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${ONNX_MODEL_NAME}
+    ...  project_title=${PRJ_TITLE}
+    ...  AND
+    ...  Clean All Models Of Current User
+    ...  AND
+    ...  Delete Serving Runtime Template From CLI    displayed_name=triton-kserve-grpc
 
 
 *** Keywords ***
@@ -157,7 +162,7 @@ Triton On Kserve Suite Setup
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
     Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
-    #Clean All Models Of Current User
+    Clean All Models Of Current User
 
 Triton On Kserve Suite Teardown
     [Documentation]    Suite teardown steps after testing DSG. It Deletes
@@ -165,15 +170,15 @@ Triton On Kserve Suite Teardown
     # Even if kw fails, deleting the whole project will also delete the model
     # Failure will be shown in the logs of the run nonetheless
     IF    ${MODEL_CREATED}
-        #Clean All Models Of Current User
+        Clean All Models Of Current User
         Log    Skipped
     ELSE
         Log    Model not deployed, skipping deletion step during teardown    console=true
     END
     ${projects}=    Create List    ${PRJ_TITLE}
-    #Delete List Of Projects Via CLI   ocp_projects=${projects}
+    Delete List Of Projects Via CLI   ocp_projects=${projects}
     # Will only be present on SM cluster runs, but keyword passes
     # if file does not exist
     Remove File    openshift_ca_istio_knative.crt
     SeleniumLibrary.Close All Browsers
-    #RHOSi Teardown
+    RHOSi Teardown

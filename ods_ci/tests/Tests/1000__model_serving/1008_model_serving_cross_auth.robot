@@ -11,8 +11,8 @@ Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Mo
 Resource          ../../Resources/Page/ODH/Monitoring/Monitoring.resource
 Resource          ../../Resources/OCP.resource
 Resource          ../../Resources/CLI/ModelServing/modelmesh.resource
-Suite Setup       Cross Auth On Kserve Suite Setup
-Suite Teardown    Cross Auth On Kserve Suite Teardown
+#Suite Setup       Cross Auth On Kserve Suite Setup
+#Suite Teardown    Cross Auth On Kserve Suite Teardown
 Test Tags         Kserve    Modelmesh   Sanity  ProductBug
 
 
@@ -33,21 +33,22 @@ ${SINGLE_MODE_DISABLED}=    ${FALSE}
 *** Test Cases ***
 Test Cross Model Authentication On Kserve
     [Documentation]    Tests for the presence of CVE-2024-7557 when using Kserve
-    Set Test Variable     ${project_name}    ${PRJ_TITLE}-kserve
     Template with embedded arguments
-    ...    mode=${SINGLE_MODE_ENABLED}
+    ...     project_name=${PRJ_TITLE}-kserve
+    ...     mode=${SINGLE_MODE_ENABLED}
     [Tags]  RHOAIENG-11007    RHOAIENG-12048
 
 Test Cross Model Authentication On ModelMesh
     [Documentation]    Tests for the presence of CVE-2024-7557 when using ModelMesh
-    Set Test Variable     ${project_name}    ${PRJ_TITLE}-modelmesh
     Template with embedded arguments
-    ...    mode=${SINGLE_MODE_DISABLED}
+    ...     project_name=${PRJ_TITLE}-modelmesh
+    ...     mode=${SINGLE_MODE_DISABLED}
     [Tags]  RHOAIENG-12314    RHOAIENG-12853
 
 *** Keywords ***
 Template with embedded arguments
-    [Arguments]    ${mode}
+    [Arguments]    ${project_name}  ${mode}
+    Cross Auth On Kserve Suite Setup
     Open Data Science Projects Home Page
     Create Data Science Project    title=${project_name}    description=${PRJ_DESCRIPTION}
     ...    existing_project=${FALSE}
@@ -84,6 +85,7 @@ Template with embedded arguments
     Run Keyword And Warn On Failure    Should Contain    ${inf_out}    Log in with OpenShift
     [Teardown]  Run Keywords  Run Keyword If Test Failed    Get Kserve Events And Logs
     ...    model_name=${MODEL_NAME}    project_title=${project_name}    AND    Clean All Models Of Current User
+    ...    AND    Cross Auth On Kserve Suite Teardown   project_title=${project_name}
 
 Cross Auth On Kserve Suite Setup
     [Documentation]    Suite setup steps for testing DSG. It creates some test variables
@@ -99,6 +101,7 @@ Cross Auth On Kserve Suite Setup
 Cross Auth On Kserve Suite Teardown
     [Documentation]    Suite teardown steps after testing DSG. It Deletes
     ...                all the DS projects created by the tests and run RHOSi teardown
+    [Arguments]     ${project_name}
     # Even if kw fails, deleting the whole project will also delete the model
     # Failure will be shown in the logs of the run nonetheless
     IF    ${MODEL_CREATED}

@@ -21,7 +21,7 @@ Test Tags         Kserve
 ${INFERENCE_GRPC_INPUT_ONNX}=    tests/Resources/Files/triton/kserve-triton-onnx-gRPC-input.json
 ${INFERENCE_REST_INPUT_ONNX}=    @tests/Resources/Files/triton/kserve-triton-onnx-rest-input.json
 ${PROTOBUFF_FILE}=      tests/Resources/Files/triton/grpc_predict_v2.proto
-${PRJ_TITLE}=    ms-triton-project
+${PRJ_TITLE}=    ms-triton-project-v2
 ${PRJ_DESCRIPTION}=    project used for model serving triton runtime tests
 ${MODEL_CREATED}=    ${FALSE}
 ${ONNX_MODEL_NAME}=    densenet_onnx
@@ -108,7 +108,7 @@ Test PYTORCH Model Inference Via UI(Triton on Kserve)
 
 Test Onnx Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of an onnx model in Kserve using Triton
-    [Tags]    Sanity    RHOAIENG-11565
+    [Tags]    Sanity    RHOAIENG-11565      RunThisTest
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    existing_project=${FALSE}
@@ -134,11 +134,13 @@ Test Onnx Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-l
     ${host_url}=    Get Model Route Via UI       model_name=${ONNX_MODEL_NAME}
     ${host}=    Evaluate    re.search(r"${PATTERN}", r"${host_url}").group(1)    re
     Log    ${host}
+    Sleep    5s
     ${token}=   Get Access Token Via UI    single_model=${TRUE}      model_name=densenet_onnx   project_name=${PRJ_TITLE}
     ${inference_output}=    Query Model With GRPCURL   host=${host}    port=443
     ...    endpoint=inference.GRPCInferenceService/ModelInfer
     ...    json_body=@      input_filepath=${INFERENCE_GRPC_INPUT_ONNX}
     ...    insecure=${True}    protobuf_file=${PROTOBUFF_FILE}      json_header="Authorization: Bearer ${token}"
+    Log    ${inference_output}
     ${inference_output}=    Evaluate    json.dumps(${inference_output})
     Log    ${inference_output}
     ${result}    ${list}=    Inference Comparison    ${EXPECTED_INFERENCE_GRPC_OUTPUT_ONNX}    ${inference_output}

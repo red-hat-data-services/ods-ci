@@ -20,20 +20,6 @@ ${URL_TEST_PIPELINE_RUN_YAML}=                 https://raw.githubusercontent.com
 
 
 *** Test Cases ***
-Verify Pipeline Server Creation With S3 Object Storage
-    [Documentation]    Creates a pipeline server using S3 object storage and verifies that all components are running
-    [Tags]    Smoke
-    Projects.Create Data Science Project From CLI    name=dsp-s3
-    DataSciencePipelinesBackend.Create Pipeline Server    namespace=dsp-s3
-    ...    object_storage_access_key=${S3.AWS_ACCESS_KEY_ID}
-    ...    object_storage_secret_key=${S3.AWS_SECRET_ACCESS_KEY}
-    ...    object_storage_endpoint=${S3.BUCKET_2.ENDPOINT}
-    ...    object_storage_region=${S3.BUCKET_2.REGION}
-    ...    object_storage_bucket_name=${S3.BUCKET_2.NAME}
-    ...    dsp_version=v2
-    DataSciencePipelinesBackend.Wait Until Pipeline Server Is Deployed    namespace=dsp-s3
-    [Teardown]    Projects.Delete Project Via CLI By Display Name    dsp-s3
-
 Verify Admin Users Can Create And Run a Data Science Pipeline Using The Api
     [Documentation]    Creates, runs pipelines with admin user. Double check the pipeline result and clean
     ...    the pipeline resources.

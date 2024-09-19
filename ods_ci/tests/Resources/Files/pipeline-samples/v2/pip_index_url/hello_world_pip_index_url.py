@@ -19,15 +19,22 @@ from kfp import kubernetes
 common_base_image = "registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61"
 
 
-@dsl.component(base_image=common_base_image, pip_index_urls=['$PIP_INDEX_URL'], pip_trusted_hosts=['$PIP_TRUSTED_HOST'])
+@dsl.component(base_image=common_base_image,
+               packages_to_install=["pyfiglet==1.0.2"],
+               pip_index_urls=['$PIP_INDEX_URL'],
+               pip_trusted_hosts=['$PIP_TRUSTED_HOST'])
 def print_message(message: str):
     import os
+    from pyfiglet import Figlet
     """Prints a message"""
     print("------------------------------------------------------------------")
     print(message)
     print('pip_index_url:' + os.environ['PIP_INDEX_URL'])
     print('pip_trusted_host:' + os.environ['PIP_TRUSTED_HOST'])
     print("------------------------------------------------------------------")
+
+    f = Figlet(font='slant')
+    print(f.renderText(message))
 
 
 @dsl.pipeline(name="hello-world-pipeline", description="Pipeline that prints a hello message")

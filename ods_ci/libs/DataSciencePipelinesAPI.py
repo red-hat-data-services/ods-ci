@@ -11,10 +11,10 @@ from robotlibcore import keyword
 
 class DataSciencePipelinesAPI:
     # init should not have a call to external system, otherwise dry-run will fail
-    def __init__(self):
+    def __init__(self, sleep_time: int = 45):
         self.route = ""
         self.sa_token = None
-        self.sleep_time = 45
+        self.sleep_time = sleep_time
 
     @keyword
     def login_and_wait_dsp_route(

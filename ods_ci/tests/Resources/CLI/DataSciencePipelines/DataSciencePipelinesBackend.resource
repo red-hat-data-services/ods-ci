@@ -2,8 +2,9 @@
 Documentation    Collection of keywords to interact with Data Science Pipelines via CLI
 Library          OperatingSystem
 Library          String
+Library          ../../../../libs/DataSciencePipelinesAPI.py
+Library          ../../../../libs/DataSciencePipelinesKfp.py
 Resource         ../../../Resources/OCP.resource
-
 
 *** Variables ***
 ${DSPA_PATH}=      tests/Resources/Files/pipeline-samples/v2/dspa
@@ -134,3 +135,77 @@ Create Secret With Pipelines Object Storage Information
     [Arguments]    ${namespace}    ${object_storage_access_key}    ${object_storage_secret_key}
     Run    oc create secret generic dashboard-dspa-secret -n ${namespace} --from-literal=AWS_ACCESS_KEY_ID=${object_storage_access_key} --from-literal=AWS_SECRET_ACCESS_KEY=${object_storage_secret_key}
     Run    oc label secret dashboard-dspa-secret -n ${namespace} opendatahub.io/dashboard=true
+
+
+Import Pipeline And Create Run
+    [Documentation]
+    [Arguments]    ${namespace}           ${username}                ${password}
+    ...    ${pipeline_name}               ${pipeline_description}    ${pipeline_package_path}
+    ...    ${pipeline_run_name}           ${pipeline_run_params}
+    ...    ${experiment_name}=Default     ${experiment_description}=${EMPTY}
+
+    DataSciencePipelinesKfp.Setup Client    user=${username}    pwd=${password}    project=${namespace}
+
+    ${pipeline_id}    ${pipeline_version_id}=    DataSciencePipelinesKfp.Upload Pipeline
+    ...   pipeline_package_path=${pipeline_package_path}
+    ...   pipeline_name=${pipeline_name}
+    ...   description=${pipeline_description}
+    ...   namespace=${namespace}
+
+    ${experiment_id}=    DataSciencePipelinesKfp.Create Experiment    name=${experiment_name}
+    ...    description=${experiment_description}    namespace=${namespace}
+
+    ${pipeline_run_id}=    DataSciencePipelinesKfp.Run Pipeline
+    ...   experiment_id=${experiment_id}
+    ...   job_name=${pipeline_run_name}
+    ...   pipeline_id=${pipeline_id}
+    ...   version_id=${pipeline_version_id}
+    ...   params=${pipeline_run_params}
+
+    RETURN    ${pipeline_id}    ${pipeline_version_id}    ${pipeline_run_id}    ${experiment_id}
+
+Wait For Run Completion And Verify Status
+    [Documentation]
+    [Arguments]    ${namespace}           ${username}                  ${password}
+    ...    ${pipeline_run_id}             ${pipeline_run_timeout}=180
+    ...    ${pipeline_run_expected_status}="SUCCEEDED"
+
+    DataSciencePipelinesKfp.Setup Client    user=${username}    pwd=${password}    project=${namespace}
+
+    ${pipeline_run_status}=    DataSciencePipelinesKfp.Wait For Run Completion    run_id=${pipeline_run_id}
+    ...    timeout=${pipeline_run_timeout}     sleep_duration=${5}
+
+    IF   "${pipeline_run_status}" != "${pipeline_run_expected_status}"
+        ${error_msg}=    Catenate    Expected pipeline status was ${pipeline_run_expected_status} but pipeline run
+        ...    finished with status=${pipeline_run_status}
+        Fail    ${error_msg}
+    END
+
+    RETURN    ${pipeline_run_status}
+
+Delete Pipeline And Related Resources
+    [Documentation]  Deletes a pipeline, all it's versions and runs depending on the parameters
+    ...    If ${delete_versions}=${TRUE}, deletes all versions
+    ...    If ${delete_runs}=${TRUE}, deletes pipeline runs in ${experiment_id}
+    ...    If ${experiment_id} is not provided, Default experiment will be used
+    [Tags]    robot:recursive-continue-on-failure
+    [Arguments]    ${namespace}           ${username}                ${password}
+    ...    ${pipeline_id}                 ${experiment_id}=${EMPTY}
+    ...    ${delete_versions}=${TRUE}     ${delete_runs}=${TRUE}
+
+    DataSciencePipelinesKfp.Setup Client    user=${username}    pwd=${password}    project=${namespace}
+
+    IF    ${delete_runs}==True
+        DataSciencePipelinesKfp.Delete All Runs For Pipeline
+        ...    namespace=${namespace}    pipeline_id=${pipeline_id}    experiment_id=${experiment_id}
+    END
+
+    # TODO: delete recurent jobs
+
+    IF    ${delete_versions}==True
+        DataSciencePipelinesKfp.Delete All Pipeline Versions    ${pipeline_id}
+    END
+
+    DataSciencePipelinesKfp.Delete Pipeline    ${pipeline_id}
+
+

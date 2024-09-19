@@ -4,7 +4,7 @@ Suite Setup       Prepare Kuberay E2E Test Suite
 Suite Teardown    Teardown Kuberay E2E Test Suite
 Library           OperatingSystem
 Library           Process
-Resource          ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
+Resource          ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 
 *** Variables ***
 ${KUBERAY_RELEASE_ASSETS}     %{KUBERAY_RELEASE_ASSETS=https://github.com/opendatahub-io/kuberay/releases/latest/download}
@@ -15,6 +15,7 @@ Run TestRayJob test
     [Documentation]    Run Go E2E test: TestRayJob
     [Tags]  Tier1
     ...     DistributedWorkloads
+    ...     Training
     ...     Kuberay
     Run Kuberay E2E Test    "^TestRayJob$"
 
@@ -22,6 +23,7 @@ Run TestRayJobWithClusterSelector test
     [Documentation]    Run Go E2E test: TestRayJobWithClusterSelector
     [Tags]  Sanity
     ...     DistributedWorkloads
+    ...     Training
     ...     Kuberay
     Run Kuberay E2E Test    TestRayJobWithClusterSelector
 
@@ -29,6 +31,7 @@ Run TestRayJobSuspend test
     [Documentation]    Run Go E2E test: TestRayJobSuspend
     [Tags]  Tier1
     ...     DistributedWorkloads
+    ...     Training
     ...     Kuberay
     Run Kuberay E2E Test    TestRayJobSuspend
 
@@ -36,6 +39,7 @@ Run TestRayJobLightWeightMode test
     [Documentation]    Run Go E2E test: TestRayJobLightWeightMode
     [Tags]  Tier1
     ...     DistributedWorkloads
+    ...     Training
     ...     Kuberay
     ...     ProductBug:RHOAIENG-6614
     Run Kuberay E2E Test    TestRayJobLightWeightMode
@@ -44,6 +48,7 @@ Run TestRayClusterAutoscaler test
     [Documentation]    Run Go E2E test: TestRayClusterAutoscaler
     [Tags]  Tier1
     ...     DistributedWorkloads
+    ...     Training
     ...     Kuberay
     Run Kuberay E2E Test    TestRayClusterAutoscaler
 
@@ -51,6 +56,7 @@ Run TestRayService test
     [Documentation]    Run Go E2E test: TestRayService
     [Tags]  Tier1
     ...     DistributedWorkloads
+    ...     Training
     ...     Kuberay
     Run Kuberay E2E Test    TestRayService
     

@@ -21,10 +21,13 @@ Is OpenShift OAuth Login Prompt Visible
    [Return]  ${result}
 
 Is OpenShift Login Visible
-   ${login_prompt_visible} =  Run Keyword and Return Status  Page Should Contain  Log in with
-   IF  ${login_prompt_visible}  RETURN  True
-   ${login_prompt_visible} =  Run Keyword and Return Status  Page Should Contain  Log in to your account
-   [Return]  ${login_prompt_visible}
+   [Arguments]  ${timeout}=15s
+   ${login_prompt_visible} =  Run Keyword And Return Status
+   ...    Wait Until Page Contains    Log in with    timeout=${timeout}
+   IF  ${login_prompt_visible}    RETURN    ${TRUE}
+   ${login_prompt_visible} =  Run Keyword And Return Status
+   ...    Wait Until Page Contains    Log in to your account    timeout=${timeout}
+   RETURN    ${login_prompt_visible}
 
 Select Login Authentication Type
    [Arguments]  ${auth_type}

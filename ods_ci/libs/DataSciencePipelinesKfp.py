@@ -290,8 +290,9 @@ class DataSciencePipelinesKfp:
         return run_status  # pyright: ignore [reportPossiblyUnboundVariable]
 
     @keyword
-    def delete_pipeline(self, pipeline_id, delete_versions=False, delete_runs=False):
+    def delete_pipeline(self, pipeline_id):
         """Deletes a pipeline"""
+        print(f"Deleting pipeline {pipeline_id}")
         self.client.delete_pipeline(pipeline_id)
 
     @keyword
@@ -400,7 +401,7 @@ class DataSciencePipelinesKfp:
         all_versions = self.get_all_pipeline_versions(pipeline_id=pipeline_id)
         for pipeline_version in all_versions:
             self.delete_all_runs_in_experiment(namespace=namespace, experiment_id=experiment_id,
-                                               pipeline_version_id=pipeline_version)
+                                               pipeline_version_id=pipeline_version.pipeline_version_id)
 
     @keyword
     def delete_run(self, run_id):

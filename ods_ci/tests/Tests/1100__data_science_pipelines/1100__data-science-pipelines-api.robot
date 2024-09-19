@@ -96,7 +96,7 @@ End To End Pipeline Workflow Via Api
     Should Be True    ${status} == 200    Could not login to the Data Science Pipelines Rest API OR DSP routing is not working    # robocop: disable:line-too-long
     Setup Client    ${username}    ${password}    ${project}
     ${pipeline_param}=    Create Dictionary    recipient=integration_test
-    ${run_id}    Import Run Pipeline    pipeline_url=${URL_TEST_PIPELINE_RUN_YAML}    pipeline_params=${pipeline_param}
+    ${run_id}    Import Run Pipeline From Url    pipeline_url=${URL_TEST_PIPELINE_RUN_YAML}    pipeline_params=${pipeline_param}
     ${run_status}    Check Run Status    ${run_id}
     Should Be Equal As Strings    ${run_status}    SUCCEEDED    Pipeline run doesn't have a status that means success. Check the logs
     DataSciencePipelinesKfp.Delete Run    ${run_id}

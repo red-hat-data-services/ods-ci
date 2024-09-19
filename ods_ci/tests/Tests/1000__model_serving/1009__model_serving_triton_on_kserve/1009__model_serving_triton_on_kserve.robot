@@ -108,7 +108,7 @@ Test PYTORCH Model Inference Via UI(Triton on Kserve)
 
 Test Onnx Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of an onnx model in Kserve using Triton
-    [Tags]    Sanity    RHOAIENG-11565      RunThisTest
+    [Tags]    Sanity    RHOAIENG-9053
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    existing_project=${FALSE}
@@ -171,8 +171,7 @@ Triton On Kserve Suite Teardown
     # Even if kw fails, deleting the whole project will also delete the model
     # Failure will be shown in the logs of the run nonetheless
     IF    ${MODEL_CREATED}
-        #Clean All Models Of Current User
-        Log    Skipped
+        Clean All Models Of Current User
     ELSE
         Log    Model not deployed, skipping deletion step during teardown    console=true
     END

@@ -11,7 +11,8 @@ Resource          ../../Resources/RHOSi.resource
 *** Variables ***
 ${CODEFLARE-SDK_DIR}                codeflare-sdk
 ${CODEFLARE-SDK_REPO_URL}           %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
-${CODEFLARE-SDK-API_URL}            %{CODEFLARE-SDK-API_URL=https://api.github.com/repos/project-codeflare/codeflare-sdk/releases/latest}
+# Supported codeflare-sdk version for 2.10 release is "v0.16.1"
+${CODEFLARE-SDK-API_URL}                 %{CODEFLARE-SDK-API_URL=https://api.github.com/repos/project-codeflare/codeflare-sdk/releases/155520501}
 ${VIRTUAL_ENV_NAME}                 venv3.9
 
 

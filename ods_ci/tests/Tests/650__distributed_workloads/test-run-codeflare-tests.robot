@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation     Codeflare operator E2E tests - https://github.com/project-codeflare/integration-tests/tree/main/test/odh
+Documentation     Codeflare operator E2E tests - https://github.com/opendatahub-io/distributed-workloads/tree/main/tests/odh
 Suite Setup       Prepare Codeflare E2E Test Suite
 Suite Teardown    Teardown Codeflare E2E Test Suite
 Library           OperatingSystem
@@ -9,7 +9,8 @@ Resource          ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 
 *** Variables ***
 ${CODEFLARE_DIR}                codeflare-operator
-${CODEFLARE_RELEASE_ASSETS}     %{CODEFLARE_RELEASE_ASSETS=https://github.com/project-codeflare/integration-tests/releases/latest/download}
+# using v2.11.0-RC1 release as v2.10.0-prerc1 release doesn't contain odh assests
+${CODEFLARE_RELEASE_ASSETS}     %{CODEFLARE_RELEASE_ASSETS=https://github.com/opendatahub-io/distributed-workloads/releases/download/v2.11.0-RC1}
 ${NOTEBOOK_IMAGE_STREAM_NAME}   %{NOTEBOOK_IMAGE_STREAM_NAME=s2i-generic-data-science-notebook}
 ${NOTEBOOK_ADMIN_NAME}          ${TEST_USER_2.USERNAME}
 ${NOTEBOOK_ADMIN_PASSWORD}      ${TEST_USER_2.PASSWORD}

@@ -41,11 +41,11 @@ deploymentSpec:
           '
         - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
           \ *\n\ndef print_message(message: str):\n    import os\n    from pyfiglet\
-          \ import Figlet\n    \"\"\"Prints a message\"\"\"\n    print(\"------------------------------------------------------------------\"\
-          )\n    print(message)\n    print('pip_index_url:' + os.environ['PIP_INDEX_URL'])\n\
-          \    print('pip_trusted_host:' + os.environ['PIP_TRUSTED_HOST'])\n    print(\"\
-          ------------------------------------------------------------------\")\n\n\
-          \    f = Figlet(font='slant')\n    print(f.renderText(message))\n\n"
+          \ import Figlet\n\n    \"\"\"Prints a message\"\"\"\n    print(\"------------------------------------------------------------------\"\
+          )\n    print(message)\n    print(\"pip_index_url:\" + os.environ[\"PIP_INDEX_URL\"\
+          ])\n    print(\"pip_trusted_host:\" + os.environ[\"PIP_TRUSTED_HOST\"])\n\
+          \    print(\"------------------------------------------------------------------\"\
+          )\n\n    f = Figlet(font=\"slant\")\n    print(f.renderText(message))\n\n"
         image: registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61
 pipelineInfo:
   description: Pipeline that prints a hello message

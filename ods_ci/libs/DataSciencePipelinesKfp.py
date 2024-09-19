@@ -65,10 +65,9 @@ class DataSciencePipelinesKfp:
         return response.experiment_id
 
     @keyword
-    def get_experiment(self,
-                       experiment_id: str | None = None,
-                       experiment_name: str | None = None,
-                       namespace: str | None = None) -> kfp_server_api.V2beta1Experiment:
+    def get_experiment(
+        self, experiment_id: str | None = None, experiment_name: str | None = None, namespace: str | None = None
+    ) -> kfp_server_api.V2beta1Experiment:
         """Gets details of an experiment.
 
         Either ``experiment_id`` or ``experiment_name`` is required.
@@ -112,12 +111,14 @@ class DataSciencePipelinesKfp:
         return pipeline_id, pipeline_version_id
 
     @keyword
-    def upload_pipeline_version(self,
-                                pipeline_package_path: str,
-                                pipeline_version_name: str,
-                                pipeline_id: str | None = None,
-                                pipeline_name: str | None = None,
-                                description: str | None = None):
+    def upload_pipeline_version(
+        self,
+        pipeline_package_path: str,
+        pipeline_version_name: str,
+        pipeline_id: str | None = None,
+        pipeline_name: str | None = None,
+        description: str | None = None,
+    ):
         """
         Creates a pipeline version of the pipeline (located by pipeline_id or pipeline_name). Pipeline should exist
         :param pipeline_package_path:
@@ -128,8 +129,9 @@ class DataSciencePipelinesKfp:
         :return:
             pipeline_version_id
         """
-        response = self.client.upload_pipeline_version(pipeline_package_path, pipeline_version_name, pipeline_id,
-                                                       pipeline_name, description)
+        response = self.client.upload_pipeline_version(
+            pipeline_package_path, pipeline_version_name, pipeline_id, pipeline_name, description
+        )
         pipeline_version_id = response.pipeline_version_id
         return pipeline_version_id
 
@@ -155,22 +157,18 @@ class DataSciencePipelinesKfp:
         all_versions = []
         next_page_token = ""
         while next_page_token is not None:
-            response = self.list_pipeline_versions(pipeline_id=pipeline_id,
-                                                   page_token=next_page_token,
-                                                   page_size=10,
-                                                   sort_by="created_at desc")
+            response = self.list_pipeline_versions(
+                pipeline_id=pipeline_id, page_token=next_page_token, page_size=10, sort_by="created_at desc"
+            )
             next_page_token = response.next_page_token
             if response.pipeline_versions is not None:
                 all_versions.extend(response.pipeline_versions)
         return all_versions
 
     @keyword
-    def list_pipeline_versions(self,
-                               pipeline_id: str,
-                               page_token: str = "",
-                               page_size: int = 10,
-                               sort_by: str = "",
-                               filter: str | None = None):
+    def list_pipeline_versions(
+        self, pipeline_id: str, page_token: str = "", page_size: int = 10, sort_by: str = "", filter: str | None = None
+    ):
         """Lists pipeline versions.
 
         :param pipeline_id: ID of the pipeline for which to list versions.
@@ -207,7 +205,7 @@ class DataSciencePipelinesKfp:
 
     @keyword
     def delete_all_pipeline_versions(self, pipeline_id: str):
-        """ Deletes all pipeline versions for a pipeline
+        """Deletes all pipeline versions for a pipeline
         :param pipeline_id: ID of the pipeline
         """
         all_versions = self.get_all_pipeline_versions(pipeline_id=pipeline_id)
@@ -215,16 +213,18 @@ class DataSciencePipelinesKfp:
             self.delete_pipeline_version(pipeline_version.pipeline_id, pipeline_version.pipeline_version_id)
 
     @keyword
-    def run_pipeline(self,
-                     experiment_id: str | None = None,
-                     job_name: str | None = None,
-                     pipeline_package_path: str | None = None,
-                     params: dict[str, Any] | None = None,
-                     pipeline_id: str | None = None,
-                     version_id: str | None = None,
-                     pipeline_root: str | None = None,
-                     enable_caching: bool | None = None,
-                     service_account: str | None = None):
+    def run_pipeline(
+        self,
+        experiment_id: str | None = None,
+        job_name: str | None = None,
+        pipeline_package_path: str | None = None,
+        params: dict[str, Any] | None = None,
+        pipeline_id: str | None = None,
+        version_id: str | None = None,
+        pipeline_root: str | None = None,
+        enable_caching: bool | None = None,
+        service_account: str | None = None,
+    ):
         """Runs a pipeline.
 
         Must specify either `pipeline_package_path` or both `pipeline_id` and `version_id`.
@@ -234,8 +234,17 @@ class DataSciencePipelinesKfp:
         if experiment_id is None:
             experiment_id = self.get_default_experiment_id()
 
-        response = self.client.run_pipeline(experiment_id, job_name, pipeline_package_path, params, pipeline_id,
-                                            version_id, pipeline_root, enable_caching, service_account)
+        response = self.client.run_pipeline(
+            experiment_id,
+            job_name,
+            pipeline_package_path,
+            params,
+            pipeline_id,
+            version_id,
+            pipeline_root,
+            enable_caching,
+            service_account,
+        )
         return response.run_id
 
     @keyword
@@ -296,13 +305,15 @@ class DataSciencePipelinesKfp:
         self.client.delete_pipeline(pipeline_id)
 
     @keyword
-    def list_runs(self,
-                  page_token: str = "",
-                  page_size: int = 10,
-                  sort_by: str = "",
-                  experiment_id: str | None = None,
-                  namespace: str | None = None,
-                  filter: str | None = None):
+    def list_runs(
+        self,
+        page_token: str = "",
+        page_size: int = 10,
+        sort_by: str = "",
+        experiment_id: str | None = None,
+        namespace: str | None = None,
+        filter: str | None = None,
+    ):
         """List runs.
 
         Args:
@@ -316,13 +327,17 @@ class DataSciencePipelinesKfp:
 
                   ::
 
-                    json.dumps({
-                        "predicates": [{
-                            "operation": "EQUALS",
-                            "key": "display_name",
-                            "stringValue": "my-name",
-                        }]
-                    })
+                    json.dumps(
+                        {
+                            "predicates": [
+                                {
+                                    "operation": "EQUALS",
+                                    "key": "display_name",
+                                    "stringValue": "my-name",
+                                }
+                            ]
+                        }
+                    )
 
           Returns:
             ``V2beta1ListRunsResponse`` object.
@@ -331,10 +346,7 @@ class DataSciencePipelinesKfp:
         return response
 
     @keyword
-    def get_all_runs(self,
-                     namespace: str,
-                     experiment_id: str | None = None,
-                     pipeline_version_id: str | None = None):
+    def get_all_runs(self, namespace: str, experiment_id: str | None = None, pipeline_version_id: str | None = None):
         """
         Returns a list of all pipeline runs in an experiment, filtering by pipeline_version_id when provided.
         When needed, this function goes through pagination in order to get all the pipeline run
@@ -344,25 +356,31 @@ class DataSciencePipelinesKfp:
             experiment_id = self.get_default_experiment_id()
 
         if pipeline_version_id is not None:
-            my_filter = json.dumps({
-                "predicates": [{
-                    "operation": "EQUALS",
-                    "key": "pipeline_version_id",
-                    "stringValue": "PIPELINE_VERSION_ID",
-                }]
-            }).replace("PIPELINE_VERSION_ID", pipeline_version_id)
+            my_filter = json.dumps(
+                {
+                    "predicates": [
+                        {
+                            "operation": "EQUALS",
+                            "key": "pipeline_version_id",
+                            "stringValue": "PIPELINE_VERSION_ID",
+                        }
+                    ]
+                }
+            ).replace("PIPELINE_VERSION_ID", pipeline_version_id)
         else:
             my_filter = ""
 
         all_runs = []
         next_page_token = ""
         while next_page_token is not None:
-            response = self.list_runs(page_token=next_page_token,
-                                      page_size=10,
-                                      sort_by="created_at desc",
-                                      experiment_id=experiment_id,
-                                      namespace=namespace,
-                                      filter=my_filter)
+            response = self.list_runs(
+                page_token=next_page_token,
+                page_size=10,
+                sort_by="created_at desc",
+                experiment_id=experiment_id,
+                namespace=namespace,
+                filter=my_filter,
+            )
             next_page_token = response.next_page_token
             if response.runs is not None:
                 all_runs.extend(response.runs)
@@ -370,10 +388,9 @@ class DataSciencePipelinesKfp:
         return all_runs
 
     @keyword
-    def delete_all_runs_in_experiment(self,
-                                      namespace: str,
-                                      experiment_id: str | None = None,
-                                      pipeline_version_id: str | None = None):
+    def delete_all_runs_in_experiment(
+        self, namespace: str, experiment_id: str | None = None, pipeline_version_id: str | None = None
+    ):
         """
         Delete all pipeline runs in a namespace and experiment, optionally filtering by pipeline_version_id
         :param namespace: Namespace where to delete the runs
@@ -386,22 +403,23 @@ class DataSciencePipelinesKfp:
             f"experiment_id={experiment_id}, pipeline_version_id={pipeline_version_id}"
         )
         print(message)
-        all_runs = self.get_all_runs(namespace=namespace, experiment_id=experiment_id,
-                                     pipeline_version_id=pipeline_version_id)
+        all_runs = self.get_all_runs(
+            namespace=namespace, experiment_id=experiment_id, pipeline_version_id=pipeline_version_id
+        )
         for pipeline_run in all_runs:
             self.delete_run(pipeline_run.run_id)
 
     @keyword
-    def delete_all_runs_for_pipeline(self,
-                                     namespace: str,
-                                     pipeline_id: str,
-                                     experiment_id: str | None = None):
+    def delete_all_runs_for_pipeline(self, namespace: str, pipeline_id: str, experiment_id: str | None = None):
         """Delete all pipeline runs for all versions for a given pipeline and experiment. If experiment_id is not
-         provided, Default experiment will be used"""
+        provided, Default experiment will be used"""
         all_versions = self.get_all_pipeline_versions(pipeline_id=pipeline_id)
         for pipeline_version in all_versions:
-            self.delete_all_runs_in_experiment(namespace=namespace, experiment_id=experiment_id,
-                                               pipeline_version_id=pipeline_version.pipeline_version_id)
+            self.delete_all_runs_in_experiment(
+                namespace=namespace,
+                experiment_id=experiment_id,
+                pipeline_version_id=pipeline_version.pipeline_version_id,
+            )
 
     @keyword
     def delete_run(self, run_id):

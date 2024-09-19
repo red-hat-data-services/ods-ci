@@ -16,7 +16,7 @@ Suite Teardown      RHOSi Teardown
 
 
 *** Variables ***
-${URL_TEST_PIPELINE_RUN_YAML}=                 https://raw.githubusercontent.com/opendatahub-io/data-science-pipelines-operator/main/tests/resources/test-pipeline-run.yaml
+${URL_TEST_PIPELINE_RUN_YAML}=                 https://raw.githubusercontent.com/opendatahub-io/data-science-pipelines-operator/main/tests/resources/test-pipeline-run.yaml    # robocop: disable:line-too-long
 
 
 *** Test Cases ***
@@ -37,10 +37,10 @@ Verify Ods Users Can Do Http Request That Must Be Redirected to Https
     [Tags]        Tier1    ODS-2234
     Projects.Create Data Science Project From CLI    name=project-redirect-http
     DataSciencePipelinesBackend.Create PipelineServer Using Custom DSPA    project-redirect-http
-    ${status}    Login And Wait Dsp Route    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
+    ${status} =    Login And Wait Dsp Route    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
     ...         project-redirect-http
     Should Be True    ${status} == 200    Could not login to the Data Science Pipelines Rest API OR DSP routing is not working    # robocop: disable:line-too-long
-    ${url}    Do Http Request    apis/v2beta1/runs
+    ${url} =    Do Http Request    apis/v2beta1/runs
     Should Start With    ${url}    https
     [Teardown]    Projects.Delete Project Via CLI By Display Name    project-redirect-http
 
@@ -62,13 +62,14 @@ Verify DSPO Operator Reconciliation Retry
     # Add the missing secret with storage credentials. The DSPO will reconcile and start the pipeline server pods
     # Note: as the credentials are dummy, the DSPA status won't be ready, but it's ok because in this test
     # we are just testing the DSPO reconciliation
-    ${rc}  ${out} =    Run And Return Rc And Output   oc apply -f ${DSPA_PATH}/dummy-storage-creds.yaml -n ${local_project_name}
+    ${rc}  ${out} =    Run And Return Rc And Output   oc apply -f ${DSPA_PATH}/dummy-storage-creds.yaml -n ${local_project_name}    # robocop: disable:line-too-long
     IF    ${rc}!=0    Fail
 
     # After reconciliation, the project should have at least one pod running
     Wait For Pods Number  1    namespace=${local_project_name}    timeout=60
 
     [Teardown]   Projects.Delete Project Via CLI By Display Name    ${local_project_name}
+
 
 *** Keywords ***
 End To End Pipeline Workflow Via Api
@@ -78,13 +79,13 @@ End To End Pipeline Workflow Via Api
     Projects.Delete Project Via CLI By Display Name    ${project}
     Projects.Create Data Science Project From CLI    name=${project}
     Create PipelineServer Using Custom DSPA    ${project}
-    ${status}    Login And Wait Dsp Route    ${username}    ${password}    ${project}
+    ${status} =    Login And Wait Dsp Route    ${username}    ${password}    ${project}
     Should Be True    ${status} == 200    Could not login to the Data Science Pipelines Rest API OR DSP routing is not working    # robocop: disable:line-too-long
     Setup Client    ${username}    ${password}    ${project}
-    ${pipeline_param}=    Create Dictionary    recipient=integration_test
-    ${run_id}    Import Run Pipeline From Url    pipeline_url=${URL_TEST_PIPELINE_RUN_YAML}    pipeline_params=${pipeline_param}
-    ${run_status}    Check Run Status    ${run_id}
-    Should Be Equal As Strings    ${run_status}    SUCCEEDED    Pipeline run doesn't have a status that means success. Check the logs
+    ${pipeline_param} =    Create Dictionary    recipient=integration_test
+    ${run_id} =    Import Run Pipeline From Url    pipeline_url=${URL_TEST_PIPELINE_RUN_YAML}    pipeline_params=${pipeline_param}    # robocop: disable:line-too-long
+    ${run_status} =    Check Run Status    ${run_id}
+    Should Be Equal As Strings    ${run_status}    SUCCEEDED    Pipeline run doesn't have a status that means success. Check the logs    # robocop: disable:line-too-long
     DataSciencePipelinesKfp.Delete Run    ${run_id}
     [Teardown]    Projects.Delete Project Via CLI By Display Name    ${project}
 
@@ -99,12 +100,12 @@ Verify DSPO Logs Show Error Encountered When Parsing DSPA
     ${stopped} =    Set Variable    ${False}
     # limit is 180 because the reconciliation run every 2 minutes
     ${timeout} =    Set Variable    180
-    ${pod_name} =    Run    oc get pods -n ${APPLICATIONS_NAMESPACE} | grep data-science-pipelines-operator | awk '{print $1}'
+    ${pod_name} =    Run    oc get pods -n ${APPLICATIONS_NAMESPACE} | grep data-science-pipelines-operator | awk '{print $1}'    # robocop: disable:line-too-long
     Log    ${pod_name}
     TRY
         WHILE    not ${stopped}    limit=${timeout}
             Sleep    1s
-            ${logs}        Run   oc logs --tail=1000000 ${pod_name} -n ${APPLICATIONS_NAMESPACE}
+            ${logs} =       Run   oc logs --tail=1000000 ${pod_name} -n ${APPLICATIONS_NAMESPACE}
             ${stopped} =    Set Variable If    "Encountered error when parsing CR" in """${logs}"""    True    False
         END
     EXCEPT    WHILE loop was aborted    type=start

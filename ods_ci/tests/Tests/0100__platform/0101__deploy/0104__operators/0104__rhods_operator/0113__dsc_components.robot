@@ -189,7 +189,7 @@ Validate Modelmeshserving Removed State
 Validate ModelRegistry Managed State
     [Documentation]    Validate that the DSC ModelRegistry component Managed state creates the expected resources,
     ...    check that ModelRegistry deployment is created and pod is in Ready state
-    [Tags]    Operator    Tier1    RHOAIENG-10404    modelregistry-managed    ExcludeOnRHOAI
+    [Tags]    Operator    Tier1    RHOAIENG-10404    modelregistry-managed
 
     Set DSC Component Managed State And Wait For Completion   modelregistry    ${MODELREGISTRY_CONTROLLER__DEPLOYMENT_NAME}    ${MODELREGISTRY_CONTROLLER__LABEL_SELECTOR}
 
@@ -199,7 +199,7 @@ Validate ModelRegistry Managed State
 
 Validate ModelRegistry Removed State
     [Documentation]    Validate that ModelRegistry management state Removed does remove relevant resources.
-    [Tags]    Operator    Tier1    RHOAIENG-10404    modelregistry-removed    ExcludeOnRHOAI
+    [Tags]    Operator    Tier1    RHOAIENG-10404    modelregistry-removed
 
     # Properly validate Removed state by first setting to Manged, which will ensure that namspace
     # was created as needed for later validating that namespace persisted when component is Removed

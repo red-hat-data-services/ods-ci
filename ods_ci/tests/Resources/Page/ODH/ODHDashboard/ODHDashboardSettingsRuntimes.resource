@@ -100,6 +100,5 @@ Select Runtime API Protocol
     [Documentation]    Selects which API protocol for the runtime
     [Arguments]    ${protocol}=gRPC
     Click Element    xpath://button[@data-testid="custom-serving-api-protocol-selection"]
-    Sleep    10s
-    Wait Until Page Contains Element    xpath://li[@data-testid="${protocol}"]
+    Wait Until Page Contains Element    xpath://li[@data-testid="${protocol}"]      timeout=10s
     Click Element    xpath://li[@data-testid="${protocol}"]

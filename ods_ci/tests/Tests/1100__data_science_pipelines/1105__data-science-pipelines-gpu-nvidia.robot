@@ -9,12 +9,15 @@ Suite Teardown      Dsp Nvidia Gpu Suite Teardown
 
 
 *** Variables ***
+# robocop: off=line-too-long
 ${PROJECT}=    dsp-gpu-nvidia
-${PIPELINE_GPU_AVAILABILITY_FILEPATH}=    tests/Resources/Files/pipeline-samples/v2/gpu/pytorch/pytorch_verify_gpu_availability_compiled.yaml    # robocop: off=line-too-long
+${PIPELINE_GPU_AVAILABILITY_FILEPATH}=    tests/Resources/Files/pipeline-samples/v2/gpu/pytorch/pytorch_verify_gpu_availability_compiled.yaml
+# robocop: on=line-too-long
 
 
 *** Test Cases ***
-Verify Pipeline Tasks Run On GPU Nodes Only When Tolerations Are Added   # robocop: off=too-long-test-case
+# robocop: off=too-long-test-case
+Verify Pipeline Tasks Run On GPU Nodes Only When Tolerations Are Added
     [Documentation]    Runs a pipeline that tests GPU availability according to GPU tolerations in pipeline tasks:
     ...    - One task should not have GPUs available, as we don't add the GPU tolerations
     ...    - Another task should have GPUs available, as we add the GPU tolerations

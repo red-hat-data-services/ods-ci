@@ -23,7 +23,7 @@ ${EXAMPLE_ISTIO_ENV}=                ${MODELREGISTRY_BASE_FOLDER}/samples/istio/
 ${ISTIO_ENV}=                        ${MODELREGISTRY_BASE_FOLDER}/samples/istio/components/istio.env
 ${SAMPLE_ONNX_MODEL}=                ${MODELREGISTRY_BASE_FOLDER}/mnist.onnx
 ${MR_PYTHON_CLIENT_FILES}=           ${MODELREGISTRY_BASE_FOLDER}/Python_Dependencies
-${MR_PYTHON_CLIENT_WHL_VERSION}=     model_registry==0.2.5a1
+${MR_PYTHON_CLIENT_WHL_VERSION}=     model_registry==0.2.6a1
 ${SERVICE_MESH_MEMBER}=              ${MODELREGISTRY_BASE_FOLDER}/serviceMeshMember.yaml
 ${ENABLE_REST_API}=                  ${MODELREGISTRY_BASE_FOLDER}/enable_rest_api_route.yaml
 ${IPYNB_UPDATE_SCRIPT}=              ${MODELREGISTRY_BASE_FOLDER}/updateIPYNB.py
@@ -37,6 +37,7 @@ ${NAMESPACE_MODEL-REGISTRY}=         odh-model-registries
 ${SECRET_PART_NAME_1}=               modelregistry-sample-rest
 ${SECRET_PART_NAME_2}=               modelregistry-sample-grpc
 ${SECRET_PART_NAME_3}=               model-registry-db
+${BROWSER.NAME}=                     chrome
 
 
 *** Test Cases ***
@@ -67,6 +68,7 @@ Verify Model Registry Integration With Secured-DB
     ...    username=${TEST_USER.USERNAME}     password=${TEST_USER.PASSWORD}
     ...    auth_type=${TEST_USER.AUTH_TYPE}
     Upload Certificate To Jupyter Notebook    ${CERTS_DIRECTORY}/domain.crt
+    Upload Certificate To Jupyter Notebook    openshift_ca.crt
     Jupyter Notebook Can Query Model Registry     ${JUPYTER_NOTEBOOK}
 
 

@@ -26,8 +26,6 @@ ${PRJ_DESCRIPTION}=    project used for model serving triton runtime tests
 ${MODEL_CREATED}=    ${FALSE}
 ${ONNX_MODEL_NAME}=    densenet_onnx
 ${ONNX_MODEL_LABEL}=     densenetonnx
-${PYTORCH_MODEL_NAME}=    resnet50
-${PYTORCH_MODEL_LABEL}=     resnet50
 ${ONNX_GRPC_RUNTIME_NAME}=    triton-kserve-grpc
 ${ONNX_RUNTIME_NAME}=    triton-kserve-rest
 ${RESOURCES_DIRPATH}=        tests/Resources/Files/triton
@@ -173,7 +171,7 @@ Test PYTORCH Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=to
     Deploy Kserve Model Via UI    model_name=${PYTORCH_MODEL_NAME}    serving_runtime=triton-kserve-grpc
     ...    data_connection=model-serving-connection    path=triton/model_repository/    model_framework=pytorch - 1
     ...    token=${TRUE}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${PYTORCH_MODEL_LABEL}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${PYTORCH_MODEL_NAME}
     ...    namespace=${PRJ_TITLE}
     ${EXPECTED_INFERENCE_GRPC_OUTPUT_PYTORCH}=     Load Json File     file_path=${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE_PYTORCH}
     ...     as_string=${TRUE}
@@ -181,7 +179,7 @@ Test PYTORCH Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=to
     ${EXPECTED_INFERENCE_GRPC_OUTPUT_PYTORCH}=     Evaluate    json.dumps(${EXPECTED_INFERENCE_GRPC_OUTPUT_PYTORCH})
     Log     ${EXPECTED_INFERENCE_GRPC_OUTPUT_PYTORCH}
     Open Model Serving Home Page
-    ${host_url}=    Get Model Route Via UI       model_name=${PYTORCH_MODEL_NAMEE}
+    ${host_url}=    Get Model Route Via UI       model_name=${PYTORCH_MODEL_NAME}
     ${host}=    Evaluate    re.search(r"${PATTERN}", r"${host_url}").group(1)    re
     Log    ${host}
     ${token}=   Get Access Token Via UI    single_model=${TRUE}      model_name=resnet50   project_name=${PRJ_TITLE}

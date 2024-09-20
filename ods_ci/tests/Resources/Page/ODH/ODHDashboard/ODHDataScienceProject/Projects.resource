@@ -11,6 +11,7 @@ ${DESCR_INPUT_XP}=    xpath=//textarea[@id="manage-project-modal-description"]
 ${RESOURCE_INPUT_XP}=    xpath=//input[@data-testid="resource-manage-project-modal-name"]
 ${GENERIC_CREATE_BTN_XP}=     xpath=//button[text()="Create"]
 ${GENERIC_CANCEL_BTN_XP}=     xpath=//button[text()="Cancel"]
+# TODO: Update to latter option once the change is pulled from ODH into downstream!
 ${PROJECT_CREATE_BTN_XP}=     xpath=///button[text()="Create data science project" or text()="Create project"]
 ${ACTIONS_BTN_XP}=    xpath=//div/button[@aria-label="Actions"]
 ${DELETE_ACTION_BTN_XP}=  xpath=//div/ul/li/button[text()="Delete project"]

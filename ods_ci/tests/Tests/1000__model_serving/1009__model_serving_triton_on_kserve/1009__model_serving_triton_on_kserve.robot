@@ -26,6 +26,8 @@ ${PRJ_DESCRIPTION}=    project used for model serving triton runtime tests
 ${MODEL_CREATED}=    ${FALSE}
 ${ONNX_MODEL_NAME}=    densenet_onnx
 ${ONNX_MODEL_LABEL}=     densenetonnx
+${PYTORCH_MODEL_NAME}=    resnet50
+${PYTORCH_MODEL_LABEL}=     resnet50
 ${ONNX_GRPC_RUNTIME_NAME}=    triton-kserve-grpc
 ${ONNX_RUNTIME_NAME}=    triton-kserve-rest
 ${RESOURCES_DIRPATH}=        tests/Resources/Files/triton
@@ -35,10 +37,12 @@ ${ONNX_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_onnx_rest_servingruntim
 ${EXPECTED_INFERENCE_REST_OUTPUT_FILE}=      tests/Resources/Files/triton/kserve-triton-onnx-rest-output.json
 ${PATTERN}=  https:\/\/([^\/:]+)
 ${INFERENCE_REST_INPUT_PYTORCH}=    @tests/Resources/Files/triton/kserve-triton-resnet-rest-input.json
+${INFERENCE_GRPC_INPUT_PYTORCH}=    tests/Resources/Files/triton/kserve-triton-pytorch-gRPC-input.json
 ${PYTORCH_MODEL_NAME}=    resnet50
 ${PYTORCH_RUNTIME_NAME}=    triton-kserve-rest
 ${PYTORCH_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_onnx_rest_servingruntime.yaml
 ${EXPECTED_INFERENCE_REST_OUTPUT_FILE_PYTORCH}=       tests/Resources/Files/triton/kserve-triton-resnet-rest-output.json
+${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE_PYTORCH}=       tests/Resources/Files/triton/kserve-triton-pytorch-gRPC-output.json
 
 
 
@@ -74,7 +78,7 @@ Test Onnx Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-l
     ...  Delete Serving Runtime Template From CLI    displayed_name=triton-kserve-rest
 
 
-Test PYTORCH Model Inference Via UI(Triton on Kserve)
+Test PYTORCH Model Inference Via UI(Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of an pytorch model in Kserve using Triton
     [Tags]    Sanity           RHOAIENG-11561
 
@@ -108,7 +112,7 @@ Test PYTORCH Model Inference Via UI(Triton on Kserve)
 
 Test Onnx Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of an onnx model in Kserve using Triton
-    [Tags]    Sanity    RHOAIENG-9053
+    [Tags]    Sanity    RHOAIENG-9054
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    existing_project=${FALSE}
@@ -146,6 +150,52 @@ Test Onnx Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-l
     Log    ${result}
     Log    ${list}
     [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${ONNX_MODEL_NAME}
+    ...  project_title=${PRJ_TITLE}
+    ...  AND
+    ...  Clean All Models Of Current User
+    ...  AND
+    ...  Delete Serving Runtime Template From CLI    displayed_name=triton-kserve-grpc
+    
+Test PYTORCH Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
+    [Documentation]    Test the deployment of an onnx model in Kserve using Triton
+    [Tags]    Sanity    RHOAIENG-9053
+    Open Data Science Projects Home Page
+    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
+    ...    existing_project=${FALSE}
+    Open Dashboard Settings    settings_page=Serving runtimes
+    Upload Serving Runtime Template    runtime_filepath=${ONNX_GRPC_RUNTIME_FILEPATH}
+    ...    serving_platform=single      runtime_protocol=gRPC
+    Serving Runtime Template Should Be Listed    displayed_name=${ONNX_GRPC_RUNTIME_NAME}
+    ...    serving_platform=single
+    Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
+    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
+    ...            aws_bucket_name=ods-ci-s3
+    Deploy Kserve Model Via UI    model_name=${PYTORCH_MODEL_NAME}    serving_runtime=triton-kserve-grpc
+    ...    data_connection=model-serving-connection    path=triton/model_repository/    model_framework=pytorch - 1
+    ...    token=${TRUE}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${PYTORCH_MODEL_LABEL}
+    ...    namespace=${PRJ_TITLE}
+    ${EXPECTED_INFERENCE_GRPC_OUTPUT_PYTORCH}=     Load Json File     file_path=${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE_PYTORCH}
+    ...     as_string=${TRUE}
+    ${EXPECTED_INFERENCE_GRPC_OUTPUT_PYTORCH}=     Load Json String    ${EXPECTED_INFERENCE_GRPC_OUTPUT_PYTORCH}
+    ${EXPECTED_INFERENCE_GRPC_OUTPUT_PYTORCH}=     Evaluate    json.dumps(${EXPECTED_INFERENCE_GRPC_OUTPUT_PYTORCH})
+    Log     ${EXPECTED_INFERENCE_GRPC_OUTPUT_PYTORCH}
+    Open Model Serving Home Page
+    ${host_url}=    Get Model Route Via UI       model_name=${PYTORCH_MODEL_NAMEE}
+    ${host}=    Evaluate    re.search(r"${PATTERN}", r"${host_url}").group(1)    re
+    Log    ${host}
+    ${token}=   Get Access Token Via UI    single_model=${TRUE}      model_name=resnet50   project_name=${PRJ_TITLE}
+    ${inference_output}=    Query Model With GRPCURL   host=${host}    port=443
+    ...    endpoint=inference.GRPCInferenceService/ModelInfer
+    ...    json_body=@      input_filepath=${INFERENCE_GRPC_INPUT_PYTORCH}
+    ...    insecure=${True}    protobuf_file=${PROTOBUFF_FILE}      json_header="Authorization: Bearer ${token}"
+    Log    ${inference_output}
+    ${inference_output}=    Evaluate    json.dumps(${inference_output})
+    Log    ${inference_output}
+    ${result}    ${list}=    Inference Comparison    ${EXPECTED_INFERENCE_GRPC_OUTPUT_PYTORCH}    ${inference_output}
+    Log    ${result}
+    Log    ${list}
+    [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${PYTORCH_MODEL_NAME}
     ...  project_title=${PRJ_TITLE}
     ...  AND
     ...  Clean All Models Of Current User

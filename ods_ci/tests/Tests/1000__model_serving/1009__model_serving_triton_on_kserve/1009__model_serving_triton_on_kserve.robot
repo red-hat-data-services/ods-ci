@@ -158,7 +158,7 @@ Test Onnx Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-l
     ...  Delete Serving Runtime Template From CLI    displayed_name=triton-kserve-grpc
 
 Test KERAS Model Inference Via UI(Triton on Kserve)
-    [Documentation]    Test the deployment of an pytorch model in Kserve using Triton
+    [Documentation]    Test the deployment of an keras model in Kserve using Triton
     [Tags]    Sanity           RHOAIENG-10328
 
     Open Data Science Projects Home Page
@@ -172,12 +172,12 @@ Test KERAS Model Inference Via UI(Triton on Kserve)
     Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
-    Deploy Kserve Model Via UI    model_name=${PYTORCH_MODEL_NAME}    serving_runtime=triton-keras-rest
+    Deploy Kserve Model Via UI    model_name=${KERAS_MODEL_NAME}    serving_runtime=triton-keras-rest
     ...    data_connection=model-serving-connection    path=triton/model_repository/resnet50    model_framework=tensorflow - 2
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${KERAS_MODEL_NAME}
     ...    namespace=${PRJ_TITLE}
     ${EXPECTED_INFERENCE_REST_OUTPUT_KERAS}=     Load Json File
-    ...    file_path=${EXPECTED_INFERENCE_REST_OUTPUT_FILE_PYTORCH}    as_string=${TRUE}
+    ...    file_path=${EXPECTED_INFERENCE_REST_OUTPUT_FILE_KERAS}    as_string=${TRUE}
     Log    ${EXPECTED_INFERENCE_REST_OUTPUT_KERAS}
     Run Keyword And Continue On Failure    Verify Model Inference With Retries
     ...    ${KERAS_MODEL_NAME}    ${INFERENCE_REST_INPUT_KERAS}    ${EXPECTED_INFERENCE_REST_OUTPUT_KERAS}

@@ -42,6 +42,7 @@ Resource            OCP.resource
 ...                         Generate Minio Random Credentials
 ...                         Get Minio Credentials
 ...                         Create Inference Access Token
+...                         Create Secret With Pipelines Object Storage Information
 ${ODH_RELEASE_NAME}=     Open Data Hub
 ${RHOAI_SELFMANAGED_RELEASE_NAME}=      OpenShift AI Self-Managed
 ${RHOAI_MANAGED_RELEASE_NAME}=      OpenShift AI Cloud Service

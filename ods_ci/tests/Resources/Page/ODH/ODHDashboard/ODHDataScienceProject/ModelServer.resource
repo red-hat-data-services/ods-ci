@@ -244,6 +244,8 @@ Query Model With GRPCURL
     ...            ${port}
     ...            ${endpoint}
     ...            ${json_body}
+    ...            ${protobuf_file}=${NONE}
+    ...            ${input_filepath}=${NONE}
     ...            ${json_header}=${NONE}
     ...            ${insecure}=${FALSE}
     ...            ${plaintext}=${FALSE}
@@ -264,12 +266,15 @@ Query Model With GRPCURL
         END
         ${cmd}=    Catenate    ${cmd}    -cacert ${cert}
     END
+    IF    "${protobuf_file}" != "${NONE}"
+        ${cmd}=    Catenate    ${cmd}    -proto ${protobuf_file}
+    END
     IF    ${plaintext}
         ${cmd}=    Catenate    ${cmd}    -plaintext
     END
-    # IF    "${proto_filepath}" != "${NONE}"
-    #     ${cmd}=    Catenate    ${cmd}    -proto ${proto_filepath}
-    # END
+    IF    "${input_filepath}" != "${NONE}"
+         ${cmd}=    Catenate    ${cmd}    < ${input_filepath}
+     END
     FOR    ${index}    ${option}    IN ENUMERATE    @{args}
         Log    ${index}: ${option}: ${args}[${option}]
         ${cmd}=    Catenate    ${cmd}    -${option} ${args}[${option}]
@@ -283,7 +288,7 @@ Query Model With GRPCURL
           # Run Keyword And Continue On Failure    Should Be Equal As Integers    ${query_process.rc}    ${0}
           ${rc}=    Set Variable    ${query_process.rc}
           Run Keyword And Continue On Failure    Should Be Equal As Integers    ${rc}    ${0}
-          # Log    ${query_process.stdout}    console=yes
+          Log    ${query_process.stdout}    console=yes
           ${response}=    Set Variable    ${query_process.stdout}
           Log    ${response}    console=yes
           Log    ${rc}    console=yes

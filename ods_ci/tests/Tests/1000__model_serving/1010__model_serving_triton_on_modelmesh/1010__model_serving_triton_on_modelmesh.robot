@@ -13,7 +13,7 @@ Resource          ../../../Resources/OCP.resource
 Resource          ../../../Resources/CLI/ModelServing/modelmesh.resource
 Resource          ../../../Resources/Common.robot
 Suite Setup       Triton On Kserve Suite Setup
-Suite Teardown    Triton On Kserve Suite Teardown
+#Suite Teardown    Triton On Kserve Suite Teardown
 Test Tags         Kserve
 
 
@@ -35,7 +35,7 @@ ${PYTORCH_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_pytorch_modelmesh_ru
 ${EXPECTED_INFERENCE_REST_OUTPUT_FILE_PYTORCH}=       tests/Resources/Files/triton/modelmesh-triton-pytorch-rest-output.json
 ${INFERENCE_REST_INPUT_TENSORFLOW_FILE}=    @${RESOURCES_DIRPATH}/modelmesh-triton-tensorflow-input.json
 ${EXPECTED_INFERENCE_TENSORFLOW_OUTPUT_FILE}=      ${RESOURCES_DIRPATH}/modelmesh-triton-tensorflow-output.json
-${TENSORFLOW_RUNTIME_FILEPATH}=      ${RESOURCES_DIRPATH}/triton_tensorflow-_modelmesh_runtime.yaml
+${TENSORFLOW_RUNTIME_FILEPATH}=      ${RESOURCES_DIRPATH}/triton_tensorflow_modelmesh_runtime.yaml
 
 
 *** Test Cases ***

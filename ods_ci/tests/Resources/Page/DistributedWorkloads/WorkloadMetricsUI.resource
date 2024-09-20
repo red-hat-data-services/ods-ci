@@ -271,7 +271,7 @@ Compare Workload Created Date With Current Date
     [Documentation]    Check Workload Created Date To Be Less Than Equal To Current Date
     [Arguments]    ${workload_created_date}    ${current_date}
     ${check_workload_created_date}    Evaluate    datetime.datetime.strptime('${workload_created_date}','%m/%d/%Y') <= datetime.datetime.strptime('${current_date}','%m/%d/%Y')
-    Should Be True    ${check_workload_created_date}
+    Should Be True    ${check_workload_created_date}    Workload created date (${workload_created_date}) should be less than or equal to the current date (${current_date}).
 
 Check Requested Resources Chart
     [Documentation]    checks Requested Resources Chart

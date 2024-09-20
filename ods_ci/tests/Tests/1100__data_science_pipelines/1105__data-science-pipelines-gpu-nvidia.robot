@@ -4,39 +4,34 @@ Resource            ../../Resources/RHOSi.resource
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource            ../../Resources/CLI/DataSciencePipelines/DataSciencePipelinesBackend.resource
 Test Tags           DataSciencePipelines-Backend
-Suite Setup         Dsp Acceptance Suite Setup
-Suite Teardown      Dsp Acceptance Suite Teardown
+Suite Setup         Dsp Nvidia Gpu Suite Setup
+Suite Teardown      Dsp Nvidia Gpu Suite Teardown
 
 
 *** Variables ***
-${PROJECT}=    dsp-acceptance
-${PIPELINE_HELLOWORLD_FILEPATH}=    tests/Resources/Files/pipeline-samples/v2/pip_index_url/hello_world_pip_index_url_compiled.yaml  # robocop: disable:line-too-long
+${PROJECT}=    dsp-gpu-nvidia
+${PIPELINE_GPU_AVAILABILITY_FILEPATH}=    tests/Resources/Files/pipeline-samples/v2/gpu/pytorch/pytorch_verify_gpu_availability_compiled.yaml    # robocop: off=line-too-long
 
 
 *** Test Cases ***
-Verify Pipeline Server Creation With S3 Object Storage
-    [Documentation]    Creates a pipeline server using S3 object storage and verifies that all components are running
-    [Tags]    Smoke
-    Pass Execution    Passing test, as suite setup creates pipeline server
+Verify Pipeline Tasks Run On GPU Nodes Only When Tolerations Are Added   # robocop: off=too-long-test-case
+    [Documentation]    Runs a pipeline that tests GPU availability according to GPU tolerations in pipeline tasks:
+    ...    - One task should not have GPUs available, as we don't add the GPU tolerations
+    ...    - Another task should have GPUs available, as we add the GPU tolerations
+    [Tags]    Tier1    Resources-GPU    NVIDIA-GPUs
 
-Verify Hello World Pipeline Runs Successfully    # robocop: disable:too-long-test-case
-    [Documentation]    Runs a quick hello-world pipeline and verifies that it finishes successfully
-    [Tags]    Smoke
-
-    ${pipeline_run_params}=    Create Dictionary    message=Hello world!
-
+    # robocop: off=unused-variable
     ${pipeline_id}    ${pipeline_version_id}    ${pipeline_run_id}    ${experiment_id}=
     ...    DataSciencePipelinesBackend.Import Pipeline And Create Run
     ...    namespace=${PROJECT}    username=${TEST_USER.USERNAME}    password=${TEST_USER.PASSWORD}
-    ...    pipeline_name=hello-world
-    ...    pipeline_description=A hello world pipeline
-    ...    pipeline_package_path=${PIPELINE_HELLOWORLD_FILEPATH}
-    ...    pipeline_run_name=hello-wold-run
-    ...    pipeline_run_params=${pipeline_run_params}
+    ...    pipeline_name=pytorch-verify-gpu-availability
+    ...    pipeline_description=Verifies GPU availability in tasks when using tolerations
+    ...    pipeline_package_path=${PIPELINE_GPU_AVAILABILITY_FILEPATH}
+    ...    pipeline_run_name=pytorch-verify-gpu-availability-run
 
     DataSciencePipelinesBackend.Wait For Run Completion And Verify Status
     ...    namespace=${PROJECT}    username=${TEST_USER.USERNAME}    password=${TEST_USER.PASSWORD}
-    ...    pipeline_run_id=${pipeline_run_id}    pipeline_run_timeout=180
+    ...    pipeline_run_id=${pipeline_run_id}    pipeline_run_timeout=240
     ...    pipeline_run_expected_status=SUCCEEDED
 
     [Teardown]       DataSciencePipelinesBackend.Delete Pipeline And Related Resources
@@ -45,7 +40,7 @@ Verify Hello World Pipeline Runs Successfully    # robocop: disable:too-long-tes
 
 
 *** Keywords ***
-Dsp Acceptance Suite Setup
+Dsp Nvidia Gpu Suite Setup
     [Documentation]    Dsp Acceptance Suite Setup
     RHOSi Setup
     Projects.Create Data Science Project From CLI    ${PROJECT}
@@ -58,7 +53,7 @@ Dsp Acceptance Suite Setup
     ...    dsp_version=v2
     DataSciencePipelinesBackend.Wait Until Pipeline Server Is Deployed    namespace=${PROJECT}
 
-Dsp Acceptance Suite Teardown
+Dsp Nvidia Gpu Suite Teardown
     [Documentation]    Dsp Acceptance Suite Teardown
     Projects.Delete Project Via CLI By Display Name    ${PROJECT}
     RHOSi Teardown

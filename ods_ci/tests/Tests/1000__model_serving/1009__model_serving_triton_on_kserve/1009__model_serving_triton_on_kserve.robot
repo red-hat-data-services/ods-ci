@@ -46,11 +46,13 @@ ${TENSORFLOW_GRPC_RUNTIME_NAME}=    triton-tensorflow-grpc
 ${TENSORFLOW_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_tensorflow_gRPC_servingruntime.yaml
 ${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE_TENSORFLOW}=       tests/Resources/Files/triton/kserve-triton-inception_graphdef-gRPC-output.json
 ${KERAS_RUNTIME_NAME}=    triton-keras-rest
-${KERAS_MODEL_NAME}=      resnet50
 ${KERAS_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_keras_rest_servingruntime.yaml
 ${INFERENCE_REST_INPUT_KERAS}=    @tests/Resources/Files/triton/kserve-triton-keras-rest-input.json
 ${EXPECTED_INFERENCE_REST_OUTPUT_FILE_KERAS}=       tests/Resources/Files/triton/kserve-triton-keras-rest-output.json
-
+${KERAS_RUNTIME_NAME_GRPC}=    triton-keras-grpc
+${KERAS_GRPC_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_keras_gRPC_servingruntime.yaml
+${INFERENCE_GRPC_INPUT_KERAS}=    @tests/Resources/Files/triton/kserve-triton-keras-gRPC-input.json
+${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE_KERAS}=       tests/Resources/Files/triton/kserve-triton-keras-gRPC-output.json
 
 
 *** Test Cases ***
@@ -208,6 +210,52 @@ Test Tensorflow Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off
     ...  AND
     ...  Delete Serving Runtime Template From CLI    displayed_name=triton-tensorflow-grpc
 
+Test KERAS Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
+    [Documentation]    Test the deployment of an keras model in Kserve using Triton
+    [Tags]    Sanity    RHOAIENG-10327
+    Open Data Science Projects Home Page
+    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
+    ...    existing_project=${FALSE}
+    Open Dashboard Settings    settings_page=Serving runtimes
+    Upload Serving Runtime Template    runtime_filepath=${KERAS_GRPC_RUNTIME_FILEPATH}
+    ...    serving_platform=single      runtime_protocol=gRPC
+    Serving Runtime Template Should Be Listed    displayed_name=${KERAS_RUNTIME_NAME_GRPC}
+    ...    serving_platform=single
+    Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
+    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
+    ...            aws_bucket_name=ods-ci-s3
+    Deploy Kserve Model Via UI    model_name=${PYTORCH_MODEL_NAME}    serving_runtime=triton-keras-grpc
+    ...    data_connection=model-serving-connection    path=tritonkeras/model_repository/    model_framework=tensorflow - 2
+    ...    token=${TRUE}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${PYTORCH_MODEL_NAME}
+    ...    namespace=${PRJ_TITLE}
+    ${EXPECTED_INFERENCE_GRPC_OUTPUT_KERAS}=     Load Json File     file_path=${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE_KERAS}
+    ...     as_string=${TRUE}
+    ${EXPECTED_INFERENCE_GRPC_OUTPUT_KERAS}=     Load Json String    ${EXPECTED_INFERENCE_GRPC_OUTPUT_KERAS}
+    ${EXPECTED_INFERENCE_GRPC_OUTPUT_KERAS}=     Evaluate    json.dumps(${EXPECTED_INFERENCE_GRPC_OUTPUT_KERAS})
+    Log     ${EXPECTED_INFERENCE_GRPC_OUTPUT_KERAS}
+    Open Model Serving Home Page
+    ${host_url}=    Get Model Route Via UI       model_name=${PYTORCH_MODEL_NAME}
+    ${host}=    Evaluate    re.search(r"${PATTERN}", r"${host_url}").group(1)    re
+    Log    ${host}
+    ${token}=   Get Access Token Via UI    single_model=${TRUE}      model_name=resnet50   project_name=${PRJ_TITLE}
+    ${inference_output}=    Query Model With GRPCURL   host=${host}    port=443
+    ...    endpoint=inference.GRPCInferenceService/ModelInfer
+    ...    json_body=@      input_filepath=${INFERENCE_GRPC_INPUT_KERAS}
+    ...    insecure=${True}    protobuf_file=${PROTOBUFF_FILE}      json_header="Authorization: Bearer ${token}"
+    Log    ${inference_output}
+    ${inference_output}=    Evaluate    json.dumps(${inference_output})
+    Log    ${inference_output}
+    ${result}    ${list}=    Inference Comparison    ${EXPECTED_INFERENCE_GRPC_OUTPUT_KERAS}    ${inference_output}
+    Log    ${result}
+    Log    ${list}
+    [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${PYTORCH_MODEL_NAME}
+    ...  project_title=${PRJ_TITLE}
+    ...  AND
+    ...  Clean All Models Of Current User
+    ...  AND
+    ...  Delete Serving Runtime Template From CLI    displayed_name=triton-keras-grpc
+
 Test KERAS Model Inference Via UI(Triton on Kserve)
     [Documentation]    Test the deployment of an keras model in Kserve using Triton
     [Tags]    Sanity           RHOAIENG-10328
@@ -223,17 +271,17 @@ Test KERAS Model Inference Via UI(Triton on Kserve)
     Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
-    Deploy Kserve Model Via UI    model_name=${KERAS_MODEL_NAME}    serving_runtime=triton-keras-rest
+    Deploy Kserve Model Via UI    model_name=${PYTORCH_MODEL_NAME}    serving_runtime=triton-keras-rest
     ...    data_connection=model-serving-connection    path=tritonkeras/model_repository/    model_framework=tensorflow - 2
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${KERAS_MODEL_NAME}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${PYTORCH_MODEL_NAME}
     ...    namespace=${PRJ_TITLE}    timeout=180s
     ${EXPECTED_INFERENCE_REST_OUTPUT_KERAS}=     Load Json File
     ...    file_path=${EXPECTED_INFERENCE_REST_OUTPUT_FILE_KERAS}    as_string=${TRUE}
     Log    ${EXPECTED_INFERENCE_REST_OUTPUT_KERAS}
     Run Keyword And Continue On Failure    Verify Model Inference With Retries
-    ...    ${KERAS_MODEL_NAME}    ${INFERENCE_REST_INPUT_KERAS}    ${EXPECTED_INFERENCE_REST_OUTPUT_KERAS}
+    ...    ${PYTORCH_MODEL_NAME}    ${INFERENCE_REST_INPUT_KERAS}    ${EXPECTED_INFERENCE_REST_OUTPUT_KERAS}
     ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}
-    [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${KERAS_MODEL_NAME}
+    [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${PYTORCH_MODEL_NAME}
     ...  project_title=${PRJ_TITLE}
     ...  AND
     ...  Clean All Models Of Current User

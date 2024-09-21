@@ -121,7 +121,7 @@ Select Model Server
     ...    Selects the given one
     [Arguments]    ${model_server}
     ${selectable}=    Run Keyword And Return Status
-    ...    Wait Until Element Is Visible    xpath://span[.="Model servers"]/../../..//button[@aria-label="Options menu"]    timeout=1
+    ...    Wait Until Element Is Visible    xpath://span[.="Model servers"]/../../..//button[@aria-label="Options menu"]    timeout=3
     IF    ${selectable}==True
         Open Model servers Options Menu  # robocop:disable
         Click Element    xpath://li/button[.="${model_server}"]

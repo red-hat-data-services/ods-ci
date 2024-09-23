@@ -65,7 +65,7 @@ Validate Service Mesh Control Plane Already Created
     [Documentation]    This Test Case validates that only one ServiceMeshControlPlane is allowed to be installed per project/namespace
     [Tags]      Operator        Tier3       RHOAIENG-2517
     Fetch Image Url And Update Channel
-    Check Whether DSC Exists
+    Check Whether DSC Exists And Save Component Statuses
     Fetch Cluster Type By Domain
     IF    "${CLUSTER_TYPE}" == "selfmanaged"
         Uninstall RHODS In Self Managed Cluster
@@ -100,14 +100,20 @@ Teardown Service Mesh Control Plane Already Created
     # Cleanup Olminstall dir
     Cleanup Olm Install Dir
     IF      ${DSC_EXISTS} == True
-        Apply DataScienceCluster CustomResource     ${DSC_NAME}
+        Apply DataScienceCluster CustomResource     ${DSC_NAME}     True    ${custom_cmp}
     END
 
-Check Whether DSC Exists
+Check Whether DSC Exists And Save Component Statuses
     ${rc}=    Run And Return Rc
     ...    oc get datasciencecluster ${DSC_NAME}
     IF  ${rc} == 0
         Set Global Variable    ${DSC_EXISTS}    True
+        &{custom_cmp} =       Create Dictionary
+        ${rc}    ${out}=    Run And Return Rc And Output
+        ...    oc get datasciencecluster ${DSC_NAME} -o jsonpath='{.spec.components}'
+        ${custom_cmp}=    evaluate    json.loads('''${out}''')    json
+        # Overwrite what is taken from test-variables
+        Set Test Variable    ${custom_cmp}    ${custom_cmp}
     ELSE 
         Set Global Variable    ${DSC_EXISTS}    False
     END
@@ -116,11 +122,11 @@ Fetch Image Url And Update Channel
     [Documentation]    Fetch url for image and Update Channel
     # Fetch subscription first
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc get subscription ${OPERATOR_SUBSCRIPTION_NAME} -o jsonpath='{.spec.source}'
+    ...    oc get subscription ${OPERATOR_SUBSCRIPTION_NAME} -n ${OPERATOR_NAMESPACE} -o jsonpath='{.spec.source}'
     Should Be Equal As Integers    ${rc}    0
     Set Global Variable    ${CS_NAME}    ${out}
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc get subscription ${OPERATOR_SUBSCRIPTION_NAME} -o jsonpath='{.spec.sourceNamespace}'
+    ...    oc get subscription ${OPERATOR_SUBSCRIPTION_NAME} -n ${OPERATOR_NAMESPACE} -o jsonpath='{.spec.sourceNamespace}'
     Should Be Equal As Integers    ${rc}    0
     Set Global Variable    ${CS_NAMESPACE}    ${out}
     # Get CatalogSource

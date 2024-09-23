@@ -144,7 +144,7 @@ Test Tensorflow Model Rest Inference Via UI (Triton on Modelmesh)
     Verify Model Inference With Retries    ${TENSORFLOW_MODEL_NAME}    ${INFERENCE_REST_INPUT_TENSORFLOW_FILE}
     ...    ${EXPECTED_INFERENCE_REST_OUTPUT_TENSORFLOW}
     ...    token_auth=${TRUE}
-    ...    project_title=${PRJ_TITLE}
+    ...    project_title=${PRJ_TITLE}       service_account_name=default-name
     #[Teardown]  Run Keywords    Get Modelmesh Events And Logs      model_name=${TENSORFLOW_MODEL_NAME}
     #...  project_title=${PRJ_TITLE}
     #...  AND

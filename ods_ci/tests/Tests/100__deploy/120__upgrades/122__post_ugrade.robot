@@ -19,6 +19,7 @@ Resource           ../../../Resources/Page/OCPDashboard/Builds/Builds.robot
 Resource           ../../../Resources/Page/HybridCloudConsole/OCM.robot
 Resource           ../../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 Resource           ../../../Resources/Page/DistributedWorkloads/WorkloadMetricsUI.resource
+Test Tags          PostUpgrade
 
 *** Variables ***
 ${S_SIZE}       25

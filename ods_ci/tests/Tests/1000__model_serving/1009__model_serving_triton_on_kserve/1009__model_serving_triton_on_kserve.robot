@@ -175,7 +175,7 @@ Test KERAS Model Inference Via UI(Triton on Kserve)
     Deploy Kserve Model Via UI    model_name=${KERAS_MODEL_NAME}    serving_runtime=triton-keras-rest
     ...    data_connection=model-serving-connection    path=triton/model_repository/resnet50    model_framework=tensorflow - 2
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${KERAS_MODEL_NAME}
-    ...    namespace=${PRJ_TITLE}
+    ...    namespace=${PRJ_TITLE}    timeout=180s
     ${EXPECTED_INFERENCE_REST_OUTPUT_KERAS}=     Load Json File
     ...    file_path=${EXPECTED_INFERENCE_REST_OUTPUT_FILE_KERAS}    as_string=${TRUE}
     Log    ${EXPECTED_INFERENCE_REST_OUTPUT_KERAS}

@@ -246,6 +246,7 @@ Get Access Token Via UI
     ...    by using the UI of DSP
     [Arguments]    ${project_name}    ${service_account_name}=default-name    ${single_model}=${FALSE}
     ...            ${model_name}=${NONE}
+    Log     ${service_account_name}
     Open Data Science Project Details Page    ${project_name}    tab_id=model-server
     ${token}=    Get Model Serving Access Token via UI    ${service_account_name}    ${single_model}    ${model_name}
     RETURN    ${token}
@@ -265,7 +266,8 @@ Get Model Inference
     ...    set to ${TRUE}.
     [Arguments]    ${model_name}    ${inference_input}    ${token_auth}=${FALSE}   ${project_title}=${NONE}
     ...    ${kserve_mode}=Serverless   ${deployment_mode}=UI   ${service_port}=8888   ${end_point}=${NONE}
-    ...    ${service_account_name}=${NONE}    ${token}=${NONE}      ${service_account_name}=${NONE}
+    ...    ${service_account_name}=${NONE}    ${token}=${NONE}
+    Log    ${service_account_name}
     ${curl_cmd}=     Set Variable    ${NONE}
     ${self_managed}=    Is RHODS Self-Managed
     IF    $deployment_mode == 'UI'
@@ -333,6 +335,7 @@ Verify Model Inference
          Open Model Serving Home Page
          Switch Model Serving Project    ${project_title}
     END
+    Log    ${service_account_name}
     ${inference_output}=    Get Model Inference    model_name=${model_name}   inference_input=${inference_input}
     ...    token_auth=${token_auth}    kserve_mode=${kserve_mode}    project_title=${project_title}
     ...    deployment_mode=${deployment_mode}    service_port=${service_port}    end_point=${end_point}
@@ -359,6 +362,7 @@ Verify Model Inference With Retries
     [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}=${FALSE}
     ...            ${project_title}=${NONE}    ${retries}=${5}     ${deployment_mode}=UI    ${kserve_mode}=Serverless
     ...            ${service_port}=${NONE}   ${end_point}=${NONE}       ${service_account_name}=${NONE}
+    Log     ${service_account_name}
     ${status}=    Run Keyword And Return Status    Verify Model Inference    ${model_name}    ${inference_input}
     ...    ${expected_inference_output}    ${token_auth}    ${project_title}    ${deployment_mode}     ${service_account_name}
     IF    not ${status}

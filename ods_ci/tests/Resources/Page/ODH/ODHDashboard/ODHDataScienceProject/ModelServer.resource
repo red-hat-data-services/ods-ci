@@ -244,14 +244,17 @@ Query Model With GRPCURL
     ...            ${port}
     ...            ${endpoint}
     ...            ${json_body}
+    ...            ${protobuf_file}=${NONE}
+    ...            ${input_filepath}=${NONE}
     ...            ${json_header}=${NONE}
     ...            ${insecure}=${FALSE}
     ...            ${plaintext}=${FALSE}
     ...            ${background}=${NONE}
     ...            ${skip_res_json}=${FALSE}
     ...            ${cert}=${False}
+    ...            ${connect_timeout}=10
     ...            &{args}
-    ${cmd}=    Set Variable    grpcurl -d ${json_body}
+    ${cmd}=    Set Variable    grpcurl -connect-timeout ${connect_timeout} -d ${json_body}
     IF    $json_header != None
         ${cmd}=    Catenate    ${cmd}    -H ${json_header}
     END
@@ -263,12 +266,15 @@ Query Model With GRPCURL
         END
         ${cmd}=    Catenate    ${cmd}    -cacert ${cert}
     END
+    IF    "${protobuf_file}" != "${NONE}"
+        ${cmd}=    Catenate    ${cmd}    -proto ${protobuf_file}
+    END
     IF    ${plaintext}
         ${cmd}=    Catenate    ${cmd}    -plaintext
     END
-    # IF    "${proto_filepath}" != "${NONE}"
-    #     ${cmd}=    Catenate    ${cmd}    -proto ${proto_filepath}
-    # END
+    IF    "${input_filepath}" != "${NONE}"
+         ${cmd}=    Catenate    ${cmd}    < ${input_filepath}
+     END
     FOR    ${index}    ${option}    IN ENUMERATE    @{args}
         Log    ${index}: ${option}: ${args}[${option}]
         ${cmd}=    Catenate    ${cmd}    -${option} ${args}[${option}]
@@ -277,15 +283,17 @@ Query Model With GRPCURL
     ${cmd}=    Catenate    ${cmd}    ${endpoint}
     IF   '${background}' == '${NONE}'
           # ${rc}    ${response}=    Run And Return Rc And Output    ${cmd}
+          Log    ${cmd}    console=yes
           ${query_process}=    Run Process    command=${cmd}    stderr=STDOUT  shell=yes
           # Run Keyword And Continue On Failure    Should Be Equal As Integers    ${query_process.rc}    ${0}
           ${rc}=    Set Variable    ${query_process.rc}
           Run Keyword And Continue On Failure    Should Be Equal As Integers    ${rc}    ${0}
-          # Log    ${query_process.stdout}    console=yes
+          Log    ${query_process.stdout}    console=yes
           ${response}=    Set Variable    ${query_process.stdout}
           Log    ${response}    console=yes
+          Log    ${rc}    console=yes
           # ${json_res}=    Load Json String    ${query_process.stdout}
-          IF    ${skip_res_json} == ${TRUE}
+          IF    ${rc} != ${0} or ${skip_res_json} == ${TRUE}
             Log    ${response}
             RETURN    ${response}
           ELSE

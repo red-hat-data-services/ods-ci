@@ -155,7 +155,7 @@ Test Onnx Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-l
     ...  Delete Serving Runtime Template From CLI    displayed_name=triton-kserve-grpc
     
 Test PYTORCH Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
-    [Documentation]    Test the deployment of an onnx model in Kserve using Triton
+    [Documentation]    Test the deployment of an pytorch model in Kserve using Triton
     [Tags]    Sanity    RHOAIENG-9053
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
@@ -167,12 +167,12 @@ Test PYTORCH Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=to
     ...    serving_platform=single
     Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
-    ...            aws_bucket_name=ods-ci-s3
+    ...            aws_bucket_name=${S3.BUCKET_1.NAME}
     Deploy Kserve Model Via UI    model_name=${PYTORCH_MODEL_NAME}    serving_runtime=triton-kserve-grpc
     ...    data_connection=model-serving-connection    path=triton/model_repository/    model_framework=pytorch - 1
     ...    token=${TRUE}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${PYTORCH_MODEL_NAME}
-    ...    namespace=${PRJ_TITLE}
+    ...    namespace=${PRJ_TITLE}    timeout=180s
     ${EXPECTED_INFERENCE_GRPC_OUTPUT_PYTORCH}=     Load Json File     file_path=${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE_PYTORCH}
     ...     as_string=${TRUE}
     ${EXPECTED_INFERENCE_GRPC_OUTPUT_PYTORCH}=     Load Json String    ${EXPECTED_INFERENCE_GRPC_OUTPUT_PYTORCH}

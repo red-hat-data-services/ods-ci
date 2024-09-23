@@ -39,13 +39,13 @@ ${PYTORCH_MODEL_NAME}=    resnet50
 ${PYTORCH_RUNTIME_NAME}=    triton-kserve-rest
 ${PYTORCH_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_onnx_rest_servingruntime.yaml
 ${EXPECTED_INFERENCE_REST_OUTPUT_FILE_PYTORCH}=       tests/Resources/Files/triton/kserve-triton-resnet-rest-output.json
-${INFERENCE_GRPC_INPUT_TENSORFLOW}=    @tests/Resources/Files/triton/kserve-triton-tensorflow-gRPC-input.json
+${INFERENCE_GRPC_INPUT_TENSORFLOW}=    tests/Resources/Files/triton/kserve-triton-inception_graphdef-gRPC-input.json
 ${TENSORFLOW_MODEL_NAME}=    inception_graphdef
 ${TENSORFLOW_MODEL_LABEL}=     inceptiongraphdef
 ${TENSORFLOW_RUNTIME_NAME}=    triton-tensorflow-grpc
 ${TENSORFLOW_GRPC_RUNTIME_NAME}=    triton-tensorflow-grpc
 ${TENSORFLOW_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_tensorflow_gRPC_servingruntime.yaml
-${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE_TENSORFLOW}=       tests/Resources/Files/triton/kserve-triton-tensorflow-gRPC-output.json
+${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE_TENSORFLOW}=       tests/Resources/Files/triton/kserve-triton-inception_graphdef-gRPC-output.json
 
 
 

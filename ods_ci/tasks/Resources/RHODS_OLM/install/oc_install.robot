@@ -89,7 +89,12 @@ Verify RHODS Installation
   IF  "${UPDATE_CHANNEL}" == "odh-nightlies" or "${cluster_type}" != "managed"
     IF  "${PRODUCT}" == "ODH"
         Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
-        Wait For DSCInitialization CustomResource To Be Ready    timeout=30
+        IF    "${TEST_ENV.lower()}" == "crc"
+            ${timeout_in_seconds} =   Set Variable   180
+        ELSE
+            ${timeout_in_seconds} =   Set Variable   30
+        END
+        Wait For DSCInitialization CustomResource To Be Ready    timeout=${timeout_in_seconds}
     END
     Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
   END
@@ -256,22 +261,14 @@ Create DSCInitialization CustomResource Using Test Variables
     Run    sed -i'' -e 's/<monitoring_namespace>/${MONITORING_NAMESPACE}/' ${file_path}dsci_apply.yml
 
 Wait For DSCInitialization CustomResource To Be Ready
-  [Documentation]   Wait for DSCInitialization CustomResource To Be Ready
-  [Arguments]     ${timeout}
-  Log To Console    Waiting for DSCInitialization CustomResource To Be Ready
-  ${status}   Set Variable   False
-  FOR    ${counter}    IN RANGE   ${timeout}
-         ${return_code}    ${output} =    Run And Return Rc And Output   oc get DSCInitialization --no-headers -o custom-columns=":status.phase"
-         IF    '${output}' == 'Ready'
-               ${status} =  Set Variable  True
-               Log To Console  DSCInitialization CustomResource is Ready
-               BREAK
-         END
-         Sleep    1 sec
-  END
-  IF    '${status}' == 'False'
-        Run Keyword And Continue On Failure    FAIL    Timeout- DSCInitialization CustomResource is not Ready
-  END
+    [Documentation]   Wait ${timeout} seconds for DSCInitialization CustomResource To Be Ready
+    [Arguments]     ${timeout}
+    Log To Console    Waiting ${timeout} seconds for DSCInitialization CustomResource To Be Ready
+    ${result} =    Run Process    oc wait DSCInitialization --timeout\=${timeout}s --for jsonpath\='{.status.phase}'\=Ready --all
+    ...    shell=true    stderr=STDOUT
+    IF    ${result.rc} != 0
+        Run Keyword And Continue On Failure    FAIL    ${result.stdout}
+    END
 
 Apply DataScienceCluster CustomResource
     [Documentation]

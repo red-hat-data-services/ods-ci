@@ -8,6 +8,11 @@ Resource          ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 Resource          ../../../../tests/Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 
 
+*** Variables ***
+${RAY_CUDA_IMAGE}                    quay.io/modh/ray@sha256:4575dd54fe05213fe9228cd316d5e87a9395cd16b618a85a94995709e5f3aaeb
+${RAY_TORCH_CUDA_IMAGE}              quay.io/rhoai/ray@sha256:158b481b8e9110008d60ac9fb8d156eadd71cb057ac30382e62e3a231ceb39c0
+
+
 *** Test Cases ***
 Run TestKueueRayCpu ODH test
     [Documentation]    Run Go ODH test: TestKueueRayCpu
@@ -16,7 +21,7 @@ Run TestKueueRayCpu ODH test
     ...     DistributedWorkloads
     ...     Training
     ...     CodeflareOperator
-    Run Codeflare ODH Test    TestMnistRayCpu
+    Run Codeflare ODH Test    TestMnistRayCpu    ${RAY_CUDA_IMAGE}
 
 Run TestKueueRayGpu ODH test
     [Documentation]    Run Go ODH test: TestKueueRayGpu
@@ -25,7 +30,7 @@ Run TestKueueRayGpu ODH test
     ...     DistributedWorkloads
     ...     Training
     ...     CodeflareOperator
-    Run Codeflare ODH Test    TestMnistRayGpu
+    Run Codeflare ODH Test    TestMnistRayGpu    ${RAY_CUDA_IMAGE}
 
 Run TestRayTuneHPOCpu ODH test
     [Documentation]    Run Go ODH test: TestMnistRayTuneHpoCpu
@@ -34,7 +39,7 @@ Run TestRayTuneHPOCpu ODH test
     ...     DistributedWorkloads
     ...     Training
     ...     CodeflareOperator
-    Run Codeflare ODH Test    TestMnistRayTuneHpoCpu
+    Run Codeflare ODH Test    TestMnistRayTuneHpoCpu    ${RAY_CUDA_IMAGE}
 
 Run TestRayTuneHPOGpu ODH test
     [Documentation]    Run Go ODH test: TestMnistRayTuneHpoGpu
@@ -43,4 +48,23 @@ Run TestRayTuneHPOGpu ODH test
     ...     DistributedWorkloads
     ...     Training
     ...     CodeflareOperator
-    Run Codeflare ODH Test    TestMnistRayTuneHpoGpu
+    Run Codeflare ODH Test    TestMnistRayTuneHpoGpu    ${RAY_CUDA_IMAGE}
+
+Run TestKueueCustomRayCpu ODH test
+    [Documentation]    Run Go ODH test: TestKueueCustomRayCpu
+    [Tags]  RHOAIENG-10013
+    ...     Tier1
+    ...     DistributedWorkloads
+    ...     Training
+    ...     CodeflareOperator
+    Run Codeflare ODH Test    TestMnistCustomRayImageCpu    ${RAY_TORCH_CUDA_IMAGE}
+
+Run TestKueueCustomRayGpu ODH test
+    [Documentation]    Run Go ODH test: TestKueueCustomRayGpu
+    [Tags]  RHOAIENG-10013
+    ...     Resources-GPU
+    ...     Tier1
+    ...     DistributedWorkloads
+    ...     Training
+    ...     CodeflareOperator
+    Run Codeflare ODH Test    TestMnistCustomRayImageGpu    ${RAY_TORCH_CUDA_IMAGE}

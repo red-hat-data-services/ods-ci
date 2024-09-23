@@ -35,12 +35,12 @@ ${ONNX_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_onnx_rest_servingruntim
 ${EXPECTED_INFERENCE_REST_OUTPUT_FILE}=      tests/Resources/Files/triton/kserve-triton-onnx-rest-output.json
 ${PATTERN}=  https:\/\/([^\/:]+)
 ${INFERENCE_REST_INPUT_PYTORCH}=    @tests/Resources/Files/triton/kserve-triton-resnet-rest-input.json
-${INFERENCE_GRPC_INPUT_PYTORCH}=    tests/Resources/Files/triton/kserve-triton-pytorch-gRPC-input.json
+${INFERENCE_GRPC_INPUT_PYTORCH}=    tests/Resources/Files/triton/kserve-triton-resnet-gRPC-input.json
 ${PYTORCH_MODEL_NAME}=    resnet50
 ${PYTORCH_RUNTIME_NAME}=    triton-kserve-rest
 ${PYTORCH_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_onnx_rest_servingruntime.yaml
 ${EXPECTED_INFERENCE_REST_OUTPUT_FILE_PYTORCH}=       tests/Resources/Files/triton/kserve-triton-resnet-rest-output.json
-${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE_PYTORCH}=       tests/Resources/Files/triton/kserve-triton-pytorch-gRPC-output.json
+${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE_PYTORCH}=       tests/Resources/Files/triton/kserve-triton-resnet-gRPC-output.json
 
 
 

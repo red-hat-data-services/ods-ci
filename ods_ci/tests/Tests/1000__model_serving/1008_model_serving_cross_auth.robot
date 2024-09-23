@@ -1,6 +1,6 @@
 # robocop: off=too-long-test-case,too-many-calls-in-test-case,wrong-case-in-keyword-name
 *** Settings ***
-Documentation     Suite of test cases for OVMS in Kserve
+Documentation     Suite of test cases for OVMS in Kserve and ModelMesh
 Library           OperatingSystem
 Library           ../../../libs/Helpers.py
 Resource          ../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
@@ -13,6 +13,7 @@ Resource          ../../Resources/OCP.resource
 Resource          ../../Resources/CLI/ModelServing/modelmesh.resource
 #Suite Setup       Cross Auth On Kserve Suite Setup
 #Suite Teardown    Cross Auth On Kserve Suite Teardown
+Test Teardown     Run Keywords    Cross Auth On Kserve Test Teardown
 Test Tags         Kserve    Modelmesh   Sanity  ProductBug
 
 
@@ -26,29 +27,32 @@ ${SECOND_MODEL_NAME}=    test-model-second
 ${RUNTIME_NAME}=    Model Serving Test
 ${EXPECTED_INFERENCE_OUTPUT}=    {"model_name":"${MODEL_NAME}__isvc-83d6fab7bd","model_version":"1","outputs":[{"name":"Plus214_Output_0","datatype":"FP32","shape":[1,10],"data":[-8.233053,-7.7497034,-3.4236815,12.3630295,-12.079103,17.266596,-10.570976,0.7130762,3.321715,1.3621228]}]}  #robocop: disable
 ${SECOND_EXPECTED_INFERENCE_OUTPUT}=    {"model_name":"${SECOND_MODEL_NAME}__isvc-83d6fab7bd","model_version":"1","outputs":[{"name":"Plus214_Output_0","datatype":"FP32","shape":[1,10],"data":[-8.233053,-7.7497034,-3.4236815,12.3630295,-12.079103,17.266596,-10.570976,0.7130762,3.321715,1.3621228]}]}  #robocop: disable
-${SINGLE_MODE_ENABLED}=    ${TRUE}
-${SINGLE_MODE_DISABLED}=    ${FALSE}
 
 
 *** Test Cases ***
 Test Cross Model Authentication On Kserve
     [Documentation]    Tests for the presence of CVE-2024-7557 when using Kserve
-    Template with embedded arguments
-    ...     project_name=${PRJ_TITLE}-kserve
-    ...     mode=${SINGLE_MODE_ENABLED}
     [Tags]  RHOAIENG-11007    RHOAIENG-12048
+    Set Test Variable    $serving_mode  kserve
+    Set Test Variable    $project_name  ${PRJ_TITLE}-${serving_mode}
+    Template with embedded arguments
+    ...     project_name=${project_name}
+    ...     mode=${serving_mode}
 
 Test Cross Model Authentication On ModelMesh
     [Documentation]    Tests for the presence of CVE-2024-7557 when using ModelMesh
-    Template with embedded arguments
-    ...     project_name=${PRJ_TITLE}-modelmesh
-    ...     mode=${SINGLE_MODE_DISABLED}
     [Tags]  RHOAIENG-12314    RHOAIENG-12853
+    Set Test Variable    $serving_mode  modelmeshserving
+    Set Test Variable    $project_name  ${PRJ_TITLE}-${serving_mode}
+    Template with embedded arguments
+    ...     project_name=${project_name}
+    ...     mode=${serving_mode}
 
 *** Keywords ***
 Template with embedded arguments
     [Arguments]    ${project_name}  ${mode}
-    Cross Auth On Kserve Suite Setup
+    ${single_model}=    Set Variable If    "${mode}" == "kserve"    ${True}    ${False}
+    Cross Auth On Kserve Suite Setup    mode=${mode}
     Open Data Science Projects Home Page
     Create Data Science Project    title=${project_name}    description=${PRJ_DESCRIPTION}
     ...    existing_project=${FALSE}
@@ -60,7 +64,7 @@ Template with embedded arguments
     ...    service_account_name=first_account    token=${TRUE}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${MODEL_NAME}
     ...    namespace=${project_name}
-    ${first_token}=  Get Model Serving Access Token via UI    service_account_name=first_account    single_model=${TRUE}
+    ${first_token}=  Get Model Serving Access Token via UI    service_account_name=first_account    single_model=${single_model}
     ...    model_name=${MODEL_NAME}
     Deploy Kserve Model Via UI    model_name=${SECOND_MODEL_NAME}    serving_runtime=OpenVINO Model Server
     ...    data_connection=model-serving-connection    path=test-dir    model_framework=onnx
@@ -68,7 +72,7 @@ Template with embedded arguments
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${SECOND_MODEL_NAME}
     ...    namespace=${project_name}
     ${second_token}=  Get Model Serving Access Token via UI    service_account_name=second_account
-    ...    single_model=${mode}    model_name=${SECOND_MODEL_NAME}
+    ...    single_model=${single_model}    model_name=${SECOND_MODEL_NAME}
     Verify Model Inference    model_name=${MODEL_NAME}    inference_input=${INFERENCE_INPUT}
     ...    expected_inference_output=${EXPECTED_INFERENCE_OUTPUT}    token_auth=${TRUE}    token=${first_token}
     ...    project_title=${project_name}
@@ -83,15 +87,16 @@ Template with embedded arguments
     ${inf_out}=  Get Model Inference    model_name=${SECOND_MODEL_NAME}    inference_input=${INFERENCE_INPUT}
     ...    token_auth=${TRUE}    token=${first_token}
     Run Keyword And Warn On Failure    Should Contain    ${inf_out}    Log in with OpenShift
-    [Teardown]  Run Keywords  Run Keyword If Test Failed    Get Kserve Events And Logs
-    ...    model_name=${MODEL_NAME}    project_title=${project_name}    AND    Clean All Models Of Current User
-    ...    AND    Cross Auth On Kserve Suite Teardown   project_title=${project_name}
+#    [Teardown]  Run Keywords  Run Keyword If Test Failed    Get Kserve Events And Logs
+#    ...    model_name=${MODEL_NAME}    project_title=${project_name}    AND    Clean All Models Of Current User
+#    ...    AND    Cross Auth On Kserve Suite Teardown   project_title=${project_name}
 
 Cross Auth On Kserve Suite Setup
     [Documentation]    Suite setup steps for testing DSG. It creates some test variables
     ...                and runs RHOSi setup
+    [Arguments]    ${mode}
     Set Library Search Order    SeleniumLibrary
-    Skip If Component Is Not Enabled    kserve
+    Skip If Component Is Not Enabled    ${mode}
     RHOSi Setup
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
@@ -116,3 +121,11 @@ Cross Auth On Kserve Suite Teardown
     Remove File    openshift_ca_istio_knative.crt
     SeleniumLibrary.Close All Browsers
     RHOSi Teardown
+
+
+Cross Auth On Kserve Test Teardown
+    [Documentation]     Test teardown steps after testing DSG. Collects logs and
+    ...                 events.
+    Run Keywords  Run Keyword If Test Failed    Get Kserve Events And Logs
+    ...    model_name=${MODEL_NAME}    project_title=${project_name}    AND    Clean All Models Of Current User
+    ...    AND    Cross Auth On Kserve Suite Teardown   project_title=${project_name}

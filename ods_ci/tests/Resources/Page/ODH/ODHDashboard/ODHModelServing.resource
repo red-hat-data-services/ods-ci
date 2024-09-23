@@ -399,7 +399,7 @@ Clean Up Model Serving Page
         Sleep    1s
     END
 #    Switch Model Serving Project    project_name=All projects
-#    END
+#     END
 
 Add Namespace To ServiceMeshMemberRoll
     [Arguments]    ${namespace}    ${servicemesh_ns}=istio-system

@@ -360,7 +360,7 @@ Verify Model Inference With Retries
     ...            ${project_title}=${NONE}    ${retries}=${5}     ${deployment_mode}=UI    ${kserve_mode}=Serverless
     ...            ${service_port}=${NONE}   ${end_point}=${NONE}       ${service_account_name}=${NONE}
     ${status}=    Run Keyword And Return Status    Verify Model Inference    ${model_name}    ${inference_input}
-    ...    ${expected_inference_output}    ${token_auth}    ${project_title}    ${deployment_mode}
+    ...    ${expected_inference_output}    ${token_auth}    ${project_title}    ${deployment_mode}     ${service_account_name}
     IF    not ${status}
         ${retry}=    Set Variable    ${0}
         WHILE    ${retry} < ${retries}

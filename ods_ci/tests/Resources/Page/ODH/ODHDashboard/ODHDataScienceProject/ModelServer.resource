@@ -212,6 +212,7 @@ Get Model Serving Access Token via UI
     [Documentation]    Returns the token used for authentication to the serving route
     ...    TODO: There can be multiple tokens defined for each model server, handle this case as well
     [Arguments]    ${service_account_name}=default-name    ${single_model}=${FALSE}    ${model_name}=${NONE}
+    Log    ${service_account_name}
     IF    ${single_model}
         # Expand the model
         SeleniumLibrary.Click Button    xpath: //a[text()='${model_name}']/parent::div/parent::td[@data-label='Name']/preceding-sibling::td/button  # robocop: off=line-too-long

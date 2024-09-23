@@ -18,6 +18,7 @@ Resource           ../../../Resources/Page/OCPDashboard/Pods/Pods.robot
 Resource           ../../../Resources/Page/OCPDashboard/Builds/Builds.robot
 Resource           ../../../Resources/Page/HybridCloudConsole/OCM.robot
 Resource           ../../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
+Test Tags          PostUpgrade
 
 
 *** Variables ***

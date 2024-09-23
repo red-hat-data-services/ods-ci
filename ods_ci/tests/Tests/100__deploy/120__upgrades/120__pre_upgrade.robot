@@ -21,6 +21,7 @@ Resource           ../../../Resources/CLI/ModelServing/modelmesh.resource
 Resource           ../../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 Suite Setup        Dashboard Suite Setup
 Suite Teardown     RHOSi Teardown
+Test Tags          PreUpgrade
 
 
 *** Variables ***

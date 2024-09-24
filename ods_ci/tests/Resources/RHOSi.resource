@@ -105,6 +105,7 @@ Assign Vars According To Product
         Set Suite Variable    ${DASHBOARD_LABEL_SELECTOR}     app.kubernetes.io/part-of=rhods-dashboard
         Set Suite Variable    ${APPLICATIONS_NAMESPACE}    redhat-ods-applications
         Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     rhoai-operator-dev
+        Set Suite Variable  ${MODEL_REGISTRY_NAMESPACE}    rhoai-model-registries
     ELSE IF    "${PRODUCT}" == "ODH"
         Set Suite Variable    ${OPERATOR_APPNAME}  "Open Data Hub Operator"
         Set Suite Variable    ${OPERATOR_DEPLOYMENT_NAME}    opendatahub-operator-controller-manager
@@ -116,6 +117,7 @@ Assign Vars According To Product
         Set Suite Variable    ${DASHBOARD_LABEL_SELECTOR}     app.kubernetes.io/part-of=dashboard
         Set Suite Variable    ${APPLICATIONS_NAMESPACE}    opendatahub
         Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     rhoai-operator-dev
+        Set Suite Variable   ${MODEL_REGISTRY_NAMESPACE}    odh-model-registries
     END
 
 Gather Release Attributes From DSC And DSCI

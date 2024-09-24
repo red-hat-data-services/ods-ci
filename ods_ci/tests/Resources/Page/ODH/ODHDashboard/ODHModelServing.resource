@@ -642,6 +642,7 @@ Set Up Project
 Set Modelmesh Model Name
     [Documentation]    Sets the model name in the "add model server" modal
     [Arguments]    ${model_name}
+    Log To Console    ${model_name} xxxxxxx
     Input Text    xpath://input[@id="serving-runtime-name-input"]    ${model_name}
 
 Add Model Server Via UI

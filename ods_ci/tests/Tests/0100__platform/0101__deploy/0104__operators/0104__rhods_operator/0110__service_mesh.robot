@@ -111,8 +111,7 @@ Check Whether DSC Exists And Save Component Statuses
         &{custom_cmp} =       Create Dictionary
         ${rc}    ${out}=    Run And Return Rc And Output
         ...    oc get datasciencecluster ${DSC_NAME} -o jsonpath='{.spec.components}'
-        ${custom_cmp}=    evaluate    json.loads('''${out}''')    json
-        # Overwrite what is taken from test-variables
+        ${custom_cmp}=    Load Json String    ${out}
         Set Test Variable    ${custom_cmp}    ${custom_cmp}
     ELSE 
         Set Global Variable    ${DSC_EXISTS}    False

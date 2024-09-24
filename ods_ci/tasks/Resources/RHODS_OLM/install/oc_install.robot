@@ -273,12 +273,12 @@ Wait For DSCInitialization CustomResource To Be Ready
 
 Apply DataScienceCluster CustomResource
     [Documentation]
-    [Arguments]        ${dsc_name}=${DSC_NAME}      ${custom}='False'       ${custom_cmp}=''
+    [Arguments]        ${dsc_name}=${DSC_NAME}      ${custom}=False       ${custom_cmp}=''
     ${file_path} =    Set Variable    tasks/Resources/Files/
     IF      ${custom} == True
         Log to Console    message=Creating DataScience Cluster using custom configuration
         Create DataScienceCluster CustomResource Using Custom Configuration
-        Apply Custom Manifest in DataScienceCluster CustomResource Using Custom Configuration
+        Apply DevFlags in DataScienceCluster CustomResource
         ${yml} =    Get File    ${file_path}dsc_apply.yml
         Log To Console    Applying DSC yaml
         Log To Console    ${yml}
@@ -370,9 +370,9 @@ Apply Custom Manifest in DataScienceCluster CustomResource Using Test Variables
          END
     END
 
-Apply Custom Manifest in DataScienceCluster CustomResource Using Custom Configuration
-    [Documentation]    Apply custom manifests to a DSC file
-    Log To Console    Applying Custom Manifests
+Apply DevFlags in DataScienceCluster CustomResource
+    [Documentation]    Apply devFlags to a DSC file
+    Log To Console    Applying devFlags
     ${file_path} =    Set Variable    tasks/Resources/Files/
     FOR    ${cmp}    IN    @{COMPONENT_LIST}
         Run     sed -i'' -e "s|<${cmp}_devflags>||g" ${file_path}dsc_apply.yml

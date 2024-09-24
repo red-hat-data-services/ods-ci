@@ -10,7 +10,7 @@ ${CODEFLARE-SDK-API_URL}                 %{CODEFLARE-SDK-API_URL=https://api.git
 ${CODEFLARE-SDK_DIR}                     codeflare-sdk
 ${CODEFLARE-SDK_REPO_URL}                %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
 ${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}  https://github.com/opendatahub-io/distributed-workloads/releases/latest/download
-${FMS_HF_TUNING_IMAGE}                   quay.io/modh/fms-hf-tuning@sha256:8edea6f0f9c4c631cdca1e1c10abf0d4b994738fde78c40d48eda216fdd382f5
+${FMS_HF_TUNING_IMAGE}                   quay.io/modh/fms-hf-tuning@sha256:f8f732c340488734bf9023953d14bb2410991bd3ff2a519ad2ce07c531353797
 ${NOTEBOOK_IMAGE}                        quay.io/modh/odh-generic-data-science-notebook@sha256:9d7f80080a453bcf7dee01b986df9ee811ee74f6f433c601a8b67d283c160547
 ${NOTEBOOK_USER_NAME}                    ${TEST_USER_3.USERNAME}
 ${NOTEBOOK_USER_PASSWORD}                ${TEST_USER_3.PASSWORD}

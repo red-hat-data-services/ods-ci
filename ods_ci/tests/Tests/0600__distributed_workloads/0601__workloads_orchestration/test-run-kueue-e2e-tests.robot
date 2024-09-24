@@ -5,8 +5,8 @@ Suite Teardown    Teardown Kueue E2E Test Suite
 Library           OperatingSystem
 Library           Process
 Library           OpenShiftLibrary
-Resource          ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
-Resource          ../../../tests/Resources/Page/OCPLogin/OCPLogin.robot
+Resource          ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
+Resource          ../../../../tests/Resources/Page/OCPLogin/OCPLogin.robot
 
 
 *** Variables ***
@@ -20,6 +20,7 @@ Run Kueue E2E test
     [Tags]  Tier1
     ...     Kueue
     ...     DistributedWorkloads
+    ...     WorkloadsOrchestration
     ...     ExcludeOnDisconnected
     Run Kueue E2E Test    e2e_test.go
 
@@ -28,6 +29,7 @@ Run Sanity test
     [Tags]  Sanity
     ...     Kueue
     ...     DistributedWorkloads
+    ...     WorkloadsOrchestration
     Run Kueue sanity Test    Should run with prebuilt workload
 
 

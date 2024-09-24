@@ -335,8 +335,8 @@ Verify User Can Validate Scale To Zero    # robocop: off=too-long-test-case,too-
     ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}    exp_replicas=${2}
     Wait For Pods To Be Terminated    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}
-    Query Model Multiple Times    model_name=${flan_model_name}    runtime=${TGIS_RUNTIME_NAME}    n_times=1
-    ...    namespace=${test_namespace}
+    Query Model Multiple Times    model_name=${flan_model_name}    n_times=1    connect_timeout=300
+    ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    runtime=${TGIS_RUNTIME_NAME}
     Wait For Pods To Be Terminated    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}

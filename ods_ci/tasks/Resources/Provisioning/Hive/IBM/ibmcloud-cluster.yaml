@@ -75,3 +75,6 @@ items:
         name: ibmcloud-sno-install-config
       manifestsSecretRef:
         name: ${infrastructure_configurations}[hive_cluster_name]-manifests
+      installerEnv:
+        - name: OPENSHIFT_INSTALL_SKIP_HOSTCRYPT_VALIDATION
+          value: 'true'

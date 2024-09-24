@@ -150,7 +150,7 @@ Create Floating IPs
     Export Variables From File    ${fips_file_to_export}
 
 Watch Hive Install Log
-    [Arguments]    ${pool_name}    ${namespace}    ${hive_timeout}=70m
+    [Arguments]    ${pool_name}    ${namespace}    ${hive_timeout}=80m
     ${label_selector} =    Set Variable    hive.openshift.io/cluster-deployment-name=${cluster_name}
     IF    ${use_cluster_pool}
         ${label_selector} =    Set Variable    hive.openshift.io/clusterpool-name=${pool_name}

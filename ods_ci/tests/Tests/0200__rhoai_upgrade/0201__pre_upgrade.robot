@@ -22,6 +22,7 @@ Resource           ../../Resources/Page/DistributedWorkloads/DistributedWorkload
 Resource           ../../Resources/Page/DistributedWorkloads/WorkloadMetricsUI.resource
 Suite Setup        Dashboard Suite Setup
 Suite Teardown     RHOSi Teardown
+Test Tags          PreUpgrade
 
 
 *** Variables ***

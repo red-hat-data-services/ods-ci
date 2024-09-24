@@ -158,6 +158,14 @@ Verify RHODS Installation
     ...                   label_selector=app.kubernetes.io/name=data-science-pipelines-operator
     ...                   timeout=400
   END
+  ${modelregistry} =    Is Component Enabled    modelregistry    ${DSC_NAME}
+  IF    "${modelregistry}" == "true"
+    Log To Console    "Waiting for 1 pod in ${APPLICATIONS_NAMESPACE}, label_selector=app.kubernetes.io/part-of=model-registry-operator"
+    Wait For Pods Numbers   1
+    ...                   namespace=${APPLICATIONS_NAMESPACE}
+    ...                   label_selector=app.kubernetes.io/part-of=model-registry-operator
+    ...                   timeout=400
+  END
   ${kserve} =    Is Component Enabled    kserve    ${DSC_NAME}
   IF    "${kserve}" == "true"
     Log To Console    "Waiting for 3 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app=odh-model-controller"

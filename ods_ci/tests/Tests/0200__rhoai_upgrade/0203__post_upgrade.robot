@@ -22,7 +22,8 @@ Resource           ../../Resources/Page/HybridCloudConsole/OCM.robot
 Resource           ../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 Resource           ../../Resources/Page/DistributedWorkloads/WorkloadMetricsUI.resource
 Resource           ../../Resources/CLI/MustGather/MustGather.resource
-Suite Setup    Upgrade Suite Setup
+Suite Setup        Upgrade Suite Setup
+Test Tags          PostUpgrade
 
 
 *** Variables ***

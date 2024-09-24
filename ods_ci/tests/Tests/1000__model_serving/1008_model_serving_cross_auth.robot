@@ -12,7 +12,7 @@ Resource          ../../Resources/Page/ODH/Monitoring/Monitoring.resource
 Resource          ../../Resources/OCP.resource
 Resource          ../../Resources/CLI/ModelServing/modelmesh.resource
 Test Teardown     Cross Auth Test Teardown
-Test Tags         Kserve    Modelmesh   Sanity  ProductBug
+Test Tags             Sanity  ProductBug
 
 
 *** Variables ***
@@ -32,14 +32,14 @@ ${SECOND_SERVICE_ACCOUNT}=    second_account
 *** Test Cases ***
 Test Cross Model Authentication On Kserve
     [Documentation]    Tests for the presence of CVE-2024-7557 when using Kserve
-    [Tags]  RHOAIENG-11007    RHOAIENG-12048
+    [Tags]  Kserve       RHOAIENG-11007    RHOAIENG-12048
     Set Test Variable    $serving_mode  kserve
     Set Test Variable    $project_name  ${PRJ_TITLE}-${serving_mode}
     Template with embedded arguments
 
 Test Cross Model Authentication On ModelMesh
     [Documentation]    Tests for the presence of CVE-2024-7557 when using ModelMesh
-    [Tags]  RHOAIENG-12314    RHOAIENG-12853
+    [Tags]  ModelMesh    RHOAIENG-11007      RHOAIENG-12853
     Set Test Variable    $serving_mode  modelmeshserving
     Set Test Variable    $project_name  ${PRJ_TITLE}-${serving_mode}
     Template with embedded arguments
@@ -55,14 +55,14 @@ Template with embedded arguments
     Cross Auth Model Deployment     single_model=${single_model}
     ...     model_name=${MODEL_NAME}  service_account_name=${FIRST_SERVICE_ACCOUNT}
 
-    ${first_token}=  Get Model Serving Access Token via UI    service_account_name=${FIRST_SERVICE_ACCOUNT}    single_model=${single_model}
-    ...    model_name=${MODEL_NAME}
+    ${first_token}=  Get Access Token Via UI    service_account_name=${FIRST_SERVICE_ACCOUNT}    single_model=${single_model}
+    ...    model_name=${MODEL_NAME}     project_name=${project_name}
 
     Cross Auth Model Deployment     single_model=${single_model}
     ...     model_name=${SECOND_MODEL_NAME}     service_account_name=${SECOND_SERVICE_ACCOUNT}
 
-    ${second_token}=  Get Model Serving Access Token via UI    service_account_name=${SECOND_SERVICE_ACCOUNT}
-    ...    single_model=${single_model}    model_name=${SECOND_MODEL_NAME}
+    ${second_token}=  Get Access Token Via UI    single_model=${single_model}
+    ...    model_name=${MODEL_NAME}     project_name=${project_name}
 
     Verify Model Inference    model_name=${MODEL_NAME}    inference_input=${INFERENCE_INPUT}
     ...    expected_inference_output=${EXPECTED_INFERENCE_OUTPUT}    token_auth=${TRUE}    token=${first_token}
@@ -94,12 +94,16 @@ Cross Auth Model Deployment
         ...    service_account_name=${service_account_name}    token=${TRUE}
         Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}    namespace=${project_name}
     ELSE
-        Add Model Server Via UI         model_name=${model_name}    serving_runtime=OpenVINO Model Server
-        ...    service_account_name=${service_account_name}    token=${TRUE}
-        Deploy Model Via UI             model_name=${model_name}     model_framework=onnx
-        ...    data_connection=${dc_name}    path=test-dir
-        Wait For Pods To Be Ready     label_selector=name=modelmesh-serving-${model_name}
-        ...    namespace=${project_name}
+        Create Model Server    token=${TRUE}    server_name=${model_name}
+        Serve Model    project_name=${project_name}    model_name=${model_name}    framework=onnx
+        ...    existing_data_connection=${TRUE}    data_connection_name=${dc_name}      model_server=${model_name}
+        ...    model_path=openvino-example-model
+        ${runtime_pod_name}=    Replace String Using Regexp    string=${project_name}    pattern=\\s    replace_with=-
+        ${runtime_pod_name}=    Convert To Lower Case    ${runtime_pod_name}
+        Wait Until Keyword Succeeds    5 min  10 sec  Verify Openvino Deployment    runtime_name=${model_name}
+        ...    project_name=${project_name}
+        Wait Until Keyword Succeeds    5 min  10 sec  Verify Serving Service    project_name=${project_name}
+        Verify Model Status    ${MODEL_NAME}    success
     END
 
 Cross Auth Test Setup

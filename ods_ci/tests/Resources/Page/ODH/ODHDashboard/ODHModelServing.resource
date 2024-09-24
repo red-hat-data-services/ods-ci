@@ -26,10 +26,8 @@ ${MS_TABLE_STATUS_SUCCESS}=     //span[contains(@class,"pf-v5-c-icon__content")]
 ${MS_TABLE_STATUS_FAILURE}=     //span[contains(@class,"pf-v5-c-icon__content")][contains(@class,"pf-m-danger")]
 ${KSERVE_MODAL_HEADER}=    //header[@class="pf-v5-c-modal-box__header"]/h1[.="Deploy model"]
 ${KSERVE_RUNTIME_DROPDOWN}=    //button[@data-testid="serving-runtime-template-selection"]
-${MODELMESH_MODAL_HEADER}=    //header[@class="pf-v5-c-modal-box__header"]/h1[.="Add model server"]
 ${LLM_RESOURCES_DIRPATH}=    tests/Resources/Files/llm
 ${DEPLOY_MODEL_BTN}=    //button[contains(@data-testid,"deploy")]
-${DEPLOY_MODELMESH_MODEL_BTN}=    //button[contains(@data-testid,"add")]
 ${TOKEN_AUTH_CHECKBOX_XP}=    xpath://input[@id="alt-form-checkbox-auth"]
 
 
@@ -638,57 +636,3 @@ Set Up Project
     ELSE
         Log    message=Skipping UserWorkloadMonitoring enablement.
     END
-
-Set Modelmesh Model Name
-    [Documentation]    Sets the model name in the "add model server" modal
-    [Arguments]    ${model_name}
-    Input Text    xpath://input[@id="serving-runtime-name-input"]    ${model_name}
-
-Add Model Server Via UI
-    [Documentation]  Add model server (multi-model) using the Data Science Projects UI
-    [Arguments]    ${model_name}    ${serving_runtime}
-    ...    ${replicas}=1    ${size}=Small
-    ...    ${token}=${FALSE}    ${multi_token}=${FALSE}    ${multi_service_account_name}=default-name2
-    ...    ${public_endpoint}=${TRUE}    ${service_account_name}=${NONE}
-    Move To Tab    Models
-    SeleniumLibrary.Click Button    ${DEPLOY_MODELMESH_MODEL_BTN}
-    SeleniumLibrary.Wait Until Page Contains Element    xpath=${MODELMESH_MODAL_HEADER}
-    Set Modelmesh Model Name   ${model_name}
-    Set Model Server Runtime    ${serving_runtime}
-    Set Replicas Number With Buttons    ${replicas}
-    Set Server Size    ${size}
-    IF    ${public_endpoint}
-        Enable External Serving Route
-        # By default this also enables Token Authentication. Let's disable it and let it get re-enable by the next
-        # IF block if needed.
-        ${token_enabled}=     Run Keyword And Return Status    SeleniumLibrary.Checkbox Should Be Selected
-        ...    ${TOKEN_AUTH_CHECKBOX_XP}
-        IF    ${token_enabled}
-            Disable Token Authentication
-        ELSE
-            Log    Token Authentication was supposed to be automatically enabled, but it wasn't    level=ERROR
-            ...    console=${True}
-        END
-    END
-    IF    ${token}
-        Enable Token Authentication    service_account_name=${service_account_name}
-        IF    ${multi_token}
-            Add Another Service Account    ${multi_service_account_name}
-        END
-    END
-    Click Button    Add
-    Wait Until Page Does Not Contain Element    xpath=${KSERVE_MODAL_HEADER}   timeout=60s
-
-Deploy Model Via UI
-    [Documentation]  Deploy a model using the Data Science Projects UI
-    [Arguments]    ${model_name}    ${model_framework}    ${data_connection}    ${path}
-    Move To Tab    Models
-    SeleniumLibrary.Click Button    ${DEPLOY_MODEL_BTN}
-    SeleniumLibrary.Wait Until Page Contains Element    xpath=${KSERVE_MODAL_HEADER}
-    Set Model Name   ${model_name}
-    Select Framework    ${model_framework}
-    Select Existing Data Connection    ${data_connection}
-    Set Folder Path    ${path}
-    Click Button    Deploy
-    Wait Until Page Does Not Contain Element    xpath=${KSERVE_MODAL_HEADER}   timeout=60s
-

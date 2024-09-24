@@ -33,7 +33,6 @@ ${ONNX_GRPC_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_onnx_gRPC_servingr
 ${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE}=     tests/Resources/Files/triton/kserve-triton-onnx-gRPC-output.json
 ${ONNX_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_onnx_rest_servingruntime.yaml
 ${EXPECTED_INFERENCE_REST_OUTPUT_FILE}=      tests/Resources/Files/triton/kserve-triton-onnx-rest-output.json
-${PATTERN}=  https:\/\/([^\/:]+)
 ${INFERENCE_REST_INPUT_PYTORCH}=    @tests/Resources/Files/triton/kserve-triton-resnet-rest-input.json
 ${PYTORCH_MODEL_NAME}=    resnet50
 ${PYTORCH_RUNTIME_NAME}=    triton-kserve-rest
@@ -177,17 +176,16 @@ Test Tensorflow Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off
     ...    data_connection=model-serving-connection    path=triton/model_repository/    model_framework=tensorflow - 2
     ...    token=${TRUE}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${TENSORFLOW_MODEL_LABEL}
-    ...    namespace=${PRJ_TITLE}
+    ...    namespace=${PRJ_TITLE}    timeout=180s
     ${EXPECTED_INFERENCE_GRPC_OUTPUT_TENSORFLOW}=     Load Json File     file_path=${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE_TENSORFLOW}
     ...     as_string=${TRUE}
     ${EXPECTED_INFERENCE_GRPC_OUTPUT_TENSORFLOW}=     Load Json String    ${EXPECTED_INFERENCE_GRPC_OUTPUT_TENSORFLOW}
     ${EXPECTED_INFERENCE_GRPC_OUTPUT_TENSORFLOW}=     Evaluate    json.dumps(${EXPECTED_INFERENCE_GRPC_OUTPUT_TENSORFLOW})
     Log     ${EXPECTED_INFERENCE_GRPC_OUTPUT_TENSORFLOW}
     Open Model Serving Home Page
-    ${host_url}=    Get Model Route Via UI       model_name=${TENSORFLOW_MODEL_NAME}
-    ${host}=    Evaluate    re.search(r"${PATTERN}", r"${host_url}").group(1)    re
+    ${host}=    Get Model Route for gRPC Via UI    model_name=${TENSORFLOW_MODEL_NAME}   
     Log    ${host}
-    ${token}=   Get Access Token Via UI    single_model=${TRUE}      model_name=inception_graphdef   project_name=${PRJ_TITLE}
+    ${token}=   Get Access Token Via UI    single_model=${TRUE}      model_name=${TENSORFLOW_MODEL_NAME}   project_name=${PRJ_TITLE}
     ${inference_output}=    Query Model With GRPCURL   host=${host}    port=443
     ...    endpoint=inference.GRPCInferenceService/ModelInfer
     ...    json_body=@      input_filepath=${INFERENCE_GRPC_INPUT_TENSORFLOW}

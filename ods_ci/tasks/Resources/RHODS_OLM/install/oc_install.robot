@@ -277,7 +277,7 @@ Apply DataScienceCluster CustomResource
     ${file_path} =    Set Variable    tasks/Resources/Files/
     IF      ${custom} == True
         Log to Console    message=Creating DataScience Cluster using custom configuration
-        Create DataScienceCluster CustomResource Using Custom Configuration
+        Generate CustomManifest In DSC YAML
         Apply DevFlags in DataScienceCluster CustomResource
         ${yml} =    Get File    ${file_path}dsc_apply.yml
         Log To Console    Applying DSC yaml
@@ -338,8 +338,7 @@ Create DataScienceCluster CustomResource Using Test Variables
             END
     END
 
-Create DataScienceCluster CustomResource Using Custom Configuration
-    [Documentation]
+Generate CustomManifest In DSC YAML
     [Arguments]    ${dsc_name}=${DSC_NAME}
     Log To Console      ${custom_cmp}.items
     ${file_path} =    Set Variable    tasks/Resources/Files/

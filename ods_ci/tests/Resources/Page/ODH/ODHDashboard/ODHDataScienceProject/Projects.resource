@@ -8,7 +8,7 @@ Resource       ./Workbenches.resource
 ${DS_PROJECT_TITLE}=    Data Science Projects
 ${TITLE_INPUT_XP}=    xpath=//input[@id="manage-project-modal-name"]
 ${DESCR_INPUT_XP}=    xpath=//textarea[@id="manage-project-modal-description"]
-${RESOURCE_INPUT_XP}=    css:[data-testid="resource-manage-project-modal-name"]
+${RESOURCE_INPUT_XP}=    css:[data-testid="manage-project-modal-name"]
 ${GENERIC_CREATE_BTN_XP}=     xpath=//button[text()="Create"]
 ${GENERIC_CANCEL_BTN_XP}=     xpath=//button[text()="Cancel"]
 # TODO: Update to latter option once the change is pulled from ODH into downstream!

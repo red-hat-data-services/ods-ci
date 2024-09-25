@@ -286,14 +286,14 @@ Apply DataScienceCluster CustomResource
     IF      ${custom} == True
         Log to Console    message=Creating DataScience Cluster using custom configuration
         Generate CustomManifest In DSC YAML
-        Apply DevFlags in DataScienceCluster CustomResource
+        Rename DevFlags in DataScienceCluster CustomResource
         ${yml} =    Get File    ${file_path}dsc_apply.yml
         Log To Console    Applying DSC yaml
         Log To Console    ${yml}
         ${return_code}    ${output} =    Run And Return Rc And Output    oc apply -f ${file_path}dsc_apply.yml
         Log To Console    ${output}
         Should Be Equal As Integers  ${return_code}  0  msg=Error detected while applying DSC CR
-        Remove File    ${file_path}dsc_apply.yml
+        #Remove File    ${file_path}dsc_apply.yml
         Wait For DSC Conditions Reconciled    ${OPERATOR_NS}     ${DSC_NAME}
     ELSE
         Log to Console    Requested Configuration:
@@ -339,7 +339,6 @@ Create DataScienceCluster CustomResource Using Test Variables
             ELSE IF    '${COMPONENTS.${cmp}}' == 'Removed'
                 Run    sed -i'' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
             END
-
             # The model registry component needs to set the namespace used, so adding this special statement just for it
             IF    '${cmp}' == 'modelregistry'
                 Run    sed -i'' -e 's/<${cmp}_namespace>/${MODEL_REGISTRY_NAMESPACE}/' ${file_path}dsc_apply.yml
@@ -361,6 +360,10 @@ Generate CustomManifest In DSC YAML
             ELSE IF    '${status}' == 'Removed'
                 Run    sed -i'' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
             END
+            # The model registry component needs to set the namespace used, so adding this special statement just for it
+            IF    '${cmp}' == 'modelregistry'
+                Run    sed -i'' -e 's/<${cmp}_namespace>/${MODEL_REGISTRY_NAMESPACE}/' ${file_path}dsc_apply.yml
+            END
     END
 
 Apply Custom Manifest in DataScienceCluster CustomResource Using Test Variables
@@ -377,9 +380,9 @@ Apply Custom Manifest in DataScienceCluster CustomResource Using Test Variables
          END
     END
 
-Apply DevFlags in DataScienceCluster CustomResource
-    [Documentation]    Apply devFlags to a DSC file
-    Log To Console    Applying devFlags
+Rename DevFlags in DataScienceCluster CustomResource
+    [Documentation]     Filling devFlags fields for every component in DSC
+    Log To Console    Filling devFlags fields for every component in DSC
     ${file_path} =    Set Variable    tasks/Resources/Files/
     FOR    ${cmp}    IN    @{COMPONENT_LIST}
         Run     sed -i'' -e "s|<${cmp}_devflags>||g" ${file_path}dsc_apply.yml

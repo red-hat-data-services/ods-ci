@@ -102,6 +102,8 @@ Teardown Service Mesh Control Plane Already Created
     IF      ${DSC_EXISTS} == True
         Apply DataScienceCluster CustomResource     ${DSC_NAME}     True    ${custom_cmp}
     END
+    Wait Until Keyword Succeeds    2 min    0 sec
+    ...    Is Resource Present    ServiceMeshControlPlane    ${SERVICE_MESH_CR_NAME}    ${SERVICE_MESH_CR_NS}    ${IS_PRESENT}
 
 Check Whether DSC Exists And Save Component Statuses
     ${rc}=    Run And Return Rc

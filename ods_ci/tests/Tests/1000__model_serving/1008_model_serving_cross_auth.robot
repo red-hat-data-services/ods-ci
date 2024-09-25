@@ -88,13 +88,14 @@ Cross Auth Model Deployment
     Recreate S3 Data Connection    project_title=${project_name}    dc_name=${dc_name}
     ...     aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...     aws_bucket_name=ods-ci-s3
+    Open Data Science Project Details Page    ${project_name}    tab_id=model-server
     IF    ${single_model} == ${TRUE}
         Deploy Kserve Model Via UI    model_name=${model_name}    serving_runtime=OpenVINO Model Server
         ...    data_connection=${dc_name}    path=test-dir    model_framework=onnx
         ...    service_account_name=${service_account_name}    token=${TRUE}
         Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}    namespace=${project_name}
     ELSE
-        Create Model Server    token=${TRUE}    server_name=${model_name}
+        Create Model Server    token=${TRUE}    server_name=${model_name}   service_account_name=${service_account_name}
         Serve Model    project_name=${project_name}    model_name=${model_name}    framework=onnx
         ...    existing_data_connection=${TRUE}    data_connection_name=${dc_name}      model_server=${model_name}
         ...    model_path=openvino-example-model

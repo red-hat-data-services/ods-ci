@@ -15,7 +15,7 @@ Test Tags          Dashboard
 
 
 *** Variables ***
-${PRJ_TITLE}=   ods-ci-common-project
+${PRJ_TITLE}=   ODS-CI Common Prj
 ${PRJ_TITLE1}=    ODS-CI DS Project1
 ${PRJ_RESOURCE_NAME}=   ods-ci-common-project
 ${PRJ_DESCRIPTION}=   ${PRJ_TITLE} is a test project for validating DS Projects feature and shared by multiple tests

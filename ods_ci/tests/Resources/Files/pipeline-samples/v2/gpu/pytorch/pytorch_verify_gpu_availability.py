@@ -7,12 +7,6 @@ common_base_image = (
 )
 
 
-# Plain Python image
-# common_base_image = (
-#     "registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61"
-# )
-
-
 def add_pip_index_configuration(task: PipelineTask):
     kubernetes.use_config_map_as_env(
         task,

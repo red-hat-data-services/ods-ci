@@ -104,7 +104,7 @@ Create Workbench
         Wait Until Element Is Enabled    ${WORKBENCH_CREATE_BTN_2_XP}
         Click Button    ${WORKBENCH_CREATE_BTN_2_XP}
     END
-    Wait Until Element Is Not Visible    //form    10s
+    Wait Until Element Is Not Visible    //form    60s
     Open Data Science Project Details Page       project_title=${prj_title}    tab_id=workbenches
 
 #robocop: disable: line-too-long

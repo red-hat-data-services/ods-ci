@@ -19,6 +19,7 @@ ${DSCI_NAME} =    default-dsci
 ...    trainingoperator
 ...    trustyai
 ...    workbenches
+...    modelregistry
 ${SERVERLESS_OP_NAME}=     serverless-operator
 ${SERVERLESS_SUB_NAME}=    serverless-operator
 ${SERVERLESS_NS}=    openshift-serverless
@@ -155,6 +156,14 @@ Verify RHODS Installation
     Wait For Pods Numbers   1
     ...                   namespace=${APPLICATIONS_NAMESPACE}
     ...                   label_selector=app.kubernetes.io/name=data-science-pipelines-operator
+    ...                   timeout=400
+  END
+  ${modelregistry} =    Is Component Enabled    modelregistry    ${DSC_NAME}
+  IF    "${modelregistry}" == "true"
+    Log To Console    "Waiting for 1 pod in ${APPLICATIONS_NAMESPACE}, label_selector=app.kubernetes.io/part-of=model-registry-operator"
+    Wait For Pods Numbers   1
+    ...                   namespace=${APPLICATIONS_NAMESPACE}
+    ...                   label_selector=app.kubernetes.io/part-of=model-registry-operator
     ...                   timeout=400
   END
   ${kserve} =    Is Component Enabled    kserve    ${DSC_NAME}
@@ -315,6 +324,11 @@ Create DataScienceCluster CustomResource Using Test Variables
                 Run    sed -i'' -e 's/<${cmp}_value>/Managed/' ${file_path}dsc_apply.yml
             ELSE IF    '${COMPONENTS.${cmp}}' == 'Removed'
                 Run    sed -i'' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
+            END
+
+            # The model registry component needs to set the namespace used, so adding this special statement just for it
+            IF    '${cmp}' == 'modelregistry'
+                Run    sed -i'' -e 's/<${cmp}_namespace>/${MODEL_REGISTRY_NAMESPACE}/' ${file_path}dsc_apply.yml
             END
     END
 

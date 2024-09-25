@@ -183,7 +183,7 @@ Enable Token Authentication
     [Arguments]    ${service_account_name}=${NONE}
     SeleniumLibrary.Select Checkbox    ${TOKEN_AUTH_CHECKBOX_XP}
     IF    "${service_account_name}" == "${NONE}"
-        ${service_account_name}=    Set Variable    default-name
+        ${service_account_name}     default-name
     END
     Input Service Account Name    ${service_account_name}
 

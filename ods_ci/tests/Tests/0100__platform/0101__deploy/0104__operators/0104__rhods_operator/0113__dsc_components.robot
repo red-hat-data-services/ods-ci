@@ -193,6 +193,9 @@ Validate ModelRegistry Managed State
 
     Set DSC Component Managed State And Wait For Completion   modelregistry    ${MODELREGISTRY_CONTROLLER__DEPLOYMENT_NAME}    ${MODELREGISTRY_CONTROLLER__LABEL_SELECTOR}
 
+    # Check if Deployment exists in expected namespace
+    Check Model Registry Deployment Namespace
+
     [Teardown]     Restore DSC Component State    modelregistry    ${MODELREGISTRY_CONTROLLER__DEPLOYMENT_NAME}    ${MODELREGISTRY_CONTROLLER__LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.MODELREGISTRY}
 
 Validate ModelRegistry Removed State
@@ -382,3 +385,19 @@ Check Image Pull Path Is Redhatio
     ELSE
         Fail    Deployment image  ${deployment_name} does not contain pull path registry.redhat.io
     END
+
+Check Model Registry Deployment Namespace
+    [Documentation]    Check that Model Registry is deployed into namespace as defined in DSC modelregistry.registriesNamespace
+
+    # Get expected namespace
+    ${rc}   ${expected_namespace}=    Run And Return Rc And Output
+    ...    oc get DataScienceCluster/${DSC_NAME} -n ${OPERATOR_NS} -o "jsonpath={".spec.components.modelregistry.registriesNamespace"}"
+    Should Be Equal As Integers    ${rc}    0    msg=${expected_namespace}
+
+    # Get actual namespace
+    ${rc}   ${actual_namespace}=    Run And Return Rc And Output
+    ...    oc get deployments -A | grep ${MODELREGISTRY_CONTROLLER_DEPLOYMENT_NAME} | awk '{print$1}'
+    Should Be Equal As Integers    ${rc}    0    msg=${actual_namespace}
+
+    Log To Console    Model Registry Namespace: Actual "${actual_namespace}" Expected: "${expected_namespace}
+    Should Be Equal    ${actual_namespace}    ${expected_namespace}

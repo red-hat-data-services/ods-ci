@@ -19,6 +19,7 @@ ${DSCI_NAME} =    default-dsci
 ...    trainingoperator
 ...    trustyai
 ...    workbenches
+...    modelregistry
 ${SERVERLESS_OP_NAME}=     serverless-operator
 ${SERVERLESS_SUB_NAME}=    serverless-operator
 ${SERVERLESS_NS}=    openshift-serverless
@@ -89,7 +90,12 @@ Verify RHODS Installation
   IF  "${UPDATE_CHANNEL}" == "odh-nightlies" or "${cluster_type}" != "managed"
     IF  "${PRODUCT}" == "ODH"
         Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
-        Wait For DSCInitialization CustomResource To Be Ready    timeout=30
+        IF    "${TEST_ENV.lower()}" == "crc"
+            ${timeout_in_seconds} =   Set Variable   180
+        ELSE
+            ${timeout_in_seconds} =   Set Variable   30
+        END
+        Wait For DSCInitialization CustomResource To Be Ready    timeout=${timeout_in_seconds}
     END
     Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
   END
@@ -150,6 +156,14 @@ Verify RHODS Installation
     Wait For Pods Numbers   1
     ...                   namespace=${APPLICATIONS_NAMESPACE}
     ...                   label_selector=app.kubernetes.io/name=data-science-pipelines-operator
+    ...                   timeout=400
+  END
+  ${modelregistry} =    Is Component Enabled    modelregistry    ${DSC_NAME}
+  IF    "${modelregistry}" == "true"
+    Log To Console    "Waiting for 1 pod in ${APPLICATIONS_NAMESPACE}, label_selector=app.kubernetes.io/part-of=model-registry-operator"
+    Wait For Pods Numbers   1
+    ...                   namespace=${APPLICATIONS_NAMESPACE}
+    ...                   label_selector=app.kubernetes.io/part-of=model-registry-operator
     ...                   timeout=400
   END
   ${kserve} =    Is Component Enabled    kserve    ${DSC_NAME}
@@ -256,53 +270,59 @@ Create DSCInitialization CustomResource Using Test Variables
     Run    sed -i'' -e 's/<monitoring_namespace>/${MONITORING_NAMESPACE}/' ${file_path}dsci_apply.yml
 
 Wait For DSCInitialization CustomResource To Be Ready
-  [Documentation]   Wait for DSCInitialization CustomResource To Be Ready
-  [Arguments]     ${timeout}
-  Log To Console    Waiting for DSCInitialization CustomResource To Be Ready
-  ${status}   Set Variable   False
-  FOR    ${counter}    IN RANGE   ${timeout}
-         ${return_code}    ${output} =    Run And Return Rc And Output   oc get DSCInitialization --no-headers -o custom-columns=":status.phase"
-         IF    '${output}' == 'Ready'
-               ${status} =  Set Variable  True
-               Log To Console  DSCInitialization CustomResource is Ready
-               BREAK
-         END
-         Sleep    1 sec
-  END
-  IF    '${status}' == 'False'
-        Run Keyword And Continue On Failure    FAIL    Timeout- DSCInitialization CustomResource is not Ready
-  END
+    [Documentation]   Wait ${timeout} seconds for DSCInitialization CustomResource To Be Ready
+    [Arguments]     ${timeout}
+    Log To Console    Waiting ${timeout} seconds for DSCInitialization CustomResource To Be Ready
+    ${result} =    Run Process    oc wait DSCInitialization --timeout\=${timeout}s --for jsonpath\='{.status.phase}'\=Ready --all
+    ...    shell=true    stderr=STDOUT
+    IF    ${result.rc} != 0
+        Run Keyword And Continue On Failure    FAIL    ${result.stdout}
+    END
 
 Apply DataScienceCluster CustomResource
     [Documentation]
-    [Arguments]        ${dsc_name}=${DSC_NAME}
+    [Arguments]        ${dsc_name}=${DSC_NAME}      ${custom}=False       ${custom_cmp}=''
     ${file_path} =    Set Variable    tasks/Resources/Files/
-    Log to Console    Requested Configuration:
-    FOR    ${cmp}    IN    @{COMPONENT_LIST}
-         TRY
-               Log To Console    ${cmp} - ${COMPONENTS.${cmp}}
-         EXCEPT
-               Log To Console    ${cmp} - Removed
-         END
-    END
-    Log to Console    message=Creating DataScience Cluster using yml template
-    Create DataScienceCluster CustomResource Using Test Variables
-    Apply Custom Manifest in DataScienceCluster CustomResource Using Test Variables
-    ${yml} =    Get File    ${file_path}dsc_apply.yml
-    Log To Console    Applying DSC yaml
-    Log To Console    ${yml}
-    ${return_code}    ${output} =    Run And Return Rc And Output    oc apply -f ${file_path}dsc_apply.yml
-    Log To Console    ${output}
-    Should Be Equal As Integers  ${return_code}  0  msg=Error detected while applying DSC CR
-    Remove File    ${file_path}dsc_apply.yml
-    FOR    ${cmp}    IN    @{COMPONENT_LIST}
-           IF    $cmp not in $COMPONENTS
-                Component Should Not Be Enabled    ${cmp}
-           ELSE IF    '${COMPONENTS.${cmp}}' == 'Managed'
-                Component Should Be Enabled    ${cmp}
-           ELSE IF    '${COMPONENTS.${cmp}}' == 'Removed'
-                Component Should Not Be Enabled    ${cmp}
-           END
+    IF      ${custom} == True
+        Log to Console    message=Creating DataScience Cluster using custom configuration
+        Generate CustomManifest In DSC YAML
+        Rename DevFlags in DataScienceCluster CustomResource
+        ${yml} =    Get File    ${file_path}dsc_apply.yml
+        Log To Console    Applying DSC yaml
+        Log To Console    ${yml}
+        ${return_code}    ${output} =    Run And Return Rc And Output    oc apply -f ${file_path}dsc_apply.yml
+        Log To Console    ${output}
+        Should Be Equal As Integers  ${return_code}  0  msg=Error detected while applying DSC CR
+        #Remove File    ${file_path}dsc_apply.yml
+        Wait For DSC Conditions Reconciled    ${OPERATOR_NS}     ${DSC_NAME}
+    ELSE
+        Log to Console    Requested Configuration:
+        FOR    ${cmp}    IN    @{COMPONENT_LIST}
+            TRY
+                Log To Console    ${cmp} - ${COMPONENTS.${cmp}}
+            EXCEPT
+                Log To Console    ${cmp} - Removed
+            END
+        END
+        Log to Console    message=Creating DataScience Cluster using yml template
+        Create DataScienceCluster CustomResource Using Test Variables
+        Apply Custom Manifest in DataScienceCluster CustomResource Using Test Variables
+        ${yml} =    Get File    ${file_path}dsc_apply.yml
+        Log To Console    Applying DSC yaml
+        Log To Console    ${yml}
+        ${return_code}    ${output} =    Run And Return Rc And Output    oc apply -f ${file_path}dsc_apply.yml
+        Log To Console    ${output}
+        Should Be Equal As Integers  ${return_code}  0  msg=Error detected while applying DSC CR
+        Remove File    ${file_path}dsc_apply.yml
+        FOR    ${cmp}    IN    @{COMPONENT_LIST}
+            IF    $cmp not in $COMPONENTS
+                    Component Should Not Be Enabled    ${cmp}
+            ELSE IF    '${COMPONENTS.${cmp}}' == 'Managed'
+                    Component Should Be Enabled    ${cmp}
+            ELSE IF    '${COMPONENTS.${cmp}}' == 'Removed'
+                    Component Should Not Be Enabled    ${cmp}
+            END
+        END
     END
 
 Create DataScienceCluster CustomResource Using Test Variables
@@ -319,6 +339,31 @@ Create DataScienceCluster CustomResource Using Test Variables
             ELSE IF    '${COMPONENTS.${cmp}}' == 'Removed'
                 Run    sed -i'' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
             END
+            # The model registry component needs to set the namespace used, so adding this special statement just for it
+            IF    '${cmp}' == 'modelregistry'
+                Run    sed -i'' -e 's/<${cmp}_namespace>/${MODEL_REGISTRY_NAMESPACE}/' ${file_path}dsc_apply.yml
+            END
+    END
+
+Generate CustomManifest In DSC YAML
+    [Arguments]    ${dsc_name}=${DSC_NAME}
+    Log To Console      ${custom_cmp}.items
+    ${file_path} =    Set Variable    tasks/Resources/Files/
+    Copy File    source=${file_path}dsc_template.yml    destination=${file_path}dsc_apply.yml
+    Run    sed -i'' -e 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
+    FOR    ${cmp}    IN    @{COMPONENT_LIST}
+            ${value}=       Get From Dictionary 	${custom_cmp} 	${cmp}
+            ${status}=       Get From Dictionary 	${value} 	managementState
+            Log To Console      ${status}
+            IF    '${status}' == 'Managed'
+                Run    sed -i'' -e 's/<${cmp}_value>/Managed/' ${file_path}dsc_apply.yml
+            ELSE IF    '${status}' == 'Removed'
+                Run    sed -i'' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
+            END
+            # The model registry component needs to set the namespace used, so adding this special statement just for it
+            IF    '${cmp}' == 'modelregistry'
+                Run    sed -i'' -e 's/<${cmp}_namespace>/${MODEL_REGISTRY_NAMESPACE}/' ${file_path}dsc_apply.yml
+            END
     END
 
 Apply Custom Manifest in DataScienceCluster CustomResource Using Test Variables
@@ -333,6 +378,14 @@ Apply Custom Manifest in DataScienceCluster CustomResource Using Test Variables
          ELSE
               Run    sed -i'' -e "s|<${cmp}_devflags>||g" ${file_path}dsc_apply.yml
          END
+    END
+
+Rename DevFlags in DataScienceCluster CustomResource
+    [Documentation]     Filling devFlags fields for every component in DSC
+    Log To Console    Filling devFlags fields for every component in DSC
+    ${file_path} =    Set Variable    tasks/Resources/Files/
+    FOR    ${cmp}    IN    @{COMPONENT_LIST}
+        Run     sed -i'' -e "s|<${cmp}_devflags>||g" ${file_path}dsc_apply.yml
     END
 
 Wait For DataScienceCluster CustomResource To Be Ready

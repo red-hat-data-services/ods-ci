@@ -102,7 +102,7 @@ Verify Pipelines Integration With Elyra Running Hello World Pipeline Test     # 
     ...    ods-ci-notebooks-main/notebooks/500__jupyterhub/pipelines/v2/elyra/run-pipelines-on-data-science-pipelines/hello-generic-world.pipeline  # robocop: disable
     Verify Hello World Pipeline Elements
     Set Runtime Image In All Nodes    runtime_image=${runtime_image}
-    Run Pipeline    pipeline_name=${img} Pipeline
+    Run Pipeline    pipeline_name=${experiment_name}
     Wait Until Page Contains Element    xpath=//a[.="Run Details."]    timeout=30s
     ${pipeline_run_name} =    Get Pipeline Run Name
     Switch To Pipeline Execution Page

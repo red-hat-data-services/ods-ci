@@ -43,7 +43,7 @@ ${PYTORCH_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_onnx_rest_servingrun
 ${EXPECTED_INFERENCE_REST_OUTPUT_FILE_PYTORCH}=       tests/Resources/Files/triton/kserve-triton-resnet-rest-output.json
 ${INFERENCE_REST_INPUT_TENSORFLOW}=    @tests/Resources/Files/triton/kserve-triton-tensorflow-rest-input.json
 ${TENSORFLOW_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_tensorflow_rest_servingruntime.yaml
-${EXPECTED_INFERENCE_REST_OUTPUT_FILE_TENSORFLOW}=       @tests/Resources/Files/triton/kserve-triton-tensorflow-rest-output.json
+${EXPECTED_INFERENCE_REST_OUTPUT_FILE_TENSORFLOW}=       tests/Resources/Files/triton/kserve-triton-tensorflow-rest-output.json
 
 
 *** Test Cases ***

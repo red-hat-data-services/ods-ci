@@ -326,7 +326,7 @@ Verify User Can Set Requests And Limits For A Model    # robocop: off=too-long-t
     ${new_requests}=    Create Dictionary    cpu=2    memory=3Gi
     Set Model Hardware Resources    model_name=${flan_model_name}    namespace=hw-res
     ...    requests=${new_requests}    limits=${NONE}
-    Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${rev_id}
+    Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${rev_id}    timeout=300s
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}

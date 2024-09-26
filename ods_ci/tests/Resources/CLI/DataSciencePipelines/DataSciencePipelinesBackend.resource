@@ -141,7 +141,7 @@ Import Pipeline And Create Run
     [Documentation]
     [Arguments]    ${namespace}           ${username}                ${password}
     ...    ${pipeline_name}               ${pipeline_description}    ${pipeline_package_path}
-    ...    ${pipeline_run_name}           ${pipeline_run_params}
+    ...    ${pipeline_run_name}           ${pipeline_run_params}=${None}
     ...    ${experiment_name}=Default     ${experiment_description}=${EMPTY}
 
     DataSciencePipelinesKfp.Setup Client    user=${username}    pwd=${password}    project=${namespace}

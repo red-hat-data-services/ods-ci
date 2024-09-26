@@ -36,6 +36,8 @@ ${EXPECTED_INFERENCE_REST_OUTPUT_FILE}=      tests/Resources/Files/triton/kserve
 ${PATTERN}=  https:\/\/([^\/:]+)
 ${INFERENCE_REST_INPUT_PYTORCH}=    @tests/Resources/Files/triton/kserve-triton-resnet-rest-input.json
 ${PYTORCH_MODEL_NAME}=    resnet50
+${TENSORFLOW_MODEL_NAME}=   inception_graphdef
+${TENSORFLOW_MODEL_LABEL}=    inceptiongraphdef
 ${PYTORCH_RUNTIME_NAME}=    triton-kserve-rest
 ${PYTORCH_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_onnx_rest_servingruntime.yaml
 ${EXPECTED_INFERENCE_REST_OUTPUT_FILE_PYTORCH}=       tests/Resources/Files/triton/kserve-triton-resnet-rest-output.json
@@ -169,21 +171,23 @@ Test Tensorflow Model Rest Inference Via UI (Triton on Kserve)    # robocop: off
     Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
-    Deploy Kserve Model Via UI    model_name=${PYTORCH_MODEL_NAME}    serving_runtime=triton-kserve-rest
+    Deploy Kserve Model Via UI    model_name=${TENSORFLOW_MODEL_NAME}    serving_runtime=triton-kserve-rest
     ...    data_connection=model-serving-connection    path=triton/model_repository/    model_framework=tensorflow - 2
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${ONNX_MODEL_LABEL}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${TENSORFLOW_MODEL_LABEL}
     ...    namespace=${PRJ_TITLE}
     ${EXPECTED_INFERENCE_REST_OUTPUT_TENSORFLOW}=     Load Json File     file_path=${EXPECTED_INFERENCE_REST_OUTPUT_FILE_TENSORFLOW}
     ...     as_string=${TRUE}
     Run Keyword And Continue On Failure    Verify Model Inference With Retries
-    ...    ${PYTORCH_MODEL_NAME}    ${INFERENCE_REST_INPUT_TENSORFLOW}    ${EXPECTED_INFERENCE_REST_OUTPUT_TENSORFLOW}
+    ...    ${TENSORFLOW_MODEL_NAME}    ${INFERENCE_REST_INPUT_TENSORFLOW}    ${EXPECTED_INFERENCE_REST_OUTPUT_TENSORFLOW}
     ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}
-    [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${PYTORCH_MODEL_NAME}
+    [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${TENSORFLOW_MODEL_NAME}
     ...  project_title=${PRJ_TITLE}
     ...  AND
     ...  Clean All Models Of Current User
     ...  AND
     ...  Delete Serving Runtime Template From CLI    displayed_name=triton-kserve-rest
+
+
 *** Keywords ***
 Triton On Kserve Suite Setup
     [Documentation]    Suite setup steps for testing Triton. It creates some test variables

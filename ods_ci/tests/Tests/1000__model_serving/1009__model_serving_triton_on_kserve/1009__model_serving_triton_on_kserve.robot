@@ -173,7 +173,7 @@ Test KERAS Model Inference Via UI(Triton on Kserve)
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
     Deploy Kserve Model Via UI    model_name=${KERAS_MODEL_NAME}    serving_runtime=triton-keras-rest
-    ...    data_connection=model-serving-connection    path=triton/model_repository/resnet50    model_framework=tensorflow - 2
+    ...    data_connection=model-serving-connection    path=tritonkeras/model_repository/    model_framework=tensorflow - 2
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${KERAS_MODEL_NAME}
     ...    namespace=${PRJ_TITLE}    timeout=180s
     ${EXPECTED_INFERENCE_REST_OUTPUT_KERAS}=     Load Json File

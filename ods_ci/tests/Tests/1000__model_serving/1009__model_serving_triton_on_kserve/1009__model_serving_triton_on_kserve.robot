@@ -176,7 +176,7 @@ Test KERAS Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-
     ...    token=${TRUE}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${KERAS_MODEL_NAME}
     ...    namespace=${PRJ_TITLE}
-    ${EXPECTED_INFERENCE_GRPC_OUTPUT_KERAS}=     Load Json File     file_path=${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE}
+    ${EXPECTED_INFERENCE_GRPC_OUTPUT_KERAS}=     Load Json File     file_path=${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE_KERAS}
     ...     as_string=${TRUE}
     ${EXPECTED_INFERENCE_GRPC_OUTPUT_KERAS}=     Load Json String    ${EXPECTED_INFERENCE_GRPC_OUTPUT_KERAS}
     ${EXPECTED_INFERENCE_GRPC_OUTPUT_KERAS}=     Evaluate    json.dumps(${EXPECTED_INFERENCE_GRPC_OUTPUT_KERAS})

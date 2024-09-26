@@ -61,7 +61,7 @@ Template with embedded arguments
     Cross Auth Model Deployment     single_model=${single_model}
     ...     model_name=${SECOND_MODEL_NAME}     service_account_name=${SECOND_SERVICE_ACCOUNT}
 
-    ${second_token}=  Get Access Token Via UI    service_account_name=${FIRST_SERVICE_ACCOUNT}      single_model=${single_model}
+    ${second_token}=  Get Access Token Via UI    service_account_name=${SECOND_SERVICE_ACCOUNT}      single_model=${single_model}
     ...    model_name=${MODEL_NAME}     project_name=${project_name}
 
     Verify Model Inference    model_name=${MODEL_NAME}    inference_input=${INFERENCE_INPUT}
@@ -96,7 +96,7 @@ Cross Auth Model Deployment
         Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}    namespace=${project_name}
     ELSE
         Create Model Server    token=${TRUE}    server_name=${model_name}   service_account_name=${service_account_name}
-        Serve Model    project_name=${project_name}    model_name=${model_name}    framework=onnx
+        Deploy Model From Models Tab    project_name=${project_name}    model_name=${model_name}    framework=onnx
         ...    existing_data_connection=${TRUE}    data_connection_name=${dc_name}      model_server=${model_name}
         ...    model_path=openvino-example-model
         ${runtime_pod_name}=    Replace String Using Regexp    string=${project_name}    pattern=\\s    replace_with=-

@@ -7,7 +7,6 @@ Resource       ODHDataScienceProject/ModelServer.resource
 Resource       ODHDataScienceProject/DataConnections.resource
 Resource       ../../../CLI/ModelServing/llm.resource
 Library        ../../../../../libs/Helpers.py
-Library    RPA.Salesforce
 
 
 *** Variables ***
@@ -76,7 +75,7 @@ Serve Model
         SeleniumLibrary.Click Button    ${DEPLOY_MODEL_BTN}
     END
     SeleniumLibrary.Wait Until Page Contains Element    //div[@role="dialog"]
-    Fill Deploy Model Form    model_name=${model_name}    model_server=${model_server}    
+    Fill Deploy Model Form    model_name=${model_name}    model_server=${model_server}
     ...    serving_runtime=${serving_runtime}    framework=${framework}
     ...    data_connection_name=${data_connection_name}    existing_data_connection=${existing_data_connection}
     ...    model_path=${model_path}
@@ -218,7 +217,6 @@ Get Model Route Via CLI
 Open ${section} Options Menu
     [Documentation]    Opens the "Options menu" dropdown for different sections
     ...    Valid sections are: "Name", "Model framework (name - version)", "Project"
-
     ${optionsmenu}=    Run Keyword And Return Status    Page Should Contain Element
     ...    xpath://span[.="${section}"]/../../..//button[@aria-label="Options menu"]
     IF    ${optionsmenu} == ${TRUE}
@@ -631,7 +629,7 @@ Deploy Model From Models Tab
     Open Data Science Project Details Page    ${project_name}    tab_id=model-server
     SeleniumLibrary.Click Button    xpath://*[@id="expand-table-row-${model_name}-1-undefined-1"]/../../td[@class='pf-v5-c-table__td']//button
     SeleniumLibrary.Wait Until Page Contains Element    //div[@role="dialog"]
-    Fill Deploy Model Form    model_name=${model_name}    model_server=${model_server}    
+    Fill Deploy Model Form    model_name=${model_name}    model_server=${model_server}
     ...    serving_runtime=${serving_runtime}    framework=${framework}
     ...    data_connection_name=${data_connection_name}    existing_data_connection=${existing_data_connection}
     ...    model_path=${model_path}

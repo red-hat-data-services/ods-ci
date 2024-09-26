@@ -95,8 +95,7 @@ Required Global Variables Should Exist
 Assign Vars According To Product
     [Documentation]    Assign vars related to product
     IF    "${PRODUCT}" == "RHODS"
-        Set Suite Variable    ${OPERATOR_APPNAME}     Red Hat OpenShift AI
-        Set Suite Variable    ${OPERATOR_NAME}    Red Hat OpenShift AI
+        Set Suite Variable    ${OPERATOR_APPNAME}     "Red Hat OpenShift AI"
         Set Suite Variable    ${OPERATOR_DEPLOYMENT_NAME}    rhods-operator
         Set Suite Variable    ${OPERATOR_POD_CONTAINER_NAME}  rhods-operator
         Set Suite Variable    ${OPERATOR_LABEL_SELECTOR}    name=rhods-operator
@@ -105,10 +104,10 @@ Assign Vars According To Product
         Set Suite Variable    ${DASHBOARD_DEPLOYMENT_NAME}    rhods-dashboard
         Set Suite Variable    ${DASHBOARD_LABEL_SELECTOR}     app.kubernetes.io/part-of=rhods-dashboard
         Set Suite Variable    ${APPLICATIONS_NAMESPACE}    redhat-ods-applications
+        Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     rhoai-operator-dev
         Set Suite Variable  ${MODEL_REGISTRY_NAMESPACE}    rhoai-model-registries
     ELSE IF    "${PRODUCT}" == "ODH"
-        Set Suite Variable    ${OPERATOR_APPNAME}  Open Data Hub Operator
-        Set Suite Variable    ${OPERATOR_NAME}    Open Data Hub Operator
+        Set Suite Variable    ${OPERATOR_APPNAME}  "Open Data Hub Operator"
         Set Suite Variable    ${OPERATOR_DEPLOYMENT_NAME}    opendatahub-operator-controller-manager
         Set Suite Variable    ${OPERATOR_POD_CONTAINER_NAME}  manager
         Set Suite Variable    ${OPERATOR_LABEL_SELECTOR}    control-plane=controller-manager
@@ -117,6 +116,7 @@ Assign Vars According To Product
         Set Suite Variable    ${DASHBOARD_DEPLOYMENT_NAME}    odh-dashboard
         Set Suite Variable    ${DASHBOARD_LABEL_SELECTOR}     app.kubernetes.io/part-of=dashboard
         Set Suite Variable    ${APPLICATIONS_NAMESPACE}    opendatahub
+        Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     rhoai-operator-dev
         Set Suite Variable   ${MODEL_REGISTRY_NAMESPACE}    odh-model-registries
     END
 

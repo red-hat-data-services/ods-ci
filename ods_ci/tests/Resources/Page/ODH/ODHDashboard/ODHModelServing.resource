@@ -235,6 +235,7 @@ Open ${section} Options Menu
     ...    Valid sections are: "Name", "Model framework (name - version)", "Project"
     ${optionsmenu}=    Run Keyword And Return Status    Page Should Contain Element
     ...    xpath://span[.="${section}"]/../../..//button[@aria-label="Options menu"]
+    Sleep    5s
     IF    ${optionsmenu} == ${TRUE}
         SeleniumLibrary.Click Element    xpath://span[.="${section}"]/../../..//button[@aria-label="Options menu"]  # Remove attribute which is not present anymore
     ELSE

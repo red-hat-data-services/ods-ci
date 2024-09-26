@@ -61,7 +61,7 @@ Template with embedded arguments
     Cross Auth Model Deployment     single_model=${single_model}
     ...     model_name=${SECOND_MODEL_NAME}     service_account_name=${SECOND_SERVICE_ACCOUNT}
 
-    ${second_token}=  Get Access Token Via UI    single_model=${single_model}
+    ${second_token}=  Get Access Token Via UI    service_account_name=${FIRST_SERVICE_ACCOUNT}      single_model=${single_model}
     ...    model_name=${MODEL_NAME}     project_name=${project_name}
 
     Verify Model Inference    model_name=${MODEL_NAME}    inference_input=${INFERENCE_INPUT}

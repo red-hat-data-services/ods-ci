@@ -188,7 +188,7 @@ Test KERAS Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-
     ${token}=   Get Access Token Via UI    single_model=${TRUE}      model_name=resnet50   project_name=${PRJ_TITLE}
     ${inference_output}=    Query Model With GRPCURL   host=${host}    port=443
     ...    endpoint=inference.GRPCInferenceService/ModelInfer
-    ...    json_body=@      input_filepath=${INFERENCE_GRPC_INPUT_ONNX}
+    ...    json_body=@      input_filepath=${INFERENCE_GRPC_INPUT_KERAS}
     ...    insecure=${True}    protobuf_file=${PROTOBUFF_FILE}      json_header="Authorization: Bearer ${token}"
     Log    ${inference_output}
     ${inference_output}=    Evaluate    json.dumps(${inference_output})

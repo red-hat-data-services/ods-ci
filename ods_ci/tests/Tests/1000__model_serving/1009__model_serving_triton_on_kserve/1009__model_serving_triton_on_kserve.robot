@@ -173,7 +173,7 @@ Test Tensorflow Model Rest Inference Via UI (Triton on Kserve)    # robocop: off
     ...            aws_bucket_name=ods-ci-s3
     Deploy Kserve Model Via UI    model_name=${TENSORFLOW_MODEL_NAME}    serving_runtime=triton-kserve-rest
     ...    data_connection=model-serving-connection    path=triton/model_repository/
-    ...     model_framework=tensorflow - 2      ${token}=${TRUE}
+    ...    model_framework=tensorflow - 2      token=${TRUE}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${TENSORFLOW_MODEL_LABEL}
     ...    namespace=${PRJ_TITLE}
     ${EXPECTED_INFERENCE_REST_OUTPUT_TENSORFLOW}=     Load Json File     file_path=${EXPECTED_INFERENCE_REST_OUTPUT_FILE_TENSORFLOW}

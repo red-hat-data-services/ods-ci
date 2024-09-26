@@ -51,7 +51,7 @@ ${INFERENCE_REST_INPUT_KERAS}=    @tests/Resources/Files/triton/kserve-triton-ke
 ${EXPECTED_INFERENCE_REST_OUTPUT_FILE_KERAS}=       tests/Resources/Files/triton/kserve-triton-keras-rest-output.json
 ${KERAS_RUNTIME_NAME_GRPC}=    triton-keras-grpc
 ${KERAS_GRPC_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_keras_gRPC_servingruntime.yaml
-${INFERENCE_GRPC_INPUT_KERAS}=    @tests/Resources/Files/triton/kserve-triton-keras-gRPC-input.json
+${INFERENCE_GRPC_INPUT_KERAS}=    tests/Resources/Files/triton/kserve-triton-keras-gRPC-input.json
 ${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE_KERAS}=       tests/Resources/Files/triton/kserve-triton-keras-gRPC-output.json
 
 

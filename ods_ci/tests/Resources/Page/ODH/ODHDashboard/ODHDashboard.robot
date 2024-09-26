@@ -10,9 +10,9 @@ Library       JupyterLibrary
 
 
 *** Variables ***
-# This variable is overriden for ODH runs via 'ods_ci/test-variables-odh-overwrite.yml'
+# This variable is overriden for ODH runs via 'test-variables-odh-overwrite.yml'
 ${ODH_DASHBOARD_PROJECT_NAME}=   Red Hat OpenShift AI
-
+${ODH_DASHBOARD_SPINNER_XP}=     xpath://*[@data-id="loading-empty-state" or @aria-valuetext="Loading..."]
 ${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}=         //*[@class="pf-v5-c-drawer__panel-main"]//button[.='Enable']
 ${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}=   //*[@class="pf-v5-c-drawer__panel-main"]//*[.='Get started']
 ${CARDS_XP}=  //*[(contains(@class, 'odh-card')) and (contains(@class, 'pf-v5-c-card'))]
@@ -32,7 +32,7 @@ ${OFFICIAL_BADGE_XP_OLD}=  div[@class='pf-v5-c-card__title']//img[contains(@clas
 ${FALLBK_IMAGE_XP}=  ${HEADER_XP}/svg[contains(@class, 'odh-card__header-fallback-img')]
 ${IMAGE_XP}=  ${HEADER_XP}//picture[contains(@class,'pf-m-picture')]/source
 ${IMAGE_XP_OLD}=  ${HEADER_XP}/img[contains(@class, 'odh-card__header-brand')]
-${APPS_DICT_PATH_LATEST}=   ods_ci/tests/Resources/Files/AppsInfoDictionary_latest.json
+${APPS_DICT_PATH_LATEST}=   tests/Resources/Files/AppsInfoDictionary_latest.json
 ${SIDEBAR_TEXT_CONTAINER_XP}=  //div[contains(@class,'odh-markdown-view')]
 ${SUCCESS_MSG_XP}=  //div[@class='pf-v5-c-alert pf-m-success']
 ${PAGE_TITLE_XP}=  //*[@data-testid="app-page-title"]
@@ -53,13 +53,15 @@ ${NOTIFICATION_DRAWER_CLOSED}=  //div[@class="pf-v5-c-drawer__panel" and @hidden
 ${GROUPS_CONFIG_CM}=    groups-config
 ${RHODS_GROUPS_CONFIG_CM}=    rhods-groups-config
 ${RHODS_LOGO_XPATH}=    //img[@alt="${ODH_DASHBOARD_PROJECT_NAME} Logo"]
+${USER_MENU_TOGGLE}=    //button[@id="user-menu-toggle"]
+${LOGOUT_BTN}=    //button[.="Log out"]
 @{ISV_TO_REMOVE_SELF_MANAGED}=      Create List     starburst   nvidia    rhoam
 
 
 *** Keywords ***
 Launch Dashboard
   [Arguments]  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}  ${dashboard_url}  ${browser}  ${browser_options}
-  ...          ${expected_page}=Enabled    ${wait_for_cards}=${TRUE}    ${browser_alias}=${NONE}
+  ...          ${expected_page}=${NONE}    ${wait_for_cards}=${TRUE}    ${browser_alias}=${NONE}
   Open Browser  ${dashboard_url}  browser=${browser}  options=${browser_options}
   ...    alias=${browser_alias}
   Login To RHODS Dashboard  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
@@ -82,31 +84,27 @@ Login To RHODS Dashboard
    IF  ${login-required}  Login To Openshift  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
    ${authorize_service_account}=  Is rhods-dashboard Service Account Authorization Required
    IF  ${authorize_service_account}  Authorize rhods-dashboard service account
-   Navigate To Page    Applications    Enabled
 
 Logout From RHODS Dashboard
     [Documentation]  Logs out from the current user in the RHODS dashboard
     ...    This will reload the page and show the `Log in with OpenShift` page
     ...    so you want to use `Login to RHODS Dashboard` after this
-    # Another option for the logout button
-    #${user} =  Get Text  xpath:/html/body/div/div/header/div[2]/div/div[3]/div/button/span[1]
-    #Click Element  xpath://span[.="${user}"]/..
-    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.21.0
-    IF  ${version_check}==True
-        Click Button  xpath://button[@id="user-menu-toggle"]
-    ELSE
-        Click Button  xpath:(//button[@id="toggle-id"])[2]
-    END
-    Wait Until Page Contains Element  xpath://a[.="Log out"]
-    Click Element  xpath://a[.="Log out"]
+    Click Button  ${USER_MENU_TOGGLE}
+    Wait Until Page Contains Element  xpath:${LOGOUT_BTN}
+    Click Element  xpath:${LOGOUT_BTN}
     Wait Until Page Contains  Log in with OpenShift
 
 Wait For RHODS Dashboard To Load
     [Arguments]  ${dashboard_title}="${ODH_DASHBOARD_PROJECT_NAME}"    ${wait_for_cards}=${TRUE}
-    ...          ${expected_page}=Enabled
-    Wait For Condition    return document.title == ${dashboard_title}    timeout=15s
-    Wait Until Page Contains Element    xpath:${RHODS_LOGO_XPATH}    timeout=20s
-    IF    "${expected_page}" != "${NONE}"    Wait For Dashboard Page Title    ${expected_page}    timeout=75s
+    ...          ${expected_page}=${NONE}    ${timeout}=60
+    ${half_timeout}=   Evaluate    int(${timeout}) / 2
+    Wait For Condition    return document.title == ${dashboard_title}    timeout=${half_timeout}
+    Wait Until Page Contains Element    xpath:${RHODS_LOGO_XPATH}    timeout=${half_timeout}
+    IF    "${expected_page}" == "${NONE}"
+        Wait Until Page Contains Element    //div[@data-testid="home-page"]    timeout=${half_timeout}
+    ELSE
+        Wait For Dashboard Page Title    ${expected_page}    timeout=${timeout}
+    END
     IF    ${wait_for_cards} == ${TRUE}
         Wait Until Keyword Succeeds    3 times   5 seconds    Wait Until Cards Are Loaded
     END
@@ -181,7 +179,7 @@ Verify Service Is Available In The Explore Page
   END
 
 Verify Service Is Not Available In The Explore Page
-  [Documentation]   Verify the service appears in Applications > Explore
+  [Documentation]   Verify the service does not appear in Applications > Explore
   [Arguments]  ${app_name}    ${split_last}=${FALSE}
   Menu.Navigate To Page    Applications    Explore
   Wait For RHODS Dashboard To Load    expected_page=Explore
@@ -263,7 +261,7 @@ Load Expected Data Of RHODS Explore Section
 
 Wait Until Cards Are Loaded
     [Documentation]    Waits until the Application cards are displayed in the page
-    ${status}=    Run Keyword and Return Status    Wait Until Page Contains Element
+    ${status}=    Run Keyword And Return Status    Wait Until Page Contains Element
     ...    xpath:${CARDS_XP}    timeout=10s
     IF    not ${status}    Reload Page
     Should Be True   ${status}   msg=This might be caused by bug RHOAIENG-404
@@ -353,7 +351,7 @@ Open Get Started Sidebar And Return Status
 
 Close Get Started Sidebar
     Click Button  xpath://button[@aria-label='Close drawer panel']
-    Wait Until Page Does Not Contain Element    xpath://div[contains(@class,'odh-markdown-view')]/h1
+    Wait Until Page Does Not Contain Element    xpath:${EXPLORE_PANEL_XP}
 
 Check Get Started Sidebar Status
     [Arguments]  ${sidebar_status}  ${badges_titles}
@@ -398,8 +396,10 @@ Check Sidebar Links
 
 Check Sidebar Header Text
     [Arguments]  ${app_id}  ${expected_data}
-    ${h1}=  Get Text    xpath://div[contains(@class,'odh-markdown-view')]/h1
-    Run Keyword And Continue On Failure  Should Be Equal  ${h1}  ${expected_data}[${app_id}][sidebar_h1]
+    Page Should Contain Element  xpath:${SIDEBAR_TEXT_CONTAINER_XP}/h1
+    ...    message=Missing Sidebar Title for App Card ${app_id}
+    ${header}=  Get Text    xpath:${SIDEBAR_TEXT_CONTAINER_XP}/h1
+    Run Keyword And Continue On Failure  Should Be Equal  ${header}  ${expected_data}[${app_id}][sidebar_h1]
     ${getstarted_title}=  Get Text  xpath://div[contains(@class,'pf-v5-c-drawer__head')]
     ${titles}=    Split String    ${getstarted_title}   separator=\n    max_split=1
     Run Keyword And Continue On Failure  Should Be Equal   ${titles[0]}  ${expected_data}[${app_id}][title]
@@ -482,15 +482,10 @@ Re-validate License For Disabled Application From Enabled Page
 
 Get Question Mark Links
     [Documentation]      It returns the link elements from the question mark
-    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.21.0
-    IF  ${version_check}==True
-        Click Button  id:help-icon-toggle
-    ELSE
-        Click Element    xpath=//*[@id="toggle-id"]
-    END
+    Click Button  id:help-icon-toggle
     @{links_list}=  Create List
     @{link_elements}=  Get WebElements
-    ...    //a[contains(@class,"pf-v5-c-dropdown__menu-item")]
+    ...    //button[@id="help-icon-toggle"]/following-sibling::div//a
     FOR  ${link}  IN  @{link_elements}
          ${href}=    Get Element Attribute    ${link}    href
          Append To List    ${links_list}    ${href}
@@ -541,15 +536,7 @@ Search Items In Resources Section
 Verify Username Displayed On RHODS Dashboard
     [Documentation]    Verifies that given username matches with username present on RHODS Dashboard
     [Arguments]    ${user_name}
-    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.21.0
-    IF  ${version_check}==True
-        ${versioned_user_xp}=    Set Variable
-        ...    xpath=//button[@id="user-menu-toggle"]/span[contains(@class,'toggle-text')]
-    ELSE
-        ${versioned_user_xp}=    Set Variable  xpath=//div[@class='pf-v5-c-page__header-tools-item'][3]//span[1]
-    END
-
-    Element Text Should Be    ${versioned_user_xp}    ${user_name}
+    Element Text Should Be    ${USER_MENU_TOGGLE}    ${user_name}
 
 RHODS Notification Drawer Should Contain
     [Documentation]    Verifies RHODS Notifications contains given Message
@@ -807,7 +794,7 @@ Get Links From Switcher
 
 Open Application Switcher Menu
     [Documentation]     Clicks on the App Switcher in the top navigation bar of RHODS Dashboard
-    Click Button    //button[@class="pf-v5-c-app-launcher__toggle"]
+    Click Button    //div[@data-testid="application-launcher"]//button
 
 Maybe Wait For Dashboard Loading Spinner Page
     [Documentation]     Detecs the loading symbol (spinner) and wait for it to disappear.
@@ -817,11 +804,10 @@ Maybe Wait For Dashboard Loading Spinner Page
     IF   ${do not wait for spinner} == ${true}
       RETURN
     END
-    ${spinner_ball}=   Set Variable    xpath=//span[@class="pf-v5-c-spinner__tail-ball"]
     Run Keyword And Ignore Error    Run Keywords
-    ...    Wait Until Page Contains Element    ${spinner_ball}    timeout=${timeout-pre}
+    ...    Wait Until Page Contains Element    ${ODH_DASHBOARD_SPINNER_XP}    timeout=${timeout-pre}
     ...    AND
-    ...    Wait Until Page Does Not Contain Element    ${spinner_ball}    timeout=${timeout}
+    ...    Wait Until Page Does Not Contain Element    ${ODH_DASHBOARD_SPINNER_XP}    timeout=${timeout}
 
 Maybe Wait For Loading Indicator
     [Documentation]     Detecs the loading symbol (three dots) and wait for it to disappear.
@@ -840,7 +826,7 @@ Maybe Wait For Loading Indicator
 Reload RHODS Dashboard Page
     [Documentation]    Reload the web page and wait for RHODS Dashboard
     ...    to be loaded
-    [Arguments]    ${expected_page}=Enabled    ${wait_for_cards}=${TRUE}
+    [Arguments]    ${expected_page}=${NONE}    ${wait_for_cards}=${TRUE}
     Reload Page
     Wait For RHODS Dashboard To Load    expected_page=${expected_page}
     ...    wait_for_cards=${wait_for_cards}
@@ -871,9 +857,12 @@ Handle Deletion Confirmation Modal
 Click Action From Actions Menu
     [Documentation]    Clicks an action from Actions menu (3-dots menu on the right)
     [Arguments]    ${item_title}    ${action}    ${item_type}=${NONE}
-    Click Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]/td[contains(@class,"-table__action")]//button[@aria-label="Kebab toggle"]    # robocop: disable
+    ${item_row}=    Set Variable    //tr[td[@data-label="Name"]//*[text()="${item_title}"]]
+    Click Element       xpath=${item_row}//button[@aria-label="Kebab toggle"]
     IF    "${item_type}" != "${NONE}"
         ${action}=    Catenate    ${action}    ${item_type}
     END
-    Wait Until Page Contains Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]//td//li//*[text()="${action}"]    # robocop: disable
-    Click Element       xpath=//tr[td[@data-label="Name"]//*[text()="${item_title}"]]//td//li//*[text()="${action}"]
+    Wait Until Page Contains Element
+    ...    xpath=${item_row}//button[@role="menuitem"]//*[.="${action}"]
+    Sleep    0.5    msg=Avoid element missclicking
+    Click Element    xpath=${item_row}//button[@role="menuitem"]//*[.="${action}"]

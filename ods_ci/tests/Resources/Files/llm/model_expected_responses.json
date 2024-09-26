@@ -42,6 +42,38 @@
                     "tgis-runtime": {
                         "tokenize_response_text": "{'responses':[{'tokenCount':9,'tokens':['\\u003cs\\u003e','▁At','▁what','▁temperature','▁does','▁water','▁bo','il','?']}]}"
                     }
+                },
+                "llama-3-8b-chat": {
+                    "response_tokens": 1024,
+                    "response_text": "\n\nWater boils at 100 degrees Celsius or 212",
+                    "streamed_response_text": "{ 'inputTokenCount': 9 } { 'generatedTokenCount': 2, 'text': '\n' } { 'generatedTokenCount': 3, 'text': '\n' } { 'generatedTokenCount': 4, 'text': 'Wate' } { 'generatedTokenCount': 5, 'text': 'r b' } { 'generatedTokenCount': 6, 'text': 'oil' } { 'generatedTokenCount': 7, 'text': 's a' } { 'generatedTokenCount': 8, 'text': 't' } { 'generatedTokenCount': 9, 'text': ' ' } { 'generatedTokenCount': 10, 'text': '1' } { 'generatedTokenCount': 11, 'text': '0' } { 'generatedTokenCount': 12, 'text': '0 degree' } { 'generatedTokenCount': 13, 'text': 's Ce' } { 'generatedTokenCount': 14, 'text': 'ls' } { 'generatedTokenCount': 15, 'text': 'iu' } { 'generatedTokenCount': 16, 'text': 's o' } { 'generatedTokenCount': 17, 'text': 'r' } { 'generatedTokenCount': 18, 'text': ' ' } { 'generatedTokenCount': 19, 'text': '2' } { 'generatedTokenCount': 20, 'text': '12', 'stopReason': 'MAX_TOKENS' }",
+                    "tgis-runtime": {
+                        "tokenize_response_text": "{'responses':[{'tokenCount':9,'tokens':['\\u003cs\\u003e','▁At','▁what','▁temperature','▁does','▁water','▁bo','il','?']}]}"
+                    }
+                },
+                "granite-8b-code": {
+                    "response_tokens": 20,
+                    "response_text": "\n\nWater boils at 100 degrees Celsius or 212",
+                    "streamed_response_text": "{ 'inputTokenCount': 8 } { 'generatedTokenCount': 2, 'text': '\n' } { 'generatedTokenCount': 3, 'text': '\n' } { 'generatedTokenCount': 4, 'text': 'Wate' } { 'generatedTokenCount': 5, 'text': 'r b' } { 'generatedTokenCount': 6, 'text': 'oil' } { 'generatedTokenCount': 7, 'text': 's a' } { 'generatedTokenCount': 8, 'text': 't' } { 'generatedTokenCount': 9, 'text': ' ' } { 'generatedTokenCount': 10, 'text': '1' } { 'generatedTokenCount': 11, 'text': '0' } { 'generatedTokenCount': 12, 'text': '0 degree' } { 'generatedTokenCount': 13, 'text': 's Ce' } { 'generatedTokenCount': 14, 'text': 'ls' } { 'generatedTokenCount': 15, 'text': 'iu' } { 'generatedTokenCount': 16, 'text': 's o' } { 'generatedTokenCount': 17, 'text': 'r' } { 'generatedTokenCount': 18, 'text': ' ' } { 'generatedTokenCount': 19, 'text': '2' } { 'generatedTokenCount': 20, 'text': '12', 'stopReason': 'MAX_TOKENS' }",
+                    "tgis-runtime": {
+                        "tokenize_response_text": "{'responses':[{'tokenCount':9,'tokens':['\\u003cs\\u003e','▁At','▁what','▁temperature','▁does','▁water','▁bo','il','?']}]}"
+                    }
+                },
+                "granite-7b-code": {
+                    "response_tokens": 20,
+                    "response_text": "\n\nOnce upon a time there was",
+                    "streamed_response_text": "{ 'inputTokenCount': 8 } { 'generatedTokenCount': 2, 'text': '\n' } { 'generatedTokenCount': 3, 'text': '\n' } { 'generatedTokenCount': 4, 'text': 'Wate' } { 'generatedTokenCount': 5, 'text': 'r b' } { 'generatedTokenCount': 6, 'text': 'oil' } { 'generatedTokenCount': 7, 'text': 's a' } { 'generatedTokenCount': 8, 'text': 't' } { 'generatedTokenCount': 9, 'text': ' ' } { 'generatedTokenCount': 10, 'text': '1' } { 'generatedTokenCount': 11, 'text': '0' } { 'generatedTokenCount': 12, 'text': '0 degree' } { 'generatedTokenCount': 13, 'text': 's Ce' } { 'generatedTokenCount': 14, 'text': 'ls' } { 'generatedTokenCount': 15, 'text': 'iu' } { 'generatedTokenCount': 16, 'text': 's o' } { 'generatedTokenCount': 17, 'text': 'r' } { 'generatedTokenCount': 18, 'text': ' ' } { 'generatedTokenCount': 19, 'text': '2' } { 'generatedTokenCount': 20, 'text': '12', 'stopReason': 'MAX_TOKENS' }",
+                    "tgis-runtime": {
+                        "tokenize_response_text": "{'responses':[{'tokenCount':9,'tokens':['\\u003cs\\u003e','▁At','▁what','▁temperature','▁does','▁water','▁bo','il','?']}]}"
+                    }
+                },
+                "merlinite-7b-lab": {
+                    "response_tokens": 20,
+                    "response_text": "\n\nWater boils at 100 degrees Celsius or 212",
+                    "streamed_response_text": "{ 'inputTokenCount': 8 } { 'generatedTokenCount': 2, 'text': '\n' } { 'generatedTokenCount': 3, 'text': '\n' } { 'generatedTokenCount': 4, 'text': 'Wate' } { 'generatedTokenCount': 5, 'text': 'r b' } { 'generatedTokenCount': 6, 'text': 'oil' } { 'generatedTokenCount': 7, 'text': 's a' } { 'generatedTokenCount': 8, 'text': 't' } { 'generatedTokenCount': 9, 'text': ' ' } { 'generatedTokenCount': 10, 'text': '1' } { 'generatedTokenCount': 11, 'text': '0' } { 'generatedTokenCount': 12, 'text': '0 degree' } { 'generatedTokenCount': 13, 'text': 's Ce' } { 'generatedTokenCount': 14, 'text': 'ls' } { 'generatedTokenCount': 15, 'text': 'iu' } { 'generatedTokenCount': 16, 'text': 's o' } { 'generatedTokenCount': 17, 'text': 'r' } { 'generatedTokenCount': 18, 'text': ' ' } { 'generatedTokenCount': 19, 'text': '2' } { 'generatedTokenCount': 20, 'text': '12', 'stopReason': 'MAX_TOKENS' }",
+                    "tgis-runtime": {
+                        "tokenize_response_text": "{'responses':[{'tokenCount':9,'tokens':['\\u003cs\\u003e','▁At','▁what','▁temperature','▁does','▁water','▁bo','il','?']}]}"
+                    }
                 }
             }
         },
@@ -184,6 +216,26 @@
                     "vllm-runtime": {
                         "completions_response_text": "{\"object\":\"text_completion\",\"created\":,\"model\":\"llama-2-13b-chat\",\"choices\":[{\"index\":0,\"text\":\" beautiful city that is full of life and energy. Located along the San Francisco\",\"logprobs\":null,\"finish_reason\":\"length\",\"stop_reason\":null}],\"usage\":{\"prompt_tokens\":5,\"total_tokens\":21,\"completion_tokens\":16}}"
                     }
+                },
+                "llama-3-8b-chat":{
+                    "vllm-runtime": {
+                        "completions_response_text": "{\"object\":\"text_completion\",\"created\":,\"model\":\"llama-2-13b-chat\",\"choices\":[{\"index\":0,\"text\":\" beautiful city that is full of life and energy. Located along the San Francisco\",\"logprobs\":null,\"finish_reason\":\"length\",\"stop_reason\":null}],\"usage\":{\"prompt_tokens\":5,\"total_tokens\":21,\"completion_tokens\":16}}"
+                    }
+                },
+                "granite-8b-code":{
+                    "vllm-runtime": {
+                        "completions_response_text": "{\"object\":\"text_completion\",\"created\":,\"model\":\"granite-8b-code-base\",\"choices\":[{\"index\":0,\"text\":\" city in California, one of the most populous cities in the United States\",\"logprobs\":null,\"finish_reason\":\"length\",\"stop_reason\":null}],\"usage\":{\"prompt_tokens\":5,\"total_tokens\":20,\"completion_tokens\":16}}"
+                    }
+                },
+                "merlinite-7b-lab":{
+                    "vllm-runtime": {
+                        "completions_response_text": "{\"object\":\"text_completion\",\"created\":,\"model\":\"granite-8b-code-base\",\"choices\":[{\"index\":0,\"text\":\" city in California, one of the most populous cities in the United States\",\"logprobs\":null,\"finish_reason\":\"length\",\"stop_reason\":null}],\"usage\":{\"prompt_tokens\":5,\"total_tokens\":20,\"completion_tokens\":16}}"
+                    }
+                },
+                "e5-mistral-7b":{
+                    "vllm-runtime": {
+                        "embeddings_response_text": "The actual embedded output is too large, and we don't check or match the response"
+                    }
                 }
             }
         },
@@ -191,6 +243,51 @@
             "query_text": "{'role': 'user' , 'content' : 'Say this is a test!'}",
             "models": {
                 "llama-2-13b-chat":{
+                    "vllm-runtime": {
+                        "chat-completions_response_text": "{\"object\":\"chat.completion\",\"created\":,\"model\":\"llama-2-13b-chat\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"  This is a test!\"},\"logprobs\":null,\"finish_reason\":\"stop\",\"stop_reason\":null}],\"usage\":{\"prompt_tokens\":15,\"total_tokens\":22,\"completion_tokens\":7}}"
+                    }
+                },
+                "llama-3-8b-chat":{
+                    "vllm-runtime": {
+                        "chat-completions_response_text": "{\"object\":\"chat.completion\",\"created\":,\"model\":\"llama-2-13b-chat\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"  This is a test!\"},\"logprobs\":null,\"finish_reason\":\"stop\",\"stop_reason\":null}],\"usage\":{\"prompt_tokens\":15,\"total_tokens\":22,\"completion_tokens\":7}}"
+                    }
+                },
+                "granite-8b-code":{
+                    "vllm-runtime": {
+                        "chat-completions_response_text": "{\"object\":\"chat.completion\",\"created\":,\"model\":\"llama-2-13b-chat\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"  This is a test!\"},\"logprobs\":null,\"finish_reason\":\"stop\",\"stop_reason\":null}],\"usage\":{\"prompt_tokens\":15,\"total_tokens\":22,\"completion_tokens\":7}}"
+                    }
+                },
+                "merlinite-7b-lab":{
+                    "vllm-runtime": {
+                        "chat-completions_response_text": "{\"object\":\"chat.completion\",\"created\":,\"model\":\"llama-2-13b-chat\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"  This is a test!\"},\"logprobs\":null,\"finish_reason\":\"stop\",\"stop_reason\":null}],\"usage\":{\"prompt_tokens\":15,\"total_tokens\":22,\"completion_tokens\":7}}"
+                    }
+                }
+            }
+        },
+        {
+            "query_text": "{'role': 'user' , 'content' : 'The future of AI is '}",
+            "models": {
+                "granite-7b-lab":{
+                    "vllm-runtime": {
+                        "chat-completions_response_text": "{\"object\":\"chat.completion\",\"created\":,\"model\":\"llama-2-13b-chat\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"  This is a test!\"},\"logprobs\":null,\"finish_reason\":\"stop\",\"stop_reason\":null}],\"usage\":{\"prompt_tokens\":15,\"total_tokens\":22,\"completion_tokens\":7}}"
+                    }
+                }
+            }
+        },
+        {
+            "query_text": "The future of AI is ",
+            "models": {
+                "granite-7b-lab":{
+                    "vllm-runtime": {
+                        "completions_response_text": "{\"object\":\"text_completion\",\"created\":,\"model\":\"granite-7b-lab\",\"choices\":[{\"index\":0,\"text\":\" city in California, one of the most populous cities in the United States\",\"logprobs\":null,\"finish_reason\":\"length\",\"stop_reason\":null}],\"usage\":{\"prompt_tokens\":5,\"total_tokens\":20,\"completion_tokens\":16}}"
+                    }
+                }
+            }
+        },
+        {
+            "query_text": "{'role': 'user', 'content': [{'type': 'text', 'text': 'What is in this image?'}, {'type': 'image_url', 'image_url': {'url': 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Gfp-wisconsin-madison-the-nature-boardwalk.jpg/2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg'}}]}",
+            "models": {
+                "phi-3-vision":{
                     "vllm-runtime": {
                         "chat-completions_response_text": "{\"object\":\"chat.completion\",\"created\":,\"model\":\"llama-2-13b-chat\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"  This is a test!\"},\"logprobs\":null,\"finish_reason\":\"stop\",\"stop_reason\":null}],\"usage\":{\"prompt_tokens\":15,\"total_tokens\":22,\"completion_tokens\":7}}"
                     }
@@ -227,6 +324,15 @@
             "tgis-runtime": "{     'maxSequenceLength': 2048,     'maxNewTokens': 1024   }"
         },
         "llama-2-13b-chat-hf":{
+            "tgis-runtime": "{ 'maxSequenceLength': 4096,'maxNewTokens': 1024}"
+        },
+        "llama-3-8b-chat":{
+            "tgis-runtime": "{ 'maxSequenceLength': 4096,'maxNewTokens': 1024}"
+        },
+        "granite-8b-code":{
+            "tgis-runtime": "{ 'maxSequenceLength': 4096,'maxNewTokens': 1024}"
+        },
+        "merlinite-7b-lab": {
             "tgis-runtime": "{ 'maxSequenceLength': 4096,'maxNewTokens': 1024}"
         }
     }

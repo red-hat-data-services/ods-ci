@@ -1,5 +1,5 @@
 # ODS-CI
-ODS-CI is a framework to test [Red Hat Open Data Science](https://www.redhat.com/en/technologies/cloud-computing/openshift/openshift-data-science)
+ODS-CI is a framework to test [Red Hat OpenShift AI](https://www.redhat.com/en/technologies/cloud-computing/openshift/openshift-ai)
 and its upstream project, [Open Data Hub](https://opendatahub.io/).
 
 # Requirements
@@ -10,11 +10,16 @@ and its upstream project, [Open Data Hub](https://opendatahub.io/).
 
   2. [Poetry](https://python-poetry.org/docs/#installation) tool installed and added to your `$PATH`.
 
+
 # Quick Start
+  1. Move to the ods_ci folder inside ods-ci repo
+     ```bash
+     cd ods_ci
+     ```
   1. Create a variables file for all of the global test values
      ```bash
      # Create the initial test variables from the example template variables file
-     cp ods_ci/test-variables.yml.example ods_ci/test-variables.yml
+     cp test-variables.yml.example test-variables.yml
      ```
   2. Edit the test variables file to include information required for this test run.
      You will need to add info required for test execution:
@@ -28,26 +33,26 @@ and its upstream project, [Open Data Hub](https://opendatahub.io/).
   3. Run this script that will create the virtual environment, install the required packages and kickoff the Robot test suite.
   ```bash
      # Running all the tests
-     sh ods_ci/run_robot_test.sh
+     sh run_robot_test.sh
 
      # Running Smoke test suite via tag
-     sh ods_ci/run_robot_test.sh --include Smoke
+     sh run_robot_test.sh --include Smoke
 
      # Running a specific test via tag
-     sh ods_ci/run_robot_test.sh --include ODS-XYZ
+     sh run_robot_test.sh --include ODS-XYZ
 
      # Running tests in Open Data Hub:
      # You need to set accordingly the PRODUCT, APPLICATIONS_NAMESPACE, MONITORING_NAMESPACE,
      # OPERATOR_NAMESPACE and NOTEBOOKS_NAMESPACE in test-variables.yaml (or pass them as parameters
      # when launching the tests) and overwrite some local variables used in the test suites
      # adding --variablefile ./ods_ci/test-variables-odh-overwrite.yml
-     sh ods_ci/run_robot_test.sh \
+     sh run_robot_test.sh \
       --test-variable PRODUCT:ODH \
       --test-variable APPLICATIONS_NAMESPACE:opendatahub \
       --test-variable MONITORING_NAMESPACE:opendatahub \
       --test-variable OPERATOR_NAMESPACE:openshift-operators \
       --test-variable NOTEBOOKS_NAMESPACE:opendatahub \
-      --extra-robot-args '--variablefile ./ods_ci/test-variables-odh-overwrite.yml' \
+      --extra-robot-args '--variablefile test-variables-odh-overwrite.yml' \
       --include OpenDataHub
    ```
 

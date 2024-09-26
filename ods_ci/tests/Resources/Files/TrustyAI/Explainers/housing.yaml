@@ -1,0 +1,13 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: housing
+  annotations:
+    serving.kserve.io/deploymentMode: ModelMesh
+spec:
+  predictor:
+    model:
+      modelFormat:
+        name: xgboost
+      runtime: mlserver-1.x
+      storageUri: "https://github.com/ruivieira/model-collection/raw/housing-dataset/housing-data/model.json"

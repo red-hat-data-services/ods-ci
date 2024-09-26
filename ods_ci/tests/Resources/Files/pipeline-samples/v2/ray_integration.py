@@ -1,32 +1,28 @@
-from kfp import dsl
-
-from ods_ci.libs.DataSciencePipelinesKfp import DataSciencePipelinesKfp
+from kfp import dsl, compiler
 
 
-@dsl.component(packages_to_install=["codeflare-sdk"], base_image=DataSciencePipelinesKfp.base_image)
-def ray_fn(openshift_server: str, openshift_token: str) -> int:
+common_base_image = "registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61"
+
+
+# image and the sdk has a fixed value because the version matters
+@dsl.component(packages_to_install=["codeflare-sdk==0.16.4"], base_image=common_base_image)
+def ray_fn() -> int:
     import ray
-    from codeflare_sdk.cluster.auth import TokenAuthentication
     from codeflare_sdk.cluster.cluster import Cluster, ClusterConfiguration
     from codeflare_sdk import generate_cert
 
-    print("before login")
-    auth = TokenAuthentication(token=openshift_token, server=openshift_server, skip_tls=True)
-    auth_return = auth.login()
-    print(f'auth_return: "{auth_return}"')
-    print("after login")
     cluster = Cluster(
         ClusterConfiguration(
             name="raytest",
             num_workers=1,
             head_cpus=1,
-            head_memory=2,
+            head_memory=4,
             min_cpus=1,
             max_cpus=1,
             min_memory=1,
             max_memory=2,
             num_gpus=0,
-            image="quay.io/project-codeflare/ray:latest-py39-cu118",
+            image="quay.io/project-codeflare/ray:2.20.0-py39-cu118",
             verify_tls=False
         )
     )
@@ -52,7 +48,7 @@ def ray_fn(openshift_server: str, openshift_token: str) -> int:
     # establish connection to ray cluster
     generate_cert.generate_tls_cert(cluster.config.name, cluster.config.namespace)
     generate_cert.export_env(cluster.config.name, cluster.config.namespace)
-    ray.init(address=cluster.cluster_uri())
+    ray.init(address=cluster.cluster_uri(), logging_level="DEBUG")
     print("Ray cluster is up and running: ", ray.is_initialized())
 
     @ray.remote
@@ -63,7 +59,6 @@ def ray_fn(openshift_server: str, openshift_token: str) -> int:
     assert 100 == result
     ray.shutdown()
     cluster.down()
-    auth.logout()
     return result
 
 
@@ -71,5 +66,10 @@ def ray_fn(openshift_server: str, openshift_token: str) -> int:
     name="Ray Integration Test",
     description="Ray Integration Test",
 )
-def ray_integration(openshift_server: str, openshift_token: str):
-    ray_fn(openshift_server=openshift_server, openshift_token=openshift_token)
+def ray_integration():
+    ray_fn()
+
+
+if __name__ == "__main__":
+    compiler.Compiler().compile(ray_integration, package_path=__file__.replace(".py", "_compiled.yaml"))
+

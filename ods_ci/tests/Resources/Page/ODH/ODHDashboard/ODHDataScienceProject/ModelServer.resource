@@ -22,7 +22,10 @@ ${SERVING_ACCELERATOR_MINUS_BUTTON_XPATH}=    xpath=${SERVING_ACCELERATOR_INPUT_
 ${SERVING_ACCELERATOR_PLUS_BUTTON_XPATH}=    xpath=${SERVING_ACCELERATOR_INPUT_XPATH}/following-sibling::button
 ${SERVING_MODEL_SERVERS_SIDE_MENU}=    xpath=//span[text()='Models and model servers']
 ${TOKEN_AUTH_CHECKBOX_XP}=    xpath://input[@id="alt-form-checkbox-auth"]
+${ADD_SERVICE_ACCOUNT_BUTTON}=    xpath://button[text()='Add a service account']
+${SERVICE_ACCOUNT_INPUT}=    xpath://input[@data-testid='service-account-form-name']
 ${REPLICAS_COUNT_XP}=     xpath://section[@class='pf-v5-c-form__section']//span[@class='pf-v5-c-form-control']/input
+${PROJECT_SELECTOR_XP}=     xpath://main[contains(@id, 'dashboard-page-main')]//*[@data-testid="project-selector-dropdown"]
 
 
 *** Keywords ***
@@ -172,26 +175,60 @@ Set Model Server Name
 
 Enable External Serving Route
     [Documentation]    Enables the serving route to be accessed externally
-    Select Checkbox    xpath://input[@id="alt-form-checkbox-route"]
+    SeleniumLibrary.Select Checkbox    xpath://input[@id="alt-form-checkbox-route"]
 
 Enable Token Authentication
     [Documentation]    Enables Token authentication to serving route
+    [Arguments]    ${service_account_name}=${NONE}
     SeleniumLibrary.Select Checkbox    ${TOKEN_AUTH_CHECKBOX_XP}
-    # TODO: change service account name
+    IF    "${service_account_name}" != "${NONE}"
+        Input Service Account Name    ${service_account_name}
+    END
 
 Disable Token Authentication
-    [Documentation]    Enables Token authentication to serving route
-    SeleniumLibrary.Unselect Checkbox    ${TOKEN_AUTH_CHECKBOX_XP}
-    # TODO: change service account name
+    [Documentation]    Disable Token authentication to serving route
+    ...                If a Service Account is given, just disable the token for the specific one.
+    [Arguments]    ${service_account_name}=${NONE}
+    IF    "${service_account_name}" != "${NONE}"
+        Click Button    xpath://input[@value="${service_account_name}"]/parent::span/parent::div/following::div/button[@aria-label="Remove service account"]
+    ELSE
+        SeleniumLibrary.Unselect Checkbox    ${TOKEN_AUTH_CHECKBOX_XP}
+    END
+
+Add Another Service Account
+    [Documentation]    Add another Service Account once the Token Authorization is enabled
+    [Arguments]    ${service_account_name}=default-name2
+    Click Button     ${ADD_SERVICE_ACCOUNT_BUTTON}
+    Input Service Account Name    ${service_account_name}
+
+Input Service Account Name
+    [Documentation]    Input the name of the last Added Service Account.
+    [Arguments]    ${service_account_name}=default-name
+    ${service_accounts}=    Get WebElements    ${SERVICE_ACCOUNT_INPUT}
+    ${last_service_account}=    Set Variable    ${service_accounts}[-1]
+    Clear Element And Input Text    ${last_service_account}   ${service_account_name}
 
 Get Model Serving Access Token via UI
     [Documentation]    Returns the token used for authentication to the serving route
     ...    TODO: There can be multiple tokens defined for each model server, handle this case as well
-    [Arguments]    ${service_account_name}=default-name
-    Wait Until Page Contains Element    xpath://td[@data-label="Tokens"]/button
-    Click Element    xpath://td[@data-label="Tokens"]/button
+    [Arguments]    ${service_account_name}=default-name    ${single_model}=${FALSE}    ${model_name}=${NONE}
+    IF    ${single_model}
+        # Expand the model
+        SeleniumLibrary.Click Button    xpath: //a[text()='${model_name}']/parent::div/parent::td[@data-label='Name']/preceding-sibling::td/button  # robocop: off=line-too-long
+        ${token}=    Get Single Model Token    ${service_account_name}
+    ELSE
+        SeleniumLibrary.Wait Until Page Contains Element    xpath://td[@data-label="Tokens"]/button
+        SeleniumLibrary.Click Element    xpath://td[@data-label="Tokens"]/button
+        ${token}=    SeleniumLibrary.Get Element Attribute
+        ...    xpath://div[.="${service_account_name} "]/../../td[@data-label="Token Secret"]//input    value
+    END
+    RETURN    ${token}
+
+Get Single Model Token
+    [Documentation]    Gets the (Single Model) Token of an specific Service Account
+    [Arguments]    ${service_account_name}
     ${token}=    Get Element Attribute
-    ...    xpath://div[.="${service_account_name} "]/../../td[@data-label="Token Secret"]//input    value
+            ...    xpath://div[text()='${service_account_name}']/parent::td[@data-label='Token Name']/following-sibling::td[@data-label='Token Secret']//input   value
     RETURN    ${token}
 
 Click Plus Button
@@ -207,14 +244,17 @@ Query Model With GRPCURL
     ...            ${port}
     ...            ${endpoint}
     ...            ${json_body}
+    ...            ${protobuf_file}=${NONE}
+    ...            ${input_filepath}=${NONE}
     ...            ${json_header}=${NONE}
     ...            ${insecure}=${FALSE}
     ...            ${plaintext}=${FALSE}
     ...            ${background}=${NONE}
     ...            ${skip_res_json}=${FALSE}
     ...            ${cert}=${False}
+    ...            ${connect_timeout}=10
     ...            &{args}
-    ${cmd}=    Set Variable    grpcurl -d ${json_body}
+    ${cmd}=    Set Variable    grpcurl -connect-timeout ${connect_timeout} -d ${json_body}
     IF    $json_header != None
         ${cmd}=    Catenate    ${cmd}    -H ${json_header}
     END
@@ -226,12 +266,15 @@ Query Model With GRPCURL
         END
         ${cmd}=    Catenate    ${cmd}    -cacert ${cert}
     END
+    IF    "${protobuf_file}" != "${NONE}"
+        ${cmd}=    Catenate    ${cmd}    -proto ${protobuf_file}
+    END
     IF    ${plaintext}
         ${cmd}=    Catenate    ${cmd}    -plaintext
     END
-    # IF    "${proto_filepath}" != "${NONE}"
-    #     ${cmd}=    Catenate    ${cmd}    -proto ${proto_filepath}
-    # END
+    IF    "${input_filepath}" != "${NONE}"
+         ${cmd}=    Catenate    ${cmd}    < ${input_filepath}
+     END
     FOR    ${index}    ${option}    IN ENUMERATE    @{args}
         Log    ${index}: ${option}: ${args}[${option}]
         ${cmd}=    Catenate    ${cmd}    -${option} ${args}[${option}]
@@ -240,15 +283,17 @@ Query Model With GRPCURL
     ${cmd}=    Catenate    ${cmd}    ${endpoint}
     IF   '${background}' == '${NONE}'
           # ${rc}    ${response}=    Run And Return Rc And Output    ${cmd}
+          Log    ${cmd}    console=yes
           ${query_process}=    Run Process    command=${cmd}    stderr=STDOUT  shell=yes
           # Run Keyword And Continue On Failure    Should Be Equal As Integers    ${query_process.rc}    ${0}
           ${rc}=    Set Variable    ${query_process.rc}
           Run Keyword And Continue On Failure    Should Be Equal As Integers    ${rc}    ${0}
-          # Log    ${query_process.stdout}    console=yes
+          Log    ${query_process.stdout}    console=yes
           ${response}=    Set Variable    ${query_process.stdout}
           Log    ${response}    console=yes
+          Log    ${rc}    console=yes
           # ${json_res}=    Load Json String    ${query_process.stdout}
-          IF    ${skip_res_json} == ${TRUE}
+          IF    ${rc} != ${0} or ${skip_res_json} == ${TRUE}
             Log    ${response}
             RETURN    ${response}
           ELSE
@@ -274,7 +319,8 @@ Switch Model Serving Project
     IF    "${project_name}" == "${NONE}"
         ${project_name}=    Set Variable    All projects
     END
-    Click Element  //main[contains(@id, 'dashboard-page-main')]//button[contains(@id, 'dropdown-toggle')]
-    Wait Until Element Is Visible     //ul//a[contains(., '${project_name}')]
-    Click Element     //ul//a[contains(., '${project_name}')]
+    Wait Until Element Is Visible  ${PROJECT_SELECTOR_XP}
+    Click Element  ${PROJECT_SELECTOR_XP}
+    Wait Until Element Is Visible     //ul//li[contains(., '${project_name}')]
+    Click Element     //ul//li[contains(., '${project_name}')]
     ODHDashboard.Maybe Wait For Dashboard Loading Spinner Page

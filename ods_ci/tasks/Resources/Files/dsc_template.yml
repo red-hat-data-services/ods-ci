@@ -17,19 +17,26 @@ spec:
       devFlags: <kserve_devflags>
       defaultDeploymentMode: Serverless
       managementState: <kserve_value>
+    kueue:
+      devFlags: <kueue_devflags>
+      managementState: <kueue_value>
     modelmeshserving:
       devFlags: <modelmeshserving_devflags>
       managementState: <modelmeshserving_value>
     ray:
       devFlags: <ray_devflags>
       managementState: <ray_value>
-    kueue:
-      devFlags: <kueue_devflags>
-      managementState: <kueue_value>
+    trainingoperator:
+      devFlags: <trainingoperator_devflags>
+      managementState: <trainingoperator_value>
     trustyai:
       devFlags: <trustyai_devflags>
       managementState: <trustyai_value>
     workbenches:
       devFlags: <workbenches_devflags>
       managementState: <workbenches_value>
+    modelregistry:
+      devFlags: <modelregistry_devflags>
+      managementState: <modelregistry_value>
+      registriesNamespace: <modelregistry_namespace>
 

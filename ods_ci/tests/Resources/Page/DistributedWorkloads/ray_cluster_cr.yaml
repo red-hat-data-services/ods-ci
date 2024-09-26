@@ -14,7 +14,7 @@ spec:
       spec:
         containers:
         - name: ray-head
-          image: quay.io/project-codeflare/ray:latest-py39-cu118
+          image: quay.io/rhoai/ray@sha256:859f5c41d41bad1935bce455ad3732dff9d4d4c342b7155a7cd23809e85698ab
           ports:
           - containerPort: 6379
             name: gcs
@@ -28,7 +28,7 @@ spec:
                 command: ["/bin/sh", "-c", "ray stop"]
           resources:
             requests:
-              cpu: '1'
+              cpu: '0.5'
               memory: 1G
             limits:
               cpu: '1'
@@ -43,14 +43,14 @@ spec:
       spec:
         containers:
         - name: ray-worker
-          image: quay.io/project-codeflare/ray:latest-py39-cu118
+          image: quay.io/rhoai/ray@sha256:859f5c41d41bad1935bce455ad3732dff9d4d4c342b7155a7cd23809e85698ab
           lifecycle:
             preStop:
               exec:
                 command: ["/bin/sh", "-c", "ray stop"]
           resources:
             requests:
-              cpu: '1'
+              cpu: '0.5'
               memory: 1G
             limits:
               cpu: '1'

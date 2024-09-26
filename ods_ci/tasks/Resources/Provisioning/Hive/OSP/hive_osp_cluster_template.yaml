@@ -9,16 +9,19 @@ items:
   spec:
     baseDomain: ${infrastructure_configurations}[base_domain]
     imageSetRef:
-      name: ${infrastructure_configurations}[image_set] # see line 100
+      name: ${infrastructure_configurations}[image_set] # see line 102
     inventory:
-      - name: ${infrastructure_configurations}[hive_cluster_name]-conf # see line 72
+      - name: ${infrastructure_configurations}[hive_cluster_name]-conf # see line 74
     platform:
       openstack:
         cloud: ${infrastructure_configurations}[osp_cloud_name]
         credentialsSecretRef:
-          name: ${infrastructure_configurations}[hive_cluster_name]-cred # see line 91
+          name: ${infrastructure_configurations}[hive_cluster_name]-cred # see line 93
     installConfigSecretTemplateRef:
-      name: ${infrastructure_configurations}[hive_cluster_name]-sec # see line 30
+      name: ${infrastructure_configurations}[hive_cluster_name]-sec # see line 32
+    installerEnv:
+      - name: OPENSHIFT_INSTALL_SKIP_HOSTCRYPT_VALIDATION
+        value: 'true'
     size: 1
     maxSize: 1
     runningCount: 1
@@ -37,14 +40,14 @@ items:
       - name: worker
         platform:
           openstack:
-            type: ${infrastructure_configurations}[osp_flavor]
-        replicas: 3
+            type: ${infrastructure_configurations}[worker_node_instance_type]
+        replicas: ${infrastructure_configurations}[worker_node_replicas]
       controlPlane:
         name: master
         platform:
           openstack:
-            type: ${infrastructure_configurations}[osp_flavor]
-        replicas: 3
+            type: ${infrastructure_configurations}[master_node_instance_type]
+        replicas: ${infrastructure_configurations}[master_node_replicas]
       metadata:
         name: ${infrastructure_configurations}[hive_cluster_name]-install
       networking:

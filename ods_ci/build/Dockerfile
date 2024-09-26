@@ -29,37 +29,37 @@ RUN dnf -y update &&\
     curl --proto "=https" -L https://github.com/openshift-online/ocm-cli/releases/download/v0.1.62/ocm-linux-amd64 -o ${HOME}/ocm && \
     mv ${HOME}/ocm /usr/local/bin/ && chmod 755 /usr/local/bin/ocm && ocm version
 
-RUN mkdir ${HOME}/ods-ci
-# Change the WORKDIR so the run script references any files/folders from the root of the repo
-WORKDIR ${HOME}/ods-ci
+RUN mkdir -p ${HOME}/ods-ci/ods_ci
+# Change the WORKDIR so the run script references any files/folders from the ods_ci folder under the root of the repo
+WORKDIR ${HOME}/ods-ci/ods_ci
 
+COPY ods_ci/tests tests/
+COPY ods_ci/tasks tasks/
+COPY ods_ci/libs libs/
+COPY ods_ci/run_robot_test.sh run_robot_test.sh
+COPY ods_ci/build/run.sh  build/run.sh
+COPY ods_ci/build/install_idp.sh  build/install_idp.sh
+COPY ods_ci/build/clean_idp.sh build/clean_idp.sh
+COPY ods_ci/utils/scripts/Sender  utils/scripts/Sender/
+COPY ods_ci/utils/scripts/ocm/ocm.py  utils/scripts/ocm/ocm.py
+COPY ods_ci/utils/scripts/logger.py  utils/scripts/logger.py
+COPY ods_ci/utils/scripts/util.py  utils/scripts/util.py
+COPY ods_ci/utils/scripts/SplitSuite.py  utils/scripts/SplitSuite.py
+COPY ods_ci/utils/scripts/testconfig/test-variables.yml test-variables.yml.model
+COPY ods_ci/test-variables.yml.example test-variables.yml
+COPY ods_ci/configs/templates/ldap/ldap.yaml configs/templates/ldap/ldap.yaml
+COPY ods_ci/configs/templates/user_config.json configs/templates/user_config.json
+COPY ods_ci/configs/resources/oauth_htp_idp.json configs/resources/oauth_htp_idp.json
+COPY ods_ci/configs/resources/oauth_ldap_idp.json configs/resources/oauth_ldap_idp.json
+COPY ods_ci/configs/templates/ca-rolebinding.yaml configs/templates/ca-rolebinding.yaml
+COPY ods_ci/utils/scripts/ocm/templates/create_ldap_idp.jinja utils/scripts/ocm/templates/create_ldap_idp.jinja
+RUN  chmod +x build/run.sh &&\
+     chmod +x build/clean_idp.sh
 
-COPY ods_ci/tests ods_ci/tests/
-COPY ods_ci/tasks ods_ci/tasks/
-COPY ods_ci/libs ods_ci/libs/
-COPY ods_ci/run_robot_test.sh ods_ci/run_robot_test.sh
-COPY ods_ci/build/run.sh  ods_ci/build/run.sh
-COPY ods_ci/build/install_idp.sh  ods_ci/build/install_idp.sh
-COPY ods_ci/build/clean_idp.sh ods_ci/build/clean_idp.sh
-COPY ods_ci/utils/scripts/Sender  ods_ci/utils/scripts/Sender/
-COPY ods_ci/utils/scripts/ocm/ocm.py  ods_ci/utils/scripts/ocm/ocm.py
-COPY ods_ci/utils/scripts/logger.py  ods_ci/utils/scripts/logger.py
-COPY ods_ci/utils/scripts/util.py  ods_ci/utils/scripts/util.py
-COPY ods_ci/utils/scripts/SplitSuite.py  ods_ci/utils/scripts/SplitSuite.py
-COPY ods_ci/utils/scripts/testconfig/test-variables.yml ods_ci/test-variables.yml.model
-COPY ods_ci/test-variables.yml.example ods_ci/test-variables.yml
-COPY ods_ci/configs/templates/ldap/ldap.yaml ods_ci/configs/templates/ldap/ldap.yaml
-COPY ods_ci/configs/templates/user_config.json ods_ci/configs/templates/user_config.json
-COPY ods_ci/configs/resources/oauth_htp_idp.json ods_ci/configs/resources/oauth_htp_idp.json
-COPY ods_ci/configs/resources/oauth_ldap_idp.json ods_ci/configs/resources/oauth_ldap_idp.json
-COPY ods_ci/configs/templates/ca-rolebinding.yaml ods_ci/configs/templates/ca-rolebinding.yaml
-COPY ods_ci/utils/scripts/ocm/templates/create_ldap_idp.jinja ods_ci/utils/scripts/ocm/templates/create_ldap_idp.jinja
-RUN  chmod +x ods_ci/build/run.sh &&\
-     chmod +x ods_ci/build/clean_idp.sh
+COPY pyproject.toml ../
+COPY poetry.lock ../
+COPY README.md ../
 
-COPY pyproject.toml .
-COPY poetry.lock .
-COPY README.md .
 RUN alternatives --install /usr/local/bin/python3 python3 /usr/bin/python${PYTHON_VERSION} 1
 RUN python3 --version
 RUN curl -sSL https://install.python-poetry.org | python3 -
@@ -69,4 +69,4 @@ RUN poetry install
 RUN chgrp -R 0 . && \
     chmod -R g=u .
 
-ENTRYPOINT ["./ods_ci/build/run.sh"]
+ENTRYPOINT ["./build/run.sh"]

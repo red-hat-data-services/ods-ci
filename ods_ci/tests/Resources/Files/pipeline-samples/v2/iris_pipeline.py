@@ -144,7 +144,7 @@ def my_pipeline(
     create_dataset_task = create_dataset()
 
     normalize_dataset_task = normalize_dataset(
-        input_iris_dataset=create_dataset_task.outputs["iris_dataset"], standard_scaler=True
+        input_iris_dataset=create_dataset_task.outputs["iris_dataset"], standard_scaler=standard_scaler
     )
 
     train_model(
@@ -152,4 +152,6 @@ def my_pipeline(
     )
 
 
-compiler.Compiler().compile(pipeline_func=my_pipeline, package_path=__file__.replace(".py", "_compiled.yaml"))
+if __name__ == "__main__":
+    compiler.Compiler().compile(my_pipeline, package_path=__file__.replace(".py", "_compiled.yaml"))
+

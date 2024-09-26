@@ -97,6 +97,12 @@
         },
         "containers": ["kserve-container"]
     },
+    "caikit-standalone-runtime": {
+        "containers": ["kserve-container"]
+    },
+    "caikit-standalone-runtime-grpc": {
+        "containers": ["kserve-container","queue-proxy","istio-proxy"]
+    },
     "vllm-runtime": {
         "endpoints": {
             "chat-completions": {
@@ -120,6 +126,18 @@
                         "response": "choices",
                         "completion_tokens":  "completion_tokens",
                         "response_text":    "text"
+                    }
+                }
+            },
+            "embeddings"  : {
+                "http": {
+                    "endpoint": "v1/embeddings",
+                    "header": "Content-Type:application/json",
+                    "body": "{'encoding_format': 'float', 'model': '${model_name}','input': '${query_text}'}",
+                    "response_fields_map": {
+                        "response": "data",
+                        "completion_tokens":  "completion_tokens",
+                        "response_text":    "embedding"
                     }
                 }
             }

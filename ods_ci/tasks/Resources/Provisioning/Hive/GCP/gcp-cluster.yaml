@@ -17,6 +17,9 @@ items:
           name: gcp-creds
     installConfigSecretTemplateRef:
       name: gcp-sno-install-config
+    installerEnv:
+      - name: OPENSHIFT_INSTALL_SKIP_HOSTCRYPT_VALIDATION
+        value: 'true'
     size: 0
     skipMachinePools: true
 - apiVersion: v1
@@ -85,4 +88,4 @@ items:
     name: {{ image_set|default("rhods-openshift") }}
     namespace: {{ hive_claim_ns }}
   spec:
-    releaseImage: {{ release_image|default("quay.io/openshift-release-dev/ocp-release:4.10.18-x86_64") }}
+    releaseImage: {{ release_image|default("quay.io/openshift-release-dev/ocp-release:4.15.25-x86_64") }}

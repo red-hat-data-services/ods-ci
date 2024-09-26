@@ -11,7 +11,7 @@ Library          String
 ${cluster_type}                 selfmanaged
 ${image_url}                    ${EMPTY}
 ${RHODS_OSD_INSTALL_REPO}       None
-@{SUPPORTED_TEST_ENV}           AWS   AWS_DIS   GCP   PSI   PSI_DIS   ROSA   IBM_CLOUD   CRC
+@{SUPPORTED_TEST_ENV}           AWS   AWS_DIS   GCP   PSI   PSI_DIS   ROSA   IBM_CLOUD   CRC    AZURE	ROSA_HCP
 ${TEST_ENV}                     AWS
 ${INSTALL_TYPE}                 OperatorHub
 ${UPDATE_CHANNEL}               odh-nightlies
@@ -23,6 +23,8 @@ Can Install RHODS Operator
   [Tags]  install
   IF  "${PRODUCT}" == "ODH"
       Set Global Variable  ${OPERATOR_NAMESPACE}  opendatahub-operators
+      Set Global Variable  ${OPERATOR_NAME_LABEL}  opendatahub-operator
+      Set Global Variable  ${MODEL_REGISTRY_NAMESPACE}    odh-model-registries
       IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
           Set Global Variable  ${OPERATOR_NAME}  rhods-operator
       ELSE
@@ -30,6 +32,8 @@ Can Install RHODS Operator
       END
   ELSE
       Set Global Variable  ${OPERATOR_NAME}  rhods-operator
+      Set Global Variable  ${OPERATOR_NAME_LABEL}  rhods-operator
+      Set Global Variable  ${MODEL_REGISTRY_NAMESPACE}    rhoai-model-registries
   END
   Given Selected Cluster Type ${cluster_type}
   When Installing RHODS Operator ${image_url}

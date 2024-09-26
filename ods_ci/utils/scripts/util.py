@@ -8,7 +8,8 @@ import time
 
 import jinja2
 import yaml
-from logger import log
+
+from ods_ci.utils.scripts.logger import log
 
 
 def clone_config_repo(**kwargs):
@@ -80,13 +81,11 @@ def execute_command(cmd: str, print_stdout: bool = True) -> str | None:
     return None
 
 
-def oc_login(ocp_console_url, username, password, timeout=600):
+def oc_login(ocp_api_url, username, password, timeout=600):
     """
     Login to test cluster using oc cli command
     """
-    cluster_api_url = ocp_console_url.replace("console-openshift-console.apps", "api")
-    cluster_api_url = re.sub(r"/$", "", cluster_api_url) + ":6443"
-    cmd = "oc login -u {} -p {} {} --insecure-skip-tls-verify=true".format(username, password, cluster_api_url)
+    cmd = f"oc login -u {username} -p {password} {ocp_api_url} --insecure-skip-tls-verify=true"
     count = 0
     chk_flag = 0
     while count <= timeout:

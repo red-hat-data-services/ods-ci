@@ -13,10 +13,10 @@ from contextlib import redirect_stderr, redirect_stdout
 import jinja2
 import yaml
 
+from ods_ci.utils.scripts.logger import log
+from ods_ci.utils.scripts.util import compare_dicts, execute_command, read_data_from_json, write_data_in_json
+
 dir_path = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(dir_path + "/../")
-from logger import log
-from util import compare_dicts, execute_command, read_data_from_json, write_data_in_json
 
 """
 Class for Openshift Cluster Manager
@@ -62,7 +62,6 @@ class OpenshiftClusterManager:
         self.idp_name = args.get("idp_name")
         self.pool_instance_type = args.get("pool_instance_type")
         self.pool_node_count = args.get("pool_node_count")
-        self.taints = args.get("taints")
         self.pool_name = args.get("pool_name")
         self.reuse_machine_pool = args.get("reuse_machine_pool")
         self.notification_email = args.get("notification_email")
@@ -263,6 +262,16 @@ class OpenshiftClusterManager:
             sys.exit(1)
         return cluster_console_url.strip("\n")
 
+    def get_osd_cluster_api_url(self):
+        """Gets osd cluster api url"""
+
+        filter_str = "--json | jq -r '.api.url'"
+        cluster_api_url = self.ocm_describe(jq_filter=filter_str)
+        if cluster_api_url in [None, ""]:
+            log.error(f"Unable to retrieve cluster api url for cluster name {self.cluster_name}. EXITING")
+            sys.exit(1)
+        return cluster_api_url.strip("\n")
+
     def get_osd_cluster_info(self, config_file="cluster_config.yaml"):
         """Gets osd cluster information and stores in config file"""
 
@@ -271,6 +280,8 @@ class OpenshiftClusterManager:
         cluster_info["OCP_CONSOLE_URL"] = console_url
         cluster_version = self.get_osd_cluster_version()
         cluster_info["CLUSTER_VERSION"] = cluster_version
+        api_url = self.get_osd_cluster_api_url()
+        cluster_info["OCP_API_URL"] = api_url
         odh_dashboard_url = console_url.replace(
             "console-openshift-console",
             "rhods-dashboard-redhat-ods-applications",
@@ -384,12 +395,11 @@ class OpenshiftClusterManager:
             log.info(f"MachinePool with name {self.pool_name} exists in cluster {self.cluster_name}. Hence reusing it")
         else:
             self.get_osd_cluster_id()
-            cmd = "ocm --v={} create machinepool --cluster {} --instance-type {} --replicas {} --taints {} {}".format(
+            cmd = "ocm --v={} create machinepool --cluster {} --instance-type {} --replicas {} {}".format(
                 self.ocm_verbose_level,
                 self.cluster_id,
                 self.pool_instance_type,
                 self.pool_node_count,
-                self.taints,
                 self.pool_name,
             )
             ret = execute_command(cmd)
@@ -878,11 +888,19 @@ class OpenshiftClusterManager:
 
     def install_rhods_addon(self):
         if not self.is_addon_installed():
-            # Install dependency operators for rhoai deployment
-            dependency_operators = ["servicemesh", "serverless"]
-            for dependency_operator in dependency_operators:
-                self.install_openshift_isv(dependency_operator, "stable", "redhat-operators")
-                self.wait_for_isv_installation_to_complete(dependency_operator, namespace="openshift-operators")
+            # Install dependency operators for rhoai deployment:
+            # Authorino
+            dependency_operator = "authorino-operator"
+            self.install_openshift_isv(dependency_operator, "tech-preview-v1", "redhat-operators")
+            self.wait_for_isv_installation_to_complete(dependency_operator, namespace="openshift-operators")
+            # ServiceMesh
+            dependency_operator = "servicemeshoperator"
+            self.install_openshift_isv(dependency_operator, "stable", "redhat-operators")
+            self.wait_for_isv_installation_to_complete(dependency_operator, namespace="openshift-operators")
+            # Serverless
+            dependency_operator = "serverless-operator"
+            self.install_openshift_isv(dependency_operator, "stable", "redhat-operators")
+            self.wait_for_isv_installation_to_complete(dependency_operator, namespace="openshift-operators")
 
             # Deploy rhoai
             self.install_rhods()
@@ -1040,40 +1058,6 @@ class OpenshiftClusterManager:
         template_file = "install_isv.jinja"
         output_file = "install_isv.yaml"
         self._render_template(template_file, output_file, replace_vars)
-
-        if operator_name == "servicemesh":
-            with open(output_file) as f:
-                newdct = yaml.safe_load(f)
-            newdct["spec"]["name"] = "servicemeshoperator"
-            with open(output_file, "w") as f:
-                yaml.dump(newdct, f)
-
-        if operator_name == "serverless":
-            replace_vars = {
-                "ISV_NAME": "serverless-operators",
-                "NAMESPACE": "openshift-serverless",
-            }
-            template_file = "resource.jinja"
-            file_path1 = "resource.yaml"
-            self._render_template(template_file, file_path1, replace_vars)
-
-            def yaml_loader(filepath):
-                with open(filepath, "rb") as file_descriptor:
-                    data = yaml.load(file_descriptor, Loader=yaml.SafeLoader)
-                return data
-
-            data1 = yaml_loader(file_path1)
-            data2 = yaml_loader(output_file)
-            data1.update(data2)
-
-            with open(output_file, "w") as yaml_output:
-                yaml.dump(
-                    data1,
-                    yaml_output,
-                    default_flow_style=False,
-                    explicit_start=True,
-                    allow_unicode=True,
-                )
 
         cmd = "oc apply -f {} ".format(os.path.abspath(output_file))
         ret = execute_command(cmd)
@@ -1855,14 +1839,6 @@ if __name__ == "__main__":
         dest="pool_node_count",
         metavar="",
         default="1",
-    )
-    optional_machinepool_cluster_parser.add_argument(
-        "--taints",
-        help="Machine pool taints information",
-        action="store",
-        dest="taints",
-        metavar="",
-        default="nvidia.com/gpu=NONE:NoSchedule",
     )
     optional_machinepool_cluster_parser.add_argument(
         "--pool-name",

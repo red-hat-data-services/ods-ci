@@ -11,7 +11,7 @@ Resource       ../../../Common.robot
 ...                 https://user-dev-rhoam-quarkus-openapi-3scale-api.cluster.com/status/?user_key=.
 ...                 https://console-openshift-console.apps.test-cluster.example.com
 ...                 console-openshift-console.apps.test-cluster.example.com
-
+${QUICKSTART_PANNEL}=    //div[@data-test="quickstart drawer"]
 
 *** Keywords ***
 Open QuickStart Element in Resource Section By Name
@@ -22,7 +22,7 @@ Open QuickStart Element in Resource Section By Name
     ...    //div[@id="${element}"]//button[contains(., 'Open') or contains(., 'Continue') or contains(., 'Restart')]
     Wait Until Page Contains Element    ${start_tutorial_btn_xp}
     Click Button    ${start_tutorial_btn_xp}
-    Wait Until Page Contains Element    //div[@data-test="quickstart drawer"]     5
+    Wait Until Page Contains Element    ${QUICKSTART_PANNEL}     5
 
 Star QuickStart Tour
     Click Button    //button[@data-test="Start button"]
@@ -69,7 +69,7 @@ Close QuickStart From Top
     IF  ${btn_exists}    Click Element    //*[@data-test="${decision} button"]
 
 Page Should Not Contain QuickStart Sidebar
-    Wait Until Page Does Not Contain Element    //div[@class="pf-c-drawer__panel-main"]     5
+    Wait Until Page Does Not Contain Element    ${QUICKSTART_PANNEL}     5
 
 Close QuickStart From Button
     Click Element    //*[@data-testid="qs-drawer-close"]
@@ -126,7 +126,7 @@ Wait Until Resource Page Is Loaded
 Get Link Web Elements From Resource Page
     [Documentation]    Returns the link web elements from Resources page which redirects users to
     ...                external websites. It excludes Quick Starts items
-    ${link_elements}=    Get WebElements    //a[@class="odh-card__footer__link" and not(starts-with(@href, '#'))]
+    ${link_elements}=    Get WebElements     //a[contains(@class,"odh-card__footer__link") and not(starts-with(@href, '#'))]
     ${len}=    Get Length    ${link_elements}
     Log To Console    ${len} Links found\n
     RETURN    ${link_elements}
@@ -224,19 +224,14 @@ Verify Quick Starts Work As Expected When At Least One Step Is Skipped
         END
     END
 
-External URLs Should Not Be Broken
+Quickstart Steps URLs Are Valid
     [Documentation]     Go through a QuickStart and checks the status of all the external links
-    ${quick_start_steps}=   Get WebElements   //button[@class='pf-c-wizard__nav-link']
-    ${element_list}=    Get WebElements    xpath=//div[@Class="pf-c-drawer__panel-main"]//a[@href]
-    URLs HTTP Status Code Should Be Equal To    ${element_list}
+    ${quick_start_steps}=   Get WebElements   //button[contains(@class, "nav-link")]
     FOR    ${quick_start_step}    IN     @{quick_start_steps}
-            Open QuickStart Step  ${quick_start_step}
-            ${element_list}=    Get WebElements    xpath=//div[@Class="pf-c-drawer__panel-main"]//a[@href]
-            Run Keyword And Continue On Failure
-            ...    URLs HTTP Status Code Should Be Equal To    ${element_list}
-            ${doc_text}=     Get Text  //*[@class="pf-c-drawer__body pf-m-no-padding pfext-quick-start-panel-content__body"]    # robocop: disable
-            ${doc_link}=    Extract URLs From Text    text=${doc_text}
-            Validate Links Extracted From Text     ${doc_link}
+        Open QuickStart Step  ${quick_start_step}
+        ${doc_text}=     Get Text  //*[@class="pfext-quick-start-task__content"]
+        ${doc_link}=    Extract URLs From Text    text=${doc_text}
+        Validate Links Extracted From Text     ${doc_link}
     END
 
 Verify Links Are Not Broken For Each QuickStart
@@ -257,7 +252,7 @@ Verify Links Are Not Broken For Each QuickStart
         Log                ${Title[${0}]}    console=yes
         Click Element                 ${quickStartElements[${counter}]}
         Wait Until Element Is Visible  //button[contains(@class, "-c-wizard__nav-link")]
-        External URLs Should Not Be Broken
+        Quickstart Steps URLs Are Valid
     END
 
 Get QuickStart Items

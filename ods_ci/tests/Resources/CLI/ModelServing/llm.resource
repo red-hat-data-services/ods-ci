@@ -7,11 +7,12 @@ Library           ../../../../libs/Helpers.py
 
 
 *** Variables ***
-${LLM_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files/llm
+${LLM_RESOURCES_DIRPATH}=    tests/Resources/Files/llm
 ${EXP_RESPONSES_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/model_expected_responses.json
 ${RUNTIME_FORMATS_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/runtime_query_formats.json
 ${INFERENCESERVICE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/serving_runtimes/base/isvc.yaml
-${INFERENCESERVICE_FILLED_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/serving_runtimes/isvc_filled.yaml
+${INFERENCESERVICE_FILEPATH_NEW}=    ${LLM_RESOURCES_DIRPATH}/serving_runtimes/isvc
+${INFERENCESERVICE_FILLED_FILEPATH}=    ${INFERENCESERVICE_FILEPATH_NEW}/isvc_filled.yaml
 ${DEFAULT_BUCKET_SECRET_NAME}=    models-bucket-secret
 ${DEFAULT_BUCKET_SA_NAME}=        models-bucket-sa
 ${DEFAULT_BUCKET_PREFIX}=         models-bucket
@@ -24,6 +25,8 @@ ${SERVICEMESH_CR_NS}=    istio-system
 &{RUNTIME_FLIEPATHS}=    caikit-tgis-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/caikit_tgis_servingruntime_{{protocol}}.yaml
 ...                      tgis-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/tgis_servingruntime_{{protocol}}.yaml
 ...                      vllm-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/vllm_servingruntime_{{protocol}}.yaml
+...                      ovms-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/ovms_servingruntime_{{protocol}}.yaml
+...                      caikit-standalone-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/caikit_standalone_servingruntime_{{protocol}}.yaml     # robocop: disable
 ${DOWNLOAD_PVC_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_model_in_pvc.yaml
 ${DOWNLOAD_PVC_FILLED_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_model_in_pvc_filled.yaml
 
@@ -66,12 +69,14 @@ Set Project And Runtime
     [Arguments]    ${namespace}    ${enable_metrics}=${FALSE}    ${runtime}=caikit-tgis-runtime    ${protocol}=grpc
     ...            ${access_key_id}=${S3.AWS_ACCESS_KEY_ID}    ${access_key}=${S3.AWS_SECRET_ACCESS_KEY}
     ...            ${endpoint}=${MODELS_BUCKET.ENDPOINT}    ${verify_ssl}=${TRUE}
-    ...            ${download_in_pvc}=${FALSE}    ${storage_size}=70Gi    ${model_name}=${NONE}    ${model_path}=${model_name}    ${download_timeout}=600s
+    ...            ${download_in_pvc}=${FALSE}    ${storage_size}=70Gi    ${model_name}=${NONE}
+    ...            ${model_path}=${model_name}    ${download_timeout}=600s    ${memory_request}=40Gi
     Set Up Test OpenShift Project    test_ns=${namespace}
     IF    ${download_in_pvc}
-        Create PVC And Download Model From S3    model_name=${model_name}    namespace=${namespace}    bucket_name=${MODELS_BUCKET.NAME}
-        ...    use_https=${USE_BUCKET_HTTPS}    download_timeout=${download_timeout}
-        ...    storage_size=${storage_size}    model_path=${model_path}
+        Create PVC And Download Model From S3    model_name=${model_name}    namespace=${namespace}
+        ...    bucket_name=${MODELS_BUCKET.NAME}    use_https=${USE_BUCKET_HTTPS}
+        ...    download_timeout=${download_timeout}    storage_size=${storage_size}    model_path=${model_path}
+        ...    memory_request=${memory_request}
     ELSE
         Create Secret For S3-Like Buckets    endpoint=${endpoint}
         ...    region=${MODELS_BUCKET.REGION}    namespace=${namespace}
@@ -105,19 +110,19 @@ Create Secret For S3-Like Buckets
     ${endpoint_escaped}=    Escape String Chars    str=${endpoint}
     ${accesskey_escaped}=    Escape String Chars    str=${access_key}
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i 's/{{ENDPOINT}}/${endpoint_escaped}/g' ${LLM_RESOURCES_DIRPATH}/bucket_secret_filled.yaml
+    ...    sed -i'' -e 's/{{ENDPOINT}}/${endpoint_escaped}/g' ${LLM_RESOURCES_DIRPATH}/bucket_secret_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i 's/{{USE_HTTPS}}/${use_https}/g' ${LLM_RESOURCES_DIRPATH}/bucket_secret_filled.yaml
+    ...    sed -i'' -e 's/{{USE_HTTPS}}/${use_https}/g' ${LLM_RESOURCES_DIRPATH}/bucket_secret_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i 's/{{REGION}}/${region}/g' ${LLM_RESOURCES_DIRPATH}/bucket_secret_filled.yaml
+    ...    sed -i'' -e 's/{{REGION}}/${region}/g' ${LLM_RESOURCES_DIRPATH}/bucket_secret_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i 's/{{ACCESS_KEY_ID}}/${access_key_id}/g' ${LLM_RESOURCES_DIRPATH}/bucket_secret_filled.yaml
+    ...    sed -i'' -e 's/{{ACCESS_KEY_ID}}/${access_key_id}/g' ${LLM_RESOURCES_DIRPATH}/bucket_secret_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i 's/{{SECRET_ACCESS_KEY}}/${accesskey_escaped}/g' ${LLM_RESOURCES_DIRPATH}/bucket_secret_filled.yaml
+    ...    sed -i'' -e 's/{{SECRET_ACCESS_KEY}}/${accesskey_escaped}/g' ${LLM_RESOURCES_DIRPATH}/bucket_secret_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i 's/{{NAME}}/${name}/g' ${LLM_RESOURCES_DIRPATH}/bucket_secret_filled.yaml
+    ...    sed -i'' -e 's/{{NAME}}/${name}/g' ${LLM_RESOURCES_DIRPATH}/bucket_secret_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    sed -i 's/{{NAME}}/${sa_name}/g' ${LLM_RESOURCES_DIRPATH}/bucket_sa_filled.yaml
+    ...    sed -i'' -e 's/{{NAME}}/${sa_name}/g' ${LLM_RESOURCES_DIRPATH}/bucket_sa_filled.yaml
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc apply -f ${LLM_RESOURCES_DIRPATH}/bucket_secret_filled.yaml -n ${namespace}
     Should Be Equal As Integers    ${rc}    ${0}
@@ -321,11 +326,13 @@ Query Model Multiple Times
     ...            ${runtime}=caikit-tgis-runtime
     ...            ${isvc_name}=${model_name}
     ...            ${inference_type}=all-tokens
+    ...            ${status_code}=200
     ...            ${n_times}=10
     ...            ${query_idx}=0
     ...            ${validate_response}=${TRUE}
     ...            ${string_check_only}=${FALSE}
     ...            ${protocol}=grpc
+    ...            ${connect_timeout}=10
     ...            ${port_forwarding}=${FALSE}
     ...            ${port}=443
     ...            ${body_params}=&{EMPTY}
@@ -356,7 +363,11 @@ Query Model Multiple Times
     ...    inference_type=${inference_type}    model_name=${model_name}    body_params=${body_params}
     ...    query_text=${EXP_RESPONSES}[queries][${query_idx}][query_text]
     IF    "${token}" != "${None}"
-        ${header}=    Set Variable  "Authorization: Bearer ${token}" -H ${header}
+        IF    "${protocol}" == "grpc"
+            ${header}=   Set Variable   "Authorization: Bearer ${token}" -H ${header}
+            ELSE
+                Set To Dictionary    ${header}    Authorization    Bearer ${token}
+        END
     END
     ${runtime_details}=    Set Variable    ${RUNTIME_FORMATS}[${runtime}][endpoints][${inference_type}][${protocol}]
     ${endpoint}=    Set Variable    ${runtime_details}[endpoint]
@@ -368,7 +379,7 @@ Query Model Multiple Times
             ...    endpoint=${endpoint}
             ...    json_body=${body}    json_header=${header}
             ...    insecure=${insecure}    plaintext=${plaintext}    skip_res_json=${skip_json_load_response}
-            ...    cert=${cert}    &{args}
+            ...    cert=${cert}    connect_timeout=${connect_timeout}    &{args}
          ELSE IF    "${protocol}" == "http"
             ${payload}=     ODHDashboardAPI.Prepare Payload     body=${body}    str_to_json=${TRUE}
             Log Dictionary    ${args}
@@ -376,14 +387,14 @@ Query Model Multiple Times
             ...             headers=${header}   json=${payload}    verify=${cert}
             ${is_timeout}=    Run Keyword And Return Status    Dictionary Should Contain Key    ${args}    timeout
             IF    ${is_timeout} == ${FALSE}
-                Set To Dictionary    ${args}    timeout=10
+                Set To Dictionary    ${args}    timeout=100
             END
             Log Dictionary    ${args}
             ${res}=    Run Keyword And Continue On Failure     Perform Request     request_type=POST
             ...    skip_res_json=${skip_json_load_response}    &{args}
-            Run Keyword And Continue On Failure    Status Should Be  200
+            Run Keyword And Continue On Failure    Status Should Be  ${status_code}
         END
-        Log    ${res}
+        Log    ${res}    console=yes
         IF    ${validate_response} == ${TRUE}
             IF    ${string_check_only}
                 Model Response Should Be    response=${res}    model_name=${model_name}    inference_type=${inference_type}
@@ -529,9 +540,9 @@ Check Query Response Values    # robocop:disable
             Log    message=Metrics source namespaced succesfully checked. Going to next step.
         END
         IF    "${exp_model_name}" != "${EMPTY}"
-            ${source_model}=    Set Variable    ${result["metric"]["job"]}
-            ${checked}=    Run Keyword And Return Status    Should Be Equal As Strings    ${source_model}
-            ...    ${exp_model_name}-metrics
+            ${source_pod}=    Set Variable    ${result["metric"]["pod"]}
+            ${checked}=    Run Keyword And Return Status    Should Start With    ${source_pod}
+            ...    ${exp_model_name}
             IF    ${checked} == ${FALSE}
                 Continue For Loop
             ELSE
@@ -600,12 +611,19 @@ Traffic Should Be Redirected Based On Canary Percentage
 
 Get KServe Inference Host Via CLI
     [Documentation]    Fetches the model URL
-    [Arguments]    ${isvc_name}    ${namespace}
-    Sleep    5s
-    ${rc}    ${ksvc_host}=    Run And Return Rc And Output
-    ...    oc get isvc ${isvc_name} -n ${namespace} -o jsonpath='{.status.url}' | cut -d'/' -f3
-    # ...    oc get ksvc ${isvc_name}-predictor -n ${namespace} -o jsonpath='{.status.url}' | cut -d'/' -f3
-    Should Be Equal As Integers    ${rc}    ${0}
+    [Arguments]    ${isvc_name}    ${namespace}    ${retries}=10
+    ${ksvc_host}=    Set Variable    ""
+    ${condition1}=    Evaluate    ${ksvc_host}=="${EMPTY}"
+    ${condition2}=    Evaluate    ${retries} > 0
+    WHILE    ${condition1} and ${condition2}
+        Sleep    5s
+        ${rc}    ${ksvc_host}=    Run And Return Rc And Output
+        ...    oc get isvc ${isvc_name} -n ${namespace} -o jsonpath='{.status.url}' | cut -d'/' -f3
+        Should Be Equal As Integers    ${rc}    ${0}
+        ${retries} =    Evaluate    ${retries} - 1
+        ${condition1}=    Evaluate    "${ksvc_host}"=="${EMPTY}"
+        ${condition2}=    Evaluate    ${retries} > 0
+    END
     Should Not Be Empty    ${ksvc_host}
     RETURN    ${ksvc_host}
 
@@ -724,7 +742,7 @@ Clean Up Test Project
 Create PVC And Download Model From S3
     [Arguments]    ${model_name}    ${bucket_name}
     ...            ${use_https}    ${namespace}    ${storage_size}
-    ...            ${model_path}    ${download_timeout}=500s
+    ...            ${model_path}    ${memory_request}    ${download_timeout}=500s
     Set Log Level    NONE
     Set Test Variable    ${model_name}
     Set Test Variable    ${bucket_name}
@@ -733,11 +751,14 @@ Create PVC And Download Model From S3
     Set Test Variable    ${namespace}
     Set Test Variable    ${storage_size}
     Set Test Variable    ${model_path}
+    Set Test Variable    ${memory_request}
     Set Log Level    INFO
     Create File From Template    ${DOWNLOAD_PVC_FILEPATH}    ${DOWNLOAD_PVC_FILLED_FILEPATH}
     ${rc}    ${out}=    Run And Return Rc And Output    oc -n ${namespace} apply -f ${DOWNLOAD_PVC_FILLED_FILEPATH}
     Should Be Equal As Integers    ${rc}    ${0}
-    Wait For Pods To Be Ready    label_selector=name=download-${model_name}    namespace=${namespace}
+    # No reason to keep this file around once it's applied
+    Remove File    ${DOWNLOAD_PVC_FILLED_FILEPATH}
+    Run Keyword And Continue On Failure   Wait For Pods To Be Ready    label_selector=name=download-${model_name}    namespace=${namespace}
     Wait For Pods To Succeed    label_selector=name=download-${model_name}    namespace=${namespace}
     ...    timeout=${download_timeout}
     ${rc}    ${out}=    Run And Return Rc And Output    oc delete pods -l name=download-${model_name} -n ${namespace}
@@ -745,13 +766,17 @@ Create PVC And Download Model From S3
 
 Extract Service Port
     [Arguments]    ${service_name}    ${namespace}    ${protocol}
-    IF    "${protocol}" == "grpc"
+    ${protocol_name}     Set Variable    name
+    IF    '${protocol}' == 'grpc'
         ${port_name}=    Set Variable    h2c
+    ELSE IF    '${protocol}' == 'TCP'
+            ${protocol_name}=    Set Variable    protocol
+            ${port_name}=    Set Variable    TCP
     ELSE
         ${port_name}=    Set Variable    ${protocol}
     END
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc get svc/${service_name} -n ${namespace} -o jsonpath='{range .spec.ports[?(@.name=="${port_name}")]}{@.targetPort}{end}'
+    ...    oc get svc/${service_name} -n ${namespace} -o jsonpath='{range .spec.ports[?(@.${protocol_name}=="${port_name}")]}{@.targetPort}{end}'
     Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
     RETURN    ${out}
 
@@ -817,7 +842,11 @@ Wait For Model KServe Deployment To Be Ready
     ...                the deployment has the expected pods and containers
     [Arguments]    ${label_selector}    ${namespace}    ${runtime}
     ...    ${timeout}=300s    ${exp_replicas}=${1}
-    Wait For Pods To Be Ready    label_selector=${label_selector}    namespace=${namespace}    timeout=${timeout}
+    Wait For Pods To Be Ready    label_selector=${label_selector}    namespace=${namespace}   timeout=${timeout}
+    # Get the model name from the label_selector variable
+    ${splitted_str}    Split String    ${label_selector}    =
+    ${model_name}    Set Variable    ${splitted_str}[1]
+    Wait For ISVC To Be Loaded     ${model_name}     ${namespace}
     Verify Model KServe Deployment    ${label_selector}    ${namespace}    ${runtime}    ${exp_replicas}
 
 Verify Model KServe Deployment
@@ -850,3 +879,32 @@ Verify Model KServe Deployment
     ${n_containers}=    Get Length    ${containers}
     Run Keyword And Continue On Failure    Verify Deployment    ${model_pods}  ${exp_replicas}
     ...    ${n_containers}  ${containers}
+
+Wait For ISVC To Be Loaded
+    [Documentation]    Waits for the ISVC to be Loaded
+    [Arguments]    ${isvc_name}    ${namespace}    ${retries}=60
+    Wait Until Keyword Succeeds    ${retries} times    5s    ISVC Should Be Loaded    ${isvc_name}    ${namespace}
+    Sleep    30s    msg=There is a 20 seconds polling
+
+ISVC Should Be Loaded
+    [Documentation]    Check if the ISVC is Loaded (i.e., Success status in the grid)
+    [Arguments]    ${isvc_name}    ${namespace}
+    ${rc}    ${isvc_status}=    Run And Return Rc And Output
+    ...    oc get isvc ${isvc_name} -n ${namespace} -o=jsonpath='{.status.modelStatus.states.activeModelState}'
+    Should Be Equal As Integers    ${rc}    ${0}
+    Should Be Equal As Strings    ${isvc_status}    Loaded
+
+Update ISVC Filled Config
+    [Documentation]    Update default inference service with runtime argument based on requirement
+    [Arguments]    ${overlay}
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc kustomize ${LLM_RESOURCES_DIRPATH}/serving_runtimes/overlay/${overlay} > ${INFERENCESERVICE_FILEPATH_NEW}/isvc_custom_filled.yaml
+    Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
+
+Remove Model Mount Path From Runtime
+    [Documentation]    This keyword is to remove model mount(mnt/model) path from runtime
+    ...   This is required for speculative decoding using draft model
+    [Arguments]     ${namespace}   ${runtime}=vllm-runtime
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...   oc patch servingruntime ${runtime} -n ${namespace} --type='json' -p='[{"op": "remove", "path": "/spec/containers/0/args/1"}]'
+    Should Be Equal As Integers    ${rc}    ${0}    msg=${out}

@@ -1,13 +1,15 @@
+#!/usr/bin/env python3
+
 """
 Examples
 Input:
-python3 ods_ci/utils/scripts/fetch_tests.py --test-repo git@github.com:red-hat-data-services/ods-ci.git --ref1 releases/2.8.0 --ref2-auto true --selector-attribute creatordate -A new-arg-file.txt
+poetry run ods_ci/utils/scripts/fetch_tests.py --test-repo git@github.com:red-hat-data-services/ods-ci.git --ref1 releases/2.8.0 --ref2-auto true --selector-attribute creatordate -A new-arg-file.txt
 Output:
 ---| Computing differences |----
 Done. Found 30 new tests in releases/2.8.0 which were not present in origin/releases/2.7.0
 
 Input:
-python3 ods_ci/utils/scripts/fetch_tests.py --test-repo git@github.com:red-hat-data-services/ods-ci.git --ref1 master  --ref2-auto true --selector-attribute creatordate -A new-arg-file.txt
+poetry run ods_ci/utils/scripts/fetch_tests.py --test-repo git@github.com:red-hat-data-services/ods-ci.git --ref1 master  --ref2-auto true --selector-attribute creatordate -A new-arg-file.txt
 Output:
 ---| Computing differences |----
 Done. Found 14 new tests in master which were not present in origin/releases/2.9.0
@@ -20,7 +22,8 @@ import shutil
 
 from robot.model import SuiteVisitor
 from robot.running import TestSuiteBuilder
-from util import execute_command
+
+from ods_ci.utils.scripts.util import execute_command
 
 
 class TestCasesFinder(SuiteVisitor):
@@ -60,7 +63,7 @@ def checkout_repository(ref):
 
 def get_branch(ref_to_exclude, selector_attribute):
     """
-    List the remote branches and sort by last commit date (ASC order), exclude $ref_to_exclude and get latest
+    List the remote branches and sort by selector_attribute date (ASC order), exclude $ref_to_exclude and get latest
     """
     ref_to_exclude_esc = ref_to_exclude.replace("/", r"\/")
     cmd = f"git branch -r --sort={selector_attribute} | grep releases/"
@@ -89,7 +92,7 @@ def extract_test_cases_from_ref(repo_local_path, ref, auto=False, selector_attri
         print(f"\n---| Extracting test cases from {ref} branch/commit |---")
         checkout_repository(ref)
         builder = TestSuiteBuilder()
-        testsuite = builder.build("ods_ci/tests/")
+        testsuite = builder.build("tests/")
         finder = TestCasesFinder()
         tests = []
         testsuite.visit(finder)
@@ -192,8 +195,8 @@ if __name__ == "__main__":
         help="Select the git attribute to use when --ref2-auto is enabled",
         action="store",
         dest="selector_attribute",
-        choices=["creatordate", "committerdate", "authordate"],
-        default="creatordate",
+        choices=["creatordate", "committerdate", "authordate", "taggerdate", "version:refname"],
+        default="version:refname",
     )
 
     args = parser.parse_args()

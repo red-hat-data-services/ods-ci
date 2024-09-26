@@ -9,15 +9,26 @@ Resource   ../../../../tests/Resources/Page/OCPDashboard/UserManagement/Groups.r
 *** Variables ***
 ${DSC_NAME} =    default-dsc
 ${DSCI_NAME} =    default-dsci
-@{COMPONENT_LIST} =    dashboard    datasciencepipelines    kserve    modelmeshserving    workbenches    codeflare    ray    trustyai    kueue  # robocop: disable
+@{COMPONENT_LIST} =    codeflare
+...    dashboard
+...    datasciencepipelines
+...    kserve
+...    kueue
+...    modelmeshserving
+...    ray
+...    trainingoperator
+...    trustyai
+...    workbenches
+...    modelregistry
 ${SERVERLESS_OP_NAME}=     serverless-operator
 ${SERVERLESS_SUB_NAME}=    serverless-operator
 ${SERVERLESS_NS}=    openshift-serverless
+${OPENSHIFT_OPERATORS_NS}=    openshift-operators
 ${SERVICEMESH_OP_NAME}=     servicemeshoperator
 ${SERVICEMESH_SUB_NAME}=    servicemeshoperator
 ${AUTHORINO_OP_NAME}=     authorino-operator
 ${AUTHORINO_SUB_NAME}=    authorino-operator
-${AUTHORINO_CHANNEL_NAME}=  managed-services
+${AUTHORINO_CHANNEL_NAME}=  tech-preview-v1
 ${RHODS_CSV_DISPLAY}=    Red Hat OpenShift AI
 ${ODH_CSV_DISPLAY}=    Open Data Hub Operator
 ${CUSTOM_MANIFESTS}=    ${EMPTY}
@@ -39,13 +50,13 @@ Install RHODS
           ${file_path} =    Set Variable    tasks/Resources/RHODS_OLM/install/
           Copy File    source=${file_path}cs_template.yaml    destination=${file_path}cs_apply.yaml
           IF  "${PRODUCT}" == "ODH"
-              Run    sed -i 's/<CATALOG_SOURCE>/community-operators/' ${file_path}cs_apply.yaml
+              Run    sed -i'' -e 's/<CATALOG_SOURCE>/community-operators/' ${file_path}cs_apply.yaml
           ELSE
-              Run    sed -i 's/<CATALOG_SOURCE>/redhat-operators/' ${file_path}cs_apply.yaml
+              Run    sed -i'' -e 's/<CATALOG_SOURCE>/redhat-operators/' ${file_path}cs_apply.yaml
           END
-          Run    sed -i 's/<OPERATOR_NAME>/${OPERATOR_NAME}/' ${file_path}cs_apply.yaml
-          Run    sed -i 's/<OPERATOR_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}cs_apply.yaml
-          Run    sed -i 's/<UPDATE_CHANNEL>/${UPDATE_CHANNEL}/' ${file_path}cs_apply.yaml
+          Run    sed -i'' -e 's/<OPERATOR_NAME>/${OPERATOR_NAME}/' ${file_path}cs_apply.yaml
+          Run    sed -i'' -e 's/<OPERATOR_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}cs_apply.yaml
+          Run    sed -i'' -e 's/<UPDATE_CHANNEL>/${UPDATE_CHANNEL}/' ${file_path}cs_apply.yaml
           Oc Apply   kind=List   src=${file_path}cs_apply.yaml
           Remove File    ${file_path}cs_apply.yml
       ELSE
@@ -56,6 +67,7 @@ Install RHODS
           # odh-nightly is not build for Managed, it is only possible for Self-Managed
           Set Global Variable    ${OPERATOR_NAMESPACE}    openshift-marketplace
           Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
+          Set Global Variable    ${OPERATOR_NAME}         opendatahub-operator
       ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "CLi"
           Install RHODS In Managed Cluster Using CLI  ${cluster_type}     ${image_url}
       ELSE
@@ -70,7 +82,7 @@ Verify RHODS Installation
   Log To Console    Waiting for all RHODS resources to be up and running
   Wait For Pods Numbers  1
   ...                   namespace=${OPERATOR_NAMESPACE}
-  ...                   label_selector=name=${OPERATOR_NAME}
+  ...                   label_selector=name=${OPERATOR_NAME_LABEL}
   ...                   timeout=2000
   Wait For Pods Status  namespace=${OPERATOR_NAMESPACE}  timeout=1200
   Log  Verified ${OPERATOR_NAMESPACE}  console=yes
@@ -78,7 +90,12 @@ Verify RHODS Installation
   IF  "${UPDATE_CHANNEL}" == "odh-nightlies" or "${cluster_type}" != "managed"
     IF  "${PRODUCT}" == "ODH"
         Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
-        Wait For DSCInitialization CustomResource To Be Ready    timeout=30
+        IF    "${TEST_ENV.lower()}" == "crc"
+            ${timeout_in_seconds} =   Set Variable   180
+        ELSE
+            ${timeout_in_seconds} =   Set Variable   30
+        END
+        Wait For DSCInitialization CustomResource To Be Ready    timeout=${timeout_in_seconds}
     END
     Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
   END
@@ -139,6 +156,14 @@ Verify RHODS Installation
     Wait For Pods Numbers   1
     ...                   namespace=${APPLICATIONS_NAMESPACE}
     ...                   label_selector=app.kubernetes.io/name=data-science-pipelines-operator
+    ...                   timeout=400
+  END
+  ${modelregistry} =    Is Component Enabled    modelregistry    ${DSC_NAME}
+  IF    "${modelregistry}" == "true"
+    Log To Console    "Waiting for 1 pod in ${APPLICATIONS_NAMESPACE}, label_selector=app.kubernetes.io/part-of=model-registry-operator"
+    Wait For Pods Numbers   1
+    ...                   namespace=${APPLICATIONS_NAMESPACE}
+    ...                   label_selector=app.kubernetes.io/part-of=model-registry-operator
     ...                   timeout=400
   END
   ${kserve} =    Is Component Enabled    kserve    ${DSC_NAME}
@@ -207,7 +232,7 @@ Wait For Pods Numbers
          IF    ${output} == ${count}
                ${status}  Set Variable  True
                Log To Console  pods ${label_selector} created
-               Exit For Loop
+               BREAK
          END
          Sleep    1 sec
   END
@@ -240,56 +265,63 @@ Create DSCInitialization CustomResource Using Test Variables
     [Arguments]    ${dsci_name}=${DSCI_NAME}
     ${file_path} =    Set Variable    tasks/Resources/Files/
     Copy File    source=${file_path}dsci_template.yml    destination=${file_path}dsci_apply.yml
-    Run    sed -i 's/<dsci_name>/${dsci_name}/' ${file_path}dsci_apply.yml
-    Run    sed -i 's/<application_namespace>/${APPLICATIONS_NAMESPACE}/' ${file_path}dsci_apply.yml
-    Run    sed -i 's/<monitoring_namespace>/${MONITORING_NAMESPACE}/' ${file_path}dsci_apply.yml
+    Run    sed -i'' -e 's/<dsci_name>/${dsci_name}/' ${file_path}dsci_apply.yml
+    Run    sed -i'' -e 's/<application_namespace>/${APPLICATIONS_NAMESPACE}/' ${file_path}dsci_apply.yml
+    Run    sed -i'' -e 's/<monitoring_namespace>/${MONITORING_NAMESPACE}/' ${file_path}dsci_apply.yml
 
 Wait For DSCInitialization CustomResource To Be Ready
-  [Documentation]   Wait for DSCInitialization CustomResource To Be Ready
-  [Arguments]     ${timeout}
-  Log To Console    Waiting for DSCInitialization CustomResource To Be Ready
-  ${status}   Set Variable   False
-  FOR    ${counter}    IN RANGE   ${timeout}
-         ${return_code}    ${output}    Run And Return Rc And Output   oc get DSCInitialization --no-headers -o custom-columns=":status.phase"
-         IF    '${output}' == 'Ready'
-               ${status}  Set Variable  True
-               Log To Console  DSCInitialization CustomResource is Ready
-               Exit For Loop
-         END
-         Sleep    1 sec
-  END
-  IF    '${status}' == 'False'
-        Run Keyword And Continue On Failure    FAIL    Timeout- DSCInitialization CustomResource is not Ready
-  END
+    [Documentation]   Wait ${timeout} seconds for DSCInitialization CustomResource To Be Ready
+    [Arguments]     ${timeout}
+    Log To Console    Waiting ${timeout} seconds for DSCInitialization CustomResource To Be Ready
+    ${result} =    Run Process    oc wait DSCInitialization --timeout\=${timeout}s --for jsonpath\='{.status.phase}'\=Ready --all
+    ...    shell=true    stderr=STDOUT
+    IF    ${result.rc} != 0
+        Run Keyword And Continue On Failure    FAIL    ${result.stdout}
+    END
 
 Apply DataScienceCluster CustomResource
     [Documentation]
-    [Arguments]        ${dsc_name}=${DSC_NAME}
+    [Arguments]        ${dsc_name}=${DSC_NAME}      ${custom}=False       ${custom_cmp}=''
     ${file_path} =    Set Variable    tasks/Resources/Files/
-    Log to Console    Requested Configuration:
-    FOR    ${cmp}    IN    @{COMPONENT_LIST}
-        TRY
-            Log To Console    ${cmp} - ${COMPONENTS.${cmp}}
-        EXCEPT
-            Log To Console    ${cmp} - Removed
+    IF      ${custom} == True
+        Log to Console    message=Creating DataScience Cluster using custom configuration
+        Generate CustomManifest In DSC YAML
+        Rename DevFlags in DataScienceCluster CustomResource
+        ${yml} =    Get File    ${file_path}dsc_apply.yml
+        Log To Console    Applying DSC yaml
+        Log To Console    ${yml}
+        ${return_code}    ${output} =    Run And Return Rc And Output    oc apply -f ${file_path}dsc_apply.yml
+        Log To Console    ${output}
+        Should Be Equal As Integers  ${return_code}  0  msg=Error detected while applying DSC CR
+        #Remove File    ${file_path}dsc_apply.yml
+        Wait For DSC Conditions Reconciled    ${OPERATOR_NS}     ${DSC_NAME}
+    ELSE
+        Log to Console    Requested Configuration:
+        FOR    ${cmp}    IN    @{COMPONENT_LIST}
+            TRY
+                Log To Console    ${cmp} - ${COMPONENTS.${cmp}}
+            EXCEPT
+                Log To Console    ${cmp} - Removed
+            END
         END
-    END
-    Create DataScienceCluster CustomResource Using Test Variables
-    Apply Custom Manifest in DataScienceCluster CustomResource Using Test Variables
-    ${yml} =    Get File    ${file_path}dsc_apply.yml
-    Log To Console    Applying DSC yaml
-    Log To Console    ${yml}
-    ${return_code}    ${output} =    Run And Return Rc And Output    oc apply -f ${file_path}dsc_apply.yml
-    Log To Console    ${output}
-    Should Be Equal As Integers  ${return_code}  0  msg=Error detected while applying DSC CR
-    Remove File    ${file_path}dsc_apply.yml
-    FOR    ${cmp}    IN    @{COMPONENT_LIST}
-        IF    $cmp not in $COMPONENTS
-            Component Should Not Be Enabled    ${cmp}
-        ELSE IF    '${COMPONENTS.${cmp}}' == 'Managed'
-            Component Should Be Enabled    ${cmp}
-        ELSE IF    '${COMPONENTS.${cmp}}' == 'Removed'
-            Component Should Not Be Enabled    ${cmp}
+        Log to Console    message=Creating DataScience Cluster using yml template
+        Create DataScienceCluster CustomResource Using Test Variables
+        Apply Custom Manifest in DataScienceCluster CustomResource Using Test Variables
+        ${yml} =    Get File    ${file_path}dsc_apply.yml
+        Log To Console    Applying DSC yaml
+        Log To Console    ${yml}
+        ${return_code}    ${output} =    Run And Return Rc And Output    oc apply -f ${file_path}dsc_apply.yml
+        Log To Console    ${output}
+        Should Be Equal As Integers  ${return_code}  0  msg=Error detected while applying DSC CR
+        Remove File    ${file_path}dsc_apply.yml
+        FOR    ${cmp}    IN    @{COMPONENT_LIST}
+            IF    $cmp not in $COMPONENTS
+                    Component Should Not Be Enabled    ${cmp}
+            ELSE IF    '${COMPONENTS.${cmp}}' == 'Managed'
+                    Component Should Be Enabled    ${cmp}
+            ELSE IF    '${COMPONENTS.${cmp}}' == 'Removed'
+                    Component Should Not Be Enabled    ${cmp}
+            END
         END
     END
 
@@ -300,13 +332,38 @@ Create DataScienceCluster CustomResource Using Test Variables
     Copy File    source=${file_path}dsc_template.yml    destination=${file_path}dsc_apply.yml
     Run    sed -i'' -e 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
     FOR    ${cmp}    IN    @{COMPONENT_LIST}
-        IF    $cmp not in $COMPONENTS
-            Run    sed -i'' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
-        ELSE IF    '${COMPONENTS.${cmp}}' == 'Managed'
-            Run    sed -i'' -e 's/<${cmp}_value>/Managed/' ${file_path}dsc_apply.yml
-        ELSE IF    '${COMPONENTS.${cmp}}' == 'Removed'
-            Run    sed -i'' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
-        END
+            IF    $cmp not in $COMPONENTS
+                Run    sed -i'' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
+            ELSE IF    '${COMPONENTS.${cmp}}' == 'Managed'
+                Run    sed -i'' -e 's/<${cmp}_value>/Managed/' ${file_path}dsc_apply.yml
+            ELSE IF    '${COMPONENTS.${cmp}}' == 'Removed'
+                Run    sed -i'' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
+            END
+            # The model registry component needs to set the namespace used, so adding this special statement just for it
+            IF    '${cmp}' == 'modelregistry'
+                Run    sed -i'' -e 's/<${cmp}_namespace>/${MODEL_REGISTRY_NAMESPACE}/' ${file_path}dsc_apply.yml
+            END
+    END
+
+Generate CustomManifest In DSC YAML
+    [Arguments]    ${dsc_name}=${DSC_NAME}
+    Log To Console      ${custom_cmp}.items
+    ${file_path} =    Set Variable    tasks/Resources/Files/
+    Copy File    source=${file_path}dsc_template.yml    destination=${file_path}dsc_apply.yml
+    Run    sed -i'' -e 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
+    FOR    ${cmp}    IN    @{COMPONENT_LIST}
+            ${value}=       Get From Dictionary 	${custom_cmp} 	${cmp}
+            ${status}=       Get From Dictionary 	${value} 	managementState
+            Log To Console      ${status}
+            IF    '${status}' == 'Managed'
+                Run    sed -i'' -e 's/<${cmp}_value>/Managed/' ${file_path}dsc_apply.yml
+            ELSE IF    '${status}' == 'Removed'
+                Run    sed -i'' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
+            END
+            # The model registry component needs to set the namespace used, so adding this special statement just for it
+            IF    '${cmp}' == 'modelregistry'
+                Run    sed -i'' -e 's/<${cmp}_namespace>/${MODEL_REGISTRY_NAMESPACE}/' ${file_path}dsc_apply.yml
+            END
     END
 
 Apply Custom Manifest in DataScienceCluster CustomResource Using Test Variables
@@ -315,14 +372,40 @@ Apply Custom Manifest in DataScienceCluster CustomResource Using Test Variables
     ${file_path} =    Set Variable    tasks/Resources/Files/
     Log To Console    ${file_path}
     FOR    ${cmp}    IN    @{COMPONENT_LIST}
-        # IF    $cmp in ${CUSTOM_MANIFESTS}
-        #     ${manifest_string}=    Convert To String    ${CUSTOM_MANIFESTS}[${cmp}]
-        #     # Use sed to replace the placeholder with the YAML string
-        #     Run    sed -i "s|<${cmp}_devflags>|${manifest_string}|g" ${file_path}dsc_apply.yml
-        # ELSE
-            Run    sed -i'' -e "s|<${cmp}_devflags>||g" ${file_path}dsc_apply.yml
-        # END
+         IF    $cmp in $CUSTOM_MANIFESTS
+              ${manifest_string}=    Convert To String    ${CUSTOM_MANIFESTS}[${cmp}]
+              # Use sed to replace the placeholder with the YAML string
+              Run    sed -i'' -e "s|<${cmp}_devflags>|${manifest_string}|g" ${file_path}dsc_apply.yml
+         ELSE
+              Run    sed -i'' -e "s|<${cmp}_devflags>||g" ${file_path}dsc_apply.yml
+         END
     END
+
+Rename DevFlags in DataScienceCluster CustomResource
+    [Documentation]     Filling devFlags fields for every component in DSC
+    Log To Console    Filling devFlags fields for every component in DSC
+    ${file_path} =    Set Variable    tasks/Resources/Files/
+    FOR    ${cmp}    IN    @{COMPONENT_LIST}
+        Run     sed -i'' -e "s|<${cmp}_devflags>||g" ${file_path}dsc_apply.yml
+    END
+
+Wait For DataScienceCluster CustomResource To Be Ready
+  [Documentation]   Wait for DataScienceCluster CustomResource To Be Ready
+  [Arguments]     ${timeout}
+  Log To Console    Waiting for DataScienceCluster CustomResource To Be Ready
+  ${status} =   Set Variable   False
+  FOR    ${counter}    IN RANGE   ${timeout}
+         ${return_code}    ${output} =    Run And Return Rc And Output   oc get DataScienceCluster --no-headers -o custom-columns=":status.phase"        #robocop:disable
+         IF    '${output}' == 'Ready'
+               ${status} =  Set Variable  True
+               Log To Console  DataScienceCluster CustomResource is Ready
+               BREAK
+         END
+         Sleep    1 sec
+  END
+  IF    '${status}' == 'False'
+        Run Keyword And Continue On Failure    FAIL    Timeout- DataScienceCluster CustomResource is not Ready
+  END
 
 Component Should Be Enabled
     [Arguments]    ${component}    ${dsc_name}=${DSC_NAME}
@@ -337,7 +420,7 @@ Component Should Not Be Enabled
 Is Component Enabled
     [Documentation]    Returns the enabled status of a single component (true/false)
     [Arguments]    ${component}    ${dsc_name}=${DSC_NAME}
-    ${return_code}    ${output} =    Run And Return Rc And Output    oc get datasciencecluster ${dsc_name} -o json | jq '.spec.components.${component}.managementState'  #robocop:disable
+    ${return_code}    ${output} =    Run And Return Rc And Output    oc get datasciencecluster ${dsc_name} -o json | jq '.spec.components.${component}.managementState // "Removed"'  #robocop:disable
     Log    ${output}
     Should Be Equal As Integers  ${return_code}  0  msg=Error detected while getting component status
     ${n_output} =    Evaluate    '${output}' == ''
@@ -369,6 +452,55 @@ Catalog Is Ready
     Should Be Equal As Integers   ${rc}  0  msg=Error detected while getting CatalogSource status state
     Should Be Equal As Strings    "READY"    ${output}
 
+Install Authorino Operator Via Cli
+    [Documentation]    Install Authorino Operator Via CLI
+    Install ISV Operator From OperatorHub Via CLI    operator_name=${AUTHORINO_OP_NAME}
+          ...    subscription_name=${AUTHORINO_SUB_NAME}
+          ...    channel=${AUTHORINO_CHANNEL_NAME}
+          ...    catalog_source_name=redhat-operators
+    Wait Until Operator Subscription Last Condition Is
+          ...    type=CatalogSourcesUnhealthy    status=False
+          ...    reason=AllCatalogSourcesHealthy    subcription_name=${AUTHORINO_SUB_NAME}
+          ...    retry=150
+    Wait For Pods To Be Ready    label_selector=control-plane=authorino-operator
+          ...    namespace=${OPENSHIFT_OPERATORS_NS}
+    Wait For Pods To Be Ready    label_selector=authorino-component=authorino-webhooks
+          ...    namespace=${OPENSHIFT_OPERATORS_NS}
+
+Install Service Mesh Operator Via Cli
+    [Documentation]    Install Service Mesh Operator Via CLI
+    Install ISV Operator From OperatorHub Via CLI    operator_name=${SERVICEMESH_OP_NAME}
+          ...    subscription_name=${SERVICEMESH_SUB_NAME}
+          ...    catalog_source_name=redhat-operators
+    Wait Until Operator Subscription Last Condition Is
+          ...    type=CatalogSourcesUnhealthy    status=False
+          ...    reason=AllCatalogSourcesHealthy    subcription_name=${SERVICEMESH_SUB_NAME}
+          ...    retry=150
+    Wait For Pods To Be Ready    label_selector=name=istio-operator
+          ...    namespace=${OPENSHIFT_OPERATORS_NS}
+
+Install Serverless Operator Via Cli
+    [Documentation]    Install Serverless Operator Via CLI
+    ${rc}    ${out} =    Run And Return Rc And Output    oc create namespace ${SERVERLESS_NS}
+    Install ISV Operator From OperatorHub Via CLI    operator_name=${SERVERLESS_OP_NAME}
+          ...    namespace=${SERVERLESS_NS}
+          ...    subscription_name=${SERVERLESS_SUB_NAME}
+          ...    catalog_source_name=redhat-operators
+          ...    operator_group_name=serverless-operators
+          ...    operator_group_ns=${SERVERLESS_NS}
+          ...    operator_group_target_ns=${NONE}
+    Wait Until Operator Subscription Last Condition Is
+          ...    type=CatalogSourcesUnhealthy    status=False
+          ...    reason=AllCatalogSourcesHealthy    subcription_name=${SERVERLESS_SUB_NAME}
+          ...    namespace=${SERVERLESS_NS}
+          ...    retry=150
+    Wait For Pods To Be Ready    label_selector=name=knative-openshift
+          ...    namespace=${SERVERLESS_NS}
+    Wait For Pods To Be Ready    label_selector=name=knative-openshift-ingress
+          ...    namespace=${SERVERLESS_NS}
+    Wait For Pods To Be Ready    label_selector=name=knative-operator
+          ...    namespace=${SERVERLESS_NS}
+
 Install Kserve Dependencies
     [Documentation]    Install Dependent Operators For Kserve
     Set Suite Variable   ${FILES_RESOURCES_DIRPATH}    tests/Resources/Files
@@ -376,50 +508,19 @@ Install Kserve Dependencies
     Set Suite Variable   ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
     ${is_installed} =   Check If Operator Is Installed Via CLI   ${AUTHORINO_OP_NAME}
     IF    not ${is_installed}
-          Install ISV Operator From OperatorHub Via CLI    operator_name=${AUTHORINO_OP_NAME}
-          ...    subscription_name=${AUTHORINO_SUB_NAME}
-          ...    channel=${AUTHORINO_CHANNEL_NAME}
-          ...    catalog_source_name=redhat-operators
-          Wait Until Operator Subscription Last Condition Is
-          ...    type=CatalogSourcesUnhealthy    status=False
-          ...    reason=AllCatalogSourcesHealthy    subcription_name=${AUTHORINO_SUB_NAME}
-          ...    retry=150
+          Install Authorino Operator Via Cli
     ELSE
           Log To Console    message=Authorino Operator is already installed
     END
-    ${is_installed}=   Check If Operator Is Installed Via CLI   ${SERVICEMESH_OP_NAME}
+    ${is_installed} =   Check If Operator Is Installed Via CLI   ${SERVICEMESH_OP_NAME}
     IF    not ${is_installed}
-          Install ISV Operator From OperatorHub Via CLI    operator_name=${SERVICEMESH_OP_NAME}
-          ...    subscription_name=${SERVICEMESH_SUB_NAME}
-          ...    catalog_source_name=redhat-operators
-          Wait Until Operator Subscription Last Condition Is
-          ...    type=CatalogSourcesUnhealthy    status=False
-          ...    reason=AllCatalogSourcesHealthy    subcription_name=${SERVICEMESH_SUB_NAME}
-          ...    retry=150
+          Install Service Mesh Operator Via Cli
     ELSE
           Log To Console    message=ServiceMesh Operator is already installed
     END
-    ${is_installed}=   Check If Operator Is Installed Via CLI   ${SERVERLESS_OP_NAME}
+    ${is_installed} =   Check If Operator Is Installed Via CLI   ${SERVERLESS_OP_NAME}
     IF    not ${is_installed}
-          ${rc}    ${out}=    Run And Return Rc And Output    oc create namespace ${SERVERLESS_NS}
-          Install ISV Operator From OperatorHub Via CLI    operator_name=${SERVERLESS_OP_NAME}
-          ...    namespace=${SERVERLESS_NS}
-          ...    subscription_name=${SERVERLESS_SUB_NAME}
-          ...    catalog_source_name=redhat-operators
-          ...    operator_group_name=serverless-operators
-          ...    operator_group_ns=${SERVERLESS_NS}
-          ...    operator_group_target_ns=${NONE}
-          Wait Until Operator Subscription Last Condition Is
-          ...    type=CatalogSourcesUnhealthy    status=False
-          ...    reason=AllCatalogSourcesHealthy    subcription_name=${SERVERLESS_SUB_NAME}
-          ...    namespace=${SERVERLESS_NS}
-          ...    retry=150
-          Wait For Pods To Be Ready    label_selector=name=knative-openshift
-          ...    namespace=${SERVERLESS_NS}
-          Wait For Pods To Be Ready    label_selector=name=knative-openshift-ingress
-          ...    namespace=${SERVERLESS_NS}
-          Wait For Pods To Be Ready    label_selector=name=knative-operator
-          ...    namespace=${SERVERLESS_NS}
+         Install Serverless Operator Via Cli
     ELSE
          Log To Console    message=Serverless Operator is already installed
     END

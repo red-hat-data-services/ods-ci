@@ -1,14 +1,16 @@
 import argparse
-import os
 import re
-import sys
 
-dir_path = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(dir_path + "/../")
-from awsOps import aws_configure
-from logger import log
-from rosaOps import create_account_roles, rosa_create_cluster, rosa_whoami, wait_for_osd_cluster_to_be_ready
-from util import execute_command
+from rosaOps import (
+    create_account_roles,
+    rosa_create_cluster,
+    rosa_whoami,
+    wait_for_osd_cluster_to_be_ready,
+)
+
+from ods_ci.utils.scripts.awsOps import aws_configure
+from ods_ci.utils.scripts.logger import log
+from ods_ci.utils.scripts.util import execute_command
 
 
 class RosaClusterManager:
@@ -35,7 +37,9 @@ class RosaClusterManager:
             f"awk '{{print $1}}' | grep -w '^{re.escape(version)}*' | head -n1"
         )
         latest_version = execute_command(latest_version_cmd)
-        self.rosa_version = latest_version.strip()
+        # when rosa cli is not the latest one, we see WARN messages, and this is breaking the automations when
+        # picking up the retrieved version, so adding this spilitlines method to take the correct part of the output
+        self.rosa_version = latest_version.splitlines()[-1].strip()
         log.info(f"Using the latest rosa version: {self.rosa_version}")
 
     def create_rosa_cluster(self):

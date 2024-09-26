@@ -81,10 +81,7 @@ Handle Already Existing Cluster
 
 Create Provider Resources
     Log    Creating Hive resources for cluster ${cluster_name} on ${provider_type} according to: ${template}   console=True
-    IF    "${provider_type}" == "AWS"
-        Oc Apply    kind=List    src=${template}    api_version=v1
-        ...    template_data=${infrastructure_configurations}
-    ELSE IF    "${provider_type}" == "GCP"
+    IF    "${provider_type}" in ["AWS", "GCP", "AZURE"]
         Oc Apply    kind=List    src=${template}    api_version=v1
         ...    template_data=${infrastructure_configurations}
     ELSE IF    "${provider_type}" == "OSP"
@@ -103,19 +100,18 @@ Select Provisioner Template
     [Arguments]    ${provider_type}
     IF    "${provider_type}" == "AWS"
         Set Task Variable    ${template}    tasks/Resources/Provisioning/Hive/AWS/aws-cluster.yaml
-        Log    Setting AWS Hive Template ${template}   console=True
     ELSE IF    "${provider_type}" == "GCP"
         Set Task Variable    ${template}    tasks/Resources/Provisioning/Hive/GCP/gcp-cluster.yaml
-        Log    Setting GCP Hive Template ${template}    console=True
     ELSE IF    "${provider_type}" == "OSP"
         Set Task Variable    ${template}    tasks/Resources/Provisioning/Hive/OSP/hive_osp_cluster_template.yaml
-        Log    Setting OSP Hive Template ${template}    console=True
     ELSE IF    "${provider_type}" == "IBM"
         Set Task Variable    ${template}    tasks/Resources/Provisioning/Hive/IBM/ibmcloud-cluster.yaml
-        Log    Setting IBM Hive Template ${template}    console=True
+    ELSE IF    "${provider_type}" == "AZURE"
+        Set Task Variable    ${template}    tasks/Resources/Provisioning/Hive/AZURE/azure-cluster.yaml
     ELSE
         FAIL    Invalid provider name
     END
+    Log    Setting ${provider_type} Hive Template ${template}    console=True
     RETURN    ${template}
 
 Create Openstack Resources
@@ -154,43 +150,27 @@ Create Floating IPs
     Export Variables From File    ${fips_file_to_export}
 
 Watch Hive Install Log
-    [Arguments]    ${namespace}    ${install_log_file}    ${hive_timeout}=50m
-    WHILE   True    limit=${hive_timeout}    on_limit_message=Hive Install ${hive_timeout} Timeout Exceeded    # robotcode: ignore
-        ${old_log_data} = 	Get File 	${install_log_file}
-        ${last_line_index} =    Get Line Count    ${old_log_data}
-        IF    ${use_cluster_pool}
-            ${pod} =    Oc Get    kind=Pod    namespace=${namespace}
-        ELSE
-            ${pod} =    Oc Get    kind=Pod    namespace=${namespace}
-            ...    label_selector=hive.openshift.io/cluster-deployment-name=${cluster_name}
-        END
-        TRY
-            ${new_log_data} =    Oc Get Pod Logs    name=${pod[0]['metadata']['name']}    container=hive    namespace=${namespace}
-        EXCEPT
-            # Hive container (OCP installer log) is not ready yet
-            Log To Console    .    no_newline=true
-            Sleep   10s
-            CONTINUE
-        END
-        # Print the new lines that were added to the installer log
-        @{new_lines} =    Split To Lines    ${new_log_data}    ${last_line_index}
-        ${lines_count} =    Get length    ${new_lines}
-        IF  ${lines_count} > 0
-            Create File    ${install_log_file}    ${new_log_data}
-            FOR    ${line}    IN    @{new_lines}
-                Log To Console    ${line}
-            END
-        ELSE
-            ${hive_pods_status} =    Run And Return Rc    oc get pod -n ${namespace} --no-headers | awk '{print $3}' | grep -v 'Completed'
-            IF    ${hive_pods_status} != 0
-                Log    All Hive pods in ${namespace} have completed    console=True
-                BREAK
-            END
-            Log To Console    .    no_newline=true
-            Sleep   10s
-        END
+    [Arguments]    ${pool_name}    ${namespace}    ${hive_timeout}=80m
+    ${label_selector} =    Set Variable    hive.openshift.io/cluster-deployment-name=${cluster_name}
+    IF    ${use_cluster_pool}
+        ${label_selector} =    Set Variable    hive.openshift.io/clusterpool-name=${pool_name}
     END
-    Should Contain    ${new_log_data}    install completed successfully
+    ${label_selector} =    Catenate    SEPARATOR=    ${label_selector}    ,hive.openshift.io/job-type=provision
+    ${logs_cmd} =     Set Variable    oc logs -f -l ${label_selector} -n ${namespace}
+    Wait For Pods To Be Ready    label_selector=${label_selector}    namespace=${namespace}    timeout=5m
+    TRY
+        ${return_code} =    Run And Watch Command    ${logs_cmd}    timeout=${hive_timeout}
+        ...    output_should_contain=install completed successfully
+    EXCEPT
+        Log To Console    ERROR: Check Hive Logs if present or you may have hit timeout ${hive_timeout}.
+    END
+    Should Be Equal As Integers    ${return_code}    ${0}
+    ${hive_pods_status} =    Run And Return Rc
+    ...    oc get pod -n ${namespace} --no-headers | awk '{print $3}' | grep -v 'Completed'
+    IF    ${hive_pods_status} != 0
+        Log    All Hive pods in ${namespace} have completed    console=True
+    END
+    Sleep   10s    reason=Let's wait some seconds before proceeding with next checks
 
 Wait For Cluster To Be Ready
     IF    ${use_cluster_pool}
@@ -205,7 +185,7 @@ Wait For Cluster To Be Ready
     END
     ${install_log_file} =    Set Variable    ${artifacts_dir}/${cluster_name}_install.log
     Create File    ${install_log_file}
-    Run Keyword And Ignore Error    Watch Hive Install Log    ${pool_namespace}    ${install_log_file}
+    Run Keyword And Continue On Failure    Watch Hive Install Log    ${pool_name}    ${pool_namespace}
     Log    Verifying that Cluster '${cluster_name}' has been provisioned and is running according to Hive Pool namespace '${pool_namespace}'      console=True    # robocop: disable:line-too-long
     ${provision_status} =    Run Process
     ...    oc -n ${pool_namespace} wait --for\=condition\=ProvisionFailed\=False cd ${clusterdeployment_name} --timeout\=15m    # robocop: disable:line-too-long

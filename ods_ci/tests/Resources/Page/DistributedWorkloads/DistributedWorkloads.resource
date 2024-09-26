@@ -5,10 +5,25 @@ Library          Process
 
 
 *** Variables ***
-${CODEFLARE_TEST_TIMEOUT_LONG}    20m
-${GO_TEST_TIMEOUT}    1h
-${JOB_GO_BIN}    %{WORKSPACE=.}/go-bin
-${GO_JUNIT_REPORT_TOOL}    github.com/jstemmer/go-junit-report/v2@latest
+${VIRTUAL_ENV_NAME}                      venv3.9
+${CODEFLARE-SDK-API_URL}                 %{CODEFLARE-SDK-API_URL=https://api.github.com/repos/project-codeflare/codeflare-sdk/releases/latest}
+${CODEFLARE-SDK_DIR}                     codeflare-sdk
+${CODEFLARE-SDK_REPO_URL}                %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
+${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}  https://github.com/opendatahub-io/distributed-workloads/releases/latest/download
+${FMS_HF_TUNING_IMAGE}                   quay.io/modh/fms-hf-tuning@sha256:f8f732c340488734bf9023953d14bb2410991bd3ff2a519ad2ce07c531353797
+${NOTEBOOK_IMAGE}                        quay.io/modh/odh-generic-data-science-notebook@sha256:9d7f80080a453bcf7dee01b986df9ee811ee74f6f433c601a8b67d283c160547
+${NOTEBOOK_USER_NAME}                    ${TEST_USER_3.USERNAME}
+${NOTEBOOK_USER_PASSWORD}                ${TEST_USER_3.PASSWORD}
+${KFTO_CORE_BINARY_NAME}                 kfto
+${KFTO_UPGRADE_BINARY_NAME}              kfto-upgrade
+${ODH_BINARY_NAME}                       odh
+${PIP_INDEX_URL}                         ${PIP_INDEX_URL}
+${PIP_TRUSTED_HOST}                      ${PIP_TRUSTED_HOST}
+${AWS_DEFAULT_ENDPOINT}                  ${S3.BUCKET_5.ENDPOINT}
+${AWS_STORAGE_BUCKET}                    ${S3.BUCKET_5.NAME}
+${AWS_ACCESS_KEY_ID}                     ${S3.AWS_ACCESS_KEY_ID}
+${AWS_SECRET_ACCESS_KEY}                 ${S3.AWS_SECRET_ACCESS_KEY}
+${AWS_STORAGE_BUCKET_MNIST_DIR}          mnist-datasets
 
 
 *** Keywords ***
@@ -22,34 +37,213 @@ Clone Git Repository
         FAIL    Unable to clone DW repo ${DW_REPO_URL}:${DW_REPO_BRANCH}:${DW_DIR}
     END
 
-Run Distributed Workloads Tests
-    [Documentation]   Run distributed workloads E2E tests from integration directory
-    [Arguments]    ${DW_DIR}    ${DW_TEST_RESULT_FILE}    ${TEST_PARAMETERS}
-    ${result} =    Run Process
-    ...    go test -v -timeout ${GO_TEST_TIMEOUT} ./integration ${TEST_PARAMETERS} 2>&1 > ${DW_TEST_RESULT_FILE}
-    ...    shell=true    cwd=${DW_DIR}/tests    env:ODH_NAMESPACE=redhat-ods-applications
-    ...    env:CODEFLARE_TEST_TIMEOUT_LONG=${CODEFLARE_TEST_TIMEOUT_LONG}
-    ...    env:CODEFLARE_TEST_RAY_IMAGE=quay.io/project-codeflare/ray:2.5.0-py38-cu116
-    Log To Console    ${result.stdout}
-    ${test_output}=    Get File    ${DW_TEST_RESULT_FILE}
-    Log To Console    ${test_output}
-    RETURN    ${result.rc}
+Prepare Codeflare-SDK Test Setup
+    [Documentation]   Prepare codeflare-sdk tests by cloning codeflare-sdk repo and python virtual environmnet
 
-Install Go Junit Report Tool
-    [Documentation]   Use Go install command to install Go Junit report tool
-    ${result} =    Run Process    go install ${GO_JUNIT_REPORT_TOOL}
-    ...    shell=true    env:GOBIN=${JOB_GO_BIN}    stderr=STDOUT
-    Log To Console    ${result.stdout}
-    IF    ${result.rc} != 0
-        FAIL    Failed to install Go junit report tool
+    Log To Console    "Restarting kueue"
+    Restart Kueue
+
+    ${latest_tag} =    Run Process   curl -s "${CODEFLARE-SDK-API_URL}" | grep '"tag_name":' | cut -d '"' -f 4
+    ...    shell=True    stderr=STDOUT
+    Log To Console  codeflare-sdk latest tag is : ${latest_tag.stdout}
+    IF    ${latest_tag.rc} != 0
+        FAIL    Unable to fetch codeflare-sdk latest tag
     END
 
-Convert Go Test Results To Junit
-    [Documentation]   Use Go Junit report tool to convert Go test results to Junit
-    [Arguments]    ${DW_TEST_RESULT_FILE}    ${DW_JUNIT_FILE}
-    ${result} =    Run Process    ${JOB_GO_BIN}/go-junit-report -in ${DW_TEST_RESULT_FILE} -iocopy -out ${DW_JUNIT_FILE}
+    Clone Git Repository    ${CODEFLARE-SDK_REPO_URL}    ${latest_tag.stdout}    ${CODEFLARE-SDK_DIR}
+
+    ${result} =    Run Process  virtualenv -p python3.9 ${VIRTUAL_ENV_NAME}
     ...    shell=true    stderr=STDOUT
     Log To Console    ${result.stdout}
     IF    ${result.rc} != 0
-        FAIL    Failed to convert Go test results to Junit
+        FAIL    Unable to setup Python virtual environment
+    END
+
+Run Codeflare-SDK Test
+    [Documentation]   Run codeflare-sdk Test
+    [Arguments]    ${TEST_TYPE}    ${TEST_NAME}
+    Log To Console    "Running codeflare-sdk test: ${TEST_NAME}"
+    ${result} =    Run Process  source ${VIRTUAL_ENV_NAME}/bin/activate && cd ${CODEFLARE-SDK_DIR} && poetry env use 3.9 && poetry install --with test,docs && poetry run pytest -v -s ./tests/${TEST_TYPE}/${TEST_NAME} --timeout\=300 && deactivate
+    ...    env:RAY_IMAGE=${RAY_IMAGE}
+    ...    env:AWS_DEFAULT_ENDPOINT=${AWS_DEFAULT_ENDPOINT}
+    ...    env:AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+    ...    env:AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    ...    env:AWS_STORAGE_BUCKET=${AWS_STORAGE_BUCKET}
+    ...    env:AWS_STORAGE_BUCKET_MNIST_DIR=${AWS_STORAGE_BUCKET_MNIST_DIR}
+    ...    env:PIP_INDEX_URL=${PIP_INDEX_URL}
+    ...    env:PIP_TRUSTED_HOST=${PIP_TRUSTED_HOST}
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Running test ${TEST_NAME} failed
+    END
+
+Codeflare Upgrade Tests Teardown
+    [Documentation]   cleanup codeflare-SDK upgrade tests resources created
+    [Arguments]    ${project_name}    ${project_created}
+    IF    ${project_created} == True    Run Keywords
+    ...    Run   oc delete project ${project_name}    AND
+    ...    Run Process    oc delete LocalQueue local-queue-mnist -n ${project_name} &
+    ...    oc delete ClusterQueue cluster-queue-mnist &
+    ...    oc delete ResourceFlavor default-flavor-mnist    shell=True
+
+Cleanup Codeflare-SDK Setup
+    [Documentation]   cleanup codeflare repository cloned and python setup
+    Log To Console     "Removing Python virtual environment directory ${VIRTUAL_ENV_NAME}"
+    Remove Directory        ${VIRTUAL_ENV_NAME}    recursive=True
+
+    Log To Console     "Removing directory ${CODEFLARE-SDK_DIR}"
+    Remove Directory        ${CODEFLARE-SDK_DIR}    recursive=True
+
+Restart Kueue
+    Log To Console    "Rollout restart kueue-controller-manager"
+    ${result} =    Run Process    oc rollout restart deployment/kueue-controller-manager -n ${APPLICATIONS_NAMESPACE}
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Failed to restart Kueue
+    END
+
+    Log To Console    "Wait for kueue-controller-manager rollout to finish"
+    ${result} =    Run Process    oc rollout status deployment/kueue-controller-manager -w -n ${APPLICATIONS_NAMESPACE}
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Failed to finish Kueue rollout
+    END
+
+Prepare Training Operator E2E Core Test Suite
+    [Documentation]    Prepare Training Operator E2E Core Test Suite
+    Prepare Training Operator E2E Test Suite    ${KFTO_CORE_BINARY_NAME}
+
+Prepare Training Operator E2E Upgrade Test Suite
+    [Documentation]    Prepare Training Operator E2E Upgrade Test Suite
+    Prepare Training Operator E2E Test Suite    ${KFTO_UPGRADE_BINARY_NAME}
+
+Prepare Training Operator E2E Test Suite
+    [Documentation]    Prepare Training Operator E2E Test Suite
+    [Arguments]        ${test_binary}
+    Log To Console    "Downloading compiled test binary ${test_binary}"
+    ${result} =    Run Process    curl --location --silent --output ${test_binary} ${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}/${test_binary} && chmod +x ${test_binary}
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Unable to retrieve ${test_binary} compiled binary
+    END
+    Create Directory    %{WORKSPACE}/codeflare-${test_binary}-logs
+    Enable Component    trainingoperator
+    Wait Component Ready    trainingoperator
+    Log To Console    "Restarting kueue"
+    Restart Kueue
+
+Teardown Training Operator E2E Core Test Suite
+    [Documentation]    Prepare Training Operator E2E Core Test Suite
+    Teardown Training Operator E2E Test Suite    ${KFTO_CORE_BINARY_NAME}
+
+Teardown Training Operator E2E Upgrade Test Suite
+    [Documentation]    Prepare Training Operator E2E Upgrade Test Suite
+    Teardown Training Operator E2E Test Suite    ${KFTO_UPGRADE_BINARY_NAME}
+
+Teardown Training Operator E2E Test Suite
+    [Documentation]    Teardown Training Operator E2E Test Suite
+    [Arguments]        ${test_binary}
+    Log To Console     "Removing test binaries"
+    Remove File        ${test_binary}
+    Disable Component    trainingoperator
+
+Run Training Operator ODH Core Test
+    [Documentation]    Run Training Operator ODH Core Test
+    [Arguments]    ${TEST_NAME}
+    Run Training Operator ODH Test   ${TEST_NAME}   ${KFTO_CORE_BINARY_NAME}
+
+Run Training Operator ODH Upgrade Test
+    [Documentation]    Run Training Operator ODH Upgrade Test
+    [Arguments]    ${TEST_NAME}
+    Run Training Operator ODH Test   ${TEST_NAME}   ${KFTO_UPGRADE_BINARY_NAME}
+
+Run Training Operator ODH Test
+    [Documentation]    Run Training Operator ODH Test
+    [Arguments]    ${TEST_NAME}    ${test_binary}
+    Log To Console    "Running test: ${TEST_NAME}"
+    ${result} =    Run Process    ./${test_binary} -test.run ${TEST_NAME}
+    ...    shell=true
+    ...    stderr=STDOUT
+    ...    env:CODEFLARE_TEST_TIMEOUT_SHORT=5m
+    ...    env:CODEFLARE_TEST_TIMEOUT_MEDIUM=10m
+    ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
+    ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-${test_binary}-logs
+    ...    env:FMS_HF_TUNING_IMAGE=${FMS_HF_TUNING_IMAGE}
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    ${TEST_NAME} failed
+    END
+
+Prepare Codeflare E2E Test Suite
+    [Documentation]    Prepare Codeflare E2E Core Test Suite
+    Log To Console    "Restarting kueue"
+    Restart Kueue
+
+    Log To Console    "Downloading compiled test binary ${ODH_BINARY_NAME}"
+
+    ${result} =    Run Process    curl --location --silent --output ${ODH_BINARY_NAME} ${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}/${ODH_BINARY_NAME} && chmod +x ${ODH_BINARY_NAME}
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Unable to retrieve odh compiled binary
+    END
+    Create Directory    %{WORKSPACE}/codeflare-odh-logs
+    Log To Console    "Retrieving user tokens"
+    ${common_user_token} =    Generate User Token    ${NOTEBOOK_USER_NAME}    ${NOTEBOOK_USER_PASSWORD}
+    Set Suite Variable    ${NOTEBOOK_USER_TOKEN}   ${common_user_token}
+    Log To Console    "Log back as cluster admin"
+    Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
+    RHOSi Setup
+
+Teardown Codeflare E2E Test Suite
+    [Documentation]    Teardown Codeflare E2E Test Suite
+    Log To Console    "Log back as cluster admin"
+    Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
+    Log To Console    "Removing test binaries"
+    Remove File        ${ODH_BINARY_NAME}
+    RHOSi Teardown
+
+Generate User Token
+    [Documentation]    Authenticate as a user and return user token.
+    [Arguments]    ${username}    ${password}
+    Login To OCP Using API    ${username}    ${password}
+    ${rc}    ${out} =    Run And Return Rc And Output    oc whoami -t
+    Should Be Equal As Integers    ${rc}    ${0}
+    RETURN    ${out}
+
+Run Codeflare ODH Test
+    [Documentation]    Run Codeflare ODH Test
+    [Arguments]    ${TEST_NAME}    ${RAY_IMAGE}
+    Log To Console    "Running test: ${TEST_NAME}"
+    ${result} =    Run Process    ./${ODH_BINARY_NAME} -test.run ${TEST_NAME}
+    ...    shell=true
+    ...    stderr=STDOUT
+    ...    env:CODEFLARE_TEST_TIMEOUT_SHORT=5m
+    ...    env:CODEFLARE_TEST_TIMEOUT_MEDIUM=10m
+    ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
+    ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-odh-logs
+    ...    env:CODEFLARE_TEST_RAY_IMAGE=${RAY_IMAGE}
+    ...    env:ODH_NAMESPACE=${APPLICATIONS_NAMESPACE}
+    ...    env:NOTEBOOK_USER_NAME=${NOTEBOOK_USER_NAME}
+    ...    env:NOTEBOOK_USER_TOKEN=${NOTEBOOK_USER_TOKEN}
+    ...    env:NOTEBOOK_IMAGE=${NOTEBOOK_IMAGE}
+    ...    env:AWS_DEFAULT_ENDPOINT=${AWS_DEFAULT_ENDPOINT}
+    ...    env:AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+    ...    env:AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    ...    env:AWS_STORAGE_BUCKET=${AWS_STORAGE_BUCKET}
+    ...    env:AWS_STORAGE_BUCKET_MNIST_DIR=${AWS_STORAGE_BUCKET_MNIST_DIR}
+    ...    env:PIP_INDEX_URL=${PIP_INDEX_URL}
+    ...    env:PIP_TRUSTED_HOST=${PIP_TRUSTED_HOST}
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    ${TEST_NAME} failed
     END

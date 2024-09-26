@@ -1,3 +1,4 @@
+# robocop: off=wrong-case-in-keyword-name,too-many-arguments,too-long-keyword
 *** Settings ***
 Documentation    Collection of keywords to interact with Model Serving
 Resource       ../../../Page/Components/Components.resource
@@ -25,8 +26,9 @@ ${MS_TABLE_STATUS_SUCCESS}=     //span[contains(@class,"pf-v5-c-icon__content")]
 ${MS_TABLE_STATUS_FAILURE}=     //span[contains(@class,"pf-v5-c-icon__content")][contains(@class,"pf-m-danger")]
 ${KSERVE_MODAL_HEADER}=    //header[@class="pf-v5-c-modal-box__header"]/h1[.="Deploy model"]
 ${KSERVE_RUNTIME_DROPDOWN}=    //button[@data-testid="serving-runtime-template-selection"]
-${LLM_RESOURCES_DIRPATH}=    ods_ci/tests/Resources/Files/llm
+${LLM_RESOURCES_DIRPATH}=    tests/Resources/Files/llm
 ${DEPLOY_MODEL_BTN}=    //button[contains(@data-testid,"deploy")]
+${TOKEN_AUTH_CHECKBOX_XP}=    xpath://input[@id="alt-form-checkbox-auth"]
 
 
 *** Keywords ***
@@ -200,7 +202,8 @@ Open Model Edit Modal
     [Documentation]    Opens the modal used to edit the details of an already deployed model.
     [Arguments]    ${model_name}
     ODHDashboard.Click Action From Actions Menu    item_title=${model_name}    action=Edit
-    Wait For Dashboard Page Title    Deploy model
+    # Wait for modal header
+    Wait Until Page Contains Element    xpath://span[contains(@class, "modal") and text()="Deploy model"]
 
 Get Model Route Via UI
     [Documentation]    Grabs the serving route (URL) of an already deployed model from the Model Serving page.
@@ -238,12 +241,13 @@ Open ${section} Options Menu
         SeleniumLibrary.Click Element    xpath://span[.="${section}"]/../../..//button  # Remove attribute which is not present anymore
     END
 
-Get Access Token via UI
+Get Access Token Via UI
     [Documentation]    Returns the access token for models deployed in a specific project
     ...    by using the UI of DSP
-    [Arguments]    ${project_name}    ${service_account_name}=default-name
+    [Arguments]    ${project_name}    ${service_account_name}=default-name    ${single_model}=${FALSE}
+    ...            ${model_name}=${NONE}
     Open Data Science Project Details Page    ${project_name}    tab_id=model-server
-    ${token}=    Get Model Serving Access Token via UI    ${service_account_name}
+    ${token}=    Get Model Serving Access Token via UI    ${service_account_name}    ${single_model}    ${model_name}
     RETURN    ${token}
 
 Get Model Project
@@ -259,44 +263,88 @@ Get Model Inference
     [Documentation]    Returns the inference result after sending a POST request to a deployed
     ...    model endpoint. If token authentication is needed for the model, ${token_auth} should be
     ...    set to ${TRUE}.
-    [Arguments]    ${model_name}    ${inference_input}    ${token_auth}=${FALSE}
-    ...    ${project_title}=${NONE}
+    [Arguments]    ${model_name}    ${inference_input}    ${token_auth}=${FALSE}   ${project_title}=${NONE}
+    ...    ${kserve_mode}=Serverless   ${deployment_mode}=UI   ${service_port}=8888   ${end_point}=${NONE}
+    ...    ${service_account_name}=${NONE}    ${token}=${NONE}
+    ${curl_cmd}=     Set Variable    ${NONE}
     ${self_managed}=    Is RHODS Self-Managed
-    ${url}=    Get Model Route Via UI    ${model_name}
-    ${kserve}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain    Single-model serving enabled
-    ${curl_cmd}=     Set Variable    curl -s ${url} -d ${inference_input}
-    IF    ${token_auth}
-        IF    "${project_title}" == "${NONE}"
-            ${project_title}=    Get Model Project    ${model_name}
+    IF    $deployment_mode == 'UI'
+        ${url}=    Get Model Route Via UI    ${model_name}
+        ${kserve}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain
+        ...    Single-model serving enabled
+        ${curl_cmd}=     Set Variable    curl -s ${url} -d ${inference_input}
+        IF    ${token_auth}
+            IF    "${project_title}" == "${NONE}"
+                ${project_title}=    Get Model Project    ${model_name}
+            END
+            IF    $token == ${NONE}
+                ${token}=    Get Access Token via UI    ${project_title}    service_account_name=${service_account_name}
+                ...    single_model=${kserve}    model_name=${model_name}
+            END
+            ${curl_cmd}=     Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
         END
-        ${token}=    Get Access Token via UI    ${project_title}
-        ${curl_cmd}=     Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
+        IF  ${kserve}
+            Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
+            ${curl_cmd}=     Catenate    ${curl_cmd}    --cacert openshift_ca_istio_knative.crt
+        ELSE IF  ${self_managed}
+            Fetch Openshift CA Bundle
+            ${curl_cmd}=     Catenate    ${curl_cmd}    --cacert openshift_ca.crt
+        END
+    ELSE IF    $deployment_mode == 'Cli'
+        ${rc}   ${cmd_op}=  Run And Return Rc And Output
+        ...    oc get isvc ${model_name} -o jsonpath='{.metadata.annotations.serving\.kserve\.io/deploymentMode}' -n ${project_title}    # robocop: disable
+        Should Be Equal As Integers    ${rc}    0
+        IF  "${cmd_op}" != "ModelMesh"
+            Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
+            ${cert}=    Set Variable    --cacert openshift_ca_istio_knative.crt
+        ELSE IF  ${self_managed}
+            Fetch Openshift CA Bundle
+            ${cert}=   Set Variable   --cacert openshift_ca.crt
+        END
+        IF    '${kserve_mode}' == 'Serverless'
+            ${rc}    ${url}=    Run And Return Rc And Output
+            ...    oc get ksvc ${model_name}-predictor -n ${project_title} -o jsonpath='{.status.url}'
+            Should Be Equal As Integers    ${rc}    0
+            ${curl_cmd}=    Set Variable    curl -s ${url}${end_point} -d ${inference_input}
+        ELSE IF    '${kserve_mode}' == 'RawDeployment'
+            ${url}=   Set Variable    http://localhost:${service_port}${end_point}
+            ${curl_cmd}=    Set Variable    curl -s ${url} -d ${inference_input} --cacert openshift_ca_istio_knative.crt
+        ELSE
+            Log    "Modelmesh CLI mode only"
+        END
+        IF    ${token_auth}
+            ${token}=    Create Inference Access Token    ${project_title}    ${DEFAULT_BUCKET_SA_NAME}
+            ${curl_cmd}=    Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
+        END
     END
-    IF  ${kserve}
-        Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
-        ${curl_cmd}=     Catenate    ${curl_cmd}    --cacert openshift_ca_istio_knative.crt
-    ELSE IF  ${self_managed}
-        Fetch Openshift CA Bundle
-        ${curl_cmd}=     Catenate    ${curl_cmd}    --cacert openshift_ca.crt
-    END
+
     ${inference_output}=    Run    ${curl_cmd}
+    # Passes if file does not exist, cleans up otherwise. No point keeping these after executing the curl call.
+    Remove File    openshift_ca_istio_knative.crt
+    Remove File    openshift_ca.crt
     RETURN    ${inference_output}
 
 Verify Model Inference
     [Documentation]    Verifies that the inference result of a model is equal to an expected output
     [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}=${FALSE}
-    ...    ${project_title}=${NONE}
-    Open Model Serving Home Page
-    Switch Model Serving Project    ${project_title}
-    ${inference_output}=    Get Model Inference    ${model_name}    ${inference_input}    ${token_auth}
-    ...    project_title=${project_title}
+    ...    ${project_title}=${NONE}    ${deployment_mode}=UI    ${kserve_mode}=Serverless
+    ...    ${service_port}=${NONE}   ${end_point}=${NONE}    ${token}=${NONE}
+    IF   $deployment_mode == 'UI'
+         Open Model Serving Home Page
+         Switch Model Serving Project    ${project_title}
+    END
+    ${inference_output}=    Get Model Inference    model_name=${model_name}   inference_input=${inference_input}
+    ...    token_auth=${token_auth}    kserve_mode=${kserve_mode}    project_title=${project_title}
+    ...    deployment_mode=${deployment_mode}    service_port=${service_port}    end_point=${end_point}
+    ...    token=${token}    # robocop: disable
+    Log    ${inference_output}
     ${result}    ${list}=    Inference Comparison    ${expected_inference_output}    ${inference_output}
     Log    ${result}
     Log    ${list}
     IF    ${result}==False
         IF    $project_title == $NONE
-            ${rc}    ${project_title}=    Run And Return Rc And Output
-            ...    oc get InferenceServices --all-namespaces -ojson | jq '.items[] | select(.metadata.name=="${model_name}") | .metadata.namespace' | tr -d '"'    # robocop: disable
+              ${rc}    ${project_title}=    Run And Return Rc And Output
+              ...    oc get InferenceServices --all-namespaces -ojson | jq '.items[] | select(.metadata.name=="${model_name}") | .metadata.namespace' | tr -d '"'    # robocop: disable
         END
         ${events}    ${podlogs}=    Get Events And Pod Logs    namespace=${project_title}
         ...    label_selector=modelmesh-service=modelmesh-serving
@@ -308,10 +356,11 @@ Verify Model Inference With Retries
     ...                timing: model not ready to reply yet, despite the pod is up and running and the
     ...                endpoint exposed.
     ...                This is a temporary mitigation meanwhile we find a better way to check the model
-    [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}
-    ...            ${token_auth}=${FALSE}    ${project_title}=${NONE}    ${retries}=${5}
-    ${status}=    Run Keyword And Return Status    Verify Model Inference
-    ...    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}    ${project_title}
+    [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}=${FALSE}
+    ...            ${project_title}=${NONE}    ${retries}=${5}     ${deployment_mode}=UI    ${kserve_mode}=Serverless
+    ...            ${service_port}=${NONE}   ${end_point}=${NONE}
+    ${status}=    Run Keyword And Return Status    Verify Model Inference    ${model_name}    ${inference_input}
+    ...    ${expected_inference_output}    ${token_auth}    ${project_title}    ${deployment_mode}
     IF    not ${status}
         ${retry}=    Set Variable    ${0}
         WHILE    ${retry} < ${retries}
@@ -321,7 +370,8 @@ Verify Model Inference With Retries
             END
             ${status}=    Run Keyword And Return Status    Verify Model Inference
             ...    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}
-            ...    ${project_title}
+            ...    project_title=${project_title}     deployment_mode=${deployment_mode}  kserve_mode=${kserve_mode}
+            ...    service_port=${service_port}   end_point=${end_point}
             IF    ${status}
                 BREAK
             END
@@ -388,14 +438,35 @@ Deploy Kserve Model Via UI  #robocop: disable
     [Documentation]  Deploys a model using the kserve/caikit runtime using the Data Science Projects UI
     [Arguments]    ${model_name}    ${serving_runtime}    ${data_connection}    ${path}
     ...    ${model_framework}=caikit    ${replicas}=1    ${size}=Small    ${no_gpus}=${0}
+    ...    ${token}=${FALSE}    ${multi_token}=${FALSE}    ${multi_service_account_name}=default-name2
+    ...    ${public_endpoint}=${TRUE}    ${service_account_name}=${NONE}
     Move To Tab    Models
-    Click Button    ${DEPLOY_MODEL_BTN}
-    Wait Until Page Contains Element    xpath=${KSERVE_MODAL_HEADER}
+    SeleniumLibrary.Click Button    ${DEPLOY_MODEL_BTN}
+    SeleniumLibrary.Wait Until Page Contains Element    xpath=${KSERVE_MODAL_HEADER}
     Set Model Name   ${model_name}
     Set Model Server Runtime    ${serving_runtime}
     Select Framework    ${model_framework}
     Set Replicas Number With Buttons    ${replicas}
     Set Server Size    ${size}
+    IF    ${public_endpoint}
+        Enable External Serving Route
+        # By default this also enables Token Authentication. Let's disable it and let it get re-enable by the next
+        # IF block if needed.
+        ${token_enabled}=     Run Keyword And Return Status    SeleniumLibrary.Checkbox Should Be Selected
+        ...    ${TOKEN_AUTH_CHECKBOX_XP}
+        IF    ${token_enabled}
+            Disable Token Authentication
+        ELSE
+            Log    Token Authentication was supposed to be automatically enabled, but it wasn't    level=ERROR
+            ...    console=${True}
+        END
+    END
+    IF    ${token}
+        Enable Token Authentication    service_account_name=${service_account_name}
+        IF    ${multi_token}
+            Add Another Service Account    ${multi_service_account_name}
+        END
+    END
     Select Existing Data Connection    ${data_connection}
     Set Folder Path    ${path}
     IF    ${no_gpus} > ${0}
@@ -413,7 +484,7 @@ Deploy Kserve Model Via UI  #robocop: disable
 Set Model Server Runtime
     [Documentation]    Opens the Serving runtime dropdown in the deploy model modal window for models
     ...    and select the given runtime
-    [Arguments]    ${runtime}=Caikit
+    [Arguments]    ${runtime}=Caikit TGIS
     Page Should Contain Element    ${KSERVE_RUNTIME_DROPDOWN}
     Click Element    ${KSERVE_RUNTIME_DROPDOWN}
     Click Element    ${KSERVE_RUNTIME_DROPDOWN}/..//span[contains(text(),"${runtime}")]
@@ -523,18 +594,9 @@ Clean Up DSP Page
         Click Element    //button[@aria-label="Close"]
     END
     Open Data Science Projects Home Page
-    ${projects}=    Get All Displayed Projects
-    ${projects_count}=    Get Length    ${projects}
-    WHILE    ${projects_count} > 0    limit=${projects_count}m
-    ...    on_limit_message=Timeout exceeded waiting for all DS projects deletion
-        Delete Data Science Projects From CLI    ${projects}
-        Reload Page
-        ${reloaded}=    Run Keyword And Return Status
-        ...    SeleniumLibrary.Wait Until Page Contains    Data science projects    timeout=30s
-        IF  ${reloaded}==${FALSE}    SeleniumLibrary.Capture Page Screenshot
-        ${projects}=    Get All Displayed Projects
-        ${projects_count}=    Get Length    ${projects}
-    END
+    Delete Project Via CLI By Display Name    ALL
+    Reload Page
+    Wait For Dashboard Page Title    Data Science Projects    timeout=30s
 
 Clean All Models Of Current User
     [Documentation]    Tries to clean up DSP and Model Serving pages
@@ -542,9 +604,9 @@ Clean All Models Of Current User
     ...    controls how many retries are made.
     [Arguments]    ${retries}=5
     Open Model Serving Home Page
-    ${projects_empty}=    Run Keyword And Return Status    Page Should Contain    No data science projects
+    ${projects_empty}=    Run Keyword And Return Status    Page Should Contain    No deployed models
     IF    ${projects_empty}
-        Log    No Data Sciense projects exist, skipping cleanup    console=True
+        Log    No Models Deployed, Skipping Cleanup    console=True
     ELSE
         FOR    ${try}    IN RANGE    0    ${retries}
             ${status}=    Run Keyword And Return Status    Page Should Contain    Select a project

@@ -26,7 +26,7 @@ Click Add Serving Runtime Template Button
 
 Upload Serving Runtime Template
     [Documentation]    Uploads via UI a YAML file containing a custom Serving Runtime definition
-    [Arguments]    ${runtime_filepath}    ${serving_platform}
+    [Arguments]    ${runtime_filepath}    ${serving_platform}       ${runtime_protocol}
     Click Add Serving Runtime Template Button
     Element Should Be Enabled   ${UPLOAD_RUNTIME_BTN_XP}
     ${rc}    ${pwd}=    Run And Return Rc And Output    echo $PWD
@@ -36,7 +36,7 @@ Upload Serving Runtime Template
     Run Keyword And Continue On Failure    Wait Until Page Contains Element    //span[text()="kind"]
     Run Keyword And Continue On Failure    Wait Until Page Contains Element    //span[text()="ServingRuntime"]
     Select Model Serving Platform    platform=${serving_platform}
-    IF    '${serving_platform}'=='single'    Select Runtime API Protocol
+    IF    '${serving_platform}'=='single'    Select Runtime API Protocol    protocol=${runtime_protocol}
     Click Element    ${SUBMIT_RUNTIME_BTN_XP}
     Wait Until Element Is Not Visible   ${SUBMIT_RUNTIME_BTN_XP}
     Wait For RHODS Dashboard To Load    expected_page=Serving runtimes
@@ -100,5 +100,5 @@ Select Runtime API Protocol
     [Documentation]    Selects which API protocol for the runtime
     [Arguments]    ${protocol}=gRPC
     Click Element    xpath://button[@data-testid="custom-serving-api-protocol-selection"]
-    Wait Until Page Contains Element    xpath://li[@data-testid="dropdown-item ${protocol}"]
-    Click Element    xpath://li[@data-testid="dropdown-item ${protocol}"]
+    Wait Until Page Contains Element    xpath://li[@data-testid="${protocol}"]      timeout=10s
+    Click Element    xpath://li[@data-testid="${protocol}"]

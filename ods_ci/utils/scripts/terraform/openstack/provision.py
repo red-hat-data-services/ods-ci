@@ -5,10 +5,10 @@ import sys
 
 from python_terraform import IsFlagged, IsNotFlagged, Terraform
 
+from ods_ci.utils.scripts.logger import log
+from ods_ci.utils.scripts.util import render_template
+
 dir_path = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(dir_path + "/../../")
-from logger import log
-from util import render_template
 
 """
 Class for Openstack Terraform Provisioner

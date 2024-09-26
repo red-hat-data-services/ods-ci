@@ -111,12 +111,6 @@ Create Workbench
 Add Environment Variables In Workbench
     [Documentation]    Adds the environment variables through the workbench creation page
     [Arguments]    ${env_variables}
-    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
-    IF  ${version_check}==True
-        ${add_key_value_text}=    Set Variable    Add another key / value pair
-    ELSE
-        ${add_key_value_text}=    Set Variable    Add another variable
-    END
     # Use the `Jump to section` links in the page to scroll the section into view
     Click Element    //a[@href="#environment-variables"]
     Click Element    ${WORKBENCH_ADD_VAR_BTN_XP}
@@ -137,14 +131,12 @@ Add Environment Variables In Workbench
                 Input Text    ${ENV_VARIABLES_SECTION_XP}/div[contains(@class, "-l-split")][${idx}]//input[@aria-label="value of item ${pair_idx}"]
                 ...           ${value}
                 IF    ${n_pairs}-${pair_idx} > 1
-                    Click Element    ${ENV_VARIABLES_SECTION_XP}/div[contains(@class, "-l-split")][${idx}]//button[text()="${add_key_value_text}"]
-                    # The element we want to click might get pushed out of view on every loop, let's scroll by an approx
-                    # amount of pixels for the block of elements that gets added.
-                    IF    "${add_key_value_text}" == "Add another key / value pair"
-                        Execute Javascript    document.getElementsByClassName("pf-v5-c-drawer__content")[1].scrollBy(0,500)  # robocop: disable
-                    ELSE IF    "${add_key_value_text}" == "Add another variable"
-                        Execute Javascript    document.getElementsByClassName("pf-v5-c-drawer__content")[1].scrollBy(0,700)  # robocop: disable
-                    END
+                    ${another_key_button_xpath}=    Set Variable
+                    ...    //section[@aria-label="Environment variables"]/div[contains(@class, "-l-split")][${idx}]//button[@data-testid="another-key-value-pair-button"]  # robocop: disable:line-too-long
+                    # Assure that the button we want to click is in the view
+                    Execute Javascript
+                    ...    document.evaluate('${another_key_button_xpath}', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.scrollIntoView()  # robocop: disable:line-too-long
+                    Click Element    xpath=${another_key_button_xpath}
                 END
             END
         ELSE IF  "${input_type}" == "${UPLOAD_TYPE}"
@@ -201,9 +193,9 @@ Select An Existent PV
     Run Keyword And Continue On Failure
     ...    Wait Until Element Is Enabled    xpath=//input[@placeholder="Select a persistent storage"]
     Click Element    xpath=//input[@placeholder="Select a persistent storage"]
-    Wait Until Page Contains Element    xpath=//ul/li/button[text()="${name}"]
-    Wait Until Page Contains Element    xpath=//ul[@aria-label="Persistent storage select"]//button[text()="${name}"]
-    Click Element   xpath=//ul/li/button[text()="${name}"]
+    ${existing_pv_xpath}=    Set Variable    xpath=//ul/li/button[string()="${name}"]
+    Wait Until Page Contains Element    ${existing_pv_xpath}
+    Click Element   ${existing_pv_xpath}
 
 Select Workbench Jupyter Image
     [Documentation]    Selects a Jupyter image in the workbench creation page
@@ -263,22 +255,24 @@ Select Workbench Container Size
     Click Element    ${WORKBENCH_SIZE_SIDE_MENU_BTN}
     Wait Until Page Contains Element    ${WORKBENCH_SIZE_MENU_BTN_XP}
     Click Element    ${WORKBENCH_SIZE_MENU_BTN_XP}
-    Wait Until Page Contains Element    ${WORKBENCH_SIZE_ITEM_BTN_XP}/span[text()="${size_name}"]
-    Click Element    ${WORKBENCH_SIZE_ITEM_BTN_XP}/span[text()="${size_name}"]
+    ${workbench_size_button_click}=    Set Variable    ${WORKBENCH_SIZE_ITEM_BTN_XP}//span[text()="${size_name}"]
+    Wait Until Page Contains Element    ${workbench_size_button_click}
+    Click Element    ${workbench_size_button_click}
 
 Workbench Should Be Listed
     [Documentation]    Checks a workbench is listed in the DS Project details page
-    [Arguments]     ${workbench_title}    ${timeout}=5s
+    [Arguments]     ${workbench_title}    ${timeout}=10s
     Run keyword And Continue On Failure
     ...    Wait Until Page Contains Element
     ...    ${WORKBENCH_SECTION_XP}//td[@data-label="Name"]/*[div[text()="${workbench_title}"]]    timeout=${timeout}
 
 Workbench With Description Should Be Listed
     [Documentation]    Checks a workbench with particular name and description is listed in the DS Project details page
-    [Arguments]     ${workbench_title}  ${workbench_description}
+    [Arguments]     ${workbench_title}  ${workbench_description}    ${timeout}=10s
     Run keyword And Continue On Failure
     ...    Wait Until Page Contains Element
-    ...        ${WORKBENCH_SECTION_XP}//td[@data-label="Name"][//div[text()="${workbench_title}"] and //p[text()="${workbench_description}"]]
+    ...    ${WORKBENCH_SECTION_XP}//td[@data-label="Name"][//div[text()="${workbench_title}"] and //p[text()="${workbench_description}"]]
+    ...    timeout=${timeout}
 
 Workbench Should Not Be Listed
     [Documentation]    Checks a workbench is not listed in the DS Project details page
@@ -588,3 +582,9 @@ Get Workbench Pod
     ...    workbench_title=${workbench_title}  namespace=${ns_name}
     ${pod_info}=    Oc Get    kind=Pod  name=${cr_name}-0  api_version=v1  namespace=${ns_name}
     RETURN    ${ns_name}    ${cr_name}    ${pod_info}
+
+ Upload File In The Workbench
+    [Documentation]    Uploads the working files inside the workbench PVC
+    [Arguments]    ${workbench_title}    ${workbench_namespace}    ${filepath}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc cp ${EXECDIR}/${filepath} ${workbench_title}-0:/opt/app-root/src -n ${workbench_namespace}
+    Should Be Equal As Integers    ${rc}    ${0}    msg=${out}

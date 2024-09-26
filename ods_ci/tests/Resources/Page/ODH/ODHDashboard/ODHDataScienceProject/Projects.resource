@@ -8,14 +8,18 @@ Resource       ./Workbenches.resource
 ${DS_PROJECT_TITLE}=    Data Science Projects
 ${TITLE_INPUT_XP}=    xpath=//input[@id="manage-project-modal-name"]
 ${DESCR_INPUT_XP}=    xpath=//textarea[@id="manage-project-modal-description"]
-${RESOURCE_INPUT_XP}=    xpath=//input[@id="resource-manage-project-modal-name"]
+${RESOURCE_INPUT_XP}=    css:[data-testid="resource-manage-project-modal-name"]
 ${GENERIC_CREATE_BTN_XP}=     xpath=//button[text()="Create"]
 ${GENERIC_CANCEL_BTN_XP}=     xpath=//button[text()="Cancel"]
-${PROJECT_CREATE_BTN_XP}=     xpath=//button[text()="Create data science project"]
+# TODO: Update to latter option once the change is pulled from ODH into downstream!
+${PROJECT_CREATE_BTN_XP}=     xpath=//button[text()="Create data science project" or text()="Create project"]
 ${ACTIONS_BTN_XP}=    xpath=//div/button[@aria-label="Actions"]
 ${DELETE_ACTION_BTN_XP}=  xpath=//div/ul/li/button[text()="Delete project"]
 ${EDIT_ACTION_BTN_XP}=    xpath=//div/ul/li/button[text()="Edit project"]
 ${SPAWNER_LINK}=        xpath=//*[text()="Launch Jupyter"]
+${PROJECT_SEARCH_BAR}=    //div[@data-testid="dashboard-table-toolbar"]
+${PROJECT_FILTER_TYPE}=    ${PROJECT_SEARCH_BAR}//button[@data-testid="filter-dropdown-select"]
+${PROJECT_SEARCH_INPUT}=    ${PROJECT_SEARCH_BAR}//input[@aria-label="Search input"]
 
 *** Keywords ***
 Open Data Science Projects Home Page
@@ -102,7 +106,7 @@ Project Should Be Listed
 Wait Until Project Is Listed
     [Documentation]    Waits until the DS projects appears in the list in DS project Home Page
     [Arguments]     ${project_title}    ${timeout}=30s
-    Wait Until Page Contains Element    xpath=//div/div/a[text()="${project_title}"]
+    Wait Until Page Contains Element    xpath=//table[@data-testid="project-view-table"]//td[@data-label="Name"]//a[text()="${project_title}"]
     ...    timeout=${timeout}
 
 Project Should Not Be Listed
@@ -122,6 +126,7 @@ Create Data Science Project
     ...    Reuse project if already exists: ${existing_project}
     [Arguments]    ${title}    ${description}    ${resource_name}=${NONE}    ${existing_project}=${FALSE}
     IF    ${existing_project}
+        Filter Projects By Name    ${title}
         ${existing_project}=  Run Keyword And Return Status
         ...    Wait Until Page Contains Element    xpath://a[text()="${title}"]
     END
@@ -136,10 +141,11 @@ Create Data Science Project
         Input Text    ${TITLE_INPUT_XP}    ${title}
         Input Text    ${DESCR_INPUT_XP}    ${description}
         Run Keyword And Continue On Failure    Validate Generated Resource Name    project_title=${title}
-        IF    "${resource_name}" != "${NONE}"
-            Clear Element Text    ${RESOURCE_INPUT_XP}
-            Input Text    ${RESOURCE_INPUT_XP}    ${resource_name}
+        IF    "${resource_name}" == "${NONE}"
+            ${resource_name}=    Get Value  ${RESOURCE_INPUT_XP}
+            ${resource_name}=    Generate Unique Namespace    ${resource_name}
         END
+        Input Text    ${RESOURCE_INPUT_XP}    ${resource_name}
         Wait Until Element Is Enabled    ${GENERIC_CREATE_BTN_XP}
         Click Button    ${GENERIC_CREATE_BTN_XP}
         Wait Until Generic Modal Disappears
@@ -154,6 +160,57 @@ Create Data Science Project
             Fail
         END
     END
+
+Generate Unique Namespace
+    [Documentation]    If DS Project Namespace '${namespace}' already exists - Return the Namespace + Random Suffix.
+    ...                (DS Project Display Name does not need to be unique, but DS Project Namespace does).
+    [Arguments]    ${namespace}
+    ${rc}=    Run And Return Rc    oc get namespace ${namespace}
+    IF    "${rc}" == "${0}" and len("${namespace}") < 60
+        # Add unique string to Project resource name (max length is 63 chars)
+        ${suffix}=    Generate Random String    3   [LOWER]
+        ${namespace}=    Set Variable    ${namespace}-${suffix}
+    END
+    RETURN    ${namespace}
+
+Create Data Science Project From CLI
+    [Documentation]    Creates a Data Science Project, adding the needed labels to be recognized by Dashboard.
+    ...    - If ${as_user} is provided, the project is created for that user, and group will be set as
+    ...      recommended in https://docs.openshift.com/container-platform/4.16/applications/projects/creating-project-other-user.html
+    ...    - If ${randomize_name}=${TRUE} a numerical suffix will be added to ${name} (e.g. ${name}-1234)
+    ...    - If ${randomize_name}=${FALSE} and project already exists, it returns doing nothing
+    ...    - If ${display_name}=${EMPTY} the final project name (including randomization) will be set as display_name
+    ...    - RETURNS: ${complete_name} of the created project (including randomization)
+    [Arguments]    ${name}    ${display_name}=${EMPTY}    ${description}=${EMPTY}    ${as_user}=${EMPTY}
+    ...    ${randomize_name}=${FALSE}
+
+    IF    ${randomize_name} == ${TRUE}
+        ${project_suffix}=    Generate Random String    4   [NUMBERS]
+        ${complete_name}=    Catenate    SEPARATOR=-    ${name}    ${project_suffix}
+    ELSE
+        ${complete_name}=    Set Variable    ${name}
+        ${rc}=    Run And Return Rc    oc get project ${complete_name}
+        IF    "${rc}" == "${0}"
+            Log    message=OpenShift Project ${complete_name} already present. Skipping project creation...    level=WARN
+            RETURN    ${complete_name}
+        END
+    END
+
+    IF    "${display_name}" == "${EMPTY}"
+        ${display_name}=    Set Variable    ${complete_name}
+    END
+
+    IF    "${as_user}" != "${EMPTY}"
+        ${rc}=    Run And Return Rc    oc new-project "${complete_name}" --display-name="${display_name}" --description="${description}" --as=${as_user} --as-group=system:authenticated --as-group=system:authenticated:oauth    # robocop: off=line-too-long
+        Should Be Equal As Numbers    ${rc}    ${0}
+    ELSE
+        ${rc}=    Run And Return Rc    oc new-project "${complete_name}" --display-name="${display_name}" --description="${description}"    # robocop: off=line-too-long
+        Should Be Equal As Numbers    ${rc}    ${0}
+    END
+
+    Run    oc label namespace ${complete_name} opendatahub.io/dashboard=true
+    Run    oc label namespace ${complete_name} modelmesh-enabled=true
+    RETURN    ${complete_name}
 
 Validate Generated Resource Name
     [Documentation]    Checks if the generated resource name matches the expected validation regex
@@ -171,29 +228,44 @@ Get Openshift Namespace From Data Science Project
     ${k8s_name}=    Replace String    ${k8s_name}    "    ${EMPTY}
     RETURN    ${k8s_name}
 
-Delete Data Science Projects From CLI
-    [Documentation]     Deletes the Openshift Projects using OpenshiftLibrary.
-    ...                 It expects to receive a list of project (i.e,${ocp_projects}) as argument
+Delete List Of Projects Via CLI
+    [Documentation]     Loop over the Project list and Delete all projects using OC command.
+    ...                 It expects to receive a list of projects (i.e. ${ocp_projects}) as argument
     [Arguments]     ${ocp_projects}
     FOR   ${displayed_name}    IN  @{ocp_projects}
-        Delete Data Science Project From CLI    displayed_name=${displayed_name}
+        Delete Project Via CLI By Display Name    displayed_name=${displayed_name}
     END
 
-Delete Data Science Project From CLI
-    [Documentation]    Deletes a single DS project usig CLI command
+Delete Project Via CLI
+    [Documentation]    Find and delete namespaces by '${name}' using OC command.
+    [Arguments]     ${namespace}
+    ${return_code}    ${output}     Run And Return Rc And Output    oc delete project ${namespace} --force --grace-period=0
+    Log    ${output}
+    Should Be Equal As Integers    ${return_code}    ${0}
+
+#robocop: disable: line-too-long
+Delete Project Via CLI By Display Name
+    [Documentation]    Find and delete namespaces by DS Project display name '${displayed_name}' using OC command.
+    ...                If specifying "ALL" - All Data Science user-defined projects will be deleted.
     [Arguments]     ${displayed_name}
-    ${project_k8s_name}=     Run     oc get projects -o json | jq '.items[] | select((.metadata.annotations."openshift.io/display-name" != null) and (.metadata.labels."opendatahub.io/dashboard"=="true") and (.metadata.annotations."openshift.io/display-name"=="${displayed_name}")) | .metadata.name'    # robocop: disable
-    ${project_k8s_name}=    Replace String    ${project_k8s_name}    "    ${EMPTY}
-    IF    "${project_k8s_name}" == "${EMPTY}"
-        Log    msg=There are probably no DS Projects with Display Name equal to ${displayed_name}
+    # DS Project Display name is not unique (i.e. multiple projects with same display name), but Project namespace is unique
+    IF    "${displayed_name}"=="ALL"
+        ${display_query}=    Set Variable   "openshift.io/display-name"!\=null
+    ELSE
+        ${display_query}=    Set Variable   "openshift.io/display-name"\=\="${displayed_name}"
+    END
+    ${project_k8s_name}=     Run     oc get projects -o json | jq -r '.items[] | select((.metadata.labels."opendatahub.io/dashboard"\=\="true") and (.metadata.annotations.${display_query})) | .metadata.name'
+    IF    """${project_k8s_name}""" == """${EMPTY}"""
+        Log    msg=Project '${displayed_name}' not found, or not a user-defined Data Science project
         ...    level=WARN
     ELSE
-        Oc Delete    kind=Project   name=${project_k8s_name}
-        WHILE    ${TRUE}
-            ${exists}=    Run And Return Rc    oc get project ${project_k8s_name}
-            IF    "${exists}" == "1"    BREAK
-            Sleep    5s    reason=let's not overload the API
-        END
+        ${project_k8s_name}=    Replace String    ${project_k8s_name}    \n    ${SPACE}
+        ${project_names}=    Split String    string=${project_k8s_name}
+        ${counter}=    Get Length    ${project_names}
+        ${counter}=  Evaluate  ${counter} * 20
+        ${rc}=    Wait Until Keyword Succeeds    ${counter}s    5s
+        ...    Run And Return Rc    oc delete namespace ${project_k8s_name}
+        Should Be Equal As Integers    ${rc}    ${0}
     END
 
 #robocop: disable: line-too-long
@@ -330,10 +402,24 @@ Remove Current Page Projects From All Projects
     END
     RETURN    ${all_projects}
 
+Filter Projects By ${Type}
+    [Documentation]    Search for projects where ${Type} includes "${text}"
+    [Arguments]     ${text}
+    Open Data Science Projects Home Page
+    ${searchbar_exists}=    Run Keyword And Return Status
+    ...    Page Should Contain Element    xpath:${PROJECT_SEARCH_BAR}
+    IF    ${searchbar_exists}
+        Click Element    xpath:${PROJECT_FILTER_TYPE}
+        Click Element    xpath:${PROJECT_SEARCH_BAR}//li[@data-testid="${Type}"]
+        Input Text    ${PROJECT_SEARCH_INPUT}    ${text}
+    ELSE
+        Log    No projects are listed
+    END
+
 Check Pagination Is Correct On The Current Page
     [Documentation]    Check the pagination is correct for the Data Science displayed on current page
     [Arguments]     ${page}    ${total}
-    ${actual_text}=    SeleniumLibrary.Get Text    xpath://button[contains(@class,"-menu-toggle")]
+    ${actual_text}=    SeleniumLibrary.Get Text    xpath://button[@id="table-pagination-top-toggle"]
     IF    ${page}==1
         ${expected_text}=    Set Variable   1 - 10 of ${total} items
     ELSE IF    ${page}==2

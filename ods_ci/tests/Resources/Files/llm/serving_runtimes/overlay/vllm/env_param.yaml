@@ -7,5 +7,3 @@
           value: $(HF_HUB_CACHE)
         - name: DTYPE
           value: float16
-        - name: SERVED_MODEL_NAME
-          value: ${model_name}

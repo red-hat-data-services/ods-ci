@@ -16,17 +16,13 @@ cat <<EOF | kubectl apply --server-side -f -
       namespace: $namespace
       labels:
         kueue.x-k8s.io/queue-name: $local_queue_name
-      annotations:
-        kueue.x-k8s.io/job-min-parallelism: "1"
     spec:
-      parallelism: 2
-      completions: 2
       suspend: true
       template:
         spec:
           containers:
           - name: test-job
-            image: quay.io/biocontainers/perl:5.32
+            image: quay.io/biocontainers/perl@sha256:1889c73a71acbe17b2857a0ff437fd919a5bc69f1d8299be85d40316b91a4e01
             command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(12000)"]
             resources:
               requests:

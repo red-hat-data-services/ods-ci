@@ -22,9 +22,9 @@ ${REQUESTED_RESOURCES_TITLE_XP}=    xpath=//div[text()="Requested resources"]
 ${RESOURCES_CONSUMING_TITLE_XP}=    xpath=//div[text()="Top resource-consuming distributed workloads"]
 ${MAX_RETRIES}=    3
 ${RAY_WORKLOAD_CREATED}=    False
-${KUEUE_RESOURCES_SETUP_FILEPATH}=    ods_ci/tests/Resources/Page/DistributedWorkloads/kueue_resources_setup.sh
-${KUEUE_WORKLOADS_SETUP_FILEPATH}=    ods_ci/tests/Resources/Page/DistributedWorkloads/kueue_workloads.sh
-${RAY_CR_FILE}=    ods_ci/tests/Resources/Page/DistributedWorkloads/ray_cluster_cr.yaml
+${KUEUE_RESOURCES_SETUP_FILEPATH}=    tests/Resources/Page/DistributedWorkloads/kueue_resources_setup.sh
+${KUEUE_WORKLOADS_SETUP_FILEPATH}=    tests/Resources/Page/DistributedWorkloads/kueue_workloads.sh
+${RAY_CR_FILE}=    tests/Resources/Page/DistributedWorkloads/ray_cluster_cr.yaml
 ${CPU_SHARED_QUOTA}=    9
 ${MEMEORY_SHARED_QUOTA}=    36
 ${tolerance}=    1
@@ -41,8 +41,8 @@ Select Distributed Workload Project By Name
     [Documentation]    Select the project in distributed workload metrics page by project name
     [Arguments]    ${project_name}
     Wait Until Element Is Visible    ${PROJECT_XP}   timeout=20
-    Click Element    xpath://div[@data-testid="project-selector-dropdown"]
-    Click Element    xpath://a[@role="menuitem" and text()="${project_name}"]
+    Click Element    xpath://*[@data-testid="project-selector-dropdown"]
+    Click Element    xpath://*[@role="menuitem" and string()="${project_name}"]
 
 Check Expected String Contains
     [Documentation]    Check Expected String Contains with the xpath prvoided get text
@@ -61,12 +61,11 @@ Select Refresh Interval
     [Arguments]    ${refresh_interval}
     Wait Until Element Is Visible  ${REFRESH_INTERVAL_XP}    timeout=20
     Click Element     ${REFRESH_INTERNAL_MENU_XP}
-    Click Element     xpath=//button[text()="${refresh_interval}"]
+    Click Element     xpath=//button[@role="option" and contains(., "${refresh_interval}")]
 
 Get Current CPU Usage
     [Documentation]    Returns value of current cpu usage
     [Arguments]    ${namespace}    ${workload_type}
-
     ${thanos_url}=    Get OpenShift Thanos URL
     ${token}=    Generate Thanos Token
     ${expression}=    Set Variable
@@ -81,8 +80,8 @@ Get Current CPU Usage
             Wait Until Element Is Visible    xpath=//*[@id="topResourceConsumingCPU-ChartLegend-ChartLabel-0"]    timeout=60
         END
     END
-    ${QUERY_RESULT}=    Set Variable    ${query_result.json()["data"]["result"][0]["value"][-1]}
-    ${cpu_requested}=    Convert To Number    ${QUERY_RESULT}
+    ${cpu_usage_value}=    Get Query Value    ${query_result}
+    ${cpu_requested}=    Convert To Number    ${cpu_usage_value}
     ${cpu_usage_rounded_value}=    Evaluate    round( ${cpu_requested}, 3)
     RETURN  ${cpu_usage_rounded_value}
 
@@ -103,18 +102,44 @@ Get Current Memory Usage
             Wait Until Element Is Visible    xpath=//*[@id="topResourceConsumingMemory-ChartLegend-ChartLabel-0"]     timeout=60
         END
     END
-
-    ${value}=    Set Variable    ${query_result.json()["data"]["result"][0]["value"][-1]}
-    ${memory_requested}=    Convert To Number    ${value}
+    ${memory_usage_value}=   Get Query Value    ${query_result}
+    ${memory_requested}=    Convert To Number    ${memory_usage_value}
     ${memory_requested_gb_value}=    Evaluate    round( ${memory_requested} / (1024**3), 3)
     RETURN  ${memory_requested_gb_value}
+
+Get Query Value
+    [Documentation]    Returns total value of query response
+    [Arguments]    ${query_response}
+    @{data}=    BuiltIn.Evaluate   list(${query_response.json()["data"]["result"]})
+    Log  ${data}
+    ${size}=    Get Length    ${data}
+    ${total}=    Set Variable    0
+    IF    ${size}>1
+        FOR    ${item}    IN    @{data}
+            ${value}=    Get From Dictionary    ${item}    value
+            ${last_value}=    Get From List    ${value}    -1
+            ${total}=    Evaluate    ${total} + ${last_value}
+        END
+    ELSE
+        ${total}=    Set Variable    ${query_response.json()["data"]["result"][0]["value"][-1]}
+    END
+    RETURN    ${total}
 
 Get CPU Requested
     [Documentation]    get CPU requested from LocalQueue  flavorsReservation
     [Arguments]    ${project}    ${local_queue_name}
     ${result}  ${output}=    Run And Return Rc And Output
     ...    oc get LocalQueue ${local_queue_name} -n ${project} -o=jsonpath='{.status.flavorsReservation[0].resources[?(@.name=="cpu")].total}'
-    RETURN   ${output}
+    # If CPU match millicores regex then convert value to cores, otherwise treat it as cores
+    ${cpu_requested_array}=          Get Regexp Matches    ${output}      (\\d+)m      1
+    ${cpu_requested_array_length}=   Get Length      ${cpu_requested_array}
+    IF    ${cpu_requested_array_length} == 0
+        ${cpu_requested}=    Evaluate    ${output}
+    ELSE
+        ${cpu_requested_millicores}=     Convert To Number    ${cpu_requested_array}[0]
+        ${cpu_requested}=    Evaluate    ${cpu_requested_millicores} / 1000
+    END
+    RETURN   ${cpu_requested}
 
 Get Memory Requested
     [Documentation]    get Memory requested from LocalQueue  flavorsReservation
@@ -125,10 +150,13 @@ Get Memory Requested
         ${memory_requested}=    Replace String    ${output}    Mi    ${EMPTY}
         ${memory_requested_num}=    Convert To Number    ${memory_requested}
         ${memory_requested_gb_value}=    Evaluate    round( ${memory_requested_num} / 1024, 3)
-    ELSE
+    ELSE IF    "${workload_type}" == "RayCluster"
         ${memory_requested}=    Replace String    ${output}    Ki    ${EMPTY}
         ${memory_requested_num}=    Convert To Number    ${memory_requested}
         ${memory_requested_gb_value}=    Evaluate    round( ${memory_requested_num} / (1024*1024), 3)
+    ELSE
+        ${memory_requested_num}=    Convert To Number    ${output}
+        ${memory_requested_gb_value}=    Evaluate    round( ${memory_requested_num} / (1024*1024*1024), 3)
     END
     RETURN  ${memory_requested_gb_value}
 
@@ -146,9 +174,9 @@ Get Memory Requested Tooltip Text
     @{memory_usage_list}    Split To Lines    ${memory_usage_hover_data}
     ${memory_usage_line}    Set Variable    ${memory_usage_list}[0]
     ${memory_requested_line}    Set Variable    ${memory_usage_list}[1]
-    ${memory_usage_value}     Set Variable    ${memory_usage_line}[16:21]
-    ${memory_requested_value}     Set Variable    ${memory_requested_line}[20:25]
-    RETURN    ${memory_usage_value}     ${memory_requested_value}
+    ${memory_usage_value_array}=       Get Regexp Matches    ${memory_usage_line}      \\d+\\.?\\d*
+    ${memory_requested_value_array}=   Get Regexp Matches    ${memory_requested_line}  \\d+\\.?\\d*
+    RETURN    ${memory_usage_value_array}[0]     ${memory_requested_value_array}[0]
 
 Get CPU Requested Tooltip Text
     [Documentation]    retuns tooltip text of CPU requested chart
@@ -158,9 +186,9 @@ Get CPU Requested Tooltip Text
     @{cpu_usage_list}    Split To Lines    ${cpu_usage_hover_data}
     ${cpu_usage_line}    Set Variable    ${cpu_usage_list}[0]
     ${cpu_requested_line}    Set Variable    ${cpu_usage_list}[1]
-    ${cpu_usage_value}     Set Variable    ${cpu_usage_line}[13:18]
-    ${cpu_requested_value}     Set Variable    ${cpu_requested_line}[17:18]
-    RETURN    ${cpu_usage_value}    ${cpu_requested_value}
+    ${cpu_usage_value_array}=       Get Regexp Matches    ${cpu_usage_line}      \\d+\\.?\\d*
+    ${cpu_requested_value_array}=   Get Regexp Matches    ${cpu_requested_line}  \\d+\\.?\\d*
+    RETURN    ${cpu_usage_value_array}[0]    ${cpu_requested_value_array}[0]
 
 Create Ray Cluster Workload
     [Documentation]    Creates Ray cluster
@@ -188,7 +216,7 @@ Check Project Metrics Default Page Contents
     Page Should Contain Element    ${RESOURCES_CONSUMING_TITLE_XP}
     Page Should Contain Element    xpath=//*[@data-testid="dw-top-consuming-workloads"]//*[text()="No distributed workloads in the selected project are currently consuming resources."]
     Page Should Contain Element    ${DISTRIBUITED_WORKLOAD_RESOURCE_METRICS_TITLE_XP}
-    Page Should Contain Element    xpath=//*[@data-testid="dw-workloada-resource-metrics"]//*[text()="No distributed workloads in the selected project are currently consuming resources."]
+    Page Should Contain Element    xpath=//*[@data-testid="dw-workload-resource-metrics"]//*[text()="No distributed workloads in the selected project are currently consuming resources."]
 
 Check Distributed Workload Status Page Contents
     [Documentation]    checks Distributed Workload status Default Page contents exists
@@ -238,6 +266,12 @@ Check Distributed Workload Resource Metrics Status
     [Arguments]    ${job_name}    ${job_status}
     Check Expected String Contains    //td[@data-label="Name"]    ${job_name}
     Check Expected String Equals    //td[@data-label="Status"]//span[@class="pf-v5-c-label__text"]    ${job_status}
+
+Compare Workload Created Date With Current Date
+    [Documentation]    Check Workload Created Date To Be Less Than Equal To Current Date
+    [Arguments]    ${workload_created_date}    ${current_date}
+    ${check_workload_created_date}    Evaluate    datetime.datetime.strptime('${workload_created_date}','%m/%d/%Y') <= datetime.datetime.strptime('${current_date}','%m/%d/%Y')
+    Should Be True    ${check_workload_created_date}    Workload created date (${workload_created_date}) should be less than or equal to the current date (${current_date}).
 
 Check Requested Resources Chart
     [Documentation]    checks Requested Resources Chart
@@ -300,8 +334,10 @@ Check Distributed Worklaod Status Overview
     Page Should Contain    text=${JOB_STATUS}: 1
     Check Expected String Contains    //td[@data-label="Name"]    ${job_name}
     Check Expected String Equals    //td[@data-label="Priority"]    0
-    ${get_date} =    Get Current Date    result_format=%-m/%-d/%Y
-    Check Expected String Contains    //td[@data-label="Created"]    ${get_date}
+    ${get_current_date} =    Get Current Date    result_format=%-m/%-d/%Y
+    ${get_created_datetime} =    Get Text    xpath=//td[@data-label="Created"]
+    ${get_created_date} =    Evaluate    re.search(r'[^,]+','''${get_created_datetime}''').group(0)
+    Compare Workload Created Date With Current Date    ${get_created_date}    ${get_current_date}
     Check Expected String Equals    //td[@data-label="Status"]//span[@class="pf-v5-c-label__text"]    ${job_status}
     Check Expected String Equals    //td[@data-label="Latest Message"]    ${job_status_message}
 
@@ -315,3 +351,20 @@ Check Resource Consuming Usage
     ...    ELSE IF    ${usage_hover} > ${usage_lower_bound} and ${usage_hover} < ${usage_higher_bound}
     ...    Log    ${resource_name} usage value is partially matches
     ...    ELSE    Fail    ${resource_name} usage hover value ${usage_hover} is not matching with expected value ${usage_expected}
+
+Submit Kueue Workload
+    [Documentation]    method for creating kueue workload
+    [Arguments]    ${local_queue}   ${project}    ${cpu_requested}    ${memory_requested}    ${job_name_queue}
+    ${result}=    Run Process    sh ${KUEUE_WORKLOADS_SETUP_FILEPATH} ${local_queue} ${project} ${cpu_requested} ${memory_requested} ${job_name_queue}
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Failed to submit kueue workloads
+    END
+
+Wait For Job With Status
+    [Documentation]    Wait for job status with job name
+    [Arguments]    ${job_name}    ${job_status}    ${timeout}
+    Wait Until Element Is Visible    //td[@class='pf-v5-c-table__td' and contains(text(), '${job_name}')]/following-sibling::td[@data-label='Status']/span/span/span[@class='pf-v5-c-label__text'and text()='${job_status}']    timeout=${timeout}
+

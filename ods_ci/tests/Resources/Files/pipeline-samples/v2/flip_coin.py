@@ -13,12 +13,13 @@
 # limitations under the License.
 
 # source https://github.com/kubeflow/kfp-tekton/blob/master/samples/flip-coin/condition.py
-from kfp import dsl
-
-from ods_ci.libs.DataSciencePipelinesKfp import DataSciencePipelinesKfp
+from kfp import compiler, dsl
 
 
-@dsl.component(base_image=DataSciencePipelinesKfp.base_image)
+common_base_image = "registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61"
+
+
+@dsl.component(base_image=common_base_image)
 def random_num(low: int, high: int) -> int:
     """Generate a random number between low and high."""
     import random
@@ -28,7 +29,7 @@ def random_num(low: int, high: int) -> int:
     return result
 
 
-@dsl.component(base_image=DataSciencePipelinesKfp.base_image)
+@dsl.component(base_image=common_base_image)
 def flip_coin() -> str:
     """Flip a coin and output heads or tails randomly."""
     import random
@@ -38,7 +39,7 @@ def flip_coin() -> str:
     return result
 
 
-@dsl.component(base_image=DataSciencePipelinesKfp.base_image)
+@dsl.component(base_image=common_base_image)
 def print_msg(msg: str):
     """Print a message."""
     print(msg)
@@ -63,3 +64,8 @@ def flipcoin_pipeline():
             print_msg(msg="tails and %s > 15!" % random_num_tail.output)
         with dsl.If(random_num_tail.output <= 15):
             print_msg(msg="tails and %s <= 15!" % random_num_tail.output)
+
+
+if __name__ == "__main__":
+    compiler.Compiler().compile(flipcoin_pipeline, package_path=__file__.replace(".py", "_compiled.yaml"))
+

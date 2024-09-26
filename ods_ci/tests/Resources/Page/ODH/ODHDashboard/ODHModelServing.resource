@@ -78,6 +78,8 @@ Serve Model
     SeleniumLibrary.Wait Until Page Contains Element    //div[@role="dialog"]
     Fill Deploy Model Form    model_name=${model_name}    model_server=${model_server}    
     ...    serving_runtime=${serving_runtime}    framework=${framework}
+    ...    data_connection_name=${data_connection_name}    existing_data_connection=${existing_data_connection}
+    ...    model_path=${model_path}
 
 Select Project
     [Documentation]    Selects a project in the "deploy model" modal.
@@ -631,10 +633,13 @@ Deploy Model From Models Tab
     SeleniumLibrary.Wait Until Page Contains Element    //div[@role="dialog"]
     Fill Deploy Model Form    model_name=${model_name}    model_server=${model_server}    
     ...    serving_runtime=${serving_runtime}    framework=${framework}
+    ...    data_connection_name=${data_connection_name}    existing_data_connection=${existing_data_connection}
+    ...    model_path=${model_path}
 
 Fill Deploy Model Form
     [Documentation]    Fills the deploy model form
     [Arguments]    ${model_name}    ${model_server}    ${serving_runtime}    ${framework}
+    ...    ${data_connection_name}    ${existing_data_connection}    ${model_path}
     Set Model Name    ${model_name}
     Select Model Server    ${model_server}
     IF    "${serving_runtime}" != "${NONE}"    Set Model Server Runtime    ${serving_runtime}

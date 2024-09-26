@@ -42,7 +42,7 @@ ${EXPECTED_INFERENCE_REST_OUTPUT_FILE_PYTORCH}=       tests/Resources/Files/trit
 ${KERAS_RUNTIME_NAME_GRPC}=    triton-keras-grpc
 ${KERAS_MODEL_NAME}=      resnet50
 ${KERAS_GRPC_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_keras_gRPC_servingruntime.yaml
-${INFERENCE_GRPC_INPUT_KERAS}=    @tests/Resources/Files/triton/kserve-triton-keras-gRPC-input.json
+${INFERENCE_GRPC_INPUT_KERAS}=    tests/Resources/Files/triton/kserve-triton-keras-gRPC-input.json
 ${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE_KERAS}=       tests/Resources/Files/triton/kserve-triton-keras-gRPC-output.json
 
 

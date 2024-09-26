@@ -233,6 +233,7 @@ Get Model Route Via CLI
 Open ${section} Options Menu
     [Documentation]    Opens the "Options menu" dropdown for different sections
     ...    Valid sections are: "Name", "Model framework (name - version)", "Project"
+
     ${optionsmenu}=    Run Keyword And Return Status    Page Should Contain Element
     ...    xpath://span[.="${section}"]/../../..//button[@aria-label="Options menu"]
     Sleep    5s

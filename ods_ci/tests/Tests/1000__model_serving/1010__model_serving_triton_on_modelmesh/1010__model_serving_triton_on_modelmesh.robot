@@ -13,7 +13,7 @@ Resource          ../../../Resources/OCP.resource
 Resource          ../../../Resources/CLI/ModelServing/modelmesh.resource
 Resource          ../../../Resources/Common.robot
 Suite Setup       Triton On Kserve Suite Setup
-Suite Teardown    Triton On Kserve Suite Teardown
+#Suite Teardown    Triton On Kserve Suite Teardown
 Test Tags         Kserve
 
 
@@ -146,10 +146,6 @@ Test Keras Model Rest Inference Via UI (Triton on Modelmesh)
     ...  project_title=${PRJ_TITLE}
     ...  AND
     ...  Clean All Models Of Current User
-    ...  AND
-    ...  Open Dashboard Settings    settings_page=Serving runtime
-    ...  AND
-    ...  Delete Serving Runtime Template         displayed_name=modelmesh-triton
 
 *** Keywords ***
 Triton On Kserve Suite Setup
@@ -171,13 +167,13 @@ Triton On Kserve Suite Teardown
     # Even if kw fails, deleting the whole project will also delete the model
     # Failure will be shown in the logs of the run nonetheless
     IF    ${MODEL_CREATED}
-        Clean All Models Of Current User
+        #Clean All Models Of Current User
         Log    Skip
     ELSE
        Log    Model not deployed, skipping deletion step during teardown    console=true
     END
     ${projects}=    Create List    ${PRJ_TITLE}
-    Delete List Of Projects Via CLI   ocp_projects=${projects}
+    #Delete List Of Projects Via CLI   ocp_projects=${projects}
     # Will only be present on SM cluster runs, but keyword passes
     # if file does not exist
     Remove File    openshift_ca_istio_knative.crt

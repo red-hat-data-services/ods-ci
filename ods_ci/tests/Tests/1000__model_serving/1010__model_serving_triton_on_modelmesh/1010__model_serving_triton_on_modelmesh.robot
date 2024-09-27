@@ -142,10 +142,10 @@ Test Keras Model Rest Inference Via UI (Triton on Modelmesh)
     ...    ${EXPECTED_INFERENCE_REST_OUTPUT_KERAS}
     ...    token_auth=${TRUE}
     ...    project_title=${PRJ_TITLE}
-    [Teardown]  Run Keywords    Get Modelmesh Events And Logs      model_name=${ONNX_MODEL_NAME}
-    ...  project_title=${PRJ_TITLE}
-    ...  AND
-    ...  Clean All Models Of Current User
+    #[Teardown]  Run Keywords    Get Modelmesh Events And Logs      model_name=${ONNX_MODEL_NAME}
+    #...  project_title=${PRJ_TITLE}
+    #...  AND
+    #...  Clean All Models Of Current User
 
 *** Keywords ***
 Triton On Kserve Suite Setup

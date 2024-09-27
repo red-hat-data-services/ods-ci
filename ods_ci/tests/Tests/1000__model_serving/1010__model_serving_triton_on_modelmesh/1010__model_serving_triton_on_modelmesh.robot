@@ -131,7 +131,7 @@ Test Keras Model Rest Inference Via UI (Triton on Modelmesh)
     Sleep    10s
     Serve Model    project_name=${PRJ_TITLE}    model_name=${PYTORCH_MODEL_NAME}    framework=tensorflow - 2
     ...    existing_data_connection=${TRUE}    data_connection_name=model-serving-connection
-    ...    model_path=tritonresnet/model_repository/resnet50/        model_server=${ONNX_RUNTIME_NAME}
+    ...    model_path=tritonkeras/model_repository/resnet50/        model_server=${ONNX_RUNTIME_NAME}
     Wait Until Runtime Pod Is Running    server_name=${ONNX_RUNTIME_NAME}
     ...    project_title=${PRJ_TITLE}    timeout=5m
     Verify Model Status    ${PYTORCH_MODEL_NAME}    success

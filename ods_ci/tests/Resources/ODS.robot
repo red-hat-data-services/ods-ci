@@ -392,7 +392,7 @@ Delete RHODS Config Map
 
 Wait Until Operator Ready
     [Documentation]    Wait for operator to be available/ready
-    [Arguments]    ${operator_name}    ${namespace}    ${wait_time}=2m
+    [Arguments]    ${operator_name}    ${namespace}    ${wait_time}=10m
     ${rc}   ${output}=    Run And Return Rc And Output
     ...    oc wait --timeout=${wait_time} --for condition=available -n ${namespace} deploy/${operator_name}
     Should Be Equal    "${rc}"    "0"    msg=${output}

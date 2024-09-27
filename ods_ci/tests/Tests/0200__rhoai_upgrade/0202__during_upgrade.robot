@@ -9,6 +9,7 @@ Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboardSettings.r
 Resource            ../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
 Library             DebugLibrary
 Library             JupyterLibrary
+Test Tags           DuringUpgrade
 
 
 *** Variables ***

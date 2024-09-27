@@ -1,0 +1,164 @@
+# PIPELINE DEFINITION
+# Name: pytorch-verify-gpu-availability
+# Description: Verifies pipeline tasks run on GPU nodes only when tolerations are added
+components:
+  comp-verify-gpu-availability:
+    executorLabel: exec-verify-gpu-availability
+    inputDefinitions:
+      parameters:
+        gpu_toleration_added:
+          parameterType: BOOLEAN
+  comp-verify-gpu-availability-2:
+    executorLabel: exec-verify-gpu-availability-2
+    inputDefinitions:
+      parameters:
+        gpu_toleration_added:
+          parameterType: BOOLEAN
+deploymentSpec:
+  executors:
+    exec-verify-gpu-availability:
+      container:
+        args:
+        - --executor_input
+        - '{{$}}'
+        - --function_to_execute
+        - verify_gpu_availability
+        command:
+        - sh
+        - -c
+        - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
+          \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
+          \ python3 -m pip install --quiet --no-warn-script-location --index-url $PIP_INDEX_URL\
+          \ --trusted-host $PIP_INDEX_URL 'kfp==2.9.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
+          \ python_version<\"3.9\"'  &&  python3 -m pip install --quiet --no-warn-script-location\
+          \ --index-url $PIP_INDEX_URL --trusted-host $PIP_INDEX_URL 'torch' && \"\
+          $0\" \"$@\"\n"
+        - sh
+        - -ec
+        - 'program_path=$(mktemp -d)
+
+
+          printf "%s" "$0" > "$program_path/ephemeral_component.py"
+
+          _KFP_RUNTIME=true python3 -m kfp.dsl.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
+
+          '
+        - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
+          \ *\n\ndef verify_gpu_availability(gpu_toleration_added: bool):\n    import\
+          \ torch  # noqa: PLC0415\n\n    cuda_available = torch.cuda.is_available()\n\
+          \    device_count = torch.cuda.device_count()\n    print(\"------------------------------\"\
+          )\n    print(\"GPU availability\")\n    print(\"------------------------------\"\
+          )\n    print(\"gpu_toleration_added:\" + str(gpu_toleration_added))\n  \
+          \  print(\"torch.cuda.is_available():\" + str(cuda_available))\n    print(\"\
+          torch.cuda.device_count():\" + str(device_count))\n    if gpu_toleration_added\
+          \ and not torch.cuda.is_available():\n        print(\"GPU availability test:\
+          \ FAIL\")\n        raise ValueError(\"GPU toleration was added but there\
+          \ is no GPU not available for this task\")\n    if not gpu_toleration_added\
+          \ and torch.cuda.is_available():\n        print(\"GPU availability test:\
+          \ FAIL\")\n        raise ValueError(\"GPU toleration was not added but there\
+          \ is a GPU available for this task\")\n    print(\"GPU availability test:\
+          \ PASS\")\n\n"
+        image: quay.io/modh/runtime-images@sha256:cee154f6db15de27929362f91baa128fc4f79b9c1930ab0f27561174d39aadfa
+    exec-verify-gpu-availability-2:
+      container:
+        args:
+        - --executor_input
+        - '{{$}}'
+        - --function_to_execute
+        - verify_gpu_availability
+        command:
+        - sh
+        - -c
+        - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
+          \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
+          \ python3 -m pip install --quiet --no-warn-script-location --index-url $PIP_INDEX_URL\
+          \ --trusted-host $PIP_INDEX_URL 'kfp==2.9.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
+          \ python_version<\"3.9\"'  &&  python3 -m pip install --quiet --no-warn-script-location\
+          \ --index-url $PIP_INDEX_URL --trusted-host $PIP_INDEX_URL 'torch' && \"\
+          $0\" \"$@\"\n"
+        - sh
+        - -ec
+        - 'program_path=$(mktemp -d)
+
+
+          printf "%s" "$0" > "$program_path/ephemeral_component.py"
+
+          _KFP_RUNTIME=true python3 -m kfp.dsl.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
+
+          '
+        - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
+          \ *\n\ndef verify_gpu_availability(gpu_toleration_added: bool):\n    import\
+          \ torch  # noqa: PLC0415\n\n    cuda_available = torch.cuda.is_available()\n\
+          \    device_count = torch.cuda.device_count()\n    print(\"------------------------------\"\
+          )\n    print(\"GPU availability\")\n    print(\"------------------------------\"\
+          )\n    print(\"gpu_toleration_added:\" + str(gpu_toleration_added))\n  \
+          \  print(\"torch.cuda.is_available():\" + str(cuda_available))\n    print(\"\
+          torch.cuda.device_count():\" + str(device_count))\n    if gpu_toleration_added\
+          \ and not torch.cuda.is_available():\n        print(\"GPU availability test:\
+          \ FAIL\")\n        raise ValueError(\"GPU toleration was added but there\
+          \ is no GPU not available for this task\")\n    if not gpu_toleration_added\
+          \ and torch.cuda.is_available():\n        print(\"GPU availability test:\
+          \ FAIL\")\n        raise ValueError(\"GPU toleration was not added but there\
+          \ is a GPU available for this task\")\n    print(\"GPU availability test:\
+          \ PASS\")\n\n"
+        image: quay.io/modh/runtime-images@sha256:cee154f6db15de27929362f91baa128fc4f79b9c1930ab0f27561174d39aadfa
+        resources:
+          accelerator:
+            count: '1'
+            type: nvidia.com/gpu
+pipelineInfo:
+  description: Verifies pipeline tasks run on GPU nodes only when tolerations are
+    added
+  name: pytorch-verify-gpu-availability
+root:
+  dag:
+    tasks:
+      verify-gpu-availability:
+        cachingOptions: {}
+        componentRef:
+          name: comp-verify-gpu-availability
+        inputs:
+          parameters:
+            gpu_toleration_added:
+              runtimeValue:
+                constant: false
+        taskInfo:
+          name: verify-gpu-availability
+      verify-gpu-availability-2:
+        cachingOptions: {}
+        componentRef:
+          name: comp-verify-gpu-availability-2
+        inputs:
+          parameters:
+            gpu_toleration_added:
+              runtimeValue:
+                constant: true
+        taskInfo:
+          name: verify-gpu-availability-2
+schemaVersion: 2.1.0
+sdkVersion: kfp-2.9.0
+---
+platforms:
+  kubernetes:
+    deploymentSpec:
+      executors:
+        exec-verify-gpu-availability:
+          configMapAsEnv:
+          - configMapName: ds-pipeline-custom-env-vars
+            keyToEnv:
+            - configMapKey: pip_index_url
+              envVar: PIP_INDEX_URL
+            - configMapKey: pip_trusted_host
+              envVar: PIP_TRUSTED_HOST
+        exec-verify-gpu-availability-2:
+          configMapAsEnv:
+          - configMapName: ds-pipeline-custom-env-vars
+            keyToEnv:
+            - configMapKey: pip_index_url
+              envVar: PIP_INDEX_URL
+            - configMapKey: pip_trusted_host
+              envVar: PIP_TRUSTED_HOST
+          tolerations:
+          - effect: NoSchedule
+            key: nvidia.com/gpu
+            operator: Exists

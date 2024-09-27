@@ -437,11 +437,13 @@ Extract URLs From Text
     RETURN    ${urls}
 
 Run And Verify Command
-    [Documentation]    Run an oc delete command and log the output and errors
-    [Arguments]    ${command}
+    [Documentation]    Runs the given command in the system, logs the output and errors,
+    ...    verifies that result matches ${expected_rc} and returns the output.
+    [Arguments]    ${command}    ${expected_rc}=${0}
     ${result}=    Run Process    ${command}    shell=yes
     Log    ${result.stdout}\n${result.stderr}     console=True
-    Should Be True    ${result.rc} == 0
+    Should Be True    ${result.rc} == ${expected_rc}
+    RETURN    ${result.stdout}
 
 Run And Watch Command
   [Documentation]    Run any shell command (including args) with optional:

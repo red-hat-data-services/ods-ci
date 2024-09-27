@@ -21,7 +21,7 @@ ${MODEL_FORMAT}=   pytorch       # vLLM
 ${PROTOCOL}=     grpc         # http
 ${OVERLAY}=      ${EMPTY}               # vllm
 ${GPU_TYPE}=     NVIDIA
-
+${RUNTIME_IMAGE}=  quay.io/modh/vllm@sha256:2e7f97b69d6e0aa7366ee6a841a7e709829136a143608bee859b1fe700c36d31
 
 *** Test Cases ***
 Verify User Can Serve And Query A bigscience/mt0-xxl Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
@@ -32,7 +32,7 @@ Verify User Can Serve And Query A bigscience/mt0-xxl Model    # robocop: off=too
     ...    kserve_mode=${KSERVE_MODE}
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}
-    ...    storage_size=70Gi
+    ...    storage_size=70Gi    runtime_image=${RUNTIME_IMAGE}
     ${requests}=    Create Dictionary    memory=40Gi
     Compile Inference Service YAML    isvc_name=${model_name}
     ...    sa_name=${EMPTY}
@@ -80,7 +80,7 @@ Verify User Can Serve And Query A google/flan-t5-xl Model    # robocop: off=too-
     ${test_namespace}=   Set Variable    flant5xl-google
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}
-    ...    storage_size=70Gi
+    ...    storage_size=70Gi   runtime_image=${RUNTIME_IMAGE}
     ${requests}=    Create Dictionary    memory=40Gi
     Compile Inference Service YAML    isvc_name=${model_name}
     ...    sa_name=${EMPTY}
@@ -128,7 +128,7 @@ Verify User Can Serve And Query A google/flan-t5-xxl Model    # robocop: off=too
     ${test_namespace}=   Set Variable    flant5xxl-google
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}
-    ...    storage_size=70Gi
+    ...    storage_size=70Gi    runtime_image=${RUNTIME_IMAGE}
     ${requests}=    Create Dictionary    memory=40Gi
     Compile Inference Service YAML    isvc_name=${model_name}
     ...    sa_name=${EMPTY}
@@ -175,7 +175,7 @@ Verify User Can Serve And Query A elyza/elyza-japanese-llama-2-7b-instruct Model
     ...    kserve_mode=${KSERVE_MODE}    model_path=ELYZA-japanese-Llama-2-7b-instruct-hf
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}   protocol=${PROTOCOL}
-    ...    storage_size=70Gi    model_path=${model_path}
+    ...    storage_size=70Gi    model_path=${model_path}    runtime_image=${RUNTIME_IMAGE}
     ${requests}=    Create Dictionary    memory=40Gi
     IF    "${OVERLAY}" != "${EMPTY}"
           ${overlays}=   Create List    ${OVERLAY}
@@ -239,7 +239,7 @@ Verify User Can Serve And Query A ibm/mpt-7b-instruct2 Model    # robocop: off=t
     ${test_namespace}=   Set Variable    mpt-7b-instruct2-ibm
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}
-    ...    storage_size=20Gi
+    ...    storage_size=20Gi    runtime_image=${RUNTIME_IMAGE}
     ${requests}=    Create Dictionary    memory=40Gi
     Compile Inference Service YAML    isvc_name=${model_name}
     ...    sa_name=${EMPTY}
@@ -287,7 +287,7 @@ Verify User Can Serve And Query A google/flan-ul-2 Model    # robocop: off=too-l
     ${test_namespace}=   Set Variable    flan-ul2-google
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}
-    ...    storage_size=70Gi   model_path=${model_path}
+    ...    storage_size=70Gi   model_path=${model_path}   runtime_image=${RUNTIME_IMAGE}
     ${requests}=    Create Dictionary    memory=40Gi
     Compile Inference Service YAML    isvc_name=${model_name}
     ...    sa_name=${EMPTY}
@@ -335,7 +335,7 @@ Verify User Can Serve And Query A codellama/codellama-34b-instruct-hf Model    #
     ${test_namespace}=   Set Variable    codellama-34b
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}
-    ...    storage_size=80Gi   model_path=${model_path}
+    ...    storage_size=80Gi   model_path=${model_path}    runtime_image=${RUNTIME_IMAGE}
     ${requests}=    Create Dictionary    memory=130Gi
     Compile Inference Service YAML    isvc_name=${model_name}
     ...    sa_name=${EMPTY}
@@ -374,7 +374,7 @@ Verify User Can Serve And Query A meta-llama/llama-2-13b-chat Model    # robocop
     ...    kserve_mode=${KSERVE_MODE}    model_path=Llama-2-13b-chat-hf
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}    protocol=${PROTOCOL}
-    ...    storage_size=70Gi    model_path=${model_path}
+    ...    storage_size=70Gi    model_path=${model_path}    runtime_image=${RUNTIME_IMAGE}
     ${requests}=    Create Dictionary    memory=40Gi
     IF    "${OVERLAY}" != "${EMPTY}"
           ${overlays}=   Create List    ${OVERLAY}
@@ -438,7 +438,7 @@ Verify User Can Serve And Query A google/flan-t5-xl Prompt Tuned Model    # robo
     ...    kserve_mode=${KSERVE_MODE}    model_path=flan-t5-xl-hf
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}
-    ...    storage_size=20Gi    model_path=${model_path}
+    ...    storage_size=20Gi    model_path=${model_path}    runtime_image=${RUNTIME_IMAGE}
     Download Prompts Weights In PVC    prompts_path=flan-t5-xl-tuned    model_name=${model_name}
     ...    namespace=${test_namespace}    bucket_name=${MODELS_BUCKET.NAME}    use_https=${USE_BUCKET_HTTPS}
     ...    storage_size=10Gi    model_path=${model_path}
@@ -499,7 +499,7 @@ Verify User Can Serve And Query A instructlab/merlinite-7b-lab Model    # roboco
     ...    kserve_mode=${KSERVE_MODE}    model_path=merlinite-7b-lab
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}    protocol=${PROTOCOL}
-    ...    storage_size=70Gi    model_path=${model_path}
+    ...    storage_size=70Gi    model_path=${model_path}     runtime_image=${RUNTIME_IMAGE}
     ${requests}=    Create Dictionary    memory=40Gi
     IF    "${OVERLAY}" != "${EMPTY}"
           ${overlays}=   Create List    ${OVERLAY}
@@ -562,7 +562,7 @@ Verify User Can Serve And Query A ibm-granite/granite-8b-code-base Model    # ro
     ...    kserve_mode=${KSERVE_MODE}    model_path=granite-8b-code-base
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}    protocol=${PROTOCOL}
-    ...    storage_size=40Gi    model_path=${model_path}
+    ...    storage_size=40Gi    model_path=${model_path}     runtime_image=${RUNTIME_IMAGE}
     ${requests}=    Create Dictionary    memory=40Gi
     IF    "${OVERLAY}" != "${EMPTY}"
           ${overlays}=   Create List    ${OVERLAY}
@@ -625,7 +625,7 @@ Verify User Can Serve And Query A intfloat/e5-mistral-7b-instruct Model    # rob
     ...    kserve_mode=${KSERVE_MODE}    model_path=e5-mistral-7b-instruct
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}    protocol=${PROTOCOL}
-    ...    storage_size=40Gi    model_path=${model_path}
+    ...    storage_size=40Gi    model_path=${model_path}    runtime_image=${RUNTIME_IMAGE}
     ${requests}=    Create Dictionary    memory=20Gi
     IF    "${OVERLAY}" != "${EMPTY}"
           ${overlays}=   Create List    ${OVERLAY}
@@ -669,7 +669,7 @@ Verify User Can Serve And Query A meta-llama/llama-3-8B-Instruct Model    # robo
     ...    kserve_mode=${KSERVE_MODE}    model_path=Meta-Llama-3-8B-Instruct
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}    protocol=${PROTOCOL}
-    ...    storage_size=70Gi    model_path=${model_path}
+    ...    storage_size=70Gi    model_path=${model_path}     runtime_image=${RUNTIME_IMAGE}
     ${requests}=    Create Dictionary    memory=40Gi
     IF    "${OVERLAY}" != "${EMPTY}"
           ${overlays}=   Create List    ${OVERLAY}
@@ -732,7 +732,7 @@ Verify User Can Serve And Query A ibm-granite/granite-3b-code-instruct Model    
     ...    kserve_mode=${KSERVE_MODE}    model_path=granite-3b-code-instruct
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}    protocol=${PROTOCOL}
-    ...    storage_size=40Gi    model_path=${model_path}
+    ...    storage_size=40Gi    model_path=${model_path}    runtime_image=${RUNTIME_IMAGE}
     ${requests}=    Create Dictionary    memory=40Gi
     IF    "${OVERLAY}" != "${EMPTY}"
           ${overlays}=   Create List    ${OVERLAY}
@@ -795,7 +795,7 @@ Verify User Can Serve And Query A ibm-granite/granite-8b-code-instruct Model    
     ...    kserve_mode=${KSERVE_MODE}    model_path=granite-8b-code-instruct
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}    protocol=${PROTOCOL}
-    ...    storage_size=40Gi    model_path=${model_path}
+    ...    storage_size=40Gi    model_path=${model_path}    runtime_image=${RUNTIME_IMAGE}
     ${requests}=    Create Dictionary    memory=40Gi
     IF    "${OVERLAY}" != "${EMPTY}"
           ${overlays}=   Create List    ${OVERLAY}
@@ -858,7 +858,7 @@ Verify User Can Serve And Query A ibm-granite/granite-7b-lab Model    # robocop:
     ...    kserve_mode=${KSERVE_MODE}    model_path=granite-7b-lab
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}    protocol=${PROTOCOL}
-    ...    storage_size=40Gi    model_path=${model_path}
+    ...    storage_size=40Gi    model_path=${model_path}     runtime_image=${RUNTIME_IMAGE}
     ${requests}=    Create Dictionary    memory=40Gi
     IF    "${OVERLAY}" != "${EMPTY}"
           ${overlays}=   Create List    ${OVERLAY}
@@ -921,7 +921,7 @@ Verify User Can Serve And Query A ibm-granite/granite-7b-lab ngram speculative M
     ...    kserve_mode=${KSERVE_MODE}    model_path=granite-7b-lab
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}    protocol=${PROTOCOL}
-    ...    storage_size=40Gi    model_path=${model_path}
+    ...    storage_size=40Gi    model_path=${model_path}    runtime_image=${RUNTIME_IMAGE}
     ${requests}=    Create Dictionary    memory=40Gi
     IF    "${OVERLAY}" != "${EMPTY}"
           ${overlays}=   Create List    ${OVERLAY}
@@ -987,7 +987,7 @@ Verify User Can Serve And Query A microsoft/Phi-3-vision-128k-instruct vision Mo
     ...    kserve_mode=${KSERVE_MODE}    model_path=Phi-3-vision-128k-instruct
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}    protocol=${PROTOCOL}
-    ...    storage_size=40Gi    model_path=${model_path}
+    ...    storage_size=40Gi    model_path=${model_path}    runtime_image=${RUNTIME_IMAGE}
     ${requests}=    Create Dictionary    memory=40Gi
     IF    "${OVERLAY}" != "${EMPTY}"
           ${overlays}=   Create List    ${OVERLAY}
@@ -1033,7 +1033,7 @@ Verify User Can Serve And Query A meta-llama/llama-31-8B-Instruct Model    # rob
     ...    kserve_mode=${KSERVE_MODE}    model_path=Meta-Llama-3.1-8B
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}    protocol=${PROTOCOL}
-    ...    storage_size=70Gi    model_path=${model_path}
+    ...    storage_size=70Gi    model_path=${model_path}    runtime_image=${RUNTIME_IMAGE}
     ${requests}=    Create Dictionary    memory=40Gi
     IF    "${OVERLAY}" != "${EMPTY}"
           ${overlays}=   Create List    ${OVERLAY}
@@ -1099,7 +1099,7 @@ Verify User Can Serve And Query RHAL AI granite-7b-starter Model    # robocop: o
     ...    kserve_mode=${KSERVE_MODE}    model_path=granite-7b-starter
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}    protocol=${PROTOCOL}
-    ...    storage_size=40Gi    model_path=${model_path}
+    ...    storage_size=40Gi    model_path=${model_path}    runtime_image=${RUNTIME_IMAGE}
     ${requests}=    Create Dictionary    memory=40Gi
     IF    "${OVERLAY}" != "${EMPTY}"
           ${overlays}=   Create List    ${OVERLAY}
@@ -1165,7 +1165,7 @@ Verify User Can Serve And Query Granite-7b Speculative Decoding Using Draft Mode
     END
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${FALSE}    model_name=${model_name}    protocol=${PROTOCOL}
-    ...    storage_size=40Gi    model_path=${model_path}
+    ...    storage_size=40Gi    model_path=${model_path}     runtime_image=${RUNTIME_IMAGE}
     Remove Model Mount Path From Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
     ${requests}=    Create Dictionary    memory=40Gi
     IF    "${OVERLAY}" != "${EMPTY}"
@@ -1232,7 +1232,7 @@ Verify User Can Serve And Query RHAL AI Granite-7b-redhat-lab Model    # robocop
     ...    kserve_mode=${KSERVE_MODE}    model_path=granite-7b-redhat-lab
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${model_name}    protocol=${PROTOCOL}
-    ...    storage_size=40Gi    model_path=${model_path}
+    ...    storage_size=40Gi    model_path=${model_path}    runtime_image=${RUNTIME_IMAGE}
     ${requests}=    Create Dictionary    memory=40Gi
     IF    "${OVERLAY}" != "${EMPTY}"
           ${overlays}=   Create List    ${OVERLAY}

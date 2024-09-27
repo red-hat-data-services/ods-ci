@@ -27,15 +27,16 @@ Run Training operator ODH test base LoRA use case
     ...     TrainingOperator
     Run Training Operator ODH Core Test    TestPytorchjobWithSFTtrainerLoRa
 
-Run Training operator ODH test base QLoRA use case
-    [Documentation]    Run Go ODH tests for Training operator base QLoRA use case
-    [Tags]  RHOAIENG-13142
-    ...     Resources-GPU
-    ...     Tier1
-    ...     DistributedWorkloads
-    ...     Training
-    ...     TrainingOperator
-    Run Training Operator ODH Core Test    TestPytorchjobWithSFTtrainerQLoRa
+## Note : This test is disabled because the required model supported for QLoRA test is not available
+# Run Training operator ODH test base QLoRA use case
+#     [Documentation]    Run Go ODH tests for Training operator base QLoRA use case
+#     [Tags]  RHOAIENG-13142
+#     ...     Resources-GPU
+#     ...     Tier1
+#     ...     DistributedWorkloads
+#     ...     Training
+#     ...     TrainingOperator
+#     Run Training Operator ODH Core Test    TestPytorchjobWithSFTtrainerQLoRa
 
 Run Training operator ODH test with Kueue quota
     [Documentation]    Run Go ODH tests for Training operator with Kueue quota

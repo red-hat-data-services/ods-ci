@@ -67,7 +67,7 @@ Deploy Serving Runtime
 Set Project And Runtime
     [Documentation]    Creates the DS Project (if not exists), creates the data connection for the models,
     ...                creates caikit runtime. This can be used as test setup
-    [Arguments]    ${namespace}    ${runtime_image}    ${enable_metrics}=${FALSE}    ${runtime}=caikit-tgis-runtime
+    [Arguments]    ${namespace}    ${runtime_image}=${NONE}    ${enable_metrics}=${FALSE}    ${runtime}=caikit-tgis-runtime
     ...            ${access_key_id}=${S3.AWS_ACCESS_KEY_ID}    ${access_key}=${S3.AWS_SECRET_ACCESS_KEY}   ${protocol}=grpc
     ...            ${endpoint}=${MODELS_BUCKET.ENDPOINT}    ${verify_ssl}=${TRUE}
     ...            ${download_in_pvc}=${FALSE}    ${storage_size}=70Gi    ${model_name}=${NONE}

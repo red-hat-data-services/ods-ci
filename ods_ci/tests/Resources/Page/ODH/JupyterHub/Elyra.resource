@@ -69,7 +69,8 @@ Run Pipeline
     Click Run Button
     Set Pipeline Name    ${pipeline_name}
     Select Runtime Config    ${runtime_config}
-    Click Element    xpath=//button[.="OK"]
+    # "OK" is for Elyra 3 ; "Ok" is for Elyra 4
+    Click Element    xpath=//button[.="Ok" or .="OK"]
 
 Click Run Button
     [Documentation]    Click the `Run` button in Elyra

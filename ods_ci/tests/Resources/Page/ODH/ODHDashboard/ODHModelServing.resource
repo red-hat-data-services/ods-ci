@@ -623,11 +623,17 @@ Set Up Project
 
 Deploy Model From Models Tab
     [Documentation]    Deploys a model from the project's Models tab
-    [Arguments]    ${project_name}    ${data_connection_name}    ${model_name}
-    ...    ${framework}    ${existing_data_connection}    ${model_path}    ${model_server}
+    [Arguments]    ${project_name}    
+    ...    ${data_connection_name}
+    ...    ${model_name}
+    ...    ${framework}
+    ...    ${existing_data_connection}
+    ...    ${model_path}
+    ...    ${model_server}
     ...    ${serving_runtime}=${NONE}
     Open Data Science Project Details Page    ${project_name}    tab_id=model-server
-    SeleniumLibrary.Click Button    xpath://*[@id="expand-table-row-${model_name}-1-undefined-1"]/../../td[@class='pf-v5-c-table__td']//button
+    SeleniumLibrary.Click Button    
+    ...    xpath://*[@id="expand-table-row-${model_name}-1-undefined-1"]/../../td[@class='pf-v5-c-table__td']//button
     SeleniumLibrary.Wait Until Page Contains Element    //div[@role="dialog"]
     Fill Deploy Model Form    model_name=${model_name}    model_server=${model_server}
     ...    serving_runtime=${serving_runtime}    framework=${framework}
@@ -636,14 +642,20 @@ Deploy Model From Models Tab
 
 Fill Deploy Model Form
     [Documentation]    Fills the deploy model form
-    [Arguments]    ${model_name}    ${model_server}    ${serving_runtime}    ${framework}
-    ...    ${data_connection_name}    ${existing_data_connection}    ${model_path}
+    [Arguments]    ${model_name}    
+    ...    ${model_server}
+    ...    ${serving_runtime}
+    ...    ${framework}
+    ...    ${data_connection_name}
+    ...    ${existing_data_connection}
+    ...    ${model_path}
     Set Model Name    ${model_name}
     Select Model Server    ${model_server}
     IF    "${serving_runtime}" != "${NONE}"    Set Model Server Runtime    ${serving_runtime}
-    SeleniumLibrary.Wait Until Page Contains Element    xpath://span[.="Model framework (name - version)"]
+    SeleniumLibrary.Wait Until Page Contains Element    
+    ...    xpath://span[.="Model framework (name - version)"]
     Select Framework    ${framework}
-    IF    ${existing_data_connection}==${TRUE}
+    IF    ${existing_data_connection}
         # Select Radio Button    group_name=radiogroup    value=existing-data-connection-radio
         # Selected by default, let's skip for now
         Select Existing Data Connection    ${data_connection_name}

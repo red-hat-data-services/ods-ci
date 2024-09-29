@@ -31,9 +31,15 @@ ${PROJECT_SELECTOR_XP}=     xpath://main[contains(@id, 'dashboard-page-main')]//
 *** Keywords ***
 Create Model Server
     [Documentation]    Keyword to create a Model Server in a Data Science Project
-    [Arguments]    ${no_replicas}=1    ${server_size}=Small    ${ext_route}=${TRUE}
-    ...    ${token}=${TRUE}    ${runtime}=OpenVINO Model Server    ${server_name}=Model Serving Test
-    ...    ${no_gpus}=0    ${existing_server}=${FALSE}  ${service_account_name}=${NONE}
+    [Arguments]    ${no_replicas}=1    
+    ...    ${server_size}=Small
+    ...    ${ext_route}=${TRUE}
+    ...    ${token}=${TRUE}
+    ...    ${runtime}=OpenVINO Model Server
+    ...    ${server_name}=Model Serving Test
+    ...    ${no_gpus}=0
+    ...    ${existing_server}=${FALSE}
+    ...    ${service_account_name}=${NONE}
     Move To Tab    Models
     IF    ${existing_server}
         ${existing_server}=  Run Keyword And Return Status     Wait Until Page Contains Element    //button[.="${server_name}"]
@@ -64,7 +70,7 @@ Create Model Server
             SeleniumLibrary.Checkbox Should Be Selected    ${TOKEN_AUTH_CHECKBOX_XP}
         END
     END
-    IF    ${token}==${TRUE}
+    IF    ${token}
         Enable Token Authentication     service_account_name=${service_account_name}
     END
     SeleniumLibrary.Wait Until Element Is Enabled   //button[contains(text(),"Add")]
@@ -183,7 +189,7 @@ Enable Token Authentication
     [Arguments]    ${service_account_name}=${NONE}
     SeleniumLibrary.Select Checkbox    ${TOKEN_AUTH_CHECKBOX_XP}
     IF    "${service_account_name}" == "${NONE}"
-        ${service_account_name} =    Set Variable    default-name
+        ${service_account_name}=default-name
     END
     Input Service Account Name    ${service_account_name}
 

@@ -44,6 +44,7 @@ Test Cross Model Authentication On ModelMesh
     Set Test Variable    $project_name  ${PRJ_TITLE}-${serving_mode}
     Template with embedded arguments
 
+
 *** Keywords ***
 Template with embedded arguments
     [Documentation]    Template for cross-auth test cases
@@ -55,14 +56,14 @@ Template with embedded arguments
     Cross Auth Model Deployment     single_model=${single_model}
     ...     model_name=${MODEL_NAME}  service_account_name=${FIRST_SERVICE_ACCOUNT}
 
-    ${first_token}=  Get Access Token Via UI    service_account_name=${FIRST_SERVICE_ACCOUNT}    single_model=${single_model}
-    ...    model_name=${MODEL_NAME}     project_name=${project_name}
+    ${first_token}=  Get Access Token Via UI    service_account_name=${FIRST_SERVICE_ACCOUNT}    
+    ...    single_model=${single_model}    model_name=${MODEL_NAME}     project_name=${project_name}
 
     Cross Auth Model Deployment     single_model=${single_model}
     ...     model_name=${SECOND_MODEL_NAME}     service_account_name=${SECOND_SERVICE_ACCOUNT}
 
-    ${second_token}=  Get Access Token Via UI    service_account_name=${SECOND_SERVICE_ACCOUNT}      single_model=${single_model}
-    ...    model_name=${MODEL_NAME}     project_name=${project_name}
+    ${second_token}=  Get Access Token Via UI    service_account_name=${SECOND_SERVICE_ACCOUNT}
+    ...      single_model=${single_model}    model_name=${MODEL_NAME}     project_name=${project_name}
 
     Verify Model Inference    model_name=${MODEL_NAME}    inference_input=${INFERENCE_INPUT}
     ...    expected_inference_output=${EXPECTED_INFERENCE_OUTPUT}    token_auth=${TRUE}    token=${first_token}
@@ -89,18 +90,17 @@ Cross Auth Model Deployment
     ...     aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...     aws_bucket_name=ods-ci-s3
     Open Data Science Project Details Page    ${project_name}    tab_id=model-server
-    IF    ${single_model} == ${TRUE}
+    IF    ${single_model}
         Deploy Kserve Model Via UI    model_name=${model_name}    serving_runtime=OpenVINO Model Server
         ...    data_connection=${dc_name}    path=test-dir    model_framework=onnx
         ...    service_account_name=${service_account_name}    token=${TRUE}
-        Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}    namespace=${project_name}
+        Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
+        ...    namespace=${project_name}
     ELSE
         Create Model Server    token=${TRUE}    server_name=${model_name}   service_account_name=${service_account_name}
         Deploy Model From Models Tab    project_name=${project_name}    model_name=${model_name}    framework=onnx
         ...    existing_data_connection=${TRUE}    data_connection_name=${dc_name}      model_server=${model_name}
         ...    model_path=openvino-example-model
-        ${runtime_pod_name}=    Replace String Using Regexp    string=${project_name}    pattern=\\s    replace_with=-
-        ${runtime_pod_name}=    Convert To Lower Case    ${runtime_pod_name}
         Wait Until Keyword Succeeds    5 min  10 sec  Verify Openvino Deployment    runtime_name=${model_name}
         ...    project_name=${project_name}
         Wait Until Keyword Succeeds    5 min  10 sec  Verify Serving Service    project_name=${project_name}

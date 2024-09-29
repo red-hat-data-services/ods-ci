@@ -103,7 +103,7 @@ Verify RHODS Installation
   IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${dashboard}" == "true"
     # Needs to be removed ASAP
     IF  "${PRODUCT}" == "ODH"
-        Log To Console    "Waiting for 2 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app=odh-dashboard"
+        Log To Console    Waiting for 2 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app=odh-dashboard
         Wait For Pods Numbers  2
         ...                   namespace=${APPLICATIONS_NAMESPACE}
         ...                   label_selector=app=odh-dashboard
@@ -112,7 +112,7 @@ Verify RHODS Installation
         Add UI Admin Group To Dashboard Admin
 
     ELSE
-        Log To Console    "Waiting for 5 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app=${DASHBOARD_APP_NAME}"
+        Log To Console    Waiting for 5 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app=${DASHBOARD_APP_NAME}
         Wait For Pods Numbers  5
         ...                   namespace=${APPLICATIONS_NAMESPACE}
         ...                   label_selector=app=${DASHBOARD_APP_NAME}
@@ -121,12 +121,12 @@ Verify RHODS Installation
   END
   ${workbenches} =    Is Component Enabled    workbenches    ${DSC_NAME}
   IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${workbenches}" == "true"
-    Log To Console    "Waiting for 1 pod in ${APPLICATIONS_NAMESPACE}, label_selector=app=notebook-controller"
+    Log To Console    Waiting for 1 pod in ${APPLICATIONS_NAMESPACE}, label_selector=app=notebook-controller
     Wait For Pods Numbers  1
     ...                   namespace=${APPLICATIONS_NAMESPACE}
     ...                   label_selector=app=notebook-controller
     ...                   timeout=400
-    Log To Console    "Waiting for 1 pod in ${APPLICATIONS_NAMESPACE}, label_selector=app=odh-notebook-controller"
+    Log To Console    Waiting for 1 pod in ${APPLICATIONS_NAMESPACE}, label_selector=app=odh-notebook-controller
     Wait For Pods Numbers  1
     ...                   namespace=${APPLICATIONS_NAMESPACE}
     ...                   label_selector=app=odh-notebook-controller
@@ -134,17 +134,17 @@ Verify RHODS Installation
   END
   ${modelmeshserving} =    Is Component Enabled    modelmeshserving    ${DSC_NAME}
   IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${modelmeshserving}" == "true"
-    Log To Console    "Waiting for 3 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app=odh-model-controller"
+    Log To Console    Waiting for 3 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app=odh-model-controller
     Wait For Pods Numbers   3
     ...                   namespace=${APPLICATIONS_NAMESPACE}
     ...                   label_selector=app=odh-model-controller
     ...                   timeout=400
-    Log To Console    "Waiting for 1 pod in ${APPLICATIONS_NAMESPACE}, label_selector=component=model-mesh-etcd"
+    Log To Console    Waiting for 1 pod in ${APPLICATIONS_NAMESPACE}, label_selector=component=model-mesh-etcd
     Wait For Pods Numbers   1
     ...                   namespace=${APPLICATIONS_NAMESPACE}
     ...                   label_selector=component=model-mesh-etcd
     ...                   timeout=400
-    Log To Console    "Waiting for 3 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app.kubernetes.io/name=modelmesh-controller"
+    Log To Console    Waiting for 3 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app.kubernetes.io/name=modelmesh-controller
     Wait For Pods Numbers   3
     ...                   namespace=${APPLICATIONS_NAMESPACE}
     ...                   label_selector=app.kubernetes.io/name=modelmesh-controller
@@ -152,7 +152,7 @@ Verify RHODS Installation
   END
   ${datasciencepipelines} =    Is Component Enabled    datasciencepipelines    ${DSC_NAME}
   IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${datasciencepipelines}" == "true"
-    Log To Console    "Waiting for 1 pod in ${APPLICATIONS_NAMESPACE}, label_selector=app.kubernetes.io/name=data-science-pipelines-operator"
+    Log To Console    Waiting for 1 pod in ${APPLICATIONS_NAMESPACE}, label_selector=app.kubernetes.io/name=data-science-pipelines-operator
     Wait For Pods Numbers   1
     ...                   namespace=${APPLICATIONS_NAMESPACE}
     ...                   label_selector=app.kubernetes.io/name=data-science-pipelines-operator
@@ -160,7 +160,7 @@ Verify RHODS Installation
   END
   ${modelregistry} =    Is Component Enabled    modelregistry    ${DSC_NAME}
   IF    "${modelregistry}" == "true"
-    Log To Console    "Waiting for 1 pod in ${APPLICATIONS_NAMESPACE}, label_selector=app.kubernetes.io/part-of=model-registry-operator"
+    Log To Console    Waiting for 1 pod in ${APPLICATIONS_NAMESPACE}, label_selector=app.kubernetes.io/part-of=model-registry-operator
     Wait For Pods Numbers   1
     ...                   namespace=${APPLICATIONS_NAMESPACE}
     ...                   label_selector=app.kubernetes.io/part-of=model-registry-operator
@@ -168,12 +168,12 @@ Verify RHODS Installation
   END
   ${kserve} =    Is Component Enabled    kserve    ${DSC_NAME}
   IF    "${kserve}" == "true"
-    Log To Console    "Waiting for 3 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app=odh-model-controller"
+    Log To Console    Waiting for 3 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app=odh-model-controller
     Wait For Pods Numbers   3
     ...                   namespace=${APPLICATIONS_NAMESPACE}
     ...                   label_selector=app=odh-model-controller
     ...                   timeout=400
-    Log To Console    "Waiting for 1 pods in ${APPLICATIONS_NAMESPACE}, label_selector=control-plane=kserve-controller-manager"
+    Log To Console    Waiting for 1 pods in ${APPLICATIONS_NAMESPACE}, label_selector=control-plane=kserve-controller-manager
     Wait For Pods Numbers   1
        ...                   namespace=${APPLICATIONS_NAMESPACE}
        ...                   label_selector=control-plane=kserve-controller-manager
@@ -181,14 +181,14 @@ Verify RHODS Installation
   END
 
   IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${dashboard}" == "true" or "${workbenches}" == "true" or "${modelmeshserving}" == "true" or "${datasciencepipelines}" == "true"  # robocop: disable
-    Log To Console    "Waiting for pod status in ${APPLICATIONS_NAMESPACE}"
+    Log To Console    Waiting for pod status in ${APPLICATIONS_NAMESPACE}
     Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=200
     Log  Verified Applications NS: ${APPLICATIONS_NAMESPACE}  console=yes
   END
 
   # Monitoring stack only deployed for managed, as modelserving monitoring stack is no longer deployed
   IF  "${cluster_type}" == "managed"
-     Log To Console    "Waiting for pod status in ${MONITORING_NAMESPACE}"
+     Log To Console    Waiting for pod status in ${MONITORING_NAMESPACE}
      Wait For Pods Status  namespace=${MONITORING_NAMESPACE}  timeout=600
      Log  Verified Monitoring NS: ${MONITORING_NAMESPACE}  console=yes
   END
@@ -226,18 +226,15 @@ Install RHODS In Managed Cluster Using CLI
 Wait For Pods Numbers
   [Documentation]   Wait for number of pod during installtion
   [Arguments]     ${count}     ${namespace}     ${label_selector}    ${timeout}
-  ${status}   Set Variable   False
-  FOR    ${counter}    IN RANGE   ${timeout}
-         ${return_code}    ${output}    Run And Return Rc And Output   oc get pod -n ${namespace} -l ${label_selector} | tail -n +2 | wc -l
-         IF    ${output} == ${count}
-               ${status}  Set Variable  True
-               Log To Console  pods ${label_selector} created
-               BREAK
-         END
-         Sleep    1 sec
-  END
-  IF    '${status}' == 'False'
-        Run Keyword And Continue On Failure    FAIL    Timeout- ${output} pods found with the label selector ${label_selector} in ${namespace} namespace
+  ${output} =    Wait Until Keyword Succeeds    ${timeout}s   3s    Run And Verify Command
+  ...    oc wait -n ${namespace} --for condition\=ready pod -l "${label_selector}" --timeout\=${timeout}s    print_to_log=${FALSE}
+  Log To Console    ${output}
+  ${result} =    Run Process    oc get pod -n ${namespace} -l ${label_selector} | tail -n +2 | wc -l    shell=true
+  Log To Console  ${result.stdout}/${count} pods created with label ${label_selector} in ${namespace} namespace
+  IF    ${result.stdout} != ${count}
+    Log To Console    [WARN] Timeout exceeded for all ${count} pods to be ready. Verifying if desired ReplicaSet created    STDERR
+    Run Keyword And Continue On Failure    Run And Verify Command
+    ...    oc get deployment -l ${label_selector} -n ${namespace} -o json | jq -e '.status | .replicas \=\= .readyReplicas'
   END
 
 Apply DSCInitialization CustomResource

@@ -101,7 +101,7 @@ Cross Auth Model Deployment
         sleep    1m
         Deploy Model From Models Tab    project_name=${project_name}    model_name=${model_name}    framework=onnx
         ...    existing_data_connection=${TRUE}    data_connection_name=${dc_name}      model_server=${model_name}
-        ...    model_path=openvino-example-model
+        ...    model_path=mnist-8.onnx
         Wait Until Keyword Succeeds    5 min  10 sec  Verify Openvino Deployment    runtime_name=${model_name}
         ...    project_name=${project_name}
         Wait Until Keyword Succeeds    5 min  10 sec  Verify Serving Service    project_name=${project_name}

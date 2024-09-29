@@ -59,6 +59,7 @@ Deploy Serving Runtime
     END
     ${runtime_final_filepath}=    Replace String    string=${RUNTIME_FLIEPATHS}[${runtime}]    search_for={{protocol}}
     ...    replace_with=${protocol}
+    Create File From Template    ${runtime_final_filepath}   ${runtime_final_filepath}
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc apply -f ${runtime_final_filepath} -n ${namespace}
     Should Be Equal As Integers    ${rc}    ${0}
@@ -66,8 +67,8 @@ Deploy Serving Runtime
 Set Project And Runtime
     [Documentation]    Creates the DS Project (if not exists), creates the data connection for the models,
     ...                creates caikit runtime. This can be used as test setup
-    [Arguments]    ${namespace}    ${enable_metrics}=${FALSE}    ${runtime}=caikit-tgis-runtime    ${protocol}=grpc
-    ...            ${access_key_id}=${S3.AWS_ACCESS_KEY_ID}    ${access_key}=${S3.AWS_SECRET_ACCESS_KEY}
+    [Arguments]    ${namespace}    ${runtime_image}=${NONE}    ${enable_metrics}=${FALSE}    ${runtime}=caikit-tgis-runtime
+    ...            ${access_key_id}=${S3.AWS_ACCESS_KEY_ID}    ${access_key}=${S3.AWS_SECRET_ACCESS_KEY}   ${protocol}=grpc
     ...            ${endpoint}=${MODELS_BUCKET.ENDPOINT}    ${verify_ssl}=${TRUE}
     ...            ${download_in_pvc}=${FALSE}    ${storage_size}=70Gi    ${model_name}=${NONE}
     ...            ${model_path}=${model_name}    ${download_timeout}=600s    ${memory_request}=40Gi

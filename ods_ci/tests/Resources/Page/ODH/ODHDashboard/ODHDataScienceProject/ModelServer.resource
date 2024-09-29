@@ -226,7 +226,8 @@ Get Model Serving Access Token via UI
         ${token}=    Get Single Model Token    ${service_account_name}
     ELSE
         SeleniumLibrary.Wait Until Page Contains Element    xpath://td[@data-label="Tokens"]/button
-        SeleniumLibrary.Click Element    xpath://td[@data-label="Tokens"]/button
+        SeleniumLibrary.Click Button    
+        ...    xpath://*[@id="expand-table-row-${model_name}-1-undefined-1"]/../../td[@data-label='Tokens']//button
         ${token}=    SeleniumLibrary.Get Element Attribute
         ...    xpath://div[.="${service_account_name} "]/../../td[@data-label="Token Secret"]//input    value
     END

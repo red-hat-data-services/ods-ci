@@ -21,7 +21,7 @@ ${PRJ_TITLE}=    cross-auth-prj
 ${PRJ_DESCRIPTION}=    project used for validating cross-auth CVE
 ${MODEL_CREATED}=    ${FALSE}
 ${MODEL_NAME}=    test-model
-${SECOND_MODEL_NAME}=    test-model-second
+${SECOND_MODEL_NAME}=    ${MODEL_NAME}-second
 ${RUNTIME_NAME}=    Model Serving Test
 ${EXPECTED_INFERENCE_OUTPUT}=    {"model_name":"${MODEL_NAME}__isvc-83d6fab7bd","model_version":"1","outputs":[{"name":"Plus214_Output_0","datatype":"FP32","shape":[1,10],"data":[-8.233053,-7.7497034,-3.4236815,12.3630295,-12.079103,17.266596,-10.570976,0.7130762,3.321715,1.3621228]}]}  #robocop: disable
 ${SECOND_EXPECTED_INFERENCE_OUTPUT}=    {"model_name":"${SECOND_MODEL_NAME}__isvc-83d6fab7bd","model_version":"1","outputs":[{"name":"Plus214_Output_0","datatype":"FP32","shape":[1,10],"data":[-8.233053,-7.7497034,-3.4236815,12.3630295,-12.079103,17.266596,-10.570976,0.7130762,3.321715,1.3621228]}]}  #robocop: disable
@@ -63,7 +63,7 @@ Template with embedded arguments
     ...     model_name=${SECOND_MODEL_NAME}     service_account_name=${SECOND_SERVICE_ACCOUNT}
 
     ${second_token}=  Get Access Token Via UI    service_account_name=${SECOND_SERVICE_ACCOUNT}
-    ...      single_model=${single_model}    model_name=${MODEL_NAME}     project_name=${project_name}
+    ...      single_model=${single_model}    model_name=${SECOND_MODEL_NAME}     project_name=${project_name}
 
     Verify Model Inference    model_name=${MODEL_NAME}    inference_input=${INFERENCE_INPUT}
     ...    expected_inference_output=${EXPECTED_INFERENCE_OUTPUT}    token_auth=${TRUE}    token=${first_token}
@@ -98,6 +98,7 @@ Cross Auth Model Deployment
         ...    namespace=${project_name}
     ELSE
         Create Model Server    token=${TRUE}    server_name=${model_name}   service_account_name=${service_account_name}
+        sleep    1m
         Deploy Model From Models Tab    project_name=${project_name}    model_name=${model_name}    framework=onnx
         ...    existing_data_connection=${TRUE}    data_connection_name=${dc_name}      model_server=${model_name}
         ...    model_path=openvino-example-model

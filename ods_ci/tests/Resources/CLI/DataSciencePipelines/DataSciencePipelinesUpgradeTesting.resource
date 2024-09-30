@@ -20,7 +20,7 @@ Setup Environment For Upgrade Testing
 
 Verify Resources After Upgrade
     [Documentation]    Verifies the status of the resources created in ${PROJECT} after the upgrade
-    ...    Deletes ${PROJECT} if all verifications are correct (leaving for debugging purpuses if not)
+    ...    Deletes ${PROJECT} if all verifications are correct (leaving for debugging purposes if not)
 
     DataSciencePipelinesBackend.Wait Until Pipeline Server Is Deployed    namespace=${PROJECT}
 

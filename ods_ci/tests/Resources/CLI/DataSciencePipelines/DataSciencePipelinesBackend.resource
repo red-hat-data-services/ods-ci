@@ -47,7 +47,7 @@ Create Pipeline Server
 
     IF  ${configure_pip_index}   Create Pipelines ConfigMap With Custom Pip Index Url And Trusted Host  ${namespace}
 
-Get Dsp Version
+Get DSP Version
     [Documentation]    Returns dspVersion of the DSPA deployed in ${namespace}
     [Arguments]     ${namespace}
     ${dsp_version}=    Run And Verify Command    oc get datasciencepipelinesapplications -n ${namespace} -o json | jq -r '.items[0].spec.dspVersion'    # robocop: off=line-too-long
@@ -154,7 +154,7 @@ Wait Until Pipeline Server Is Deployed
     ...                are running
     [Arguments]    ${namespace}
 
-    ${dspVersion}=    Get Dsp Version    ${namespace}
+    ${dspVersion}=    Get DSP Version    ${namespace}
     IF    "${dspVersion}" == "v2"
             Wait Until Keyword Succeeds    10 times    10s
             ...    Verify Pipeline Server Deployments    namespace=${namespace}
@@ -269,5 +269,3 @@ Delete Pipeline And Related Resources
     END
 
     DataSciencePipelinesKfp.Delete Pipeline    ${pipeline_id}
-
-

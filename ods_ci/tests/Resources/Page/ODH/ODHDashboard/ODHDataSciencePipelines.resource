@@ -16,7 +16,7 @@ ${PIPELINE_NAME_INPUT_XP}=                       xpath://*[@data-testid="pipelin
 ${PIPELINE_DESC_INPUT_XP}=                       xpath://*[@data-testid="pipeline-description"]
 ${PIPELINE_RUN_NAME_INPUT_XP}=                   id:run-name
 ${PIPELINE_RUN_DESC_INPUT_XP}=                   id:run-description
-${PIPELINE_RUN_EXPERIMENT_BUTTON_XP}=            xpath://*[@data-testid="experiment-toggle-button"]
+${PIPELINE_RUN_EXPERIMENT_BUTTON_XP}=            xpath://*[@data-testid="experiment-selector-toggle"]
 ${PIPELINE_RUN_EXPERIMENT_SELECTOR_TABLE_XP}=    xpath://*[@data-testid="experiment-selector-table-list"]
 ${PIPELINE_RUN_CREATE_BTN_XP}=                   xpath://*[@data-testid="run-page-submit-button"]
 ${PIPELINE_EXPERIMENT_TABLE_XP}=                 xpath://*[@data-testid="experiment-table"]

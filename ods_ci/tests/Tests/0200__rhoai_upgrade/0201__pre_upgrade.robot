@@ -18,6 +18,7 @@ Resource           ../../Resources/Page/OCPDashboard/Pods/Pods.robot
 Resource           ../../Resources/Page/OCPDashboard/Builds/Builds.robot
 Resource           ../../Resources/Page/HybridCloudConsole/OCM.robot
 Resource           ../../Resources/CLI/ModelServing/modelmesh.resource
+Resource           ../../Resources/CLI/DataSciencePipelines/DataSciencePipelinesUpgradeTesting.resource
 Resource           ../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 Resource           ../../Resources/Page/DistributedWorkloads/WorkloadMetricsUI.resource
 Suite Setup        Dashboard Suite Setup
@@ -172,6 +173,11 @@ Run Training Operator ODH Setup Sleep PyTorchJob Test Use Case
     [Setup]            Prepare Training Operator E2E Upgrade Test Suite
     Run Training Operator ODH Upgrade Test    TestSetupSleepPytorchjob
     [Teardown]         Teardown Training Operator E2E Upgrade Test Suite
+
+Data Science Pipelines Pre Upgrade Configuration
+    [Documentation]    Creates project dsp-test-upgrade and configures the pipeline resources testing upgrade
+    [Tags]             Upgrade    DataSciencePipelines-Backend
+    DataSciencePipelinesUpgradeTesting.Setup Environment For Upgrade Testing
 
 
 *** Keywords ***

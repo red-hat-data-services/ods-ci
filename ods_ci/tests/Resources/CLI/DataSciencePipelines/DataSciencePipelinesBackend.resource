@@ -216,6 +216,20 @@ Import Pipeline And Create Run
 
     RETURN    ${pipeline_id}    ${pipeline_version_id}    ${pipeline_run_id}    ${experiment_id}
 
+Verify Run Status
+    [Documentation]  Verifies pipeline run status matches ${pipeline_run_expected_status}
+    [Arguments]    ${namespace}           ${username}                  ${password}
+    ...    ${pipeline_run_id}    ${pipeline_run_expected_status}="SUCCEEDED"
+
+    DataSciencePipelinesKfp.Setup Client    user=${username}    pwd=${password}    project=${namespace}
+
+    ${pipeline_run_status}=    DataSciencePipelinesKfp.Get Run Status    run_id=${pipeline_run_id}
+    IF   "${pipeline_run_status}" != "${pipeline_run_expected_status}"
+        ${error_msg}=    Catenate    Expected pipeline status was ${pipeline_run_expected_status} but pipeline run
+        ...    has status=${pipeline_run_status}
+        Fail    ${error_msg}
+    END
+
 Wait For Run Completion And Verify Status
     [Documentation]
     [Arguments]    ${namespace}           ${username}                  ${password}
@@ -227,11 +241,8 @@ Wait For Run Completion And Verify Status
     ${pipeline_run_status}=    DataSciencePipelinesKfp.Wait For Run Completion    run_id=${pipeline_run_id}
     ...    timeout=${pipeline_run_timeout}     sleep_duration=${5}
 
-    IF   "${pipeline_run_status}" != "${pipeline_run_expected_status}"
-        ${error_msg}=    Catenate    Expected pipeline status was ${pipeline_run_expected_status} but pipeline run
-        ...    finished with status=${pipeline_run_status}
-        Fail    ${error_msg}
-    END
+    Verify Run Status   namespace=${namespace}    username=${username}    password=${password}
+    ...    pipeline_run_id=${pipeline_run_id}    pipeline_run_expected_status=${pipeline_run_expected_status}
 
     RETURN    ${pipeline_run_status}
 

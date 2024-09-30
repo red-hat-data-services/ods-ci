@@ -62,12 +62,11 @@ Can Spawn Notebook
     Remove Spawner Environment Variable  env_four
     Remove Spawner Environment Variable  env_five
     Remove Spawner Environment Variable  env_six
-    ${version-check}=   Is RHODS Version Greater Or Equal Than  1.18.0
-    IF  ${version-check}==True
-        FOR    ${env_var}    IN    @{UNSUPPORTED_VAR_NAMES}
-            Verify Unsupported Environment Variable Is Not Allowed    ${env_var}
-        END
+
+    FOR    ${env_var}    IN    @{UNSUPPORTED_VAR_NAMES}
+        Verify Unsupported Environment Variable Is Not Allowed    ${env_var}
     END
+
     # TODO: Verify why error isn't appearing within 1 minute
     # Verify Notebook Spawner Modal Does Not Get Stuck When Requesting Too Many Resources To Spawn Server
     Spawn Notebook  same_tab=${False}
@@ -82,7 +81,7 @@ Can Spawn Notebook
     Maybe Close Popup
     ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
     IF  not ${is_launcher_selected}  Open JupyterLab Launcher
-    Launch a new JupyterLab Document    kernel=Python 3.9
+    Launch a new JupyterLab Document    kernel=Python 3.11
     Close Other JupyterLab Tabs
 
 *** Keywords ***

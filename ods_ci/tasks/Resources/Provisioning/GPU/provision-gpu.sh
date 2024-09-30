@@ -40,11 +40,9 @@ sed -i'' -e "s/INSTANCE_TYPE/$INSTANCE_TYPE/g" $PROVIDER_OVERLAY_DIR/gpu.yaml
 oc apply --kustomize $PROVIDER_OVERLAY_DIR
 # Add GPU label to the new machine-set
 oc patch machinesets -n openshift-machine-api "$NEW_MACHINESET_NAME" -p '{"metadata":{"labels":{"gpu-machineset":"true"}}}' --type=merge
-oc wait --timeout=$MACHINE_WAIT_TIMEOUT --for jsonpath='{.status.phase}'=Running machine $NEW_MACHINESET_NAME -n openshift-machine-api
-if [ $? -ne 0 ]; then
-  echo ">> Machine $NEW_MACHINESET_NAME is not in Running state after timeout $MACHINE_WAIT_TIMEOUT. Check the cluster please"
-  current_status=$(oc get machine $NEW_MACHINESET_NAME -n openshift-machine-api -ojsonpath="{.status.phase}")
-  echo "Current status is: $current_status"
-else
-  echo "Machine $NEW_MACHINESET_NAME successfully deployed"
+# wait for the machine to be Ready
+oc wait --timeout=$MACHINE_WAIT_TIMEOUT --for jsonpath='{.status.readyReplicas}'=1 machineset $NEW_MACHINESET_NAME -n openshift-machine-api
+ if [ $? -ne 0 ]; then
+  echo "Machine Set $NEW_MACHINESET_NAME does not have its Machines in Running status after $MACHINE_WAIT_TIMEOUT timeout"
+  echo "Please check the cluster"
 fi

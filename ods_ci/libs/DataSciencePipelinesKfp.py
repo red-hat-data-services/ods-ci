@@ -284,7 +284,7 @@ class DataSciencePipelinesKfp:
 
     @keyword
     def get_run_status(self, run_id):
-        ###Gets run status"""
+        """###Gets run status"""
         response = self.client.get_run(run_id)
         return response.state
 

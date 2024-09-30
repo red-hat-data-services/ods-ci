@@ -47,7 +47,6 @@ Create Pipeline Server
 
     IF  ${configure_pip_index}   Create Pipelines ConfigMap With Custom Pip Index Url And Trusted Host  ${namespace}
 
-
 Get Dsp Version
     [Documentation]    Returns dspVersion of the DSPA deployed in ${namespace}
     [Arguments]     ${namespace}

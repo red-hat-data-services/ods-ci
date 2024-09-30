@@ -193,8 +193,7 @@ Validate ModelRegistry Managed State
 
     Set DSC Component Managed State And Wait For Completion   modelregistry    ${MODELREGISTRY_CONTROLLER__DEPLOYMENT_NAME}    ${MODELREGISTRY_CONTROLLER__LABEL_SELECTOR}
 
-    # Check if Deployment exists in expected namespace
-    Check Model Registry Deployment Namespace
+    Check Model Registry Namespace
 
     [Teardown]     Restore DSC Component State    modelregistry    ${MODELREGISTRY_CONTROLLER__DEPLOYMENT_NAME}    ${MODELREGISTRY_CONTROLLER__LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.MODELREGISTRY}
 
@@ -202,7 +201,14 @@ Validate ModelRegistry Removed State
     [Documentation]    Validate that ModelRegistry management state Removed does remove relevant resources.
     [Tags]    Operator    Tier1    RHOAIENG-10404    modelregistry-removed    ExcludeOnRHOAI
 
+    # Properly validate Removed state by first setting to Manged, which will ensure that namspace
+    # was created as needed for later validating that namespace persisted when component is Removed
+    [Setup]   Set DSC Component Managed State And Wait For Completion   modelregistry    ${MODELREGISTRY_CONTROLLER__DEPLOYMENT_NAME}    ${MODELREGISTRY_CONTROLLER__LABEL_SELECTOR}
+
     Set DSC Component Removed State And Wait For Completion   modelregistry    ${MODELREGISTRY_CONTROLLER__DEPLOYMENT_NAME}    ${MODELREGISTRY_CONTROLLER__LABEL_SELECTOR}
+
+    # Note: Model Registry namespace will not be deleted when component state changed from Manged to Removed
+    Check Model Registry Namespace
 
     [Teardown]     Restore DSC Component State    modelregistry    ${MODELREGISTRY_CONTROLLER__DEPLOYMENT_NAME}    ${MODELREGISTRY_CONTROLLER__LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.MODELREGISTRY}
 
@@ -386,18 +392,16 @@ Check Image Pull Path Is Redhatio
         Fail    Deployment image  ${deployment_name} does not contain pull path registry.redhat.io
     END
 
-Check Model Registry Deployment Namespace
-    [Documentation]    Check that Model Registry is deployed into namespace as defined in DSC modelregistry.registriesNamespace
+Check Model Registry Namespace
+    [Documentation]    Check that DSC modelregistry.registriesNamespace is correct for ODH/RHOAI
+    ...    Validate that namespace exists.
 
-    # Get expected namespace
-    ${rc}   ${expected_namespace}=    Run And Return Rc And Output
+    ${rc}   ${namespace}=    Run And Return Rc And Output
     ...    oc get DataScienceCluster/${DSC_NAME} -n ${OPERATOR_NS} -o "jsonpath={".spec.components.modelregistry.registriesNamespace"}"
-    Should Be Equal As Integers    ${rc}    0    msg=${expected_namespace}
+    Should Be Equal As Integers    ${rc}    0    msg=${namespace}
 
-    # Get actual namespace
-    ${rc}   ${actual_namespace}=    Run And Return Rc And Output
-    ...    oc get deployments -A | grep ${MODELREGISTRY_CONTROLLER_DEPLOYMENT_NAME} | awk '{print$1}'
-    Should Be Equal As Integers    ${rc}    0    msg=${actual_namespace}
+    Should Be Equal    ${namespace}    ${MODEL_REGISTRY_NAMESPACE}    msg=Model Registry Namespace: Actual "${namespace}" Expected: "${MODEL_REGISTRY_NAMESPACE}
 
-    Log To Console    Model Registry Namespace: Actual "${actual_namespace}" Expected: "${expected_namespace}
-    Should Be Equal    ${actual_namespace}    ${expected_namespace}
+    ${rc}   ${output}=    Run And Return Rc And Output
+    ...    oc get namespace -A ${MODEL_REGISTRY_NAMESPACE}
+    Should Be Equal As Integers    ${rc}    0    msg=${output}

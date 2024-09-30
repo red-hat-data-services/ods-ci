@@ -22,8 +22,6 @@ ${PRJ_DESCRIPTION}=    project used for validating cross-auth CVE
 ${MODEL_CREATED}=    ${FALSE}
 ${MODEL_NAME}=    test-model
 ${SECOND_MODEL_NAME}=    ${MODEL_NAME}-second
-${RUNTIME_NAME}=    Model Serving Test
-${SECOND_RUNTIME_NAME}=    Second Model Serving Test
 ${EXPECTED_INFERENCE_OUTPUT}=    {"model_name":"${MODEL_NAME}__isvc-83d6fab7bd","model_version":"1","outputs":[{"name":"Plus214_Output_0","datatype":"FP32","shape":[1,10],"data":[-8.233053,-7.7497034,-3.4236815,12.3630295,-12.079103,17.266596,-10.570976,0.7130762,3.321715,1.3621228]}]}  #robocop: disable
 ${SECOND_EXPECTED_INFERENCE_OUTPUT}=    {"model_name":"${SECOND_MODEL_NAME}__isvc-83d6fab7bd","model_version":"1","outputs":[{"name":"Plus214_Output_0","datatype":"FP32","shape":[1,10],"data":[-8.233053,-7.7497034,-3.4236815,12.3630295,-12.079103,17.266596,-10.570976,0.7130762,3.321715,1.3621228]}]}  #robocop: disable
 ${FIRST_SERVICE_ACCOUNT}=    first_account
@@ -55,18 +53,18 @@ Template with embedded arguments    # robocop: off=too-many-calls-in-keyword
     Create Data Science Project    title=${project_name}    description=${PRJ_DESCRIPTION}
     ...    existing_project=${FALSE}
     Cross Auth Model Deployment     single_model=${single_model}
-    ...    model_name=${MODEL_NAME}  service_account_name=${FIRST_SERVICE_ACCOUNT}
-    ...    runtime=${RUNTIME_NAME}
+    ...     model_name=${MODEL_NAME}  service_account_name=${FIRST_SERVICE_ACCOUNT}
 
-    ${first_token}=  Get Access Token Via UI    service_account_name=${FIRST_SERVICE_ACCOUNT}
-    ...    single_model=${single_model}    serving_runtime_name=${RUNTIME_NAME}     project_name=${project_name}
+    ${first_token}=  Get Access Token Via UI    service_account_name=${FIRST_SERVICE_ACCOUNT}    
+    ...    single_model=${single_model}    model_name=${MODEL_NAME}     project_name=${project_name}
+    ...    multi_model_servers=not ${single_model}
 
     Cross Auth Model Deployment     single_model=${single_model}
-    ...    model_name=${SECOND_MODEL_NAME}     service_account_name=${SECOND_SERVICE_ACCOUNT}
-    ...    runtime=${SECOND_RUNTIME_NAME}
+    ...     model_name=${SECOND_MODEL_NAME}     service_account_name=${SECOND_SERVICE_ACCOUNT}
 
     ${second_token}=  Get Access Token Via UI    service_account_name=${SECOND_SERVICE_ACCOUNT}
-    ...    single_model=${single_model}    serving_runtime_name=${SECOND_RUNTIME_NAME}     project_name=${project_name}
+    ...    single_model=${single_model}    model_name=${SECOND_MODEL_NAME}     project_name=${project_name}
+    ...    multi_model_servers=not ${single_model}
 
     Verify Model Inference    model_name=${MODEL_NAME}    inference_input=${INFERENCE_INPUT}
     ...    expected_inference_output=${EXPECTED_INFERENCE_OUTPUT}    token_auth=${TRUE}    token=${first_token}
@@ -87,7 +85,7 @@ Template with embedded arguments    # robocop: off=too-many-calls-in-keyword
 
 Cross Auth Model Deployment    # robocop: off=too-many-calls-in-keyword
     [Documentation]    Deploys a model with cross auth enabled
-    [Arguments]    ${single_model}  ${model_name}   ${service_account_name}    ${runtime}
+    [Arguments]    ${single_model}  ${model_name}   ${service_account_name}
     ${dc_name}=     Set Variable    model-serving-connection-${serving_mode}
     Recreate S3 Data Connection    project_title=${project_name}    dc_name=${dc_name}
     ...     aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
@@ -100,12 +98,12 @@ Cross Auth Model Deployment    # robocop: off=too-many-calls-in-keyword
         Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
         ...    namespace=${project_name}
     ELSE
-        Create Model Server    token=${TRUE}    server_name=${runtime}   service_account_name=${service_account_name}
+        Create Model Server    token=${TRUE}    server_name=${model_name}   service_account_name=${service_account_name}
         sleep    1m
         Deploy Model From Models Tab    project_name=${project_name}    model_name=${model_name}    framework=onnx
-        ...    existing_data_connection=${TRUE}    data_connection_name=${dc_name}      model_server=${runtime}
+        ...    existing_data_connection=${TRUE}    data_connection_name=${dc_name}      model_server=${model_name}
         ...    model_path=mnist-8.onnx
-        Wait Until Keyword Succeeds    5 min  10 sec  Verify Openvino Deployment    runtime_name=${runtime}
+        Wait Until Keyword Succeeds    5 min  10 sec  Verify Openvino Deployment    runtime_name=${model_name}
         ...    project_name=${project_name}
         Wait Until Keyword Succeeds    5 min  10 sec  Verify Serving Service    project_name=${project_name}
         Verify Model Status    model_name=${model_name}    expected_status=success

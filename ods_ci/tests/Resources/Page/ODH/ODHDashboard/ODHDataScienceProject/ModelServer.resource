@@ -220,7 +220,7 @@ Get Model Serving Access Token via UI
     [Documentation]    Returns the token used for authentication to the serving route
     ...    TODO: There can be multiple tokens defined for each model server, handle this case as well
     [Arguments]    ${service_account_name}=default-name    ${single_model}=${FALSE}
-    ...    ${model_name}=${NONE}    ${serving_runtime_name}=${NONE}
+    ...    ${model_name}=${NONE}    ${multi_model_servers}=${FALSE}
     IF    ${single_model}
         # Expand the model
         SeleniumLibrary.Click Button    xpath: //a[text()='${model_name}']/parent::div/parent::td[@data-label='Name']/preceding-sibling::td/button  # robocop: off=line-too-long
@@ -230,11 +230,9 @@ Get Model Serving Access Token via UI
         # TODO: ModelMesh requires passing model server name and not model name; in particular when there are multiple model servers
         # in the same project.
         # This is a temporary workaround until the issue is fixed. With one model server, the model name is not required.
-        IF    "${serving_runtime_name}" != "${NONE}"
-            ${model_server_name}=    Replace String Using Regexp    string=${serving_runtime_name}    pattern=\\s    replace_with=-
-            ${model_server_name}=    Convert To Lower Case    ${runtime_formattted_name}
+        IF    ${multi_model_servers}
             SeleniumLibrary.Click Button
-        ...    xpath://*[@id="expand-table-row-${model_server_name}-1-undefined-1"]/../../td[@data-label='Tokens']//button
+        ...    xpath://*[@id="expand-table-row-${model_name}-1-undefined-1"]/../../td[@data-label='Tokens']//button
         ELSE
             SeleniumLibrary.Click Element    xpath://td[@data-label="Tokens"]/button
         END
@@ -242,7 +240,7 @@ Get Model Serving Access Token via UI
         IF    "${service_account_name}" == "${NONE}"
             ${service_account_name}=    Set Variable    default-name
         END
-        
+
         ${token}=    SeleniumLibrary.Get Element Attribute
         ...    xpath://div[.="${service_account_name} "]/../../td[@data-label="Token Secret"]//input    value
     END

@@ -46,7 +46,7 @@ Test Cross Model Authentication On ModelMesh
 
 
 *** Keywords ***
-Template with embedded arguments
+Template with embedded arguments    # robocop: off=too-many-calls-in-keyword
     [Documentation]    Template for cross-auth test cases
     Cross Auth Test Setup
     ${single_model}=    Set Variable If    "${serving_mode}" == "kserve"    ${True}    ${False}
@@ -56,14 +56,14 @@ Template with embedded arguments
     Cross Auth Model Deployment     single_model=${single_model}
     ...     model_name=${MODEL_NAME}  service_account_name=${FIRST_SERVICE_ACCOUNT}
 
-    ${first_token}=  Get Access Token Via UI    service_account_name=${FIRST_SERVICE_ACCOUNT}    
-    ...    single_model=${single_model}    model_name=${MODEL_NAME}     project_name=${project_name}
+    ${first_token}=  Get Access Token Via UI    service_account_name=${FIRST_SERVICE_ACCOUNT}
+    ...    single_model=${single_model}    serving_runtime_name=${MODEL_NAME}     project_name=${project_name}
 
     Cross Auth Model Deployment     single_model=${single_model}
     ...     model_name=${SECOND_MODEL_NAME}     service_account_name=${SECOND_SERVICE_ACCOUNT}
 
     ${second_token}=  Get Access Token Via UI    service_account_name=${SECOND_SERVICE_ACCOUNT}
-    ...      single_model=${single_model}    model_name=${SECOND_MODEL_NAME}     project_name=${project_name}
+    ...      single_model=${single_model}    serving_runtime_name=${SECOND_MODEL_NAME}     project_name=${project_name}
 
     Verify Model Inference    model_name=${MODEL_NAME}    inference_input=${INFERENCE_INPUT}
     ...    expected_inference_output=${EXPECTED_INFERENCE_OUTPUT}    token_auth=${TRUE}    token=${first_token}
@@ -82,7 +82,7 @@ Template with embedded arguments
     ...    token_auth=${TRUE}    token=${first_token}
     Run Keyword And Warn On Failure    Should Contain    ${inf_out}    Log in with OpenShift
 
-Cross Auth Model Deployment
+Cross Auth Model Deployment    # robocop: off=too-many-calls-in-keyword
     [Documentation]    Deploys a model with cross auth enabled
     [Arguments]    ${single_model}  ${model_name}   ${service_account_name}
     ${dc_name}=     Set Variable    model-serving-connection-${serving_mode}
@@ -105,7 +105,7 @@ Cross Auth Model Deployment
         Wait Until Keyword Succeeds    5 min  10 sec  Verify Openvino Deployment    runtime_name=${model_name}
         ...    project_name=${project_name}
         Wait Until Keyword Succeeds    5 min  10 sec  Verify Serving Service    project_name=${project_name}
-        Verify Model Status    ${MODEL_NAME}    success
+        Verify Model Status    model_name=${model_name}    expected_status=success
     END
 
 Cross Auth Test Setup
@@ -133,7 +133,7 @@ Cross Auth Test Teardown
     ELSE
         Log    Model not deployed, skipping deletion step during teardown    console=true
     END
-    ${projects}=    Create List    ${project_name}
+    VAR @{projects}    ${project_name}
     Delete List Of Projects Via CLI   ocp_projects=${projects}
     # Will only be present on SM cluster runs, but keyword passes
     # if file does not exist

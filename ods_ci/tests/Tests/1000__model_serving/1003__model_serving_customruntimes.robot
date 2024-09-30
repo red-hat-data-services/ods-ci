@@ -86,6 +86,7 @@ Verify RHODS Users Can Deploy A Model Using A Custom Serving Runtime    # roboco
     Verify Model Inference With Retries    ${model_name}    ${inference_input}    ${exp_inference_output}
     ...    token_auth=${TRUE}
     ...    project_title=${PRJ_TITLE}
+    ...    serving_runtime_name=${UPLOADED_OVMS_DISPLAYED_NAME}
     [Teardown]    Run Keyword If Test Failed    Get Events And Pod Logs    namespace=${ns_name}
     ...    label_selector=name=modelmesh-serving-${RUNTIME_POD_NAME}
 

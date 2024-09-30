@@ -1,4 +1,4 @@
-# robocop: off=wrong-case-in-keyword-name,too-many-arguments,too-long-keyword
+# robocop: off=wrong-case-in-keyword-name,too-many-arguments,too-long-keyword,line-too-long
 *** Settings ***
 Documentation    Collection of keywords to interact with Model Serving
 Resource       ../../../Page/Components/Components.resource
@@ -229,9 +229,10 @@ Get Access Token Via UI
     [Documentation]    Returns the access token for models deployed in a specific project
     ...    by using the UI of DSP
     [Arguments]    ${project_name}    ${service_account_name}=default-name    ${single_model}=${FALSE}
-    ...            ${model_name}=${NONE}
+    ...            ${model_name}=${NONE}    ${serving_runtime_name}=${NONE}
     Open Data Science Project Details Page    ${project_name}    tab_id=model-server
     ${token}=    Get Model Serving Access Token via UI    ${service_account_name}    ${single_model}    ${model_name}
+    ...    ${serving_runtime_name}
     RETURN    ${token}
 
 Get Model Project
@@ -250,6 +251,7 @@ Get Model Inference
     [Arguments]    ${model_name}    ${inference_input}    ${token_auth}=${FALSE}   ${project_title}=${NONE}
     ...    ${kserve_mode}=Serverless   ${deployment_mode}=UI   ${service_port}=8888   ${end_point}=${NONE}
     ...    ${service_account_name}=${NONE}    ${token}=${NONE}
+    ...    ${serving_runtime_name}=${NONE}
     ${curl_cmd}=     Set Variable    ${NONE}
     ${self_managed}=    Is RHODS Self-Managed
     IF    $deployment_mode == 'UI'
@@ -263,7 +265,7 @@ Get Model Inference
             END
             IF    $token == ${NONE}
                 ${token}=    Get Access Token via UI    ${project_title}    service_account_name=${service_account_name}
-                ...    single_model=${kserve}    model_name=${model_name}
+                ...    single_model=${kserve}    model_name=${model_name}    serving_runtime_name=${serving_runtime_name}
             END
             ${curl_cmd}=     Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
         END
@@ -313,6 +315,7 @@ Verify Model Inference
     [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}=${FALSE}
     ...    ${project_title}=${NONE}    ${deployment_mode}=UI    ${kserve_mode}=Serverless
     ...    ${service_port}=${NONE}   ${end_point}=${NONE}    ${token}=${NONE}
+    ...    ${serving_runtime_name}=${NONE}
     IF   $deployment_mode == 'UI'
          Open Model Serving Home Page
          Switch Model Serving Project    ${project_title}
@@ -320,7 +323,7 @@ Verify Model Inference
     ${inference_output}=    Get Model Inference    model_name=${model_name}   inference_input=${inference_input}
     ...    token_auth=${token_auth}    kserve_mode=${kserve_mode}    project_title=${project_title}
     ...    deployment_mode=${deployment_mode}    service_port=${service_port}    end_point=${end_point}
-    ...    token=${token}    # robocop: disable
+    ...    token=${token}    serving_runtime_name=${serving_runtime_name}    # robocop: disable
     Log    ${inference_output}
     ${result}    ${list}=    Inference Comparison    ${expected_inference_output}    ${inference_output}
     Log    ${result}
@@ -623,7 +626,7 @@ Set Up Project
 
 Deploy Model From Models Tab
     [Documentation]    Deploys a model from the project's Models tab
-    [Arguments]    ${project_name}    
+    [Arguments]    ${project_name}
     ...    ${data_connection_name}
     ...    ${model_name}
     ...    ${framework}
@@ -632,7 +635,7 @@ Deploy Model From Models Tab
     ...    ${model_server}
     ...    ${serving_runtime}=${NONE}
     Open Data Science Project Details Page    ${project_name}    tab_id=model-server
-    SeleniumLibrary.Click Button    
+    SeleniumLibrary.Click Button
     ...    xpath://*[@id="expand-table-row-${model_name}-1-undefined-1"]/../../td[@class='pf-v5-c-table__td']//button
     SeleniumLibrary.Wait Until Page Contains Element    //div[@role="dialog"]
     Fill Deploy Model Form    model_name=${model_name}    model_server=${model_server}
@@ -640,9 +643,9 @@ Deploy Model From Models Tab
     ...    data_connection_name=${data_connection_name}    existing_data_connection=${existing_data_connection}
     ...    model_path=${model_path}
 
-Fill Deploy Model Form
+Fill Deploy Model Form    # robocop: off=too-many-calls-in-keyword
     [Documentation]    Fills the deploy model form
-    [Arguments]    ${model_name}    
+    [Arguments]    ${model_name}
     ...    ${model_server}
     ...    ${serving_runtime}
     ...    ${framework}
@@ -652,7 +655,7 @@ Fill Deploy Model Form
     Set Model Name    ${model_name}
     Select Model Server    ${model_server}
     IF    "${serving_runtime}" != "${NONE}"    Set Model Server Runtime    ${serving_runtime}
-    SeleniumLibrary.Wait Until Page Contains Element    
+    SeleniumLibrary.Wait Until Page Contains Element
     ...    xpath://span[.="Model framework (name - version)"]
     Select Framework    ${framework}
     IF    ${existing_data_connection}

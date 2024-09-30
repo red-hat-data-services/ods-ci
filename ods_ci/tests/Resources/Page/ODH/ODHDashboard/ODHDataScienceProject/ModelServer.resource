@@ -31,7 +31,7 @@ ${PROJECT_SELECTOR_XP}=     xpath://main[contains(@id, 'dashboard-page-main')]//
 *** Keywords ***
 Create Model Server
     [Documentation]    Keyword to create a Model Server in a Data Science Project
-    [Arguments]    ${no_replicas}=1    
+    [Arguments]    ${no_replicas}=1
     ...    ${server_size}=Small
     ...    ${ext_route}=${TRUE}
     ...    ${token}=${TRUE}
@@ -219,15 +219,22 @@ Input Service Account Name
 Get Model Serving Access Token via UI
     [Documentation]    Returns the token used for authentication to the serving route
     ...    TODO: There can be multiple tokens defined for each model server, handle this case as well
-    [Arguments]    ${service_account_name}=default-name    ${single_model}=${FALSE}    ${model_name}=${NONE}
+    [Arguments]    ${service_account_name}=default-name    ${single_model}=${FALSE}
+    ...    ${model_name}=${NONE}    ${serving_runtime_name}=${NONE}
     IF    ${single_model}
         # Expand the model
         SeleniumLibrary.Click Button    xpath: //a[text()='${model_name}']/parent::div/parent::td[@data-label='Name']/preceding-sibling::td/button  # robocop: off=line-too-long
         ${token}=    Get Single Model Token    ${service_account_name}
     ELSE
+        IF    ${serving_runtime_name} IS NOT NONE
+            ${model_server_name}=    Replace String Using Regexp    string=${serving_runtime_name}    pattern=\\s    replace_with=-
+            ${model_server_name}=    Convert To Lower Case    ${runtime_formattted_name}
+        ELSE
+            ${model_server_name}=    Set Variable    ${model_name}
+        END
         SeleniumLibrary.Wait Until Page Contains Element    xpath://td[@data-label="Tokens"]/button
-        SeleniumLibrary.Click Button    
-        ...    xpath://*[@id="expand-table-row-${model_name}-1-undefined-1"]/../../td[@data-label='Tokens']//button
+        SeleniumLibrary.Click Button
+        ...    xpath://*[@id="expand-table-row-${model_server_name}-1-undefined-1"]/../../td[@data-label='Tokens']//button
         ${token}=    SeleniumLibrary.Get Element Attribute
         ...    xpath://div[.="${service_account_name} "]/../../td[@data-label="Token Secret"]//input    value
     END

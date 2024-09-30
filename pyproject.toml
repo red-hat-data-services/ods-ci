@@ -17,7 +17,7 @@ robotframework-dependencylibrary = "^4.0.1"
 robotframework-seleniumlibrary = "^6.1.1"
 # Selenium has been releasing versions prone to breaking, let's pin to a single release
 selenium = "4.13.0"
-robotframework-jupyterlibrary = "^0.4.0"
+robotframework-jupyterlibrary = "^0.5.0"
 robotframework-openshift = {git = "https://git@github.com/red-hat-data-services/robotframework-openshift.git"}
 pytest = "^7.2.1"
 pytest-logger = "^0.5.1"

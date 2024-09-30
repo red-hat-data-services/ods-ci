@@ -1,5 +1,7 @@
 *** Settings ***
 Resource  ../../OCPDashboard/Pods/Pods.robot
+Resource  ./Icons.resource
+
 Library  JupyterLibrary
 Library  jupyter-helper.py
 Library  OperatingSystem
@@ -10,17 +12,14 @@ Library  SeleniumLibrary
 
 
 *** Variables ***
-${JL_TABBAR_CONTENT_XPATH} =  //div[contains(@class,"lm-DockPanel-tabBar")]/ul[@class="lm-TabBar-content p-TabBar-content"]
-${JL_TABBAR_SELECTED_XPATH} =  ${JL_TABBAR_CONTENT_XPATH}/li[contains(@class,"lm-mod-current p-mod-current")]
-${JL_TABBAR_NOT_SELECTED_XPATH} =  ${JL_TABBAR_CONTENT_XPATH}/li[not(contains(@class,"lm-mod-current p-mod-current"))]
+${JL_TABBAR_CONTENT_XPATH}    //div[contains(@class,"lm-DockPanel-tabBar")]
+${JL_TABBAR_SELECTED_XPATH}    ${JL_TABBAR_CONTENT_XPATH}//li[@aria-selected="true"]
+${JL_TABBAR_NOT_SELECTED_XPATH}    ${JL_TABBAR_CONTENT_XPATH}//li[@aria-selected="false"]
 ${JLAB CSS ACTIVE DOC}    .jp-Document:not(.jp-mod-hidden)
 ${JLAB CSS ACTIVE CELL}    ${JLAB CSS ACTIVE DOC} .jp-Cell.jp-mod-active
-${JLAB CSS ACTIVE INPUT}    ${JLAB CSS ACTIVE CELL} .CodeMirror
 ${JLAB XP NB TOOLBAR FRAG}    [contains(@class, 'jp-NotebookPanel-toolbar')]
-${JLAB CSS ACTIVE DOC}    .jp-Document:not(.jp-mod-hidden)
 ${JLAB CSS ACTIVE DOC CELLS}    ${JLAB CSS ACTIVE DOC} .jp-Cell
 ${JLAB CSS ACTIVE CELL}    ${JLAB CSS ACTIVE DOC} .jp-Cell.jp-mod-active
-${JLAB CSS ACTIVE INPUT}    ${JLAB CSS ACTIVE CELL} .CodeMirror
 ${REPO_URL}             https://github.com/sclorg/nodejs-ex.git
 ${FILE_NAME}            nodejs-ex
 
@@ -30,14 +29,14 @@ Get JupyterLab Selected Tab Label
   RETURN  ${tab_label}
 
 JupyterLab Launcher Tab Is Visible
-  Get WebElement  xpath:${JL_TABBAR_CONTENT_XPATH}/li/div[.="Launcher"]
+  Get WebElement  xpath:${JL_TABBAR_CONTENT_XPATH}//li/div[.="Launcher"]
 
 JupyterLab Launcher Tab Is Selected
   Get WebElement  xpath:${JL_TABBAR_SELECTED_XPATH}/div[.="Launcher"]
 
 Open JupyterLab Launcher
   Maybe Select Kernel
-  Open With JupyterLab Menu  File  New Launcher
+  Click Element    //div[@title="New Launcher"]
   JupyterLab Launcher Tab Is Visible
   JupyterLab Launcher Tab Is Selected
 
@@ -45,8 +44,7 @@ Wait Until ${filename} JupyterLab Tab Is Selected
   Wait Until Page Contains Element  xpath:${JL_TABBAR_SELECTED_XPATH}/div[.="${filename}"]
 
 Close Other JupyterLab Tabs
-  ${original_tab} =  Get WebElement  xpath:${JL_TABBAR_SELECTED_XPATH}/div[contains(@class, "p-TabBar-tabLabel")]
-  #${original_tab} =  Get WebElement  xpath:${JL_TABBAR_SELECTED_XPATH}/div[contains(concat(' ',normalize-space(@class),' '),' p-TabBar-tabLabel ')]
+  ${original_tab} =  Get WebElement  xpath:${JL_TABBAR_SELECTED_XPATH}/div[contains(@class, "-TabBar-tabLabel")]
 
   ${xpath_background_tab} =  Set Variable  xpath:${JL_TABBAR_NOT_SELECTED_XPATH}
   ${jl_tabs} =  Get WebElements  ${xpath_background_tab}
@@ -329,12 +327,29 @@ Maybe Close Popup
       Capture Page Screenshot
     END
 
-Add And Run JupyterLab Code Cell In Active Notebook    # robocop:disable
+Add And Run JupyterLab Code Cell In Active Notebook
     [Arguments]    @{code}    ${n}=1
     [Documentation]    Add a ``code`` cell to the ``n`` th notebook on the page and run it.
     ...    ``code`` is a list of strings to set as lines in the code editor.
     ...    ``n`` is the 1-based index of the notebook, usually in order of opening.
-    ${add icon} =    Get JupyterLab Icon XPath    add
+    ...    This keyword should work on both JupyterLab 3.x and JupyterLab 4.x
+    # JupyterLab 3.x uses CodeMirror 5; JupyterLab 4.x uses CodeMirror 6
+    # CM VERSION variable is set via JupyterLibrary - we have to run
+    # Update Globals For JupyterLab 4 keyword in case we're running JupyterLab 4.x image.
+    IF  "${CM VERSION}"=="6"
+        Add And Run JupyterLab Code Cell 6 In Active Notebook    @{code}    n=${n}
+    ELSE
+        Add And Run JupyterLab Code Cell 5 In Active Notebook    @{code}    n=${n}
+    END
+
+Add And Run JupyterLab Code Cell 5 In Active Notebook
+    [Documentation]    Add a ``code`` cell to the ``n`` th notebook on the page and run it.
+    ...    ``code`` is a list of strings to set as lines in the code editor.
+    ...    ``n`` is the 1-based index of the notebook, usually in order of opening.
+    [Arguments]    @{code}    ${n}=1
+    # This keyword was copied and amended from JupyterLibrary resources - Notebook.Add And Run JupyterLab Code Cell.
+
+    ${add icon} =    Get JupyterLab Icon XPath Custom    add
 
     ${nb} =    Get WebElement    xpath://div${JLAB XP NB FRAG}\[${n}]
     ${nbid} =    Get Element Attribute    ${nb}    id
@@ -346,15 +361,53 @@ Add And Run JupyterLab Code Cell In Active Notebook    # robocop:disable
     Sleep    0.1s
     Click Element    xpath://div[@aria-labelledby="${tab-id}"]//div[contains(concat(' ',normalize-space(@class),' '),' jp-mod-selected ')]
     Set CodeMirror Value    \#${nbid}${JLAB CSS ACTIVE INPUT}    @{code}
-    Run Current JupyterLab Code Cell MOD  ${tab-id}
+    Run Current JupyterLab Code Cell 5  ${tab-id}
     Click Element    xpath://div[@aria-labelledby="${tab-id}"]//div[contains(concat(' ',normalize-space(@class),' '),' jp-mod-selected ')]
 
-Run Current JupyterLab Code Cell MOD
-    [Arguments]  ${tab-id}
+Add And Run JupyterLab Code Cell 6 In Active Notebook
+    [Documentation]    Add a ``code`` cell to the ``n`` th notebook on the page and run it.
+    ...    ``code`` is a list of strings to set as lines in the code editor.
+    ...    ``n`` is the 1-based index of the notebook, usually in order of opening.
+    # This keyword was copied and amended from JupyterLibrary resources - Notebook.Add And Run JupyterLab Code Cell.
+
+    [Arguments]    @{code}    ${n}=1
+    ${add icon} =    Get JupyterLab Icon XPath Custom    add
+    ${nb} =    Get WebElement    xpath://div${JLAB XP NB FRAG}\[${n}]
+    # rely on main area widgets all having ids
+    ${nbid} =    JupyterLibrary.Get Element Attribute    ${nb}    id
+    ${icon} =    Get WebElement Relative To    ${nb}
+    ...    xpath://*[@aria-label="notebook actions"]//*[contains(@class, "jp-CommandToolbarButton") and .//${add icon}]
+    Click Element    ${icon}
+    Sleep    0.1s
+    ${cell} =    Get WebElement Relative To    ${nb}
+    ...    css:${JLAB CSS ACTIVE INPUT.replace('''${JLAB CSS ACTIVE DOC}''', '')}
+    Click Element    ${cell}
+    Set CodeMirror Value    \#${nbid}${JLAB CSS ACTIVE INPUT}    @{code}
+    Run Current JupyterLab Code Cell 6    ${n}
+    Click Element    ${cell}
+
+Run Current JupyterLab Code Cell 5
     [Documentation]    Run the currently-selected cell(s) in the ``n`` th notebook.
     ...    ``n`` is the 1-based index of the notebook, usually in order of opening.
-    ${run icon} =    Get JupyterLab Icon XPath    run
+    [Arguments]  ${tab-id}
+    # This keyword was copied and amended from JupyterLibrary resources - Notebook.Run Current JupyterLab Code Cell
+
+    ${run icon} =    Get JupyterLab Icon XPath Custom    run
     Click Element    xpath://div[@aria-labelledby="${tab-id}"]/div[1]//${run icon}
+    Sleep    0.5s
+
+Run Current JupyterLab Code Cell 6
+    [Documentation]    Run the currently-selected cell(s) in the ``n`` th notebook.
+    ...    ``n`` is the 1-based index of the notebook, usually in order of opening.
+    [Arguments]    ${n}=1
+    # This keyword was copied and amended from JupyterLibrary resources - Notebook.Run Current JupyterLab Code Cell
+
+    ${run icon} =    Get JupyterLab Icon XPath Custom    run
+    ${nb} =    Get WebElement    xpath://div${JLAB XP NB FRAG}\[${n}]
+    # ${run btn} =    Get WebElement Relative To    ${nb}    xpath:div${JLAB XP NB TOOLBAR FRAG}//${run icon}
+    ${run btn} =    Get WebElement Relative To    ${nb}
+    ...    xpath://*[@aria-label="notebook actions"]//*[contains(@class, "jp-CommandToolbarButton") and .//${run icon}]  # Edited
+    Click Element    ${run btn}
     Sleep    0.5s
 
 Wait Until JupyterLab Code Cell Is Not Active In a Given Tab

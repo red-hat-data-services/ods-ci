@@ -32,7 +32,7 @@ oc wait --timeout=3m --for jsonpath='{.status.components.labelSelector.matchExpr
 function wait_until_pod_ready_status() {
   local pod_label=$1
   local namespace=nvidia-gpu-operator
-  local timeout=360
+  local timeout=${2:-360}
   start_time=$(date +%s)
   while [ $(($(date +%s) - start_time)) -lt $timeout ]; do
      pod_status="$(oc get pod -l app="$pod_label" -n "$namespace" --no-headers=true 2>/dev/null)"
@@ -85,7 +85,7 @@ wait_until_pod_ready_status  "gpu-operator"
 oc apply -f "$GPU_INSTALL_DIR/../nfd_deploy.yaml"
 oc get csv -n nvidia-gpu-operator "$CSVNAME" -o jsonpath='{.metadata.annotations.alm-examples}' | jq .[0] > clusterpolicy.json
 oc apply -f clusterpolicy.json
-wait_until_pod_ready_status "nvidia-device-plugin-daemonset"
+wait_until_pod_ready_status "nvidia-device-plugin-daemonset" 600
 wait_until_pod_ready_status "nvidia-container-toolkit-daemonset"
 wait_until_pod_ready_status "nvidia-dcgm-exporter"
 wait_until_pod_ready_status "gpu-feature-discovery"

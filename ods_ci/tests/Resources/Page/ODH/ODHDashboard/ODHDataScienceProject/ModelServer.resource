@@ -230,15 +230,19 @@ Get Model Serving Access Token via UI
         # TODO: ModelMesh requires passing model server name and not model name; in particular when there are multiple model servers
         # in the same project.
         # This is a temporary workaround until the issue is fixed. With one model server, the model name is not required.
-        IF    ${serving_runtime_name} != "${NONE}"
+        IF    "${serving_runtime_name}" != "${NONE}"
             ${model_server_name}=    Replace String Using Regexp    string=${serving_runtime_name}    pattern=\\s    replace_with=-
             ${model_server_name}=    Convert To Lower Case    ${runtime_formattted_name}
             SeleniumLibrary.Click Button
         ...    xpath://*[@id="expand-table-row-${model_server_name}-1-undefined-1"]/../../td[@data-label='Tokens']//button
-
         ELSE
             SeleniumLibrary.Click Element    xpath://td[@data-label="Tokens"]/button
         END
+        # TODO: service account name is required; remove from all places that pass `None`
+        IF    "${service_account_name}" == "${NONE}"
+            ${service_account_name}=    Set Variable    default-name
+        END
+        
         ${token}=    SeleniumLibrary.Get Element Attribute
         ...    xpath://div[.="${service_account_name} "]/../../td[@data-label="Token Secret"]//input    value
     END

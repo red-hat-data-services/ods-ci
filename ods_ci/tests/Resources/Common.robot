@@ -40,7 +40,7 @@ Begin Web Test
 End Web Test
     [Arguments]    ${username}=${TEST_USER.USERNAME}
     ${server}=    Run Keyword And Return Status    Page Should Contain Element
-    ...    //div[@id='jp-top-panel']//div[contains(@class, 'p-MenuBar-itemLabel')][text() = 'File']
+    ...    //div[@id='jp-top-panel']//div[contains(@class, '-MenuBar-itemLabel')][text() = 'File']
     IF  ${server}==True
         Clean Up Server    username=${username}
         Stop JupyterLab Notebook Server

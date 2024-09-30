@@ -302,7 +302,7 @@ Wait Notebook To Be Loaded
         Open New Notebook In Jupyterlab Menu
         Spawned Image Check    ${image}    ${version}
     ELSE
-        Fail    msg=Unknown IDE typ has been resolved: '${ide}'. Please check and fix or implement.
+        Fail    msg=Unknown IDE type has been resolved: '${ide}'. Please check and fix or implement.
     END
 
 Spawn Notebook With Arguments  # robocop: disable
@@ -354,6 +354,12 @@ Spawn Notebook With Arguments  # robocop: disable
             Run Keyword And Warn On Failure   Login To Openshift  ${username}  ${password}  ${auth_type}
             ${authorization_required} =  Is Service Account Authorization Required
             IF  ${authorization_required}  Authorize jupyterhub service account
+
+            # For Jupyter 4, we need to update global default variable values (images 2024b and newer)
+            # This calls method from JupyterLibrary Version.resource module
+            # TODO - shall be uncommented once the 2024b images will land into the product
+            # IF  "${version}"=="default"  Update Globals For JupyterLab 4
+
             Wait Notebook To Be Loaded  ${image}    ${version}
             ${spawn_fail} =  Has Spawn Failed
             Exit For Loop If  ${spawn_fail} == False

@@ -195,13 +195,13 @@ Pipeline Should Be Listed
     [Arguments]     ${pipeline_name}    ${pipeline_description}=${EMPTY}
 
     Projects.Move To Tab    Pipelines
-    ${pipeline_title_xp}=    Set Variable      //*[@data-testid="table-row-title"]/a/span[text()="${pipeline_name}"]
+    ${pipeline_title_xp}=    Set Variable      //*[@data-testid="table-row-title"]//span[text()="${pipeline_name}"]
     Run Keyword And Continue On Failure    Wait Until Page Contains Element    ${pipeline_title_xp}
 
     IF    "${pipeline_description}" != "${EMPTY}"
         Run Keyword And Continue On Failure
         ...    Wait Until Page Contains Element
-        ...        ${pipeline_title_xp}/ancestor::b/following-sibling::*[p[text()="${pipeline_description}"]]
+        ...        ${pipeline_title_xp}/ancestor::td//div[@class="odh-markdown-view"]/p[text()="${pipeline_description}"]
     END
 
 Pipeline Should Not Be Listed

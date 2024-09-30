@@ -33,7 +33,7 @@ function wait_until_pod_ready_status() {
   local timeout_seconds=1200
   local pod_label=$1
   local namespace=nvidia-gpu-operator
-  local timeout=240
+  local timeout=360
   start_time=$(date +%s)
   while [ $(($(date +%s) - start_time)) -lt $timeout ]; do
      pod_status="$(oc get pod -l app="$pod_label" -n "$namespace" --no-headers=true 2>/dev/null)"
@@ -42,7 +42,10 @@ function wait_until_pod_ready_status() {
         echo "Waiting until GPU Pods or Daemonset of '$pod_label' in namespace '$namespace' are in running state..."
         echo "Pods status: '$pod_status'"
         echo "Daemonset status: '$daemon_status'"
-        oc wait --timeout="${timeout_seconds}s" --for=condition=ready pod -n "$namespace" -l app="$pod_label" || \
+        oc wait --timeout=10s --for=condition=ready pod -n "$namespace" -l app="$pod_label" || \
+        if [ $? -ne 0 ]; then
+          continue
+        fi
         oc rollout status --watch --timeout=3m daemonset -n "$namespace" -l app="$pod_label" || continue
         break
      fi

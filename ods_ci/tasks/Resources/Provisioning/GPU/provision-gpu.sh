@@ -41,6 +41,7 @@ oc apply --kustomize $PROVIDER_OVERLAY_DIR
 # Add GPU label to the new machine-set
 oc patch machinesets -n openshift-machine-api "$NEW_MACHINESET_NAME" -p '{"metadata":{"labels":{"gpu-machineset":"true"}}}' --type=merge
 # wait for the machine to be Ready
+echo "Waiting for GPU Node to be Ready"
 oc wait --timeout=$MACHINE_WAIT_TIMEOUT --for jsonpath='{.status.readyReplicas}'=1 machineset $NEW_MACHINESET_NAME -n openshift-machine-api
  if [ $? -ne 0 ]; then
   echo "Machine Set $NEW_MACHINESET_NAME does not have its Machines in Running status after $MACHINE_WAIT_TIMEOUT timeout"

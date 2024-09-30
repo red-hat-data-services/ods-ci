@@ -126,8 +126,7 @@ root:
   dag:
     tasks:
       print-message:
-        cachingOptions:
-          enableCache: true
+        cachingOptions: {}
         componentRef:
           name: comp-print-message
         inputs:
@@ -137,8 +136,7 @@ root:
         taskInfo:
           name: print-message
       print-message-2:
-        cachingOptions:
-          enableCache: true
+        cachingOptions: {}
         componentRef:
           name: comp-print-message-2
         dependentTasks:
@@ -152,8 +150,7 @@ root:
         taskInfo:
           name: print-message-2
       print-message-3:
-        cachingOptions:
-          enableCache: true
+        cachingOptions: {}
         componentRef:
           name: comp-print-message-3
         dependentTasks:

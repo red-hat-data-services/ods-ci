@@ -89,8 +89,7 @@ root:
   dag:
     tasks:
       take-nap:
-        cachingOptions:
-          enableCache: true
+        cachingOptions: {}
         componentRef:
           name: comp-take-nap
         inputs:
@@ -100,8 +99,7 @@ root:
         taskInfo:
           name: take-nap
       wake-up:
-        cachingOptions:
-          enableCache: true
+        cachingOptions: {}
         componentRef:
           name: comp-wake-up
         dependentTasks:

@@ -55,7 +55,7 @@ Template with embedded arguments    # robocop: off=too-many-calls-in-keyword
     Cross Auth Model Deployment     single_model=${single_model}
     ...     model_name=${MODEL_NAME}  service_account_name=${FIRST_SERVICE_ACCOUNT}
 
-    ${first_token}=  Get Access Token Via UI    service_account_name=${FIRST_SERVICE_ACCOUNT}    
+    ${first_token}=  Get Access Token Via UI    service_account_name=${FIRST_SERVICE_ACCOUNT}
     ...    single_model=${single_model}    model_name=${MODEL_NAME}     project_name=${project_name}
     ...    multi_model_servers=not ${single_model}
 

@@ -228,8 +228,9 @@ Open ${section} Options Menu
 Get Access Token Via UI
     [Documentation]    Returns the access token for models deployed in a specific project
     ...    by using the UI of DSP
-    [Arguments]    ${project_name}    ${service_account_name}=default-name    ${single_model}=${FALSE}
-    ...            ${model_name}=${NONE}    ${multi_model_servers}=${FALSE}
+    [Arguments]    ${project_name}    ${service_account_name}=default-name
+    ...    ${single_model}=${FALSE}    ${model_name}=${NONE}
+    ...    ${multi_model_servers}=${FALSE}
     Open Data Science Project Details Page    ${project_name}    tab_id=model-server
     ${token}=    Get Model Serving Access Token via UI    ${service_account_name}    ${single_model}    ${model_name}
     ...    ${multi_model_servers}

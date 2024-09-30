@@ -227,9 +227,11 @@ Get Model Serving Access Token via UI
         ${token}=    Get Single Model Token    ${service_account_name}
     ELSE
         SeleniumLibrary.Wait Until Page Contains Element    xpath://td[@data-label="Tokens"]/button
-        # TODO: ModelMesh requires passing model server name and not model name; in particular when there are multiple model servers
+        # TODO: ModelMesh requires passing model server name and not model name; 
+        # in particular when there are multiple model servers
         # in the same project.
-        # This is a temporary workaround until the issue is fixed. With one model server, the model name is not required.
+        # This is a temporary workaround until the issue is fixed. 
+        # With one model server, the model name is not required.
         IF    ${multi_model_servers}
             SeleniumLibrary.Click Button
         ...    xpath://*[@id="expand-table-row-${model_name}-1-undefined-1"]/../../td[@data-label='Tokens']//button

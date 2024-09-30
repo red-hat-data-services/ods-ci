@@ -212,7 +212,6 @@ Get Model Serving Access Token via UI
     [Documentation]    Returns the token used for authentication to the serving route
     ...    TODO: There can be multiple tokens defined for each model server, handle this case as well
     [Arguments]    ${service_account_name}=default-name    ${single_model}=${FALSE}    ${model_name}=${NONE}
-    Log    ${service_account_name}
     IF    ${single_model}
         # Expand the model
         SeleniumLibrary.Click Button    xpath: //a[text()='${model_name}']/parent::div/parent::td[@data-label='Name']/preceding-sibling::td/button  # robocop: off=line-too-long
@@ -220,10 +219,8 @@ Get Model Serving Access Token via UI
     ELSE
         SeleniumLibrary.Wait Until Page Contains Element    xpath://td[@data-label="Tokens"]/button
         SeleniumLibrary.Click Element    xpath://td[@data-label="Tokens"]/button
-        Log    ${service_account_name}
-        SeleniumLibrary.Wait Until Page Contains        ${service_account_name}     timeout=10s
         ${token}=    SeleniumLibrary.Get Element Attribute
-        ...    xpath://div[.="${service_account_name}"]/../../td[@data-label="Token Secret"]//span/input    value
+        ...    xpath://div[.="${service_account_name} "]/../../td[@data-label="Token Secret"]//span/input    value
     END
     RETURN    ${token}
 

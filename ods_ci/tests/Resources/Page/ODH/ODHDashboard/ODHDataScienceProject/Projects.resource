@@ -8,7 +8,8 @@ Resource       ./Workbenches.resource
 ${DS_PROJECT_TITLE}=    Data Science Projects
 ${TITLE_INPUT_XP}=    xpath=//input[@id="manage-project-modal-name"]
 ${DESCR_INPUT_XP}=    xpath=//textarea[@id="manage-project-modal-description"]
-${RESOURCE_INPUT_XP}=     css:[data-testid="resource-manage-project-modal-name"]
+${RESOURCE_EDIT_BTN_XP}=    xpath=//button[.="Edit resource name"]
+${RESOURCE_INPUT_XP}=    css:[data-testid="manage-project-modal-resourceName"]
 ${GENERIC_CREATE_BTN_XP}=     xpath=//button[text()="Create"]
 ${GENERIC_CANCEL_BTN_XP}=     xpath=//button[text()="Cancel"]
 # TODO: Update to latter option once the change is pulled from ODH into downstream!
@@ -136,6 +137,8 @@ Create Data Science Project
     ELSE
         Wait Until Page Contains Element    ${PROJECT_CREATE_BTN_XP}
         Click Button    ${PROJECT_CREATE_BTN_XP}
+        Wait Until Page Contains Element    ${RESOURCE_EDIT_BTN_XP}
+        Click Button    ${RESOURCE_EDIT_BTN_XP}
         Wait Until Page Contains Element    ${TITLE_INPUT_XP}
         Run Keyword And Warn On Failure     Element Should Be Disabled    ${GENERIC_CREATE_BTN_XP}
         Input Text    ${TITLE_INPUT_XP}    ${title}

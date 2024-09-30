@@ -8,6 +8,7 @@ GPU_COUNT=${3:-"1"}
 KUSTOMIZE_PATH="$PWD/tasks/Resources/Provisioning/Hive/GPU"
 MACHINESET_PATH="$KUSTOMIZE_PATH/base/source-machineset.yaml"
 PROVIDER_OVERLAY_DIR=$KUSTOMIZE_PATH/overlays/$PROVIDER
+MACHINE_WAIT_TIMEOUT=10m
 # Check if existing machineset GPU already exists
 EXISTING_GPU_MACHINESET="$(oc get machineset -n openshift-machine-api -o jsonpath="{.items[?(@.metadata.annotations['machine\.openshift\.io/GPU']>'0')].metadata.name}")"
 if [[ -n "$EXISTING_GPU_MACHINESET" ]] ; then
@@ -39,3 +40,11 @@ sed -i'' -e "s/INSTANCE_TYPE/$INSTANCE_TYPE/g" $PROVIDER_OVERLAY_DIR/gpu.yaml
 oc apply --kustomize $PROVIDER_OVERLAY_DIR
 # Add GPU label to the new machine-set
 oc patch machinesets -n openshift-machine-api "$NEW_MACHINESET_NAME" -p '{"metadata":{"labels":{"gpu-machineset":"true"}}}' --type=merge
+oc wait --timeout=$MACHINE_WAIT_TIMEOUT --for jsonpath='{.status.phase}'=Running machine $NEW_MACHINESET_NAME -n openshift-machine-api
+if [ $? -ne 0 ]; then
+  echo ">> Machine $NEW_MACHINESET_NAME is not in Running state after timeout $MACHINE_WAIT_TIMEOUT. Check the cluster please"
+  current_status=$(oc get machine $NEW_MACHINESET_NAME -n openshift-machine-api -ojsonpath="{.status.phase}")
+  echo "Current status is: $current_status"
+else
+  echo "Machine $NEW_MACHINESET_NAME successfully deployed"
+fi

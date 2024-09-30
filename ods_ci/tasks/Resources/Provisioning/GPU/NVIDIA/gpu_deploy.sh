@@ -30,7 +30,6 @@ oc wait --timeout=3m --for jsonpath='{.status.components.labelSelector.matchExpr
 oc wait --timeout=3m --for jsonpath='{.status.components.labelSelector.matchExpressions[].operator}'=Exists operator gpu-operator-certified.nvidia-gpu-operator
 
 function wait_until_pod_ready_status() {
-  local timeout_seconds=1200
   local pod_label=$1
   local namespace=nvidia-gpu-operator
   local timeout=360

@@ -11,7 +11,7 @@ def print_message(message: str):
 
 @dsl.pipeline(name="version-test-pipeline", description="Pipeline that prints a hello message")
 def version_test_pipeline(message: str = "Hello world"):
-    print_message_task = print_message(message=message).set_caching_options(False)
+    print_message_task = print_message(message=message)
 
 
 if __name__ == "__main__":

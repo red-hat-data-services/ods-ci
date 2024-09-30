@@ -21,8 +21,8 @@ def wake_up(message: str):
 
 @dsl.pipeline(name="take-nap-pipeline", description="Pipeline that sleeps for 15 mins (900 secs)")
 def take_nap_pipeline(naptime_secs: int = 900):
-    take_nap_task = take_nap(naptime_secs=naptime_secs).set_caching_options(False)
-    wake_up_task = wake_up(message=take_nap_task.output).set_caching_options(False)
+    take_nap_task = take_nap(naptime_secs=naptime_secs)
+    wake_up_task = wake_up(message=take_nap_task.output)
 
 
 if __name__ == "__main__":

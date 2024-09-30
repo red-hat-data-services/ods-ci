@@ -24,9 +24,9 @@ def print_message_3(message: str):
 
 @dsl.pipeline(name="version-test-pipeline", description="Pipeline that prints a hello message")
 def version_test_pipeline(message: str = "Hello world"):
-    print_message_task = print_message(message=message).set_caching_options(False)
-    print_message_2_task = print_message_2(message=print_message_task.output).set_caching_options(False)
-    print_message_3(message=print_message_2_task.output).set_caching_options(False)
+    print_message_task = print_message(message=message)
+    print_message_2_task = print_message_2(message=print_message_task.output)
+    print_message_3(message=print_message_2_task.output)
 
 
 if __name__ == "__main__":

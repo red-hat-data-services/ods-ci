@@ -48,7 +48,8 @@ root:
   dag:
     tasks:
       print-message:
-        cachingOptions: {}
+        cachingOptions:
+          enableCache: true
         componentRef:
           name: comp-print-message
         inputs:

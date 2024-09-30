@@ -400,7 +400,7 @@ Check Model Registry Namespace
     ...    oc get DataScienceCluster/${DSC_NAME} -n ${OPERATOR_NS} -o "jsonpath={".spec.components.modelregistry.registriesNamespace"}"
     Should Be Equal As Integers    ${rc}    0    msg=${namespace}
 
-    Should Be Equal    ${namespace}    ${MODEL_REGISTRY_NAMESPACE}    msg=Model Registry Namespace: Actual "${namespace}" Expected: "${MODEL_REGISTRY_NAMESPACE}
+    Should Be Equal    ${namespace}    ${MODEL_REGISTRY_NAMESPACE}    msg=Model Registry Namespace: Actual "${namespace}" Expected: "${MODEL_REGISTRY_NAMESPACE}"
 
     ${rc}   ${output}=    Run And Return Rc And Output
     ...    oc get namespace -A ${MODEL_REGISTRY_NAMESPACE}

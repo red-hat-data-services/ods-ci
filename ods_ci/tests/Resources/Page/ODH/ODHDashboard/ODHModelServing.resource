@@ -251,7 +251,6 @@ Get Model Inference
     [Arguments]    ${model_name}    ${inference_input}    ${token_auth}=${FALSE}   ${project_title}=${NONE}
     ...    ${kserve_mode}=Serverless   ${deployment_mode}=UI   ${service_port}=8888   ${end_point}=${NONE}
     ...    ${service_account_name}=${NONE}    ${token}=${NONE}
-    ...    ${serving_runtime_name}=${NONE}
     ${curl_cmd}=     Set Variable    ${NONE}
     ${self_managed}=    Is RHODS Self-Managed
     IF    $deployment_mode == 'UI'
@@ -265,7 +264,7 @@ Get Model Inference
             END
             IF    $token == ${NONE}
                 ${token}=    Get Access Token via UI    ${project_title}    service_account_name=${service_account_name}
-                ...    single_model=${kserve}    model_name=${model_name}    serving_runtime_name=${serving_runtime_name}
+                ...    single_model=${kserve}    model_name=${model_name}
             END
             ${curl_cmd}=     Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
         END
@@ -315,7 +314,6 @@ Verify Model Inference
     [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}=${FALSE}
     ...    ${project_title}=${NONE}    ${deployment_mode}=UI    ${kserve_mode}=Serverless
     ...    ${service_port}=${NONE}   ${end_point}=${NONE}    ${token}=${NONE}
-    ...    ${serving_runtime_name}=${NONE}
     IF   $deployment_mode == 'UI'
          Open Model Serving Home Page
          Switch Model Serving Project    ${project_title}
@@ -323,7 +321,7 @@ Verify Model Inference
     ${inference_output}=    Get Model Inference    model_name=${model_name}   inference_input=${inference_input}
     ...    token_auth=${token_auth}    kserve_mode=${kserve_mode}    project_title=${project_title}
     ...    deployment_mode=${deployment_mode}    service_port=${service_port}    end_point=${end_point}
-    ...    token=${token}    serving_runtime_name=${serving_runtime_name}    # robocop: disable
+    ...    token=${token}    # robocop: disable
     Log    ${inference_output}
     ${result}    ${list}=    Inference Comparison    ${expected_inference_output}    ${inference_output}
     Log    ${result}

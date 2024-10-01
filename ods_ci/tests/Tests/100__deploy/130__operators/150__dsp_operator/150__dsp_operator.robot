@@ -15,17 +15,8 @@ Suite Teardown      Suite Teardown
 *** Variables ***
 ${OLM_DIR}                                  olm
 ${OPERATOR_NS}                              ${OPERATOR_NAMESPACE}
-${DSCI_NAME}                                default-dsci
 ${DSC_NAME}                                 default-dsc
 ${DSC_CRD}                                  datascienceclusters.datasciencecluster.opendatahub.io
-${SERVICE_MESH_OPERATOR_NS}                 openshift-operators
-${SERVICE_MESH_OPERATOR_DEPLOYMENT_NAME}    istio-operator
-${SERVICE_MESH_CR_NS}                       istio-system
-${SERVICE_MESH_CR_NAME}                     data-science-smcp
-${INSTALL_TYPE}                             CLi
-${TEST_ENV}                                 PSI
-${IS_PRESENT}                               0
-${IS_NOT_PRESENT}                           1
 ${MWC_LABEL}                                olm.webhook-description-generate-name=mutate.operator.opendatahub.io
 
 
@@ -47,7 +38,7 @@ Detect Pre-existing Install Of Argo Workflows And Block RHOAI Install
         Install RHODS In Managed Cluster Using CLI      ${CLUSTER_TYPE}     ${IMAGE_URL}
     END
     Restore Datasciencecluster If Existed
-    Wait for failed Conditions
+    Wait For Failed Conditions
     ${return_code}          ${output}               Run And Return Rc And Output
     ...                     oc delete DataScienceCluster default-dsc
     Log To Console          ${output}
@@ -79,7 +70,7 @@ Check And Delete Argo Workflow Crd
         ${rc}    ${output}    Run And Return Rc And Output
         ...    oc delete crd workflows.argoproj.io
         Log To Console    ${output}
-    END    
+    END
 
 Create Argo Workflow From Template
     [Documentation]     Create an Argo Workflow from a template
@@ -98,6 +89,7 @@ Fetch Cluster Type By Domain
     END
 
 Check Whether DSC Exists And Save Component Statuses
+    [Documentation]     Check Whether DSC Exists And Save Component Statuses
     ${rc}=    Run And Return Rc
     ...    oc get datasciencecluster ${DSC_NAME}
     IF  ${rc} == 0
@@ -107,7 +99,7 @@ Check Whether DSC Exists And Save Component Statuses
         ...    oc get datasciencecluster ${DSC_NAME} -o jsonpath='{.spec.components}'
         ${custom_cmp}=    Load Json String    ${out}
         Set Test Variable    ${custom_cmp}    ${custom_cmp}
-    ELSE 
+    ELSE
         Set Global Variable    ${DSC_EXISTS}    False
     END
 
@@ -148,7 +140,7 @@ Operator Deployment Should Be Ready
 Restore Datasciencecluster If Existed
     [Documentation]     Restore Datasciencecluster If Existed as it was in case it existed previously
     IF      ${DSC_EXISTS} == True
-        Wait For Datasciencecluster Crd To Be available
+        Wait For Datasciencecluster Crd To Be Available
         Wait For Mutatingwebhook To Be Available
         Apply DataScienceCluster CustomResource     ${DSC_NAME}     True    ${custom_cmp}
     END
@@ -166,7 +158,8 @@ Teardown Detect Pre-existing Install Of Argo Workflows
     Operator Deployment Should Be Ready
     Wait For DSC Conditions Reconciled    ${OPERATOR_NS}     ${DSC_NAME}
 
-Wait for failed Conditions
+Wait For Failed Conditions
+    [Documentation]     Wait until conditions get failed
     Wait Until Keyword Succeeds
     ...                     5 min
     ...                     30s

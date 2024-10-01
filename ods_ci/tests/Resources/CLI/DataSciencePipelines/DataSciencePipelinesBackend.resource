@@ -1,10 +1,11 @@
 *** Settings ***
 Documentation    Collection of keywords to interact with Data Science Pipelines via CLI
-Library          OperatingSystem
 Library          String
 Library          ../../../../libs/DataSciencePipelinesAPI.py
 Library          ../../../../libs/DataSciencePipelinesKfp.py
 Resource         ../../../Resources/OCP.resource
+Resource         ../../../Resources/Common.robot
+
 
 *** Variables ***
 ${DSPA_PATH}=      tests/Resources/Files/pipeline-samples/v2/dspa
@@ -42,9 +43,15 @@ Create Pipeline Server
     ...    -p OBJECT_STORAGE_REGION=${object_storage_region}
     ...    -p OBJECT_STORAGE_BUCKET=${object_storage_bucket_name}
 
-    Run      oc process -f ${DSPA_PATH}/dspa-template.yaml ${template_parameters} | oc apply -n ${namespace} -f -
+    Run And Verify Command    oc process -f ${DSPA_PATH}/dspa-template.yaml ${template_parameters} | oc apply -n ${namespace} -f -    # robocop: off=line-too-long
 
     IF  ${configure_pip_index}   Create Pipelines ConfigMap With Custom Pip Index Url And Trusted Host  ${namespace}
+
+Get DSP Version
+    [Documentation]    Returns dspVersion of the DSPA deployed in ${namespace}
+    [Arguments]     ${namespace}
+    ${dsp_version}=    Run And Verify Command    oc get datasciencepipelinesapplications -n ${namespace} -o json | jq -r '.items[0].spec.dspVersion'    # robocop: off=line-too-long
+    RETURN    ${dsp_version}
 
 # robocop: disable:line-too-long
 Create PipelineServer Using Custom DSPA
@@ -55,21 +62,25 @@ Create PipelineServer Using Custom DSPA
     [Arguments]     ${namespace}    ${dspa_file}=data-science-pipelines-sample.yaml
     ...    ${assert_install}=${TRUE}    ${configure_pip_index}=${TRUE}
 
-    Run     oc apply -f "${DSPA_PATH}/${dspa_file}" -n ${namespace}
+    Run And Verify Command     oc apply -f "${DSPA_PATH}/${dspa_file}" -n ${namespace}
     IF    ${assert_install}==True
-        ${generation_value}    Run    oc get datasciencepipelinesapplications -n ${namespace} -o json | jq '.items[0].metadata.generation'
+        ${generation_value}=    Run And Verify Command    oc get datasciencepipelinesapplications -n ${namespace} -o json | jq '.items[0].metadata.generation'    # robocop: off=line-too-long
         Should Be True    ${generation_value} == 2    DataSciencePipelinesApplication created
     END
 
     IF  ${configure_pip_index}   Create Pipelines ConfigMap With Custom Pip Index Url And Trusted Host  ${namespace}
 
 Verify Pipeline Server Deployments    # robocop: disable
-    [Documentation]    Verifies the correct deployment of DS Pipelines in the rhods namespace
+    [Documentation]    Verifies the correct deployment of a DSPv2 DataSciencePipelineApplication
     [Arguments]    ${namespace}
 
     @{all_pods}=  Oc Get    kind=Pod    namespace=${namespace}
     ...    label_selector=component=data-science-pipelines
-    Run Keyword And Continue On Failure    Length Should Be    ${all_pods}    7
+
+    ${pods_count}=   Get Length    ${all_pods}
+    IF    ${pods_count} < 7
+         Fail    DSPA requires at least 7 pods running in the namespace
+    END
 
     @{pipeline_api_server}=  Oc Get    kind=Pod    namespace=${namespace}
     ...    label_selector=app=ds-pipeline-dspa
@@ -106,12 +117,52 @@ Verify Pipeline Server Deployments    # robocop: disable
     ${containerNames}=  Create List  mariadb
     Verify Deployment    ${mariadb}  1  1  ${containerNames}
 
+Verify DSPv1 Pipeline Server Deployments
+    [Documentation]    Verifies the correct deployment of a DSPv1 DataSciencePipelineApplication
+    [Arguments]    ${namespace}
+
+    @{all_pods}=  Oc Get    kind=Pod    namespace=${namespace}
+    ...    label_selector=component=data-science-pipelines
+
+    ${pods_count}=   Get Length    ${all_pods}
+    IF    ${pods_count} < 4
+         Fail    DSPA requires at least 4 pods running in the namespace
+    END
+
+    @{pipeline_api_server}=  Oc Get    kind=Pod    namespace=${namespace}
+    ...    label_selector=app=ds-pipeline-dspa
+    ${containerNames}=  Create List  oauth-proxy    ds-pipeline-api-server
+    Verify Deployment    ${pipeline_api_server}  1  2  ${containerNames}
+
+    @{pipeline_persistenceagent}=  Oc Get    kind=Pod    namespace=${namespace}
+    ...    label_selector=app=ds-pipeline-persistenceagent-dspa
+    ${containerNames}=  Create List  ds-pipeline-persistenceagent
+    Verify Deployment    ${pipeline_persistenceagent}  1  1  ${containerNames}
+
+    @{pipeline_scheduledworkflow}=  Oc Get    kind=Pod    namespace=${namespace}
+    ...    label_selector=app=ds-pipeline-scheduledworkflow-dspa
+    ${containerNames}=  Create List  ds-pipeline-scheduledworkflow
+    Verify Deployment    ${pipeline_scheduledworkflow}  1  1  ${containerNames}
+
+    @{mariadb}=  Oc Get    kind=Pod    namespace=${namespace}
+    ...    label_selector=app=mariadb-dspa
+    ${containerNames}=  Create List  mariadb
+    Verify Deployment    ${mariadb}  1  1  ${containerNames}
+
 Wait Until Pipeline Server Is Deployed
     [Documentation]    Waits until all the expected pods of the pipeline server
     ...                are running
     [Arguments]    ${namespace}
-    Wait Until Keyword Succeeds    10 times    10s
-    ...    Verify Pipeline Server Deployments    namespace=${namespace}
+
+    ${dspVersion}=    Get DSP Version    ${namespace}
+    IF    "${dspVersion}" == "v2"
+            Wait Until Keyword Succeeds    10 times    10s
+            ...    Verify Pipeline Server Deployments    namespace=${namespace}
+    ELSE
+             Wait Until Keyword Succeeds    10 times    10s
+            ...    Verify DSPv1 Pipeline Server Deployments    namespace=${namespace}
+    END
+
 
 Wait Until Pipeline Server Is Deleted
     [Documentation]    Waits until all pipeline server pods are deleted
@@ -128,13 +179,13 @@ Create Pipelines ConfigMap With Custom Pip Index Url And Trusted Host
     [Documentation]     Creates a Configmap (ds-pipeline-custom-env-vars) in the project,
     ...    storing the values for pip_index_url and pip_trusted_host
     [Arguments]    ${namespace}
-    Run    oc create configmap ds-pipeline-custom-env-vars -n ${namespace} --from-literal=pip_index_url=${PIP_INDEX_URL} --from-literal=pip_trusted_host=${PIP_TRUSTED_HOST}
+    Run And Verify Command    oc create configmap ds-pipeline-custom-env-vars -n ${namespace} --from-literal=pip_index_url=${PIP_INDEX_URL} --from-literal=pip_trusted_host=${PIP_TRUSTED_HOST}    # robocop: off=line-too-long
 
 Create Secret With Pipelines Object Storage Information
     [Documentation]     Creates a secret needed to create a pipeline server containing the object storage credentials
     [Arguments]    ${namespace}    ${object_storage_access_key}    ${object_storage_secret_key}
-    Run    oc create secret generic dashboard-dspa-secret -n ${namespace} --from-literal=AWS_ACCESS_KEY_ID=${object_storage_access_key} --from-literal=AWS_SECRET_ACCESS_KEY=${object_storage_secret_key}
-    Run    oc label secret dashboard-dspa-secret -n ${namespace} opendatahub.io/dashboard=true
+    Run And Verify Command    oc create secret generic dashboard-dspa-secret -n ${namespace} --from-literal=AWS_ACCESS_KEY_ID=${object_storage_access_key} --from-literal=AWS_SECRET_ACCESS_KEY=${object_storage_secret_key}    # robocop: off=line-too-long
+    Run And Verify Command    oc label secret dashboard-dspa-secret -n ${namespace} opendatahub.io/dashboard=true
 
 
 Import Pipeline And Create Run
@@ -164,6 +215,20 @@ Import Pipeline And Create Run
 
     RETURN    ${pipeline_id}    ${pipeline_version_id}    ${pipeline_run_id}    ${experiment_id}
 
+Verify Run Status
+    [Documentation]  Verifies pipeline run status matches ${pipeline_run_expected_status}
+    [Arguments]    ${namespace}           ${username}                  ${password}
+    ...    ${pipeline_run_id}    ${pipeline_run_expected_status}="SUCCEEDED"
+
+    DataSciencePipelinesKfp.Setup Client    user=${username}    pwd=${password}    project=${namespace}
+
+    ${pipeline_run_status}=    DataSciencePipelinesKfp.Get Run Status    run_id=${pipeline_run_id}
+    IF   "${pipeline_run_status}" != "${pipeline_run_expected_status}"
+        ${error_msg}=    Catenate    Expected pipeline status was ${pipeline_run_expected_status} but pipeline run
+        ...    has status=${pipeline_run_status}
+        Fail    ${error_msg}
+    END
+
 Wait For Run Completion And Verify Status
     [Documentation]
     [Arguments]    ${namespace}           ${username}                  ${password}
@@ -175,11 +240,8 @@ Wait For Run Completion And Verify Status
     ${pipeline_run_status}=    DataSciencePipelinesKfp.Wait For Run Completion    run_id=${pipeline_run_id}
     ...    timeout=${pipeline_run_timeout}     sleep_duration=${5}
 
-    IF   "${pipeline_run_status}" != "${pipeline_run_expected_status}"
-        ${error_msg}=    Catenate    Expected pipeline status was ${pipeline_run_expected_status} but pipeline run
-        ...    finished with status=${pipeline_run_status}
-        Fail    ${error_msg}
-    END
+    Verify Run Status   namespace=${namespace}    username=${username}    password=${password}
+    ...    pipeline_run_id=${pipeline_run_id}    pipeline_run_expected_status=${pipeline_run_expected_status}
 
     RETURN    ${pipeline_run_status}
 
@@ -207,5 +269,3 @@ Delete Pipeline And Related Resources
     END
 
     DataSciencePipelinesKfp.Delete Pipeline    ${pipeline_id}
-
-

@@ -283,6 +283,12 @@ class DataSciencePipelinesKfp:
         return response.state
 
     @keyword
+    def get_run_status(self, run_id):
+        """###Gets run status"""
+        response = self.client.get_run(run_id)
+        return response.state
+
+    @keyword
     def check_run_status(self, run_id, timeout=160):
         """Waits for a run to complete"""
         count = 0

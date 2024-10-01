@@ -22,7 +22,12 @@ def add_gpu_toleration(task: PipelineTask, accelerator_type: str, accelerator_li
     kubernetes.add_toleration(task, key=accelerator_type, operator="Exists", effect="NoSchedule")
 
 
-@dsl.component(base_image=common_base_image, packages_to_install=["torch"], pip_index_urls=["$PIP_INDEX_URL"])
+@dsl.component(
+    base_image=common_base_image,
+    packages_to_install=["torch"],
+    pip_index_urls=["$PIP_INDEX_URL"],
+    pip_trusted_hosts=["$PIP_TRUSTED_HOST"],
+)
 def verify_gpu_availability(gpu_toleration_added: bool):
     import torch  # noqa: PLC0415
 

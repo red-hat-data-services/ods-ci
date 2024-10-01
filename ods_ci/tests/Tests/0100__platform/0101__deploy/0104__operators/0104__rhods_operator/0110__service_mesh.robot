@@ -63,7 +63,7 @@ Validate Service Mesh State Removed
 
 Validate Service Mesh Control Plane Already Created
     [Documentation]    This Test Case validates that only one ServiceMeshControlPlane is allowed to be installed per project/namespace
-    [Tags]      Operator        Tier3       RHOAIENG-2517
+    [Tags]      RHOAIENG-2517
     Fetch Image Url And Update Channel
     Check Whether DSC Exists And Save Component Statuses
     Fetch Cluster Type By Domain

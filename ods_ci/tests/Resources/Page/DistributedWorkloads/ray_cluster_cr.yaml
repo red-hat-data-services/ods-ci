@@ -6,7 +6,7 @@ metadata:
   labels:
       kueue.x-k8s.io/queue-name: $LOCAL_QUEUE
 spec:
-  rayVersion: "2.7.0"
+  rayVersion: "2.35.0"
   headGroupSpec:
     rayStartParams:
       dashboard-host: "0.0.0.0"
@@ -14,7 +14,7 @@ spec:
       spec:
         containers:
         - name: ray-head
-          image: quay.io/rhoai/ray@sha256:859f5c41d41bad1935bce455ad3732dff9d4d4c342b7155a7cd23809e85698ab
+          image: quay.io/modh/ray@sha256:0d715f92570a2997381b7cafc0e224cfa25323f18b9545acfd23bc2b71576d06
           ports:
           - containerPort: 6379
             name: gcs
@@ -43,7 +43,7 @@ spec:
       spec:
         containers:
         - name: ray-worker
-          image: quay.io/rhoai/ray@sha256:859f5c41d41bad1935bce455ad3732dff9d4d4c342b7155a7cd23809e85698ab
+          image: quay.io/modh/ray@sha256:0d715f92570a2997381b7cafc0e224cfa25323f18b9545acfd23bc2b71576d06
           lifecycle:
             preStop:
               exec:

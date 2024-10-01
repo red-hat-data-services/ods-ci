@@ -473,7 +473,9 @@ Set Model Server Runtime
     [Arguments]    ${runtime}=Caikit TGIS
     Page Should Contain Element    ${KSERVE_RUNTIME_DROPDOWN}
     Click Element    ${KSERVE_RUNTIME_DROPDOWN}
-    Click Element    ${KSERVE_RUNTIME_DROPDOWN}/..//span[contains(text(),"${runtime}")]
+    ${runtime_element}    Set Variable     ${KSERVE_RUNTIME_DROPDOWN}/..//span[contains(text(),"${runtime}")]
+    Page Should Contain Element    ${runtime_element}
+    Click Element    ${runtime_element}
 
 Get Kserve Inference Host Via UI
     [Documentation]    Fetches the host of the model's URL from the Data Science Project UI

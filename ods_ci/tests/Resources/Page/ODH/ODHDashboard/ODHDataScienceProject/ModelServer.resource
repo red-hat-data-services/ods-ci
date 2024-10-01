@@ -80,7 +80,6 @@ Create Model Server
 Set Replicas Number With Buttons
     [Documentation]    Sets the number of replicas for the model serving pod
     [Arguments]    ${number}
-    ${RESOURCE_INPUT_XP}=    css:[id="model-server-replicas"]
     ${current}=    Get Element Attribute    css:[id="model-server-replicas"]   value
     ${difference}=    Evaluate    int(${number})-int(${current})
     ${op}=    Set Variable    plus
@@ -224,7 +223,8 @@ Get Model Serving Access Token via UI
     ...    ${model_name}=${NONE}    ${multi_model_servers}=${FALSE}
     IF    ${single_model}
         # Expand the model
-        SeleniumLibrary.Click Button    xpath: //a[text()='${model_name}']/parent::div/parent::td[@data-label='Name']/preceding-sibling::td/button  # robocop: off=line-too-long
+        #SeleniumLibrary.Click Button    xpath://a[text()='${model_name}']/parent::div/parent::td[@data-label='Name']/preceding-sibling::td/button  # robocop: off=line-too-long
+        SeleniumLibrary.Click Element    xpath://a[text()='${model_name}']/../../../../td/button[@class="pf-v5-c-button pf-m-plain pf-m-expanded"]
         ${token}=    Get Single Model Token    ${service_account_name}
     ELSE
         SeleniumLibrary.Wait Until Page Contains Element    xpath://td[@data-label="Tokens"]/button

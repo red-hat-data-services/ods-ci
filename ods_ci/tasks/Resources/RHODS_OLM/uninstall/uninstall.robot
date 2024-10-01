@@ -110,7 +110,10 @@ Uninstall RHODS V2
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete operatorgroup --all -n ${OPERATOR_NAMESPACE} --ignore-not-found
     Should Be Equal As Integers  ${return_code}   0   msg=Error deleting operatorgroup
-    Log To Console    message=Deleting Operator and it's associate namepsace
+    Log To Console    message=Deleting model registry associated namespace ${MODEL_REGISTRY_NAMESPACE}
+    ${return_code}    ${output}    Run And Return Rc And Output    oc delete ns ${MODEL_REGISTRY_NAMESPACE} --ignore-not-found
+    Verify Project Does Not Exists  ${MODEL_REGISTRY_NAMESPACE}
+    Log To Console    message=Deleting Operator and it's associate namespace
     ${return_code}    ${output}    Run And Return Rc And Output    oc delete ns -l opendatahub.io/generated-namespace --ignore-not-found
     Verify Project Does Not Exists  ${APPLICATIONS_NAMESPACE}
     Verify Project Does Not Exists  ${MONITORING_NAMESPACE}

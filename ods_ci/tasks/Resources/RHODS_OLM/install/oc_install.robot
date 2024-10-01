@@ -96,6 +96,7 @@ Verify RHODS Installation
         Wait For DSCInitialization CustomResource To Be Ready    timeout=${timeout_in_seconds}
     END
     Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
+    Wait For DSC Conditions Reconciled    ${OPERATOR_NS}     ${DSC_NAME}
   END
 
   ${dashboard} =    Is Component Enabled    dashboard    ${DSC_NAME}
@@ -260,11 +261,17 @@ Apply DataScienceCluster CustomResource
         ${yml} =    Get File    ${file_path}dsc_apply.yml
         Log To Console    Applying DSC yaml
         Log To Console    ${yml}
-        ${return_code}    ${output} =    Run And Return Rc And Output    oc apply -f ${file_path}dsc_apply.yml
-        Log To Console    ${output}
-        Should Be Equal As Integers  ${return_code}  0  msg=Error detected while applying DSC CR
-        #Remove File    ${file_path}dsc_apply.yml
-        Wait For DSC Conditions Reconciled    ${OPERATOR_NS}     ${DSC_NAME}
+        ${rc}=    Set Variable    1
+        TRY
+            WHILE    ${rc} != 0    limit=2m
+                Sleep    5s
+                ${rc}    ${output}=    Run And Return Rc And Output
+                ...    oc apply -f ${file_path}dsc_apply.yml
+            END
+        EXCEPT    WHILE loop was aborted    type=start
+            Fail    msg=Error detected while applying DSC CR
+        END
+        Remove File    ${file_path}dsc_apply.yml
     ELSE
         Log to Console    Requested Configuration:
         FOR    ${cmp}    IN    @{COMPONENT_LIST}

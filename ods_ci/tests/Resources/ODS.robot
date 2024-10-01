@@ -406,7 +406,7 @@ Wait For DSCI Ready State
 
 Wait For DSC Conditions Reconciled
     [Documentation]    Checks all DSC conditions to be successfully reconciled
-    [Arguments]    ${namespace}    ${dsc_name}    ${wait_time}=6m
+    [Arguments]    ${namespace}    ${dsc_name}    ${wait_time}=10m
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc wait --timeout=${wait_time} --for jsonpath='{.status.conditions[].reason}'=ReconcileCompleted -n ${namespace} dsc ${dsc_name}    # robocop: disable
     Should Be Equal As Integers    ${rc}     ${0}

@@ -110,7 +110,7 @@ Assign Vars According To Product
     ELSE IF    "${PRODUCT}" == "ODH"
         Set Suite Variable    ${OPERATOR_APPNAME}  "Open Data Hub Operator"
         Set Suite Variable    ${OPERATOR_DEPLOYMENT_NAME}    opendatahub-operator-controller-manager
-        Set Suite Variable    ${OPERATOR_NAMESPACE}    openshift-operators
+        Set Suite Variable    ${OPERATOR_NAMESPACE}    opendatahub-operators
         Set Suite Variable    ${OPERATOR_POD_CONTAINER_NAME}  manager
         Set Suite Variable    ${OPERATOR_LABEL_SELECTOR}    control-plane=controller-manager
         Set Suite Variable    ${OPERATOR_SUBSCRIPTION_LABEL}     operators.coreos.com/rhods-operator.opendatahub-operators

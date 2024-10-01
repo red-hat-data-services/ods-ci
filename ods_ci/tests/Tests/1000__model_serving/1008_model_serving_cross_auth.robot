@@ -119,7 +119,7 @@ Cross Auth Test Setup
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
     Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
-    # Clean All Models Of Current User
+    Clean All Models Of Current User
 
 Cross Auth Test Teardown
     [Documentation]    Test teardown steps after testing DSG. It Deletes
@@ -129,11 +129,11 @@ Cross Auth Test Teardown
 
     # Even if kw fails, deleting the whole project will also delete the model
     # Failure will be shown in the logs of the run nonetheless
-    # IF    ${MODEL_CREATED}
-    #     Clean All Models Of Current User
-    # ELSE
-    #     Log    Model not deployed, skipping deletion step during teardown    console=true
-    # END
+    IF    ${MODEL_CREATED}
+        Clean All Models Of Current User
+    ELSE
+        Log    Model not deployed, skipping deletion step during teardown    console=true
+    END
     ${projects}=    Create List    ${project_name}
     Delete List Of Projects Via CLI   ocp_projects=${projects}
     # Will only be present on SM cluster runs, but keyword passes

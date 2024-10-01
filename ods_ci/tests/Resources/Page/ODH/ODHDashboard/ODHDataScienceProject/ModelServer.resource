@@ -80,7 +80,7 @@ Create Model Server
 Set Replicas Number With Buttons
     [Documentation]    Sets the number of replicas for the model serving pod
     [Arguments]    ${number}
-    ${current}=    Get Element Attribute    css:[id="model-server-replicas"]   value
+    ${current}=    Get Element Attribute    ${REPLICAS_COUNT_XP}   value
     ${difference}=    Evaluate    int(${number})-int(${current})
     ${op}=    Set Variable    plus
     IF    ${difference}<${0}
@@ -94,7 +94,7 @@ Set Replicas Number With Buttons
             Click Minus Button
         END
     END
-    ${current}=    Get Element Attribute    css:[id="model-server-replicas"]   value
+    ${current}=    Get Element Attribute    ${REPLICAS_COUNT_XP}   value
     Should Be Equal As Integers    ${current}    ${number}
 
 Set Server Size
@@ -223,15 +223,14 @@ Get Model Serving Access Token via UI
     ...    ${model_name}=${NONE}    ${multi_model_servers}=${FALSE}
     IF    ${single_model}
         # Expand the model
-        #SeleniumLibrary.Click Button    xpath://a[text()='${model_name}']/parent::div/parent::td[@data-label='Name']/preceding-sibling::td/button  # robocop: off=line-too-long
-        SeleniumLibrary.Click Element    xpath://a[text()='${model_name}']/../../../../td/button[@class="pf-v5-c-button pf-m-plain pf-m-expanded"]
+        SeleniumLibrary.Click Button    xpath: //a[text()='${model_name}']/parent::div/parent::td[@data-label='Name']/preceding-sibling::td/button  # robocop: off=line-too-long
         ${token}=    Get Single Model Token    ${service_account_name}
     ELSE
         SeleniumLibrary.Wait Until Page Contains Element    xpath://td[@data-label="Tokens"]/button
-        # TODO: ModelMesh requires passing model server name and not model name; 
+        # TODO: ModelMesh requires passing model server name and not model name;
         # in particular when there are multiple model servers
         # in the same project.
-        # This is a temporary workaround until the issue is fixed. 
+        # This is a temporary workaround until the issue is fixed.
         # With one model server, the model name is not required.
         IF    ${multi_model_servers}
             SeleniumLibrary.Click Button

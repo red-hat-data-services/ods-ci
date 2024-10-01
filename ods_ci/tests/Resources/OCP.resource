@@ -124,16 +124,6 @@ Wait For Pods To Be Ready
         Length Should Be  ${replicas}  ${exp_replicas}
     END
 
-Wait For Deployment Replica To Be Ready
-  [Documentation]   Wait for Deployment of ${label_selector} in ${namespace} to have the Replica-Set Ready
-  [Arguments]     ${namespace}     ${label_selector}    ${timeout}=600s
-  Log To Console    Waiting for Deployment with label "${label_selector}" in Namespace "${namespace}", to have desired Replica-Set
-  ${output} =    Wait Until Keyword Succeeds    ${timeout}   3s    Run And Verify Command
-  ...    oc wait -n ${namespace} --for condition\=ready pod -l "${label_selector}" --timeout\=${timeout}
-  ...    print_to_log=${FALSE}
-  Run And Verify Command
-  ...    oc get deployment -l ${label_selector} -n ${namespace} -o json | jq -e '.status | .replicas \=\= .readyReplicas'
-
 Wait For Pods To Succeed
     [Arguments]    ${label_selector}    ${namespace}    ${timeout}=300s    ${exp_replicas}=${NONE}
     Wait Until Keyword Succeeds    ${timeout}    3s

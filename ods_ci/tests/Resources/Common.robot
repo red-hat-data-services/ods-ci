@@ -443,7 +443,7 @@ Run And Verify Command
     IF    ${print_to_log}    Log    ${result.stdout}     console=True
     Should Be True    ${result.rc} == ${expected_rc}
     RETURN    ${result.stdout}
-
+  
 Run And Watch Command
   [Documentation]    Run any shell command (including args) with optional:
   ...    Timeout: 10 minutes by default.

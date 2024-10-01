@@ -20,6 +20,7 @@ Resource           ../../../Resources/Page/HybridCloudConsole/OCM.robot
 Resource           ../../../Resources/CLI/ModelServing/modelmesh.resource
 Suite Setup        Dashboard Suite Setup
 Suite Teardown     RHOSi Teardown
+Test Tags          PreUpgrade
 
 
 *** Variables ***

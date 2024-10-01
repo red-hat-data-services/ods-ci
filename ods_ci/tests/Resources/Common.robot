@@ -437,11 +437,10 @@ Extract URLs From Text
     RETURN    ${urls}
 
 Run And Verify Command
-    [Documentation]    Runs the given command in the system, logs the output and errors,
-    ...    verifies that result matches ${expected_rc} and returns the output.
-    [Arguments]    ${command}    ${expected_rc}=${0}
-    ${result}=    Run Process    ${command}    shell=yes
-    Log    ${result.stdout}\n${result.stderr}     console=True
+    [Documentation]    Run and verify shell command
+    [Arguments]    ${command}    ${print_to_log}=${TRUE}    ${expected_rc}=${0}
+    ${result}=    Run Process    ${command}    shell=yes    stderr=STDOUT
+    IF    ${print_to_log}    Log    ${result.stdout}     console=True
     Should Be True    ${result.rc} == ${expected_rc}
     RETURN    ${result.stdout}
 

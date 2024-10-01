@@ -143,12 +143,12 @@ Create Data Science Project
         Run Keyword And Warn On Failure     Element Should Be Disabled    ${GENERIC_CREATE_BTN_XP}
         Input Text    ${TITLE_INPUT_XP}    ${title}
         Input Text    ${DESCR_INPUT_XP}    ${description}
-        Run Keyword And Continue On Failure    Validate Generated Resource Name    project_title=${title}
-        IF    "${resource_name}" == "${NONE}"
-            ${resource_name}=    Get Value  ${RESOURCE_INPUT_XP}
-            ${resource_name}=    Generate Unique Namespace    ${resource_name}
-        END
-        Input Text    ${RESOURCE_INPUT_XP}    ${resource_name}
+        #Run Keyword And Continue On Failure    Validate Generated Resource Name    project_title=${title}
+        #IF    "${resource_name}" == "${NONE}"
+        #    ${resource_name}=    Get Value  ${RESOURCE_INPUT_XP}
+        #    ${resource_name}=    Generate Unique Namespace    ${resource_name}
+        #END
+        #Input Text    ${RESOURCE_INPUT_XP}    ${resource_name}
         Wait Until Element Is Enabled    ${GENERIC_CREATE_BTN_XP}
         Click Button    ${GENERIC_CREATE_BTN_XP}
         Wait Until Generic Modal Disappears

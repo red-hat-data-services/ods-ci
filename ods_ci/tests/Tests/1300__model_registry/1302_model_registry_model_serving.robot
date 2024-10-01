@@ -38,6 +38,11 @@ ${SECRET_PART_NAME_1}=               modelregistry-sample-rest
 ${SECRET_PART_NAME_2}=               modelregistry-sample-grpc
 ${SECRET_PART_NAME_3}=               model-registry-db
 ${BROWSER.NAME}=                     chrome
+${MR_REGISTERED_MODEL_NAME}=         test minst
+${MR_REGISTERED_MODEL_VERSION}=      2.0.0
+${MR_REGISTERED_MODEL_AUTHOR}=       Tony
+${MR_TABLE_XPATH}=                   //table[@data-testid="registered-model-table"]
+${MR_VERSION_TABLE_XPATH}=           //table[@data-testid="model-versions-table"]
 
 
 *** Test Cases ***
@@ -52,11 +57,11 @@ Verify Model Registry Integration With Secured-DB
     Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     ${workbenches}=    Create List    ${WORKBENCH_TITLE}
-    # Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME}
-    # ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
-    # ...            aws_bucket_name=${AWS_BUCKET}    connected_workbench=${workbenches}
-    # Data Connection Should Be Listed    name=${DC_S3_NAME}    type=${DC_S3_TYPE}    connected_workbench=${workbenches}
-    # Open Data Science Project Details Page       project_title=${prj_title}    tab_id=workbenches
+    Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME}
+    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
+    ...            aws_bucket_name=${AWS_BUCKET}    connected_workbench=${workbenches}
+    Data Connection Should Be Listed    name=${DC_S3_NAME}    type=${DC_S3_TYPE}    connected_workbench=${workbenches}
+    Open Data Science Project Details Page       project_title=${prj_title}    tab_id=workbenches
     Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}
     Upload File In The Workbench     filepath=${SAMPLE_ONNX_MODEL}    workbench_title=${WORKBENCH_TITLE}
     ...         workbench_namespace=${PRJ_TITLE}
@@ -64,12 +69,21 @@ Verify Model Registry Integration With Secured-DB
     ...         workbench_namespace=${PRJ_TITLE}
     Download Python Client Dependencies    ${MR_PYTHON_CLIENT_FILES}    ${MR_PYTHON_CLIENT_WHL_VERSION}
     Upload Python Client Files In The Workbench    ${MR_PYTHON_CLIENT_FILES}
-    Launch And Access Workbench    workbench_title=${WORKBENCH_TITLE}
+    ${handle}=    Launch And Access Workbench    workbench_title=${WORKBENCH_TITLE}
     ...    username=${TEST_USER.USERNAME}     password=${TEST_USER.PASSWORD}
     ...    auth_type=${TEST_USER.AUTH_TYPE}
     Upload Certificate To Jupyter Notebook    ${CERTS_DIRECTORY}/domain.crt
     Upload Certificate To Jupyter Notebook    openshift_ca.crt
     Jupyter Notebook Can Query Model Registry     ${JUPYTER_NOTEBOOK}
+    SeleniumLibrary.Switch Window    ${handle}
+    Open Model Registry Dashboard Page
+    SeleniumLibrary.Page Should Contain Element    xpath:${MR_TABLE_XPATH}/tbody/tr/td[@data-label="Model name"]//a[.="${MR_REGISTERED_MODEL_NAME}"]
+    SeleniumLibrary.Page Should Contain Element    xpath:${MR_TABLE_XPATH}/tbody/tr/td[@data-label="Owner"]//p[.="${MR_REGISTERED_MODEL_AUTHOR}"]
+    SeleniumLibrary.Page Should Contain Element    xpath:${MR_TABLE_XPATH}/tbody/tr/td[@data-label="Labels" and .="-"]
+    SeleniumLibrary.Click Element    xpath:${MR_TABLE_XPATH}/tbody/tr/td[@data-label="Model name"]//a[.="${MR_REGISTERED_MODEL_NAME}"]
+    Maybe Wait For Dashboard Loading Spinner Page
+    SeleniumLibrary.Page Should Contain Element    xpath:${MR_VERSION_TABLE_XPATH}/tbody/tr/td[@data-label="Version name"]//a[.="${MR_REGISTERED_MODEL_VERSION}"]
+    SeleniumLibrary.Page Should Contain Element    xpath:${MR_VERSION_TABLE_XPATH}/tbody/tr/td[@data-label="Author" and .="${MR_REGISTERED_MODEL_AUTHOR}"]
 
 
 *** Keywords ***
@@ -187,6 +201,7 @@ Jupyter Notebook Can Query Model Registry
     [Arguments]    ${filepath}
     Open Notebook File In JupyterLab    ${filepath}
     Open With JupyterLab Menu  Run  Restart Kernel and Run All Cells…
+    Wait Until Page Contains Element    xpath=//div[contains(text(),"Restart") and @class="jp-Dialog-buttonLabel"]
     Click Element    xpath=//div[contains(text(),"Restart") and @class="jp-Dialog-buttonLabel"]
     Wait Until JupyterLab Code Cell Is Not Active  timeout=120s
     Sleep    2m    msg=Waits until the jupyter notebook has completed execution of all cells
@@ -287,3 +302,21 @@ Upload Python Client Files In The Workbench
         ...    filepath=${file_location}/${file}    workbench_title=${WORKBENCH_TITLE}
         ...    workbench_namespace=${PRJ_TITLE}
     END
+
+Open Model Registry Dashboard Page
+    [Documentation]    Opens the Model Registry page from the dashboard nav bar
+    SeleniumLibrary.Wait Until Page Contains    Model Registry
+    SeleniumLibrary.Click Link      Model Registry
+    Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=Model Registry
+    SeleniumLibrary.Wait Until Page Contains    Select a model registry to view and manage your registered models.
+    Maybe Wait For Dashboard Loading Spinner Page
+    ${loaded}=    Run Keyword And Return Status
+    ...    SeleniumLibrary.Page Should Not Contain    Request access to model registries
+    WHILE    ${loaded}!=${TRUE}    limit=5
+        SeleniumLibrary.Reload Page
+        SeleniumLibrary.Wait Until Page Contains    Model Registry
+        SeleniumLibrary.Wait Until Page Contains    Select a model registry to view and manage your registered models.
+        ${loaded}=    Run Keyword And Return Status
+        ...    SeleniumLibrary.Page Should Not Contain    Request access to model registries
+    END
+    Maybe Wait For Dashboard Loading Spinner Page

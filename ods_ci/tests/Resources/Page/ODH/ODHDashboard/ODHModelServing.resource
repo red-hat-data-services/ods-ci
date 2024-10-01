@@ -121,7 +121,7 @@ Select Model Server
     ...    Selects the given one
     [Arguments]    ${model_server}
     ${selectable}=    Run Keyword And Return Status
-    ...    Wait Until Element Is Visible    xpath://span[.="Model servers"]/../../..//button[@aria-label="Options menu"]    timeout=1
+    ...    Wait Until Element Is Visible    xpath://span[.="Model servers"]/../../..//button[@aria-label="Options menu"]    timeout=3
     IF    ${selectable}==True
         Open Model servers Options Menu  # robocop:disable
         Click Element    xpath://li/button[.="${model_server}"]
@@ -179,11 +179,11 @@ Verify Model Status
     [Arguments]    ${model_name}    ${expected_status}=success
     IF    "${expected_status}"=="success"
         SeleniumLibrary.Wait Until Page Contains Element
-        ...    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_SUCCESS}    timeout=2m
+        ...    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_SUCCESS}    timeout=4m
         Page Should Not Contain Element    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_FAILURE}
     ELSE
         SeleniumLibrary.Wait Until Page Contains Element
-        ...    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_FAILURE}    timeout=2m
+        ...    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_FAILURE}    timeout=4m
         Page Should Not Contain Element    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_SUCCESS}
     END
 

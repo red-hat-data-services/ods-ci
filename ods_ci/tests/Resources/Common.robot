@@ -437,7 +437,7 @@ Extract URLs From Text
     RETURN    ${urls}
 
 Run And Verify Command
-    [Documentation]    Run and verify shell command
+    [Documentation]    Run and verify shell command 
     [Arguments]    ${command}    ${print_to_log}=${TRUE}
     ${result}=    Run Process    ${command}    shell=yes    stderr=STDOUT
     IF    ${print_to_log}    Log    ${result.stdout}     console=True

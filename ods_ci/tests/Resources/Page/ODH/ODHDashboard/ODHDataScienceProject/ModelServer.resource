@@ -80,7 +80,8 @@ Create Model Server
 Set Replicas Number With Buttons
     [Documentation]    Sets the number of replicas for the model serving pod
     [Arguments]    ${number}
-    ${current}=    Get Element Attribute    ${REPLICAS_COUNT_XP}   value
+    ${RESOURCE_INPUT_XP}=    css:[id="model-server-replicas"]
+    ${current}=    Get Element Attribute    css:[id="model-server-replicas"]   value
     ${difference}=    Evaluate    int(${number})-int(${current})
     ${op}=    Set Variable    plus
     IF    ${difference}<${0}
@@ -94,7 +95,7 @@ Set Replicas Number With Buttons
             Click Minus Button
         END
     END
-    ${current}=    Get Element Attribute    ${REPLICAS_COUNT_XP}   value
+    ${current}=    Get Element Attribute    css:[id="model-server-replicas"]   value
     Should Be Equal As Integers    ${current}    ${number}
 
 Set Server Size

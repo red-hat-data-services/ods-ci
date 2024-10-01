@@ -3,6 +3,7 @@ Documentation    This is a resource file for Distributed Workloads.
 Library          OperatingSystem
 Library          Process
 
+Resource    ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 
 *** Variables ***
 ${CODEFLARE_TEST_TIMEOUT_LONG}    20m
@@ -14,6 +15,11 @@ ${GO_JUNIT_REPORT_TOOL}    github.com/jstemmer/go-junit-report/v2@latest
 ${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}  https://github.com/opendatahub-io/distributed-workloads/releases/download/v2.12.0-RC1
 ${FMS_HF_TUNING_IMAGE}                   quay.io/modh/fms-hf-tuning@sha256:31489be603af448a6e5d25d558ba9ae1d93038d16c08a8500595e63abd54c216
 ${KFTO_UPGRADE_BINARY_NAME}              kfto-upgrade
+${VIRTUAL_ENV_NAME}                      venv3.9
+# Supported codeflare-sdk version for 2.10 release is "v0.16.1"
+${CODEFLARE-SDK-API_URL}                 %{CODEFLARE-SDK-API_URL=https://api.github.com/repos/project-codeflare/codeflare-sdk/releases/155520501}
+${CODEFLARE-SDK_DIR}                     codeflare-sdk
+${CODEFLARE-SDK_REPO_URL}                %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
 
 
 *** Keywords ***
@@ -117,3 +123,54 @@ Run Training Operator ODH Upgrade Test
     IF    ${result.rc} != 0
         FAIL    ${TEST_NAME} failed
     END
+
+Prepare Codeflare-SDK Test Setup
+    [Documentation]   Prepare codeflare-sdk tests by cloning codeflare-sdk repo and python virtual environmnet
+
+    Log To Console    "Restarting kueue"
+    Restart Kueue
+
+    ${latest_tag} =    Run Process   curl -s "${CODEFLARE-SDK-API_URL}" | grep '"tag_name":' | cut -d '"' -f 4
+    ...    shell=True    stderr=STDOUT
+    Log To Console  codeflare-sdk latest tag is : ${latest_tag.stdout}
+    IF    ${latest_tag.rc} != 0
+        FAIL    Unable to fetch codeflare-sdk latest tag
+    END
+
+    Clone Git Repository    ${CODEFLARE-SDK_REPO_URL}    ${latest_tag.stdout}    ${CODEFLARE-SDK_DIR}
+
+    ${result} =    Run Process  virtualenv -p python3.9 ${VIRTUAL_ENV_NAME}
+    ...    shell=true    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Unable to setup Python virtual environment
+    END
+
+Run Codeflare-SDK Test
+    [Documentation]   Run codeflare-sdk Test
+    [Arguments]    ${TEST_TYPE}    ${TEST_NAME}
+    Log To Console    "Running codeflare-sdk test: ${TEST_NAME}"
+    ${result} =    Run Process  source ${VIRTUAL_ENV_NAME}/bin/activate && cd ${CODEFLARE-SDK_DIR} && poetry env use 3.9 && poetry install --with test,docs && poetry run pytest -v -s ./tests/${TEST_TYPE}/${TEST_NAME} --timeout\=300 && deactivate
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Running test ${TEST_NAME} failed
+    END
+
+Codeflare Upgrade Tests Teardown
+    [Documentation]   cleanup codeflare-SDK upgrade tests resources created
+    [Arguments]    ${project_name}    ${project_created}
+    IF    ${project_created} == True    Run Keywords
+    ...    Run   oc delete project ${project_name}    AND
+    ...    Run Process    oc delete LocalQueue local-queue-mnist -n ${project_name} &
+    ...    oc delete ClusterQueue cluster-queue-mnist &
+    ...    oc delete ResourceFlavor default-flavor-mnist    shell=True
+
+Cleanup Codeflare-SDK Setup
+    [Documentation]   cleanup codeflare repository cloned and python setup
+    Log To Console     "Removing Python virtual environment directory ${VIRTUAL_ENV_NAME}"
+    Remove Directory        ${VIRTUAL_ENV_NAME}    recursive=True
+
+    Log To Console     "Removing directory ${CODEFLARE-SDK_DIR}"
+    Remove Directory        ${CODEFLARE-SDK_DIR}    recursive=True

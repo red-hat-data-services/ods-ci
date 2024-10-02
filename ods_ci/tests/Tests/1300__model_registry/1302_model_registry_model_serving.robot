@@ -64,16 +64,15 @@ Verify Model Registry Integration With Secured-DB
     Data Connection Should Be Listed    name=${DC_S3_NAME}    type=${DC_S3_TYPE}    connected_workbench=${workbenches}
     Open Data Science Project Details Page       project_title=${prj_title}    tab_id=workbenches
     Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}
-    Sleep    5s    reason=Sometimes the pod/container is not found by oc, let's give it some time
+    ${handle}=    Launch And Access Workbench    workbench_title=${WORKBENCH_TITLE}
+    ...    username=${TEST_USER.USERNAME}     password=${TEST_USER.PASSWORD}
+    ...    auth_type=${TEST_USER.AUTH_TYPE}
     Upload File In The Workbench     filepath=${SAMPLE_ONNX_MODEL}    workbench_title=${WORKBENCH_TITLE}
     ...         workbench_namespace=${PRJ_TITLE}
     Upload File In The Workbench     filepath=${JUPYTER_NOTEBOOK_FILEPATH}    workbench_title=${WORKBENCH_TITLE}
     ...         workbench_namespace=${PRJ_TITLE}
     Download Python Client Dependencies    ${MR_PYTHON_CLIENT_FILES}    ${MR_PYTHON_CLIENT_WHL_VERSION}
     Upload Python Client Files In The Workbench    ${MR_PYTHON_CLIENT_FILES}
-    ${handle}=    Launch And Access Workbench    workbench_title=${WORKBENCH_TITLE}
-    ...    username=${TEST_USER.USERNAME}     password=${TEST_USER.PASSWORD}
-    ...    auth_type=${TEST_USER.AUTH_TYPE}
     Upload Certificate To Jupyter Notebook    ${CERTS_DIRECTORY}/domain.crt
     Upload Certificate To Jupyter Notebook    openshift_ca.crt
     Jupyter Notebook Can Query Model Registry     ${JUPYTER_NOTEBOOK}

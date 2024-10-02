@@ -264,14 +264,14 @@ Workbench Should Be Listed
     [Arguments]     ${workbench_title}    ${timeout}=10s
     Run keyword And Continue On Failure
     ...    Wait Until Page Contains Element
-    ...    ${WORKBENCH_SECTION_XP}//td[@data-label="Name"]/*[div[text()="${workbench_title}"]]    timeout=${timeout}
+    ...    ${WORKBENCH_SECTION_XP}//td[@data-label="Name"]//*[.="${workbench_title}"]    timeout=${timeout}
 
 Workbench With Description Should Be Listed
     [Documentation]    Checks a workbench with particular name and description is listed in the DS Project details page
     [Arguments]     ${workbench_title}  ${workbench_description}    ${timeout}=10s
     Run keyword And Continue On Failure
     ...    Wait Until Page Contains Element
-    ...    ${WORKBENCH_SECTION_XP}//td[@data-label="Name"][//div[text()="${workbench_title}"] and //p[text()="${workbench_description}"]]
+    ...    ${WORKBENCH_SECTION_XP}//td[@data-label="Name"][//*[text()="${workbench_title}"] and //p[text()="${workbench_description}"]]
     ...    timeout=${timeout}
 
 Workbench Should Not Be Listed
@@ -286,7 +286,7 @@ Workbench Status Should Be
     [Arguments]     ${workbench_title}      ${status}    ${timeout}=10
     Run keyword And Continue On Failure
     ...    Wait Until Page Contains Element
-    ...    ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p[text()="${status}"]
+    ...    ${WORKBENCH_SECTION_XP}//td[@data-label="Name"]//*[.="${workbench_title}"]/../../../td[@data-label="Status"]//span[text()="${status}"]
     ...    timeout=${timeout}
 
 Status Error Icon Should Appear
@@ -301,7 +301,7 @@ Wait Until Workbench Is Started
     [Documentation]    Waits until workbench status is "RUNNING" in the DS Project details page
     [Arguments]     ${workbench_title}    ${timeout}=60s    ${status}=${WORKBENCH_STATUS_RUNNING}
     Wait Until Page Contains Element
-    ...    ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p[text()="${status}"]
+    ...    ${WORKBENCH_SECTION_XP}//td[@data-label="Name"]//*[.="${workbench_title}"]/../../../td[@data-label="Status"]//span[text()="${status}"]
     ...    timeout=${timeout}
 
 Wait Until Workbench Is Stopped
@@ -350,27 +350,42 @@ Access To Workbench
     END
 
 Launch And Access Workbench
-    [Documentation]    Launches a workbench from DS Project details page
+    [Documentation]    Launches a workbench from DS Project details page and returns the handle of the current tab
     [Arguments]     ${workbench_title}    ${username}=${TEST_USER_3.USERNAME}
     ...    ${password}=${TEST_USER_3.PASSWORD}  ${auth_type}=${TEST_USER_3.AUTH_TYPE}
     ${is_started}=      Run Keyword And Return Status   Workbench Status Should Be
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}
     IF    ${is_started} == ${TRUE}
-        Open Workbench    workbench_title=${workbench_title}
+        ${previous_handle}=    Open Workbench    workbench_title=${workbench_title}
         Access To Workbench    username=${username}    password=${password}
         ...    auth_type=${auth_type}
     ELSE
         Fail   msg=Cannot Launch And Access Workbench ${workbench_title} because it is not running...
     END
+    RETURN    ${previous_handle}
 
 Open Workbench
-    [Documentation]    Clicks on "open" link for a given workbench
+    [Documentation]    Clicks on "open" link for a given workbench and returns the handle of the current tab
     [Arguments]    ${workbench_title}
+    ${desc}=    Does Workbench Have A Description    ${workbench_title}
     ${open_workbench_link}=    Set Variable
-    ...    ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td//a[text()="Open"]
-    Wait Until Page Contains Element    ${open_workbench_link}    timeout=30s
-    Click Link    ${open_workbench_link}
-    Switch Window    NEW
+    ...    ${WORKBENCH_SECTION_XP}//td[@data-label="Name"]//*[.="${workbench_title}"]
+    IF    ${desc}
+        ${open_workbench_link}=    Catenate    ${open_workbench_link}    /../../../td//a[.="Open"]
+    ELSE
+        ${open_workbench_link}=    Catenate    ${open_workbench_link}    /../../td//a[.="Open"]
+    END
+    SeleniumLibrary.Wait Until Page Contains Element    ${open_workbench_link}    timeout=30s
+    SeleniumLibrary.Click Link    ${open_workbench_link}
+    ${previous_handle}=    SeleniumLibrary.Switch Window    NEW
+    RETURN    ${previous_handle}
+
+Does Workbench Have A Description
+    [Documentation]    Checks if a Workbench has a description in the list view of the project
+    [Arguments]    ${workbench_title}
+    ${has_description}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain Element
+    ...    ${WORKBENCH_SECTION_XP}//td[@data-label="Name"]//*[.="${workbench_title}"]/../span[@data-testid="table-row-title-description"]    # robocop: disable
+    RETURN    ${has_description}
 
 Stop Workbench
     [Documentation]    Stops a workbench from DS Project details page

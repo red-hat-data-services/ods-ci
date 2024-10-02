@@ -68,7 +68,7 @@ Close JupyterLab Selected Tab
   Maybe Close Popup
 
 JupyterLab Code Cell Error Output Should Not Be Visible
-  Run Keyword And Continue On Failure    
+  Run Keyword And Continue On Failure
   ...    SeleniumLibrary.Element Should Not Be Visible    xpath://div[contains(@class,"jp-OutputArea-output") and @data-mime-type="application/vnd.jupyter.stderr"]  A JupyterLab code cell output returned an error  # robocop: disable
   Capture Element Screenshot    xpath://div[contains(@class,"jp-OutputArea-output") and @data-mime-type="application/vnd.jupyter.stderr"]  # robocop: disable
   Fail    msg=A JupyterLab code cell output returned an error, see screenshot

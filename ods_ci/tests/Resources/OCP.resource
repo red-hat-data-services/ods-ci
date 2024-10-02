@@ -306,6 +306,12 @@ Get Resource Attribute
 Wait For Namespace To Be Active
     [Documentation]    Waits for a given namespace to become active
     [Arguments]    ${namespace}    ${timeout}=30s
+    WHILE    True    limit=${timeout}
+        ${out}=    Run    oc get namespace/${namespace}
+        IF    '${out}' != 'Error from server (NotFound): namespaces "${namespace}" not found'
+            BREAK
+        END
+    END
     ${rc}  ${value}=    Run And Return Rc And Output
     ...    oc wait --for jsonpath='{.status.phase}=Active' --timeout=${timeout} namespace/${namespace}
     Log    ${rc}

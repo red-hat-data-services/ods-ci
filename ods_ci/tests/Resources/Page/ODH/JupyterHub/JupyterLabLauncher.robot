@@ -72,8 +72,8 @@ JupyterLab Code Cell Error Output Should Not Be Visible
   ...    SeleniumLibrary.Element Should Be Visible    xpath://div[contains(@class,"jp-OutputArea-output") and @data-mime-type="application/vnd.jupyter.stderr"]  A JupyterLab code cell output returned an error  # robocop: disable
   IF    ${failure}
       Capture Element Screenshot    xpath://div[contains(@class,"jp-OutputArea-output") and @data-mime-type="application/vnd.jupyter.stderr"]  # robocop: disable
+      Fail    msg=A JupyterLab code cell output returned an error, see screenshot
   END
-  Fail    msg=A JupyterLab code cell output returned an error, see screenshot
 
 Get JupyterLab Code Cell Error Text
   ${error_txt} =  Get Text  //div[contains(@class,"jp-OutputArea-output") and @data-mime-type="application/vnd.jupyter.stderr"]

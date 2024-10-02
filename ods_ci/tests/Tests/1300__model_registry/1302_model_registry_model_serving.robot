@@ -211,6 +211,8 @@ Jupyter Notebook Can Query Model Registry
     Open With JupyterLab Menu  Run  Restart Kernel and Run All Cells…
     Wait Until Page Contains Element    xpath=//div[contains(text(),"Restart") and @class="jp-Dialog-buttonLabel"]
     Click Element    xpath=//div[contains(text(),"Restart") and @class="jp-Dialog-buttonLabel"]
+    # Somehow misses the check on the active cells without the sleep
+    Sleep    5s
     Wait Until JupyterLab Code Cell Is Not Active  timeout=120s
     JupyterLab Code Cell Error Output Should Not Be Visible
     SeleniumLibrary.Capture Page Screenshot

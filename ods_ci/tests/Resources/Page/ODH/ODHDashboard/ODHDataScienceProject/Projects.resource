@@ -17,7 +17,7 @@ ${PROJECT_CREATE_BTN_XP}=     xpath=//button[text()="Create data science project
 ${ACTIONS_BTN_XP}=    xpath=//div/button[@aria-label="Actions"]
 ${DELETE_ACTION_BTN_XP}=  xpath=//div/ul/li/button[text()="Delete project"]
 ${EDIT_ACTION_BTN_XP}=    xpath=//div/ul/li/button[text()="Edit project"]
-${SPAWNER_LINK}=        xpath=//*[text()="Launch Jupyter"]
+${SPAWNER_LINK}=        xpath=//*[text()="Launch standalone notebook server"]
 ${PROJECT_SEARCH_BAR}=    //div[@data-testid="dashboard-table-toolbar"]
 ${PROJECT_FILTER_TYPE}=    ${PROJECT_SEARCH_BAR}//button[@data-testid="filter-dropdown-select"]
 ${PROJECT_SEARCH_INPUT}=    ${PROJECT_SEARCH_BAR}//input[@aria-label="Search input"]

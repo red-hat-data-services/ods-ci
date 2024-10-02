@@ -285,7 +285,8 @@ Remove Model Registry
     [Documentation]    Run multiple oc delete commands to remove model registry components
     # We don't want to stop the teardown if any of these resources are not found
     Run Keyword And Continue On Failure
-    ...    Run And Verify Command    oc delete -k ${MODELREGISTRY_BASE_FOLDER}/samples/secure-db/mysql-tls
+    ...    Run And Verify Command
+    ...    oc delete -n ${NAMESPACE_MODEL_REGISTRY} -k ${MODELREGISTRY_BASE_FOLDER}/samples/secure-db/mysql-tls
     Run Keyword And Continue On Failure
     ...    Run And Verify Command    oc delete secret modelregistry-sample-grpc-credential -n ${NAMESPACE_ISTIO}
     Run Keyword And Continue On Failure

@@ -324,6 +324,8 @@ Open Model Registry Dashboard Page
     ${mr_present}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain    Model Registry
     WHILE    ${mr_present}!=${TRUE}    limit=120s
         SeleniumLibrary.Reload Page
+        SeleniumLibrary.Wait Until Page Contains    Home
+        Maybe Wait For Dashboard Loading Spinner Page
         ${mr_present}=    Run Keyword And Return Status
         ...    SeleniumLibrary.Page Should Contain    Model Registry
     END
@@ -368,4 +370,5 @@ Disable Model Registry If Needed
     ...    the cluster in the same state we found it in
     IF    ${DISABLE_COMPONENT}==${True}
         Set Component State    modelregistry    Removed
+        Run And Verify Command    oc delete namespace ${NAMESPACE_MODEL_REGISTRY} --force
     END

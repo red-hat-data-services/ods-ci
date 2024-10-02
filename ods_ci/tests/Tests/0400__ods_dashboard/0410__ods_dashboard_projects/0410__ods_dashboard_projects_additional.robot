@@ -14,7 +14,7 @@ Test Tags          Dashboard
 *** Variables ***
 ${PRJ_TITLE}=   ODS-CI DS Project 2
 ${PRJ_TITLE_GPU}=   ODS-CI DS Project GPU
-${PRJ_RESOURCE_NAME}=   ods-ci-ds-project-test-additional
+${PRJ_RESOURCE_NAME}=   ods-ci-ds-pr-test-0410
 ${PRJ_DESCRIPTION}=   ${PRJ_TITLE} is a test project for validating DS Project feature
 ${TOLERATIONS}=    workbench-tolerations
 ${TOLERATIONS_2}=    workbench-tolerations-two

@@ -1,3 +1,4 @@
+# robocop: off=too-many-calls-in-keyword
 *** Settings ***
 Documentation     Test suite for Model Registry Integration
 Suite Setup       Prepare Model Registry Test Setup
@@ -24,7 +25,7 @@ ${ISTIO_ENV}=                        ${MODELREGISTRY_BASE_FOLDER}/samples/istio/
 ${SAMPLE_ONNX_MODEL}=                ${MODELREGISTRY_BASE_FOLDER}/mnist.onnx
 ${MR_PYTHON_CLIENT_FILES}=           ${MODELREGISTRY_BASE_FOLDER}/Python_Dependencies
 ${MR_PYTHON_CLIENT_WHL_VERSION}=     model_registry==0.2.6a1
-${SERVICE_MESH_MEMBER}=              ${MODELREGISTRY_BASE_FOLDER}/serviceMeshMember.yaml
+${SERVICE_MESH_MEMBER}=              ${MODELREGISTRY_BASE_FOLDER}/serviceMeshMember_template.yaml
 ${ENABLE_REST_API}=                  ${MODELREGISTRY_BASE_FOLDER}/enable_rest_api_route.yaml
 ${IPYNB_UPDATE_SCRIPT}=              ${MODELREGISTRY_BASE_FOLDER}/updateIPYNB.py
 ${CERTS_DIRECTORY}=                  certs
@@ -33,7 +34,7 @@ ${JUPYTER_NOTEBOOK}=                 MRMS_UPDATED.ipynb
 ${JUPYTER_NOTEBOOK_FILEPATH}=        ${MODELREGISTRY_BASE_FOLDER}/${JUPYTER_NOTEBOOK}
 ${DC_S3_TYPE}=                       Object storage
 ${NAMESPACE_ISTIO}=                  istio-system
-${NAMESPACE_MODEL-REGISTRY}=         odh-model-registries
+# ${NAMESPACE_MODEL_REGISTRY}=         odh-model-registries
 ${SECRET_PART_NAME_1}=               modelregistry-sample-rest
 ${SECRET_PART_NAME_2}=               modelregistry-sample-grpc
 ${SECRET_PART_NAME_3}=               model-registry-db
@@ -63,6 +64,7 @@ Verify Model Registry Integration With Secured-DB
     Data Connection Should Be Listed    name=${DC_S3_NAME}    type=${DC_S3_TYPE}    connected_workbench=${workbenches}
     Open Data Science Project Details Page       project_title=${prj_title}    tab_id=workbenches
     Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}
+    Sleep    5s    reason=Sometimes the pod/container is not found by oc, let's give it some time
     Upload File In The Workbench     filepath=${SAMPLE_ONNX_MODEL}    workbench_title=${WORKBENCH_TITLE}
     ...         workbench_namespace=${PRJ_TITLE}
     Upload File In The Workbench     filepath=${JUPYTER_NOTEBOOK_FILEPATH}    workbench_title=${WORKBENCH_TITLE}
@@ -91,16 +93,21 @@ Prepare Model Registry Test Setup
     [Documentation]    Suite setup steps for testing Model Registry.
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
+    Component Should Be Enabled    modelregistry
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
-    Create Namespace In Openshift    ${NAMESPACE_MODEL-REGISTRY}
+    # This should be created by the RHOAI operator when the component is enabled in the DSC.
+    # We can grab the name of the NS by querying the DSC
+    # Create Namespace In Openshift    ${NAMESPACE_MODEL_REGISTRY}
+    ${NAMESPACE_MODEL_REGISTRY}=    Get Model Registry Namespace From DSC
+    Set Suite Variable    ${NAMESPACE_MODEL_REGISTRY}
     Apply ServiceMeshMember Configuration
     Get Cluster Domain And Token
     Run Update Notebook Script
     Generate ModelRegistry Certificates
-    Apply Db Config Samples    namespace=${NAMESPACE_MODEL-REGISTRY}
+    Apply Db Config Samples    namespace=${NAMESPACE_MODEL_REGISTRY}
     Create Model Registry Secrets
     Fetch CA Certificate If RHODS Is Self-Managed
 
@@ -151,11 +158,11 @@ Create Model Registry Secrets
     ...    certs/${SECRET_PART_NAME_1}.domain.key    certs/${SECRET_PART_NAME_1}.domain.crt    certs/domain.crt
     Create Generic Secret    ${NAMESPACE_ISTIO}    ${SECRET_PART_NAME_2}-credential
     ...    certs/${SECRET_PART_NAME_2}.domain.key    certs/${SECRET_PART_NAME_2}.domain.crt    certs/domain.crt
-    Create Generic Secret    ${NAMESPACE_MODEL-REGISTRY}  ${SECRET_PART_NAME_3}-credential
+    Create Generic Secret    ${NAMESPACE_MODEL_REGISTRY}  ${SECRET_PART_NAME_3}-credential
     ...    certs/${SECRET_PART_NAME_3}.key           certs/${SECRET_PART_NAME_3}.crt     certs/domain.crt
     Secret Should Exist      ${NAMESPACE_ISTIO}    ${SECRET_PART_NAME_1}-credential
     Secret Should Exist      ${NAMESPACE_ISTIO}    ${SECRET_PART_NAME_2}-credential
-    Secret Should Exist      ${NAMESPACE_MODEL-REGISTRY}  ${SECRET_PART_NAME_3}-credential
+    Secret Should Exist      ${NAMESPACE_MODEL_REGISTRY}  ${SECRET_PART_NAME_3}-credential
 
 Secret Should Exist
     [Documentation]    Check if the specified secret exists in the given namespace
@@ -245,7 +252,10 @@ Get Token
 
 Apply ServiceMeshMember Configuration
     [Documentation]    Apply a ServiceMeshMember configuration using oc.
-    Apply OpenShift Configuration    ${SERVICE_MESH_MEMBER}
+    Copy File    source=${SERVICE_MESH_MEMBER}    destination=${MODELREGISTRY_BASE_FOLDER}/serviceMeshMember.yaml
+    Run    sed -i'' -e 's/<MODEL_REGISTRY_NS>/${NAMESPACE_MODEL_REGISTRY}/' ${MODELREGISTRY_BASE_FOLDER}/serviceMeshMember.yaml    # robocop: disable
+    Apply OpenShift Configuration    ${MODELREGISTRY_BASE_FOLDER}/serviceMeshMember.yaml
+    Remove File    ${MODELREGISTRY_BASE_FOLDER}/serviceMeshMember.yaml
 
 Apply Rest API Configuration
     [Documentation]    Apply a Rest API configuration using oc.
@@ -273,10 +283,15 @@ Run Update Notebook Script
 
 Remove Model Registry
     [Documentation]    Run multiple oc delete commands to remove model registry components
-    Run And Verify Command    oc delete -k ${MODELREGISTRY_BASE_FOLDER}/samples/secure-db/mysql-tls
-    Run And Verify Command    oc delete secret modelregistry-sample-grpc-credential -n ${NAMESPACE_ISTIO}
-    Run And Verify Command    oc delete secret modelregistry-sample-rest-credential -n ${NAMESPACE_ISTIO}
-    Run And Verify Command    oc delete namespace ${NAMESPACE_MODEL-REGISTRY} --force
+    # We don't want to stop the teardown if any of these resources are not found
+    Run Keyword And Continue On Failure
+    ...    Run And Verify Command    oc delete -k ${MODELREGISTRY_BASE_FOLDER}/samples/secure-db/mysql-tls
+    Run Keyword And Continue On Failure
+    ...    Run And Verify Command    oc delete secret modelregistry-sample-grpc-credential -n ${NAMESPACE_ISTIO}
+    Run Keyword And Continue On Failure
+    ...    Run And Verify Command    oc delete secret modelregistry-sample-rest-credential -n ${NAMESPACE_ISTIO}
+    # I don't think this NS should be removed, it's managed by the DSC
+    # Run And Verify Command    oc delete namespace ${NAMESPACE_MODEL_REGISTRY} --force
 
 Remove Deployment Files
     [Documentation]    Remove all files from the given directory
@@ -320,3 +335,14 @@ Open Model Registry Dashboard Page
         ...    SeleniumLibrary.Page Should Not Contain    Request access to model registries
     END
     Maybe Wait For Dashboard Loading Spinner Page
+
+Get Model Registry Namespace From DSC
+    [Documentation]    Fetches the namespace defined for model registry in the DSC
+    ${rc}  ${ns}=    Run And Return Rc And Output
+    ...    oc get dsc default-dsc -o json | jq '.spec.components.modelregistry.registriesNamespace'
+    Should Be Equal As Integers    ${rc}    0
+    Log    ${ns}
+    # Remove double quotes
+    ${ns}=    Get Substring    ${ns}    1    -1
+    Log    ${ns}
+    RETURN    ${ns}

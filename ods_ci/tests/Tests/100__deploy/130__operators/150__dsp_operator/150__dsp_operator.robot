@@ -18,6 +18,7 @@ ${OPERATOR_NS}                              ${OPERATOR_NAMESPACE}
 ${DSC_NAME}                                 default-dsc
 ${DSC_CRD}                                  datascienceclusters.datasciencecluster.opendatahub.io
 ${MWC_LABEL}                                olm.webhook-description-generate-name=mutate.operator.opendatahub.io
+${INSTALL_TYPE}                             CLi
 
 
 *** Test Cases ***

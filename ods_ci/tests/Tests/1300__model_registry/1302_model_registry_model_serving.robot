@@ -253,7 +253,7 @@ Get Token
 Apply ServiceMeshMember Configuration
     [Documentation]    Apply a ServiceMeshMember configuration using oc.
     Copy File    source=${SERVICE_MESH_MEMBER}    destination=${MODELREGISTRY_BASE_FOLDER}/serviceMeshMember.yaml
-    Run    sed -i'' -e 's/<MODEL_REGISTRY_NS>/${NAMESPACE_MODEL_REGISTRY}/' ${MODELREGISTRY_BASE_FOLDER}/serviceMeshMember.yaml    # robocop: disable
+    Run    sed -i '' -e 's/<MODEL_REGISTRY_NS>/${NAMESPACE_MODEL_REGISTRY}/' ${MODELREGISTRY_BASE_FOLDER}/serviceMeshMember.yaml    # robocop: disable
     Apply OpenShift Configuration    ${MODELREGISTRY_BASE_FOLDER}/serviceMeshMember.yaml
     Remove File    ${MODELREGISTRY_BASE_FOLDER}/serviceMeshMember.yaml
 

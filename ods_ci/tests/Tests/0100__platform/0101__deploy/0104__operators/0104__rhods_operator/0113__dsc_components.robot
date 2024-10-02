@@ -193,13 +193,22 @@ Validate ModelRegistry Managed State
 
     Set DSC Component Managed State And Wait For Completion   modelregistry    ${MODELREGISTRY_CONTROLLER__DEPLOYMENT_NAME}    ${MODELREGISTRY_CONTROLLER__LABEL_SELECTOR}
 
+    Check Model Registry Namespace
+
     [Teardown]     Restore DSC Component State    modelregistry    ${MODELREGISTRY_CONTROLLER__DEPLOYMENT_NAME}    ${MODELREGISTRY_CONTROLLER__LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.MODELREGISTRY}
 
 Validate ModelRegistry Removed State
     [Documentation]    Validate that ModelRegistry management state Removed does remove relevant resources.
     [Tags]    Operator    Tier1    RHOAIENG-10404    modelregistry-removed
 
+    # Properly validate Removed state by first setting to Manged, which will ensure that namspace
+    # was created as needed for later validating that namespace persisted when component is Removed
+    [Setup]   Set DSC Component Managed State And Wait For Completion   modelregistry    ${MODELREGISTRY_CONTROLLER__DEPLOYMENT_NAME}    ${MODELREGISTRY_CONTROLLER__LABEL_SELECTOR}
+
     Set DSC Component Removed State And Wait For Completion   modelregistry    ${MODELREGISTRY_CONTROLLER__DEPLOYMENT_NAME}    ${MODELREGISTRY_CONTROLLER__LABEL_SELECTOR}
+
+    # Note: Model Registry namespace will not be deleted when component state changed from Manged to Removed
+    Check Model Registry Namespace
 
     [Teardown]     Restore DSC Component State    modelregistry    ${MODELREGISTRY_CONTROLLER__DEPLOYMENT_NAME}    ${MODELREGISTRY_CONTROLLER__LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.MODELREGISTRY}
 
@@ -382,3 +391,17 @@ Check Image Pull Path Is Redhatio
     ELSE
         Fail    Deployment image  ${deployment_name} does not contain pull path registry.redhat.io
     END
+
+Check Model Registry Namespace
+    [Documentation]    Check that DSC modelregistry.registriesNamespace is correct for ODH/RHOAI
+    ...    Validate that namespace exists.
+
+    ${rc}   ${namespace}=    Run And Return Rc And Output
+    ...    oc get DataScienceCluster/${DSC_NAME} -n ${OPERATOR_NS} -o "jsonpath={".spec.components.modelregistry.registriesNamespace"}"
+    Should Be Equal As Integers    ${rc}    0    msg=${namespace}
+
+    Should Be Equal    ${namespace}    ${MODEL_REGISTRY_NAMESPACE}    msg=Model Registry Namespace: Actual "${namespace}" Expected: "${MODEL_REGISTRY_NAMESPACE}"
+
+    ${rc}   ${output}=    Run And Return Rc And Output
+    ...    oc get namespace -A ${MODEL_REGISTRY_NAMESPACE}
+    Should Be Equal As Integers    ${rc}    0    msg=${output}

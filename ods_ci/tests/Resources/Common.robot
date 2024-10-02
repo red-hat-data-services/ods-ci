@@ -437,13 +437,13 @@ Extract URLs From Text
     RETURN    ${urls}
 
 Run And Verify Command
-    [Documentation]    Run and verify shell command 
-    [Arguments]    ${command}    ${print_to_log}=${TRUE}
+    [Documentation]    Run and verify shell command
+    [Arguments]    ${command}    ${print_to_log}=${TRUE}    ${expected_rc}=${0}
     ${result}=    Run Process    ${command}    shell=yes    stderr=STDOUT
     IF    ${print_to_log}    Log    ${result.stdout}     console=True
-    Should Be True    ${result.rc} == 0
+    Should Be True    ${result.rc} == ${expected_rc}
     RETURN    ${result.stdout}
-
+  
 Run And Watch Command
   [Documentation]    Run any shell command (including args) with optional:
   ...    Timeout: 10 minutes by default.

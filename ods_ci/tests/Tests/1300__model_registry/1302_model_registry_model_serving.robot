@@ -34,7 +34,6 @@ ${JUPYTER_NOTEBOOK}=                 MRMS_UPDATED.ipynb
 ${JUPYTER_NOTEBOOK_FILEPATH}=        ${MODELREGISTRY_BASE_FOLDER}/${JUPYTER_NOTEBOOK}
 ${DC_S3_TYPE}=                       Object storage
 ${NAMESPACE_ISTIO}=                  istio-system
-# ${NAMESPACE_MODEL_REGISTRY}=         odh-model-registries
 ${SECRET_PART_NAME_1}=               modelregistry-sample-rest
 ${SECRET_PART_NAME_2}=               modelregistry-sample-grpc
 ${SECRET_PART_NAME_3}=               model-registry-db
@@ -44,6 +43,7 @@ ${MR_REGISTERED_MODEL_VERSION}=      2.0.0
 ${MR_REGISTERED_MODEL_AUTHOR}=       Tony
 ${MR_TABLE_XPATH}=                   //table[@data-testid="registered-model-table"]
 ${MR_VERSION_TABLE_XPATH}=           //table[@data-testid="model-versions-table"]
+${DISABLE_COMPONENT}=                ${False}
 
 
 *** Test Cases ***
@@ -93,6 +93,7 @@ Prepare Model Registry Test Setup
     [Documentation]    Suite setup steps for testing Model Registry.
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
+    Enable Model Registry If Needed
     Component Should Be Enabled    modelregistry
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
@@ -347,3 +348,18 @@ Get Model Registry Namespace From DSC
     ${ns}=    Get Substring    ${ns}    1    -1
     Log    ${ns}
     RETURN    ${ns}
+
+Enable Model Registry If Needed
+    [Documentation]    While in tech preview the component will not be enabled by default. This keyword enables it.
+    ${management_state}=    Get DSC Component State    default-dsc    modelregistry    ${OPERATOR_NAMESPACE}
+    IF    "${management_state}" != "Managed"
+            Set Component State    modelregistry    Managed
+            Set Suite Variable    ${DISABLE_COMPONENT}    ${True}
+    END
+
+Disable Model Registry If Needed
+    [Documentation]    If we had to enable the component before the test run, let's also disable it at the end to leave
+    ...    the cluster in the same state we found it in
+    IF    ${DISABLE_COMPONENT}==${True}
+        Set Component State    modelregistry    Removed
+    END

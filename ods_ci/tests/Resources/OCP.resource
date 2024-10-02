@@ -307,8 +307,8 @@ Wait For Namespace To Be Active
     [Documentation]    Waits for a given namespace to become active
     [Arguments]    ${namespace}    ${timeout}=30s
     WHILE    True    limit=${timeout}
-        ${out}=    Run    oc get namespace/${namespace}
-        IF    '${out}' != 'Error from server (NotFound): namespaces "${namespace}" not found'
+        ${rc}=    Run And Return Rc    oc get namespace/${namespace}
+        IF    "${rc}" == "0"
             BREAK
         END
     END

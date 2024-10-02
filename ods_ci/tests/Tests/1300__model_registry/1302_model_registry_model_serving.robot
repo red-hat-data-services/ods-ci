@@ -121,6 +121,7 @@ Teardown Model Registry Test Setup
     Remove Model Registry
     Remove Deployment Files    ${CERTS_DIRECTORY}
     Remove Deployment Files    ${MODELREGISTRY_BASE_FOLDER}/Python_Dependencies
+    Disable Model Registry If Needed
     RHOSi Teardown
 
 Get Cluster Domain And Token

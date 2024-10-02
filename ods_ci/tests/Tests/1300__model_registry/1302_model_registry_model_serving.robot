@@ -355,6 +355,8 @@ Enable Model Registry If Needed
     IF    "${management_state}" != "Managed"
             Set Component State    modelregistry    Managed
             Set Suite Variable    ${DISABLE_COMPONENT}    ${True}
+            ${ns}=    Get Model Registry Namespace From DSC
+            Wait For Namespace To Be Active    ${ns}    timeout=120s
     END
 
 Disable Model Registry If Needed

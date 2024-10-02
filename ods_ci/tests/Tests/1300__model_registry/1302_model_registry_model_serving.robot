@@ -212,7 +212,6 @@ Jupyter Notebook Can Query Model Registry
     Wait Until Page Contains Element    xpath=//div[contains(text(),"Restart") and @class="jp-Dialog-buttonLabel"]
     Click Element    xpath=//div[contains(text(),"Restart") and @class="jp-Dialog-buttonLabel"]
     Wait Until JupyterLab Code Cell Is Not Active  timeout=120s
-    Sleep    2m    msg=Waits until the jupyter notebook has completed execution of all cells
     JupyterLab Code Cell Error Output Should Not Be Visible
     SeleniumLibrary.Capture Page Screenshot
 

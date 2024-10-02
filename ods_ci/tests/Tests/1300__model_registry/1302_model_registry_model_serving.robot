@@ -321,7 +321,12 @@ Upload Python Client Files In The Workbench
 
 Open Model Registry Dashboard Page
     [Documentation]    Opens the Model Registry page from the dashboard nav bar
-    SeleniumLibrary.Wait Until Page Contains    Model Registry
+    ${mr_present}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain    Model Registry
+    WHILE    ${mr_present}!=${TRUE}    limit=120s
+        SeleniumLibrary.Reload Page
+        ${mr_present}=    Run Keyword And Return Status
+        ...    SeleniumLibrary.Page Should Contain    Model Registry
+    END
     SeleniumLibrary.Click Link      Model Registry
     Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=Model Registry
     SeleniumLibrary.Wait Until Page Contains    Select a model registry to view and manage your registered models.

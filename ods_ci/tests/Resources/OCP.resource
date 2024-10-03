@@ -302,3 +302,18 @@ Get Resource Attribute
     Should Be Equal    "${rc}"    "0"    msg=${value}
     Log To Console    ${resource_type} ${resource_name} in the namespace ${namespace} attribute ${attribute_path} value is ${value}
     RETURN    ${value}
+
+Wait For Namespace To Be Active
+    [Documentation]    Waits for a given namespace to become active
+    [Arguments]    ${namespace}    ${timeout}=30s
+    WHILE    True    limit=${timeout}
+        ${rc}=    Run And Return Rc    oc get namespace/${namespace}
+        IF    "${rc}" == "0"
+            BREAK
+        END
+    END
+    ${rc}  ${value}=    Run And Return Rc And Output
+    ...    oc wait --for jsonpath='{.status.phase}=Active' --timeout=${timeout} namespace/${namespace}
+    Log    ${rc}
+    Log    ${value}
+    Should Be Equal As Integers    ${rc}    0

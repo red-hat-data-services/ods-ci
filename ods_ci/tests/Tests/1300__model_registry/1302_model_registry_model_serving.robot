@@ -1,3 +1,4 @@
+# robocop: off=too-many-calls-in-keyword
 *** Settings ***
 Documentation     Test suite for Model Registry Integration
 Suite Setup       Prepare Model Registry Test Setup
@@ -24,7 +25,7 @@ ${ISTIO_ENV}=                        ${MODELREGISTRY_BASE_FOLDER}/samples/istio/
 ${SAMPLE_ONNX_MODEL}=                ${MODELREGISTRY_BASE_FOLDER}/mnist.onnx
 ${MR_PYTHON_CLIENT_FILES}=           ${MODELREGISTRY_BASE_FOLDER}/Python_Dependencies
 ${MR_PYTHON_CLIENT_WHL_VERSION}=     model_registry==0.2.6a1
-${SERVICE_MESH_MEMBER}=              ${MODELREGISTRY_BASE_FOLDER}/serviceMeshMember.yaml
+${SERVICE_MESH_MEMBER}=              ${MODELREGISTRY_BASE_FOLDER}/serviceMeshMember_template.yaml
 ${ENABLE_REST_API}=                  ${MODELREGISTRY_BASE_FOLDER}/enable_rest_api_route.yaml
 ${IPYNB_UPDATE_SCRIPT}=              ${MODELREGISTRY_BASE_FOLDER}/updateIPYNB.py
 ${CERTS_DIRECTORY}=                  certs
@@ -33,18 +34,23 @@ ${JUPYTER_NOTEBOOK}=                 MRMS_UPDATED.ipynb
 ${JUPYTER_NOTEBOOK_FILEPATH}=        ${MODELREGISTRY_BASE_FOLDER}/${JUPYTER_NOTEBOOK}
 ${DC_S3_TYPE}=                       Object storage
 ${NAMESPACE_ISTIO}=                  istio-system
-${NAMESPACE_MODEL-REGISTRY}=         odh-model-registries
 ${SECRET_PART_NAME_1}=               modelregistry-sample-rest
 ${SECRET_PART_NAME_2}=               modelregistry-sample-grpc
 ${SECRET_PART_NAME_3}=               model-registry-db
 ${BROWSER.NAME}=                     chrome
+${MR_REGISTERED_MODEL_NAME}=         test minst
+${MR_REGISTERED_MODEL_VERSION}=      2.0.0
+${MR_REGISTERED_MODEL_AUTHOR}=       Tony
+${MR_TABLE_XPATH}=                   //table[@data-testid="registered-model-table"]
+${MR_VERSION_TABLE_XPATH}=           //table[@data-testid="model-versions-table"]
+${DISABLE_COMPONENT}=                ${False}
 
 
 *** Test Cases ***
 # robocop: disable:line-too-long
 Verify Model Registry Integration With Secured-DB
     [Documentation]    Verifies the Integartion of Model Registry operator with Jupyter Notebook
-    [Tags]    OpenDataHub    MRMS1302    Smoke    ExcludeOnRhoai
+    [Tags]    Smoke    MRMS1302
     Create Workbench    workbench_title=${WORKBENCH_TITLE}    workbench_description=Registry test
     ...                 prj_title=${PRJ_TITLE}    image_name=Minimal Python  deployment_size=${NONE}
     ...                 storage=Persistent   pv_existent=${NONE}
@@ -52,24 +58,33 @@ Verify Model Registry Integration With Secured-DB
     Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     ${workbenches}=    Create List    ${WORKBENCH_TITLE}
-    # Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME}
-    # ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
-    # ...            aws_bucket_name=${AWS_BUCKET}    connected_workbench=${workbenches}
-    # Data Connection Should Be Listed    name=${DC_S3_NAME}    type=${DC_S3_TYPE}    connected_workbench=${workbenches}
-    # Open Data Science Project Details Page       project_title=${prj_title}    tab_id=workbenches
+    Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME}
+    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
+    ...            aws_bucket_name=${AWS_BUCKET}    connected_workbench=${workbenches}
+    Data Connection Should Be Listed    name=${DC_S3_NAME}    type=${DC_S3_TYPE}    connected_workbench=${workbenches}
+    Open Data Science Project Details Page       project_title=${prj_title}    tab_id=workbenches
     Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}
+    ${handle}=    Launch And Access Workbench    workbench_title=${WORKBENCH_TITLE}
+    ...    username=${TEST_USER.USERNAME}     password=${TEST_USER.PASSWORD}
+    ...    auth_type=${TEST_USER.AUTH_TYPE}
     Upload File In The Workbench     filepath=${SAMPLE_ONNX_MODEL}    workbench_title=${WORKBENCH_TITLE}
     ...         workbench_namespace=${PRJ_TITLE}
     Upload File In The Workbench     filepath=${JUPYTER_NOTEBOOK_FILEPATH}    workbench_title=${WORKBENCH_TITLE}
     ...         workbench_namespace=${PRJ_TITLE}
     Download Python Client Dependencies    ${MR_PYTHON_CLIENT_FILES}    ${MR_PYTHON_CLIENT_WHL_VERSION}
     Upload Python Client Files In The Workbench    ${MR_PYTHON_CLIENT_FILES}
-    Launch And Access Workbench    workbench_title=${WORKBENCH_TITLE}
-    ...    username=${TEST_USER.USERNAME}     password=${TEST_USER.PASSWORD}
-    ...    auth_type=${TEST_USER.AUTH_TYPE}
     Upload Certificate To Jupyter Notebook    ${CERTS_DIRECTORY}/domain.crt
     Upload Certificate To Jupyter Notebook    openshift_ca.crt
     Jupyter Notebook Can Query Model Registry     ${JUPYTER_NOTEBOOK}
+    SeleniumLibrary.Switch Window    ${handle}
+    Open Model Registry Dashboard Page
+    SeleniumLibrary.Page Should Contain Element    xpath:${MR_TABLE_XPATH}/tbody/tr/td[@data-label="Model name"]//a[.="${MR_REGISTERED_MODEL_NAME}"]
+    SeleniumLibrary.Page Should Contain Element    xpath:${MR_TABLE_XPATH}/tbody/tr/td[@data-label="Owner"]//p[.="${MR_REGISTERED_MODEL_AUTHOR}"]
+    SeleniumLibrary.Page Should Contain Element    xpath:${MR_TABLE_XPATH}/tbody/tr/td[@data-label="Labels" and .="-"]
+    SeleniumLibrary.Click Element    xpath:${MR_TABLE_XPATH}/tbody/tr/td[@data-label="Model name"]//a[.="${MR_REGISTERED_MODEL_NAME}"]
+    Maybe Wait For Dashboard Loading Spinner Page
+    SeleniumLibrary.Page Should Contain Element    xpath:${MR_VERSION_TABLE_XPATH}/tbody/tr/td[@data-label="Version name"]//a[.="${MR_REGISTERED_MODEL_VERSION}"]
+    SeleniumLibrary.Page Should Contain Element    xpath:${MR_VERSION_TABLE_XPATH}/tbody/tr/td[@data-label="Author" and .="${MR_REGISTERED_MODEL_AUTHOR}"]
 
 
 *** Keywords ***
@@ -77,16 +92,22 @@ Prepare Model Registry Test Setup
     [Documentation]    Suite setup steps for testing Model Registry.
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
+    Enable Model Registry If Needed
+    Component Should Be Enabled    modelregistry
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
-    Create Namespace In Openshift    ${NAMESPACE_MODEL-REGISTRY}
+    # This should be created by the RHOAI operator when the component is enabled in the DSC.
+    # We can grab the name of the NS by querying the DSC
+    # Create Namespace In Openshift    ${NAMESPACE_MODEL_REGISTRY}
+    ${NAMESPACE_MODEL_REGISTRY}=    Get Model Registry Namespace From DSC
+    Set Suite Variable    ${NAMESPACE_MODEL_REGISTRY}
     Apply ServiceMeshMember Configuration
     Get Cluster Domain And Token
     Run Update Notebook Script
     Generate ModelRegistry Certificates
-    Apply Db Config Samples    namespace=${NAMESPACE_MODEL-REGISTRY}
+    Apply Db Config Samples    namespace=${NAMESPACE_MODEL_REGISTRY}
     Create Model Registry Secrets
     Fetch CA Certificate If RHODS Is Self-Managed
 
@@ -100,6 +121,7 @@ Teardown Model Registry Test Setup
     Remove Model Registry
     Remove Deployment Files    ${CERTS_DIRECTORY}
     Remove Deployment Files    ${MODELREGISTRY_BASE_FOLDER}/Python_Dependencies
+    Disable Model Registry If Needed
     RHOSi Teardown
 
 Get Cluster Domain And Token
@@ -137,11 +159,11 @@ Create Model Registry Secrets
     ...    certs/${SECRET_PART_NAME_1}.domain.key    certs/${SECRET_PART_NAME_1}.domain.crt    certs/domain.crt
     Create Generic Secret    ${NAMESPACE_ISTIO}    ${SECRET_PART_NAME_2}-credential
     ...    certs/${SECRET_PART_NAME_2}.domain.key    certs/${SECRET_PART_NAME_2}.domain.crt    certs/domain.crt
-    Create Generic Secret    ${NAMESPACE_MODEL-REGISTRY}  ${SECRET_PART_NAME_3}-credential
+    Create Generic Secret    ${NAMESPACE_MODEL_REGISTRY}  ${SECRET_PART_NAME_3}-credential
     ...    certs/${SECRET_PART_NAME_3}.key           certs/${SECRET_PART_NAME_3}.crt     certs/domain.crt
     Secret Should Exist      ${NAMESPACE_ISTIO}    ${SECRET_PART_NAME_1}-credential
     Secret Should Exist      ${NAMESPACE_ISTIO}    ${SECRET_PART_NAME_2}-credential
-    Secret Should Exist      ${NAMESPACE_MODEL-REGISTRY}  ${SECRET_PART_NAME_3}-credential
+    Secret Should Exist      ${NAMESPACE_MODEL_REGISTRY}  ${SECRET_PART_NAME_3}-credential
 
 Secret Should Exist
     [Documentation]    Check if the specified secret exists in the given namespace
@@ -187,9 +209,11 @@ Jupyter Notebook Can Query Model Registry
     [Arguments]    ${filepath}
     Open Notebook File In JupyterLab    ${filepath}
     Open With JupyterLab Menu  Run  Restart Kernel and Run All Cells…
+    Wait Until Page Contains Element    xpath=//div[contains(text(),"Restart") and @class="jp-Dialog-buttonLabel"]
     Click Element    xpath=//div[contains(text(),"Restart") and @class="jp-Dialog-buttonLabel"]
+    # Somehow misses the check on the active cells without the sleep
+    Sleep    5s
     Wait Until JupyterLab Code Cell Is Not Active  timeout=120s
-    Sleep    2m    msg=Waits until the jupyter notebook has completed execution of all cells
     JupyterLab Code Cell Error Output Should Not Be Visible
     SeleniumLibrary.Capture Page Screenshot
 
@@ -230,7 +254,10 @@ Get Token
 
 Apply ServiceMeshMember Configuration
     [Documentation]    Apply a ServiceMeshMember configuration using oc.
-    Apply OpenShift Configuration    ${SERVICE_MESH_MEMBER}
+    Copy File    source=${SERVICE_MESH_MEMBER}    destination=${MODELREGISTRY_BASE_FOLDER}/serviceMeshMember.yaml
+    Run    sed -i '' -e 's/<MODEL_REGISTRY_NS>/${NAMESPACE_MODEL_REGISTRY}/' ${MODELREGISTRY_BASE_FOLDER}/serviceMeshMember.yaml    # robocop: disable
+    Apply OpenShift Configuration    ${MODELREGISTRY_BASE_FOLDER}/serviceMeshMember.yaml
+    Remove File    ${MODELREGISTRY_BASE_FOLDER}/serviceMeshMember.yaml
 
 Apply Rest API Configuration
     [Documentation]    Apply a Rest API configuration using oc.
@@ -258,10 +285,16 @@ Run Update Notebook Script
 
 Remove Model Registry
     [Documentation]    Run multiple oc delete commands to remove model registry components
-    Run And Verify Command    oc delete -k ${MODELREGISTRY_BASE_FOLDER}/samples/secure-db/mysql-tls
-    Run And Verify Command    oc delete secret modelregistry-sample-grpc-credential -n ${NAMESPACE_ISTIO}
-    Run And Verify Command    oc delete secret modelregistry-sample-rest-credential -n ${NAMESPACE_ISTIO}
-    Run And Verify Command    oc delete namespace ${NAMESPACE_MODEL-REGISTRY} --force
+    # We don't want to stop the teardown if any of these resources are not found
+    Run Keyword And Continue On Failure
+    ...    Run And Verify Command
+    ...    oc delete -n ${NAMESPACE_MODEL_REGISTRY} -k ${MODELREGISTRY_BASE_FOLDER}/samples/secure-db/mysql-tls
+    Run Keyword And Continue On Failure
+    ...    Run And Verify Command    oc delete secret modelregistry-sample-grpc-credential -n ${NAMESPACE_ISTIO}
+    Run Keyword And Continue On Failure
+    ...    Run And Verify Command    oc delete secret modelregistry-sample-rest-credential -n ${NAMESPACE_ISTIO}
+    # I don't think this NS should be removed, it's managed by the DSC
+    # Run And Verify Command    oc delete namespace ${NAMESPACE_MODEL_REGISTRY} --force
 
 Remove Deployment Files
     [Documentation]    Remove all files from the given directory
@@ -286,4 +319,58 @@ Upload Python Client Files In The Workbench
         Upload File In The Workbench
         ...    filepath=${file_location}/${file}    workbench_title=${WORKBENCH_TITLE}
         ...    workbench_namespace=${PRJ_TITLE}
+    END
+
+Open Model Registry Dashboard Page
+    [Documentation]    Opens the Model Registry page from the dashboard nav bar
+    ${mr_present}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain    Model Registry
+    WHILE    ${mr_present}!=${TRUE}    limit=120s
+        SeleniumLibrary.Reload Page
+        SeleniumLibrary.Wait Until Page Contains    Home
+        Maybe Wait For Dashboard Loading Spinner Page
+        ${mr_present}=    Run Keyword And Return Status
+        ...    SeleniumLibrary.Page Should Contain    Model Registry
+    END
+    SeleniumLibrary.Click Link      Model Registry
+    Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=Model Registry
+    SeleniumLibrary.Wait Until Page Contains    Select a model registry to view and manage your registered models.
+    Maybe Wait For Dashboard Loading Spinner Page
+    ${loaded}=    Run Keyword And Return Status
+    ...    SeleniumLibrary.Page Should Not Contain    Request access to model registries
+    WHILE    ${loaded}!=${TRUE}    limit=5
+        SeleniumLibrary.Reload Page
+        SeleniumLibrary.Wait Until Page Contains    Model Registry
+        SeleniumLibrary.Wait Until Page Contains    Select a model registry to view and manage your registered models.
+        ${loaded}=    Run Keyword And Return Status
+        ...    SeleniumLibrary.Page Should Not Contain    Request access to model registries
+    END
+    Maybe Wait For Dashboard Loading Spinner Page
+
+Get Model Registry Namespace From DSC
+    [Documentation]    Fetches the namespace defined for model registry in the DSC
+    ${rc}  ${ns}=    Run And Return Rc And Output
+    ...    oc get dsc default-dsc -o json | jq '.spec.components.modelregistry.registriesNamespace'
+    Should Be Equal As Integers    ${rc}    0
+    Log    ${ns}
+    # Remove double quotes
+    ${ns}=    Get Substring    ${ns}    1    -1
+    Log    ${ns}
+    RETURN    ${ns}
+
+Enable Model Registry If Needed
+    [Documentation]    While in tech preview the component will not be enabled by default. This keyword enables it.
+    ${management_state}=    Get DSC Component State    default-dsc    modelregistry    ${OPERATOR_NAMESPACE}
+    IF    "${management_state}" != "Managed"
+            Set Component State    modelregistry    Managed
+            Set Suite Variable    ${DISABLE_COMPONENT}    ${True}
+            ${ns}=    Get Model Registry Namespace From DSC
+            Wait For Namespace To Be Active    ${ns}    timeout=120s
+    END
+
+Disable Model Registry If Needed
+    [Documentation]    If we had to enable the component before the test run, let's also disable it at the end to leave
+    ...    the cluster in the same state we found it in
+    IF    ${DISABLE_COMPONENT}==${True}
+        Set Component State    modelregistry    Removed
+        Run And Verify Command    oc delete namespace ${NAMESPACE_MODEL_REGISTRY} --force
     END

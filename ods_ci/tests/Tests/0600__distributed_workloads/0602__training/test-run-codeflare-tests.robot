@@ -9,7 +9,7 @@ Resource          ../../../../tests/Resources/Page/DistributedWorkloads/Distribu
 
 
 *** Variables ***
-${RAY_CUDA_IMAGE}                    quay.io/modh/ray@sha256:4575dd54fe05213fe9228cd316d5e87a9395cd16b618a85a94995709e5f3aaeb
+${RAY_CUDA_IMAGE}                    quay.io/modh/ray@sha256:0d715f92570a2997381b7cafc0e224cfa25323f18b9545acfd23bc2b71576d06
 ${RAY_TORCH_CUDA_IMAGE}              quay.io/rhoai/ray@sha256:158b481b8e9110008d60ac9fb8d156eadd71cb057ac30382e62e3a231ceb39c0
 
 

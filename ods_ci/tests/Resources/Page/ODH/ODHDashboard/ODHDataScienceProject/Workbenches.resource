@@ -28,7 +28,7 @@ ${WORKBENCH_USE_CONNECTION_CHK_XP}=           xpath=//input[@name="enable-data-c
 ${WORKBENCH_EXISTING_CONNECTION_RAD_XP}=      xpath=//input[@name="existing-data-connection-type-radio"]
 ${WORKBENCH_STATUS_STOPPED}=                  Stopped
 ${WORKBENCH_STATUS_RUNNING}=                  Running
-${WORKBENCH_STATUS_STARTING}=                 Starting...
+${WORKBENCH_STATUS_STARTING}=                 Starting
 ${WORKBENCH_STOP_BTN_XP}=                 xpath=//button[text()="Stop workbench"]
 ${WORKBENCH_IMAGE_VER_LABEL}=        //label[@for="workbench-image-version-selection"]
 ${WORKBENCH_IMAGE_VER_BUTTON}=       ${WORKBENCH_IMAGE_VER_LABEL}/../..//button

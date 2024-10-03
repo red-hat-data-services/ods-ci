@@ -50,7 +50,7 @@ ${DISABLE_COMPONENT}=                ${False}
 # robocop: disable:line-too-long
 Verify Model Registry Integration With Secured-DB
     [Documentation]    Verifies the Integartion of Model Registry operator with Jupyter Notebook
-    [Tags]    Smoke    MRMS1301
+    [Tags]    Smoke    MRMS1301    ModelRegistry
     Create Workbench    workbench_title=${WORKBENCH_TITLE}    workbench_description=Registry test
     ...                 prj_title=${PRJ_TITLE}    image_name=Minimal Python  deployment_size=${NONE}
     ...                 storage=Persistent   pv_existent=${NONE}

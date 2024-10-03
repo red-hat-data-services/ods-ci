@@ -42,7 +42,8 @@ components:
             condition: int(inputs.parameter_values['pipelinechannel--random-num-Output'])
               <= 5
         random-num:
-          cachingOptions: {}
+          cachingOptions:
+            enableCache: true
           componentRef:
             name: comp-random-num
           inputs:
@@ -63,7 +64,8 @@ components:
     dag:
       tasks:
         print-msg:
-          cachingOptions: {}
+          cachingOptions:
+            enableCache: true
           componentRef:
             name: comp-print-msg
           inputs:
@@ -86,7 +88,8 @@ components:
     dag:
       tasks:
         print-msg-2:
-          cachingOptions: {}
+          cachingOptions:
+            enableCache: true
           componentRef:
             name: comp-print-msg-2
           inputs:
@@ -145,7 +148,8 @@ components:
             condition: int(inputs.parameter_values['pipelinechannel--random-num-2-Output'])
               <= 15
         random-num-2:
-          cachingOptions: {}
+          cachingOptions:
+            enableCache: true
           componentRef:
             name: comp-random-num-2
           inputs:
@@ -166,7 +170,8 @@ components:
     dag:
       tasks:
         print-msg-3:
-          cachingOptions: {}
+          cachingOptions:
+            enableCache: true
           componentRef:
             name: comp-print-msg-3
           inputs:
@@ -189,7 +194,8 @@ components:
     dag:
       tasks:
         print-msg-4:
-          cachingOptions: {}
+          cachingOptions:
+            enableCache: true
           componentRef:
             name: comp-print-msg-4
           inputs:
@@ -276,9 +282,9 @@ deploymentSpec:
         - -c
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
-          \ python3 -m pip install --quiet --no-warn-script-location --index-url $PIP_INDEX_URL\
-          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.9.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
-          \ python_version<\"3.9\"' && \"$0\" \"$@\"\n"
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.9.0'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
+          $0\" \"$@\"\n"
         - sh
         - -ec
         - 'program_path=$(mktemp -d)
@@ -307,9 +313,9 @@ deploymentSpec:
         - -c
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
-          \ python3 -m pip install --quiet --no-warn-script-location --index-url $PIP_INDEX_URL\
-          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.9.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
-          \ python_version<\"3.9\"' && \"$0\" \"$@\"\n"
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.9.0'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
+          $0\" \"$@\"\n"
         - sh
         - -ec
         - 'program_path=$(mktemp -d)
@@ -336,9 +342,9 @@ deploymentSpec:
         - -c
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
-          \ python3 -m pip install --quiet --no-warn-script-location --index-url $PIP_INDEX_URL\
-          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.9.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
-          \ python_version<\"3.9\"' && \"$0\" \"$@\"\n"
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.9.0'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
+          $0\" \"$@\"\n"
         - sh
         - -ec
         - 'program_path=$(mktemp -d)
@@ -365,9 +371,9 @@ deploymentSpec:
         - -c
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
-          \ python3 -m pip install --quiet --no-warn-script-location --index-url $PIP_INDEX_URL\
-          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.9.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
-          \ python_version<\"3.9\"' && \"$0\" \"$@\"\n"
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.9.0'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
+          $0\" \"$@\"\n"
         - sh
         - -ec
         - 'program_path=$(mktemp -d)
@@ -394,9 +400,9 @@ deploymentSpec:
         - -c
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
-          \ python3 -m pip install --quiet --no-warn-script-location --index-url $PIP_INDEX_URL\
-          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.9.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
-          \ python_version<\"3.9\"' && \"$0\" \"$@\"\n"
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.9.0'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
+          $0\" \"$@\"\n"
         - sh
         - -ec
         - 'program_path=$(mktemp -d)
@@ -423,9 +429,9 @@ deploymentSpec:
         - -c
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
-          \ python3 -m pip install --quiet --no-warn-script-location --index-url $PIP_INDEX_URL\
-          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.9.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
-          \ python_version<\"3.9\"' && \"$0\" \"$@\"\n"
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.9.0'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
+          $0\" \"$@\"\n"
         - sh
         - -ec
         - 'program_path=$(mktemp -d)
@@ -454,9 +460,9 @@ deploymentSpec:
         - -c
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
-          \ python3 -m pip install --quiet --no-warn-script-location --index-url $PIP_INDEX_URL\
-          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.9.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
-          \ python_version<\"3.9\"' && \"$0\" \"$@\"\n"
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.9.0'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
+          $0\" \"$@\"\n"
         - sh
         - -ec
         - 'program_path=$(mktemp -d)
@@ -512,71 +518,11 @@ root:
           condition: inputs.parameter_values['pipelinechannel--flip-coin-Output']
             == 'tails'
       flip-coin:
-        cachingOptions: {}
+        cachingOptions:
+          enableCache: true
         componentRef:
           name: comp-flip-coin
         taskInfo:
           name: flip-coin
 schemaVersion: 2.1.0
 sdkVersion: kfp-2.9.0
----
-platforms:
-  kubernetes:
-    deploymentSpec:
-      executors:
-        exec-flip-coin:
-          configMapAsEnv:
-          - configMapName: ds-pipeline-custom-env-vars
-            keyToEnv:
-            - configMapKey: pip_index_url
-              envVar: PIP_INDEX_URL
-            - configMapKey: pip_trusted_host
-              envVar: PIP_TRUSTED_HOST
-        exec-print-msg:
-          configMapAsEnv:
-          - configMapName: ds-pipeline-custom-env-vars
-            keyToEnv:
-            - configMapKey: pip_index_url
-              envVar: PIP_INDEX_URL
-            - configMapKey: pip_trusted_host
-              envVar: PIP_TRUSTED_HOST
-        exec-print-msg-2:
-          configMapAsEnv:
-          - configMapName: ds-pipeline-custom-env-vars
-            keyToEnv:
-            - configMapKey: pip_index_url
-              envVar: PIP_INDEX_URL
-            - configMapKey: pip_trusted_host
-              envVar: PIP_TRUSTED_HOST
-        exec-print-msg-3:
-          configMapAsEnv:
-          - configMapName: ds-pipeline-custom-env-vars
-            keyToEnv:
-            - configMapKey: pip_index_url
-              envVar: PIP_INDEX_URL
-            - configMapKey: pip_trusted_host
-              envVar: PIP_TRUSTED_HOST
-        exec-print-msg-4:
-          configMapAsEnv:
-          - configMapName: ds-pipeline-custom-env-vars
-            keyToEnv:
-            - configMapKey: pip_index_url
-              envVar: PIP_INDEX_URL
-            - configMapKey: pip_trusted_host
-              envVar: PIP_TRUSTED_HOST
-        exec-random-num:
-          configMapAsEnv:
-          - configMapName: ds-pipeline-custom-env-vars
-            keyToEnv:
-            - configMapKey: pip_index_url
-              envVar: PIP_INDEX_URL
-            - configMapKey: pip_trusted_host
-              envVar: PIP_TRUSTED_HOST
-        exec-random-num-2:
-          configMapAsEnv:
-          - configMapName: ds-pipeline-custom-env-vars
-            keyToEnv:
-            - configMapKey: pip_index_url
-              envVar: PIP_INDEX_URL
-            - configMapKey: pip_trusted_host
-              envVar: PIP_TRUSTED_HOST

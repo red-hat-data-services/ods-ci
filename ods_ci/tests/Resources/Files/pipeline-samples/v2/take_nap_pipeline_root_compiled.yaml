@@ -50,9 +50,9 @@ deploymentSpec:
           '
         - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
           \ *\n\ndef take_nap(naptime_secs: int) -> str:\n    \"\"\"Sleeps for secs\"\
-          \"\"\n    from time import sleep\n\n    print(f\"Sleeping for {naptime_secs}\
-          \ seconds: Zzzzzz ...\")\n    sleep(naptime_secs)\n    return \"I'm awake\
-          \ now. Did I snore?\"\n\n"
+          \"\"\n    from time import sleep  # noqa: PLC0415\n\n    print(f\"Sleeping\
+          \ for {naptime_secs} seconds: Zzzzzz ...\")\n    sleep(naptime_secs)\n \
+          \   return \"I'm awake now. Did I snore?\"\n\n"
         image: registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61
     exec-wake-up:
       container:
@@ -90,8 +90,7 @@ root:
   dag:
     tasks:
       take-nap:
-        cachingOptions:
-          enableCache: true
+        cachingOptions: {}
         componentRef:
           name: comp-take-nap
         inputs:
@@ -101,8 +100,7 @@ root:
         taskInfo:
           name: take-nap
       wake-up:
-        cachingOptions:
-          enableCache: true
+        cachingOptions: {}
         componentRef:
           name: comp-wake-up
         dependentTasks:

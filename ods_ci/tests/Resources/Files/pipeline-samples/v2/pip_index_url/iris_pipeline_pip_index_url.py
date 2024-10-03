@@ -13,19 +13,33 @@ PIP_INDEX_URL (this is a limitation of kfp 2.7.0). We need to manually
 modify the yaml file to use PIP_TRUSTED_HOST.
 
 """
-from kfp import Client, compiler, dsl
-from kfp.dsl import ClassificationMetrics, Dataset, Input, Model, Output
-from kfp import kubernetes
 
-common_base_image = "registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61"
+from kfp import compiler, dsl, kubernetes
+from kfp.dsl import ClassificationMetrics, Dataset, Input, Model, Output, PipelineTask
+
+common_base_image = (
+    "registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61"
+)
 
 
-@dsl.component(base_image=common_base_image, packages_to_install=["pandas==2.2.0"],
-               pip_index_urls=['$PIP_INDEX_URL'], pip_trusted_hosts=['$PIP_TRUSTED_HOST']
+def add_pip_index_configuration(task: PipelineTask):
+    kubernetes.use_config_map_as_env(
+        task,
+        config_map_name="ds-pipeline-custom-env-vars",
+        config_map_key_to_env={"pip_index_url": "PIP_INDEX_URL", "pip_trusted_host": "PIP_TRUSTED_HOST"},
+    )
+
+
+@dsl.component(
+    base_image=common_base_image,
+    packages_to_install=["pandas==2.2.0"],
+    pip_index_urls=["$PIP_INDEX_URL"],
+    pip_trusted_hosts=["$PIP_TRUSTED_HOST"],
 )
 def create_dataset(iris_dataset: Output[Dataset]):
-    import pandas as pd
-    from io import StringIO
+    from io import StringIO  # noqa: PLC0415
+
+    import pandas as pd  # noqa: PLC0415
 
     data = """
     5.1,3.5,1.4,0.2,Iris-setosa
@@ -89,16 +103,19 @@ def create_dataset(iris_dataset: Output[Dataset]):
         df.to_csv(f)
 
 
-@dsl.component(base_image=common_base_image, packages_to_install=["pandas==2.2.0", "scikit-learn==1.4.0"],
-    pip_index_urls=['$PIP_INDEX_URL'], pip_trusted_hosts=['$PIP_TRUSTED_HOST']
+@dsl.component(
+    base_image=common_base_image,
+    packages_to_install=["pandas==2.2.0", "scikit-learn==1.4.0"],
+    pip_index_urls=["$PIP_INDEX_URL"],
+    pip_trusted_hosts=["$PIP_TRUSTED_HOST"],
 )
 def normalize_dataset(
     input_iris_dataset: Input[Dataset],
     normalized_iris_dataset: Output[Dataset],
     standard_scaler: bool,
 ):
-    import pandas as pd
-    from sklearn.preprocessing import MinMaxScaler, StandardScaler
+    import pandas as pd  # noqa: PLC0415
+    from sklearn.preprocessing import MinMaxScaler, StandardScaler  # noqa: PLC0415
 
     with open(input_iris_dataset.path) as f:
         df = pd.read_csv(f)
@@ -113,8 +130,11 @@ def normalize_dataset(
         df.to_csv(f)
 
 
-@dsl.component(base_image=common_base_image, packages_to_install=["pandas==2.2.0", "scikit-learn==1.4.0"],
-    pip_index_urls=['$PIP_INDEX_URL'], pip_trusted_hosts=['$PIP_TRUSTED_HOST']
+@dsl.component(
+    base_image=common_base_image,
+    packages_to_install=["pandas==2.2.0", "scikit-learn==1.4.0"],
+    pip_index_urls=["$PIP_INDEX_URL"],
+    pip_trusted_hosts=["$PIP_TRUSTED_HOST"],
 )
 def train_model(
     normalized_iris_dataset: Input[Dataset],
@@ -122,12 +142,12 @@ def train_model(
     metrics: Output[ClassificationMetrics],
     n_neighbors: int,
 ):
-    import pickle
+    import pickle  # noqa: PLC0415
 
-    import pandas as pd
-    from sklearn.metrics import confusion_matrix, roc_curve
-    from sklearn.model_selection import cross_val_predict, train_test_split
-    from sklearn.neighbors import KNeighborsClassifier
+    import pandas as pd  # noqa: PLC0415
+    from sklearn.metrics import confusion_matrix  # noqa: PLC0415
+    from sklearn.model_selection import cross_val_predict, train_test_split  # noqa: PLC0415
+    from sklearn.neighbors import KNeighborsClassifier  # noqa: PLC0415
 
     with open(normalized_iris_dataset.path) as f:
         df = pd.read_csv(f)
@@ -135,7 +155,7 @@ def train_model(
     y = df.pop("Labels")
     X = df
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)  # noqa: F841
 
     clf = KNeighborsClassifier(n_neighbors=n_neighbors)
     clf.fit(X_train, y_train)
@@ -156,33 +176,21 @@ def my_pipeline(
     standard_scaler: bool = True,
     neighbors: int = 3,
 ):
-    create_dataset_task = create_dataset()
+    create_dataset_task = create_dataset().set_caching_options(False)
     create_dataset_task.set_caching_options(False)
-    kubernetes.use_config_map_as_env(
-        create_dataset_task,
-        config_map_name='ds-pipeline-custom-env-vars',
-        config_map_key_to_env={'pip_index_url': 'PIP_INDEX_URL', 'pip_trusted_host': 'PIP_TRUSTED_HOST'}
-    )
+    add_pip_index_configuration(create_dataset_task)
 
     normalize_dataset_task = normalize_dataset(
         input_iris_dataset=create_dataset_task.outputs["iris_dataset"], standard_scaler=standard_scaler
     )
     normalize_dataset_task.set_caching_options(False)
-    kubernetes.use_config_map_as_env(
-        normalize_dataset_task,
-        config_map_name='ds-pipeline-custom-env-vars',
-        config_map_key_to_env={'pip_index_url': 'PIP_INDEX_URL', 'pip_trusted_host': 'PIP_TRUSTED_HOST'}
-    )
+    add_pip_index_configuration(normalize_dataset_task)
 
     train_model_task = train_model(
         normalized_iris_dataset=normalize_dataset_task.outputs["normalized_iris_dataset"], n_neighbors=neighbors
     )
     train_model_task.set_caching_options(False)
-    kubernetes.use_config_map_as_env(
-        train_model_task,
-        config_map_name='ds-pipeline-custom-env-vars',
-        config_map_key_to_env={'pip_index_url': 'PIP_INDEX_URL', 'pip_trusted_host': 'PIP_TRUSTED_HOST'}
-    )
+    add_pip_index_configuration(train_model_task)
 
 
 if __name__ == "__main__":

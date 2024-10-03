@@ -1,14 +1,17 @@
-import kfp
-from kfp import Client, compiler, dsl
+from kfp import compiler, dsl
 from kfp.dsl import ClassificationMetrics, Dataset, Input, Model, Output
 
-common_base_image = "registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61"
+common_base_image = (
+    "registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61"
+)
 # common_base_image = "quay.io/opendatahub/ds-pipelines-sample-base:v1.0"
+
 
 @dsl.component(base_image=common_base_image, packages_to_install=["pandas==2.2.0"])
 def create_dataset(iris_dataset: Output[Dataset]):
-    import pandas as pd
-    from io import StringIO
+    from io import StringIO  # noqa: PLC0415
+
+    import pandas as pd  # noqa: PLC0415
 
     data = """
     5.1,3.5,1.4,0.2,Iris-setosa
@@ -81,8 +84,8 @@ def normalize_dataset(
     normalized_iris_dataset: Output[Dataset],
     standard_scaler: bool,
 ):
-    import pandas as pd
-    from sklearn.preprocessing import MinMaxScaler, StandardScaler
+    import pandas as pd  # noqa: PLC0415
+    from sklearn.preprocessing import MinMaxScaler, StandardScaler  # noqa: PLC0415
 
     with open(input_iris_dataset.path) as f:
         df = pd.read_csv(f)
@@ -107,12 +110,12 @@ def train_model(
     metrics: Output[ClassificationMetrics],
     n_neighbors: int,
 ):
-    import pickle
+    import pickle  # noqa: PLC0415
 
-    import pandas as pd
-    from sklearn.metrics import confusion_matrix, roc_curve
-    from sklearn.model_selection import cross_val_predict, train_test_split
-    from sklearn.neighbors import KNeighborsClassifier
+    import pandas as pd  # noqa: PLC0415
+    from sklearn.metrics import confusion_matrix  # noqa: PLC0415
+    from sklearn.model_selection import cross_val_predict, train_test_split  # noqa: PLC0415
+    from sklearn.neighbors import KNeighborsClassifier  # noqa: PLC0415
 
     with open(normalized_iris_dataset.path) as f:
         df = pd.read_csv(f)
@@ -120,7 +123,7 @@ def train_model(
     y = df.pop("Labels")
     X = df
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)  # noqa: F841
 
     clf = KNeighborsClassifier(n_neighbors=n_neighbors)
     clf.fit(X_train, y_train)
@@ -141,17 +144,16 @@ def my_pipeline(
     standard_scaler: bool = True,
     neighbors: int = 3,
 ):
-    create_dataset_task = create_dataset().set_caching_options(False)
+    create_dataset_task = create_dataset()
 
     normalize_dataset_task = normalize_dataset(
         input_iris_dataset=create_dataset_task.outputs["iris_dataset"], standard_scaler=standard_scaler
-    ).set_caching_options(False)
+    )
 
     train_model(
         normalized_iris_dataset=normalize_dataset_task.outputs["normalized_iris_dataset"], n_neighbors=neighbors
-    ).set_caching_options(False)
+    )
 
 
 if __name__ == "__main__":
     compiler.Compiler().compile(my_pipeline, package_path=__file__.replace(".py", "_compiled.yaml"))
-

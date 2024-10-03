@@ -70,15 +70,16 @@ deploymentSpec:
 
           '
         - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
-          \ *\n\ndef normalize_dataset(\n    input_iris_dataset: Input[Dataset],\n\
-          \    normalized_iris_dataset: Output[Dataset],\n    standard_scaler: bool\n\
-          ):\n    import pandas as pd\n    from sklearn.preprocessing import MinMaxScaler,\
-          \ StandardScaler\n\n    with open(input_iris_dataset.path) as f:\n     \
-          \   df = pd.read_csv(f)\n    labels = df.pop(\"Labels\")\n\n    scaler =\
-          \ StandardScaler() if standard_scaler else MinMaxScaler()\n\n    df = pd.DataFrame(scaler.fit_transform(df))\n\
-          \    df[\"Labels\"] = labels\n    normalized_iris_dataset.metadata[\"state\"\
-          ] = \"Normalized\"\n    with open(normalized_iris_dataset.path, \"w\") as\
-          \ f:\n        df.to_csv(f)\n\n"
+          \ *\n\ndef normalize_dataset(\n    input_iris_dataset: Input[Dataset], normalized_iris_dataset:\
+          \ Output[Dataset], standard_scaler: bool\n):\n    import pandas as pd  #\
+          \ noqa: PLC0415\n    from sklearn.preprocessing import MinMaxScaler, StandardScaler\
+          \  # noqa: PLC0415\n\n    with open(input_iris_dataset.path) as f:\n   \
+          \     df = pd.read_csv(f)\n    labels = df.pop(\"Labels\")\n\n    scaler\
+          \ = StandardScaler() if standard_scaler else MinMaxScaler()\n\n    df =\
+          \ pd.DataFrame(scaler.fit_transform(df))\n    df[\"Labels\"] = labels\n\
+          \    normalized_iris_dataset.metadata[\"state\"] = \"Normalized\"\n    with\
+          \ open(normalized_iris_dataset.path, \"w\") as f:\n        df.to_csv(f)\n\
+          \n"
         image: registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61
 pipelineInfo:
   name: my-pipe
@@ -86,8 +87,7 @@ root:
   dag:
     tasks:
       importer:
-        cachingOptions:
-          enableCache: true
+        cachingOptions: {}
         componentRef:
           name: comp-importer
         inputs:
@@ -97,8 +97,7 @@ root:
         taskInfo:
           name: importer
       normalize-dataset:
-        cachingOptions:
-          enableCache: true
+        cachingOptions: {}
         componentRef:
           name: comp-normalize-dataset
         dependentTasks:

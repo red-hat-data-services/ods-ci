@@ -37,29 +37,30 @@ deploymentSpec:
 
           '
         - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
-          \ *\n\ndef ray_fn() -> int:\n    import ray\n    from codeflare_sdk.cluster.cluster\
-          \ import Cluster, ClusterConfiguration\n    from codeflare_sdk import generate_cert\n\
-          \n    cluster = Cluster(\n        ClusterConfiguration(\n            name=\"\
-          raytest\",\n            num_workers=1,\n            head_cpus=1,\n     \
-          \       head_memory=4,\n            min_cpus=1,\n            max_cpus=1,\n\
-          \            min_memory=1,\n            max_memory=2,\n            num_gpus=0,\n\
-          \            image=\"quay.io/project-codeflare/ray:2.20.0-py39-cu118\",\n\
-          \            verify_tls=False\n        )\n    )\n\n    # always clean the\
-          \ resources\n    cluster.down()\n    print(cluster.status())\n    cluster.up()\n\
-          \    cluster.wait_ready()\n    print(cluster.status())\n    print(cluster.details())\n\
-          \n    ray_dashboard_uri = cluster.cluster_dashboard_uri()\n    ray_cluster_uri\
-          \ = cluster.cluster_uri()\n    print(ray_dashboard_uri)\n    print(ray_cluster_uri)\n\
-          \n    # before proceeding make sure the cluster exists and the uri is not\
-          \ empty\n    assert ray_cluster_uri, \"Ray cluster needs to be started and\
-          \ set before proceeding\"\n\n    # reset the ray context in case there's\
-          \ already one.\n    ray.shutdown()\n    # establish connection to ray cluster\n\
-          \    generate_cert.generate_tls_cert(cluster.config.name, cluster.config.namespace)\n\
-          \    generate_cert.export_env(cluster.config.name, cluster.config.namespace)\n\
-          \    ray.init(address=cluster.cluster_uri(), logging_level=\"DEBUG\")\n\
-          \    print(\"Ray cluster is up and running: \", ray.is_initialized())\n\n\
-          \    @ray.remote\n    def train_fn():\n        return 100\n\n    result\
-          \ = ray.get(train_fn.remote())\n    assert 100 == result\n    ray.shutdown()\n\
-          \    cluster.down()\n    return result\n\n"
+          \ *\n\ndef ray_fn() -> int:\n    import ray  # noqa: PLC0415\n    from codeflare_sdk\
+          \ import generate_cert  # noqa: PLC0415\n    from codeflare_sdk.cluster.cluster\
+          \ import Cluster, ClusterConfiguration  # noqa: PLC0415\n\n    cluster =\
+          \ Cluster(\n        ClusterConfiguration(\n            name=\"raytest\"\
+          ,\n            num_workers=1,\n            head_cpus=1,\n            head_memory=4,\n\
+          \            min_cpus=1,\n            max_cpus=1,\n            min_memory=1,\n\
+          \            max_memory=2,\n            num_gpus=0,\n            image=\"\
+          quay.io/project-codeflare/ray:2.20.0-py39-cu118\",\n            verify_tls=False,\n\
+          \        )\n    )\n\n    # always clean the resources\n    cluster.down()\n\
+          \    print(cluster.status())\n    cluster.up()\n    cluster.wait_ready()\n\
+          \    print(cluster.status())\n    print(cluster.details())\n\n    ray_dashboard_uri\
+          \ = cluster.cluster_dashboard_uri()\n    ray_cluster_uri = cluster.cluster_uri()\n\
+          \    print(ray_dashboard_uri)\n    print(ray_cluster_uri)\n\n    # before\
+          \ proceeding make sure the cluster exists and the uri is not empty\n   \
+          \ assert ray_cluster_uri, \"Ray cluster needs to be started and set before\
+          \ proceeding\"\n\n    # reset the ray context in case there's already one.\n\
+          \    ray.shutdown()\n    # establish connection to ray cluster\n    generate_cert.generate_tls_cert(cluster.config.name,\
+          \ cluster.config.namespace)\n    generate_cert.export_env(cluster.config.name,\
+          \ cluster.config.namespace)\n    ray.init(address=cluster.cluster_uri(),\
+          \ logging_level=\"DEBUG\")\n    print(\"Ray cluster is up and running: \"\
+          , ray.is_initialized())\n\n    @ray.remote\n    def train_fn():\n      \
+          \  return 100\n\n    result = ray.get(train_fn.remote())\n    assert 100\
+          \ == result\n    ray.shutdown()\n    cluster.down()\n    return result\n\
+          \n"
         image: registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61
 pipelineInfo:
   description: Ray Integration Test
@@ -68,8 +69,7 @@ root:
   dag:
     tasks:
       ray-fn:
-        cachingOptions:
-          enableCache: true
+        cachingOptions: {}
         componentRef:
           name: comp-ray-fn
         taskInfo:

@@ -14,12 +14,20 @@ modify the yaml file to use PIP_TRUSTED_HOST.
 
 """
 
-from kfp import compiler, dsl
-from kfp import kubernetes
+from kfp import compiler, dsl, kubernetes
+from kfp.dsl import PipelineTask
 
 common_base_image = (
     "registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61"
 )
+
+
+def add_pip_index_configuration(task: PipelineTask):
+    kubernetes.use_config_map_as_env(
+        task,
+        config_map_name="ds-pipeline-custom-env-vars",
+        config_map_key_to_env={"pip_index_url": "PIP_INDEX_URL", "pip_trusted_host": "PIP_TRUSTED_HOST"},
+    )
 
 
 @dsl.component(
@@ -29,8 +37,9 @@ common_base_image = (
     pip_trusted_hosts=["$PIP_TRUSTED_HOST"],
 )
 def print_message(message: str):
-    import os
-    from pyfiglet import Figlet
+    import os  # noqa: PLC0415
+
+    from pyfiglet import Figlet  # noqa: PLC0415
 
     """Prints a message"""
     print("------------------------------------------------------------------")
@@ -45,13 +54,8 @@ def print_message(message: str):
 
 @dsl.pipeline(name="hello-world-pipeline", description="Pipeline that prints a hello message")
 def hello_world_pipeline(message: str = "Hello world"):
-    print_message_task = print_message(message=message)
-    print_message_task.set_caching_options(False)
-    kubernetes.use_config_map_as_env(
-        print_message_task,
-        config_map_name="ds-pipeline-custom-env-vars",
-        config_map_key_to_env={"pip_index_url": "PIP_INDEX_URL", "pip_trusted_host": "PIP_TRUSTED_HOST"},
-    )
+    print_message_task = print_message(message=message).set_caching_options(False)
+    add_pip_index_configuration(print_message_task)
 
 
 if __name__ == "__main__":

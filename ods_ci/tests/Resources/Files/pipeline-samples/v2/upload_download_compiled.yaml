@@ -74,12 +74,12 @@ deploymentSpec:
           '
         - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
           \ *\n\ndef receive_file(\n    incomingfile: dsl.InputPath(),\n    saveartifact:\
-          \ dsl.OutputPath(),\n):\n    import os\n    import shutil\n\n    print(\"\
-          reading %s, size is %s\" % (incomingfile, os.path.getsize(incomingfile)))\n\
-          \n    with open(incomingfile, \"rb\") as f:\n        b = f.read(1)\n   \
-          \     print(\"read byte: %s\" % b)\n        f.close()\n\n    print(\"copying\
-          \ in %s to out %s\" % (incomingfile, saveartifact))\n    shutil.copyfile(incomingfile,\
-          \ saveartifact)\n\n"
+          \ dsl.OutputPath(),\n):\n    import os  # noqa: PLC0415\n    import shutil\
+          \  # noqa: PLC0415\n\n    print(\"reading %s, size is %s\" % (incomingfile,\
+          \ os.path.getsize(incomingfile)))\n\n    with open(incomingfile, \"rb\"\
+          ) as f:\n        b = f.read(1)\n        print(\"read byte: %s\" % b)\n \
+          \       f.close()\n\n    print(\"copying in %s to out %s\" % (incomingfile,\
+          \ saveartifact))\n    shutil.copyfile(incomingfile, saveartifact)\n\n"
         image: registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61
     exec-send-file:
       container:
@@ -108,11 +108,11 @@ deploymentSpec:
           '
         - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
           \ *\n\ndef send_file(\n    file_size_bytes: int,\n    outgoingfile: dsl.OutputPath(),\n\
-          ):\n    import os\n    import zipfile\n\n    def create_large_file(file_path,\
-          \ size_in_bytes):\n        with open(file_path, \"wb\") as f:\n        \
-          \    f.write(os.urandom(size_in_bytes))\n\n    def zip_file(input_file_path,\
-          \ output_zip_path):\n        with zipfile.ZipFile(output_zip_path, \"w\"\
-          , compression=zipfile.ZIP_DEFLATED) as zipf:\n            zipf.write(input_file_path,\
+          ):\n    import os  # noqa: PLC0415\n    import zipfile  # noqa: PLC0415\n\
+          \n    def create_large_file(file_path, size_in_bytes):\n        with open(file_path,\
+          \ \"wb\") as f:\n            f.write(os.urandom(size_in_bytes))\n\n    def\
+          \ zip_file(input_file_path, output_zip_path):\n        with zipfile.ZipFile(output_zip_path,\
+          \ \"w\", compression=zipfile.ZIP_DEFLATED) as zipf:\n            zipf.write(input_file_path,\
           \ os.path.basename(input_file_path))\n\n    print(\"starting creating the\
           \ file...\")\n    file_path = \"/tmp/large_file.txt\"\n    create_large_file(file_path,\
           \ file_size_bytes)\n    zip_file(file_path, outgoingfile)\n    print(f\"\
@@ -147,8 +147,9 @@ deploymentSpec:
         - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
           \ *\n\ndef test_uploaded_artifact(\n    previous_step: dsl.InputPath(),\n\
           \    file_size_bytes: int,\n    mlpipeline_minio_artifact_secret: str,\n\
-          \    bucket_name: str,\n):\n    import base64\n    import json\n\n    from\
-          \ minio import Minio\n\n    def inner_decode(my_str):\n        return base64.b64decode(my_str).decode(\"\
+          \    bucket_name: str,\n):\n    import base64  # noqa: PLC0415\n    import\
+          \ json  # noqa: PLC0415\n\n    from minio import Minio  # noqa: PLC0415\n\
+          \n    def inner_decode(my_str):\n        return base64.b64decode(my_str).decode(\"\
           utf-8\")\n\n    mlpipeline_minio_artifact_secret = json.loads(mlpipeline_minio_artifact_secret.replace(\"\
           '\", '\"'))\n    host = inner_decode(mlpipeline_minio_artifact_secret[\"\
           host\"])\n    port = inner_decode(mlpipeline_minio_artifact_secret[\"port\"\
@@ -172,8 +173,7 @@ root:
   dag:
     tasks:
       receive-file:
-        cachingOptions:
-          enableCache: true
+        cachingOptions: {}
         componentRef:
           name: comp-receive-file
         dependentTasks:
@@ -187,8 +187,7 @@ root:
         taskInfo:
           name: receive-file
       send-file:
-        cachingOptions:
-          enableCache: true
+        cachingOptions: {}
         componentRef:
           name: comp-send-file
         inputs:
@@ -199,8 +198,7 @@ root:
         taskInfo:
           name: send-file
       test-uploaded-artifact:
-        cachingOptions:
-          enableCache: true
+        cachingOptions: {}
         componentRef:
           name: comp-test-uploaded-artifact
         dependentTasks:

@@ -1,15 +1,16 @@
-from kfp import dsl, compiler
+from kfp import compiler, dsl
 
-
-common_base_image = "registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61"
+common_base_image = (
+    "registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61"
+)
 
 
 # image and the sdk has a fixed value because the version matters
 @dsl.component(packages_to_install=["codeflare-sdk==0.16.4"], base_image=common_base_image)
 def ray_fn() -> int:
-    import ray
-    from codeflare_sdk.cluster.cluster import Cluster, ClusterConfiguration
-    from codeflare_sdk import generate_cert
+    import ray  # noqa: PLC0415
+    from codeflare_sdk import generate_cert  # noqa: PLC0415
+    from codeflare_sdk.cluster.cluster import Cluster, ClusterConfiguration  # noqa: PLC0415
 
     cluster = Cluster(
         ClusterConfiguration(
@@ -23,7 +24,7 @@ def ray_fn() -> int:
             max_memory=2,
             num_gpus=0,
             image="quay.io/project-codeflare/ray:2.20.0-py39-cu118",
-            verify_tls=False
+            verify_tls=False,
         )
     )
 
@@ -67,9 +68,8 @@ def ray_fn() -> int:
     description="Ray Integration Test",
 )
 def ray_integration():
-    ray_fn()
+    ray_fn().set_caching_options(False)
 
 
 if __name__ == "__main__":
     compiler.Compiler().compile(ray_integration, package_path=__file__.replace(".py", "_compiled.yaml"))
-

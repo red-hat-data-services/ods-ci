@@ -42,8 +42,7 @@ components:
             condition: int(inputs.parameter_values['pipelinechannel--random-num-Output'])
               <= 5
         random-num:
-          cachingOptions:
-            enableCache: true
+          cachingOptions: {}
           componentRef:
             name: comp-random-num
           inputs:
@@ -64,8 +63,7 @@ components:
     dag:
       tasks:
         print-msg:
-          cachingOptions:
-            enableCache: true
+          cachingOptions: {}
           componentRef:
             name: comp-print-msg
           inputs:
@@ -88,8 +86,7 @@ components:
     dag:
       tasks:
         print-msg-2:
-          cachingOptions:
-            enableCache: true
+          cachingOptions: {}
           componentRef:
             name: comp-print-msg-2
           inputs:
@@ -148,8 +145,7 @@ components:
             condition: int(inputs.parameter_values['pipelinechannel--random-num-2-Output'])
               <= 15
         random-num-2:
-          cachingOptions:
-            enableCache: true
+          cachingOptions: {}
           componentRef:
             name: comp-random-num-2
           inputs:
@@ -170,8 +166,7 @@ components:
     dag:
       tasks:
         print-msg-3:
-          cachingOptions:
-            enableCache: true
+          cachingOptions: {}
           componentRef:
             name: comp-print-msg-3
           inputs:
@@ -194,8 +189,7 @@ components:
     dag:
       tasks:
         print-msg-4:
-          cachingOptions:
-            enableCache: true
+          cachingOptions: {}
           componentRef:
             name: comp-print-msg-4
           inputs:
@@ -297,9 +291,9 @@ deploymentSpec:
           '
         - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
           \ *\n\ndef flip_coin() -> str:\n    \"\"\"Flip a coin and output heads or\
-          \ tails randomly.\"\"\"\n    import random\n\n    result = \"heads\" if\
-          \ random.randint(0, 1) == 0 else \"tails\"\n    print(result)\n    return\
-          \ result\n\n"
+          \ tails randomly.\"\"\"\n    import random  # noqa: PLC0415\n\n    result\
+          \ = \"heads\" if random.randint(0, 1) == 0 else \"tails\"\n    print(result)\n\
+          \    return result\n\n"
         image: registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61
     exec-print-msg:
       container:
@@ -444,8 +438,9 @@ deploymentSpec:
           '
         - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
           \ *\n\ndef random_num(low: int, high: int) -> int:\n    \"\"\"Generate a\
-          \ random number between low and high.\"\"\"\n    import random\n\n    result\
-          \ = random.randint(low, high)\n    print(result)\n    return result\n\n"
+          \ random number between low and high.\"\"\"\n    import random  # noqa:\
+          \ PLC0415\n\n    result = random.randint(low, high)\n    print(result)\n\
+          \    return result\n\n"
         image: registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61
     exec-random-num-2:
       container:
@@ -474,8 +469,9 @@ deploymentSpec:
           '
         - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
           \ *\n\ndef random_num(low: int, high: int) -> int:\n    \"\"\"Generate a\
-          \ random number between low and high.\"\"\"\n    import random\n\n    result\
-          \ = random.randint(low, high)\n    print(result)\n    return result\n\n"
+          \ random number between low and high.\"\"\"\n    import random  # noqa:\
+          \ PLC0415\n\n    result = random.randint(low, high)\n    print(result)\n\
+          \    return result\n\n"
         image: registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61
 pipelineInfo:
   description: Shows how to use dsl.If().
@@ -516,8 +512,7 @@ root:
           condition: inputs.parameter_values['pipelinechannel--flip-coin-Output']
             == 'tails'
       flip-coin:
-        cachingOptions:
-          enableCache: true
+        cachingOptions: {}
         componentRef:
           name: comp-flip-coin
         taskInfo:

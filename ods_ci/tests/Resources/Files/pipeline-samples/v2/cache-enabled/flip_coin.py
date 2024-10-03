@@ -51,20 +51,20 @@ def print_msg(msg: str):
     description="Shows how to use dsl.If().",
 )
 def flipcoin_pipeline():
-    flip = flip_coin().set_caching_options(False)
+    flip = flip_coin()
     with dsl.If(flip.output == "heads"):
-        random_num_head = random_num(low=0, high=9).set_caching_options(False)
+        random_num_head = random_num(low=0, high=9)
         with dsl.If(random_num_head.output > 5):
-            print_msg(msg="heads and %s > 5!" % random_num_head.output).set_caching_options(False)
+            print_msg(msg="heads and %s > 5!" % random_num_head.output)
         with dsl.If(random_num_head.output <= 5):
-            print_msg(msg="heads and %s <= 5!" % random_num_head.output).set_caching_options(False)
+            print_msg(msg="heads and %s <= 5!" % random_num_head.output)
 
     with dsl.If(flip.output == "tails"):
-        random_num_tail = random_num(low=10, high=19).set_caching_options(False)
+        random_num_tail = random_num(low=10, high=19)
         with dsl.If(random_num_tail.output > 15):
-            print_msg(msg="tails and %s > 15!" % random_num_tail.output).set_caching_options(False)
+            print_msg(msg="tails and %s > 15!" % random_num_tail.output)
         with dsl.If(random_num_tail.output <= 15):
-            print_msg(msg="tails and %s <= 15!" % random_num_tail.output).set_caching_options(False)
+            print_msg(msg="tails and %s <= 15!" % random_num_tail.output)
 
 
 if __name__ == "__main__":

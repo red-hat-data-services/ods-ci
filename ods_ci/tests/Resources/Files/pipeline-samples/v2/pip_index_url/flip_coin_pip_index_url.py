@@ -27,33 +27,43 @@
 # Note: when compiling the pipeline, the resulting yaml file only uses
 # PIP_INDEX_URL (this is a limitation of kfp 2.7.0). We need to manually
 # modify the yaml file to use PIP_TRUSTED_HOST.
-from kfp import compiler, dsl
-from kfp import kubernetes
+from kfp import compiler, dsl, kubernetes
+from kfp.dsl import PipelineTask
 
-common_base_image = "registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61"
+common_base_image = (
+    "registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61"
+)
 
 
-@dsl.component(base_image=common_base_image, pip_index_urls=['$PIP_INDEX_URL'], pip_trusted_hosts=['$PIP_TRUSTED_HOST'])
+def add_pip_index_configuration(task: PipelineTask):
+    kubernetes.use_config_map_as_env(
+        task,
+        config_map_name="ds-pipeline-custom-env-vars",
+        config_map_key_to_env={"pip_index_url": "PIP_INDEX_URL", "pip_trusted_host": "PIP_TRUSTED_HOST"},
+    )
+
+
+@dsl.component(base_image=common_base_image, pip_index_urls=["$PIP_INDEX_URL"], pip_trusted_hosts=["$PIP_TRUSTED_HOST"])
 def random_num(low: int, high: int) -> int:
     """Generate a random number between low and high."""
-    import random
+    import random  # noqa: PLC0415
 
     result = random.randint(low, high)
     print(result)
     return result
 
 
-@dsl.component(base_image=common_base_image, pip_index_urls=['$PIP_INDEX_URL'], pip_trusted_hosts=['$PIP_TRUSTED_HOST'])
+@dsl.component(base_image=common_base_image, pip_index_urls=["$PIP_INDEX_URL"], pip_trusted_hosts=["$PIP_TRUSTED_HOST"])
 def flip_coin() -> str:
     """Flip a coin and output heads or tails randomly."""
-    import random
+    import random  # noqa: PLC0415
 
     result = "heads" if random.randint(0, 1) == 0 else "tails"
     print(result)
     return result
 
 
-@dsl.component(base_image=common_base_image, pip_index_urls=['$PIP_INDEX_URL'], pip_trusted_hosts=['$PIP_TRUSTED_HOST'])
+@dsl.component(base_image=common_base_image, pip_index_urls=["$PIP_INDEX_URL"], pip_trusted_hosts=["$PIP_TRUSTED_HOST"])
 def print_msg(msg: str):
     """Print a message."""
     print(msg)
@@ -64,65 +74,35 @@ def print_msg(msg: str):
     description="Shows how to use dsl.If().",
 )
 def flipcoin_pipeline():
-    flip_task = flip_coin()
-    flip_task.set_caching_options(False)
-    kubernetes.use_config_map_as_env(
-        flip_task,
-        config_map_name='ds-pipeline-custom-env-vars',
-        config_map_key_to_env={'pip_index_url': 'PIP_INDEX_URL', 'pip_trusted_host': 'PIP_TRUSTED_HOST'}
-    )
+    flip_task = flip_coin().set_caching_options(False)
+    add_pip_index_configuration(flip_task)
 
     with dsl.If(flip_task.output == "heads"):
-        random_num_head_task = random_num(low=0, high=9)
-        random_num_head_task.set_caching_options(False)
-        kubernetes.use_config_map_as_env(
-            random_num_head_task,
-            config_map_name='ds-pipeline-custom-env-vars',
-            config_map_key_to_env={'pip_index_url': 'PIP_INDEX_URL', 'pip_trusted_host': 'PIP_TRUSTED_HOST'}
-        )
+        random_num_head_task = random_num(low=0, high=9).set_caching_options(False)
+        add_pip_index_configuration(random_num_head_task)
+
         with dsl.If(random_num_head_task.output > 5):
-            print_msg_task = print_msg(msg="heads and %s > 5!" % random_num_head_task.output)
-            print_msg_task.set_caching_options(False)
-            kubernetes.use_config_map_as_env(
-                print_msg_task,
-                config_map_name='ds-pipeline-custom-env-vars',
-                config_map_key_to_env={'pip_index_url': 'PIP_INDEX_URL', 'pip_trusted_host': 'PIP_TRUSTED_HOST'}
-            )
+            print_msg_task = print_msg(msg="heads and %s > 5!" % random_num_head_task.output).set_caching_options(False)
+            add_pip_index_configuration(print_msg_task)
 
         with dsl.If(random_num_head_task.output <= 5):
             print_msg_task = print_msg(msg="heads and %s <= 5!" % random_num_head_task.output)
             print_msg_task.set_caching_options(False)
-            kubernetes.use_config_map_as_env(
-                print_msg_task,
-                config_map_name='ds-pipeline-custom-env-vars',
-                config_map_key_to_env={'pip_index_url': 'PIP_INDEX_URL', 'pip_trusted_host': 'PIP_TRUSTED_HOST'}
-            )
+            add_pip_index_configuration(print_msg_task)
 
     with dsl.If(flip_task.output == "tails"):
-        random_num_tail_task = random_num(low=10, high=19)
-        random_num_tail_task.set_caching_options(False)
-        kubernetes.use_config_map_as_env(
-            random_num_tail_task,
-            config_map_name='ds-pipeline-custom-env-vars',
-            config_map_key_to_env={'pip_index_url': 'PIP_INDEX_URL', 'pip_trusted_host': 'PIP_TRUSTED_HOST'}
-        )
+        random_num_tail_task = random_num(low=10, high=19).set_caching_options(False)
+        add_pip_index_configuration(random_num_tail_task)
+
         with dsl.If(random_num_tail_task.output > 15):
             print_msg_task = print_msg(msg="tails and %s > 15!" % random_num_tail_task.output)
             print_msg_task.set_caching_options(False)
-            kubernetes.use_config_map_as_env(
-                print_msg_task,
-                config_map_name='ds-pipeline-custom-env-vars',
-                config_map_key_to_env={'pip_index_url': 'PIP_INDEX_URL', 'pip_trusted_host': 'PIP_TRUSTED_HOST'}
-            )
+            add_pip_index_configuration(print_msg_task)
 
         with dsl.If(random_num_tail_task.output <= 15):
             print_msg_task = print_msg(msg="tails and %s <= 15!" % random_num_tail_task.output)
             print_msg_task.set_caching_options(False)
-            kubernetes.use_config_map_as_env(
-                print_msg_task,
-                config_map_name='ds-pipeline-custom-env-vars',
-                config_map_key_to_env={'pip_index_url': 'PIP_INDEX_URL', 'pip_trusted_host': 'PIP_TRUSTED_HOST'}
-            )
+            add_pip_index_configuration(print_msg_task)
 
 
 if __name__ == "__main__":

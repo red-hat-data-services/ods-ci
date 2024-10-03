@@ -2,8 +2,9 @@
 
 from kfp import compiler, dsl
 
-
-common_base_image = "registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61"
+common_base_image = (
+    "registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61"
+)
 
 
 @dsl.component(base_image=common_base_image)
@@ -11,8 +12,8 @@ def send_file(
     file_size_bytes: int,
     outgoingfile: dsl.OutputPath(),
 ):
-    import os
-    import zipfile
+    import os  # noqa: PLC0415
+    import zipfile  # noqa: PLC0415
 
     def create_large_file(file_path, size_in_bytes):
         with open(file_path, "wb") as f:
@@ -34,8 +35,8 @@ def receive_file(
     incomingfile: dsl.InputPath(),
     saveartifact: dsl.OutputPath(),
 ):
-    import os
-    import shutil
+    import os  # noqa: PLC0415
+    import shutil  # noqa: PLC0415
 
     print("reading %s, size is %s" % (incomingfile, os.path.getsize(incomingfile)))
 
@@ -55,10 +56,10 @@ def test_uploaded_artifact(
     mlpipeline_minio_artifact_secret: str,
     bucket_name: str,
 ):
-    import base64
-    import json
+    import base64  # noqa: PLC0415
+    import json  # noqa: PLC0415
 
-    from minio import Minio
+    from minio import Minio  # noqa: PLC0415
 
     def inner_decode(my_str):
         return base64.b64decode(my_str).decode("utf-8")
@@ -95,20 +96,19 @@ def wire_up_pipeline(mlpipeline_minio_artifact_secret: str, bucket_name: str):
     file_size_mb = 20
     file_size_bytes = file_size_mb * 1024 * 1024
 
-    send_file_task = send_file(file_size_bytes=file_size_bytes)
+    send_file_task = send_file(file_size_bytes=file_size_bytes).set_caching_options(False)
 
     receive_file_task = receive_file(
         incomingfile=send_file_task.output,
-    )
+    ).set_caching_options(False)
 
     test_uploaded_artifact(
         previous_step=receive_file_task.output,
         file_size_bytes=file_size_bytes,
         mlpipeline_minio_artifact_secret=mlpipeline_minio_artifact_secret,
         bucket_name=bucket_name,
-    )
+    ).set_caching_options(False)
 
 
 if __name__ == "__main__":
-    compiler.Compiler().compile(wire_up_pipeline,
-                                package_path=__file__.replace(".py", "_compiled.yaml"))
+    compiler.Compiler().compile(wire_up_pipeline, package_path=__file__.replace(".py", "_compiled.yaml"))

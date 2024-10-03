@@ -14,7 +14,7 @@ def add_pip_index_configuration(task: PipelineTask):
     )
 
 
-@dsl.component(base_image=common_base_image)
+@dsl.component(base_image=common_base_image, pip_index_urls=["$PIP_INDEX_URL"], pip_trusted_hosts=["$PIP_TRUSTED_HOST"])
 def take_nap(naptime_secs: int) -> str:
     """Sleeps for secs"""
     from time import sleep  # noqa: PLC0415
@@ -24,7 +24,7 @@ def take_nap(naptime_secs: int) -> str:
     return "I'm awake now. Did I snore?"
 
 
-@dsl.component(base_image=common_base_image)
+@dsl.component(base_image=common_base_image, pip_index_urls=["$PIP_INDEX_URL"], pip_trusted_hosts=["$PIP_TRUSTED_HOST"])
 def wake_up(message: str):
     """Wakes up from nap printing a message"""
     print(message)

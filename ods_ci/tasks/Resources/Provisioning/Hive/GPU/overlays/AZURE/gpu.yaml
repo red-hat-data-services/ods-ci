@@ -1,6 +1,6 @@
 - op: replace
   path: /spec/template/spec/providerSpec/value/vmSize
   value: INSTANCE_TYPE
-- op: remove
-  path: /spec/template/spec/providerSpec/value/zone
-
+- op: replace
+  path: /spec/replicas
+  value: 1

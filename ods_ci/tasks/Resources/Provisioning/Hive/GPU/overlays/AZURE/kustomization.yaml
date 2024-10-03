@@ -8,3 +8,7 @@ patches:
   - path: gpu.yaml
     target:
       kind: MachineSet
+  - path: gpu-remove-zone.yaml
+    target:
+      kind: MachineSet
+      name: ".*[^(westus)]"  # regions without availability zones. If needed, add | <region name> after westus

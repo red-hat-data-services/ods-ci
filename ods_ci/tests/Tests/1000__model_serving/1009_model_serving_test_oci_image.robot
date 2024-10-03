@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation     Collection of CLI tests to validate the model serving stack for OVMS.
+Documentation     Collection of CLI tests to validate the model serving stack.
 Resource          ../../Resources/OCP.resource
 Resource          ../../Resources/CLI/ModelServing/llm.resource
 Library    OpenShiftLibrary

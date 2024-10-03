@@ -7,7 +7,6 @@ Suite Setup       Suite Setup
 Suite Teardown    Suite Teardown
 Test Tags         KServe-OCI
 
-
 *** Variables ***
 ${TEST_NS}=        tgis-ns
 ${RUNTIME_NAME}=  tgis-runtime
@@ -53,11 +52,9 @@ Verify User Can Serve And flan ovms Model using OCI image
     ...    namespace=${test_namespace}    validate_response=${FALSE}    port_forwarding=${use_port_forwarding}
     ${pod_names}=   Create List    ${pod_name}
     ${pod_restarts}=    Get Containers With Non Zero Restart Counts   ${pod_names}   namespace=${test_namespace}
-
     ${kserve_container_value}=    Get From Dictionary    ${pod_restarts}[${pod_name}]    kserve-container
     # Below check is for race condition ,
     Run Keyword If    ${kserve_container_value} > 1    Fail    The kserve-container restart should not be greater than 1
-
 
    [Teardown]    Run Keywords
    ...    Clean Up Test Project    test_ns=${test_namespace}

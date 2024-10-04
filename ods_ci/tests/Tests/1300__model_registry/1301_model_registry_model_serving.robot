@@ -91,6 +91,8 @@ Verify Model Registry Integration With Secured-DB
 Prepare Model Registry Test Setup
     [Documentation]    Suite setup steps for testing Model Registry.
     Set Library Search Order    SeleniumLibrary
+    ${NAMESPACE_MODEL_REGISTRY}=    Get Model Registry Namespace From DSC
+    Set Suite Variable    ${NAMESPACE_MODEL_REGISTRY}
     RHOSi Setup
     Enable Model Registry If Needed
     Component Should Be Enabled    modelregistry
@@ -101,8 +103,6 @@ Prepare Model Registry Test Setup
     # This should be created by the RHOAI operator when the component is enabled in the DSC.
     # We can grab the name of the NS by querying the DSC
     # Create Namespace In Openshift    ${NAMESPACE_MODEL_REGISTRY}
-    ${NAMESPACE_MODEL_REGISTRY}=    Get Model Registry Namespace From DSC
-    Set Suite Variable    ${NAMESPACE_MODEL_REGISTRY}
     Apply ServiceMeshMember Configuration
     Get Cluster Domain And Token
     Run Update Notebook Script
@@ -363,8 +363,7 @@ Enable Model Registry If Needed
     IF    "${management_state}" != "Managed"
             Set Component State    modelregistry    Managed
             Set Suite Variable    ${DISABLE_COMPONENT}    ${True}
-            ${ns}=    Get Model Registry Namespace From DSC
-            Wait For Namespace To Be Active    ${ns}    timeout=120s
+            Wait For Namespace To Be Active    ${NAMESPACE_MODEL_REGISTRY}    timeout=5m
     END
 
 Disable Model Registry If Needed

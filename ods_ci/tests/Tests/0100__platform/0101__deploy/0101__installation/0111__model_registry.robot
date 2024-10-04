@@ -43,8 +43,8 @@ Verify Model Registry Container Names
     [Documentation]  Verifies RHODS Model Registry deployment
     @{model_registry} =  Oc Get    kind=Pod    namespace=${MODEL_REGISTRY_NS}    api_version=v1
     ...    label_selector=app.kubernetes.io/part-of=model-registry-operator
-    ${containerNames} =    Create List     manager   kube-rbac-proxy
-    Verify Deployment    ${model_registry}    1    2    ${containerNames}
+    ${containerNames} =    Create List     manager
+    Verify Deployment    ${model_registry}    1    1    ${containerNames}
 
 Registry Suite Setup
     [Documentation]  Model Registry suite setup

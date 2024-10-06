@@ -36,6 +36,7 @@ Search Installed Operator
   [Arguments]  ${operator}
   Wait Until Element is Visible  //input[@data-test-id="item-filter"]  timeout=150
   Input text  //input[@data-test-id="item-filter"]  ${operator}
+  ODHDashboard.Maybe Wait For Dashboard Loading Spinner Page
 
 Is Operator Installed
   [Arguments]  ${operator}
@@ -48,9 +49,12 @@ Expand Installed Operator Menu
   [Arguments]  ${operator}
   Set Local Variable  ${operator_row}  //a[@data-test-operator-row="${operator}"]/../..
   Set Local Variable  ${operator_menu}  ${operator_row}//button[@data-test-id="kebab-button"]
+  Wait Until Element is Visible  ${operator_row}
   ${is_operator_menu_expanded} =  Is Installed Operator Menu Expanded  ${operator_menu}
   IF  "${is_operator_menu_expanded}" == "false"
-  ...             Click Element  ${operator_menu}
+      Wait Until Page Contains Element  ${operator_menu}  timeout=150
+      Click Element  ${operator_menu}
+  END
 
 Is Installed Operator Menu Expanded
   [Arguments]  ${menu}
@@ -58,14 +62,17 @@ Is Installed Operator Menu Expanded
   RETURN  ${is_expanded}
 
 Click Uninstall Operator
+  Wait Until Element is Visible    //button[@data-test-action="Uninstall Operator"]
   Press Keys  //button[@data-test-action="Uninstall Operator"]  RETURN
 
 Confirm Uninstall
+  #Scroll Element Into View   xpath=//input[@data-test="Delete all operand instances for this operator__checkbox"]
+  #Select Checkbox    xpath=//input[@data-test="Delete all operand instances for this operator__checkbox"]
   Click Button  //button[@data-test="confirm-action"]
 
 Wait Until Uninstallation Completes
   [Arguments]  ${operator}
-  Wait Until Page Does Not Contain Element  //a[@data-test-operator-row="${operator}"]  timeout=50
+  Wait Until Page Does Not Contain Element  //a[@data-test-operator-row="${operator}"]  timeout=600
 
 Operator Should Be Uninstalled
   [Arguments]  ${operator}

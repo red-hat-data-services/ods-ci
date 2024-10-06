@@ -17,7 +17,7 @@ Open OperatorHub
     OperatorHub Should Be Open
 
 Install ODH Operator
-    Install Operator    opendatahub
+    Install Operator    ${OPERATOR_DEPLOYMENT_NAME}
 
 Open OCP Console
     Open Page    ${OCP_CONSOLE_URL}

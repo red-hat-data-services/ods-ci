@@ -21,7 +21,7 @@ ${MODEL_FORMAT}=   pytorch       # vLLM
 ${PROTOCOL}=     grpc         # http
 ${OVERLAY}=      ${EMPTY}               # vllm
 ${GPU_TYPE}=     NVIDIA
-${RUNTIME_IMAGE}=  quay.io/modh/vllm@sha256:2e7f97b69d6e0aa7366ee6a841a7e709829136a143608bee859b1fe700c36d31
+${RUNTIME_IMAGE}=    ${EMPTY}
 
 *** Test Cases ***
 Verify User Can Serve And Query A bigscience/mt0-xxl Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
@@ -1318,6 +1318,7 @@ Setup Test Variables    # robocop: off=too-many-calls-in-keyword
     END
     IF   ${use_gpu}
         ${supported_gpu_type}=   Convert To Lowercase         ${GPU_TYPE}
+        Set Runtime Image    ${supported_gpu_type}
         IF  "${supported_gpu_type}" == "nvidia"
             ${limits}=    Create Dictionary    nvidia.com/gpu=1
         ELSE IF    "${supported_gpu_type}" == "amd"
@@ -1340,3 +1341,18 @@ Setup Test Variables    # robocop: off=too-many-calls-in-keyword
     Set Test Variable    ${endpoint}    ${MODELS_BUCKET.ENDPOINT}
     Set Test Variable    ${region}    ${MODELS_BUCKET.REGION}
     Set Log Level    INFO
+
+Set Runtime Image
+    [Documentation]    Sets up runtime variables for the Suite
+    [Arguments]    ${gpu_type}
+    IF  "${RUNTIME_IMAGE}" == "${EMPTY}"
+         IF  "${gpu_type}" == "nvidia"
+            Set Test Variable    ${runtime_image}    quay.io/modh/vllm@sha256:94e2d256da29891a865103f7e92a1713f0fd385ef611c6162526f4a297e70916
+         ELSE IF    "${gpu_type}" == "amd"
+            Set Test Variable    ${runtime_image}    quay.io/modh/vllm@sha256:9969e5273a492132b39ce25165c94480393bb87628f50c30d4de26a0afa56abd
+         ELSE
+             FAIL   msg=Provided GPU type is not yet supported. Only nvidia and amd gpu type are supported
+         END
+    ELSE
+        Log To Console    msg= Using the image provided from terminal
+    END

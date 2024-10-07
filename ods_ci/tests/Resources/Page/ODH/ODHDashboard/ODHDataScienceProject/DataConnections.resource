@@ -16,7 +16,7 @@ ${DC_ADD_BTN_1_XP}=             xpath=//*[@data-testid="add-data-connection-butt
 ${S3_BUCKET_DC_INPUT_XP}=       xpath=//*[@data-testid="field AWS_S3_BUCKET"]
 ${S3_DC_ADD_BTN}=               xpath=//*[@data-testid="data-connection-submit-button"]
 ${S3_DC_EDIT_BTN}=              xpath=//footer/button[.="Update data connection"]
-${DC_WORKBENCH_SELECTOR_XP}=    xpath=//ul[@aria-label="Notebook select"]/li
+${DC_WORKBENCH_SELECTOR_XP}=    xpath=//div[@data-testid="connect-existing-workbench-group"]//ul/li
 
 
 *** Keywords ***
@@ -47,25 +47,25 @@ Edit S3 Data Connection
 Set Connection Between Data Connection And Workbench
     [Documentation]    Connects a DataConnection to an existent workbench
     [Arguments]    ${workbench_title}
-    Wait Until Element Is Enabled    xpath=//button[@aria-label="Options menu"]
-    Click Element    xpath=//button[@aria-label="Options menu"]
-    Wait Until Page Contains Element    ${DC_WORKBENCH_SELECTOR_XP}/button[text()="${workbench_title}"]
-    Click Element                       ${DC_WORKBENCH_SELECTOR_XP}/button[text()="${workbench_title}"]
+    Wait Until Element Is Enabled    xpath=//button[@aria-label="Notebook select"]
+    Click Element    xpath=//button[@aria-label="Notebook select"]
+    Wait Until Page Contains Element    ${DC_WORKBENCH_SELECTOR_XP}/button[.="${workbench_title}"]
+    Click Element                       ${DC_WORKBENCH_SELECTOR_XP}/button[.="${workbench_title}"]
 
 Data Connection Should Be Listed
     [Documentation]    Checks a Data Connection is listed in DS Project details page
     [Arguments]     ${name}   ${type}   ${connected_workbench}
-    ${connection_xp}=    Set Variable    ${DC_SECTION_XP}//tr[td[@data-label="Name"]//div[text()="${name}"]]
+    ${connection_xp}=    Set Variable    ${DC_SECTION_XP}//tr[td[@data-label="Name"]//div[.="${name}"]]
     Run Keyword And Continue On Failure     Page Should Contain Element    ${connection_xp}
-    Run Keyword And Continue On Failure     Page Should Contain Element    ${connection_xp}/td[text()=" ${type}"]
+    Run Keyword And Continue On Failure     Page Should Contain Element    ${connection_xp}/td[.=" ${type}"]
     IF    "${connected_workbench}" == "${NONE}"
         Run Keyword And Continue On Failure    Page Should Contain Element
-        ...    ${connection_xp}/td[text()="No connections"]
+        ...    ${connection_xp}/td[.="No connections"]
     ELSE
         FOR    ${index}    ${workbench_title}    IN ENUMERATE    @{connected_workbench}
             Log    ${index}: ${workbench_title}
             Run Keyword And Continue On Failure    Page Should Contain Element
-            ...    ${connection_xp}/td[@data-label="Connected workbenches"]//*[text()="${workbench_title}"]
+            ...    ${connection_xp}/td[@data-label="Connected workbenches"]//*[.="${workbench_title}"]
         END
     END
 
@@ -73,7 +73,7 @@ Data Connection Should Not Be Listed
     [Documentation]    Checks a Data Connection is not listed in DS Project details page
     [Arguments]     ${name}
     Run Keyword And Continue On Failure     Wait Until Page Does Not Contain Element
-    ...    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/*/div[text()="${name}"]]
+    ...    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/*/div[.="${name}"]]
 
 Get Openshift Secret From Data Connection
     [Documentation]    Retrieves name of Openshift secret corresponding to a given S3 Data Connection based on Dispayed name in DS Project details page
@@ -103,7 +103,7 @@ Fill Data Connection Form
         Log    msg=you are not connecting any workbenchs to ${dc_name} DataConnection
     ELSE
         Run Keyword And Continue On Failure
-        ...    Element Should Be Enabled    xpath=//div[contains(@class,"modal")]//button[@aria-label="Options menu"]
+        ...    Element Should Be Enabled    xpath=//div[contains(@class,"modal")]//button[@aria-label="Notebook select"]
         FOR    ${workbench_title}    IN    @{connected_workbench}
             Set Connection Between Data Connection And Workbench    ${workbench_title}
             Run Keyword And Continue On Failure     Element Should Be Enabled    ${S3_DC_ADD_BTN}
@@ -137,7 +137,7 @@ Recreate S3 Data Connection
     ...            ${connected_workbench}=${NONE}    ${press_cancel}=${FALSE}    ${aws_bucket_name}=${NONE}
     Open Data Science Project Details Page       project_title=${project_title}    tab_id=data-connections
     ${is_exist}=  Run Keyword And Return Status
-    ...    Wait Until Page Contains Element    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/*/div[text()="${dc_name}"]]
+    ...    Wait Until Page Contains Element    ${DC_SECTION_XP}//tr[td[@data-label="Name"]/*/div[.="${dc_name}"]]
     IF  ${is_exist}
         Log    Data Connection '${dc_name}' already exists, updating connection    console=True
         Edit S3 Data Connection    project_title=${project_title}    dc_name=${dc_name}    new_dc_name=${dc_name}${SPACE}

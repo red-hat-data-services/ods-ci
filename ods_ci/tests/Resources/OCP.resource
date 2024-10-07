@@ -124,6 +124,16 @@ Wait For Pods To Be Ready
         Length Should Be  ${replicas}  ${exp_replicas}
     END
 
+Wait For Deployment Replica To Be Ready
+  [Documentation]   Wait for Deployment of ${label_selector} in ${namespace} to have the Replica-Set Ready
+  [Arguments]     ${namespace}     ${label_selector}    ${timeout}=600s
+  Log To Console    Waiting for Deployment with label "${label_selector}" in Namespace "${namespace}", to have desired Replica-Set
+  ${output} =    Wait Until Keyword Succeeds    ${timeout}   3s    Run And Verify Command
+  ...    oc wait -n ${namespace} --for condition\=ready pod -l "${label_selector}" --timeout\=${timeout}
+  ...    print_to_log=${FALSE}
+  Run And Verify Command
+  ...    oc get deployment -l ${label_selector} -n ${namespace} -o json | jq -e '.status | .replicas \=\= .readyReplicas'
+
 Wait For Pods To Succeed
     [Arguments]    ${label_selector}    ${namespace}    ${timeout}=300s    ${exp_replicas}=${NONE}
     Wait Until Keyword Succeeds    ${timeout}    3s
@@ -292,3 +302,18 @@ Get Resource Attribute
     Should Be Equal    "${rc}"    "0"    msg=${value}
     Log To Console    ${resource_type} ${resource_name} in the namespace ${namespace} attribute ${attribute_path} value is ${value}
     RETURN    ${value}
+
+Wait For Namespace To Be Active
+    [Documentation]    Waits for a given namespace to become active
+    [Arguments]    ${namespace}    ${timeout}=30s
+    WHILE    True    limit=${timeout}
+        ${rc}=    Run And Return Rc    oc get namespace/${namespace}
+        IF    "${rc}" == "0"
+            BREAK
+        END
+    END
+    ${rc}  ${value}=    Run And Return Rc And Output
+    ...    oc wait --for jsonpath='{.status.phase}=Active' --timeout=${timeout} namespace/${namespace}
+    Log    ${rc}
+    Log    ${value}
+    Should Be Equal As Integers    ${rc}    0

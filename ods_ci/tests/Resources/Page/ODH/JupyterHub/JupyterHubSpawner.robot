@@ -30,10 +30,10 @@ ${KFNBC_MODAL_CLOSE_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Close"]
 ${KFNBC_MODAL_X_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[@aria-label="Close"]
 ${KFNBC_CONTROL_PANEL_HEADER_XPATH} =    //h1[.="Notebook server control panel"]
 ${KFNBC_ENV_VAR_NAME_PRE} =    //span[.="Variable name"]/../../../div[@class="pf-v5-c-form__group-control"]
-${DEFAULT_PYTHON_VER} =    3.9
+${DEFAULT_PYTHON_VER} =    3.11
 ${PREVIOUS_PYTHON_VER} =    3.9
-${DEFAULT_NOTEBOOK_VER} =    2024.1
-${PREVIOUS_NOTEBOOK_VER} =    2023.2
+${DEFAULT_NOTEBOOK_VER} =    2024.2
+${PREVIOUS_NOTEBOOK_VER} =    2024.1
 
 
 *** Keywords ***
@@ -77,6 +77,26 @@ Select Notebook Image
             Fail    Unknown image version requested
         END
     END
+
+    IF  "${version}"=="default"
+        # For Jupyter 4, we need to update global default variable values (images 2024b and newer)
+        # This calls method from JupyterLibrary Version.resource module
+        # https://github.com/robots-from-jupyter/robotframework-jupyterlibrary/blob/9e25fcb89a5f1a723c59e9b96706e4c638e0d9be/src/JupyterLibrary/clients/jupyterlab/Version.resource
+        Update Globals For JupyterLab 4
+    ELSE
+        # Let's reset the JupyterLibrary settings so that global variables for Jupyter 3 (default) are in place.
+        Update Globals For JupyterLab 3 Custom
+    END
+
+Update Globals For JupyterLab 3 Custom
+    [Documentation]    Replace current selectors with JupyterLab 3-specific ones.
+    ...    This is the custom implementation since the original one doesn't really
+    ...    reverts defaults if they had been set to Jupyter 4 in the past already.
+    Set Global Variable    ${CM VERSION}    ${5}
+    Set Global Variable    ${CM CSS EDITOR}    .CodeMirror
+    Set Global Variable    ${CM JS INSTANCE}    .CodeMirror
+    Set Global Variable    ${JLAB CSS ACTIVE INPUT}    ${JLAB CSS ACTIVE CELL} ${CM CSS EDITOR}
+    Log    JupyterLab 3 is now the current version.
 
 Verify Version Dropdown Is Present
     [Documentation]    Validates the version dropdown for a given Notebook image
@@ -354,11 +374,6 @@ Spawn Notebook With Arguments  # robocop: disable
             Run Keyword And Warn On Failure   Login To Openshift  ${username}  ${password}  ${auth_type}
             ${authorization_required} =  Is Service Account Authorization Required
             IF  ${authorization_required}  Authorize jupyterhub service account
-
-            # For Jupyter 4, we need to update global default variable values (images 2024b and newer)
-            # This calls method from JupyterLibrary Version.resource module
-            # TODO - shall be uncommented once the 2024b images will land into the product
-            # IF  "${version}"=="default"  Update Globals For JupyterLab 4
 
             Wait Notebook To Be Loaded  ${image}    ${version}
             ${spawn_fail} =  Has Spawn Failed

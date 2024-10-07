@@ -58,7 +58,6 @@ Verify Pipelines Integration With Elyra When Using Standard Data Science Based I
     PyTorch       Datascience with Python 3.11 (UBI9)    pytorch pipeline
     TensorFlow    Datascience with Python 3.11 (UBI9)    tensorflow pipeline
     TrustyAI      Datascience with Python 3.11 (UBI9)    trustyai pipeline
-    HabanaAI      Datascience with Python 3.11 (UBI8)    habanaai pipeline
 
 
 *** Keywords ***

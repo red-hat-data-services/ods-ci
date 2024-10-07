@@ -6,7 +6,7 @@ Resource         ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/
 
 *** Variables ***
 ${PROJECT}=    dsp-upgrade-testing
-${PIPELINE_LONGRUNNING_FILEPATH}=    tests/Resources/Files/pipeline-samples/v2/cache-disabled/pip_index_url/take_nap_pipeline_root_compiled.yaml  # robocop: disable:line-too-long
+${PIPELINE_LONGRUNNING_FILEPATH}=    tests/Resources/Files/pipeline-samples/v2/cache-disabled/pip_index_url/take_nap_pipeline_compiled.yaml  # robocop: disable:line-too-long
 
 
 *** Keywords ***

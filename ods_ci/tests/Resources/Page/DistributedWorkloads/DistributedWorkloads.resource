@@ -182,8 +182,8 @@ Run Training Operator ODH Test
         FAIL    ${TEST_NAME} failed
     END
 
-Prepare Codeflare E2E Test Suite
-    [Documentation]    Prepare Codeflare E2E Core Test Suite
+Prepare DistributedWorkloads Integration Test Suite
+    [Documentation]    Prepare DistributedWorkloads Integration Test Suite
     Log To Console    "Restarting kueue"
     Restart Kueue
 
@@ -196,7 +196,7 @@ Prepare Codeflare E2E Test Suite
     IF    ${result.rc} != 0
         FAIL    Unable to retrieve odh compiled binary
     END
-    Create Directory    %{WORKSPACE}/codeflare-odh-logs
+    Create Directory    %{WORKSPACE}/distributed-workloads-odh-logs
     Log To Console    "Retrieving user tokens"
     ${common_user_token} =    Generate User Token    ${NOTEBOOK_USER_NAME}    ${NOTEBOOK_USER_PASSWORD}
     Set Suite Variable    ${NOTEBOOK_USER_TOKEN}   ${common_user_token}
@@ -204,8 +204,8 @@ Prepare Codeflare E2E Test Suite
     Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
     RHOSi Setup
 
-Teardown Codeflare E2E Test Suite
-    [Documentation]    Teardown Codeflare E2E Test Suite
+Teardown DistributedWorkloads Integration Test Suite
+    [Documentation]    Teardown DistributedWorkloads Integration Test Suite
     Log To Console    "Log back as cluster admin"
     Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
     Log To Console    "Removing test binaries"
@@ -220,8 +220,8 @@ Generate User Token
     Should Be Equal As Integers    ${rc}    ${0}
     RETURN    ${out}
 
-Run Codeflare ODH Test
-    [Documentation]    Run Codeflare ODH Test
+Run DistributedWorkloads ODH Test
+    [Documentation]    Run DistributedWorkloads ODH Test
     [Arguments]    ${TEST_NAME}    ${RAY_IMAGE}
     Log To Console    "Running test: ${TEST_NAME}"
     ${result} =    Run Process    ./${ODH_BINARY_NAME} -test.run ${TEST_NAME}
@@ -230,7 +230,7 @@ Run Codeflare ODH Test
     ...    env:CODEFLARE_TEST_TIMEOUT_SHORT=5m
     ...    env:CODEFLARE_TEST_TIMEOUT_MEDIUM=10m
     ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
-    ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-odh-logs
+    ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/distributed-workloads-odh-logs
     ...    env:CODEFLARE_TEST_RAY_IMAGE=${RAY_IMAGE}
     ...    env:ODH_NAMESPACE=${APPLICATIONS_NAMESPACE}
     ...    env:NOTEBOOK_USER_NAME=${NOTEBOOK_USER_NAME}

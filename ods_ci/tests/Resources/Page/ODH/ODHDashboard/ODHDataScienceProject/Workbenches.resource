@@ -222,6 +222,16 @@ Select Workbench Jupyter Image
         END
     END
 
+    IF  "${version}"=="previous"
+        # Let's reset the JupyterLibrary settings so that global variables for Jupyter 3 (default) are in place.
+        Update Globals For JupyterLab 3 Custom
+    ELSE
+        # For Jupyter 4, we need to update global default variable values (images 2024b and newer)
+        # This calls method from JupyterLibrary Version.resource module
+        # https://github.com/robots-from-jupyter/robotframework-jupyterlibrary/blob/9e25fcb89a5f1a723c59e9b96706e4c638e0d9be/src/JupyterLibrary/clients/jupyterlab/Version.resource
+        Update Globals For JupyterLab 4
+    END
+
 Verify Version Selection Dropdown
     [Documentation]    Verifies the version selection dropdown is present
     ...                uses the recommended image by default, and has two options

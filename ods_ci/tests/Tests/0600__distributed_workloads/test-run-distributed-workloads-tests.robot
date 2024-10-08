@@ -1,11 +1,11 @@
 *** Settings ***
-Documentation     Codeflare operator E2E tests - https://github.com/opendatahub-io/distributed-workloads/tree/main/tests/odh
-Suite Setup       Prepare Codeflare E2E Test Suite
-Suite Teardown    Teardown Codeflare E2E Test Suite
+Documentation     Distributed Workloads Integration tests - https://github.com/opendatahub-io/distributed-workloads/tree/main/tests/odh
+Suite Setup       Prepare DistributedWorkloads Integration Test Suite
+Suite Teardown    Teardown DistributedWorkloads Integration Test Suite
 Library           OperatingSystem
 Library           Process
-Resource          ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
-Resource          ../../../../tests/Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
+Resource          ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
+Resource          ../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 
 
 *** Variables ***
@@ -20,8 +20,8 @@ Run TestKueueRayCpu ODH test
     ...     Tier1
     ...     DistributedWorkloads
     ...     Training
-    ...     CodeflareOperator
-    Run Codeflare ODH Test    TestMnistRayCpu    ${RAY_CUDA_IMAGE}
+    ...     WorkloadsOrchestration
+    Run DistributedWorkloads ODH Test    TestMnistRayCpu    ${RAY_CUDA_IMAGE}
 
 Run TestKueueRayGpu ODH test
     [Documentation]    Run Go ODH test: TestKueueRayGpu
@@ -29,8 +29,8 @@ Run TestKueueRayGpu ODH test
     ...     Tier1
     ...     DistributedWorkloads
     ...     Training
-    ...     CodeflareOperator
-    Run Codeflare ODH Test    TestMnistRayGpu    ${RAY_CUDA_IMAGE}
+    ...     WorkloadsOrchestration
+    Run DistributedWorkloads ODH Test    TestMnistRayGpu    ${RAY_CUDA_IMAGE}
 
 Run TestRayTuneHPOCpu ODH test
     [Documentation]    Run Go ODH test: TestMnistRayTuneHpoCpu
@@ -38,8 +38,8 @@ Run TestRayTuneHPOCpu ODH test
     ...     Tier1
     ...     DistributedWorkloads
     ...     Training
-    ...     CodeflareOperator
-    Run Codeflare ODH Test    TestMnistRayTuneHpoCpu    ${RAY_CUDA_IMAGE}
+    ...     WorkloadsOrchestration
+    Run DistributedWorkloads ODH Test    TestMnistRayTuneHpoCpu    ${RAY_CUDA_IMAGE}
 
 Run TestRayTuneHPOGpu ODH test
     [Documentation]    Run Go ODH test: TestMnistRayTuneHpoGpu
@@ -47,8 +47,8 @@ Run TestRayTuneHPOGpu ODH test
     ...     Tier1
     ...     DistributedWorkloads
     ...     Training
-    ...     CodeflareOperator
-    Run Codeflare ODH Test    TestMnistRayTuneHpoGpu    ${RAY_CUDA_IMAGE}
+    ...     WorkloadsOrchestration
+    Run DistributedWorkloads ODH Test    TestMnistRayTuneHpoGpu    ${RAY_CUDA_IMAGE}
 
 Run TestKueueCustomRayCpu ODH test
     [Documentation]    Run Go ODH test: TestKueueCustomRayCpu
@@ -56,8 +56,8 @@ Run TestKueueCustomRayCpu ODH test
     ...     Tier1
     ...     DistributedWorkloads
     ...     Training
-    ...     CodeflareOperator
-    Run Codeflare ODH Test    TestMnistCustomRayImageCpu    ${RAY_TORCH_CUDA_IMAGE}
+    ...     WorkloadsOrchestration
+    Run DistributedWorkloads ODH Test    TestMnistCustomRayImageCpu    ${RAY_TORCH_CUDA_IMAGE}
 
 Run TestKueueCustomRayGpu ODH test
     [Documentation]    Run Go ODH test: TestKueueCustomRayGpu
@@ -66,5 +66,5 @@ Run TestKueueCustomRayGpu ODH test
     ...     Tier1
     ...     DistributedWorkloads
     ...     Training
-    ...     CodeflareOperator
-    Run Codeflare ODH Test    TestMnistCustomRayImageGpu    ${RAY_TORCH_CUDA_IMAGE}
+    ...     WorkloadsOrchestration
+    Run DistributedWorkloads ODH Test    TestMnistCustomRayImageGpu    ${RAY_TORCH_CUDA_IMAGE}

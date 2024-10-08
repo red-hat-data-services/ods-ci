@@ -10,6 +10,7 @@ ${CODEFLARE-SDK-API_URL}                 %{CODEFLARE-SDK-API_URL=https://api.git
 ${CODEFLARE-SDK_DIR}                     codeflare-sdk
 ${CODEFLARE-SDK_REPO_URL}                %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
 ${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}  https://github.com/opendatahub-io/distributed-workloads/releases/latest/download
+${RAY_IMAGE}                             quay.io/modh/ray@sha256:0d715f92570a2997381b7cafc0e224cfa25323f18b9545acfd23bc2b71576d06
 ${FMS_HF_TUNING_IMAGE}                   quay.io/modh/fms-hf-tuning@sha256:f8f732c340488734bf9023953d14bb2410991bd3ff2a519ad2ce07c531353797
 ${NOTEBOOK_IMAGE}                        quay.io/modh/odh-generic-data-science-notebook@sha256:9d7f80080a453bcf7dee01b986df9ee811ee74f6f433c601a8b67d283c160547
 ${NOTEBOOK_USER_NAME}                    ${TEST_USER_3.USERNAME}
@@ -182,8 +183,8 @@ Run Training Operator ODH Test
         FAIL    ${TEST_NAME} failed
     END
 
-Prepare Codeflare E2E Test Suite
-    [Documentation]    Prepare Codeflare E2E Core Test Suite
+Prepare DistributedWorkloads Integration Test Suite
+    [Documentation]    Prepare DistributedWorkloads Integration Test Suite
     Log To Console    "Restarting kueue"
     Restart Kueue
 
@@ -196,7 +197,7 @@ Prepare Codeflare E2E Test Suite
     IF    ${result.rc} != 0
         FAIL    Unable to retrieve odh compiled binary
     END
-    Create Directory    %{WORKSPACE}/codeflare-odh-logs
+    Create Directory    %{WORKSPACE}/distributed-workloads-odh-logs
     Log To Console    "Retrieving user tokens"
     ${common_user_token} =    Generate User Token    ${NOTEBOOK_USER_NAME}    ${NOTEBOOK_USER_PASSWORD}
     Set Suite Variable    ${NOTEBOOK_USER_TOKEN}   ${common_user_token}
@@ -204,8 +205,8 @@ Prepare Codeflare E2E Test Suite
     Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
     RHOSi Setup
 
-Teardown Codeflare E2E Test Suite
-    [Documentation]    Teardown Codeflare E2E Test Suite
+Teardown DistributedWorkloads Integration Test Suite
+    [Documentation]    Teardown DistributedWorkloads Integration Test Suite
     Log To Console    "Log back as cluster admin"
     Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
     Log To Console    "Removing test binaries"
@@ -220,9 +221,9 @@ Generate User Token
     Should Be Equal As Integers    ${rc}    ${0}
     RETURN    ${out}
 
-Run Codeflare ODH Test
-    [Documentation]    Run Codeflare ODH Test
-    [Arguments]    ${TEST_NAME}    ${RAY_IMAGE}
+Run DistributedWorkloads ODH Test
+    [Documentation]    Run DistributedWorkloads ODH Test
+    [Arguments]    ${TEST_NAME}    ${DW_RAY_IMAGE}
     Log To Console    "Running test: ${TEST_NAME}"
     ${result} =    Run Process    ./${ODH_BINARY_NAME} -test.run ${TEST_NAME}
     ...    shell=true
@@ -230,8 +231,8 @@ Run Codeflare ODH Test
     ...    env:CODEFLARE_TEST_TIMEOUT_SHORT=5m
     ...    env:CODEFLARE_TEST_TIMEOUT_MEDIUM=10m
     ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
-    ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-odh-logs
-    ...    env:CODEFLARE_TEST_RAY_IMAGE=${RAY_IMAGE}
+    ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/distributed-workloads-odh-logs
+    ...    env:CODEFLARE_TEST_RAY_IMAGE=${DW_RAY_IMAGE}
     ...    env:ODH_NAMESPACE=${APPLICATIONS_NAMESPACE}
     ...    env:NOTEBOOK_USER_NAME=${NOTEBOOK_USER_NAME}
     ...    env:NOTEBOOK_USER_TOKEN=${NOTEBOOK_USER_TOKEN}

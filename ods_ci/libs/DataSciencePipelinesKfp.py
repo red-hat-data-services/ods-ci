@@ -461,7 +461,6 @@ class DataSciencePipelinesKfp:
             current_path = os.getcwd()
         my_source = self.import_souce_code(f"{current_path}/tests/Resources/Files/pipeline-samples/v2/{source_code}")
         pipeline_func = getattr(my_source, fn)
-
         # pipeline_params
         # there are some special keys to retrieve argument values dynamically
         # in pipeline v2, we must match the parameters names

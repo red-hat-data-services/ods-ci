@@ -71,8 +71,10 @@ Verify Model Registry Integration With Secured-DB
     ...         workbench_namespace=${PRJ_TITLE}
     Upload File In The Workbench     filepath=${JUPYTER_NOTEBOOK_FILEPATH}    workbench_title=${WORKBENCH_TITLE}
     ...         workbench_namespace=${PRJ_TITLE}
-    Download Python Client Dependencies    ${MR_PYTHON_CLIENT_FILES}    ${MR_PYTHON_CLIENT_WHL_VERSION}
-    Upload Python Client Files In The Workbench    ${MR_PYTHON_CLIENT_FILES}
+    # In the latest minimal python image these dependencies are not found by pip even though the UI shows them to be 
+    # present. Switch to installing model registry from pip directly.
+    # Download Python Client Dependencies    ${MR_PYTHON_CLIENT_FILES}    ${MR_PYTHON_CLIENT_WHL_VERSION}
+    # Upload Python Client Files In The Workbench    ${MR_PYTHON_CLIENT_FILES}
     Upload Certificate To Jupyter Notebook    ${CERTS_DIRECTORY}/domain.crt
     Upload Certificate To Jupyter Notebook    openshift_ca.crt
     Jupyter Notebook Can Query Model Registry     ${JUPYTER_NOTEBOOK}

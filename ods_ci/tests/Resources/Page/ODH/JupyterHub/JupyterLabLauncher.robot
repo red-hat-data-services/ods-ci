@@ -145,7 +145,9 @@ Get XY Python Version From Jupyterlab
     [Documentation]    Fetches the X.Y Python version from the current Jupyterlab instance
     ${output}=    Run Cell And Get Output    !python --version
     ${output}=    Fetch From Right    ${output}    ${SPACE}
-    ${vers}=    Get Substring    ${output}    0    3
+    # Y and Z can be > len 1, split on "." instead of getting substring from indices
+    @{split_out}=    Split String    ${output}   separator=.
+    ${vers}=    Set Variable   ${split_out}[0].${split_out}[1]
     RETURN    ${vers}
 
 Maybe Select Kernel

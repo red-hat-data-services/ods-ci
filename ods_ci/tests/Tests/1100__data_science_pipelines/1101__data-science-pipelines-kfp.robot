@@ -35,7 +35,7 @@ Verify Users Can Create And Run A Pipeline That Uses Only Packages From Base Ima
     ...    username=${TEST_USER_3.USERNAME}
     ...    password=${TEST_USER_3.PASSWORD}
     ...    project=${PROJECT_NAME}
-    ...    python_file=flip_coin.py
+    ...    python_file=cache-disabled/flip_coin.py
     ...    method_name=flipcoin_pipeline
     ...    status_check_timeout=180
     ...    pipeline_params=${emtpy_dict}
@@ -54,7 +54,7 @@ Verify Users Can Create And Run A Pipeline That Uses Custom Python Packages To I
     ...    username=${TEST_USER_3.USERNAME}
     ...    password=${TEST_USER_3.PASSWORD}
     ...    project=${PROJECT_NAME}
-    ...    python_file=iris_pipeline.py
+    ...    python_file=cache-disabled/iris_pipeline.py
     ...    method_name=my_pipeline
     ...    status_check_timeout=180
     ...    pipeline_params=${emtpy_dict}
@@ -71,7 +71,7 @@ Verify Upload Download In Data Science Pipelines Using The kfp Python Package
     ...    username=${TEST_USER_3.USERNAME}
     ...    password=${TEST_USER_3.PASSWORD}
     ...    project=${PROJECT_NAME}
-    ...    python_file=upload_download.py
+    ...    python_file=cache-disabled/upload_download.py
     ...    method_name=wire_up_pipeline
     ...    status_check_timeout=180
     ...    pipeline_params=${upload_download_dict}
@@ -91,7 +91,7 @@ Verify Ods Users Can Create And Run A Data Science Pipeline With Ray Using The k
     ...    username=${TEST_USER_3.USERNAME}
     ...    password=${TEST_USER_3.PASSWORD}
     ...    project=${PROJECT_NAME}
-    ...    python_file=ray_integration.py
+    ...    python_file=cache-disabled/ray_integration.py
     ...    method_name=ray_integration
     ...    status_check_timeout=600
     ...    pipeline_params=${ray_dict}

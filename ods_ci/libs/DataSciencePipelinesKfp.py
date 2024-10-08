@@ -460,7 +460,7 @@ class DataSciencePipelinesKfp:
         if current_path is None:
             current_path = os.getcwd()
         my_source = self.import_souce_code(
-            f"{current_path}/tests/Resources/Files/pipeline-samples/v2/cache-disabled/{source_code}"
+            f"{current_path}/tests/Resources/Files/pipeline-samples/v2/{source_code}"
         )
         pipeline_func = getattr(my_source, fn)
 

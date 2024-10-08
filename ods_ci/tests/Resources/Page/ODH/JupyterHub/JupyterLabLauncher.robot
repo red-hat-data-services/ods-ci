@@ -135,21 +135,22 @@ Run Cell And Get Output
     RETURN    ${output}
 
 Python Version Check
-  [Arguments]  ${expected_version}=3.8
-  Add And Run JupyterLab Code Cell In Active Notebook  !python --version
-  Wait Until JupyterLab Code Cell Is Not Active
-  #Get the text of the last output cell
-  ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
-  #start is inclusive, end exclusive, get x.y from Python x.y.z string
-  ${output} =  Fetch From Right  ${output}  ${SPACE}
-  ${vers} =  Get Substring  ${output}  0  3
-  ${status} =  Run Keyword And Return Status  Should Match  ${vers}  ${expected_version}
-  IF  '${status}' == 'FAIL'  Run Keyword And Continue On Failure  FAIL  "Expected Python at version ${expected_version}, but found at v ${vers}"
+    [Documentation]    Checks that the X.Y python version of the current Jupyterlab instance matches an expected one
+    [Arguments]    ${expected_version}=3.8
+    ${vers} =  Get XY Python Version From Jupyterlab
+    ${status} =  Run Keyword And Return Status  Should Match  ${vers}  ${expected_version}
+    IF  '${status}' == 'FAIL'  Run Keyword And Continue On Failure  FAIL  "Expected Python at version ${expected_version}, but found at v ${vers}"    # robocop: disable
 
+Get XY Python Version From Jupyterlab
+    [Documentation]    Fetches the X.Y Python version from the current Jupyterlab instance
+    ${output}=    Run Cell And Get Output    !python --version
+    ${output}=    Fetch From Right    ${output}    ${SPACE}
+    ${vers}=    Get Substring    ${output}    0    3
+    RETURN    ${vers}
 
 Maybe Select Kernel
-  ${is_kernel_selected} =  Run Keyword And Return Status  Page Should Not Contain Element  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]
-  IF  not ${is_kernel_selected}  Click Button  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]/..
+    ${is_kernel_selected} =  Run Keyword And Return Status  Page Should Not Contain Element  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]
+    IF  not ${is_kernel_selected}  SeleniumLibrary.Click Button  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]/..
 
 Clean Up Server
     [Documentation]    Cleans up user server and checks that everything has been removed

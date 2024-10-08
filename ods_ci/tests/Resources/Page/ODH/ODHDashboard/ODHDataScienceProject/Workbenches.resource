@@ -215,10 +215,8 @@ Select Workbench Jupyter Image
     IF    "${version}" != "${NONE}"
         IF    "${version}"=="default"
             Verify Version Selection Dropdown
-            Update Globals For JupyterLab 4
         ELSE IF    "${version}"=="previous"
             Select Workbench Image Version    ${version}
-            Update Globals For JupyterLab 3 Custom
         ELSE
             Fail    ${version} does not exist, use default/previous
         END

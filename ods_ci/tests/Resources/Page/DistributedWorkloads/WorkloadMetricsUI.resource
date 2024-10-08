@@ -41,8 +41,8 @@ Select Distributed Workload Project By Name
     [Documentation]    Select the project in distributed workload metrics page by project name
     [Arguments]    ${project_name}
     Wait Until Element Is Visible    ${PROJECT_XP}   timeout=20
-    Click Element    xpath://*[@data-testid="project-selector-dropdown"]
-    Click Element    xpath://*[@role="menuitem" and string()="${project_name}"]
+    Click Element    xpath://button[@id='project-selector']
+    Click Element    xpath://button[@role="menuitem" and string()="${project_name}"]
 
 Check Expected String Contains
     [Documentation]    Check Expected String Contains with the xpath prvoided get text

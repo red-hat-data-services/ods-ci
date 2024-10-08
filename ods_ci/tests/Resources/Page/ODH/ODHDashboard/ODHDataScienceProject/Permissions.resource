@@ -55,7 +55,7 @@ Select Permission Type
 Save Permission
     Element Should Be Enabled    ${SAVE_BUTTON}
     Click Element    ${SAVE_BUTTON}
-    Wait Until Page Does Not Contain Element    ${SAVE_BUTTON}
+    Wait Until Page Does Not Contain Element    ${SAVE_BUTTON}    timeout=30s
 
 Assign ${permission_type} Permissions To Group ${group_name}
     [Documentation]    Assign the user ${group_name} and level of permission ${permission_type}

@@ -10,6 +10,7 @@ ${CODEFLARE-SDK-API_URL}                 %{CODEFLARE-SDK-API_URL=https://api.git
 ${CODEFLARE-SDK_DIR}                     codeflare-sdk
 ${CODEFLARE-SDK_REPO_URL}                %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
 ${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}  https://github.com/opendatahub-io/distributed-workloads/releases/latest/download
+${RAY_IMAGE}                             quay.io/modh/ray@sha256:0d715f92570a2997381b7cafc0e224cfa25323f18b9545acfd23bc2b71576d06
 ${FMS_HF_TUNING_IMAGE}                   quay.io/modh/fms-hf-tuning@sha256:f8f732c340488734bf9023953d14bb2410991bd3ff2a519ad2ce07c531353797
 ${NOTEBOOK_IMAGE}                        quay.io/modh/odh-generic-data-science-notebook@sha256:9d7f80080a453bcf7dee01b986df9ee811ee74f6f433c601a8b67d283c160547
 ${NOTEBOOK_USER_NAME}                    ${TEST_USER_3.USERNAME}
@@ -222,7 +223,7 @@ Generate User Token
 
 Run DistributedWorkloads ODH Test
     [Documentation]    Run DistributedWorkloads ODH Test
-    [Arguments]    ${TEST_NAME}    ${RAY_IMAGE}
+    [Arguments]    ${TEST_NAME}    ${DW_RAY_IMAGE}
     Log To Console    "Running test: ${TEST_NAME}"
     ${result} =    Run Process    ./${ODH_BINARY_NAME} -test.run ${TEST_NAME}
     ...    shell=true
@@ -231,7 +232,7 @@ Run DistributedWorkloads ODH Test
     ...    env:CODEFLARE_TEST_TIMEOUT_MEDIUM=10m
     ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
     ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/distributed-workloads-odh-logs
-    ...    env:CODEFLARE_TEST_RAY_IMAGE=${RAY_IMAGE}
+    ...    env:CODEFLARE_TEST_RAY_IMAGE=${DW_RAY_IMAGE}
     ...    env:ODH_NAMESPACE=${APPLICATIONS_NAMESPACE}
     ...    env:NOTEBOOK_USER_NAME=${NOTEBOOK_USER_NAME}
     ...    env:NOTEBOOK_USER_TOKEN=${NOTEBOOK_USER_TOKEN}

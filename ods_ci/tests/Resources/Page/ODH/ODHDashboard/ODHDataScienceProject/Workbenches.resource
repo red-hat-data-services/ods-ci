@@ -333,7 +333,9 @@ Start Workbench
     ${is_stopped}=      Run Keyword And Return Status   Workbench Status Should Be
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STOPPED}
     IF    ${is_stopped} == ${TRUE}
-        Click Element       ${WORKBENCH_SECTION_XP}//div[text()="${workbench_title}"]/ancestor::tr/td[@data-label="Status"]//label[@data-ouia-component-type="PF5/Switch"]
+        Click Button    xpath=//div[@data-testid="table-row-title"]//span[text()="${workbench_title}"]/ancestor::tr//button[@aria-label="Kebab toggle"]
+        Wait Until Element Is Visible    xpath=//div[@data-testid="table-row-title"]//span[text()="${workbench_title}"]/ancestor::tr//button[@aria-label="Kebab toggle"]/following::div//span[text()="Start"]    timeout=10
+        Click Element    xpath=//div[@data-testid="table-row-title"]//span[text()="${workbench_title}"]/ancestor::tr//button[@aria-label="Kebab toggle"]/following::div//span[text()="Start"]
     ELSE
         Log     msg=Cannot start ${workbench_title} workbench because it is not stopped.
     END
@@ -405,7 +407,9 @@ Stop Workbench
     ${is_starting}=      Run Keyword And Return Status   Workbench Status Should Be
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STARTING}
     IF    ${is_started} == ${TRUE} or ${is_starting} == ${TRUE}
-        Click Element       ${WORKBENCH_SECTION_XP}//div[text()="${workbench_title}"]/ancestor::tr/td[@data-label="Status"]//label[@data-ouia-component-type="PF5/Switch"]
+        Click Button    xpath=//div[@data-testid="table-row-title"]//span[text()="${workbench_title}"]/ancestor::tr//button[@aria-label="Kebab toggle"]
+        Wait Until Element Is Visible    xpath=//div[@data-testid="table-row-title"]//span[text()="${workbench_title}"]/ancestor::tr//button[@aria-label="Kebab toggle"]/following::div//span[text()="Stop"]    timeout=10
+        Click Element    xpath=//div[@data-testid="table-row-title"]//span[text()="${workbench_title}"]/ancestor::tr//button[@aria-label="Kebab toggle"]/following::div//span[text()="Stop"]
         Wait Until Generic Modal Appears
         Handle Stop Workbench Confirmation Modal    press_cancel=${press_cancel}
         ...    from_running=${from_running}

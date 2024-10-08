@@ -357,15 +357,13 @@ Add And Run JupyterLab Code Cell 5 In Active Notebook
     [Arguments]    @{code}    ${n}=1
     # This keyword was copied and amended from JupyterLibrary resources - Notebook.Add And Run JupyterLab Code Cell.
 
-    ${add icon} =    Get JupyterLab Icon XPath Custom    add
-
     ${nb} =    Get WebElement    xpath://div${JLAB XP NB FRAG}\[${n}]
     ${nbid} =    Get Element Attribute    ${nb}    id
 
     ${active-nb-tab} =    Get WebElement    xpath:${JL_TABBAR_SELECTED_XPATH}
     ${tab-id} =    Get Element Attribute    ${active-nb-tab}    id
 
-    Click Element    xpath://div[@aria-labelledby="${tab-id}"]/div[1]//${add icon}
+    Click Element    xpath://div[@aria-labelledby="${tab-id}"]//div[@data-jp-item-name="insert"]
     Sleep    0.1s
     Click Element    xpath://div[@aria-labelledby="${tab-id}"]//div[contains(concat(' ',normalize-space(@class),' '),' jp-mod-selected ')]
     Set CodeMirror Value    \#${nbid}${JLAB CSS ACTIVE INPUT}    @{code}

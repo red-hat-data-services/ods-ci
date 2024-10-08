@@ -2,9 +2,9 @@
 Documentation       Suite to test Workload metrics feature
 Library             SeleniumLibrary
 Library             OpenShiftLibrary
-Resource            ../../../Resources/Page/DistributedWorkloads/WorkloadMetricsUI.resource
-Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
-Resource            ../../../../tests/Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
+Resource            ../../Resources/Page/DistributedWorkloads/WorkloadMetricsUI.resource
+Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
+Resource            ../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 Suite Setup         Project Suite Setup
 Suite Teardown      Project Suite Teardown
 Test Tags           DistributedWorkloadMetrics

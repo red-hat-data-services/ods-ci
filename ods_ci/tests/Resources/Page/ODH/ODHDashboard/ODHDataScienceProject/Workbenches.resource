@@ -222,6 +222,16 @@ Select Workbench Jupyter Image
         END
     END
 
+    IF  "${version}"=="previous"
+        # Let's reset the JupyterLibrary settings so that global variables for Jupyter 3 (default) are in place.
+        Update Globals For JupyterLab 3 Custom
+    ELSE
+        # For Jupyter 4, we need to update global default variable values (images 2024b and newer)
+        # This calls method from JupyterLibrary Version.resource module
+        # https://github.com/robots-from-jupyter/robotframework-jupyterlibrary/blob/9e25fcb89a5f1a723c59e9b96706e4c638e0d9be/src/JupyterLibrary/clients/jupyterlab/Version.resource
+        Update Globals For JupyterLab 4
+    END
+
 Verify Version Selection Dropdown
     [Documentation]    Verifies the version selection dropdown is present
     ...                uses the recommended image by default, and has two options
@@ -323,7 +333,9 @@ Start Workbench
     ${is_stopped}=      Run Keyword And Return Status   Workbench Status Should Be
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STOPPED}
     IF    ${is_stopped} == ${TRUE}
-        Click Element       ${WORKBENCH_SECTION_XP}//div[text()="${workbench_title}"]/ancestor::tr/td[@data-label="Status"]//label[@data-ouia-component-type="PF5/Switch"]
+        Click Button    xpath=//div[@data-testid="table-row-title"]//div[text()="${workbench_title}"]/ancestor::tr//button[@aria-label="Kebab toggle"]
+        Wait Until Element Is Visible    xpath=//div[@data-testid="table-row-title"]//div[text()="${workbench_title}"]/ancestor::tr//button[@aria-label="Kebab toggle"]/following::div//span[text()="Start"]    timeout=10
+        Click Element    xpath=//div[@data-testid="table-row-title"]//div[text()="${workbench_title}"]/ancestor::tr//button[@aria-label="Kebab toggle"]/following::div//span[text()="Start"]
     ELSE
         Log     msg=Cannot start ${workbench_title} workbench because it is not stopped.
     END
@@ -395,7 +407,9 @@ Stop Workbench
     ${is_starting}=      Run Keyword And Return Status   Workbench Status Should Be
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STARTING}
     IF    ${is_started} == ${TRUE} or ${is_starting} == ${TRUE}
-        Click Element       ${WORKBENCH_SECTION_XP}//div[text()="${workbench_title}"]/ancestor::tr/td[@data-label="Status"]//label[@data-ouia-component-type="PF5/Switch"]
+        Click Button    xpath=//div[@data-testid="table-row-title"]//div[text()="${workbench_title}"]/ancestor::tr//button[@aria-label="Kebab toggle"]
+        Wait Until Element Is Visible    xpath=//div[@data-testid="table-row-title"]//div[text()="${workbench_title}"]/ancestor::tr//button[@aria-label="Kebab toggle"]/following::div//span[text()="Stop"]    timeout=10
+        Click Element    xpath=//div[@data-testid="table-row-title"]//div[text()="${workbench_title}"]/ancestor::tr//button[@aria-label="Kebab toggle"]/following::div//span[text()="Stop"]
         Wait Until Generic Modal Appears
         Handle Stop Workbench Confirmation Modal    press_cancel=${press_cancel}
         ...    from_running=${from_running}

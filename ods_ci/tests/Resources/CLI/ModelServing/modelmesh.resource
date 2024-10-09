@@ -26,7 +26,7 @@ Verify odh-model-controller Deployment
     [Documentation]    Verifies the correct deployment of the model controller in the rhods namespace
     @{odh_model_controller} =  Oc Get    kind=Pod    namespace=${APPLICATIONS_NAMESPACE}    label_selector=control-plane=odh-model-controller    # robocop: disable
     ${containerNames} =  Create List  manager
-    Verify Deployment    ${odh_model_controller}  3  1  ${containerNames}
+    Verify Deployment    ${odh_model_controller}  1  1  ${containerNames}
 
 Verify Openvino Deployment
     [Documentation]    Verifies the correct deployment of the ovms server pod(s) in the rhods namespace

@@ -95,8 +95,8 @@ Remove Anaconda Component
 Remove Anaconda Components For Validation
     [Documentation]    Teardown for ACE test suite
     Delete ConfigMap Using Name    ${APPLICATIONS_NAMESPACE}    anaconda-ce-validation-result
-    Delete Pods Using Label Selector    ${APPLICATIONS_NAMESPACE}    component.opendatahub.io/name=anaconda-ce
-    Delete Data From Secrets Using Name    ${APPLICATIONS_NAMESPACE}    anaconda-ce-access    {"data":null}
+    Delete Pods Using Label Selector    ${APPLICATIONS_NAMESPACE}    parent\=anaconda-ce-periodic-validator
+    Delete Data From Secrets Using Name    ${APPLICATIONS_NAMESPACE}    anaconda-ce-access
 
 
 Anaconda Activation Should Have Failed

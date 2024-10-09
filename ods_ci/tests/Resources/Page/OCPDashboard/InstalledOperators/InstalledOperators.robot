@@ -54,6 +54,7 @@ Expand Installed Operator Menu
 
 Is Installed Operator Menu Expanded
   [Arguments]  ${menu}
+  Wait Until Element is Visible    ${menu}
   ${is_expanded} =  Get Element Attribute  ${menu}  attribute=aria-expanded
   RETURN  ${is_expanded}
 

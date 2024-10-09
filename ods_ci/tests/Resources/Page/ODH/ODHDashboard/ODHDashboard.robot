@@ -101,7 +101,7 @@ Wait For RHODS Dashboard To Load
     Wait For Condition    return document.title == ${dashboard_title}    timeout=${half_timeout}
     Wait Until Page Contains Element    xpath:${RHODS_LOGO_XPATH}    timeout=${timeout}
     IF    "${expected_page}" == "${NONE}"
-        Wait Until Page Contains Element    //div[@data-testid="home-page"]    timeout=${half_timeout}
+        Wait Until Page Contains Element    //div[@data-testid="home-page"]    timeout=${timeout}
     ELSE
         Wait For Dashboard Page Title    ${expected_page}    timeout=${timeout}
     END

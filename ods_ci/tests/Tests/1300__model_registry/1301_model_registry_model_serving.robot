@@ -307,7 +307,12 @@ Remove Deployment Files
 Download Python Client Dependencies
     [Documentation]  Download the model-registry package for a specific platform
     [Arguments]  ${destination}  ${package_version}
-    ${result}=    Run Process    command=pip download --platform=manylinux2014_x86_64 --python-version=3.9 --abi=cp39 --only-binary=:all: --dest=${destination} ${package_version}    # robocop: disable:line-too-long
+    # We could add --abi=cp311 as a parameter, but it does not appear to be needed as it will default to the cpython
+    # version compatible with the specific python version. If specified it will need to be updated to point to the
+    # correct cpython version (e.g. cp311 for python 3.11, cp312 for python 3.12 etc.)
+    Open New Notebook
+    ${python_version}=    Get XY Python Version From Jupyterlab
+    ${result}=    Run Process    command=pip download --platform=manylinux2014_x86_64 --python-version=${python_version} --only-binary=:all: --dest=${destination} ${package_version}    # robocop: disable:line-too-long
     ...    shell=yes
     Should Be Equal As Numbers  ${result.rc}  0  ${result.stderr}
 

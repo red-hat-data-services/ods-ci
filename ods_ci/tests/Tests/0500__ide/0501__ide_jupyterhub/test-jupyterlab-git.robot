@@ -22,7 +22,7 @@ Verify Pushing Project Changes Remote Repository
     [Documentation]    Verifies that changes has been pushed successfully to remote repository
     [Tags]    ODS-326
     ...       Tier1
-    Set Staging Status
+    Set Simple Staging Status    status=OFF
     ${randnum}=    Generate Random String    9    [NUMBERS]
     ${commit_message}=    Catenate    ${COMMIT_MSG}    ${randnum}
     Run Keyword And Return Status    Open New Notebook
@@ -37,7 +37,7 @@ Verify Updating Project With Changes From Git Repository
     [Documentation]    Verifies that changes has been pulled successfully to local repository
     [Tags]    ODS-324
     ...       Tier1
-    Set Staging Status
+    Set Simple Staging Status    status=OFF
     Clone Git Repository And Open    ${REPO_URL}    ${FILE_PATH}
     Sleep    1s
     Open New Notebook
@@ -83,15 +83,15 @@ Push Some Changes To Repo
     Open With JupyterLab Menu    Edit    Select All Cells
     Open With JupyterLab Menu    Edit    Delete Cells
     Enter Text In File And Save    code=print("Hi Hello ${commitmsgg}")
-    Set Staging Status    status=ON
+    Set Simple Staging Status    status=ON
     Commit Changes    commit_message=${commitmsgg}    name=${GITHUB_USER.USERNAME}    email_id=${GITHUB_USER.EMAIL}
     Push Changes To Remote    github_username=${GITHUB_USER.USERNAME}    token=${GITHUB_USER.TOKEN}
-    Set Staging Status    status=OFF
+    Set Simple Staging Status    status=OFF
     Close All JupyterLab Tabs
     Sleep    2s
     Open New Notebook
     ${output}=    Get Last Commit Message
-    Should Be Equal    ${commitmsgg.strip()}    ${output.strip()}
+    Should Be Equal    ${commitmsgg}    ${output}
 
 Open Folder Or File
     [Documentation]    Opens the folder or file
@@ -118,15 +118,15 @@ Commit Changes
     Sleep    2s
     ${attr} =    Get Element Attribute    xpath=//div[contains(@class, "CommitBox")]//button[.="Commit"]    title
     IF    '''${attr}''' == 'Disabled: No files are staged for commit'
-        Set Staging Status    OFF
-        Set Staging Status    ON
+        Set Simple Staging Status    status=OFF
+        Set Simple Staging Status    status=ON
     END
     Click Button    xpath=//div[contains(@class, "CommitBox")]//button[.="Commit"]
     ${identity} =    Run Keyword And Return Status    Wait Until Page Contains    Who is committing?    timeout=10s
     IF  ${identity}
         Input Text    xpath=//input[@placeholder="Name"]    ${name}
         Input Text    xpath=//input[@placeholder="Email"]    ${email_id}
-        Click Element    xpath=//button[.="OK"]
+        Click Ok Button JupyterLab Version Agnostic
     ELSE
         Page Should Contain Element    xpath=//button[@title="Disabled: No files are staged for commit"]
     END
@@ -138,34 +138,39 @@ Push Changes To Remote
     Wait Until Page Contains    Git credentials required    timeout=200s
     Input Text    xpath=//input[@placeholder="username"]    ${github_username}
     Input Text    xpath=//input[@placeholder="personal access token"]    ${token}
-    Click Element    xpath=//button[.="OK"]
-    Sleep    4s
+    Click Ok Button JupyterLab Version Agnostic
+    Wait Until Page Contains    Successfully pushed    timeout=10s
+
+Click Ok Button JupyterLab Version Agnostic
+    [Documentation]    Click the Ok button so it works in both JupyterLab 3.6 and JupyterLab 4.2
+    ...    JupyterLab 4.2 was introduced in images 2024.2.
+    # In JupyterLab 3.6 (that uses codemirror 5) the button is "OK"
+    # In JupyterLab 4.2.5 (that uses codemirror 6) the button is "Ok"
+    Click Element    xpath=//button[.="Ok" or .="OK"]
 
 Get Last Commit Message
     [Documentation]    Return the last cpmmit message
-    ${output}=    Run Cell And Get Output    !git log --name-status HEAD^..HEAD | sed -n 5p
+    ${output}=    Run Cell And Get Output    !git log --format=%B -n 1 HEAD^..HEAD
     RETURN    ${output}
 
-Simple Staging Not Clicked
-    [Documentation]    Ensures that Simple Staging has not clicked
+Simple Staging Is Enabled
+    [Documentation]    Ensures that Simple Staging is disabled
     Open With JupyterLab Menu    Git
-    Element Should Not Be Visible    //li/div[@class="f1vya9e0 lm-Menu-itemIcon p-Menu-itemIcon"]
-    Element Should Be Visible    //li[@class="lm-Menu-item p-Menu-item"][4]
+    ${simple_staging_element}=    Set Variable
+    ...    //li[@role="menuitem" and @data-command="git:toggle-simple-staging" and contains(@class, "lm-mod-toggled")]
+    Run Keyword And Continue On Failure
+    ...    Wait Until Page Contains Element    xpath=${simple_staging_element}    timeout=3s
+    # Close the menu again
+    Open With JupyterLab Menu    Git
 
-Set Staging Status
+Set Simple Staging Status
     [Documentation]    Sets the staging status
-    [Arguments]    ${status}=INITIALLY_OFF
-    IF    "${status}"=="OFF" or "${status}"=="ON"
+    [Arguments]    ${status}
+    ${curr_status}=    Run Keyword And Return Status    Simple Staging Is Enabled
+    IF    "${curr_status}"=="False" and "${status}"=="ON"
         Open With JupyterLab Menu    Git    Simple staging
-    ELSE
-        ${curr_status}=    Run Keyword And Return Status    Simple Staging Not Clicked
-        IF    "${curr_status}" == "False"
-            Sleep    1s
-            Run Keyword And Continue On Failure    Open With JupyterLab Menu    Git
-            Sleep    2s
-            Open With JupyterLab Menu    Git    Simple staging
-            Sleep    2s
-        END
+    ELSE IF    "${curr_status}"=="True" and "${status}"=="OFF"
+        Open With JupyterLab Menu    Git    Simple staging
     END
 
 Open New Notebook

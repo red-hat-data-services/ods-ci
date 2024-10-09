@@ -59,9 +59,11 @@ Is Installed Operator Menu Expanded
   RETURN  ${is_expanded}
 
 Click Uninstall Operator
+  Wait Until Element is Visible    //button[@data-test-action="Uninstall Operator"]
   Press Keys  //button[@data-test-action="Uninstall Operator"]  RETURN
 
 Confirm Uninstall
+  Wait Until Element is Visible    //button[@data-test="confirm-action"]
   Click Button  //button[@data-test="confirm-action"]
 
 Wait Until Uninstallation Completes

@@ -20,7 +20,7 @@ ${PIPELINE_TEST_NAME}=    ${PIPELINE_TEST_BASENAME}-${TEST_USER_3.USERNAME}
 ${DC_NAME}=    ds-pipeline-conn
 ${PIPELINE_TEST_BASENAME}=    iris
 ${PIPELINE_TEST_DESC}=    test pipeline definition
-${PIPELINE_TEST_FILEPATH}=    tests/Resources/Files/pipeline-samples/v2/pip_index_url/iris_pipeline_pip_index_url_compiled.yaml
+${PIPELINE_TEST_FILEPATH}=    tests/Resources/Files/pipeline-samples/v2/cache-disabled/pip_index_url/iris_pipeline_pip_index_url_compiled.yaml
 ${PIPELINE_TEST_RUN_BASENAME}=    ${PIPELINE_TEST_BASENAME}-run
 
 

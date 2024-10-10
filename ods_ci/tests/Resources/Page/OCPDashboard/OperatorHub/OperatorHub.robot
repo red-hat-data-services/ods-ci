@@ -22,11 +22,11 @@ Search Operator
 
 Select Operator with Catalog Name
     [Arguments]    ${operator}     ${catalog}
-    Wait Until Element is Visible   //a[contains(@data-test, "${operator}") and (contains(@data-test,"${catalog}"))]  timeout=50
+    Wait Until Element Is Visible   //a[contains(@data-test, "${operator}") and (contains(@data-test,"${catalog}"))]  timeout=50
     Click Element    //a[contains(@data-test, "${operator}") and (contains(@data-test,"${catalog}"))]
 
 Click Install
-    Wait Until Element is Visible    //*[text()="Install"]
+    Wait Until Element Is Visible    //*[text()="Install"]
     Click Element    //*[text()="Install"]
 
 Show Operator Warning Is Visible

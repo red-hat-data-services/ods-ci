@@ -7,14 +7,15 @@ Resource   ../../ODH/ODHDashboard/ODHDashboard.robot
 
 Delete ConfigMap using Name
     [Arguments]    ${namespace}    ${configmap_name}
-    ${config_exists}      Check If ConfigMap Exists      ${namespace}      ${configmap_name}
+    ${config_exists}=      Check If ConfigMap Exists      ${namespace}      ${configmap_name}
     IF    '${config_exists}'=='PASS'
         ${deleted_config}=    Oc Delete   kind=ConfigMap   name=${configmap_name}   namespace=${namespace}
         IF    len(${deleted_config}) == 0
             FAIL    Error deleting configmaps: ${deleted_config}
         END
-        ${config_exists}      Check If ConfigMap Exists      ${namespace}      ${configmap_name}
-        IF    '${config_exists}'=='PASS'     FAIL       ConfigMap '${configmap_name}' in namespace '${namespace}' still exists
+        ${config_exists}=      Check If ConfigMap Exists      ${namespace}      ${configmap_name}
+        IF    '${config_exists}'=='PASS'
+        ...    FAIL    ConfigMap '${configmap_name}' in namespace '${namespace}' still exists
     ELSE
         Log    level=WARN
         ...    message=No configmaps present with name '${configmap_name}' in '${namespace}' namespace
@@ -22,7 +23,8 @@ Delete ConfigMap using Name
 
 Check If ConfigMap Exists
     [Arguments]   ${namespace}   ${configmap_name}
-    ${status}     ${val}  Run keyword and Ignore Error   Oc Get  kind=ConfigMap  namespace=${namespace}   field_selector=metadata.name==${configmap_name}
+    ${status}     ${val}  Run keyword and Ignore Error
+    ...    Oc Get  kind=ConfigMap  namespace=${namespace}   field_selector=metadata.name==${configmap_name}
     RETURN   ${status}
 
 Get PVC Size

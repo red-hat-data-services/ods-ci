@@ -354,9 +354,9 @@ Get OAuth Cookie
     RETURN    ${cookie.value}
 
 Retry To Click Element
-    [Documentation]    Try to click an element up to a specified timeout or retry times
-    [Arguments]    ${locator}    ${retry}=10s    ${interval}=1s
-    Wait Until Keyword Succeeds    ${retry}    ${interval}    Click Element    ${locator}
+    [Documentation]    Try to click an element up to a specified timeout
+    [Arguments]    ${locator}    ${timeout}=10s    ${interval}=1s
+    Wait Until Keyword Succeeds    ${timeout}    ${interval}    Click Element    ${locator}
 
 Is Generic Modal Displayed
     [Documentation]    Checks if a modal window is displayed on the page.

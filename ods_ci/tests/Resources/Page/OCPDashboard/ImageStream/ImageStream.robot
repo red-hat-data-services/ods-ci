@@ -7,9 +7,9 @@ Resource   ../../ODH/ODHDashboard/ODHDashboard.robot
 
 Delete ImageStream using Name
     [Arguments]    ${namespace}    ${name}
-    ${image_exists}   Check If ImageStream Exists       ${namespace}      ${name}
+    ${image_exists}=   Check If ImageStream Exists       ${namespace}      ${name}
     IF    '${image_exists}'=='PASS'
-        ${deleted_images}=    Oc Delete   
+        ${deleted_images}=    Oc Delete
         ...    kind=ImageStream  namespace=${namespace}     label_selector=opendatahub.io/modified=false     field_selector=metadata.name==${name}
         IF    len(${deleted_images}) == 0
             FAIL    Error deleting ImageStreams: ${deleted_images}

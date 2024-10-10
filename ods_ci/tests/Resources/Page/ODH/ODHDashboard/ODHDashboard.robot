@@ -114,7 +114,7 @@ Wait For Dashboard Page Title
     [Documentation]    Wait until the visible title (h1) of the current Dashboard page is '${page_title}'
     [Arguments]  ${page_title}    ${timeout}=10s
     ${page_title_element}=    Set Variable    //*[@data-testid="app-page-title"]
-    Wait Until Element is Visible    ${page_title_element}    timeout=${timeout}
+    Wait Until Element Is Visible    ${page_title_element}    timeout=${timeout}
     # Sometimes the h1 text is inside a child element, thus get it with textContent attribute
     ${title}=    Get Element Attribute    ${page_title_element}    textContent
     Should Be Equal    ${title}    ${page_title}
@@ -122,7 +122,7 @@ Wait For Dashboard Page Title
 Wait Until RHODS Dashboard ${dashboard_app} Is Visible
   # Ideally the timeout would be an arg but Robot does not allow "normal" and "embedded" arguments
   # Setting timeout to 30seconds since anything beyond that should be flagged as a UI bug
-  Wait Until Element is Visible    xpath://div[contains(@class,'gallery')]/div//div[@class="pf-v5-c-card__title"]//*[text()="${dashboard_app}"]
+  Wait Until Element Is Visible    xpath://div[contains(@class,'gallery')]/div//div[@class="pf-v5-c-card__title"]//*[text()="${dashboard_app}"]
   ...    timeout=30s
 
 Launch ${dashboard_app} From RHODS Dashboard Link
@@ -400,7 +400,7 @@ Check Sidebar Header Text
     [Arguments]  ${app_id}  ${expected_data}
     ${sidebar_h1}=  Set Variable    ${expected_data}[${app_id}][sidebar_h1]
     IF    "${sidebar_h1}" == "${EMPTY}"
-        Log    message=Missing Sidebar h1 title definition for "${expected_data}[${app_id}]" 
+        Log    message=Missing Sidebar h1 title definition for "${expected_data}[${app_id}]"
         ...    level=WARN
         Capture Page Screenshot
         RETURN
@@ -795,7 +795,8 @@ Get ConfigMaps For RHODS Groups Configuration
 Get Links From Switcher
     [Documentation]    Returns the OpenShift Console and OpenShift Cluster Manager Link
     ${list_of_links}=    Create List
-    ${link_elements}=    Get WebElements    //*[@data-testid="application-launcher-group"]//a[not(starts-with(@href, '#'))]
+    ${link_elements}=    Get WebElements
+    ...    //*[@data-testid="application-launcher-group"]//a[not(starts-with(@href, '#'))]
     FOR    ${ext_link}    IN    @{link_elements}
         ${href}=    Get Element Attribute    ${ext_link}    href
         Append To List    ${list_of_links}    ${href}

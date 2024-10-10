@@ -50,7 +50,8 @@ Delete Pods Using Label Selector
         ELSE
             Sleep    2
             ${pod_exists}=    Check If POD Exists    ${namespace}    ${label_selector}
-            IF    '${pod_exists}'=='PASS'    FAIL    Pods with Label '${label_selector}' in namespace '${namespace}' still exist
+            IF    '${pod_exists}'=='PASS'
+            ...    FAIL    Pods with Label '${label_selector}' in namespace '${namespace}' still exist
         END
     ELSE
         Log    level=WARN

@@ -18,8 +18,7 @@ Uninstall Operator
   ${is_operator_installed} =  Is Operator Installed  ${operator}
   IF  not ${is_operator_installed}  Pass execution  ${operator}  operator is not installed
   Expand Installed Operator Menu  ${operator}
-  Click Uninstall Operator
-  Confirm Uninstall
+  Wait Until Keyword Succeeds  5x  1s  Click And Confirm Uninstall
   Wait Until Uninstallation Completes  ${operator}
 
 Is All Projects Selected
@@ -29,17 +28,17 @@ Is All Projects Selected
 
 Select All Projects
   Click Element  //div[@data-test-id="namespace-bar-dropdown"]/div
-  Wait Until Element is Visible  //*[contains(text(), "All Projects")]
+  Wait Until Element Is Visible  //*[contains(text(), "All Projects")]
   Click Element  //*[contains(text(), "All Projects")]
 
 Search Installed Operator
   [Arguments]  ${operator}
-  Wait Until Element is Visible  //input[@data-test-id="item-filter"]  timeout=150
+  Wait Until Element Is Visible  //input[@data-test-id="item-filter"]  timeout=150
   Input text  //input[@data-test-id="item-filter"]  ${operator}
 
 Is Operator Installed
   [Arguments]  ${operator}
-  Run Keyword and Return Status     Wait Until Element is Visible      //a[@data-test-operator-row="${operator}"]    timeout=10
+  Run Keyword and Return Status     Wait Until Element Is Visible      //a[@data-test-operator-row="${operator}"]    timeout=10
   ${is_installed} =  Run Keyword and Return Status
   ...                Get WebElement  //a[@data-test-operator-row="${operator}"]
   RETURN  ${is_installed}
@@ -54,16 +53,12 @@ Expand Installed Operator Menu
 
 Is Installed Operator Menu Expanded
   [Arguments]  ${menu}
-  Wait Until Element is Visible    ${menu}
+  Wait Until Element Is Visible    ${menu}
   ${is_expanded} =  Get Element Attribute  ${menu}  attribute=aria-expanded
   RETURN  ${is_expanded}
 
-Click Uninstall Operator
-  Wait Until Element is Visible    //button[@data-test-action="Uninstall Operator"]
+Click And Confirm Uninstall
   Press Keys  //button[@data-test-action="Uninstall Operator"]  RETURN
-
-Confirm Uninstall
-  Wait Until Element is Visible    //button[@data-test="confirm-action"]
   Click Button  //button[@data-test="confirm-action"]
 
 Wait Until Uninstallation Completes
@@ -82,9 +77,9 @@ Switch To New Tab
 Click On Searched Operator
     [Arguments]   ${operator}
      Search Installed Operator          ${operator}
-     Wait Until Element is Visible     xpath=//a[@data-test-operator-row="${operator}"]    timeout=10
+     Wait Until Element Is Visible     xpath=//a[@data-test-operator-row="${operator}"]    timeout=10
      Click Element       xpath=//a[@data-test-operator-row="${operator}"]
-     Wait until page contains           Description           timeout=10
+     Wait Until Page Contains           Description           timeout=10
 
 Check IF URL On The Page Is Commercial
     [Arguments]  ${url}
@@ -128,7 +123,7 @@ Create Tabname Instance For Installed Operator
     Capture Page Screenshot
     IF  not ${is_created}
         Click Button     Create ${tab_name}
-        Wait Until Element is Visible     //button[contains(text(), "Create")]          timeout=10
+        Wait Until Element Is Visible     //button[contains(text(), "Create")]          timeout=10
         Click Button      Create
         Wait Until Element Is Visible    //table[contains(@class,"ReactVirtualized")]//tr     timeout=20
     END
@@ -137,7 +132,7 @@ Delete Tabname Instance For Installed Operator
     [Documentation]   This keyword delete the instance(notebook ,Imagestream instance etc) created for installed operator in openshift
     [Arguments]    ${operator_name}     ${tab_name}     ${namespace}=None
     Move To Installed Operator Page Tab in Openshift    ${operator_name}     ${tab_name}      ${namespace}
-    Wait Until Element is Visible          //button[contains(@data-test-id,"kebab")]          timeout=10
+    Wait Until Element Is Visible          //button[contains(@data-test-id,"kebab")]          timeout=10
     Click Element   //button[contains(@data-test-id,"kebab")]
     Wait Until Element Is Enabled     //button[contains(text(),"Delete ${tab_name}")]
     Click Element   //button[contains(text(),"Delete ${tab_name}")]

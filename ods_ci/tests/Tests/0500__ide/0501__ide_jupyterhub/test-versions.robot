@@ -1,5 +1,6 @@
 *** Settings ***
-Documentation       Test Suite to verify installed library versions
+Documentation       Test Suite to verify installed library versions.
+...                 It tests only the latest versions of the images.
 
 Resource            ../../../Resources/ODS.robot
 Resource            ../../../Resources/Common.robot
@@ -17,9 +18,8 @@ Test Tags          JupyterHub
 *** Variables ***
 @{status_list}      # robocop: disable
 &{package_versions}      # robocop: disable
-${JupyterLab_Version}         v3.6
-${Notebook_Version}           v6.5
-${JupyterLab-git_Version}     v0.44
+${JupyterLab_Version}         v4.2
+${JupyterLab-git_Version}     v0.50
 
 
 *** Test Cases ***
@@ -42,20 +42,22 @@ Verify Libraries in Cuda Image
 Verify Libraries in SDS Image
     [Documentation]    Verifies libraries in Standard Data Science image
     [Tags]    Tier1
-    Verify List Of Libraries In Image    science-notebook    JupyterLab ${JupyterLab_Version}    Notebook ${Notebook_Version}
+    Verify List Of Libraries In Image    science-notebook    JupyterLab ${JupyterLab_Version}
     ...    JupyterLab-git ${JupyterLab-git_Version}
 
 Verify Libraries in PyTorch Image
     [Documentation]    Verifies libraries in PyTorch image
     [Tags]    Tier1
     ...       ODS-215    ODS-216    ODS-217    ODS-218    ODS-466
-    Verify List Of Libraries In Image    pytorch    JupyterLab ${JupyterLab_Version}    Notebook ${Notebook_Version}    JupyterLab-git ${JupyterLab-git_Version}
+    Verify List Of Libraries In Image
+    ...    pytorch    JupyterLab ${JupyterLab_Version}    JupyterLab-git ${JupyterLab-git_Version}
 
 Verify Libraries in Tensorflow Image
     [Documentation]    Verifies libraries in Tensorflow image
     [Tags]    Tier1
     ...       ODS-204    ODS-205    ODS-206    ODS-207  ODS-474
-    Verify List Of Libraries In Image    tensorflow    JupyterLab ${JupyterLab_Version}    Notebook ${Notebook_Version}    JupyterLab-git ${JupyterLab-git_Version}
+    Verify List Of Libraries In Image
+    ...    tensorflow    JupyterLab ${JupyterLab_Version}    JupyterLab-git ${JupyterLab-git_Version}
 
 Verify All Images And Spawner
     [Documentation]    Verifies that all images have the correct libraries with same versions
@@ -92,10 +94,6 @@ Verify Libraries In Base Image    # robocop: disable
 
 Load Spawner Page
     [Documentation]    Suite Setup, loads JH Spawner
-    ${version_check} =  Is RHODS Version Greater Or Equal Than  1.20.0
-    IF    ${version_check}==False
-       Wait Until All Builds Are Complete    namespace=${APPLICATIONS_NAMESPACE}    build_timeout=45m
-    END
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
 

@@ -6,7 +6,7 @@ Library          Process
 
 *** Variables ***
 ${VIRTUAL_ENV_NAME}                      venv3.9
-${CODEFLARE-SDK-API_URL}                 %{CODEFLARE-SDK-API_URL=https://api.github.com/repos/project-codeflare/codeflare-sdk/releases/latest}
+${CODEFLARE-SDK-RELEASE-TAG}             v0.21.1
 ${CODEFLARE-SDK_DIR}                     codeflare-sdk
 ${CODEFLARE-SDK_REPO_URL}                %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
 ${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}  https://github.com/opendatahub-io/distributed-workloads/releases/latest/download
@@ -44,14 +44,7 @@ Prepare Codeflare-SDK Test Setup
     Log To Console    "Restarting kueue"
     Restart Kueue
 
-    ${latest_tag} =    Run Process   curl -s "${CODEFLARE-SDK-API_URL}" | grep '"tag_name":' | cut -d '"' -f 4
-    ...    shell=True    stderr=STDOUT
-    Log To Console  codeflare-sdk latest tag is : ${latest_tag.stdout}
-    IF    ${latest_tag.rc} != 0
-        FAIL    Unable to fetch codeflare-sdk latest tag
-    END
-
-    Clone Git Repository    ${CODEFLARE-SDK_REPO_URL}    ${latest_tag.stdout}    ${CODEFLARE-SDK_DIR}
+    Clone Git Repository    ${CODEFLARE-SDK_REPO_URL}    ${CODEFLARE-SDK-RELEASE-TAG}    ${CODEFLARE-SDK_DIR}
 
     ${result} =    Run Process  virtualenv -p python3.9 ${VIRTUAL_ENV_NAME}
     ...    shell=true    stderr=STDOUT

@@ -10,7 +10,7 @@ Suite Teardown      Dsp Acceptance Suite Teardown
 
 *** Variables ***
 ${PROJECT}=    dsp-acceptance
-${PIPELINE_HELLOWORLD_FILEPATH}=    tests/Resources/Files/pipeline-samples/v2/pip_index_url/hello_world_pip_index_url_compiled.yaml  # robocop: disable:line-too-long
+${PIPELINE_HELLOWORLD_FILEPATH}=    tests/Resources/Files/pipeline-samples/v2/cache-disabled/pip_index_url/hello_world_pip_index_url_compiled.yaml  # robocop: disable:line-too-long
 
 
 *** Test Cases ***

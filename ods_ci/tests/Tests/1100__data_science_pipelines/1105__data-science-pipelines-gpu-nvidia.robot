@@ -11,7 +11,7 @@ Suite Teardown      Dsp Nvidia Gpu Suite Teardown
 *** Variables ***
 # robocop: off=line-too-long
 ${PROJECT}=    dsp-gpu-nvidia
-${PIPELINE_GPU_AVAILABILITY_FILEPATH}=    tests/Resources/Files/pipeline-samples/v2/gpu/pytorch/pytorch_verify_gpu_availability_compiled.yaml
+${PIPELINE_GPU_AVAILABILITY_FILEPATH}=    tests/Resources/Files/pipeline-samples/v2/cache-disabled/gpu/pytorch/pytorch_verify_gpu_availability_compiled.yaml
 # robocop: on=line-too-long
 
 

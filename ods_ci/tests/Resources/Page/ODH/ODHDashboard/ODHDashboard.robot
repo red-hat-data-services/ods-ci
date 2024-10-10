@@ -627,20 +627,30 @@ Remove Package From Custom Image
     Click Button  xpath://td[.="${package_name}"]/..//${CUSTOM_IMAGE_REMOVE_BTN}
 
 Delete Custom Image
-# Need to check if image is REALLY deleted
     [Documentation]    Deletes a custom image through the dashboard UI.
-    ...    Needs an additional check on removed ImageStream
     [Arguments]    ${image_name}
-    Click Button  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[last()]//button
+    ${custom_image_kebab_btn}=    Set Variable    //td[.="${image_name}"]/../td[last()]//button
+    Click Button  xpath:${custom_image_kebab_btn}
     ${image_name_id}=  Replace String  ${image_name}  ${SPACE}  -
-    Click Element  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[last()]//button/..//button[@id="custom-${image_name_id}-delete-button"]  # robocop: disable
+    Click Element  xpath:${custom_image_kebab_btn}/..//button[@id="custom-${image_name_id}-delete-button"]  # robocop: disable
     Handle Deletion Confirmation Modal  ${image_name}  notebook image
+    # Wait for the image to disappear from the list
+    Wait Until Page Does Not Contain Element    xpath:${custom_image_kebab_btn}    timeout=10s
+    # Assure that the actual ImageStream is also removed
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc wait --for=delete --timeout=10s imagestream -n ${APPLICATIONS_NAMESPACE} custom-${image_name_id}
+    IF    ${rc} != ${0}
+        Fail    msg=The ImageStream 'custom-${image_name_id}' wasn't deleted from cluster in timeout.
+    END
+
 
 Open Edit Menu For Custom Image
     [Documentation]    Opens the edit view for a specific custom image
     [Arguments]    ${image_name}
-    Click Button  xpath://td[.="${image_name}"]/../td[last()]//button
-    Click Element  xpath://td[.="${image_name}"]/../td[last()]//button/..//button[@id="${image_name}-edit-button"]
+    ${custom_image_kebab_btn}=    Set Variable    //td[.="${image_name}"]/../td[last()]//button
+    Click Button  xpath:${custom_image_kebab_btn}
+    ${image_name_id}=  Replace String  ${image_name}  ${SPACE}  -
+    Click Element  xpath:${custom_image_kebab_btn}/..//button[@id="custom-${image_name_id}-edit-button"]
     Wait Until Page Contains  Delete Notebook Image
 
 Expand Custom Image Details
@@ -665,10 +675,11 @@ Verify Custom Image Description
     [Documentation]    Verifies that the description shown in the dashboard UI
     ...    matches the given one
     [Arguments]    ${image_name}    ${expected_description}
+    ${custom_image_name_record}=    Set Variable    xpath://td[@data-label="Name"]/div/div/div[.="${image_name}"]
     ${exists}=  Run Keyword And Return Status  Page Should Contain Element
-    ...  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[@data-label="Description" and .="${expected_description}"]  # robocop: disable
+    ...  ${custom_image_name_record}/../../../../td[@data-label="Description" and .="${expected_description}"]
     IF  ${exists}==False
-        ${desc}=  Get Text  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[@data-label="Description"]
+        ${desc}=  Get Text  ${custom_image_name_record}/../../../../td[@data-label="Description"]
         Log  Description for ${image_name} does not match ${expected_description} - Actual description is ${desc}
         FAIL
     END
@@ -678,42 +689,51 @@ Verify Custom Image Is Listed
     [Documentation]    Verifies that the custom image is displayed in the dashboard
     ...    UI with the correct name
     [Arguments]    ${image_name}
-    # whitespace after ${image_name} in the xpath is important!
-    Sleep  2s  #wait for page to finish loading
-    ${exists}=  Run Keyword And Return Status  Page Should Contain Element  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]  # robocop: disable
-    IF  ${exists}==False
-        Log  ${image_name} not visible in page
-        FAIL
-    END
-    RETURN    ${exists}
+    ${custom_image_name_record}=    Set Variable    xpath://td[@data-label="Name"]/div/div/div[.="${image_name}"]
+    Wait Until Page Contains Element    ${custom_image_name_record}    timeout=10s
+
+Verify Custom Image Has Error Icon
+    [Documentation]    Verifies that the custom image is displayed with the error icon
+    [Arguments]    ${image_name}
+    ${custom_image_name_record}=    Set Variable    xpath://td[@data-label="Name"]/div/div/div[.="${image_name}"]
+    Wait Until Page Contains Element    ${custom_image_name_record}/../..//span[@aria-label="error icon"]    timeout=10s
 
 Verify Custom Image Provider
     [Documentation]    Verifies that the user listed for an image in the dahsboard
     ...    UI matches the given one
     [Arguments]    ${image_name}    ${expected_user}
+    ${custom_image_name_record}=    Set Variable    xpath://td[@data-label="Name"]/div/div/div[.="${image_name}"]
     ${exists}=  Run Keyword And Return Status  Page Should Contain Element
-    ...  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[@data-label="Provider" and .="${expected_user}"]  # robocop: disable
+    ...  ${custom_image_name_record}/../../../../td[@data-label="Provider" and .="${expected_user}"]
     IF  ${exists}==False
-        ${user}=  Get Text  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../../td[@data-label="Provider"]  # robocop: disable
+        ${user}=  Get Text  ${custom_image_name_record}/../../../../td[@data-label="Provider"]
         Log  User for ${image_name} does not match ${expected_user} - Actual user is ${user}
         FAIL
     END
     RETURN  ${exists}
 
-Enable Custom Image
-    [Documentation]    Enables a custom image (i.e. displayed in JH) [WIP]
+Is Custom Image Enabled
+    [Documentation]    Checkes whether a custom image is enabled - if yes, returns true, false otherwise
+    ...                Note: if the image isn't listed at all this will return false always.
     [Arguments]    ${image_name}
-    ${is_enabled}=  # Need to find a check
+    # This is how disabled state looks like
+    RETURN  Run Keyword And Return Status  Page Should Contain Element
+    ...  //td[@data-label="Name"]/div/div/div[.="${image_name}"]/../../../..//input[@checked and not(@disabled)]
+
+Enable Custom Image
+    [Documentation]    Enables a custom image (i.e. displayed in JH)
+    [Arguments]    ${image_name}
+    ${is_enabled}=    Is Custom Image Enabled    ${image_name}
     IF  ${is_enabled}==False
-        Click Element  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../..//input
+        Click Element  xpath://td[@data-label="Name"]/div/div/div[.="${image_name}"]/../../../..//input
     END
 
 Disable Custom Image
-    [Documentation]    Disables a custom image (i.e. not displayed in JH) [WIP]
+    [Documentation]    Disables a custom image (i.e. not displayed in JH)
     [Arguments]    ${image_name}
-    ${is_enabled}=  # Need to find a check
+    ${is_enabled}=    Is Custom Image Enabled    ${image_name}
     IF  ${is_enabled}==True
-        Click Element  xpath://td[@data-label="Name"]/div/div/div[.="${image_name} "]/../../../..//input
+        Click Element  xpath://td[@data-label="Name"]/div/div/div[.="${image_name}"]/../../../..//input
     END
 
 Close Notification Drawer

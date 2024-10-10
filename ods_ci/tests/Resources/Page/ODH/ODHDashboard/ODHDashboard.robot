@@ -103,7 +103,8 @@ Wait For RHODS Dashboard To Load
     IF    "${expected_page}" == "${NONE}"
         Wait Until Page Contains Element    //div[@data-testid="home-page"]    timeout=${timeout}
     ELSE
-        Wait For Dashboard Page Title    ${expected_page}    timeout=${timeout}
+        Wait Until Keyword Succeeds    3x    5s
+        ...    Wait For Dashboard Page Title    ${expected_page}    timeout=${timeout}
     END
     IF    ${wait_for_cards} == ${TRUE}
         Wait Until Keyword Succeeds    3 times   5 seconds    Wait Until Cards Are Loaded

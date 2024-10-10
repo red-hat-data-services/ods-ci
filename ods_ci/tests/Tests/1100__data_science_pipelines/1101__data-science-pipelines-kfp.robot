@@ -81,7 +81,7 @@ Verify Ods Users Can Create And Run A Data Science Pipeline With Ray Using The k
     [Documentation]    Creates, runs pipelines with regular user. Double check the pipeline result and clean
     ...    the pipeline resources.
     ...    AutomationBugOnDisconnected: RHOAIENG-12514
-    [Tags]      Tier1    AutomationBugOnDisconnected
+    [Tags]      Tier1    AutomationBugOnDisconnected    todo
     Skip If Component Is Not Enabled    ray
     Skip If Component Is Not Enabled    codeflare
     ${ray_dict}=    Create Dictionary
@@ -96,7 +96,7 @@ Verify Ods Users Can Create And Run A Data Science Pipeline With Ray Using The k
     ...    status_check_timeout=600
     ...    pipeline_params=${ray_dict}
     ...    ray=${TRUE}
-    [Teardown]    Projects.Delete Project Via CLI By Display Name    ${PROJECT_NAME}
+    # [Teardown]    Projects.Delete Project Via CLI By Display Name    ${PROJECT_NAME}
 
 
 *** Keywords ***

@@ -114,7 +114,7 @@ Wait For Dashboard Page Title
     [Documentation]    Wait until the visible title (h1) of the current Dashboard page is '${page_title}'
     [Arguments]  ${page_title}    ${timeout}=10s
     ${page_title_element}=    Set Variable    //*[@data-testid="app-page-title"]
-    Wait Until Element is Visible    ${page_title_element}    timeout=${timeout}
+    Wait Until Element Is Visible    ${page_title_element}    timeout=${timeout}
     # Sometimes the h1 text is inside a child element, thus get it with textContent attribute
     ${title}=    Get Element Attribute    ${page_title_element}    textContent
     Should Be Equal    ${title}    ${page_title}
@@ -122,7 +122,7 @@ Wait For Dashboard Page Title
 Wait Until RHODS Dashboard ${dashboard_app} Is Visible
   # Ideally the timeout would be an arg but Robot does not allow "normal" and "embedded" arguments
   # Setting timeout to 30seconds since anything beyond that should be flagged as a UI bug
-  Wait Until Element is Visible    xpath://div[contains(@class,'gallery')]/div//div[@class="pf-v5-c-card__title"]//*[text()="${dashboard_app}"]
+  Wait Until Element Is Visible    xpath://div[contains(@class,'gallery')]/div//div[@class="pf-v5-c-card__title"]//*[text()="${dashboard_app}"]
   ...    timeout=30s
 
 Launch ${dashboard_app} From RHODS Dashboard Link
@@ -198,6 +198,7 @@ Remove Disabled Application From Enabled Page
    ...              for those application whose license is expired. You can control the action type
    ...              by setting the "disable" argument to either "disable" or "enable".
    [Arguments]  ${app_id}
+   Menu.Navigate To Page    Applications    Enabled
    ${card_disabled_xp}=  Set Variable  //div[@id='${app_id}']//span[contains(@class,'disabled-text')]
    Wait Until Page Contains Element  xpath:${card_disabled_xp}  timeout=300
    Click Element  xpath:${card_disabled_xp}
@@ -397,10 +398,17 @@ Check Sidebar Links
 
 Check Sidebar Header Text
     [Arguments]  ${app_id}  ${expected_data}
+    ${sidebar_h1}=  Set Variable    ${expected_data}[${app_id}][sidebar_h1]
+    IF    "${sidebar_h1}" == "${EMPTY}"
+        Log    message=Missing Sidebar h1 title definition for "${expected_data}[${app_id}]"
+        ...    level=WARN
+        Capture Page Screenshot
+        RETURN
+    END
     Page Should Contain Element  xpath:${SIDEBAR_TEXT_CONTAINER_XP}/h1
     ...    message=Missing Sidebar Title for App Card ${app_id}
     ${header}=  Get Text    xpath:${SIDEBAR_TEXT_CONTAINER_XP}/h1
-    Run Keyword And Continue On Failure  Should Be Equal  ${header}  ${expected_data}[${app_id}][sidebar_h1]
+    Run Keyword And Continue On Failure  Should Be Equal  ${header}  ${sidebar_h1}
     ${getstarted_title}=  Get Text  xpath://div[contains(@class,'pf-v5-c-drawer__head')]
     ${titles}=    Split String    ${getstarted_title}   separator=\n    max_split=1
     Run Keyword And Continue On Failure  Should Be Equal   ${titles[0]}  ${expected_data}[${app_id}][title]
@@ -474,7 +482,8 @@ Re-validate License For Disabled Application From Enabled Page
    ...              for those application whose license is expired. You can control the action type
    ...              by setting the "disable" argument to either "disable" or "enable".
    [Arguments]  ${app_id}
-   ${card_disabled_xp}=  Set Variable  //div[@id='${app_id}']//div[contains(@class,'enabled-controls')]/span[contains(@class,'disabled-text')]
+   Menu.Navigate To Page    Applications    Enabled
+   ${card_disabled_xp}=  Set Variable  //div[@id='${app_id}']//*[contains(@class,'disabled-text')]
    Wait Until Page Contains Element  xpath:${card_disabled_xp}  timeout=120
    Click Element  xpath:${card_disabled_xp}
    Wait Until Page Contains   To remove card click
@@ -729,8 +738,8 @@ RHODS Notification Drawer Should Not Contain
 Sort Resources By
     [Documentation]    Changes the sort of items in resource page
     [Arguments]    ${sort_type}
-    Click Button    //*[contains(., "Sort by")]
-    Click Button    //button[@data-key="${sort_type}"]
+    Click Element    css=[data-testid="resources-select-type"]
+    Click Element    css=[data-testid="${sort_type}"]
     Sleep    1s
 
 Clear Dashboard Notifications
@@ -786,7 +795,8 @@ Get ConfigMaps For RHODS Groups Configuration
 Get Links From Switcher
     [Documentation]    Returns the OpenShift Console and OpenShift Cluster Manager Link
     ${list_of_links}=    Create List
-    ${link_elements}=    Get WebElements    //a[@class="pf-m-external pf-v5-c-app-launcher__menu-item" and not(starts-with(@href, '#'))]
+    ${link_elements}=    Get WebElements
+    ...    //*[@data-testid="application-launcher-group"]//a[not(starts-with(@href, '#'))]
     FOR    ${ext_link}    IN    @{link_elements}
         ${href}=    Get Element Attribute    ${ext_link}    href
         Append To List    ${list_of_links}    ${href}

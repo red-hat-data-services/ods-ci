@@ -24,7 +24,9 @@ Test Tags          JupyterHub
 
 *** Variables ***
 ${NAMESPACE}        ${NOTEBOOKS_NAMESPACE}
-@{NOTEBOOK_SIZE}    Small    Medium
+# Anything above Small requires more memory than our standard testsing cluster can provide.
+# TODO: We shall come up with some solution in the future.
+@{NOTEBOOK_SIZE}    Small    # Medium    Large    X Large
 ${DEFAULT_SIZE}     {"limits":{"cpu":"2","memory":"8gi"},"requests":{"cpu":"1","memory":"8gi"}}
 ${CUSTOME_SIZE}     {"limits":{"cpu":"6","memory":"9gi"},"requests":{"cpu":"2","memory":"6gi"}}
 
@@ -34,13 +36,14 @@ Verify Spawned Notebook Size
     [Documentation]    Check the available container size spec
     ...    with actual assign to spawned notebook pod
     [Tags]    Tier2
-    ...       Execution-Time-Over-15m
-    ...       FlakyTest
     ...       ODS-1072
+    # ...       Execution-Time-Over-15m
+    # ...       FlakyTest
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook And Verify Size
 
 # I think this TC is not valid anymore
+# TODO: this custom could be a workaround to test different than default values due to the cluster size.
 # Verify Custom Spwaned Notebook Size
 #     [Documentation]    Modify and verify the default notebook conatiner size spec
 #     ...    with spwaned notebook pod and set back to default size
@@ -87,12 +90,12 @@ Spawn Notebook And Verify Size
         Fix Spawner Status
     END
 
-Modify Default Container Size
-    [Documentation]    Modify the default container size using oc command
-    ${output}    Run Process    sh ${CURDIR}/odh_jh_global_profile.sh modify    shell=yes
-    Should Not Contain    ${output.stdout}    FAIL
+# Modify Default Container Size
+#     [Documentation]    Modify the default container size using oc command
+#     ${output}    Run Process    sh ${CURDIR}/odh_jh_global_profile.sh modify    shell=yes
+#     Should Not Contain    ${output.stdout}    FAIL
 
-Restore Default Container Size
-    [Documentation]    Restore default container size using oc command
-    ${output}    Run Process    sh ${CURDIR}/odh_jh_global_profile.sh default    shell=yes
-    Should Not Contain    ${output.stdout}    FAIL
+# Restore Default Container Size
+#     [Documentation]    Restore default container size using oc command
+#     ${output}    Run Process    sh ${CURDIR}/odh_jh_global_profile.sh default    shell=yes
+#     Should Not Contain    ${output.stdout}    FAIL

@@ -3,14 +3,14 @@ Documentation       Test Cases to verify DSC/DSCi negative cases when dependant 
 
 Library             Collections
 Library             OperatingSystem
-Resource            ../../../../../Resources/OCP.resource
-Resource            ../../../../../Resources/ODS.robot
-Resource            ../../../../../Resources/RHOSi.resource
-Resource            ../../../../../Resources/ServiceMesh.resource
-Resource            ../../../../../Resources/Page/OCPDashboard/InstalledOperators/InstalledOperators.robot
-Resource            ../../../../../Resources/Page/OCPDashboard/OperatorHub/InstallODH.robot
-Resource            ../../../../../../tasks/Resources/RHODS_OLM/uninstall/uninstall.robot
-Resource            ../../../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
+Resource            ../../Resources/OCP.resource
+Resource            ../../Resources/ODS.robot
+Resource            ../../Resources/RHOSi.resource
+Resource            ../../Resources/ServiceMesh.resource
+Resource            ../../Resources/Page/OCPDashboard/InstalledOperators/InstalledOperators.robot
+Resource            ../../Resources/Page/OCPDashboard/OperatorHub/InstallODH.robot
+Resource            ../../../tasks/Resources/RHODS_OLM/uninstall/uninstall.robot
+Resource            ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 Suite Setup         Suite Setup
 Suite Teardown      Suite Teardown
 

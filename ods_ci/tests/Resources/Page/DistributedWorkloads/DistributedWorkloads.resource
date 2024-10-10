@@ -41,8 +41,6 @@ Clone Git Repository
 Prepare Codeflare-SDK Test Setup
     [Documentation]   Prepare codeflare-sdk tests by cloning codeflare-sdk repo and python virtual environmnet
 
-    Log To Console    "Restarting kueue"
-    Restart Kueue
 
     Clone Git Repository    ${CODEFLARE-SDK_REPO_URL}    ${CODEFLARE-SDK-RELEASE-TAG}    ${CODEFLARE-SDK_DIR}
 
@@ -90,25 +88,6 @@ Cleanup Codeflare-SDK Setup
     Log To Console     "Removing directory ${CODEFLARE-SDK_DIR}"
     Remove Directory        ${CODEFLARE-SDK_DIR}    recursive=True
 
-Restart Kueue
-    Log To Console    "Rollout restart kueue-controller-manager"
-    ${result} =    Run Process    oc rollout restart deployment/kueue-controller-manager -n ${APPLICATIONS_NAMESPACE}
-    ...    shell=true
-    ...    stderr=STDOUT
-    Log To Console    ${result.stdout}
-    IF    ${result.rc} != 0
-        FAIL    Failed to restart Kueue
-    END
-
-    Log To Console    "Wait for kueue-controller-manager rollout to finish"
-    ${result} =    Run Process    oc rollout status deployment/kueue-controller-manager -w -n ${APPLICATIONS_NAMESPACE}
-    ...    shell=true
-    ...    stderr=STDOUT
-    Log To Console    ${result.stdout}
-    IF    ${result.rc} != 0
-        FAIL    Failed to finish Kueue rollout
-    END
-
 Prepare Training Operator E2E Core Test Suite
     [Documentation]    Prepare Training Operator E2E Core Test Suite
     Prepare Training Operator E2E Test Suite    ${KFTO_CORE_BINARY_NAME}
@@ -131,8 +110,6 @@ Prepare Training Operator E2E Test Suite
     Create Directory    %{WORKSPACE}/codeflare-${test_binary}-logs
     Enable Component    trainingoperator
     Wait Component Ready    trainingoperator
-    Log To Console    "Restarting kueue"
-    Restart Kueue
 
 Teardown Training Operator E2E Core Test Suite
     [Documentation]    Prepare Training Operator E2E Core Test Suite
@@ -178,9 +155,6 @@ Run Training Operator ODH Test
 
 Prepare DistributedWorkloads Integration Test Suite
     [Documentation]    Prepare DistributedWorkloads Integration Test Suite
-    Log To Console    "Restarting kueue"
-    Restart Kueue
-
     Log To Console    "Downloading compiled test binary ${ODH_BINARY_NAME}"
 
     ${result} =    Run Process    curl --location --silent --output ${ODH_BINARY_NAME} ${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}/${ODH_BINARY_NAME} && chmod +x ${ODH_BINARY_NAME}

@@ -62,7 +62,7 @@ Verify Custom Image Can Be Added
 
 Test Duplicate Image
     [Documentation]  Test adding two images with the same name (should fail)
-    ...       ProductBug - https://issues.redhat.com/browse/RHOAIENG-1192
+    ...       There was a bug related https://issues.redhat.com/browse/RHOAIENG-1192
     [Tags]    Tier1    ExcludeOnDisconnected
     ...       ODS-1368
     Sleep  1
@@ -71,10 +71,8 @@ Test Duplicate Image
     Import New Custom Image    ${IMG_URL}    ${IMG_NAME}    ${IMG_DESCRIPTION}
     ...    software=${IMG_SOFTWARE}
     ...    packages=${IMG_PACKAGES}
-    # Workaround for https://issues.redhat.com/browse/RHOAIENG-1192
-    # To be removed ASAP
-    Wait Until Page Contains    Unable to add notebook image: HTTP request failed
-    Log    Unable to add second image with error message "Unable to add notebook image: HTTP request failed" due to RHOAIENG-1192    level=WARN  # robocop: disable
+    # Assure that the expected error message is shown in the modal window
+    Wait Until Page Contains    Unable to add notebook image: imagestreams.image.openshift.io "${IMG_NAME}" already exists
     # Since the image cannot be created, we need to cancel the modal window now
     Click Button    ${GENERIC_CANCEL_BTN_XP}
     [Teardown]  Duplicate Image Teardown

@@ -31,8 +31,6 @@ Run TestRayLocalInteractiveOauth test
 *** Keywords ***
 Prepare Codeflare-sdk E2E Test Suite
     [Documentation]    Prepare codeflare-sdk E2E Test Suite
-    Log To Console    "Restarting kueue"
-    Restart Kueue
     Prepare Codeflare-SDK Test Setup
     RHOSi Setup
 

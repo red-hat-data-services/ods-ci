@@ -50,7 +50,7 @@ Expand Installed Operator Menu
   Set Local Variable  ${operator_menu}  ${operator_row}//button[@data-test-id="kebab-button"]
   ${is_operator_menu_expanded} =  Is Installed Operator Menu Expanded  ${operator_menu}
   IF  "${is_operator_menu_expanded}" == "false"
-  ...             Click Element  ${operator_menu}
+  ...    Retry To Click Element    ${operator_menu}
 
 Is Installed Operator Menu Expanded
   [Arguments]  ${menu}

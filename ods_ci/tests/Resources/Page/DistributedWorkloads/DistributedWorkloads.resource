@@ -6,12 +6,12 @@ Library          Process
 
 *** Variables ***
 ${VIRTUAL_ENV_NAME}                      venv3.9
-${CODEFLARE-SDK-API_URL}                 %{CODEFLARE-SDK-API_URL=https://api.github.com/repos/project-codeflare/codeflare-sdk/releases/latest}
+${CODEFLARE-SDK-RELEASE-TAG}             v0.21.1
 ${CODEFLARE-SDK_DIR}                     codeflare-sdk
 ${CODEFLARE-SDK_REPO_URL}                %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
 ${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}  https://github.com/opendatahub-io/distributed-workloads/releases/latest/download
 ${RAY_IMAGE}                             quay.io/modh/ray@sha256:0d715f92570a2997381b7cafc0e224cfa25323f18b9545acfd23bc2b71576d06
-${FMS_HF_TUNING_IMAGE}                   quay.io/modh/fms-hf-tuning@sha256:f8f732c340488734bf9023953d14bb2410991bd3ff2a519ad2ce07c531353797
+${FMS_HF_TUNING_IMAGE}                   quay.io/modh/fms-hf-tuning@sha256:73bcd66500b8637a9db1339f64c3217212ef74700a22a790f78e9a1f26b8b71a
 ${NOTEBOOK_IMAGE}                        quay.io/modh/odh-generic-data-science-notebook@sha256:9d7f80080a453bcf7dee01b986df9ee811ee74f6f433c601a8b67d283c160547
 ${NOTEBOOK_USER_NAME}                    ${TEST_USER_3.USERNAME}
 ${NOTEBOOK_USER_PASSWORD}                ${TEST_USER_3.PASSWORD}
@@ -41,17 +41,8 @@ Clone Git Repository
 Prepare Codeflare-SDK Test Setup
     [Documentation]   Prepare codeflare-sdk tests by cloning codeflare-sdk repo and python virtual environmnet
 
-    Log To Console    "Restarting kueue"
-    Restart Kueue
 
-    ${latest_tag} =    Run Process   curl -s "${CODEFLARE-SDK-API_URL}" | grep '"tag_name":' | cut -d '"' -f 4
-    ...    shell=True    stderr=STDOUT
-    Log To Console  codeflare-sdk latest tag is : ${latest_tag.stdout}
-    IF    ${latest_tag.rc} != 0
-        FAIL    Unable to fetch codeflare-sdk latest tag
-    END
-
-    Clone Git Repository    ${CODEFLARE-SDK_REPO_URL}    ${latest_tag.stdout}    ${CODEFLARE-SDK_DIR}
+    Clone Git Repository    ${CODEFLARE-SDK_REPO_URL}    ${CODEFLARE-SDK-RELEASE-TAG}    ${CODEFLARE-SDK_DIR}
 
     ${result} =    Run Process  virtualenv -p python3.9 ${VIRTUAL_ENV_NAME}
     ...    shell=true    stderr=STDOUT
@@ -97,25 +88,6 @@ Cleanup Codeflare-SDK Setup
     Log To Console     "Removing directory ${CODEFLARE-SDK_DIR}"
     Remove Directory        ${CODEFLARE-SDK_DIR}    recursive=True
 
-Restart Kueue
-    Log To Console    "Rollout restart kueue-controller-manager"
-    ${result} =    Run Process    oc rollout restart deployment/kueue-controller-manager -n ${APPLICATIONS_NAMESPACE}
-    ...    shell=true
-    ...    stderr=STDOUT
-    Log To Console    ${result.stdout}
-    IF    ${result.rc} != 0
-        FAIL    Failed to restart Kueue
-    END
-
-    Log To Console    "Wait for kueue-controller-manager rollout to finish"
-    ${result} =    Run Process    oc rollout status deployment/kueue-controller-manager -w -n ${APPLICATIONS_NAMESPACE}
-    ...    shell=true
-    ...    stderr=STDOUT
-    Log To Console    ${result.stdout}
-    IF    ${result.rc} != 0
-        FAIL    Failed to finish Kueue rollout
-    END
-
 Prepare Training Operator E2E Core Test Suite
     [Documentation]    Prepare Training Operator E2E Core Test Suite
     Prepare Training Operator E2E Test Suite    ${KFTO_CORE_BINARY_NAME}
@@ -138,8 +110,6 @@ Prepare Training Operator E2E Test Suite
     Create Directory    %{WORKSPACE}/codeflare-${test_binary}-logs
     Enable Component    trainingoperator
     Wait Component Ready    trainingoperator
-    Log To Console    "Restarting kueue"
-    Restart Kueue
 
 Teardown Training Operator E2E Core Test Suite
     [Documentation]    Prepare Training Operator E2E Core Test Suite
@@ -185,9 +155,6 @@ Run Training Operator ODH Test
 
 Prepare DistributedWorkloads Integration Test Suite
     [Documentation]    Prepare DistributedWorkloads Integration Test Suite
-    Log To Console    "Restarting kueue"
-    Restart Kueue
-
     Log To Console    "Downloading compiled test binary ${ODH_BINARY_NAME}"
 
     ${result} =    Run Process    curl --location --silent --output ${ODH_BINARY_NAME} ${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}/${ODH_BINARY_NAME} && chmod +x ${ODH_BINARY_NAME}

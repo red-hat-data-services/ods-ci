@@ -13,23 +13,29 @@ Get Build Status
   RETURN  ${build_status}
 
 Delete BuildConfig using Name
-    [Arguments]    ${namespace}                    ${name}
-    ${status}      Check If BuildConfig Exists    ${namespace}      ${name}
-    IF          '${status}'=='PASS'   Oc Delete  kind=BuildConfig   name=${name}   namespace=${namespace}
-    ...        ELSE          FAIL        No BuildConfig present with name '${name}' in '${namespace}' namespace, Check the BuildConfig name and namespace provide is correct and try again
-    Wait Until Keyword Succeeds     10s  2s
-    ...         Dependent Build should not Present     ${name}
-    ${status}      Check If BuildConfig Exists    ${namespace}      ${name}
-    IF          '${status}'!='FAIL'     FAIL       BuildConfig with name '${name}' is not deleted in '${namespace}'
+    [Arguments]    ${namespace}    ${name}
+    ${config_exists}=      Check If BuildConfig Exists    ${namespace}      ${name}
+    IF    '${config_exists}'=='PASS'
+        Oc Delete   kind=BuildConfig   name=${name}   namespace=${namespace}
+        Wait Until Keyword Succeeds     10s  2s
+        ...         Dependent Build Should Not Present     ${name}
+        ${config_exists}=      Check If BuildConfig Exists    ${namespace}      ${name}
+        IF    '${config_exists}'=='PASS'
+        ...    FAIL    BuildConfig with name '${name}' in namespace '${namespace}' still exists
+    ELSE
+        Log    level=WARN
+        ...    message=No BuildConfig present with name '${name}' in '${namespace}' namespace
+    END
 
 Check If BuildConfig Exists
     [Arguments]    ${namespace}      ${name}
-    ${status}   ${val}  Run keyword and Ignore Error   Oc Get  kind=BuildConfig  namespace=${namespace}     field_selector=metadata.name==${name}
+    ${status}   ${val}  Run keyword and Ignore Error
+    ...    Oc Get  kind=BuildConfig  namespace=${namespace}     field_selector=metadata.name==${name}
     RETURN   ${status}
 
-Dependent Build should not Present
+Dependent Build Should Not Present
      [Arguments]     ${selector}
-     ${isExist}      Run Keyword and Return Status          OC Get     kind=Build    label_selector=buildconfig=${selector}
+     ${isExist}      Run Keyword and Return Status    OC Get     kind=Build    label_selector=buildconfig=${selector}
      IF     not ${isExist}        Log    Build attached to Build config has been deleted
      ...        ELSE    FAIL       Attached Build to Build config is not deleted
 

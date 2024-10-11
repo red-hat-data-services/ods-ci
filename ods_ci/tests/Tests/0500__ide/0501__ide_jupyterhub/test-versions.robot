@@ -59,13 +59,19 @@ Verify Libraries in Tensorflow Image
     Verify List Of Libraries In Image
     ...    tensorflow    JupyterLab ${JupyterLab_Version}    JupyterLab-git ${JupyterLab-git_Version}
 
+Verify Libraries in TrustyAI Image
+    [Documentation]    Verifies libraries in TrustyAI image
+    [Tags]    Tier1
+    Verify List Of Libraries In Image
+    ...    odh-trustyai-notebook    JupyterLab ${JupyterLab_Version}    JupyterLab-git ${JupyterLab-git_Version}
+
 Verify All Images And Spawner
     [Documentation]    Verifies that all images have the correct libraries with same versions
     [Tags]    Tier1
     ...       ODS-340    ODS-452    ODS-468
     List Should Not Contain Value    ${status_list}    FAIL
     ${length} =    Get Length    ${status_list}
-    Should Be Equal As Integers    ${length}    5
+    Should Be Equal As Integers    ${length}    6
     Log To Console    ${status_list}
 
 

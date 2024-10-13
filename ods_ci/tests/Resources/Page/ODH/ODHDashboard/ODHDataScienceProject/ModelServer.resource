@@ -73,7 +73,7 @@ Create Model Server
 Set Replicas Number With Buttons
     [Documentation]    Sets the number of replicas for the model serving pod
     [Arguments]    ${number}
-    ${current}=    Get Element Attribute    ${REPLICAS_COUNT_XP}   value
+    ${current}=    Get Value    css=[id="model-server-replicas"]
     ${difference}=    Evaluate    int(${number})-int(${current})
     ${op}=    Set Variable    plus
     IF    ${difference}<${0}

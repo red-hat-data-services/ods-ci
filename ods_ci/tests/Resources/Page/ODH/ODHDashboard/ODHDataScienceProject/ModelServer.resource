@@ -24,7 +24,7 @@ ${SERVING_MODEL_SERVERS_SIDE_MENU}=    xpath=//span[text()='Models and model ser
 ${TOKEN_AUTH_CHECKBOX_XP}=    xpath://input[@id="alt-form-checkbox-auth"]
 ${ADD_SERVICE_ACCOUNT_BUTTON}=    xpath://button[text()='Add a service account']
 ${SERVICE_ACCOUNT_INPUT}=    xpath://input[@data-testid='service-account-form-name']
-${REPLICAS_COUNT_XP}=     xpath://section[@class='pf-v5-c-form__section']//span[@class='pf-v5-c-form-control']/input
+${REPLICAS_COUNT_XP}=     css=[id="model-server-replicas"]
 ${PROJECT_SELECTOR_XP}=     xpath://main[contains(@id, 'dashboard-page-main')]//*[@data-testid="project-selector-dropdown"]
 
 
@@ -73,7 +73,7 @@ Create Model Server
 Set Replicas Number With Buttons
     [Documentation]    Sets the number of replicas for the model serving pod
     [Arguments]    ${number}
-    ${current}=    Get Value    css=[id="model-server-replicas"]
+    ${current}=    Get Value    ${REPLICAS_COUNT_XP}
     ${difference}=    Evaluate    int(${number})-int(${current})
     ${op}=    Set Variable    plus
     IF    ${difference}<${0}
@@ -87,7 +87,7 @@ Set Replicas Number With Buttons
             Click Minus Button
         END
     END
-    ${current}=    Get Element Attribute    ${REPLICAS_COUNT_XP}   value
+    ${current}=    Get Value    ${REPLICAS_COUNT_XP}
     Should Be Equal As Integers    ${current}    ${number}
 
 Set Server Size

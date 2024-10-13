@@ -278,7 +278,20 @@ Workbench Status Should Be From Projects Home Page
     ${namespace}=        Get Openshift Namespace From Data Science Project    project_title=${project_title}
     ${_}  ${workbench_cr_name}=       Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}
     ...                                                                           namespace=${namespace}
-    Run Keyword And Continue On Failure     Page Should Contain Element    xpath=//a[text()="${project_title}"]/ancestor::tr/td[@data-label="Status"]//p[text()="${status}"]    # robocop: disable
+
+    ${xpath_exists}=    Run Keyword And Return Status
+    ...    Element Should Be Visible    xpath=//a[@data-testid="notebook-route-link" and text()="${workbench_title}"]
+
+    IF    not ${xpath_exists}
+        Click Element    xpath=//td[@data-testid="notebook-column-expand"]
+    ELSE
+        Log    XPath element found, no need to click alternative
+    END
+
+#    We need to wait it to render
+    ${status_xpath}=    Set Variable    //a[text()="${workbench_title}"]/ancestor::tr//td[@data-label="Status"]//*[text()="${status}"]
+    Run Keyword And Continue On Failure    Wait Until Element Is Visible    ${status_xpath}    timeout=10s
+    Run Keyword And Continue On Failure    Page Should Contain Element    ${status_xpath}
 
 Start Workbench From Projects Home Page
     [Documentation]    Triggers the workbench "start" process from DS Projects home page.
@@ -298,8 +311,12 @@ Start Workbench From Projects Home Page
                 ...           Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}
                 ...                                                        namespace=${namespace}
         END
-        Click Element       xpath=//a[text()="${workbench_title}"]/ancestor::tr//a[text()="${project_title}"]/ancestor::tr//td[@data-label="Status"]//label[@class="pf-v5-c-switch"]    # robocop: disable
-
+        ${kebab_button}=    Set Variable    xpath=//a[@data-testid="notebook-route-link" and text()="${workbench_title}"]/ancestor::tr[@data-testid="project-notebooks-table-row"]//button[@aria-label="Kebab toggle"]
+        Wait Until Element Is Visible    ${kebab_button}    timeout=10s
+        Click Element    ${kebab_button}
+        ${start_button}=    Set Variable    xpath=//a[@data-testid="notebook-route-link" and text()="${workbench_title}"]/ancestor::tr[@data-testid="project-notebooks-table-row"]//button[@aria-label="Kebab toggle"]/following::div//span[text()="Start"]
+        Wait Until Element Is Visible    ${start_button}    timeout=10s
+        Click Element    ${start_button}
     ELSE
         Fail     msg=Cannot start ${workbench_title} workbench because it is not stopped.
     END
@@ -328,7 +345,12 @@ Stop Workbench From Projects Home Page
             END
                 ${_}    ${workbench_cr_name}=       Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}    namespace=${namespace}
         END
-        Click Element       xpath=//a[text()="${workbench_title}"]/ancestor::tr//a[text()="${project_title}"]/ancestor::tr//td[@data-label="Status"]//label[@class="pf-v5-c-switch"]    # robocop: disable
+        ${kebab_button}=    Set Variable    xpath=//a[@data-testid="notebook-route-link" and text()="${workbench_title}"]/ancestor::tr[@data-testid="project-notebooks-table-row"]//button[@aria-label="Kebab toggle"]
+        Wait Until Element Is Visible    ${kebab_button}    timeout=10s
+        Click Element    ${kebab_button}
+        ${stop_button}=    Set Variable    xpath=//a[@data-testid="notebook-route-link" and text()="${workbench_title}"]/ancestor::tr[@data-testid="project-notebooks-table-row"]//button[@aria-label="Kebab toggle"]/following::div//span[text()="Stop"]
+        Wait Until Element Is Visible    ${stop_button}    timeout=10s
+        Click Element    ${stop_button}
         Handle Stop Workbench Confirmation Modal    press_cancel=${press_cancel}
     ELSE
         Fail     msg=Cannot stop ${workbench_title} workbench because it is neither starting nor running.
@@ -338,7 +360,7 @@ Stop Workbench From Projects Home Page
 
 Wait Until Workbench Is Started From Projects Home Page
     [Documentation]    Waits until the workbench status is "RUNNING", from the DS Project home page
-    [Arguments]     ${workbench_title}   ${project_title}   ${timeout}=30s
+    [Arguments]     ${workbench_title}   ${project_title}   ${timeout}=60s
     Wait Until Keyword Succeeds    ${timeout}    5s      Workbench Status Should Be From Projects Home Page
     ...     workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}   project_title=${project_title}
 
@@ -356,7 +378,7 @@ Launch And Access Workbench From Projects Home Page
     ${is_started}=      Run Keyword And Return Status   Workbench Status Should Be From Projects Home Page
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}    project_title=${project_title}
     IF    ${is_started} == ${TRUE}
-        Click Element       xpath=//tr//a[text()="${project_title}"]/ancestor::tr/td[@data-label="workbenchName"]//a[text()="${workbench_title}"]
+        Click Element       xpath=//a[@data-testid="notebook-route-link" and text()="${workbench_title}"]
         Switch Window   NEW
         Access To Workbench    username=${username}    password=${password}
         ...    auth_type=${auth_type}    expected_ide=${expected_ide}
@@ -368,7 +390,7 @@ Workbench Launch Link Should Be Disabled
     [Documentation]    Checks the workbench launch link is disabled from DS Projects home page.
     [Arguments]     ${workbench_title}    ${project_title}
     ${link_status}=    Get Element Attribute
-    ...    xpath=//tr//a[text()="${project_title}"]/ancestor::tr/td[@data-label="workbenchName"]//a[text()="${workbench_title}"]    aria-disabled
+    ...    xpath=//a[@data-testid="notebook-route-link" and text()="${workbench_title}"]    aria-disabled
     Should Be Equal As Strings    ${link_status}    true
     ...    msg=Workbench launch link should be disabled for workbench ${workbench_title} in project ${project_title}
 

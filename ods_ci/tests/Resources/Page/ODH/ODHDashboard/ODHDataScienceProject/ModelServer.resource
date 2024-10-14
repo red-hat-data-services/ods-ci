@@ -31,9 +31,15 @@ ${PROJECT_SELECTOR_XP}=     xpath://main[contains(@id, 'dashboard-page-main')]//
 *** Keywords ***
 Create Model Server
     [Documentation]    Keyword to create a Model Server in a Data Science Project
-    [Arguments]    ${no_replicas}=1    ${server_size}=Small    ${ext_route}=${TRUE}
-    ...    ${token}=${TRUE}    ${runtime}=OpenVINO Model Server    ${server_name}=Model Serving Test
-    ...    ${no_gpus}=0    ${existing_server}=${FALSE}
+    [Arguments]    ${no_replicas}=1
+    ...    ${server_size}=Small
+    ...    ${ext_route}=${TRUE}
+    ...    ${token}=${TRUE}
+    ...    ${runtime}=OpenVINO Model Server
+    ...    ${server_name}=Model Serving Test
+    ...    ${no_gpus}=0
+    ...    ${existing_server}=${FALSE}
+    ...    ${service_account_name}=${NONE}
     Move To Tab    Models
     IF    ${existing_server}
         ${existing_server}=  Run Keyword And Return Status     Wait Until Page Contains Element    //button[.="${server_name}"]
@@ -63,8 +69,9 @@ Create Model Server
             Log    message=Token Auth should be enabled by default..(from v2.5)
             SeleniumLibrary.Checkbox Should Be Selected    ${TOKEN_AUTH_CHECKBOX_XP}
         END
-    ELSE IF    ${token}==${TRUE}
-        Enable Token Authentication
+    END
+    IF    ${token}
+        Enable Token Authentication     service_account_name=${service_account_name}
     END
     SeleniumLibrary.Wait Until Element Is Enabled   //button[contains(text(),"Add")]
     SeleniumLibrary.Click Button    Add
@@ -181,9 +188,10 @@ Enable Token Authentication
     [Documentation]    Enables Token authentication to serving route
     [Arguments]    ${service_account_name}=${NONE}
     SeleniumLibrary.Select Checkbox    ${TOKEN_AUTH_CHECKBOX_XP}
-    IF    "${service_account_name}" != "${NONE}"
-        Input Service Account Name    ${service_account_name}
+    IF    "${service_account_name}" == "${NONE}"
+        ${service_account_name}=    Set Variable    default-name
     END
+    Input Service Account Name    ${service_account_name}
 
 Disable Token Authentication
     [Documentation]    Disable Token authentication to serving route
@@ -211,14 +219,30 @@ Input Service Account Name
 Get Model Serving Access Token via UI
     [Documentation]    Returns the token used for authentication to the serving route
     ...    TODO: There can be multiple tokens defined for each model server, handle this case as well
-    [Arguments]    ${service_account_name}=default-name    ${single_model}=${FALSE}    ${model_name}=${NONE}
+    [Arguments]    ${service_account_name}=default-name    ${single_model}=${FALSE}
+    ...    ${model_name}=${NONE}    ${multi_model_servers}=${FALSE}
     IF    ${single_model}
         # Expand the model
         SeleniumLibrary.Click Button    xpath: //a[text()='${model_name}']/parent::div/parent::td[@data-label='Name']/preceding-sibling::td/button  # robocop: off=line-too-long
         ${token}=    Get Single Model Token    ${service_account_name}
     ELSE
         SeleniumLibrary.Wait Until Page Contains Element    xpath://td[@data-label="Tokens"]/button
-        SeleniumLibrary.Click Element    xpath://td[@data-label="Tokens"]/button
+        # TODO: ModelMesh requires passing model server name and not model name;
+        # in particular when there are multiple model servers
+        # in the same project.
+        # This is a temporary workaround until the issue is fixed.
+        # With one model server, the model name is not required.
+        IF    ${multi_model_servers}
+            SeleniumLibrary.Click Button
+        ...    xpath://*[@id="expand-table-row-${model_name}-1-undefined-1"]/../../td[@data-label='Tokens']//button
+        ELSE
+            SeleniumLibrary.Click Element    xpath://td[@data-label="Tokens"]/button
+        END
+        # TODO: service account name is required; remove from all places that pass `None`
+        IF    "${service_account_name}" == "${NONE}"
+            ${service_account_name}=    Set Variable    default-name
+        END
+
         ${token}=    SeleniumLibrary.Get Element Attribute
         ...    xpath://div[.="${service_account_name} "]/../../td[@data-label="Token Secret"]//input    value
     END

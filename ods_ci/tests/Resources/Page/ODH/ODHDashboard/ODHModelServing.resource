@@ -1,4 +1,4 @@
-# robocop: off=wrong-case-in-keyword-name,too-many-arguments,too-long-keyword
+# robocop: off=wrong-case-in-keyword-name,too-many-arguments,too-long-keyword,line-too-long
 *** Settings ***
 Documentation    Collection of keywords to interact with Model Serving
 Resource       ../../../Page/Components/Components.resource
@@ -75,26 +75,10 @@ Serve Model
         SeleniumLibrary.Click Button    ${DEPLOY_MODEL_BTN}
     END
     SeleniumLibrary.Wait Until Page Contains Element    //div[@role="dialog"]
-    Set Model Name    ${model_name}
-    Select Model Server    ${model_server}
-    IF    "${serving_runtime}" != "${NONE}"    Set Model Server Runtime    ${serving_runtime}
-    SeleniumLibrary.Wait Until Page Contains Element    xpath://span[.="Model framework (name - version)"]
-    Select Framework    ${framework}
-    IF    ${existing_data_connection}==${TRUE}
-        # Select Radio Button    group_name=radiogroup    value=existing-data-connection-radio
-        # Selected by default, let's skip for now
-        Select Existing Data Connection    ${data_connection_name}
-        Set Folder Path    ${model_path}
-    ELSE
-        # Existing connection radio is selected by default; for now blindly click on new connection radio
-        SeleniumLibrary.Click Element    //input[@id="new-data-connection-radio"]
-        # Select Radio Button    group_name=radiogroup    value=new-data-connection-radio
-        Set Up New Data Connection    dc_name=${data_connection_name}
-        Set Folder Path    ${model_path}
-    END
-    SeleniumLibrary.Wait Until Element Is Enabled   //button[contains(text(),"Deploy")]
-    SeleniumLibrary.Click Button    Deploy
-    SeleniumLibrary.Wait Until Page Does Not Contain    xpath://h1[.="Deploy model"]
+    Fill Deploy Model Form    model_name=${model_name}    model_server=${model_server}
+    ...    serving_runtime=${serving_runtime}    framework=${framework}
+    ...    data_connection_name=${data_connection_name}    existing_data_connection=${existing_data_connection}
+    ...    model_path=${model_path}
 
 Select Project
     [Documentation]    Selects a project in the "deploy model" modal.
@@ -244,10 +228,12 @@ Open ${section} Options Menu
 Get Access Token Via UI
     [Documentation]    Returns the access token for models deployed in a specific project
     ...    by using the UI of DSP
-    [Arguments]    ${project_name}    ${service_account_name}=default-name    ${single_model}=${FALSE}
-    ...            ${model_name}=${NONE}
+    [Arguments]    ${project_name}    ${service_account_name}=default-name
+    ...    ${single_model}=${FALSE}    ${model_name}=${NONE}
+    ...    ${multi_model_servers}=${FALSE}
     Open Data Science Project Details Page    ${project_name}    tab_id=model-server
     ${token}=    Get Model Serving Access Token via UI    ${service_account_name}    ${single_model}    ${model_name}
+    ...    ${multi_model_servers}
     RETURN    ${token}
 
 Get Model Project
@@ -387,18 +373,11 @@ Clean Up Model Serving Page
     [Documentation]    Deletes all currently deployed models, if any are present.
     # Returns an empty list if no matching elements found
     Switch Model Serving Project    project_name=All projects
-    ${projects}=    Get WebElements    xpath://table/tbody/tr/td[@data-label="Project"]
-    FOR    ${project}    IN    @{projects}
-        ${project}=    Get Text   ${project}
-        @{project description}=  Split String    ${project}
-        Switch Model Serving Project    ${project description}[0]
-        ${models}=    Get WebElements    xpath://table/tbody/tr/td[@data-label="Name"]/div/a
-        FOR    ${model}    IN    @{models}
-            ${model}=    Get Text   ${model}
-            Delete Model Via UI    ${model}
-            Sleep    1s
-        END
-        Switch Model Serving Project    project_name=All projects
+    ${models}=    Get WebElements    xpath://table/tbody/tr/td[@data-label="Name"]/div/a
+    FOR    ${model}    IN    @{models}
+        ${model}=    Get Text   ${model}
+        Delete Model Via UI    ${model}
+        Sleep    1s
     END
 
 Add Namespace To ServiceMeshMemberRoll
@@ -643,3 +622,53 @@ Set Up Project
     ELSE
         Log    message=Skipping UserWorkloadMonitoring enablement.
     END
+
+Deploy Model From Models Tab
+    [Documentation]    Deploys a model from the project's Models tab
+    [Arguments]    ${project_name}
+    ...    ${data_connection_name}
+    ...    ${model_name}
+    ...    ${framework}
+    ...    ${existing_data_connection}
+    ...    ${model_path}
+    ...    ${model_server}
+    ...    ${serving_runtime}=${NONE}
+    Open Data Science Project Details Page    ${project_name}    tab_id=model-server
+    SeleniumLibrary.Click Button
+    ...    xpath://*[@id="expand-table-row-${model_name}-1-undefined-1"]/../../td[@class='pf-v5-c-table__td']//button
+    SeleniumLibrary.Wait Until Page Contains Element    //div[@role="dialog"]
+    Fill Deploy Model Form    model_name=${model_name}    model_server=${model_server}
+    ...    serving_runtime=${serving_runtime}    framework=${framework}
+    ...    data_connection_name=${data_connection_name}    existing_data_connection=${existing_data_connection}
+    ...    model_path=${model_path}
+
+Fill Deploy Model Form    # robocop: off=too-many-calls-in-keyword
+    [Documentation]    Fills the deploy model form
+    [Arguments]    ${model_name}
+    ...    ${model_server}
+    ...    ${serving_runtime}
+    ...    ${framework}
+    ...    ${data_connection_name}
+    ...    ${existing_data_connection}
+    ...    ${model_path}
+    Set Model Name    ${model_name}
+    Select Model Server    ${model_server}
+    IF    "${serving_runtime}" != "${NONE}"    Set Model Server Runtime    ${serving_runtime}
+    SeleniumLibrary.Wait Until Page Contains Element
+    ...    xpath://span[.="Model framework (name - version)"]
+    Select Framework    ${framework}
+    IF    ${existing_data_connection}
+        # Select Radio Button    group_name=radiogroup    value=existing-data-connection-radio
+        # Selected by default, let's skip for now
+        Select Existing Data Connection    ${data_connection_name}
+        Set Folder Path    ${model_path}
+    ELSE
+        # Existing connection radio is selected by default; for now blindly click on new connection radio
+        SeleniumLibrary.Click Element    //input[@id="new-data-connection-radio"]
+        # Select Radio Button    group_name=radiogroup    value=new-data-connection-radio
+        Set Up New Data Connection    dc_name=${data_connection_name}
+        Set Folder Path    ${model_path}
+    END
+    SeleniumLibrary.Wait Until Element Is Enabled   //button[contains(text(),"Deploy")]
+    SeleniumLibrary.Click Button    Deploy
+    SeleniumLibrary.Wait Until Page Does Not Contain    xpath://h1[.="Deploy model"]

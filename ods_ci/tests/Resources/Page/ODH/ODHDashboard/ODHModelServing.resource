@@ -481,7 +481,6 @@ Set Model Server Runtime
     ...    and select the given runtime
     [Arguments]    ${runtime}=Caikit TGIS
     Page Should Contain Element    ${KSERVE_RUNTIME_DROPDOWN}
-    Sleep    1s
     Click Element    ${KSERVE_RUNTIME_DROPDOWN}
     ${runtime_xpath}=    Set Variable    ${KSERVE_RUNTIME_DROPDOWN}/parent::div//span[contains(text(),"${runtime}")]
     Wait Until Page Contains Element    ${runtime_xpath}

@@ -273,7 +273,7 @@ Get Model Inference
         ${kserve}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain
         ...    Single-model serving enabled
         ${curl_cmd}=     Set Variable    curl -s ${url} -d ${inference_input}
-        IF    ${token_auth}
+        IF    ${token_auth} and "${token}" == "${NONE}"
             IF    "${project_title}" == "${NONE}"
                 ${project_title}=    Get Model Project    ${model_name}
             END
@@ -281,6 +281,8 @@ Get Model Inference
                 ${token}=    Get Access Token via UI    ${project_title}    service_account_name=${service_account_name}
                 ...    single_model=${kserve}    model_name=${model_name}
             END
+        END
+        IF    "${token}" != "${NONE}"
             ${curl_cmd}=     Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
         END
         IF  ${kserve}
@@ -486,9 +488,11 @@ Set Model Server Runtime
     ...    and select the given runtime
     [Arguments]    ${runtime}=Caikit TGIS
     Page Should Contain Element    ${KSERVE_RUNTIME_DROPDOWN}
-    Sleep    5s
+    Sleep    1s
     Click Element    ${KSERVE_RUNTIME_DROPDOWN}
-    Click Element    ${KSERVE_RUNTIME_DROPDOWN}/parent::div//span[contains(text(),"${runtime}")]
+    ${runtime_xpath}=    Set Variable    ${KSERVE_RUNTIME_DROPDOWN}/parent::div//span[contains(text(),"${runtime}")]
+    Wait Until Page Contains Element    ${runtime_xpath}
+    Click Element    ${runtime_xpath}
 
 Get Kserve Inference Host Via UI
     [Documentation]    Fetches the host of the model's URL from the Data Science Project UI

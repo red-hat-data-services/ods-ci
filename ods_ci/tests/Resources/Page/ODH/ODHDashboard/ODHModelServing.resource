@@ -20,7 +20,7 @@ ${S3_BUCKET_DC_INPUT_XP}=     xpath=//input[@aria-label="Field list AWS_S3_BUCKE
 ${S3_DEFAULT_BUCKET}=    ods-ci-s3
 ${MS_TABLE_PROJECT}=    /../../td[@data-label="Project"]
 ${MS_TABLE_STATUS}=    /../../td[@data-label="Status"]
-${MS_TABLE_ENDPOINT}=    /../../td[@data-label="Inference endpoint"]
+${MS_TABLE_ENDPOINT}=    /../td[@data-label="Inference endpoint"]
 ${MS_TABLE_ENDPOINT_INPUT}=    ${MS_TABLE_ENDPOINT}//div[@class="pf-v5-c-clipboard-copy"]//input
 ${MS_TABLE_STATUS_SUCCESS}=     //span[contains(@class,"pf-v5-c-icon__content")][contains(@class,"pf-m-success")]
 ${MS_TABLE_STATUS_FAILURE}=     //span[contains(@class,"pf-v5-c-icon__content")][contains(@class,"pf-m-danger")]
@@ -209,7 +209,7 @@ Get Model Route Via UI
     [Documentation]    Grabs the serving route (URL) of an already deployed model from the Model Serving page.
     [Arguments]    ${model_name}
     # TODO: Open model serving home page if needed?
-    ${route_xpath}=    Set Variable    xpath://div[.="${model_name} "]${MS_TABLE_ENDPOINT_INPUT}
+    ${route_xpath}=    Set Variable    xpath://a[text()='${model_name}']/ancestor::td${MS_TABLE_ENDPOINT_INPUT}
     ${loaded}=    Run Keyword And Return Status    SeleniumLibrary.Wait Until Page Contains Element    ${route_xpath}    timeout=15s
     IF    ${loaded} == ${FALSE}
         Log    message=Model Route was not loaded in UI (RHOAIENG-1919). Trying refreshing!    level=WARN
@@ -486,8 +486,9 @@ Set Model Server Runtime
     ...    and select the given runtime
     [Arguments]    ${runtime}=Caikit TGIS
     Page Should Contain Element    ${KSERVE_RUNTIME_DROPDOWN}
+    Sleep    5s
     Click Element    ${KSERVE_RUNTIME_DROPDOWN}
-    Click Element    ${KSERVE_RUNTIME_DROPDOWN}/..//span[contains(text(),"${runtime}")]
+    Click Element    ${KSERVE_RUNTIME_DROPDOWN}/parent::div//span[contains(text(),"${runtime}")]
 
 Get Kserve Inference Host Via UI
     [Documentation]    Fetches the host of the model's URL from the Data Science Project UI

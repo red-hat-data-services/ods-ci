@@ -25,7 +25,7 @@ ${TOKEN_AUTH_CHECKBOX_XP}=    xpath://input[@id="alt-form-checkbox-auth"]
 ${ADD_SERVICE_ACCOUNT_BUTTON}=    xpath://button[text()='Add a service account']
 ${SERVICE_ACCOUNT_INPUT}=    xpath://input[@data-testid='service-account-form-name']
 ${REPLICAS_COUNT_XP}=     css=[id="model-server-replicas"]
-${PROJECT_SELECTOR_XP}=     xpath://main[contains(@id, 'dashboard-page-main')]//*[@data-testid="project-selector-dropdown"]
+${PROJECT_SELECTOR_XP}=     xpath://main[contains(@id, 'dashboard-page-main')]//*[@data-testid="project-selector-toggle"]
 
 
 *** Keywords ***

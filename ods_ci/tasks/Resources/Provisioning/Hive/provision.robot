@@ -1,5 +1,4 @@
 *** Settings ***
-Resource    deprovision.robot
 Resource    ../../../../tests/Resources/Common.robot
 Library    Process
 
@@ -72,9 +71,7 @@ Handle Already Existing Cluster
         ${result} =    Run Process    oc -n ${hive_namespace} get cd ${cluster_name} -o json | jq -r '.status.webConsoleURL' --exit-status    shell=yes        # robocop: disable:line-too-long
     END
     IF    ${result.rc} != 0
-        Log    Cluster '${cluster_name}' has previously failed to be provisioned - Cleaning Hive resources
-        ...    console=True
-        Delete Cluster Configuration
+        FAIL    Cluster '${cluster_name}' is already in use and it has previously failed to be provisioned.
     ELSE
         FAIL    Cluster '${cluster_name}' is already in use, please choose a different name.
     END

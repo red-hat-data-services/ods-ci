@@ -210,9 +210,8 @@ Wait For Cluster To Be Ready
         ${provision_status} =    Run Process    oc -n ${pool_namespace} get cd ${clusterdeployment_name} -o json    shell=yes    # robocop: disable:line-too-long
         ${custer_status} =    Run Process    oc -n ${hive_namespace} get clusterclaim ${claim_name} -o json    shell=yes
         Log    Cluster '${cluster_name}' deployment had errors, see: ${\n}${provision_status.stdout}${\n}${custer_status.stdout}    level=ERROR    # robocop: disable:line-too-long
-        Log    Cluster '${cluster_name}' install completed, but it is not accessible - Cleaning Hive resources now
+        Log    Cluster '${cluster_name}' install completed, but it is not accessible
         ...    console=True
-        Deprovision Cluster
         FAIL    Cluster '${cluster_name}' provisioning failed. Please look into the logs for more details.
     END
     Log    Cluster '${cluster_name}' install completed and accessible at: ${web_access.stdout}     console=True

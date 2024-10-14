@@ -19,7 +19,7 @@ ${S3_REGION_DC_INPUT_XP}=          xpath=//input[@aria-label="Field list AWS_DEF
 ${S3_BUCKET_DC_INPUT_XP}=     xpath=//input[@aria-label="Field list AWS_S3_BUCKET"]
 ${S3_DEFAULT_BUCKET}=    ods-ci-s3
 ${MS_TABLE_PROJECT}=    /../../td[@data-label="Project"]
-${MS_TABLE_STATUS}=    /../../td[@data-label="Status"]
+${MS_TABLE_STATUS}=    /../td[@data-label="Status"]
 ${MS_TABLE_ENDPOINT}=    /../td[@data-label="Inference endpoint"]
 ${MS_TABLE_ENDPOINT_INPUT}=    ${MS_TABLE_ENDPOINT}//div[@class="pf-v5-c-clipboard-copy"]//input
 ${MS_TABLE_STATUS_SUCCESS}=     //span[contains(@class,"pf-v5-c-icon__content")][contains(@class,"pf-m-success")]
@@ -179,12 +179,12 @@ Verify Model Status
     [Arguments]    ${model_name}    ${expected_status}=success
     IF    "${expected_status}"=="success"
         SeleniumLibrary.Wait Until Page Contains Element
-        ...    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_SUCCESS}    timeout=2m
-        Page Should Not Contain Element    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_FAILURE}
+        ...    //a[text()='test-model']/ancestor::td${MS_TABLE_STATUS}${MS_TABLE_STATUS_SUCCESS}    timeout=2m
+        Page Should Not Contain Element    //a[text()='test-model']/ancestor::td${MS_TABLE_STATUS}${MS_TABLE_STATUS_FAILURE}
     ELSE
         SeleniumLibrary.Wait Until Page Contains Element
-        ...    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_FAILURE}    timeout=2m
-        Page Should Not Contain Element    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_SUCCESS}
+        ...    //a[text()='test-model']/ancestor::td${MS_TABLE_STATUS}${MS_TABLE_STATUS_FAILURE}    timeout=2m
+        Page Should Not Contain Element    //a[text()='test-model']/ancestor::td${MS_TABLE_STATUS}${MS_TABLE_STATUS_SUCCESS}
     END
 
 Delete Model Via UI
@@ -389,11 +389,18 @@ Clean Up Model Serving Page
     [Documentation]    Deletes all currently deployed models, if any are present.
     # Returns an empty list if no matching elements found
     Switch Model Serving Project    project_name=All projects
-    ${models}=    Get WebElements    xpath://table/tbody/tr/td[@data-label="Name"]/div/a
-    FOR    ${model}    IN    @{models}
-        ${model}=    Get Text   ${model}
-        Delete Model Via UI    ${model}
-        Sleep    1s
+    ${projects}=    Get WebElements    xpath://table/tbody/tr/td[@data-label="Project"]
+    FOR    ${project}    IN    @{projects}
+        ${project}=    Get Text   ${project}
+        @{project description}=  Split String    ${project}
+        Switch Model Serving Project    ${project description}[0]
+        ${models}=    Get WebElements    xpath://table/tbody/tr/td[@data-label="Name"]/div/a
+        FOR    ${model}    IN    @{models}
+            ${model}=    Get Text   ${model}
+            Delete Model Via UI    ${model}
+            Sleep    1s
+        END
+        Switch Model Serving Project    project_name=All projects
     END
 
 Add Namespace To ServiceMeshMemberRoll

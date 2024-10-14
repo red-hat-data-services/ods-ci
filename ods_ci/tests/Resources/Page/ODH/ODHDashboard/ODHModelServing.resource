@@ -27,7 +27,7 @@ ${MS_TABLE_STATUS_FAILURE}=     //span[contains(@class,"pf-v5-c-icon__content")]
 ${KSERVE_MODAL_HEADER}=    //header[@class="pf-v5-c-modal-box__header"]/h1[.="Deploy model"]
 ${KSERVE_RUNTIME_DROPDOWN}=    //button[@data-testid="serving-runtime-template-selection"]
 ${LLM_RESOURCES_DIRPATH}=    tests/Resources/Files/llm
-${DEPLOY_MODEL_BTN}=    //button[contains(@data-testid,"deploy")]
+${DEPLOY_MODEL_BTN}=    //button[contains(@data-testid,"deploy-model-button")]
 ${TOKEN_AUTH_CHECKBOX_XP}=    xpath://input[@id="alt-form-checkbox-auth"]
 
 
@@ -133,6 +133,7 @@ Select Framework
     [Arguments]    ${framework}
     TRY
         Open Model framework (name - version) Options Menu
+        SeleniumLibrary.Wait Until Page Contains Element    xpath://span[.="Model framework (name - version)"]
         Page Should Contain Element    xpath://li/button[contains(., "${framework}")]
         Click Element    xpath://li/button[contains(., "${framework}")]
     EXCEPT
@@ -437,36 +438,14 @@ Deploy Model Via CLI
 Deploy Kserve Model Via UI  #robocop: disable
     [Documentation]  Deploys a model using the kserve/caikit runtime using the Data Science Projects UI
     [Arguments]    ${model_name}    ${serving_runtime}    ${data_connection}    ${path}
-    ...    ${model_framework}=caikit    ${replicas}=1    ${size}=Small    ${no_gpus}=${0}
+    ...    ${model_framework}    ${replicas}=1    ${size}=Small    ${no_gpus}=${0}
     ...    ${token}=${FALSE}    ${multi_token}=${FALSE}    ${multi_service_account_name}=default-name2
     ...    ${public_endpoint}=${TRUE}    ${service_account_name}=${NONE}
     Move To Tab    Models
     SeleniumLibrary.Click Button    ${DEPLOY_MODEL_BTN}
     SeleniumLibrary.Wait Until Page Contains Element    xpath=${KSERVE_MODAL_HEADER}
     Set Model Name   ${model_name}
-    Set Model Server Runtime    ${serving_runtime}
     Select Framework    ${model_framework}
-    Set Replicas Number With Buttons    ${replicas}
-    Set Server Size    ${size}
-    IF    ${public_endpoint}
-        Enable External Serving Route
-        # By default this also enables Token Authentication. Let's disable it and let it get re-enable by the next
-        # IF block if needed.
-        ${token_enabled}=     Run Keyword And Return Status    SeleniumLibrary.Checkbox Should Be Selected
-        ...    ${TOKEN_AUTH_CHECKBOX_XP}
-        IF    ${token_enabled}
-            Disable Token Authentication
-        ELSE
-            Log    Token Authentication was supposed to be automatically enabled, but it wasn't    level=ERROR
-            ...    console=${True}
-        END
-    END
-    IF    ${token}
-        Enable Token Authentication    service_account_name=${service_account_name}
-        IF    ${multi_token}
-            Add Another Service Account    ${multi_service_account_name}
-        END
-    END
     Select Existing Data Connection    ${data_connection}
     Set Folder Path    ${path}
     IF    ${no_gpus} > ${0}
@@ -479,7 +458,7 @@ Deploy Kserve Model Via UI  #robocop: disable
         Set Number of GPU With Buttons   ${no_gpus}
     END
     Click Button    Deploy
-    Wait Until Page Does Not Contain Element    xpath=${KSERVE_MODAL_HEADER}   timeout=60s
+    Wait Until Page Does Not Contain Element    xpath=//button[@data-testid="modal-submit-button"]   timeout=60s
 
 Set Model Server Runtime
     [Documentation]    Opens the Serving runtime dropdown in the deploy model modal window for models
@@ -487,7 +466,7 @@ Set Model Server Runtime
     [Arguments]    ${runtime}=Caikit TGIS
     Page Should Contain Element    ${KSERVE_RUNTIME_DROPDOWN}
     Click Element    ${KSERVE_RUNTIME_DROPDOWN}
-    Click Element    ${KSERVE_RUNTIME_DROPDOWN}/..//span[contains(text(),"${runtime}")]
+    Click Element    ${KSERVE_RUNTIME_DROPDOWN}/..//*[@data-testid="ovms"]
 
 Get Kserve Inference Host Via UI
     [Documentation]    Fetches the host of the model's URL from the Data Science Project UI

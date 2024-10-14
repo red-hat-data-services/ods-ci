@@ -31,7 +31,7 @@ ${PROJECT_SELECTOR_XP}=     xpath://main[contains(@id, 'dashboard-page-main')]//
 *** Keywords ***
 Create Model Server
     [Documentation]    Keyword to create a Model Server in a Data Science Project
-    [Arguments]    ${no_replicas}=1    ${server_size}=Small    ${ext_route}=${TRUE}
+    [Arguments]    ${no_replicas}=1    ${server_size}=Small    ${ext_route}=${FALSE}
     ...    ${token}=${TRUE}    ${runtime}=OpenVINO Model Server    ${server_name}=Model Serving Test
     ...    ${no_gpus}=0    ${existing_server}=${FALSE}
     Move To Tab    Models
@@ -57,6 +57,7 @@ Create Model Server
     END
     IF    ${ext_route}==${TRUE}
         Enable External Serving Route
+        Wait Until Page Contains Element   ${TOKEN_AUTH_CHECKBOX_XP}   timeout=10s
         IF    ${token}==${FALSE}
             Disable Token Authentication
         ELSE

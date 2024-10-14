@@ -24,7 +24,7 @@ ${SERVING_MODEL_SERVERS_SIDE_MENU}=    xpath=//span[text()='Models and model ser
 ${TOKEN_AUTH_CHECKBOX_XP}=    xpath://input[@id="alt-form-checkbox-auth"]
 ${ADD_SERVICE_ACCOUNT_BUTTON}=    xpath://button[text()='Add a service account']
 ${SERVICE_ACCOUNT_INPUT}=    xpath://input[@data-testid='service-account-form-name']
-${REPLICAS_COUNT_XP}=     css=[id="model-server-replicas"]
+${REPLICAS_COUNT_XP}=     css=[aria-label="model server replicas number input"]
 ${PROJECT_SELECTOR_XP}=     xpath://main[contains(@id, 'dashboard-page-main')]//*[@data-testid="project-selector-toggle"]
 
 
@@ -43,8 +43,8 @@ Create Model Server
     SeleniumLibrary.Click Button    Add model server
     SeleniumLibrary.Wait Until Page Contains Element    //span[.="Add model server"]
     Set Model Server Name    ${server_name}
-    Set Replicas Number With Buttons    ${no_replicas}
     Set Model Server Runtime    ${runtime}
+    Set Replicas Number With Buttons    ${no_replicas}
     Set Server Size    ${server_size}
     IF    ${no_gpus} > ${0}
         ${gpu_enabled}=    Run Keyword And Return Status    Verify GPU Selector Is Usable

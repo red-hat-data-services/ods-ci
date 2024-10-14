@@ -24,8 +24,8 @@ ${SERVING_MODEL_SERVERS_SIDE_MENU}=    xpath=//span[text()='Models and model ser
 ${TOKEN_AUTH_CHECKBOX_XP}=    xpath://input[@id="alt-form-checkbox-auth"]
 ${ADD_SERVICE_ACCOUNT_BUTTON}=    xpath://button[text()='Add a service account']
 ${SERVICE_ACCOUNT_INPUT}=    xpath://input[@data-testid='service-account-form-name']
-${REPLICAS_COUNT_XP}=     xpath://section[@class='pf-v5-c-form__section']//span[@class='pf-v5-c-form-control']/input
-${PROJECT_SELECTOR_XP}=     xpath://main[contains(@id, 'dashboard-page-main')]//*[@data-testid="project-selector-dropdown"]
+${REPLICAS_COUNT_XP}=     css=[aria-label="model server replicas number input"]
+${PROJECT_SELECTOR_XP}=     xpath://main[contains(@id, 'dashboard-page-main')]//*[@data-testid="project-selector-toggle"]
 
 
 *** Keywords ***
@@ -43,8 +43,8 @@ Create Model Server
     SeleniumLibrary.Click Button    Add model server
     SeleniumLibrary.Wait Until Page Contains Element    //span[.="Add model server"]
     Set Model Server Name    ${server_name}
-    Set Replicas Number With Buttons    ${no_replicas}
     Set Model Server Runtime    ${runtime}
+    Set Replicas Number With Buttons    ${no_replicas}
     Set Server Size    ${server_size}
     IF    ${no_gpus} > ${0}
         ${gpu_enabled}=    Run Keyword And Return Status    Verify GPU Selector Is Usable
@@ -73,7 +73,7 @@ Create Model Server
 Set Replicas Number With Buttons
     [Documentation]    Sets the number of replicas for the model serving pod
     [Arguments]    ${number}
-    ${current}=    Get Element Attribute    ${REPLICAS_COUNT_XP}   value
+    ${current}=    Get Value    ${REPLICAS_COUNT_XP}
     ${difference}=    Evaluate    int(${number})-int(${current})
     ${op}=    Set Variable    plus
     IF    ${difference}<${0}
@@ -87,7 +87,7 @@ Set Replicas Number With Buttons
             Click Minus Button
         END
     END
-    ${current}=    Get Element Attribute    ${REPLICAS_COUNT_XP}   value
+    ${current}=    Get Value    ${REPLICAS_COUNT_XP}
     Should Be Equal As Integers    ${current}    ${number}
 
 Set Server Size
@@ -214,7 +214,7 @@ Get Model Serving Access Token via UI
     [Arguments]    ${service_account_name}=default-name    ${single_model}=${FALSE}    ${model_name}=${NONE}
     IF    ${single_model}
         # Expand the model
-        SeleniumLibrary.Click Button    xpath: //a[text()='${model_name}']/parent::div/parent::td[@data-label='Name']/preceding-sibling::td/button  # robocop: off=line-too-long
+        SeleniumLibrary.Click Button    xpath: //a[text()='${model_name}']/ancestor::td/preceding-sibling::td/button  # robocop: off=line-too-long
         ${token}=    Get Single Model Token    ${service_account_name}
     ELSE
         SeleniumLibrary.Wait Until Page Contains Element    xpath://td[@data-label="Tokens"]/button
@@ -228,7 +228,7 @@ Get Single Model Token
     [Documentation]    Gets the (Single Model) Token of an specific Service Account
     [Arguments]    ${service_account_name}
     ${token}=    Get Element Attribute
-            ...    xpath://div[text()='${service_account_name}']/parent::td[@data-label='Token Name']/following-sibling::td[@data-label='Token Secret']//input   value
+            ...    xpath://div[text()='${service_account_name}']/../../parent::td[@data-label='Token Name']/following-sibling::td[@data-label="Token Secret"]//input   value
     RETURN    ${token}
 
 Click Plus Button

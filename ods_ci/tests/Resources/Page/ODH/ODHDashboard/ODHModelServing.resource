@@ -19,8 +19,8 @@ ${S3_REGION_DC_INPUT_XP}=          xpath=//input[@aria-label="Field list AWS_DEF
 ${S3_BUCKET_DC_INPUT_XP}=     xpath=//input[@aria-label="Field list AWS_S3_BUCKET"]
 ${S3_DEFAULT_BUCKET}=    ods-ci-s3
 ${MS_TABLE_PROJECT}=    /../../td[@data-label="Project"]
-${MS_TABLE_STATUS}=    /../../td[@data-label="Status"]
-${MS_TABLE_ENDPOINT}=    /../../td[@data-label="Inference endpoint"]
+${MS_TABLE_STATUS}=    /../td[@data-label="Status"]
+${MS_TABLE_ENDPOINT}=    /../td[@data-label="Inference endpoint"]
 ${MS_TABLE_ENDPOINT_INPUT}=    ${MS_TABLE_ENDPOINT}//div[@class="pf-v5-c-clipboard-copy"]//input
 ${MS_TABLE_STATUS_SUCCESS}=     //span[contains(@class,"pf-v5-c-icon__content")][contains(@class,"pf-m-success")]
 ${MS_TABLE_STATUS_FAILURE}=     //span[contains(@class,"pf-v5-c-icon__content")][contains(@class,"pf-m-danger")]
@@ -179,12 +179,12 @@ Verify Model Status
     [Arguments]    ${model_name}    ${expected_status}=success
     IF    "${expected_status}"=="success"
         SeleniumLibrary.Wait Until Page Contains Element
-        ...    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_SUCCESS}    timeout=2m
-        Page Should Not Contain Element    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_FAILURE}
+        ...    //a[text()='test-model']/ancestor::td${MS_TABLE_STATUS}${MS_TABLE_STATUS_SUCCESS}    timeout=2m
+        Page Should Not Contain Element    //a[text()='test-model']/ancestor::td${MS_TABLE_STATUS}${MS_TABLE_STATUS_FAILURE}
     ELSE
         SeleniumLibrary.Wait Until Page Contains Element
-        ...    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_FAILURE}    timeout=2m
-        Page Should Not Contain Element    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_SUCCESS}
+        ...    //a[text()='test-model']/ancestor::td${MS_TABLE_STATUS}${MS_TABLE_STATUS_FAILURE}    timeout=2m
+        Page Should Not Contain Element    //a[text()='test-model']/ancestor::td${MS_TABLE_STATUS}${MS_TABLE_STATUS_SUCCESS}
     END
 
 Delete Model Via UI
@@ -209,7 +209,7 @@ Get Model Route Via UI
     [Documentation]    Grabs the serving route (URL) of an already deployed model from the Model Serving page.
     [Arguments]    ${model_name}
     # TODO: Open model serving home page if needed?
-    ${route_xpath}=    Set Variable    xpath://div[.="${model_name} "]${MS_TABLE_ENDPOINT_INPUT}
+    ${route_xpath}=    Set Variable    xpath://a[text()='${model_name}']/ancestor::td${MS_TABLE_ENDPOINT_INPUT}
     ${loaded}=    Run Keyword And Return Status    SeleniumLibrary.Wait Until Page Contains Element    ${route_xpath}    timeout=15s
     IF    ${loaded} == ${FALSE}
         Log    message=Model Route was not loaded in UI (RHOAIENG-1919). Trying refreshing!    level=WARN
@@ -273,7 +273,7 @@ Get Model Inference
         ${kserve}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain
         ...    Single-model serving enabled
         ${curl_cmd}=     Set Variable    curl -s ${url} -d ${inference_input}
-        IF    ${token_auth}
+        IF    ${token_auth} and "${token}" == "${NONE}"
             IF    "${project_title}" == "${NONE}"
                 ${project_title}=    Get Model Project    ${model_name}
             END
@@ -281,6 +281,8 @@ Get Model Inference
                 ${token}=    Get Access Token via UI    ${project_title}    service_account_name=${service_account_name}
                 ...    single_model=${kserve}    model_name=${model_name}
             END
+        END
+        IF    "${token}" != "${NONE}"
             ${curl_cmd}=     Catenate    ${curl_cmd}    -H "Authorization: Bearer ${token}"
         END
         IF  ${kserve}
@@ -487,7 +489,9 @@ Set Model Server Runtime
     [Arguments]    ${runtime}=Caikit TGIS
     Page Should Contain Element    ${KSERVE_RUNTIME_DROPDOWN}
     Click Element    ${KSERVE_RUNTIME_DROPDOWN}
-    Click Element    ${KSERVE_RUNTIME_DROPDOWN}/..//span[contains(text(),"${runtime}")]
+    ${runtime_xpath}=    Set Variable    ${KSERVE_RUNTIME_DROPDOWN}/parent::div//span[contains(text(),"${runtime}")]
+    Wait Until Page Contains Element    ${runtime_xpath}
+    Click Element    ${runtime_xpath}
 
 Get Kserve Inference Host Via UI
     [Documentation]    Fetches the host of the model's URL from the Data Science Project UI

@@ -213,7 +213,7 @@ Get Model Serving Access Token via UI
     ...    TODO: There can be multiple tokens defined for each model server, handle this case as well
     [Arguments]    ${service_account_name}=default-name    ${single_model}=${FALSE}    ${model_name}=${NONE}
     IF    ${single_model}
-        # Expand the model        
+        # Expand the model
         SeleniumLibrary.Click Button    xpath: //a[text()='${model_name}']/ancestor::td/preceding-sibling::td/button  # robocop: off=line-too-long
         ${token}=    Get Single Model Token    ${service_account_name}
     ELSE

@@ -71,7 +71,7 @@ Handle Already Existing Cluster
         ${result} =    Run Process    oc -n ${hive_namespace} get cd ${cluster_name} -o json | jq -r '.status.webConsoleURL' --exit-status    shell=yes        # robocop: disable:line-too-long
     END
     IF    ${result.rc} != 0
-        FAIL    Cluster '${cluster_name}' is already in use and it has previously failed to be provisioned.
+        FAIL    Cluster '${cluster_name}' has previously failed to be provisioned but some Hive and/or Cloud resources are still present.
     ELSE
         FAIL    Cluster '${cluster_name}' is already in use, please choose a different name.
     END

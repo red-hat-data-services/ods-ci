@@ -134,7 +134,7 @@ Verify Hello World Pipeline Elements
 Select Pipeline Project By Name
     [Documentation]    Select the project by project name
     [Arguments]    ${project_name}
-    ${project_menu}=    Set Variable    xpath://*[@data-testid="project-selector-dropdown"]
+    ${project_menu}=    Set Variable    xpath://*[@data-testid="project-selector-toggle"]
     Wait until Element is Visible    ${project_menu}   timeout=20
     Click Element    ${project_menu}
     Click Element    xpath://*[@role="menuitem" and string()="${project_name}"]

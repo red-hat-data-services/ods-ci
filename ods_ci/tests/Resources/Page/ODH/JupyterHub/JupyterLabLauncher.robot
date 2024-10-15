@@ -93,6 +93,11 @@ Wait Until JupyterLab Code Cell Is Not Active
   ...    //div[contains(@class,"jp-Cell-inputArea")]/div[contains(@class,"jp-InputArea-prompt") and (.="[*]:")][1]
   ...    ${timeout}
 
+Scroll At The End Of The Notebook
+  [Documentation]  Scrolls at the end of the opened Notebook so that
+  ...    the button for addition of a new cell is visible.
+  Scroll Element Into View    //button[string()="Click to add a cell."]
+
 Select Empty JupyterLab Code Cell
   Click Element  //div[contains(@class,"jp-mod-noOutputs jp-Notebook-cell")]
 

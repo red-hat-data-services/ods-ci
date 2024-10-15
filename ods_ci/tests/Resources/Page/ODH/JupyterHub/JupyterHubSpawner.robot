@@ -562,7 +562,7 @@ Get Container Size
    ...    timeout=30   error=Container size selector is not present in KFNBC Spawner
    Click Element    xpath:${KFNBC_CONTAINER_SIZE_DROPDOWN_XPATH}
    Wait Until Page Contains Element    xpath://span[.="${container_size}"]/../..  timeout=10
-   ${data}   Get Text  xpath://span[.="${container_size}"]/../span[2]
+   ${data}   Get Text  xpath://li[@data-testid="${container_size}"]//span[contains(text(), "Limits")]
    ${l_data}   Convert To Lower Case    ${data}
    ${data}    Get Formated Container Size To Dictionary     ${l_data}
    RETURN  ${data}

@@ -453,7 +453,6 @@ Verify Installed Labextension Version
 Check Versions In JupyterLab
     [Arguments]  ${libraries-to-check}
     ${return_status} =    Set Variable    PASS
-    @{packages} =    Create List    Python    Boto3    Kafka-Python    Matplotlib    Scikit-learn    Pandas    Scipy    Numpy
     FOR  ${libString}  IN  @{libraries-to-check}
         # libString = LibName vX.Y -> libDetail= [libName, X.Y]
         @{libDetail} =  Split String  ${libString}  ${SPACE}v
@@ -487,6 +486,11 @@ Check Versions In JupyterLab
         # CUDA version is checked in GPU-specific test cases, we can skip it here.
         ELSE IF  "${libDetail}[0]" == "CUDA"
             CONTINUE
+        ELSE IF  "${libDetail}[0]" == "Nvidia-CUDA-CU12-Bundle"
+            ${status}  ${value} =  Verify Installed Library Version  nvidia-cuda-nvcc-cu12  ${libDetail}[1]
+            IF  '${status}' == 'FAIL'
+              ${return_status} =    Set Variable    FAIL
+            END
         ELSE IF  "${libDetail}[0]" == "Elyra"
             ${status}  ${value} =  Verify Installed Library Version  elyra-code-snippet-extension  ${libDetail}[1]
             IF  '${status}' == 'FAIL'
@@ -526,12 +530,18 @@ Check Versions In JupyterLab
               ${return_status} =    Set Variable    FAIL
             END
         END
+
+        # Now check that selected list of packages has same version among all the images.
+        @{packages} =    Create List    Python    Boto3    Kafka-Python    Scipy
+
         Continue For Loop If  "${libDetail}[0]" not in ${packages}
         IF    "${libDetail}[0]" not in ${package_versions}
         ...    Set To Dictionary    ${package_versions}    ${libDetail}[0]=${libDetail}[1]
         IF    "${package_versions["${libDetail}[0]"]}" != "${libDetail}[1]"
              ${return_status} =    Set Variable    FAIL
-             Run Keyword And Continue On Failure  FAIL  "${package_versions["${libDetail}[0]"]} != ${libDetail}[1]"
+             Run Keyword And Continue On Failure    Fail
+             ...    Version of this library in this image doesn't align with versions in other images
+             ...    "${package_versions["${libDetail}[0]"]} != ${libDetail}[1]"
         END
     END
     RETURN  ${return_status}

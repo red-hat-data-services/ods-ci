@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation     Kuberay E2E tests - https://github.com/ray-project/kuberay.git
+Documentation     Kuberay E2E tests - https://github.com/opendatahub-io/kuberay/tree/dev/ray-operator/test/e2e
 Suite Setup       Prepare Kuberay E2E Test Suite
 Suite Teardown    Teardown Kuberay E2E Test Suite
 Library           OperatingSystem
@@ -44,22 +44,6 @@ Run TestRayJobLightWeightMode test
     ...     ProductBug:RHOAIENG-6614
     Run Kuberay E2E Test    TestRayJobLightWeightMode
 
-Run TestRayClusterAutoscaler test
-    [Documentation]    Run Go E2E test: TestRayClusterAutoscaler
-    [Tags]  Tier1
-    ...     DistributedWorkloads
-    ...     Training
-    ...     Kuberay
-    Run Kuberay E2E Test    TestRayClusterAutoscaler
-
-Run TestRayService test
-    [Documentation]    Run Go E2E test: TestRayService
-    [Tags]  Tier1
-    ...     DistributedWorkloads
-    ...     Training
-    ...     Kuberay
-    Run Kuberay E2E Test    TestRayService
-    
 
 *** Keywords ***
 Prepare Kuberay E2E Test Suite

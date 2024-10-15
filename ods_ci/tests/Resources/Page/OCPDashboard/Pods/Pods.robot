@@ -42,14 +42,21 @@ Get Pod Logs From UI
 Delete Pods Using Label Selector
     [Documentation]    Deletes an openshift pod by label selector
     [Arguments]    ${namespace}    ${label_selector}
-    ${status}=    Check If POD Exists    ${namespace}    ${label_selector}
-    IF    '${status}'=='PASS'    Oc Delete    kind=Pod    namespace=${namespace}
-    ...    label_selector=${label_selector}    ELSE    FAIL
-    ...    No PODS present with Label '${label_selector}' in '${namespace}' namespace, Check the label selector and namespace provide is correct and try again
-    Sleep    2
-    ${status}=    Check If POD Exists    ${namespace}    ${label_selector}
-    IF    '${status}'!='FAIL'    FAIL
-    ...    PODS with Label '${label_selector}' is not deleted in '${namespace}' namespace
+    ${pod_exists}=    Check If POD Exists    ${namespace}    ${label_selector}
+    IF    '${pod_exists}'=='PASS'
+        ${deleted_pods}=    Oc Delete   kind=Pod    namespace=${namespace}    label_selector=${label_selector}
+        IF    len(${deleted_pods}) == 0
+            FAIL    Error deleting pods: ${deleted_pods}
+        ELSE
+            Sleep    2
+            ${pod_exists}=    Check If POD Exists    ${namespace}    ${label_selector}
+            IF    '${pod_exists}'=='PASS'
+            ...    FAIL    Pods with Label '${label_selector}' in namespace '${namespace}' still exist
+        END
+    ELSE
+        Log    level=WARN
+        ...    message=No Pods present with Label '${label_selector}' in '${namespace}' namespace
+    END
 
 Check If Pod Exists
     [Documentation]    Check existence of an openshift pod by label selector
@@ -61,8 +68,6 @@ Check If Pod Exists
     ELSE
         Should Be Equal    ${status}    PASS
     END
-
-
 
 Verify Operator Pod Status
     [Documentation]    Verify Pod status

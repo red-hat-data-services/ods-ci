@@ -18,17 +18,14 @@ ${ACTIONS_BTN_XP}=    xpath=//div/button[@aria-label="Actions"]
 ${DELETE_ACTION_BTN_XP}=  xpath=//div/ul/li/button[text()="Delete project"]
 ${EDIT_ACTION_BTN_XP}=    xpath=//div/ul/li/button[text()="Edit project"]
 ${SPAWNER_LINK}=        xpath=//*[text()="Launch standalone notebook server"]
-${PROJECT_SEARCH_BAR}=    //div[@data-testid="dashboard-table-toolbar"]
-${PROJECT_FILTER_TYPE}=    ${PROJECT_SEARCH_BAR}//button[@data-testid="filter-dropdown-select"]
-${PROJECT_SEARCH_INPUT}=    ${PROJECT_SEARCH_BAR}//input[@aria-label="Search input"]
+${PROJECT_SEARCH_BAR}=    [data-testid="projects-table-toolbar"]
+${PROJECT_FILTER_TYPE}=    ${PROJECT_SEARCH_BAR} [data-testid="filter-toolbar-dropdown"]
+${PROJECT_SEARCH_INPUT}=    ${PROJECT_SEARCH_BAR} [data-testid="filter-toolbar-text-field"] input
 
 *** Keywords ***
 Open Data Science Projects Home Page
     [Documentation]    Open "Data Science Projects" page from the sidebar
-    Wait Until Page Contains    Data Science Projects
-    Click Link      Data Science Projects
     Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
-    Wait Until Page Contains    View your existing projects or create new projects.    timeout=30
     Maybe Wait For Dashboard Loading Spinner Page
 
 Is Data Science Projects Page Open
@@ -430,13 +427,12 @@ Remove Current Page Projects From All Projects
 Filter Projects By ${Type}
     [Documentation]    Search for projects where ${Type} includes "${text}"
     [Arguments]     ${text}
-    Open Data Science Projects Home Page
     ${searchbar_exists}=    Run Keyword And Return Status
-    ...    Page Should Contain Element    xpath:${PROJECT_SEARCH_BAR}
+    ...    Page Should Contain Element    css:${PROJECT_SEARCH_BAR}
     IF    ${searchbar_exists}
-        Click Element    xpath:${PROJECT_FILTER_TYPE}
-        Click Element    xpath:${PROJECT_SEARCH_BAR}//li[@data-testid="${Type}"]
-        Input Text    ${PROJECT_SEARCH_INPUT}    ${text}
+        Click Element    css:${PROJECT_FILTER_TYPE}
+        Click Element    css:${PROJECT_SEARCH_BAR} [id="${Type}"]
+        Input Text    css:${PROJECT_SEARCH_INPUT}    ${text}
     ELSE
         Log    No projects are listed
     END

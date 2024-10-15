@@ -576,7 +576,7 @@ Project Suite Setup
     Delete List Of Projects Via CLI   ocp_projects=${PROJECTS_TO_DELETE}
     Launch Data Science Project Main Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
-    ...    resource_name=${PRJ_RESOURCE_NAME}    existing_project=${TRUE}
+    ...    existing_project=${TRUE}
 
 Project Suite Teardown
     [Documentation]    Suite teardown steps after testing DS Projects. It Deletes

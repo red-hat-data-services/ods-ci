@@ -58,7 +58,6 @@ Verify Data Science Projects Page Is Accessible
     [Documentation]    Verifies "Data Science Projects" page is accessible from
     ...                the navigation menu on the left
     [Tags]    Smoke
-    ...       Tier1
     ...       ODS-1876
     Open Data Science Projects Home Page
     Page Should Contain Element     ${PROJECT_CREATE_BTN_XP}
@@ -67,7 +66,6 @@ Verify User Can Access Jupyter Launcher From DS Project Page
     [Documentation]    Verifies Data Science Projects home page contains
     ...                a link to Jupyter Spawner and it is working
     [Tags]    Smoke
-    ...       Tier1
     ...       ODS-1877
     Open Data Science Projects Home Page
     Page Should Contain Element     ${SPAWNER_LINK}
@@ -78,7 +76,6 @@ Verify Workbench Images Have Multiple Versions
     [Documentation]    Verifies that workbench images have an additional
     ...                dropdown which supports N/N-1 image versions.
     [Tags]    Sanity
-    ...       Tier1
     ...       ODS-2131
     Open Data Science Project Details Page    project_title=${PRJ_TITLE}    tab_id=workbenches
     Click Element    ${WORKBENCH_CREATE_BTN_XP}
@@ -90,14 +87,16 @@ Verify Workbench Images Have Multiple Versions
     END
 
 Verify User Cannot Create Project With Empty Fields
-    [Tags]    Sanity   ODS-1783    Tier1
+    [Tags]    Sanity
+    ...       ODS-1783
     [Documentation]    Verifies users is not allowed to create a project with Empty title
     Open Data Science Projects Home Page
     Create Project With Empty Title And Expect Error
     Close Generic Modal If Present
 
 Verify User Cannot Create Project Using Special Chars In Resource Name
-    [Tags]    Sanity    Tier1    ODS-1875
+    [Tags]    Sanity
+    ...       ODS-1875
     [Documentation]    Verifies users is not allowed to create a project with a custom resource name
     ...                containing special characters like "@" or "!"
     Open Data Science Projects Home Page
@@ -105,7 +104,8 @@ Verify User Cannot Create Project Using Special Chars In Resource Name
     Close Generic Modal If Present
 
 Verify User Can Create A Data Science Project
-    [Tags]    Smoke    ODS-1775    Tier1
+    [Tags]    Smoke
+    ...       ODS-1775
     [Documentation]    Verifies users can create a DS project
     Open Data Science Projects Home Page
     Log    message=DS Project creation covered by the Suite Setup
@@ -114,7 +114,8 @@ Verify User Can Create A Data Science Project
     ${ns_name}=    Check Corresponding Namespace Exists    project_title=${PRJ_TITLE}
 
 Verify User Can Create And Start A Workbench With Existent PV Storage
-    [Tags]    Smoke    ODS-1814    Tier1
+    [Tags]    Smoke
+    ...       ODS-1814
     [Documentation]    Verifies users can create a workbench and connect an existent PersistenVolume
     ${pv_name}=    Set Variable    ${PV_BASENAME}-existent
     Create PersistentVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}    project_title=${PRJ_TITLE}
@@ -131,7 +132,8 @@ Verify User Can Create And Start A Workbench With Existent PV Storage
     ...    project_title=${PRJ_TITLE}    pvc_title=${pv_name}
 
 Verify User Can Create A PV Storage
-    [Tags]    Sanity    Tier1    ODS-1819
+    [Tags]    Sanity
+    ...       ODS-1819
     [Documentation]    Verifies users can Create PersistentVolume Storage
     ...                THIS MUST BE UPDATED TO CHECK WORKBENCH GETS RESTARTED LIKE FOR ODS-1825.
     ...                MAIN GOAL OF THE TEST CASE IS COVERED BY ODS-1814
@@ -161,7 +163,9 @@ Verify User Can Create A PV Storage
     ...    Delete PVC In Project From CLI    pvc_title=${pv_name}    project_title=${PRJ_TITLE}
 
 Verify User Can Create And Start A Workbench Adding A New PV Storage
-    [Tags]    Sanity    ODS-1816    Tier1    ExcludeOnDisconnected
+    [Tags]    Sanity
+    ...       ODS-1816
+    ...       ExcludeOnDisconnected
     [Documentation]    Verifies users can create a workbench and connect a new PersistenVolume
     ...    We skip this test on Disconnected environment because we have a PVs predefined there hardcoded to 100Gi.
     ...    Since there is a size check in this test, it would fail unless some extra condition to be brought in here.
@@ -184,7 +188,7 @@ Verify User Can Create And Start A Workbench Adding A New PV Storage
     ...    project_title=${PRJ_TITLE}    pvc_title=${pv_name}
 
 Verify User Can Create A S3 Data Connection And Connect It To Workbenches
-    [Tags]    Sanity    Tier1
+    [Tags]    Sanity
     ...       ODS-1825    ODS-1972
     [Documentation]    Verifies users can add a Data connection to AWS S3
     Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
@@ -223,7 +227,8 @@ Verify User Can Create A S3 Data Connection And Connect It To Workbenches
     ...    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_TITLE}    project_title=${PRJ_TITLE}
 
 Verify User Can Delete A Persistent Storage
-    [Tags]    Sanity    Tier1    ODS-1824
+    [Tags]    Sanity
+    ...       ODS-1824
     [Documentation]    Verifies users can delete a PersistenVolume
     ${pv_name}=    Set Variable    ${PV_BASENAME}-TO-DELETE
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
@@ -235,7 +240,8 @@ Verify User Can Delete A Persistent Storage
     Check Storage PersistentVolumeClaim Is Deleted    storage_name=${pv_name}    namespace=${ns_name}
 
 Verify User Can Delete A Data Connection
-    [Tags]    Sanity    Tier1    ODS-1826
+    [Tags]    Sanity
+    ...       ODS-1826
     [Documentation]    Verifies users can delete a Data connection
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_3_S3_NAME}
@@ -248,7 +254,8 @@ Verify User Can Delete A Data Connection
     Check Data Connection Secret Is Deleted    dc_name=${DC_3_S3_NAME}    namespace=${ns_name}
 
 Verify user can create a workbench with an existing data connection
-    [Tags]  Sanity    Tier1  ODS-2176
+    [Tags]  Sanity
+    ...     ODS-2176
     [Documentation]  Verifies users can create a workbench with an existing data connection
     ${data_connection_name}=    Set Variable    aDataConnection
     Create S3 Data Connection  project_title=${PRJ_TITLE}
@@ -274,7 +281,8 @@ Verify user can create a workbench with an existing data connection
     ...                project_title=${PRJ_TITLE}
 
 Verify User Can Create A Workbench With Environment Variables
-    [Tags]    Sanity    Tier1    ODS-1864
+    [Tags]    Sanity
+    ...       ODS-1864
     [Documentation]    Verifies users can create a workbench and inject environment variables during creation
     ${pv_name}=    Set Variable    ${PV_BASENAME}-existent
     ${envs_var_secrets}=    Create Dictionary    secretA=TestVarA   secretB=TestVarB
@@ -295,7 +303,7 @@ Verify User Can Create A Workbench With Environment Variables
     [Teardown]    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_4_TITLE}    project_title=${PRJ_TITLE}
 
 Verify User Can Create Environment Variables By Uploading YAML Secret/ConfigMap
-    [Tags]    Tier1    Sanity
+    [Tags]    Sanity
     ...       ODS-1883
     [Documentation]    Verify user can set environment varibles in their workbenches by
     ...                uploading a yaml Secret or Config Map file.
@@ -327,7 +335,8 @@ Verify User Can Create Environment Variables By Uploading YAML Secret/ConfigMap
     ...    project_title=${PRJ_TITLE}    pvc_title=${WORKBENCH_4_TITLE}-PV
 
 Verify User Can Log Out And Return To Project From Jupyter Notebook    # robocop: disable
-    [Tags]    Sanity    Tier1    ODS-1971
+    [Tags]    Sanity
+    ...       ODS-1971
     [Documentation]    Verifies user can log out and return to the project from Jupyter notebook.
     ...                Users have 2 options:
     ...                1. click "File" > "Log Out" to actually close the login session
@@ -362,7 +371,7 @@ Verify User Can Log Out And Return To Project From Jupyter Notebook    # robocop
     ...    project_title=${PRJ_TITLE}
 
 Verify Event Log Is Accessible While Starting A Workbench
-    [Tags]    Tier1    Sanity
+    [Tags]    Sanity
     ...       ODS-1970
     [Documentation]    Verify user can access event log while starting a workbench
     Create Workbench    workbench_title=${WORKBENCH_6_TITLE}  workbench_description=${WORKBENCH_6_DESCRIPTION}
@@ -385,7 +394,8 @@ Verify Event Log Is Accessible While Starting A Workbench
     ...    project_title=${PRJ_TITLE}
 
 Verify User Can Cancel Workbench Start From Event Log
-    [Tags]    Sanity    Tier1    ODS-1975
+    [Tags]    Sanity
+    ...       ODS-1975
     [Documentation]    Verify user can cancel workbench start from event log
 
     Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
@@ -410,7 +420,7 @@ Verify User Can Cancel Workbench Start From Event Log
     [Teardown]  Clean Project From Workbench Resources  workbench_title=${WORKBENCH_TITLE}  project_title=${PRJ_TITLE}
 
 Verify Error Is Reported When Workbench Fails To Start    # robocop: disable
-    [Tags]    Tier1    Sanity
+    [Tags]    Sanity
     ...       ODS-1973
     [Documentation]    Verify UI informs users about workbenches failed to start.
     ...                At the moment the test is considering only the scenario where
@@ -502,7 +512,7 @@ Verify Users Can Start, Stop And Launch A Workbench From DS Projects Home Page
     ...    SeleniumLibrary.Close Browser
 
 Verify User Can Delete A Data Science Project
-    [Tags]    Smoke    Tier1
+    [Tags]    Smoke
     ...       ODS-1784
     [Documentation]    Verifies users can delete a Data Science project
     Open Data Science Projects Home Page
@@ -511,7 +521,8 @@ Verify User Can Delete A Data Science Project
     # check workbenches and resources get deleted too
 
 Verify User Can Access Only Its Owned Projects
-    [Tags]    Sanity    Tier1    ODS-1868
+    [Tags]    Sanity
+    ...       ODS-1868
     [Documentation]    Verifies each user can access only they owned projects. Except for
     ...                cluster and dedicated admins which should be able to fetch all the DS Projects
     [Setup]    Run Keywords

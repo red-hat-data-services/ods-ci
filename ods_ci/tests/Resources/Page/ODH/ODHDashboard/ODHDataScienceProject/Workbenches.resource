@@ -63,7 +63,7 @@ Create Workbench
     Input Text    ${WORKBENCH_NAME_INPUT_XP}    ${workbench_title}
     Input Text    ${WORKBENCH_DESCR_TXT_XP}    ${workbench_description}
     Run Keyword And Continue On Failure     Element Should Be Disabled    ${WORKBENCH_CREATE_BTN_2_XP}
-    Select Workbench Jupyter Image    image_name=${image_name}    version=${version}
+    Select Workbench Image    image_name=${image_name}    version=${version}
     IF    "${deployment_size}" != "${NONE}"    Select Workbench Container Size    size_name=${deployment_size}
     IF    "${gpus}" != "${NONE}"    Select Workbench Number Of GPUs    gpus=${gpus}
     IF    "${envs}" != "${NONE}"
@@ -197,7 +197,7 @@ Select An Existent PV
     Wait Until Page Contains Element    ${existing_pv_xpath}
     Click Element   ${existing_pv_xpath}
 
-Select Workbench Jupyter Image
+Select Workbench Image
     [Documentation]    Selects a Jupyter image in the workbench creation page
     [Arguments]     ${image_name}    ${version}=default
     IF  "${PRODUCT}" == "ODH"
@@ -206,7 +206,6 @@ Select Workbench Jupyter Image
             ${image_name}=    Set Variable    Jupyter Data Science
         END
     END
-
     Click Element    //a[@href="#notebook-image"]
     Wait Until Page Contains Element    ${WORKBENCH_IMAGE_MENU_BTN_XP}
     Click Element    ${WORKBENCH_IMAGE_MENU_BTN_XP}
@@ -221,15 +220,15 @@ Select Workbench Jupyter Image
             Fail    ${version} does not exist, use default/previous
         END
     END
-
     IF  "${version}"=="previous"
         # Let's reset the JupyterLibrary settings so that global variables for Jupyter 3 (default) are in place.
         Update Globals For JupyterLab 3 Custom
-    ELSE
+    # TODO: Create the missing Keyword "Update Globals For JupyterLab 4"
+    # ELSE
         # For Jupyter 4, we need to update global default variable values (images 2024b and newer)
         # This calls method from JupyterLibrary Version.resource module
         # https://github.com/robots-from-jupyter/robotframework-jupyterlibrary/blob/9e25fcb89a5f1a723c59e9b96706e4c638e0d9be/src/JupyterLibrary/clients/jupyterlab/Version.resource
-        Update Globals For JupyterLab 4
+        # Update Globals For JupyterLab 4
     END
 
 Verify Version Selection Dropdown

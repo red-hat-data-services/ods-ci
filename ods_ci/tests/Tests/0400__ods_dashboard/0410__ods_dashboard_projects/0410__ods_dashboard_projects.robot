@@ -85,8 +85,8 @@ Verify Workbench Images Have Multiple Versions
     Wait Until Page Contains Element    ${WORKBENCH_NAME_INPUT_XP}
     Run Keyword And Continue On Failure     Element Should Be Disabled    ${WORKBENCH_CREATE_BTN_2_XP}
     FOR    ${img}    IN    @{IMAGE_LIST}
-        Select Workbench Jupyter Image    image_name=${img}    version=previous
-        Select Workbench Jupyter Image    image_name=${img}    version=default
+        Select Workbench Image    image_name=${img}    version=previous
+        Select Workbench Image    image_name=${img}    version=default
     END
 
 Verify User Cannot Create Project With Empty Fields

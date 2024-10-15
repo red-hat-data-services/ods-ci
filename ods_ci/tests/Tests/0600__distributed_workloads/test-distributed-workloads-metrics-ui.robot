@@ -208,9 +208,6 @@ Verify Requested resources When Multiple Local Queue Exists
 *** Keywords ***
 Project Suite Setup
     [Documentation]    Suite setup steps for testing Distributed workload Metrics UI
-    Log To Console    "Restarting kueue"
-    Restart Kueue
-
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}

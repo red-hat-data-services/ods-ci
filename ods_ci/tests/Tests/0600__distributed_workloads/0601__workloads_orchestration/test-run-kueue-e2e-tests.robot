@@ -79,6 +79,7 @@ Run Kueue E2E Test
     ...    shell=true    stderr=STDOUT
     ...    env:KUBECONFIG=${KUEUE_KUBECONFIG}
     ...    env:NAMESPACE=${APPLICATIONS_NAMESPACE}
+    ...    env:SKIP_JOB_SET_AVAILABILITY_CHECK=true
     Log To Console    ${result.stdout}
     IF    ${result.rc} != 0
         FAIL    failed
@@ -92,6 +93,7 @@ Run Kueue Sanity Test
     ...    shell=true    stderr=STDOUT
     ...    env:KUBECONFIG=${KUEUE_KUBECONFIG}
     ...    env:NAMESPACE=${APPLICATIONS_NAMESPACE}
+    ...    env:SKIP_JOB_SET_AVAILABILITY_CHECK=true
     Log To Console    ${result.stdout}
     IF    ${result.rc} != 0
         FAIL    failed

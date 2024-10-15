@@ -6,7 +6,7 @@ Library          Process
 
 *** Variables ***
 ${VIRTUAL_ENV_NAME}                      venv3.9
-${CODEFLARE-SDK-RELEASE-TAG}             v0.21.1
+${CODEFLARE-SDK-RELEASE-TAG}             adjustments-release-0.21.1
 ${CODEFLARE-SDK_DIR}                     codeflare-sdk
 ${CODEFLARE-SDK_REPO_URL}                %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
 ${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}  https://github.com/opendatahub-io/distributed-workloads/releases/latest/download
@@ -25,6 +25,7 @@ ${AWS_STORAGE_BUCKET}                    ${S3.BUCKET_5.NAME}
 ${AWS_ACCESS_KEY_ID}                     ${S3.AWS_ACCESS_KEY_ID}
 ${AWS_SECRET_ACCESS_KEY}                 ${S3.AWS_SECRET_ACCESS_KEY}
 ${AWS_STORAGE_BUCKET_MNIST_DIR}          mnist-datasets
+${KUBECONFIGPATH}                        %{HOME}/.kube/config
 
 
 *** Keywords ***
@@ -50,6 +51,9 @@ Prepare Codeflare-SDK Test Setup
     IF    ${result.rc} != 0
         FAIL    Unable to setup Python virtual environment
     END
+
+    # Perform oc login with default kubeconfig
+    Login To OCP Using API And Kubeconfig    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}    ${KUBECONFIGPATH}
 
 Run Codeflare-SDK Test
     [Documentation]   Run codeflare-sdk Test

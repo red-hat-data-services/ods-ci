@@ -6,7 +6,6 @@ Documentation    Provision Self-Managed clusters for testing. The cluster provis
 Metadata         provision
 Resource         ../../tests/Resources/Common.robot
 Resource         ../Resources/Provisioning/Hive/provision.robot
-Resource         ../Resources/Provisioning/Hive/deprovision.robot
 Resource         ../Resources/Provisioning/Hive/gpu-provision.robot
 Resource         ../Resources/Provisioning/Hive/disconnect.robot
 Library          OperatingSystem
@@ -37,14 +36,6 @@ Provision Self-Managed Cluster
     Save Cluster Credentials
     Login To Cluster
     Pass Execution    Self-Managed Cluster ${cluster_name} provisionend successfully
-
-Deprovision Self-Managed Cluster
-    [Documentation]    Deprovision a self-managed cluster
-    [Tags]    self_managed_deprovision
-    [Setup]   Run Keywords    Set Hive Default Variables
-    ...    AND
-    ...    Set ClusterPool Variables
-    Deprovision Cluster
 
 Add GPU Node To Self-Managed AWS Cluster
     [Documentation]    Add GPU node to self-managed cluster

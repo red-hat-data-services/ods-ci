@@ -170,10 +170,12 @@ Create Openvino Models For Kserve    # robocop: off=too-many-calls-in-keyword
         Recreate S3 Data Connection    project_title=${new_project}    dc_name=model-serving-connection
         ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
         ...            aws_bucket_name=ods-ci-s3
+        Create Model Server    token=${TRUE}    server_name=test-server    existing_server=${TRUE}
+        Wait Until Element Is Visible    ${DEPLOY_MODEL_BTN}
         Deploy Kserve Model Via UI    model_name=${model_name}    serving_runtime=OpenVINO Model Server
         ...    data_connection=model-serving-connection    path=kserve-openvino-test/openvino-example-model
         ...    model_framework=openvino_ir
-        Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
+        Wait For Pods To Be Ready    label_selector=name=modelmesh-serving-test-server
         ...    namespace=${new_project}
         Verify Model Status    ${model_name}    success
         ${project_postfix}=    Evaluate  ${idx}+1

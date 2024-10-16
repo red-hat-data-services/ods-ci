@@ -6,7 +6,7 @@ common_base_image = (
 
 
 # image and the sdk has a fixed value because the version matters
-@dsl.component(packages_to_install=["codeflare-sdk==0.16.4"], base_image=common_base_image)
+@dsl.component(packages_to_install=["codeflare-sdk==0.21.1"], base_image=common_base_image)
 def ray_fn() -> int:
     import ray  # noqa: PLC0415
     from codeflare_sdk import generate_cert  # noqa: PLC0415
@@ -16,15 +16,16 @@ def ray_fn() -> int:
         ClusterConfiguration(
             name="raytest",
             num_workers=1,
-            head_cpus=1,
-            head_memory=4,
-            min_cpus=1,
-            max_cpus=1,
-            min_memory=1,
-            max_memory=2,
-            num_gpus=0,
-            image="quay.io/project-codeflare/ray:2.20.0-py39-cu118",
-            verify_tls=False,
+            head_cpu_requests=1,
+            head_cpu_limits=1,
+            head_memory_requests=4,
+            head_memory_limits=4,
+            worker_cpu_requests=1,
+            worker_cpu_limits=1,
+            worker_memory_requests=1,
+            worker_memory_limits=2,
+            image="quay.io/modh/ray:2.35.0-py39-cu121",
+            verify_tls=False
         )
     )
 

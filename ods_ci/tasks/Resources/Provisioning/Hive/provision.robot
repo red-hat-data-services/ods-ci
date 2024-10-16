@@ -1,5 +1,4 @@
 *** Settings ***
-Resource    deprovision.robot
 Resource    ../../../../tests/Resources/Common.robot
 Library    Process
 
@@ -72,9 +71,7 @@ Handle Already Existing Cluster
         ${result} =    Run Process    oc -n ${hive_namespace} get cd ${cluster_name} -o json | jq -r '.status.webConsoleURL' --exit-status    shell=yes        # robocop: disable:line-too-long
     END
     IF    ${result.rc} != 0
-        Log    Cluster '${cluster_name}' has previously failed to be provisioned - Cleaning Hive resources
-        ...    console=True
-        Delete Cluster Configuration
+        FAIL    Cluster '${cluster_name}' has previously failed to be provisioned but some Hive and/or Cloud resources are still present.
     ELSE
         FAIL    Cluster '${cluster_name}' is already in use, please choose a different name.
     END
@@ -210,9 +207,8 @@ Wait For Cluster To Be Ready
         ${provision_status} =    Run Process    oc -n ${pool_namespace} get cd ${clusterdeployment_name} -o json    shell=yes    # robocop: disable:line-too-long
         ${custer_status} =    Run Process    oc -n ${hive_namespace} get clusterclaim ${claim_name} -o json    shell=yes
         Log    Cluster '${cluster_name}' deployment had errors, see: ${\n}${provision_status.stdout}${\n}${custer_status.stdout}    level=ERROR    # robocop: disable:line-too-long
-        Log    Cluster '${cluster_name}' install completed, but it is not accessible - Cleaning Hive resources now
+        Log    Cluster '${cluster_name}' install completed, but it is not accessible
         ...    console=True
-        Deprovision Cluster
         FAIL    Cluster '${cluster_name}' provisioning failed. Please look into the logs for more details.
     END
     Log    Cluster '${cluster_name}' install completed and accessible at: ${web_access.stdout}     console=True

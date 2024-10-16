@@ -25,13 +25,13 @@ ${TOKEN_AUTH_CHECKBOX_XP}=    xpath://input[@id="alt-form-checkbox-auth"]
 ${ADD_SERVICE_ACCOUNT_BUTTON}=    xpath://button[text()='Add a service account']
 ${SERVICE_ACCOUNT_INPUT}=    xpath://input[@data-testid='service-account-form-name']
 ${REPLICAS_COUNT_XP}=     xpath://section[@class='pf-v5-c-form__section']//span[@class='pf-v5-c-form-control']/input
-${PROJECT_SELECTOR_XP}=    xpath://main[contains(@id, 'dashboard-page-main')]//*[@data-testid="project-selector-toggle"]
+${PROJECT_SELECTOR_XP}=     xpath://main[contains(@id, 'dashboard-page-main')]//*[@data-testid="project-selector-dropdown"]
 
 
 *** Keywords ***
 Create Model Server
     [Documentation]    Keyword to create a Model Server in a Data Science Project
-    [Arguments]    ${no_replicas}=1    ${server_size}=Small    ${ext_route}=${FALSE}
+    [Arguments]    ${no_replicas}=1    ${server_size}=Small    ${ext_route}=${TRUE}
     ...    ${token}=${TRUE}    ${runtime}=OpenVINO Model Server    ${server_name}=Model Serving Test
     ...    ${no_gpus}=0    ${existing_server}=${FALSE}
     Move To Tab    Models
@@ -57,7 +57,6 @@ Create Model Server
     END
     IF    ${ext_route}==${TRUE}
         Enable External Serving Route
-        Wait Until Page Contains Element   ${TOKEN_AUTH_CHECKBOX_XP}   timeout=10s
         IF    ${token}==${FALSE}
             Disable Token Authentication
         ELSE

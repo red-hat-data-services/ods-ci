@@ -19,13 +19,15 @@ ${S3_REGION_DC_INPUT_XP}=          xpath=//input[@aria-label="Field list AWS_DEF
 ${S3_BUCKET_DC_INPUT_XP}=     xpath=//input[@aria-label="Field list AWS_S3_BUCKET"]
 ${S3_DEFAULT_BUCKET}=    ods-ci-s3
 ${MS_TABLE_PROJECT}=    /../../td[@data-label="Project"]
-${MS_TABLE_ENDPOINT_INPUT}=    /ancestor::tr//td[@data-label="Inference endpoint"]//button[@data-testid='internal-service-button']
-${MS_TABLE_STATUS_SUCCESS}=     /ancestor::tr//td[@data-label="Status"]//span[contains(@class,"pf-m-success")]
-${MS_TABLE_STATUS_FAILURE}=     /ancestor::tr//td[@data-label="Status"]//span[contains(@class,"pf-m-danger")]
+${MS_TABLE_STATUS}=    /../../td[@data-label="Status"]
+${MS_TABLE_ENDPOINT}=    /../../td[@data-label="Inference endpoint"]
+${MS_TABLE_ENDPOINT_INPUT}=    ${MS_TABLE_ENDPOINT}//div[@class="pf-v5-c-clipboard-copy"]//input
+${MS_TABLE_STATUS_SUCCESS}=     //span[contains(@class,"pf-v5-c-icon__content")][contains(@class,"pf-m-success")]
+${MS_TABLE_STATUS_FAILURE}=     //span[contains(@class,"pf-v5-c-icon__content")][contains(@class,"pf-m-danger")]
 ${KSERVE_MODAL_HEADER}=    //header[@class="pf-v5-c-modal-box__header"]/h1[.="Deploy model"]
 ${KSERVE_RUNTIME_DROPDOWN}=    //button[@data-testid="serving-runtime-template-selection"]
 ${LLM_RESOURCES_DIRPATH}=    tests/Resources/Files/llm
-${DEPLOY_MODEL_BTN}=    //button[contains(@data-testid,"deploy-model-button")]
+${DEPLOY_MODEL_BTN}=    //button[contains(@data-testid,"deploy")]
 ${TOKEN_AUTH_CHECKBOX_XP}=    xpath://input[@id="alt-form-checkbox-auth"]
 
 
@@ -131,7 +133,6 @@ Select Framework
     [Arguments]    ${framework}
     TRY
         Open Model framework (name - version) Options Menu
-        SeleniumLibrary.Wait Until Page Contains Element    xpath://span[.="Model framework (name - version)"]
         Page Should Contain Element    xpath://li/button[contains(., "${framework}")]
         Click Element    xpath://li/button[contains(., "${framework}")]
     EXCEPT
@@ -178,12 +179,12 @@ Verify Model Status
     [Arguments]    ${model_name}    ${expected_status}=success
     IF    "${expected_status}"=="success"
         SeleniumLibrary.Wait Until Page Contains Element
-        ...    //a[@data-testid='metrics-link-test-model' and text()='${model_name}']${MS_TABLE_STATUS_SUCCESS}    timeout=2m
-        Page Should Not Contain Element    //a[@data-testid='metrics-link-test-model' and text()='${model_name}']${MS_TABLE_STATUS_FAILURE}
+        ...    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_SUCCESS}    timeout=2m
+        Page Should Not Contain Element    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_FAILURE}
     ELSE
         SeleniumLibrary.Wait Until Page Contains Element
-        ...    //a[@data-testid='metrics-link-test-model' and text()='${model_name}']${MS_TABLE_STATUS_FAILURE}    timeout=2m
-        Page Should Not Contain Element    //a[@data-testid='metrics-link-test-model' and text()='${model_name}']${MS_TABLE_STATUS_SUCCESS}
+        ...    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_FAILURE}    timeout=2m
+        Page Should Not Contain Element    //div[.="${model_name} "]${MS_TABLE_STATUS}${MS_TABLE_STATUS_SUCCESS}
     END
 
 Delete Model Via UI
@@ -208,7 +209,7 @@ Get Model Route Via UI
     [Documentation]    Grabs the serving route (URL) of an already deployed model from the Model Serving page.
     [Arguments]    ${model_name}
     # TODO: Open model serving home page if needed?
-    ${route_xpath}=    Set Variable    //a[.="${model_name}"]${MS_TABLE_ENDPOINT_INPUT}
+    ${route_xpath}=    Set Variable    xpath://div[.="${model_name} "]${MS_TABLE_ENDPOINT_INPUT}
     ${loaded}=    Run Keyword And Return Status    SeleniumLibrary.Wait Until Page Contains Element    ${route_xpath}    timeout=15s
     IF    ${loaded} == ${FALSE}
         Log    message=Model Route was not loaded in UI (RHOAIENG-1919). Trying refreshing!    level=WARN
@@ -443,7 +444,29 @@ Deploy Kserve Model Via UI  #robocop: disable
     SeleniumLibrary.Click Button    ${DEPLOY_MODEL_BTN}
     SeleniumLibrary.Wait Until Page Contains Element    xpath=${KSERVE_MODAL_HEADER}
     Set Model Name   ${model_name}
+    Set Model Server Runtime    ${serving_runtime}
     Select Framework    ${model_framework}
+    Set Replicas Number With Buttons    ${replicas}
+    Set Server Size    ${size}
+    IF    ${public_endpoint}
+        Enable External Serving Route
+        # By default this also enables Token Authentication. Let's disable it and let it get re-enable by the next
+        # IF block if needed.
+        ${token_enabled}=     Run Keyword And Return Status    SeleniumLibrary.Checkbox Should Be Selected
+        ...    ${TOKEN_AUTH_CHECKBOX_XP}
+        IF    ${token_enabled}
+            Disable Token Authentication
+        ELSE
+            Log    Token Authentication was supposed to be automatically enabled, but it wasn't    level=ERROR
+            ...    console=${True}
+        END
+    END
+    IF    ${token}
+        Enable Token Authentication    service_account_name=${service_account_name}
+        IF    ${multi_token}
+            Add Another Service Account    ${multi_service_account_name}
+        END
+    END
     Select Existing Data Connection    ${data_connection}
     Set Folder Path    ${path}
     IF    ${no_gpus} > ${0}
@@ -456,7 +479,7 @@ Deploy Kserve Model Via UI  #robocop: disable
         Set Number of GPU With Buttons   ${no_gpus}
     END
     Click Button    Deploy
-    Wait Until Page Does Not Contain Element    xpath=//button[@data-testid="modal-submit-button"]   timeout=60s
+    Wait Until Page Does Not Contain Element    xpath=${KSERVE_MODAL_HEADER}   timeout=60s
 
 Set Model Server Runtime
     [Documentation]    Opens the Serving runtime dropdown in the deploy model modal window for models
@@ -464,7 +487,7 @@ Set Model Server Runtime
     [Arguments]    ${runtime}=Caikit TGIS
     Page Should Contain Element    ${KSERVE_RUNTIME_DROPDOWN}
     Click Element    ${KSERVE_RUNTIME_DROPDOWN}
-    Click Element    ${KSERVE_RUNTIME_DROPDOWN}/..//*[@data-testid="ovms"]
+    Click Element    ${KSERVE_RUNTIME_DROPDOWN}/..//span[contains(text(),"${runtime}")]
 
 Get Kserve Inference Host Via UI
     [Documentation]    Fetches the host of the model's URL from the Data Science Project UI

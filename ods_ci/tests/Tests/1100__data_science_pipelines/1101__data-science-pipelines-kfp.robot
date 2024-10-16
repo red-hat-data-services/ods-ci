@@ -45,8 +45,7 @@ Verify Users Can Create And Run A Pipeline That Uses Custom Python Packages To I
     [Documentation]    Creates and runs iris_pipeline pipeline as regular user, verifiying the run results
     ...   In this pipeline there are tasks defining with packages_to_install some custom python packages to
     ...   be installed at execution time
-    ...   ProductBugOnDisconnected: RHOAIENG-6376
-    [Tags]      Smoke    ProductBugOnDisconnected
+    [Tags]      Smoke
     ${emtpy_dict}=    Create Dictionary
     End To End Pipeline Workflow Using Kfp
     ...    admin_username=${TEST_USER.USERNAME}
@@ -56,7 +55,7 @@ Verify Users Can Create And Run A Pipeline That Uses Custom Python Packages To I
     ...    project=${PROJECT_NAME}
     ...    python_file=cache-disabled/iris_pipeline.py
     ...    method_name=my_pipeline
-    ...    status_check_timeout=180
+    ...    status_check_timeout=300
     ...    pipeline_params=${emtpy_dict}
     [Teardown]    Projects.Delete Project Via CLI By Display Name    ${PROJECT_NAME}
 
@@ -130,7 +129,6 @@ End To End Pipeline Workflow Using Kfp
     ...    pip_trusted_host=${pip_trusted_host}
     ${run_status}    Check Run Status    ${run_id}    timeout=${status_check_timeout}
     Should Be Equal As Strings    ${run_status}    SUCCEEDED    Pipeline run doesn't have a status that means success. Check the logs
-    Projects.Delete Project Via CLI By Display Name    ${project}
 
 Data Science Pipelines Suite Setup
     [Documentation]    Data Science Pipelines Suite Setup

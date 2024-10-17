@@ -89,7 +89,7 @@ Verify CUDA Image Suite Setup
     # This will fail in case there are two nodes with the same number of GPUs
     # Since the overall available number won't change even after 1 GPU is assigned
     # However I can't think of a better way to execute this check, under the assumption that
-    # the Resources-GPU    NVIDIA-GPUs tag will always ensure there is 1 node with 1 GPU on the cluster.
+    # the Resources-GPU tag will always ensure there is 1 node with 1 GPU on the cluster.
     ${maxNo} =    Find Max Number Of GPUs In One Node
     ${maxSpawner} =    Fetch Max Number Of GPUs In Spawner Page
     # Need to continue execution even on failure or the whole suite will be failed

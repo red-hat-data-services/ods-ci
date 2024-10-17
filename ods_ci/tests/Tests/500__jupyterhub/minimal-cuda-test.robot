@@ -1,10 +1,10 @@
 *** Settings ***
 Documentation    Minimal test for the CUDA image
-Resource         ../../../Resources/ODS.robot
-Resource         ../../../Resources/Common.robot
-Resource         ../../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
-Resource         ../../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
-Resource         ../../../Resources/Page/ODH/JupyterHub/GPU.resource
+Resource         ../../Resources/ODS.robot
+Resource         ../../Resources/Common.robot
+Resource         ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
+Resource         ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
+Resource         ../../Resources/Page/ODH/JupyterHub/GPU.resource
 Library          JupyterLibrary
 Suite Setup      Verify CUDA Image Suite Setup
 Suite Teardown   End Web Test

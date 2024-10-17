@@ -58,7 +58,7 @@ Verify Non Admin Can Serve And Query A Model Using The UI    # robocop: off=too-
 Verify Model Can Be Served And Query On A GPU Node Using The UI    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
     ...                using Single-model platform and TGIS Standalone runtime.
-    [Tags]    Sanity    ODS-2612   Resources-GPU
+    [Tags]    Sanity    ODS-2612   Resources-GPU    NVIDIA-GPUs
     [Setup]    Run    git clone https://github.com/IBM/text-generation-inference/
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${isvc__name}=    Set Variable    flan-t5-small-hf-gpu
@@ -84,7 +84,7 @@ Verify Model Can Be Served And Query On A GPU Node Using The UI    # robocop: of
 Verify Model Can Be Served And Query On A GPU Node Using The UI For VLMM
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
     ...                using Single-model platform with vllm runtime.
-    [Tags]    Sanity    RHOAIENG-6344   Resources-GPU
+    [Tags]    Sanity    RHOAIENG-6344   Resources-GPU    NVIDIA-GPUs
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${isvc__name}=    Set Variable    gpt2-gpu
     ${model_name}=    Set Variable    gpt2
@@ -106,7 +106,7 @@ Verify Model Can Be Served And Query On A GPU Node Using The UI For VLMM
 Verify Embeddings Model Can Be Served And Query On A GPU Node Using The UI For VLMM
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
     ...                using Single-model platform with vllm runtime.
-    [Tags]    Sanity    RHOAIENG-8832  Resources-GPU
+    [Tags]    Sanity    RHOAIENG-8832  Resources-GPU    NVIDIA-GPUs
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${isvc__name}=    Set Variable    e5-mistral-7b-gpu
     ${model_name}=    Set Variable    e5-mistral-7b

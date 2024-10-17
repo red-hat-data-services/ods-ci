@@ -26,7 +26,7 @@ Run TestKueueRayCpu ODH test
 
 Run TestKueueRayGpu ODH test
     [Documentation]    Run Go ODH test: TestKueueRayGpu
-    [Tags]  Resources-GPU
+    [Tags]  Resources-GPU    NVIDIA-GPUs
     ...     Tier1
     ...     DistributedWorkloads
     ...     CodeflareOperator
@@ -42,7 +42,7 @@ Run TestRayTuneHPOCpu ODH test
 
 Run TestRayTuneHPOGpu ODH test
     [Documentation]    Run Go ODH test: TestMnistRayTuneHpoGpu
-    [Tags]  Resources-GPU
+    [Tags]  Resources-GPU    NVIDIA-GPUs
     ...     Tier1
     ...     DistributedWorkloads
     ...     CodeflareOperator

@@ -170,7 +170,7 @@ Verify User Can Serve And Query A google/flan-t5-xxl Model    # robocop: off=too
 Verify User Can Serve And Query A elyza/elyza-japanese-llama-2-7b-instruct Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and TGIS standalone or vllm runtime
-    [Tags]    RHOAIENG-3479     VLLM    Tier2    Resources-GPU    NVIDIA-GPUs
+    [Tags]    RHOAIENG-3479     VLLM    Tier2    Resources-GPU    NVIDIA-GPUs    AMD-GPUs
     Setup Test Variables    model_name=elyza-japanese    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=ELYZA-japanese-Llama-2-7b-instruct-hf
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
@@ -494,7 +494,7 @@ Verify User Can Serve And Query A google/flan-t5-xl Prompt Tuned Model    # robo
 Verify User Can Serve And Query A instructlab/merlinite-7b-lab Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve using TGIS standalone or vllm runtime
-    [Tags]    RHOAIENG-7690    VLLM    Tier2    Resources-GPU    NVIDIA-GPUs
+    [Tags]    RHOAIENG-7690    VLLM    Tier2    Resources-GPU    NVIDIA-GPUs    AMD-GPUs
     Setup Test Variables    model_name=merlinite-7b-lab    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=merlinite-7b-lab
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
@@ -557,7 +557,7 @@ Verify User Can Serve And Query A instructlab/merlinite-7b-lab Model    # roboco
 Verify User Can Serve And Query A ibm-granite/granite-8b-code-base Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve using TGIS standalone or vllm runtime
-    [Tags]    RHOAIENG-7689    VLLM    Tier2    Resources-GPU    NVIDIA-GPUs
+    [Tags]    RHOAIENG-7689    VLLM    Tier2    Resources-GPU    NVIDIA-GPUs    AMD-GPUs
     Setup Test Variables    model_name=granite-8b-code   use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=granite-8b-code-base
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
@@ -620,7 +620,7 @@ Verify User Can Serve And Query A ibm-granite/granite-8b-code-base Model    # ro
 Verify User Can Serve And Query A intfloat/e5-mistral-7b-instruct Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve using TGIS standalone or vllm runtime
-    [Tags]    RHOAIENG-7427    VLLM    Tier2    Resources-GPU    NVIDIA-GPUs
+    [Tags]    RHOAIENG-7427    VLLM    Tier2    Resources-GPU    NVIDIA-GPUs    AMD-GPUs
     Setup Test Variables    model_name=e5-mistral-7b   use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=e5-mistral-7b-instruct
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
@@ -664,7 +664,7 @@ Verify User Can Serve And Query A intfloat/e5-mistral-7b-instruct Model    # rob
 Verify User Can Serve And Query A meta-llama/llama-3-8B-Instruct Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and TGIS standalone or vllm runtime
-    [Tags]    RHOAIENG-8831    VLLM    Tier2    Resources-GPU    NVIDIA-GPUs
+    [Tags]    RHOAIENG-8831    VLLM    Tier2    Resources-GPU    NVIDIA-GPUs    AMD-GPUs
     Setup Test Variables    model_name=llama-3-8b-chat    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=Meta-Llama-3-8B-Instruct
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
@@ -727,7 +727,7 @@ Verify User Can Serve And Query A meta-llama/llama-3-8B-Instruct Model    # robo
 Verify User Can Serve And Query A ibm-granite/granite-3b-code-instruct Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve using TGIS standalone or vllm runtime
-    [Tags]    RHOAIENG-8819    VLLM    Tier2    Resources-GPU    NVIDIA-GPUs
+    [Tags]    RHOAIENG-8819    VLLM    Tier2    Resources-GPU    NVIDIA-GPUs    AMD-GPUs
     Setup Test Variables    model_name=granite-8b-code   use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=granite-3b-code-instruct
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
@@ -790,7 +790,7 @@ Verify User Can Serve And Query A ibm-granite/granite-3b-code-instruct Model    
 Verify User Can Serve And Query A ibm-granite/granite-8b-code-instruct Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve using TGIS standalone or vllm runtime
-    [Tags]    RHOAIENG-8830    VLLM    Tier2    Resources-GPU    NVIDIA-GPUs
+    [Tags]    RHOAIENG-8830    VLLM    Tier2    Resources-GPU    NVIDIA-GPUs    AMD-GPUs
     Setup Test Variables    model_name=granite-8b-code   use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=granite-8b-code-instruct
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
@@ -853,7 +853,7 @@ Verify User Can Serve And Query A ibm-granite/granite-8b-code-instruct Model    
 Verify User Can Serve And Query A ibm-granite/granite-7b-lab Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve using TGIS standalone or vllm runtime
-    [Tags]    RHOAIENG-8830    VLLM    Tier2    Resources-GPU    NVIDIA-GPUs
+    [Tags]    RHOAIENG-8830    VLLM    Tier2    Resources-GPU    NVIDIA-GPUs    AMD-GPUs
     Setup Test Variables    model_name=granite-8b-code   use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=granite-7b-lab
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
@@ -916,7 +916,7 @@ Verify User Can Serve And Query A ibm-granite/granite-7b-lab Model    # robocop:
 Verify User Can Serve And Query A ibm-granite/granite-7b-lab ngram speculative Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve using TGIS standalone or vllm runtime
-    [Tags]    RHOAIENG-10162   VLLM
+    [Tags]    RHOAIENG-10162   VLLM    Resources-GPU    NVIDIA-GPUs    AMD-GPUs
     Setup Test Variables    model_name=granite-7b-lab   use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=granite-7b-lab
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
@@ -982,7 +982,7 @@ Verify User Can Serve And Query A ibm-granite/granite-7b-lab ngram speculative M
 Verify User Can Serve And Query A microsoft/Phi-3-vision-128k-instruct vision Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve using TGIS standalone or vllm runtime
-    [Tags]    RHOAIENG-10164    VLLM    Tier2    Resources-GPU    NVIDIA-GPUs
+    [Tags]    RHOAIENG-10164    VLLM    Tier2    Resources-GPU    NVIDIA-GPUs    AMD-GPUs
     Setup Test Variables    model_name=phi-3-vision   use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=Phi-3-vision-128k-instruct
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
@@ -1028,7 +1028,7 @@ Verify User Can Serve And Query A microsoft/Phi-3-vision-128k-instruct vision Mo
 Verify User Can Serve And Query A meta-llama/llama-31-8B-Instruct Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve for vllm runtime
-    [Tags]    RHOAIENG-10661    VLLM    Tier2    Resources-GPU    NVIDIA-GPUs
+    [Tags]    RHOAIENG-10661    VLLM    Tier2    Resources-GPU    NVIDIA-GPUs    AMD-GPUs
     Setup Test Variables    model_name=llama-3-8b-chat    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=Meta-Llama-3.1-8B
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
@@ -1094,7 +1094,7 @@ Verify User Can Serve And Query A meta-llama/llama-31-8B-Instruct Model    # rob
 Verify User Can Serve And Query RHAL AI granite-7b-starter Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve using TGIS standalone or vllm runtime
-    [Tags]    RHOAIENG-10154	    VLLM    Tier2    Resources-GPU    NVIDIA-GPUs
+    [Tags]    RHOAIENG-10154	    VLLM    Tier2    Resources-GPU    NVIDIA-GPUs    AMD-GPUs
     Setup Test Variables    model_name=granite-7b-lab   use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=granite-7b-starter
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}
@@ -1157,7 +1157,7 @@ Verify User Can Serve And Query RHAL AI granite-7b-starter Model    # robocop: o
 Verify User Can Serve And Query Granite-7b Speculative Decoding Using Draft Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve using  vllm runtime
-    [Tags]    RHOAIENG-10163    VLLM    Tier2    Resources-GPU    NVIDIA-GPUs
+    [Tags]    RHOAIENG-10163    VLLM    Tier2    Resources-GPU    NVIDIA-GPUs    AMD-GPUs
     Setup Test Variables    model_name=granite-7b-lab   use_pvc=${FALSE}     use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=speculative_decoding
     IF     "${RUNTIME_NAME}" == "tgis-runtime"
@@ -1227,7 +1227,7 @@ Verify User Can Serve And Query Granite-7b Speculative Decoding Using Draft Mode
 Verify User Can Serve And Query RHAL AI Granite-7b-redhat-lab Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve using vllm runtime
-    [Tags]    RHOAIENG-10155    VLLM    Tier2    Resources-GPU    NVIDIA-GPUs
+    [Tags]    RHOAIENG-10155    VLLM    Tier2    Resources-GPU    NVIDIA-GPUs    AMD-GPUs
     Setup Test Variables    model_name=granite-7b-lab   use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}    model_path=granite-7b-redhat-lab
     Set Project And Runtime    runtime=${RUNTIME_NAME}     namespace=${test_namespace}

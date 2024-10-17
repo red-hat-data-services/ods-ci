@@ -29,7 +29,7 @@ Run TestKueueRayCpu ODH test
 
 Run TestKueueRayGpu ODH test
     [Documentation]    Run Go ODH test: TestKueueRayGpu
-    [Tags]  Resources-GPU
+    [Tags]  Resources-GPU    NVIDIA-GPUs
     ...     Tier1
     ...     DistributedWorkloads
     ...     CodeflareOperator

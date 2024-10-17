@@ -145,7 +145,7 @@ Verify User Can Set Requests And Limits For A Model Using The UI  # robocop: dis
 Verify Model Can Be Served And Query On A GPU Node Using The UI  # robocop: disable
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
     ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    Sanity    Tier1    ODS-2523   Resources-GPU
+    [Tags]    Sanity    Tier1    ODS-2523   Resources-GPU    NVIDIA-GPUs
     [Setup]    Set Up Project    namespace=singlemodel-gpu
     ${test_namespace}=    Set Variable    singlemodel-gpu
     ${model_name}=    Set Variable    flan-t5-small-caikit

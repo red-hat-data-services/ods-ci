@@ -52,7 +52,7 @@ Verify Tensorboard Is Accessible
 Verify Tensorflow Image Can Be Spawned With GPU
     [Documentation]    Spawns PyTorch image with 1 GPU
     [Tags]  Sanity    Tier1
-    ...     Resources-GPU
+    ...     Resources-GPU    NVIDIA-GPUs
     ...     ODS-1151
     Close Previous Server
     Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Small  gpus=1
@@ -60,28 +60,28 @@ Verify Tensorflow Image Can Be Spawned With GPU
 Verify Tensorflow Image Includes Expected CUDA Version
     [Documentation]    Checks CUDA version
     [Tags]  Sanity    Tier1
-    ...     Resources-GPU
+    ...     Resources-GPU    NVIDIA-GPUs
     ...     ODS-1152
     Verify Installed CUDA Version    ${EXPECTED_CUDA_VERSION}
 
 Verify Tensorflow Library Can See GPUs In Tensorflow Image
     [Documentation]    Verifies Tensorlow can see the GPU
     [Tags]  Sanity    Tier1
-    ...     Resources-GPU
+    ...     Resources-GPU    NVIDIA-GPUs
     ...     ODS-1153
     Verify Tensorflow Can See GPU
 
 Verify Tensorflow Image GPU Workload
     [Documentation]  Runs a workload on GPUs in Tensorflow image
     [Tags]  Sanity    Tier1
-    ...     Resources-GPU
+    ...     Resources-GPU    NVIDIA-GPUs
     ...     ODS-1154
     Run Repo And Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/tensorflow/GPU-no-warnings.ipynb
 
 Verify Previous Tensorflow Notebook Image With GPU
     [Documentation]    Runs a workload after spawning the N-1 Tensorflow Notebook
     [Tags]    Tier2    LiveTesting
-    ...       Resources-GPU
+    ...       Resources-GPU    NVIDIA-GPUs
     ...       ODS-2130
     [Setup]    N-1 Tensorflow Setup
     Spawn Notebook With Arguments    image=${NOTEBOOK_IMAGE}    size=Small    gpus=1    version=previous

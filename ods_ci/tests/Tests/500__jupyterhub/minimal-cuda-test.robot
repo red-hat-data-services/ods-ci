@@ -21,35 +21,35 @@ Verify CUDA Image Can Be Spawned With GPU
     [Documentation]    Spawns CUDA image with 1 GPU and verifies that the GPU is
     ...    not available for other users.
     [Tags]  Sanity    Tier1
-    ...     Resources-GPU
+    ...     Resources-GPU    NVIDIA-GPUs
     ...     ODS-1141    ODS-346    ODS-1359
     Pass Execution    Passing tests, as suite setup ensures that image can be spawned
 
 Verify CUDA Image Includes Expected CUDA Version
     [Documentation]    Checks CUDA version
     [Tags]  Sanity    Tier1
-    ...     Resources-GPU
+    ...     Resources-GPU    NVIDIA-GPUs
     ...     ODS-1142
     Verify Installed CUDA Version    ${EXPECTED_CUDA_VERSION}
 
 Verify PyTorch Library Can See GPUs In Minimal CUDA
     [Documentation]    Installs PyTorch and verifies it can see the GPU
     [Tags]  Sanity    Tier1
-    ...     Resources-GPU
+    ...     Resources-GPU    NVIDIA-GPUs
     ...     ODS-1144
     Verify Pytorch Can See GPU    install=True
 
 Verify Tensorflow Library Can See GPUs In Minimal CUDA
     [Documentation]    Installs Tensorflow and verifies it can see the GPU
     [Tags]  Sanity    Tier1
-    ...     Resources-GPU
+    ...     Resources-GPU    NVIDIA-GPUs
     ...     ODS-1143
     Verify Tensorflow Can See GPU    install=True
 
 Verify Cuda Image Has NVCC Installed
     [Documentation]     Verifies NVCC Version in Minimal CUDA Image
     [Tags]  Sanity    Tier1
-    ...     Resources-GPU
+    ...     Resources-GPU    NVIDIA-GPUs
     ...     ODS-483
     ${nvcc_version} =  Run Cell And Get Output    input=!nvcc --version
     Should Not Contain    ${nvcc_version}  /usr/bin/sh: nvcc: command not found
@@ -57,7 +57,7 @@ Verify Cuda Image Has NVCC Installed
 Verify Previous CUDA Notebook Image With GPU
     [Documentation]    Runs a workload after spawning the N-1 CUDA Notebook
     [Tags]    Tier2    LiveTesting
-    ...       Resources-GPU
+    ...       Resources-GPU    NVIDIA-GPUs
     ...       ODS-2128
     [Setup]    N-1 CUDA Setup
     Spawn Notebook With Arguments    image=${NOTEBOOK_IMAGE}    size=Small    gpus=1    version=previous

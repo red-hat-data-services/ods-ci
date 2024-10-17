@@ -22,7 +22,7 @@ Verify Number Of Available GPUs Is Correct
     [Documentation]  Verifies that the number of available GPUs in the
     ...    Spawner dropdown is correct; i.e., it should show the maximum
     ...    Number of GPUs available in a single node.
-    [Tags]    Tier1  Sanity  Resources-2GPUS
+    [Tags]    Tier1  Sanity  Resources-2GPU    NVIDIA-GPUsS
     ...       ODS-1256
     ${maxNo} =    Find Max Number Of GPUs In One Node
     ${maxSpawner} =    Fetch Max Number Of GPUs In Spawner Page
@@ -31,7 +31,7 @@ Verify Number Of Available GPUs Is Correct
 Verify Two Servers Can Be Spawned
     [Documentation]    Spawns two servers requesting 1 gpu each, and checks
     ...    that both can schedule and are scheduled on different nodes.
-    [Tags]    Tier1  Sanity  Resources-2GPUS
+    [Tags]    Tier1  Sanity  Resources-2GPU    NVIDIA-GPUsS
     ...       ODS-1257
     Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Small  gpus=1
     ${serial_first} =    Get GPU Serial Number

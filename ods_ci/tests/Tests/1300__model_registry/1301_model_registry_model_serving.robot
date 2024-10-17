@@ -74,7 +74,8 @@ Verify Model Registry Integration With Secured-DB
     Download Python Client Dependencies    ${MR_PYTHON_CLIENT_FILES}    ${MR_PYTHON_CLIENT_WHL_VERSION}
     Upload Python Client Files In The Workbench    ${MR_PYTHON_CLIENT_FILES}
     Upload Certificate To Jupyter Notebook    ${CERTS_DIRECTORY}/domain.crt
-    Upload Certificate To Jupyter Notebook    openshift_ca.crt
+    ${self_managed} =    Is RHODS Self-Managed
+    IF  ${self_managed}    Upload Certificate To Jupyter Notebook    openshift_ca.crt
     Jupyter Notebook Can Query Model Registry     ${JUPYTER_NOTEBOOK}
     SeleniumLibrary.Switch Window    ${handle}
     Open Model Registry Dashboard Page

@@ -25,7 +25,7 @@ ${RUNTIME_NAME}=    Model Serving GPU Test
 *** Test Cases ***
 Verify GPU Model Deployment Via UI    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Test the deployment of an openvino_ir model on a model server with GPUs attached
-    [Tags]    Sanity    Resources-GPU
+    [Tags]    Sanity    Resources-GPU    NVIDIA-GPUs
     ...       ODS-2214
     Clean All Models Of Current User
     Open Data Science Projects Home Page
@@ -57,7 +57,7 @@ Verify GPU Model Deployment Via UI    # robocop: off=too-long-test-case,too-many
 
 Test Inference Load On GPU
     [Documentation]    Test the inference load on the GPU after sending random requests to the endpoint
-    [Tags]    Sanity    Resources-GPU
+    [Tags]    Sanity    Resources-GPU    NVIDIA-GPUs
     ...       ODS-2213
     ${url}=    Get Model Route Via UI    ${MODEL_NAME}
     Send Random Inference Request     endpoint=${url}    no_requests=100

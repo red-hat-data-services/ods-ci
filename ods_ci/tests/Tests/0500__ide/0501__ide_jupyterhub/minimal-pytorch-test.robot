@@ -49,7 +49,7 @@ Verify Tensorboard Is Accessible
 Verify PyTorch Image Can Be Spawned With GPU
     [Documentation]    Spawns PyTorch image with 1 GPU
     [Tags]  Tier1
-    ...     Resources-GPU
+    ...     Resources-GPU    NVIDIA-GPUs
     ...     ODS-1145
     Clean Up Server
     Stop JupyterLab Notebook Server
@@ -60,28 +60,28 @@ Verify PyTorch Image Can Be Spawned With GPU
 Verify PyTorch Image Includes Expected CUDA Version
     [Documentation]    Checks CUDA version
     [Tags]  Tier1
-    ...     Resources-GPU
+    ...     Resources-GPU    NVIDIA-GPUs
     ...     ODS-1146
     Verify Installed CUDA Version    ${EXPECTED_CUDA_VERSION}
 
 Verify PyTorch Library Can See GPUs In PyTorch Image
     [Documentation]    Verifies PyTorch can see the GPU
     [Tags]  Tier1
-    ...     Resources-GPU
+    ...     Resources-GPU    NVIDIA-GPUs
     ...     ODS-1147
     Verify Pytorch Can See GPU
 
 Verify PyTorch Image GPU Workload
     [Documentation]  Runs a workload on GPUs in PyTorch image
     [Tags]  Tier1
-    ...     Resources-GPU
+    ...     Resources-GPU    NVIDIA-GPUs
     ...     ODS-1148
     Run Repo And Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/pytorch/fgsm_tutorial.ipynb
 
 Verify Previous PyTorch Notebook Image With GPU
     [Documentation]    Runs a workload after spawning the N-1 PyTorch Notebook
     [Tags]    Tier2    LiveTesting
-    ...       Resources-GPU
+    ...       Resources-GPU    NVIDIA-GPUs
     ...       ODS-2129
     [Setup]    N-1 PyTorch Setup
     Spawn Notebook With Arguments    image=${NOTEBOOK_IMAGE}    size=Small    gpus=1    version=previous

@@ -25,7 +25,7 @@ Run TestKueueRayCpu ODH test
 
 Run TestKueueRayGpu ODH test
     [Documentation]    Run Go ODH test: TestKueueRayGpu
-    [Tags]  Resources-GPU
+    [Tags]  Resources-GPU    NVIDIA-GPUs
     ...     Tier1
     ...     DistributedWorkloads
     ...     Training
@@ -43,7 +43,7 @@ Run TestRayTuneHPOCpu ODH test
 
 Run TestRayTuneHPOGpu ODH test
     [Documentation]    Run Go ODH test: TestMnistRayTuneHpoGpu
-    [Tags]  Resources-GPU
+    [Tags]  Resources-GPU    NVIDIA-GPUs
     ...     Tier1
     ...     DistributedWorkloads
     ...     Training
@@ -62,7 +62,7 @@ Run TestKueueCustomRayCpu ODH test
 Run TestKueueCustomRayGpu ODH test
     [Documentation]    Run Go ODH test: TestKueueCustomRayGpu
     [Tags]  RHOAIENG-10013
-    ...     Resources-GPU
+    ...     Resources-GPU    NVIDIA-GPUs
     ...     Tier1
     ...     DistributedWorkloads
     ...     Training

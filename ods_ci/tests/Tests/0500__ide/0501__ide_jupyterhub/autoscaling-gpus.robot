@@ -11,7 +11,7 @@ Resource          ../../../Resources/Page/OCPDashboard/Pods/Pods.robot
 Library           JupyterLibrary
 Suite Setup       Spawner Suite Setup
 Suite Teardown    End Web Test
-Test Tags         Resources-GPU
+Test Tags         Resources-GPU    NVIDIA-GPUs
 
 
 *** Variables ***

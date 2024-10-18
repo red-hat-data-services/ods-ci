@@ -81,6 +81,7 @@ Run Kueue E2E Test
     ...    env:NAMESPACE=${APPLICATIONS_NAMESPACE}
     ...    env:SKIP_JOB_SET_AVAILABILITY_CHECK=true
     Log To Console    ${result.stdout}
+    Check missing test    ${result.stdout}
     IF    ${result.rc} != 0
         FAIL    failed
     END
@@ -95,6 +96,12 @@ Run Kueue Sanity Test
     ...    env:NAMESPACE=${APPLICATIONS_NAMESPACE}
     ...    env:SKIP_JOB_SET_AVAILABILITY_CHECK=true
     Log To Console    ${result.stdout}
+    Check missing test    ${result.stdout}
     IF    ${result.rc} != 0
         FAIL    failed
     END
+
+Check missing test
+    [Documentation]    Check that upstream test is not missing
+    [Arguments]    ${test_run_output}
+    Should Not Match Regexp    ${test_run_output}    .*Ran 0 of .* Specs.*    No tests were run

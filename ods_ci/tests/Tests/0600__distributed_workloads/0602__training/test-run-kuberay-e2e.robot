@@ -5,6 +5,7 @@ Suite Teardown    Teardown Kuberay E2E Test Suite
 Library           OperatingSystem
 Library           Process
 Resource          ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
+Resource          ../../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 
 *** Variables ***
 ${KUBERAY_RELEASE_ASSETS}     %{KUBERAY_RELEASE_ASSETS=https://github.com/opendatahub-io/kuberay/releases/latest/download}
@@ -85,6 +86,7 @@ Run Kuberay E2E Test
     ...    timeout=20m
     ...    stdout=${TEMPDIR}/output.txt
     Log To Console    ${result.stdout}
+    Check missing Go test    ${result.stdout}
     IF    ${result.rc} != 0
         FAIL    ${test_name} failed
     END

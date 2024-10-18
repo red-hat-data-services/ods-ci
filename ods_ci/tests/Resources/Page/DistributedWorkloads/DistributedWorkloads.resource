@@ -149,6 +149,7 @@ Run Training Operator ODH Test
     ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-${test_binary}-logs
     ...    env:FMS_HF_TUNING_IMAGE=${FMS_HF_TUNING_IMAGE}
     Log To Console    ${result.stdout}
+    Check missing Go test    ${result.stdout}
     IF    ${result.rc} != 0
         FAIL    ${TEST_NAME} failed
     END
@@ -212,6 +213,12 @@ Run DistributedWorkloads ODH Test
     ...    env:PIP_INDEX_URL=${PIP_INDEX_URL}
     ...    env:PIP_TRUSTED_HOST=${PIP_TRUSTED_HOST}
     Log To Console    ${result.stdout}
+    Check missing Go test    ${result.stdout}
     IF    ${result.rc} != 0
         FAIL    ${TEST_NAME} failed
     END
+
+Check missing Go test
+    [Documentation]    Check that upstream Go test is not missing
+    [Arguments]    ${test_run_output}
+    Should Not Contain    ${test_run_output}    testing: warning: no tests to run    No Go tests were run

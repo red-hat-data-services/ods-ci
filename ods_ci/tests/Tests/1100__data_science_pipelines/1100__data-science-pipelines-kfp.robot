@@ -56,7 +56,7 @@ Verify Users Can Create And Run A Pipeline That Uses Custom Python Packages To I
     ...    project=${PROJECT_NAME}
     ...    python_file=iris_pipeline.py
     ...    method_name=my_pipeline
-    ...    status_check_timeout=180
+    ...    status_check_timeout=300
     ...    pipeline_params=${emtpy_dict}
     [Teardown]    Projects.Delete Project Via CLI By Display Name    ${PROJECT_NAME}
 

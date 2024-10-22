@@ -55,7 +55,7 @@ Verify Non Admin Can Serve And Query A Model Using The UI  # robocop: disable
 Verify Model Can Be Served And Query On A GPU Node Using The UI  # robocop: disable
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
     ...                using Single-model platform and TGIS Standalone runtime.
-    [Tags]    Sanity    Tier1    ODS-2612   Resources-GPU
+    [Tags]    Sanity    Tier1    ODS-2612   Resources-GPU    NVIDIA-GPUs
     [Setup]    Run    git clone https://github.com/IBM/text-generation-inference/
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${isvc__name}=    Set Variable    flan-t5-small-hf-gpu

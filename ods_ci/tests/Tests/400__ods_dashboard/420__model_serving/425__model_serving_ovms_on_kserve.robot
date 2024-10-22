@@ -100,7 +100,7 @@ Verify Multiple Projects With Same Model (OVMS on Kserve)
 
 Verify GPU Model Deployment Via UI (OVMS on Kserve)
     [Documentation]    Test the deployment of an openvino_ir model on a model server with GPUs attached
-    [Tags]    Sanity    Tier1    Resources-GPU
+    [Tags]    Sanity    Tier1    Resources-GPU    NVIDIA-GPUs
     ...       ODS-2630    ODS-2631    ProductBug    RHOAIENG-3355
     ${requests}=    Create Dictionary    nvidia.com/gpu=1
     ${limits}=    Create Dictionary    nvidia.com/gpu=1

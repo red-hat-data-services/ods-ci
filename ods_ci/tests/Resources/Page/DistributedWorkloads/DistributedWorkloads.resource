@@ -6,7 +6,7 @@ Library          Process
 
 *** Variables ***
 ${VIRTUAL_ENV_NAME}                      venv3.9
-${CODEFLARE-SDK-RELEASE-TAG}             v0.21.1
+${CODEFLARE-SDK-RELEASE-TAG}             v0.22.0
 ${CODEFLARE-SDK_DIR}                     codeflare-sdk
 ${CODEFLARE-SDK_REPO_URL}                %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
 ${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}  https://github.com/opendatahub-io/distributed-workloads/releases/latest/download

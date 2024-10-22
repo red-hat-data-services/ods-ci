@@ -57,7 +57,7 @@ ${TEST_NS}=                   vllm-gpt2
 *** Test Cases ***
 Verify User Can Deploy A Model With Vllm Via CLI
     [Documentation]    Deploy a model (gpt2) using the vllm runtime and confirm that it's running
-    [Tags]    Tier1    Sanity    Resources-GPU    RHOAIENG-6264   VLLM
+    [Tags]    Tier1    Sanity    Resources-GPU    NVIDIA-GPUs    RHOAIENG-6264   VLLM
     ${rc}    ${out}=    Run And Return Rc And Output    oc apply -f ${DL_POD_FILEPATH}
     Should Be Equal As Integers    ${rc}    ${0}
     Wait For Pods To Succeed    label_selector=gpt-download-pod=true    namespace=${TEST_NS}
@@ -77,7 +77,7 @@ Verify User Can Deploy A Model With Vllm Via CLI
 
 Verify Vllm Metrics Are Present
     [Documentation]    Confirm vLLM metrics are exposed in OpenShift metrics
-    [Tags]    Tier1    Sanity    Resources-GPU    RHOAIENG-6264    VLLM
+    [Tags]    Tier1    Sanity    Resources-GPU    NVIDIA-GPUs    RHOAIENG-6264    VLLM
     Depends On Test    Verify User Can Deploy A Model With Vllm Via CLI
     ${host}=    llm.Get KServe Inference Host Via CLI    isvc_name=vllm-gpt2-openai    namespace=${TEST_NS}
     ${rc}    ${out}=    Run And Return Rc And Output    curl -ks https://${host}/metrics/
@@ -91,7 +91,7 @@ Verify Vllm Metrics Are Present
 
 Verify Vllm Metrics Values Match Between UWM And Endpoint
     [Documentation]  Confirm the values returned by UWM and by the model endpoint match for each metric
-    [Tags]    Tier1    Sanity    Resources-GPU    RHOAIENG-6264    RHOAIENG-7687    VLLM
+    [Tags]    Tier1    Sanity    Resources-GPU    NVIDIA-GPUs    RHOAIENG-6264    RHOAIENG-7687    VLLM
     Depends On Test    Verify User Can Deploy A Model With Vllm Via CLI
     Depends On Test    Verify Vllm Metrics Are Present
     ${host}=    llm.Get KServe Inference Host Via CLI    isvc_name=vllm-gpt2-openai    namespace=${TEST_NS}

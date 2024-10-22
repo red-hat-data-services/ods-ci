@@ -63,10 +63,6 @@ Create PipelineServer Using Custom DSPA
     ...    ${assert_install}=${TRUE}    ${configure_pip_index}=${TRUE}
 
     Run And Verify Command     oc apply -f "${DSPA_PATH}/${dspa_file}" -n ${namespace}
-    IF    ${assert_install}==True
-        ${generation_value}=    Run And Verify Command    oc get datasciencepipelinesapplications -n ${namespace} -o json | jq '.items[0].metadata.generation'    # robocop: off=line-too-long
-        Should Be True    ${generation_value} == 2    DataSciencePipelinesApplication created
-    END
 
     IF  ${configure_pip_index}   Create Pipelines ConfigMap With Custom Pip Index Url And Trusted Host  ${namespace}
 

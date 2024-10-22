@@ -51,7 +51,7 @@ Open Data Science Project Details Page
         Wait Until Project Is Open    project_title=${project_title}
     END
     IF  "${tab_id}" != "${NONE}"
-        Wait Until Element Is Visible    //button[@role="tab" and @aria-controls="${tab_id}"]
+        Wait Until Element Is Visible    //button[@role="tab" and @aria-controls="${tab_id}"]  timout=60s
         Click Button    //button[@role="tab" and @aria-controls="${tab_id}"]
         Element Should Be Visible   //button[@role="tab" and @aria-controls="${tab_id}" and @aria-selected="true"]
         Sleep    1s    reason=The tab page needs to load content according to user permissions
@@ -94,7 +94,7 @@ Is Data Science Project Details Page Open
 
 Wait Until Project Is Open
     [Documentation]    Waits until a DS Project Details page is laoded
-    [Arguments]     ${project_title}    ${timeout-pre-spinner}=3s    ${timeout-spinner}=5s
+    [Arguments]     ${project_title}    ${timeout-pre-spinner}=3s    ${timeout-spinner}=60s
     Maybe Wait For Dashboard Loading Spinner Page
     ...    timeout-pre=${timeout-pre-spinner}    timeout=${timeout-spinner}
     Wait For Dashboard Page Title    ${project_title}    timeout=30s

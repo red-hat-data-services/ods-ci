@@ -136,18 +136,24 @@ Verify RHODS Installation
     ...    label_selector=app.kubernetes.io/name=data-science-pipelines-operator    timeout=400s
   END
 
-  ${modelregistry} =    Is Component Enabled    modelregistry    ${DSC_NAME}
-  IF    "${modelregistry}" == "true"
-    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/part-of=model-registry-operator    timeout=400s
-  END
-
   ${kserve} =    Is Component Enabled    kserve    ${DSC_NAME}
   IF    "${kserve}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app=odh-model-controller    timeout=400s
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=control-plane=kserve-controller-manager    timeout=400s
+  END
+
+  ${trustyai} =    Is Component Enabled    trustyai    ${DSC_NAME}
+  IF    "${trustyai}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/part-of=trustyai    timeout=400s
+  END
+
+  ${modelregistry} =    Is Component Enabled    modelregistry    ${DSC_NAME}
+  IF    "${modelregistry}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/part-of=model-registry-operator    timeout=400s
   END
 
   IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${dashboard}" == "true" or "${workbenches}" == "true" or "${modelmeshserving}" == "true" or "${datasciencepipelines}" == "true"  # robocop: disable

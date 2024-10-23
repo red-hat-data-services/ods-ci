@@ -34,6 +34,8 @@ ${MODELREGISTRY_CONTROLLER_LABEL_SELECTOR}     control-plane=model-registry-oper
 ${MODELREGISTRY_CONTROLLER_DEPLOYMENT_NAME}    model-registry-operator-controller-manager
 ${KSERVE_CONTROLLER_MANAGER_LABEL_SELECTOR}    control-plane=kserve-controller-manager
 ${KSERVE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}   kserve-controller-manager
+${TRUSTYAI_CONTROLLER_MANAGER_LABEL_SELECTOR}    app.kubernetes.io/part-of=trustyai
+${TRUSTYAI_CONTROLLER_MANAGER_DEPLOYMENT_NAME}   trustyai-service-operator-controller-manager
 ${IS_PRESENT}        0
 ${IS_NOT_PRESENT}    1
 &{SAVED_MANAGEMENT_STATES}
@@ -46,6 +48,7 @@ ${IS_NOT_PRESENT}    1
 ...  MODELMESHERVING=${EMPTY}
 ...  MODELREGISTRY=${EMPTY}
 ...  KSERVE=${EMPTY}
+...  TRUSTYAI=${EMPTY}
 
 @{CONTROLLERS_LIST}    kserve-controller-manager    odh-model-controller    modelmesh-controller
 @{REDHATIO_PATH_CHECK_EXCLUSTION_LIST}    kserve-controller-manager
@@ -69,7 +72,7 @@ Validate Kueue Removed State
 
     [Teardown]     Restore DSC Component State    kueue    ${KUEUE_DEPLOYMENT_NAME}    ${KUEUE_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.KUEUE}
 
- Validate Codeflare Managed State
+Validate Codeflare Managed State
     [Documentation]    Validate that the DSC Codeflare component Managed state creates the expected resources,
     ...    check that Codeflare deployment is created and pod is in Ready state
     [Tags]    Operator    Tier1    RHOAIENG-5435    codeflare-managed
@@ -153,6 +156,23 @@ Validate Datasciencepipelines Removed State
     Set DSC Component Removed State And Wait For Completion   datasciencepipelines    ${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}    ${DATASCIENCEPIPELINES_LABEL_SELECTOR}
 
     [Teardown]     Restore DSC Component State    datasciencepipelines    ${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}    ${DATASCIENCEPIPELINES_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.DATASCIENCEPIPELINES}
+
+Validate TrustyAi Managed State
+    [Documentation]    Validate that the DSC TrustyAi component Managed state creates the expected resources,
+    ...    check that TrustyAi deployment is created and pod is in Ready state
+    [Tags]    Operator    Tier1    RHOAIENG-14018    trustyai-managed
+
+    Set DSC Component Managed State And Wait For Completion   trustyai    ${TRUSTYAI_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${TRUSTYAI_CONTROLLER_MANAGER_LABEL_SELECTOR}
+
+    [Teardown]     Restore DSC Component State    trustyai    ${TRUSTYAI_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${TRUSTYAI_CONTROLLER_MANAGER_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.TRUSTYAI}
+
+Validate TrustyAi Removed State
+    [Documentation]    Validate that TrustyAi management state Removed does remove relevant resources.
+    [Tags]    Operator    Tier1    RHOAIENG-14018    trustyai-removed
+
+    Set DSC Component Removed State And Wait For Completion   trustyai    ${TRUSTYAI_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${TRUSTYAI_CONTROLLER_MANAGER_LABEL_SELECTOR}
+
+    [Teardown]     Restore DSC Component State    trustyai    ${TRUSTYAI_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${TRUSTYAI_CONTROLLER_MANAGER_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.TRUSTYAI}
 
 Validate Modelmeshserving Managed State
     [Documentation]    Validate that the DSC Modelmeshserving component Managed state creates the expected resources,
@@ -274,6 +294,7 @@ Suite Setup
     ${SAVED_MANAGEMENT_STATES.MODELMESHERVING}=     Get DSC Component State    ${DSC_NAME}    modelmeshserving    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.MODELREGISTRY}=     Get DSC Component State    ${DSC_NAME}    modelregistry    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.KSERVE}=     Get DSC Component State    ${DSC_NAME}    kserve    ${OPERATOR_NS}
+    ${SAVED_MANAGEMENT_STATES.TRUSTYAI}=     Get DSC Component State    ${DSC_NAME}    trustyai    ${OPERATOR_NS}
     Set Suite Variable    ${SAVED_MANAGEMENT_STATES}
 
 Suite Teardown

@@ -5,7 +5,7 @@ Library          Process
 
 
 *** Variables ***
-${VIRTUAL_ENV_NAME}                      venv3.9
+${VIRTUAL_ENV_NAME}                      venv3.11
 ${CODEFLARE-SDK-RELEASE-TAG}             v0.22.0
 ${CODEFLARE-SDK_DIR}                     codeflare-sdk
 ${CODEFLARE-SDK_REPO_URL}                %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
@@ -44,7 +44,7 @@ Prepare Codeflare-SDK Test Setup
 
     Clone Git Repository    ${CODEFLARE-SDK_REPO_URL}    ${CODEFLARE-SDK-RELEASE-TAG}    ${CODEFLARE-SDK_DIR}
 
-    ${result} =    Run Process  virtualenv -p python3.9 ${VIRTUAL_ENV_NAME}
+    ${result} =    Run Process  virtualenv -p python3.11 ${VIRTUAL_ENV_NAME}
     ...    shell=true    stderr=STDOUT
     Log To Console    ${result.stdout}
     IF    ${result.rc} != 0

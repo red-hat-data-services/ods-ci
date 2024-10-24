@@ -456,8 +456,7 @@ Check Resource Name Should Be Immutable
     [Documentation]    Checks if the Resource Name is not editable
     [Arguments]     ${project_title}
     ODHDashboard.Click Action From Actions Menu    item_title=${project_title}    item_type=project   action=Edit
-    Wait Until Page Contains Element    ${RESOURCE_INPUT_XP}
-    Element Should Be Disabled    ${RESOURCE_INPUT_XP}
+    Page Should Not Contain Element    ${RESOURCE_INPUT_XP}
     Click Button    Cancel
 
 Update Data Science Project Name

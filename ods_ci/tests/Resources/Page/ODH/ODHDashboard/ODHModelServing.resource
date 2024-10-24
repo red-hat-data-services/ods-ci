@@ -28,6 +28,7 @@ ${LLM_RESOURCES_DIRPATH}=    tests/Resources/Files/llm
 ${DEPLOY_SINGLE_SV_MODEL_BTN}=    //button[contains(@data-testid,"single-serving-deploy-button")]
 ${DEPLOY_MODEL_BTN}=    //button[contains(@data-testid,"deploy-button")]
 ${TOKEN_AUTH_CHECKBOX_XP}=    xpath://input[@id="alt-form-checkbox-auth"]
+${GRPC_URL_REGEX}=  https:\/\/([^\/:]+)
 
 
 *** Keywords ***
@@ -221,6 +222,12 @@ Get Model Route Via UI
         ${url}=    Catenate    SEPARATOR=    ${url}    /v2/models/${model_name}/infer
     END
     RETURN    ${url}
+
+Get Model Route for gRPC Via UI
+    [Arguments]    ${model_name}    
+    ${host_url}=    Get Model Route Via UI       model_name=${model_name}
+    ${host}=    Evaluate    re.search(r"${GRPC_URL_REGEX}", r"${host_url}").group(1)    re
+    RETURN    ${host}
 
 Get Model Route Via CLI
     [Documentation]    Grabs the serving route (URL) of an already deployed model from CLI.

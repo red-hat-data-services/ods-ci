@@ -221,7 +221,7 @@ Get Model Serving Access Token via UI
         SeleniumLibrary.Wait Until Page Contains Element    xpath://td[@data-label="Tokens"]/button
         SeleniumLibrary.Click Element    xpath://td[@data-label="Tokens"]/button
         ${token}=    SeleniumLibrary.Get Element Attribute
-        ...    xpath://div[.="${service_account_name} "]/../../td[@data-label="Token Secret"]//input    value
+        ...    xpath://div[.="${service_account_name} "]/../../td[@data-label="Token Secret"]//span/input    value
     END
     RETURN    ${token}
 
@@ -229,7 +229,7 @@ Get Single Model Token
     [Documentation]    Gets the (Single Model) Token of an specific Service Account
     [Arguments]    ${service_account_name}
     ${token}=    Get Element Attribute
-            ...    xpath://div[text()='${service_account_name}']/parent::td[@data-label='Token Name']/following-sibling::td[@data-label='Token Secret']//input   value
+    ...    xpath://div[text()='${service_account_name}']/parent::td[@data-label='Token Name']/following-sibling::td[@data-label='Token Secret']//input   value
     RETURN    ${token}
 
 Click Plus Button

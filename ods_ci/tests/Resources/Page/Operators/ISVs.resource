@@ -32,6 +32,11 @@ Install ISV Operator From OperatorHub Via CLI    # robocop: disable
     ${rc}    ${out}=    Run And Return Rc And Output    sed -i'' -e "s/<CATALOG_SOURCE>/${catalog_source_name}/g" ${operator_sub_filepath}    # robocop: disable
     ${rc}    ${out}=    Run And Return Rc And Output    sed -i'' -e "s/<CS_NAMESPACE>/${cs_namespace}/g" ${operator_sub_filepath}    # robocop: disable
     Oc Apply    kind=Subscription    src=${operator_sub_filepath}
+    Sleep    60s    reason=Waiting extra time to make sure the installplan is available
+    ${return_code}    ${installplans}     Run And Return Rc And Output   oc get installplans -n ${namespace} | grep -v NAME | awk '{print $1}'
+    Should Be Equal As Integers    ${return_code}     0   msg=Error while retrieving installplan
+    ${return_code}    ${out}     Run And Return Rc And Output   oc patch installplan ${installplans} -n ${namespace} --type='json' -p '[{"op": "replace", "path": "/spec/approved", "value": true}]' #robocop:disable
+    Should Be Equal As Integers    ${return_code}     0   msg=Error while approving installplan
 
 
 Create Operator Group

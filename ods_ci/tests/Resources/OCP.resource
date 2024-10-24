@@ -275,3 +275,12 @@ Set Default Storage Class In GCP
     ELSE
         Log    Proceeding with default storage class because we're not in GCP
     END
+
+Get Resource Attribute
+    [Documentation]    Gets the value of an attribute of a specific resource
+    [Arguments]    ${namespace}    ${resource_type}    ${resource_name}    ${attribute_path}
+    ${rc}   ${value}=    Run And Return Rc And Output
+    ...    oc get ${resource_type}/${resource_name} -n ${namespace} -o 'jsonpath={${attribute_path}}'
+    Should Be Equal    "${rc}"    "0"    msg=${value}
+    Log To Console    ${resource_type} ${resource_name} in the namespace ${namespace} attribute ${attribute_path} value is ${value}
+    RETURN    ${value}

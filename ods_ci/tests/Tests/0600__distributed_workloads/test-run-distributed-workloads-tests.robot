@@ -30,7 +30,7 @@ Run TestKueueRayGpu ODH test
     ...     DistributedWorkloads
     ...     Training
     ...     WorkloadsOrchestration
-    Run DistributedWorkloads ODH Test    TestMnistRayGpu    ${RAY_CUDA_IMAGE}
+    Run DistributedWorkloads ODH Test    TestMnistRayCudaGpu    ${RAY_CUDA_IMAGE}
 
 Run TestRayTuneHPOCpu ODH test
     [Documentation]    Run Go ODH test: TestMnistRayTuneHpoCpu

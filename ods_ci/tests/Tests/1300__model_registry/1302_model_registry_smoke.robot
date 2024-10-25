@@ -1,11 +1,11 @@
 *** Settings ***
 Documentation    Smoke Test for Model Registry Deployment
 Suite Setup        Setup Test Environment
-# Suite Teardown     Teardown Model Registry Test Setup
+Suite Teardown     Teardown Model Registry Test Setup
+Library            Collections
 Library            OperatingSystem
 Library            Process
 Library            OpenShiftLibrary
-Library            Collections
 Library            RequestsLibrary
 Resource           ../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
@@ -17,8 +17,8 @@ Resource           ../../Resources/Common.robot
 *** Variables ***
 ${MODELREGISTRY_BASE_FOLDER}=        tests/Resources/CLI/ModelRegistry
 ${MODEL_REGISTRY_DB_SAMPLES}=        ${MODELREGISTRY_BASE_FOLDER}/samples/istio/mysql
-${BROWSER.NAME}=                     chrome
 ${DISABLE_COMPONENT}=                ${False}
+
 
 *** Test Cases ***
 Deploy Model Registry
@@ -34,23 +34,23 @@ Deploy Model Registry
 Registering A Model In The Registry
     [Documentation]    Registers a model in the model registry
     [Tags]    Smoke    MR1302    ModelRegistry
-    Register A Model    ${url}
+    Register A Model    ${URL}
 
 Verify Model Registry
     [Documentation]    Deploy Python Client And Register Model.
     [Tags]    Smoke    MR1302    ModelRegistry
-    Run Curl Command And Verify Response    ${url}
+    Run Curl Command And Verify Response    ${URL}
 
 
 *** Keywords ***
 Setup Test Environment
+    [Documentation]  Set Model Regisry Test Suite
     ${NAMESPACE_MODEL_REGISTRY}=    Get Model Registry Namespace From DSC
     Log    Set namespace to: ${NAMESPACE_MODEL_REGISTRY}
     Set Suite Variable    ${NAMESPACE_MODEL_REGISTRY}
     Fetch CA Certificate If RHODS Is Self-Managed
     Get Cluster Domain And Token
-    Set Suite Variable    ${url}    http://modelregistry-sample-rest.${DOMAIN}/api/model_registry/v1alpha3/registered_models
-
+    Set Suite Variable    ${URL}    http://modelregistry-sample-rest.${DOMAIN}/api/model_registry/v1alpha3/registered_models
 
 Teardown Model Registry Test Setup
     [Documentation]  Teardown Model Registry Suite
@@ -68,11 +68,11 @@ Apply Db Config Samples
 Wait For Model Registry Containers To Be Ready
     [Documentation]    Wait for model-registry-deployment to be ready
     ${result}=    Run Process
-    ...        oc wait --for\=condition\=Available --timeout\=5m -n ${NAMESPACE_MODEL_REGISTRY} deployment/model-registry-db
+    ...        oc wait --for\=condition\=Available --timeout\=5m -n ${NAMESPACE_MODEL_REGISTRY} deployment/model-registry-db      # robocop: disable:line-too-long
     ...        shell=true    stderr=STDOUT
     Log To Console    ${result.stdout}
     ${result}=    Run Process
-    ...        oc wait --for\=condition\=Available --timeout\=5m -n ${NAMESPACE_MODEL_REGISTRY} deployment/model-registry-sample
+    ...        oc wait --for\=condition\=Available --timeout\=5m -n ${NAMESPACE_MODEL_REGISTRY} deployment/model-registry-sample     # robocop: disable:line-too-long
     ...        shell=true    stderr=STDOUT
     Log To Console    ${result.stdout}
 
@@ -81,7 +81,7 @@ Remove Model Registry
     # We don't want to stop the teardown if any of these resources are not found
     Run Keyword And Continue On Failure
     ...    Run And Verify Command
-    ...    oc delete -k ${MODELREGISTRY_BASE_FOLDER}/samples/istio/mysql -n ${NAMESPACE_MODEL_REGISTRY} 
+    ...    oc delete -k ${MODELREGISTRY_BASE_FOLDER}/samples/istio/mysql -n ${NAMESPACE_MODEL_REGISTRY}
 
 Install Python Client And Dependencies
     [Documentation]  Download the model-registry package for a specific platform
@@ -117,11 +117,6 @@ Disable Model Registry If Needed
         Run And Verify Command    oc delete namespace ${NAMESPACE_MODEL_REGISTRY} --force
     END
 
-Get File
-    [Arguments]    ${file_path}
-    ${file_content}=    Get File    ${file_path}
-    [Return]    ${file_content} 
-
 Get Cluster Domain And Token
     [Documentation]  Logs the Domain and Token capture.
     ${domain}=    Get Domain
@@ -156,8 +151,9 @@ Get Token
 
 Run Curl Command And Verify Response
     [Documentation]    Runs a curl command to verify response from server
-    [Arguments]    ${url}
-    ${result}=     Run Process    curl    -H    Authorization: Bearer ${TOKEN}    ${url}    stdout=stdout    stderr=stderr
+    [Arguments]    ${URL}
+    ${result}=     Run Process    curl    -H    Authorization: Bearer ${TOKEN}
+    ...        ${URL}    stdout=stdout    stderr=stderr
     Log    ${result.stderr}
     Log    ${result.stdout}
     Should Contain    ${result.stdout}    createTimeSinceEpoch
@@ -168,13 +164,13 @@ Run Curl Command And Verify Response
     Should Not Contain    ${result.stdout}    error
 
 Register A Model
-    [Documentation]    Registers a test model in the model-registry   
-    [Arguments]    ${url}
-    ${result}    Run Process    curl    -X    POST
+    [Documentation]    Registers a test model in the model-registry
+    [Arguments]    ${URL}
+    ${result}=    Run Process    curl    -X    POST
     ...    -H    Authorization: Bearer ${TOKEN}
     ...    -H    Content-Type: application/json
     ...    -d    {"name": "model-name", "description": "test-model"}
-    ...    ${url}    stdout=stdout    stderr=stderr
+    ...    ${URL}    stdout=stdout    stderr=stderr
     Should Be Equal As Numbers    ${result.rc}    0
     Log    ${result.stderr}
     Log    ${result.stdout}

@@ -87,13 +87,13 @@ function rerun_accelerator_migration() {
   oc describe AcceleratorProfiles -n redhat-ods-applications
 }
 
-# wait_until_pod_ready_status  "gpu-operator"
-# oc apply -f "$GPU_INSTALL_DIR/../nfd_deploy.yaml"
-# oc get csv -n nvidia-gpu-operator "$CSVNAME" -o jsonpath='{.metadata.annotations.alm-examples}' | jq .[0] > clusterpolicy.json
-# oc apply -f clusterpolicy.json
-# wait_until_pod_ready_status "nvidia-device-plugin-daemonset" 600
-# wait_until_pod_ready_status "nvidia-container-toolkit-daemonset"
-# wait_until_pod_ready_status "nvidia-dcgm-exporter"
-# wait_until_pod_ready_status "gpu-feature-discovery"
-# wait_until_pod_ready_status "nvidia-operator-validator"
+wait_until_pod_ready_status  "gpu-operator"
+oc apply -f "$GPU_INSTALL_DIR/../nfd_deploy.yaml"
+oc get csv -n nvidia-gpu-operator "$CSVNAME" -o jsonpath='{.metadata.annotations.alm-examples}' | jq .[0] > clusterpolicy.json
+oc apply -f clusterpolicy.json
+wait_until_pod_ready_status "nvidia-device-plugin-daemonset" 600
+wait_until_pod_ready_status "nvidia-container-toolkit-daemonset"
+wait_until_pod_ready_status "nvidia-dcgm-exporter"
+wait_until_pod_ready_status "gpu-feature-discovery"
+wait_until_pod_ready_status "nvidia-operator-validator"
 rerun_accelerator_migration

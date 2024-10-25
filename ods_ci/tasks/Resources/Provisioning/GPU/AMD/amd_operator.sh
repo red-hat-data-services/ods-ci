@@ -199,5 +199,5 @@ fi
 echo "Configuration of AMD GPU node and Operators completed"
 # the message appears in the logs, but the pod may get delete before our code next iteration checks the logs once again,
 # hence it'd fails to reach the pod. It happened to me
-wait_while 1200 monitor_logs "$name" openshift-amd-gpu docker-build "Successfully pushed image-registry.openshift-image-registry.svc:5000/openshift-amd-gpu"
+# wait_while 1200 monitor_logs "$name" openshift-amd-gpu docker-build "Successfully pushed image-registry.openshift-image-registry.svc:5000/openshift-amd-gpu"
 create_acceleratorprofile

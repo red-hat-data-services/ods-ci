@@ -59,7 +59,13 @@ function rerun_accelerator_migration() {
   # 1. Delete the migration configmap
   # 2. Rollout restart dashboard deployment, so the configmap is created again and the migration run again
   # Context: https://github.com/opendatahub-io/odh-dashboard/issues/1938
-
+  echo "Creating NVIDIA Accelerator Profile via RHOAI Dashboard deployment rollout"
+  configmap=$(oc get configmap migration-gpu-status --ignore-not-found -n redhat-ods-applications -oname)
+  if [ -n $configmap ];
+    then
+      echo "migration-gpu-status not found. Is RHOAI Installed? NVIDIA Accelerator Profile creation SKIPPED."
+      return 0
+  fi
   echo "Deleting configmap migration-gpu-status"
   if ! oc delete configmap migration-gpu-status -n redhat-ods-applications;
     then
@@ -81,13 +87,13 @@ function rerun_accelerator_migration() {
   oc describe AcceleratorProfiles -n redhat-ods-applications
 }
 
-wait_until_pod_ready_status  "gpu-operator"
-oc apply -f "$GPU_INSTALL_DIR/../nfd_deploy.yaml"
-oc get csv -n nvidia-gpu-operator "$CSVNAME" -o jsonpath='{.metadata.annotations.alm-examples}' | jq .[0] > clusterpolicy.json
-oc apply -f clusterpolicy.json
-wait_until_pod_ready_status "nvidia-device-plugin-daemonset" 600
-wait_until_pod_ready_status "nvidia-container-toolkit-daemonset"
-wait_until_pod_ready_status "nvidia-dcgm-exporter"
-wait_until_pod_ready_status "gpu-feature-discovery"
-wait_until_pod_ready_status "nvidia-operator-validator"
+# wait_until_pod_ready_status  "gpu-operator"
+# oc apply -f "$GPU_INSTALL_DIR/../nfd_deploy.yaml"
+# oc get csv -n nvidia-gpu-operator "$CSVNAME" -o jsonpath='{.metadata.annotations.alm-examples}' | jq .[0] > clusterpolicy.json
+# oc apply -f clusterpolicy.json
+# wait_until_pod_ready_status "nvidia-device-plugin-daemonset" 600
+# wait_until_pod_ready_status "nvidia-container-toolkit-daemonset"
+# wait_until_pod_ready_status "nvidia-dcgm-exporter"
+# wait_until_pod_ready_status "gpu-feature-discovery"
+# wait_until_pod_ready_status "nvidia-operator-validator"
 rerun_accelerator_migration

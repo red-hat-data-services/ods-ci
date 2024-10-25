@@ -386,6 +386,9 @@ Model Registry Post Upgrade Scenario
     ...    xpath:${MR_VERSION_TABLE_XPATH}/tbody/tr/td[@data-label="Version name"]//a[.="${MR_REGISTERED_MODEL_VERSION}"]
     SeleniumLibrary.Page Should Contain Element
     ...    xpath:${MR_VERSION_TABLE_XPATH}/tbody/tr/td[@data-label="Author" and .="${MR_REGISTERED_MODEL_AUTHOR}"]
+
+Post Upgrade Scenario Teardown
+    [Documentation]    Teardown keyword specific to the post upgrade scenario
     SeleniumLibrary.Close All Browsers
     # TODO: Update after component goes GA and is enabled by default
     Set Suite Variable    ${DISABLE_COMPONENT}    ${True}

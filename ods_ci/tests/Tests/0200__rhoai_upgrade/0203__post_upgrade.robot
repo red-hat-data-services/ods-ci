@@ -248,6 +248,7 @@ Model Registry Post Upgrade Verification
     [Documentation]    Verifies that registered model/version in pre-upgrade is present after the upgrade
     [Tags]             Upgrade    ModelRegistryUpgrade
     Model Registry Post Upgrade Scenario
+    [Teardown]    Post Upgrade Scenario Teardown
 
 
 *** Keywords ***

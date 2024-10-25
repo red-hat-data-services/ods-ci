@@ -387,6 +387,7 @@ Model Registry Post Upgrade Scenario
     SeleniumLibrary.Page Should Contain Element
     ...    xpath:${MR_VERSION_TABLE_XPATH}/tbody/tr/td[@data-label="Author" and .="${MR_REGISTERED_MODEL_AUTHOR}"]
     SeleniumLibrary.Close All Browsers
+    # TODO: Update after component goes GA and is enabled by default
     Set Suite Variable    ${DISABLE_COMPONENT}    ${True}
     ${return_code}    ${output}=    Run And Return Rc And Output
     ...    oc delete project ${PRJ_TITLE} --force --grace-period=0

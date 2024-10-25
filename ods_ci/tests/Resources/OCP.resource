@@ -142,7 +142,7 @@ Wait For Deployment Replica To Be Ready
     Wait For Pods To Be Ready    ${label_selector}    ${namespace}    ${timeout}    ${exp_replicas}
     # Now the status should match the number of expected replicas with ready replicas
     Run And Verify Command
-    ...    oc get deployment -l ${label_selector} -n ${namespace} -o json | jq -e '.items[].status | .replicas == .readyReplicas'  #robocop: disable:line-too-long
+    ...    oc get deployment -l ${label_selector} -n ${namespace} -o json | jq -e '.status | .replicas == .readyReplicas'  #robocop: disable:line-too-long
     ...    print_to_log=${FALSE}
 
 Wait For Pods To Succeed

@@ -29,7 +29,7 @@ Deploy Model Registry
     Enable Model Registry If Needed
     Component Should Be Enabled    modelregistry
     Apply Db Config Samples
-    Sleep    90s
+    # Sleep    90s
 
 Registering A Model In The Registry
     [Documentation]    Registers a model in the model registry
@@ -72,7 +72,7 @@ Wait For Model Registry Containers To Be Ready
     ...        shell=true    stderr=STDOUT
     Log To Console    ${result.stdout}
     ${result}=    Run Process
-    ...        oc wait --for\=condition\=Available --timeout\=5m -n ${NAMESPACE_MODEL_REGISTRY} deployment/model-registry-sample     # robocop: disable:line-too-long
+    ...        oc wait --for\=condition\=Available --timeout\=5m -n ${NAMESPACE_MODEL_REGISTRY} deployment/modelregistry-sample     # robocop: disable:line-too-long
     ...        shell=true    stderr=STDOUT
     Log To Console    ${result.stdout}
 

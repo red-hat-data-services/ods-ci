@@ -29,7 +29,6 @@ Deploy Model Registry
     Enable Model Registry If Needed
     Component Should Be Enabled    modelregistry
     Apply Db Config Samples
-    # Sleep    90s
 
 Registering A Model In The Registry
     [Documentation]    Registers a model in the model registry

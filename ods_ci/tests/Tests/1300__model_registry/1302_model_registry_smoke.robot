@@ -83,12 +83,6 @@ Remove Model Registry
     ...    Run And Verify Command
     ...    oc delete -k ${MODELREGISTRY_BASE_FOLDER}/samples/istio/mysql -n ${NAMESPACE_MODEL_REGISTRY}
 
-Install Python Client And Dependencies
-    [Documentation]  Download the model-registry package for a specific platform
-    ${result}=    Run Process    command=pip install --pre model-registry    # robocop: disable:line-too-long
-    ...    shell=yes
-    Should Be Equal As Numbers  ${result.rc}  0  ${result.stderr}
-
 Get Model Registry Namespace From DSC
     [Documentation]    Fetches the namespace defined for model registry in the DSC
     ${rc}  ${ns}=    Run And Return Rc And Output

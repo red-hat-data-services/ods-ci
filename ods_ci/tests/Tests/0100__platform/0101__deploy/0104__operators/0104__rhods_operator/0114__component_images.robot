@@ -24,7 +24,7 @@ Suite Teardown      Suite Teardown
 *** Test Cases ***
 Check For Correct Component Images
     [Documentation]    The purpose is to enforce the check of correct component images on their deployments.
-    [Tags]                  Operator                RHOAIENG-12576
+    [Tags]                  Operator                RHOAIENG-12576          Smoke
     FOR    ${cmp}    IN    @{COMPONENTS}
         ${rc}    ${managementState}=    Run And Return Rc And Output
         ...    oc get DataScienceCluster default-dsc -o jsonpath="{.spec.components['${cmp}'].managementState}"

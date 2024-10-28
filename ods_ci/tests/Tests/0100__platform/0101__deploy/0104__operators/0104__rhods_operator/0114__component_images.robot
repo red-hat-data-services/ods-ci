@@ -91,10 +91,8 @@ Check Image On Csv And Deployment
     [Documentation]    Check Image On Csv And Deployment
     [Arguments]    ${image}    ${deployment_name}
 
-    ${jsonpath}=    Set Variable
-    ...    '{.items[?(@.kind=="ClusterServiceVersion")].spec.relatedImages[?(@.name=="${image}")].image}'
     ${rc}    ${csv_image}=    Run And Return Rc And Output
-    ...    oc get ClusterServiceVersion -l ${OPERATOR_SUBSCRIPTION_LABEL} -o jsonpath=${jsonpath}
+    ...    oc get ClusterServiceVersion -l ${OPERATOR_SUBSCRIPTION_LABEL} -o jsonpath='{.items[?(@.kind=="ClusterServiceVersion")].spec.relatedImages[?(@.name=="${image}")].image}'
     Should Be Equal    "${rc}"    "0"    msg=${csv_image}
     Should Not Be Empty    ${csv_image}
     Log To Console    IMAGE ON CSV IS ${csv_image}

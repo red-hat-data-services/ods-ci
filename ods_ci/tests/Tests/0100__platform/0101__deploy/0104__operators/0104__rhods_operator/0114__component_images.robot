@@ -97,7 +97,6 @@ Check Image On Csv And Deployment
     Should Not Be Empty    ${csv_image}
     Log To Console    IMAGE ON CSV IS ${csv_image}
 
-    # Check for regex to see whether it is pointing mistream or downstream
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc get Deployment ${deployment_name} -n ${APPLICATIONS_NAMESPACE} -o jsonpath='{.spec.template.spec.containers[?(@.images=="${csv_image}")]}'
     Should Be Equal    "${rc}"    "0"    msg=${csv_image} not found on ${deployment_name} deployment

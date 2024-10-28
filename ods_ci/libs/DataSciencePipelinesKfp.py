@@ -305,6 +305,22 @@ class DataSciencePipelinesKfp:
         return run_status  # pyright: ignore [reportPossiblyUnboundVariable]
 
     @keyword
+    def get_last_run_by_pipeline_name(self, pipeline_name: str | None = None, namespace: str | None = None):
+        """
+        Gets run_id of the last run created for pipeline_name
+        :param pipeline_name:
+        :param namespace:
+        :return:
+            run_id
+        """
+        pipeline_id = self.client.get_pipeline_id(pipeline_name)
+        pipeline_version_id = self.get_last_pipeline_version(pipeline_id)
+        all_runs = self.get_all_runs(namespace=namespace, pipeline_version_id=pipeline_version_id)
+        if len(all_runs) > 0:
+            return all_runs[-1].run_id
+        return None
+
+    @keyword
     def delete_pipeline(self, pipeline_id):
         """Deletes a pipeline"""
         print(f"Deleting pipeline {pipeline_id}")

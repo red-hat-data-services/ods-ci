@@ -5,7 +5,7 @@ Resource         ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/
 
 
 *** Variables ***
-${PROJECT}=    dsp-upgrade-testing
+${PROJECT}=    upg-dsp
 ${PIPELINE_LONGRUNNING_FILEPATH}=    tests/Resources/Files/pipeline-samples/v2/cache-disabled/pip_index_url/take_nap_compiled.yaml  # robocop: disable:line-too-long
 
 
@@ -24,9 +24,13 @@ Verify Resources After Upgrade
 
     DataSciencePipelinesBackend.Wait Until Pipeline Server Is Deployed    namespace=${PROJECT}
 
+    ${take_nap_run_id}=    DataSciencePipelinesBackend.Get Last Run By Pipeline Name
+    ...    namespace=${PROJECT}    username=${TEST_USER.USERNAME}    password=${TEST_USER.PASSWORD}
+    ...    pipeline_name=take-nap
+
     Verify Run Status
     ...    namespace=${PROJECT}    username=${TEST_USER.USERNAME}    password=${TEST_USER.PASSWORD}
-    ...    pipeline_run_id=${DSP_LONGRUNNING_PIPELINE_RUN_ID}    pipeline_run_expected_status=RUNNING
+    ...    pipeline_run_id=${take_nap_run_id}    pipeline_run_expected_status=RUNNING
 
     Projects.Delete Project Via CLI By Display Name    ${PROJECT}
 
@@ -60,5 +64,3 @@ Start Long Running Pipeline
     ...    pipeline_package_path=${PIPELINE_LONGRUNNING_FILEPATH}
     ...    pipeline_run_name=take-nap-run
     ...    pipeline_run_params=${pipeline_run_params}
-
-    Set Global Variable  ${DSP_LONGRUNNING_PIPELINE_RUN_ID}    ${pipeline_run_id}

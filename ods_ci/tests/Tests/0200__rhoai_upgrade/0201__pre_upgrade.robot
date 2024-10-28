@@ -21,6 +21,7 @@ Resource           ../../Resources/CLI/ModelServing/modelmesh.resource
 Resource           ../../Resources/CLI/DataSciencePipelines/DataSciencePipelinesUpgradeTesting.resource
 Resource           ../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 Resource           ../../Resources/Page/DistributedWorkloads/WorkloadMetricsUI.resource
+Resource           ../../Resources/Page/ModelRegistry/ModelRegistry.resource
 Suite Setup        Dashboard Suite Setup
 Suite Teardown     RHOSi Teardown
 Test Tags          PreUpgrade
@@ -178,6 +179,11 @@ Data Science Pipelines Pre Upgrade Configuration
     [Documentation]    Creates project dsp-test-upgrade and configures the pipeline resources testing upgrade
     [Tags]             Upgrade    DataSciencePipelines-Backend
     DataSciencePipelinesUpgradeTesting.Setup Environment For Upgrade Testing
+
+Model Registry Pre Upgrade Set Up
+    [Documentation]    Creates a Model Registry instance and registers a model/version
+    [Tags]             Upgrade    ModelRegistryUpgrade
+    Model Registry Pre Upgrade Scenario
 
 
 *** Keywords ***

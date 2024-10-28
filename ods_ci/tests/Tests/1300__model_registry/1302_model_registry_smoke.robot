@@ -27,6 +27,7 @@ Deploy Model Registry
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
     Enable Model Registry If Needed
+    Sleep    90s
     Component Should Be Enabled    modelregistry
     Apply Db Config Samples
 

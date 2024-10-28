@@ -445,7 +445,7 @@ Edit Workbench
     # Also wait until the workbench name is populated in the text field - let's wait for DOM to finish
     Wait For Condition    return document.readyState == "complete"    timeout=5s
 
-Check Launched Workbench Is The Correct One
+Verify Workbench Image In Jupyter Lab
     [Documentation]    Checks if the launched workbench is the expected one
     [Arguments]     ${workbench_title}    ${image}    ${project_title}
     ${namespace}=    Get Openshift Namespace From Data Science Project   project_title=${project_title}

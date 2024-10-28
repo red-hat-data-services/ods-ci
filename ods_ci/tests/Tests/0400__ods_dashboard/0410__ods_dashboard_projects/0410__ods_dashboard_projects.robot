@@ -442,7 +442,7 @@ Verify Error Is Reported When Workbench Fails To Start    # robocop: disable
     Wait Until Project Is Open    project_title=${PRJ_TITLE}
 
 Verify Users Can Start, Stop, Launch And Delete A Workbench
-    [Tags]    Smoke    Tier1
+    [Tags]    Smoke
     ...       ODS-1813    ODS-1815   ODS-1817
     [Documentation]    Verifies users can start, stop, launch and delete a running workbench from project details page
     [Setup]        Run Keywords
@@ -463,7 +463,8 @@ Verify Users Can Start, Stop, Launch And Delete A Workbench
     Launch And Access Workbench    workbench_title=${WORKBENCH_TITLE}
     ...    username=${TEST_USER_3.USERNAME}     password=${TEST_USER_3.PASSWORD}
     ...    auth_type=${TEST_USER_3.AUTH_TYPE}
-    Check Launched Workbench Is The Correct One     workbench_title=${WORKBENCH_TITLE}
+    # TODO: Following Keyword should rather be called within "JupyterHub" Suite
+    Verify Workbench Image In Jupyter Lab     workbench_title=${WORKBENCH_TITLE}
     ...    image=${NB_IMAGE}    project_title=${PRJ_TITLE}
     SeleniumLibrary.Switch Window    title=${ODH_DASHBOARD_PROJECT_NAME}
     Wait Until Project Is Open    project_title=${PRJ_TITLE}
@@ -477,9 +478,8 @@ Verify Users Can Start, Stop, Launch And Delete A Workbench
     ...    SeleniumLibrary.Close Browser
 
 Verify Users Can Start, Stop And Launch A Workbench From DS Projects Home Page
-    [Tags]     Smoke    Sanity    Tier1
+    [Tags]     Sanity
     ...        ODS-1818    ODS-1823
-    ...        ProductBug    RHOAIENG-5084
     [Documentation]    Verifies users can start, stop, launch and delete a running workbench from project details page
     [Setup]        Run Keywords
     ...    Launch Data Science Project Main Page
@@ -491,20 +491,16 @@ Verify Users Can Start, Stop And Launch A Workbench From DS Projects Home Page
     ...        press_cancel=${FALSE}    envs=${NONE}
     ...    AND
     ...    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}
-    # ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
-    # ${_}    ${workbench_cr_name}=    Get Openshift Notebook CR From Workbench    workbench_title=${WORKBENCH_TITLE}
-    # ...    namespace=${ns_name}
     Open Data Science Projects Home Page
     Wait Until Project Is Listed    project_title=${PRJ_TITLE}
     Stop Workbench From Projects Home Page     workbench_title=${WORKBENCH_TITLE}   project_title=${PRJ_TITLE}
-    # ...    workbench_cr_name=${workbench_cr_name}    namespace=${ns_name}
     Workbench Launch Link Should Be Disabled    workbench_title=${WORKBENCH_TITLE}  project_title=${PRJ_TITLE}
     Start Workbench From Projects Home Page     workbench_title=${WORKBENCH_TITLE}   project_title=${PRJ_TITLE}
-    # ...    workbench_cr_name=${workbench_cr_name}    namespace=${ns_name}
     Launch And Access Workbench From Projects Home Page    workbench_title=${WORKBENCH_TITLE}
     ...    project_title=${PRJ_TITLE}    username=${TEST_USER_3.USERNAME}
     ...    password=${TEST_USER_3.PASSWORD}    auth_type=${TEST_USER_3.AUTH_TYPE}
-    Check Launched Workbench Is The Correct One     workbench_title=${WORKBENCH_TITLE}
+    # TODO: Following Keyword should rather be called within "JupyterHub" Suite
+    Verify Workbench Image In Jupyter Lab     workbench_title=${WORKBENCH_TITLE}
     ...    image=${NB_IMAGE}    project_title=${PRJ_TITLE}
     [Teardown]    Run Keywords
     ...    Clean Project From Workbench Resources    workbench_title=${WORKBENCH_TITLE}    project_title=${PRJ_TITLE}

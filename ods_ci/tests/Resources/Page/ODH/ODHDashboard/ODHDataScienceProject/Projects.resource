@@ -311,7 +311,7 @@ Start Workbench From Projects Home Page
         ${kebab_button}=    Set Variable    xpath=//a[@data-testid="notebook-route-link" and text()="${workbench_title}"]/ancestor::tr[@data-testid="project-notebooks-table-row"]//button[@aria-label="Kebab toggle"]
         Wait Until Element Is Visible    ${kebab_button}    timeout=10s
         Click Element    ${kebab_button}
-        ${start_button}=    Set Variable    xpath=//a[@data-testid="notebook-route-link" and text()="${workbench_title}"]/ancestor::tr[@data-testid="project-notebooks-table-row"]//button[@aria-label="Kebab toggle"]/following::div//span[text()="Start"]
+        ${start_button}=    Set Variable    xpath=//a[@data-testid="notebook-route-link" and text()="${workbench_title}"]/ancestor::tr[@data-testid="project-notebooks-table-row"]//button[@data-testid="notebook-start-action"]
         Wait Until Element Is Visible    ${start_button}    timeout=10s
         Click Element    ${start_button}
     ELSE
@@ -345,7 +345,7 @@ Stop Workbench From Projects Home Page
         ${kebab_button}=    Set Variable    xpath=//a[@data-testid="notebook-route-link" and text()="${workbench_title}"]/ancestor::tr[@data-testid="project-notebooks-table-row"]//button[@aria-label="Kebab toggle"]
         Wait Until Element Is Visible    ${kebab_button}    timeout=10s
         Click Element    ${kebab_button}
-        ${stop_button}=    Set Variable    xpath=//a[@data-testid="notebook-route-link" and text()="${workbench_title}"]/ancestor::tr[@data-testid="project-notebooks-table-row"]//button[@aria-label="Kebab toggle"]/following::div//span[text()="Stop"]
+        ${stop_button}=    Set Variable    xpath=//a[@data-testid="notebook-route-link" and text()="${workbench_title}"]/ancestor::tr[@data-testid="project-notebooks-table-row"]//button[@data-testid="notebook-stop-action"]
         Wait Until Element Is Visible    ${stop_button}    timeout=10s
         Click Element    ${stop_button}
         Handle Stop Workbench Confirmation Modal    press_cancel=${press_cancel}

@@ -372,6 +372,13 @@ Model Registry Post Upgrade Scenario
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
     Component Should Be Enabled    modelregistry
+    # Check for bug RHOAIENG-15033, will fail in 2.15
+    ${operator_rest}=    Get Model Registry Operator REST Image
+    ${operator_grpc}=    Get Model Registry Operator GRPC Image
+    ${instance_rest}=    Get Model Registry Instance rest Image
+    ${instance_grpc}=    Get Model Registry Instance grpc Image
+    Should Be Equal As Strings    ${operator_rest}    ${instance_rest}
+    Should Be Equal As Strings    ${operator_grpc}    ${instance_grpc}
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
     Open Model Registry Dashboard Page
@@ -404,3 +411,37 @@ Post Upgrade Scenario Teardown
     Remove Deployment Files    ${MODELREGISTRY_BASE_FOLDER}/Python_Dependencies
     Disable Model Registry If Needed
     RHOSi Teardown
+
+Get Model Registry Operator Pod
+    [Documentation]    Returns the name of the operator pod for model registry
+    ${rc}    ${name} =    Run And Return Rc And Output
+    ...    oc get pod -l component.opendatahub.io/name=model-registry-operator -n ${APPLICATIONS_NAMESPACE} -o yaml | yq '.items[0].metadata.name'
+    Should Be Equal As Integers    ${rc}    0
+    RETURN    ${name}
+
+Get Model Registry Operator ${type} Image
+    [Documentation]    Returns the GRPC image defined in the operator, type should be either GRPC or REST (case 
+    ...    sensitive)
+    IF    "${type}"!="GRPC" and "${type}"!="REST"
+        Log To Console    "Failing, `type` should be either REST or GRPC"
+        Fail
+    END
+    ${pod_name}=    Get Model Registry Operator Pod
+    ${rc}    ${img}=    Run And Return RC And Output
+    ...    oc get pod ${pod_name} -o yaml -n ${APPLICATIONS_NAMESPACE} | yq '.spec.containers[0].env[] | select(.name == "${type}_IMAGE").value'
+    Should Be Equal As Integers    ${rc}    0
+    RETURN    ${img}
+
+Get Model Registry Instance ${type} Image
+    [Documentation]    Returns the GRPC/REST image defined in a MR instance, type should be either grpc or rest (case
+    ...    sensitive)
+    [Arguments]    ${instance_name}=modelregistry-sample
+    ${ns}=    Get Model Registry Namespace From DSC
+    IF    "${type}"!="grpc" and "${type}"!="rest"
+        Log To Console    "Failing, `type` should be either rest or grpc"
+        Fail
+    END
+    ${rc}    ${img}=    Run And Return RC And Output
+    ...    oc get pod -l app=${instance_name} -n ${ns} -o yaml | yq '.items[].spec.containers[] | select(.name=="${type}-container").image'
+    Should Be Equal As Integers    ${rc}    0
+    RETURN    ${img}

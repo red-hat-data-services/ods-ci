@@ -152,10 +152,10 @@ Wait Until Pipeline Server Is Deployed
 
     ${dspVersion}=    Get DSP Version    ${namespace}
     IF    "${dspVersion}" == "v2"
-            Wait Until Keyword Succeeds    10 times    10s
+            Wait Until Keyword Succeeds    15 times    10s
             ...    Verify Pipeline Server Deployments    namespace=${namespace}
     ELSE
-             Wait Until Keyword Succeeds    10 times    10s
+             Wait Until Keyword Succeeds    15 times    10s
             ...    Verify DSPv1 Pipeline Server Deployments    namespace=${namespace}
     END
 

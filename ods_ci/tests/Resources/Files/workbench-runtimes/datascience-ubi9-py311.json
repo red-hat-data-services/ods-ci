@@ -1,0 +1,12 @@
+{
+  "display_name": "Datascience with Python 3.11 (UBI9)",
+  "metadata": {
+    "tags": [
+      "datascience"
+    ],
+    "display_name": "Datascience with Python 3.11 (UBI9)",
+    "image_name": "quay.io/modh/runtime-images@sha256:d894c46832742b3d5772ccd478d2293644e344b1be41e0a967cc6cf58212182d",
+    "pull_policy": "IfNotPresent"
+  },
+  "schema_name": "runtime-image"
+}

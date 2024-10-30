@@ -37,8 +37,8 @@ Install ISV Operator From OperatorHub Via CLI    # robocop: disable
     Wait Until Keyword Succeeds    1 min    0 sec
     ...    Is Resource Present    Subscription    ${subscription_name}     ${namespace}    ${IS_PRESENT}
     Sleep    30s
-    Wait Until Keyword Succeeds    1 min    0 sec
-    ...    ${installplan_name}=     Get Resource Attribute      ${namespace}
+    ${installplan_name}=       Wait Until Keyword Succeeds    1 min    0 sec
+    ...         Get Resource Attribute      ${namespace}
     ...      Subscription       ${subscription_name}        .status.installPlanRef.name
     ${installplan_approval}=     Get Resource Attribute      ${namespace}
     ...      InstallPlan       ${installplan_name}        .spec.approval

@@ -23,6 +23,7 @@ Resource           ../../Resources/Page/DistributedWorkloads/DistributedWorkload
 Resource           ../../Resources/Page/DistributedWorkloads/WorkloadMetricsUI.resource
 Resource           ../../Resources/CLI/MustGather/MustGather.resource
 Resource           ../../Resources/CLI/DataSciencePipelines/DataSciencePipelinesUpgradeTesting.resource
+Resource           ../../Resources/Page/ModelRegistry/ModelRegistry.resource
 Suite Setup        Upgrade Suite Setup
 Test Tags          PostUpgrade
 
@@ -215,7 +216,6 @@ Verify that the must-gather image provides RHODS logs and info
     END
     [Teardown]  Cleanup must-gather Logs
 
-
 Verify That DSC And DSCI Release.Name Attribute matches ${expected_release_name}
     [Documentation]    Tests the release.name attribute from the DSC and DSCI matches the desired value.
     ...                ODH: Open Data Hub
@@ -243,6 +243,13 @@ Data Science Pipelines Post Upgrade Verifications
     [Documentation]    Verifies the status of the resources created in project dsp-test-upgrade after the upgradea
     [Tags]             Upgrade    DataSciencePipelines-Backend
     DataSciencePipelinesUpgradeTesting.Verify Resources After Upgrade
+
+Model Registry Post Upgrade Verification
+    [Documentation]    Verifies that registered model/version in pre-upgrade is present after the upgrade
+    [Tags]             Upgrade    ModelRegistryUpgrade
+    ...                ProductBug    RHOAIENG-15033
+    Model Registry Post Upgrade Scenario
+    [Teardown]    Post Upgrade Scenario Teardown
 
 
 *** Keywords ***

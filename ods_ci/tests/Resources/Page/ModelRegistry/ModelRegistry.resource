@@ -172,6 +172,7 @@ Jupyter Notebook Can Query Model Registry
 
 Wait For Model Registry Containers To Be Ready
     [Documentation]    Wait for model-registry-deployment to be ready
+    ${NAMESPACE_MODEL_REGISTRY}=    Get Model Registry Namespace From DSC
     ${result}=    Run Process
     ...        oc wait --for\=condition\=Available --timeout\=5m -n ${NAMESPACE_MODEL_REGISTRY} deployment/model-registry-db      # robocop: disable:line-too-long
     ...        shell=true    stderr=STDOUT

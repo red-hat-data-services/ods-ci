@@ -3,7 +3,7 @@ from kfp.dsl import PipelineTask
 
 #  Runtime: Pytorch with ROCm and Python 3.9 (UBI 9)
 common_base_image = (
-    "quay.io/modh/runtime-images@sha256:76d2a5d9ca0bb35c4d9962a7ee6798672afd3a5c7d226d87ef65f952e7cb93cf"
+    "quay.io/modh/runtime-images@sha256:a1cfb7bfcff3b2aae2b20b17da83b6683d632403f674a51af6efdfe809a6fc10"
 )
 
 

@@ -16,7 +16,7 @@ Suite Teardown      RHOSi Teardown
 
 
 *** Variables ***
-${URL_TEST_PIPELINE_RUN_YAML}=                 https://raw.githubusercontent.com/opendatahub-io/data-science-pipelines-operator/main/tests/resources/test-pipeline-run.yaml    # robocop: disable:line-too-long
+${URL_TEST_PIPELINE_RUN_YAML}=                 https://raw.githubusercontent.com/red-hat-data-services/ods-ci/refs/heads/master/ods_ci/tests/Resources/Files/pipeline-samples/v2/cache-disabled/pip_index_url/hello_world_pip_index_url_compiled.yaml    # robocop: disable:line-too-long
 
 
 *** Test Cases ***
@@ -25,12 +25,15 @@ Verify Admin Users Can Create And Run a Data Science Pipeline Using The Api
     ...    the pipeline resources.
     [Tags]      Sanity    ODS-2083
     End To End Pipeline Workflow Via Api    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}    pipelinesapi1
+    [Teardown]   Projects.Delete Project Via CLI By Display Name    pipelinesapi1
+
 
 Verify Regular Users Can Create And Run a Data Science Pipeline Using The Api
     [Documentation]    Creates, runs pipelines with regular user. Double check the pipeline result and clean
     ...    the pipeline resources.
     [Tags]      Tier1    ODS-2677
     End To End Pipeline Workflow Via Api    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    pipelinesapi2
+    [Teardown]   Projects.Delete Project Via CLI By Display Name    pipelinesapi2
 
 Verify Ods Users Can Do Http Request That Must Be Redirected to Https
     [Documentation]    Verify Ods Users Can Do Http Request That Must Be Redirected to Https
@@ -82,12 +85,11 @@ End To End Pipeline Workflow Via Api
     ${status} =    Login And Wait Dsp Route    ${username}    ${password}    ${project}
     Should Be True    ${status} == 200    Could not login to the Data Science Pipelines Rest API OR DSP routing is not working    # robocop: disable:line-too-long
     Setup Client    ${username}    ${password}    ${project}
-    ${pipeline_param} =    Create Dictionary    recipient=integration_test
+    ${pipeline_param} =    Create Dictionary
     ${run_id} =    Import Run Pipeline From Url    pipeline_url=${URL_TEST_PIPELINE_RUN_YAML}    pipeline_params=${pipeline_param}    # robocop: disable:line-too-long
     ${run_status} =    Check Run Status    ${run_id}
     Should Be Equal As Strings    ${run_status}    SUCCEEDED    Pipeline run doesn't have a status that means success. Check the logs    # robocop: disable:line-too-long
     DataSciencePipelinesKfp.Delete Run    ${run_id}
-    [Teardown]    Projects.Delete Project Via CLI By Display Name    ${project}
 
 Double Check If DSPA Was Created
     [Documentation]    Double check if DSPA was created

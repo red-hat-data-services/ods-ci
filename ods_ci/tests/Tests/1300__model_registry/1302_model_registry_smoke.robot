@@ -27,9 +27,9 @@ Deploy Model Registry
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
     Enable Model Registry If Needed
+    Sleep    90s
     Component Should Be Enabled    modelregistry
     Apply Db Config Samples
-    # Sleep    90s
 
 Registering A Model In The Registry
     [Documentation]    Registers a model in the model registry
@@ -82,12 +82,6 @@ Remove Model Registry
     Run Keyword And Continue On Failure
     ...    Run And Verify Command
     ...    oc delete -k ${MODELREGISTRY_BASE_FOLDER}/samples/istio/mysql -n ${NAMESPACE_MODEL_REGISTRY}
-
-Install Python Client And Dependencies
-    [Documentation]  Download the model-registry package for a specific platform
-    ${result}=    Run Process    command=pip install --pre model-registry    # robocop: disable:line-too-long
-    ...    shell=yes
-    Should Be Equal As Numbers  ${result.rc}  0  ${result.stderr}
 
 Get Model Registry Namespace From DSC
     [Documentation]    Fetches the namespace defined for model registry in the DSC

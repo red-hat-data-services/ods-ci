@@ -1,7 +1,7 @@
 *** Settings ***
 Documentation    Smoke Test for Model Registry Deployment
-Suite Setup        Setup Test Environment
-Suite Teardown     Teardown Model Registry Test Setup
+Suite Setup        Setup Test Environment Non UI
+Suite Teardown     Teardown Model Registry Test Setup Non UI
 Library            Collections
 Library            OperatingSystem
 Library            Process
@@ -10,6 +10,7 @@ Library            RequestsLibrary
 Resource           ../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
+Resource           ../../Resources/Page/ModelRegistry/ModelRegistry.resource
 Resource           ../../Resources/OCP.resource
 Resource           ../../Resources/Common.robot
 
@@ -29,7 +30,7 @@ Deploy Model Registry
     Enable Model Registry If Needed
     Sleep    90s
     Component Should Be Enabled    modelregistry
-    Apply Db Config Samples
+    Apply Db Config Samples    namespace=${NAMESPACE_MODEL_REGISTRY}
 
 Registering A Model In The Registry
     [Documentation]    Registers a model in the model registry
@@ -43,7 +44,7 @@ Verify Model Registry
 
 
 *** Keywords ***
-Setup Test Environment
+Setup Test Environment Non UI
     [Documentation]  Set Model Regisry Test Suite
     ${NAMESPACE_MODEL_REGISTRY}=    Get Model Registry Namespace From DSC
     Log    Set namespace to: ${NAMESPACE_MODEL_REGISTRY}
@@ -52,96 +53,18 @@ Setup Test Environment
     Get Cluster Domain And Token
     Set Suite Variable    ${URL}    http://modelregistry-sample-rest.${DOMAIN}/api/model_registry/v1alpha3/registered_models
 
-Teardown Model Registry Test Setup
+Teardown Model Registry Test Setup Non UI
     [Documentation]  Teardown Model Registry Suite
-    Remove Model Registry
+    Remove Model Registry Non UI
     Disable Model Registry If Needed
     RHOSi Teardown
 
-Apply Db Config Samples
-    [Documentation]    Applying the db config samples from https://github.com/opendatahub-io/model-registry-operator
-    ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc apply -k ${MODEL_REGISTRY_DB_SAMPLES} -n ${NAMESPACE_MODEL_REGISTRY}
-    Should Be Equal As Integers	  ${rc}	 0   msg=${out}
-    Wait For Model Registry Containers To Be Ready
-
-Wait For Model Registry Containers To Be Ready
-    [Documentation]    Wait for model-registry-deployment to be ready
-    ${result}=    Run Process
-    ...        oc wait --for\=condition\=Available --timeout\=5m -n ${NAMESPACE_MODEL_REGISTRY} deployment/model-registry-db      # robocop: disable:line-too-long
-    ...        shell=true    stderr=STDOUT
-    Log To Console    ${result.stdout}
-    ${result}=    Run Process
-    ...        oc wait --for\=condition\=Available --timeout\=5m -n ${NAMESPACE_MODEL_REGISTRY} deployment/modelregistry-sample     # robocop: disable:line-too-long
-    ...        shell=true    stderr=STDOUT
-    Log To Console    ${result.stdout}
-
-Remove Model Registry
+Remove Model Registry Non UI
     [Documentation]    Run multiple oc delete commands to remove model registry components
     # We don't want to stop the teardown if any of these resources are not found
     Run Keyword And Continue On Failure
     ...    Run And Verify Command
     ...    oc delete -k ${MODELREGISTRY_BASE_FOLDER}/samples/istio/mysql -n ${NAMESPACE_MODEL_REGISTRY}
-
-Get Model Registry Namespace From DSC
-    [Documentation]    Fetches the namespace defined for model registry in the DSC
-    ${rc}  ${ns}=    Run And Return Rc And Output
-    ...    oc get dsc default-dsc -o json | jq '.spec.components.modelregistry.registriesNamespace'
-    Should Be Equal As Integers    ${rc}    0
-    Log    ${ns}
-    # Remove double quotes
-    ${ns}=    Get Substring    ${ns}    1    -1
-    Log    ${ns}
-    RETURN    ${ns}
-
-Enable Model Registry If Needed
-    [Documentation]    While in tech preview the component will not be enabled by default. This keyword enables it.
-    ${management_state}=    Get DSC Component State    default-dsc    modelregistry    ${OPERATOR_NAMESPACE}
-    IF    "${management_state}" != "Managed"
-            Set Component State    modelregistry    Managed
-            Set Suite Variable    ${DISABLE_COMPONENT}    ${True}
-            Wait For Namespace To Be Active    ${NAMESPACE_MODEL_REGISTRY}    timeout=5m
-    END
-
-Disable Model Registry If Needed
-    [Documentation]    If we had to enable the component before the test run, let's also disable it at the end to leave
-    ...    the cluster in the same state we found it in
-    IF    ${DISABLE_COMPONENT}==${True}
-        Set Component State    modelregistry    Removed
-        Run And Verify Command    oc delete namespace ${NAMESPACE_MODEL_REGISTRY} --force
-    END
-
-Get Cluster Domain And Token
-    [Documentation]  Logs the Domain and Token capture.
-    ${domain}=    Get Domain
-    ${token}=    Get Token
-    Set Suite Variable    ${DOMAIN}    ${domain}
-    Set Suite Variable    ${TOKEN}    ${token}
-    Log    Domain: ${DOMAIN}
-
-Get Domain
-    [Documentation]  Gets the Domain and returns it to 'Get Cluster Domain And Token'.
-    # Run the command to get the ingress domain
-    ${domain_result}=    Run Process    oc    get    ingresses.config/cluster
-    ...    -o    yaml    stdout=PIPE    stderr=PIPE
-    ${rc}=    Set Variable    ${domain_result.rc}
-    IF    $rc > 0    Fail    Command 'oc whoami -t' returned non-zero exit code: ${rc}
-    ${domain_yaml_output}=    Set Variable    ${domain_result.stdout}
-
-    # Return the domain from stdout
-    ${domain_parsed_yaml}=    Evaluate    yaml.load('''${domain_yaml_output}''', Loader=yaml.FullLoader)
-    ${ingress_domain}=    Set Variable    ${domain_parsed_yaml['spec']['domain']}
-
-    # Return both results
-    RETURN    ${ingress_domain}
-
-Get Token
-    [Documentation]    Gets the Token and returns it to 'Get Cluster Domain And Token'.
-    ${token_result}=    Run Process    oc    whoami    -t    stdout=YES
-    ${rc}=    Set Variable    ${token_result.rc}
-    IF    ${rc} > 0    Fail    Command 'oc whoami -t' returned non-zero exit code: ${rc}
-    ${token}=    Set Variable    ${token_result.stdout}
-    RETURN    ${token}
 
 Run Curl Command And Verify Response
     [Documentation]    Runs a curl command to verify response from server

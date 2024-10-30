@@ -147,7 +147,7 @@ class OpenshiftClusterManager:
 
                 version_cmd = f'ocm list versions {chan_grp} | grep -w "{re.escape(version)}*"'
                 versions = execute_command(version_cmd)
-                if versions is not None:
+                if versions:
                     version = [ver for ver in versions.split("\n") if ver][-1]
                 self.openshift_version = version
             else:

@@ -44,6 +44,7 @@ Registering A Model In The Registry
     [Documentation]    Registers a model in the model registry
     [Tags]    Smoke    MR1302    ModelRegistry
     Register A Model    ${URL}
+    Sleep    5s
 
 Verify Model Registry
     [Documentation]    Verify the registered model.

@@ -20,6 +20,9 @@ Resource           ../../Resources/Common.robot
 ${MODELREGISTRY_BASE_FOLDER}=        tests/Resources/CLI/ModelRegistry
 ${MODEL_REGISTRY_DB_SAMPLES}=        ${MODELREGISTRY_BASE_FOLDER}/samples/istio/mysql
 ${DISABLE_COMPONENT}=                ${False}
+${OPERATOR_NS}                       ${OPERATOR_NAMESPACE}
+${APPLICATIONS_NS}                   ${APPLICATIONS_NAMESPACE}
+${DSC_NAME}                          default-dsc
 
 @{REDHATIO_PATH_CHECK_EXCLUSTION_LIST}    model-registry-operator-controller-manager
 
@@ -30,8 +33,10 @@ Deploy Model Registry
     [Tags]    Smoke    MR1302    ModelRegistry
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
+    Enable Model Registry If Needed
     Set DSC Component Managed State And Wait For Completion   modelregistry
-    ...     model-registry-operator-controller-manager    control-plane=model-registry-operator
+    ...    model-registry-operator-controller-manager
+    ...    control-plane=model-registry-operator
     Component Should Be Enabled    modelregistry
     Apply Db Config Samples    namespace=${NAMESPACE_MODEL_REGISTRY}
 

@@ -19,7 +19,6 @@ Resource           ../../Resources/Common.robot
 *** Variables ***
 ${MODELREGISTRY_BASE_FOLDER}=        tests/Resources/CLI/ModelRegistry
 ${MODEL_REGISTRY_DB_SAMPLES}=        ${MODELREGISTRY_BASE_FOLDER}/samples/istio/mysql
-${DISABLE_COMPONENT}=                ${False}
 ${OPERATOR_NS}                       ${OPERATOR_NAMESPACE}
 ${APPLICATIONS_NS}                   ${APPLICATIONS_NAMESPACE}
 ${DSC_NAME}                          default-dsc
@@ -38,7 +37,7 @@ Deploy Model Registry
     ...    model-registry-operator-controller-manager
     ...    control-plane=model-registry-operator
     Component Should Be Enabled    modelregistry
-    Apply Db Config Samples    namespace=${NAMESPACE_MODEL_REGISTRY}
+    Apply Db Config Samples    namespace=${NAMESPACE_MODEL_REGISTRY}    samples=${MODEL_REGISTRY_DB_SAMPLES}
 
 Registering A Model In The Registry
     [Documentation]    Registers a model in the model registry

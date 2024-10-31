@@ -46,7 +46,7 @@ Registering A Model In The Registry
     Register A Model    ${URL}
 
 Verify Model Registry
-    [Documentation]    Deploy Python Client And Register Model.
+    [Documentation]    Verify the registered model.
     [Tags]    Smoke    MR1302    ModelRegistry
     Run Curl Command And Verify Response    ${URL}
 

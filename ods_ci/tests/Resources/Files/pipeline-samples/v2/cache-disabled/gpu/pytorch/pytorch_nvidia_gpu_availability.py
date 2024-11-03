@@ -3,7 +3,7 @@ from kfp.dsl import PipelineTask
 
 #  Runtime: Pytorch with CUDA and Python 3.9 (UBI 9)
 common_base_image = (
-    "quay.io/modh/runtime-images@sha256:cee154f6db15de27929362f91baa128fc4f79b9c1930ab0f27561174d39aadfa"
+    "quay.io/modh/runtime-images@sha256:7d1b065f100666fe46f64a2e8aae888cb41a38b5482bb9b9343b14db05c2a14a"
 )
 
 

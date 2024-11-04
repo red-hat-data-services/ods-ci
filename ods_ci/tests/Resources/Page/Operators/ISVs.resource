@@ -10,6 +10,7 @@ ${FILES_RESOURCES_DIRPATH}=    tests/Resources/Files
 ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}=    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
 ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}=   ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
 ${IS_PRESENT}=                           0
+${installplan_name}                     ${EMPTY}
 
 
 *** Keywords ***

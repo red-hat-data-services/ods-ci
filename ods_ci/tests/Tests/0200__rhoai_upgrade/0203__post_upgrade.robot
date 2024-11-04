@@ -162,7 +162,7 @@ Verify Ray Cluster Exists And Monitor Workload Metrics By Submitting Ray Job Aft
     ${PRJ_UPGRADE}    Set Variable    test-ns-rayupgrade
     ${LOCAL_QUEUE}    Set Variable    local-queue-mnist
     ${JOB_NAME}    Set Variable    mnist
-    Run Codeflare-SDK Test    upgrade    raycluster_sdk_upgrade_test.py::TestMnistJobSubmit
+    Run Codeflare-SDK Test    upgrade    raycluster_sdk_upgrade_test.py::TestMnistJobSubmit    3.11    ${RAY_IMAGE_3.11}
     Set Global Variable    ${DW_PROJECT_CREATED}    True
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup

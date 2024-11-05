@@ -224,7 +224,7 @@ Get Model Route Via UI
     RETURN    ${url}
 
 Get Model Route for gRPC Via UI
-    [Arguments]    ${model_name}    
+    [Arguments]    ${model_name}
     ${host_url}=    Get Model Route Via UI       model_name=${model_name}
     ${host}=    Evaluate    re.search(r"${GRPC_URL_REGEX}", r"${host_url}").group(1)    re
     RETURN    ${host}
@@ -494,7 +494,7 @@ Set Model Server Runtime
     [Arguments]    ${runtime}=Caikit TGIS
     Page Should Contain Element    ${KSERVE_RUNTIME_DROPDOWN}
     Click Element    ${KSERVE_RUNTIME_DROPDOWN}
-    Click Element    ${KSERVE_RUNTIME_DROPDOWN}/..//*[@data-testid="kserve-ovms"]
+    Click Element    ${KSERVE_RUNTIME_DROPDOWN}/..//*[@data-testid="${runtime}"]
 
 Get Kserve Inference Host Via UI
     [Documentation]    Fetches the host of the model's URL from the Data Science Project UI

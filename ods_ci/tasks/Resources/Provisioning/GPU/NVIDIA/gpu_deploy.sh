@@ -61,7 +61,7 @@ function rerun_accelerator_migration() {
   # Context: https://github.com/opendatahub-io/odh-dashboard/issues/1938
   echo "Creating NVIDIA Accelerator Profile via RHOAI Dashboard deployment rollout"
   configmap=$(oc get configmap migration-gpu-status --ignore-not-found -n redhat-ods-applications -oname)
-  if [ -n $configmap ];
+  if [ -z $configmap ];
     then
       echo "migration-gpu-status not found. Is RHOAI Installed? NVIDIA Accelerator Profile creation SKIPPED."
       return 0

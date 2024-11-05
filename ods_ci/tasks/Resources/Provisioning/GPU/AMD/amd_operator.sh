@@ -137,7 +137,7 @@ function wait_until_driver_image_is_built() {
 function create_acceleratorprofile() {
   echo "Creating AMD Accelerator Profile"
   rhoai_ns=$(oc get namespace redhat-ods-applications --ignore-not-found  -oname)
-  if [ -n $rhoai_ns ];
+  if [ -z $rhoai_ns ];
     then
       echo "redhat-ods-applications namespace not found. Is RHOAI Installed? NVIDIA Accelerator Profile creation SKIPPED."
       return 0

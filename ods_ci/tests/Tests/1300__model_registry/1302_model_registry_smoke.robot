@@ -39,6 +39,7 @@ Deploy Model Registry
     ...    control-plane=model-registry-operator
     Component Should Be Enabled    modelregistry
     Apply Db Config Samples    namespace=${NAMESPACE_MODEL_REGISTRY}    samples=${MODEL_REGISTRY_DB_SAMPLES}
+    Wait Until Keyword Succeeds    10 s    2 s    Verify Model Registry Can Accept Requests
 
 Registering A Model In The Registry
     [Documentation]    Registers a model in the model registry
@@ -86,6 +87,17 @@ Run Curl Command And Verify Response
     Should Contain    ${result.stdout}    test-model
     Should Contain    ${result.stdout}    name
     Should Contain    ${result.stdout}    model-name
+    Should Not Contain    ${result.stdout}    error
+
+Verify Model Registry Can Accept Requests
+    [Documentation]    Runs a curl command to verify response from server
+    ${result}=     Run Process    curl    -H    Authorization: Bearer ${TOKEN}
+    ...        ${URL}    stdout=stdout    stderr=stderr
+    Log    ${result.stderr}
+    Log    ${result.stdout}
+    Should Contain    ${result.stdout}    items
+    Should Contain    ${result.stdout}    nextPageToken
+    Should Contain    ${result.stdout}    pageSize
     Should Not Contain    ${result.stdout}    error
 
 Register A Model

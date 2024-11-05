@@ -64,6 +64,7 @@ Setup Test Environment Non UI
 
 Teardown Model Registry Test Setup Non UI
     [Documentation]  Teardown Model Registry Suite
+    Wait Until Keyword Succeeds    10 s    200 ms    Run Curl Command And Verify Response
     Remove Model Registry Non UI
     Disable Model Registry If Needed
     RHOSi Teardown

@@ -80,13 +80,11 @@ def execute_command(cmd, print_stdout=True):
     return None
 
 
-def oc_login(ocp_console_url, username, password, timeout=600):
+def oc_login(ocp_api_url, username, password, timeout=600):
     """
     Login to test cluster using oc cli command
     """
-    cluster_api_url = ocp_console_url.replace("console-openshift-console.apps", "api")
-    cluster_api_url = re.sub(r"/$", "", cluster_api_url) + ":6443"
-    cmd = "oc login -u {} -p {} {} --insecure-skip-tls-verify=true".format(username, password, cluster_api_url)
+    cmd = f"oc login -u {username} -p {password} {ocp_api_url} --insecure-skip-tls-verify=true"
     count = 0
     chk_flag = 0
     while count <= timeout:

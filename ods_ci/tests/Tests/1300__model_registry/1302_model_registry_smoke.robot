@@ -49,7 +49,7 @@ Verify Model Registry
     [Documentation]    Verify the registered model.
     [Tags]    Smoke    MR1302    ModelRegistry
     Log    Attempting to verify Model Registry
-    Wait Until Keyword Succeeds    10 s    200 ms    Run Curl Command And Verify Response
+    Wait Until Keyword Succeeds    10 s    2 s    Run Curl Command And Verify Response
 
 
 *** Keywords ***
@@ -64,7 +64,6 @@ Setup Test Environment Non UI
 
 Teardown Model Registry Test Setup Non UI
     [Documentation]  Teardown Model Registry Suite
-    Wait Until Keyword Succeeds    10 s    200 ms    Run Curl Command And Verify Response
     Remove Model Registry Non UI
     Disable Model Registry If Needed
     RHOSi Teardown

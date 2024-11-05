@@ -7,10 +7,12 @@ Library            OperatingSystem
 Library            Process
 Library            OpenShiftLibrary
 Library            RequestsLibrary
+Library            BuiltIn
 Resource           ../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Resource           ../../Resources/Page/ModelRegistry/ModelRegistry.resource
+Resource           ../../Resources/Page/Components/Components.resource
 Resource           ../../Resources/OCP.resource
 Resource           ../../Resources/Common.robot
 
@@ -18,7 +20,11 @@ Resource           ../../Resources/Common.robot
 *** Variables ***
 ${MODELREGISTRY_BASE_FOLDER}=        tests/Resources/CLI/ModelRegistry
 ${MODEL_REGISTRY_DB_SAMPLES}=        ${MODELREGISTRY_BASE_FOLDER}/samples/istio/mysql
-${DISABLE_COMPONENT}=                ${False}
+${OPERATOR_NS}                       ${OPERATOR_NAMESPACE}
+${APPLICATIONS_NS}                   ${APPLICATIONS_NAMESPACE}
+${DSC_NAME}                          default-dsc
+
+@{REDHATIO_PATH_CHECK_EXCLUSTION_LIST}    model-registry-operator-controller-manager
 
 
 *** Test Cases ***
@@ -28,9 +34,12 @@ Deploy Model Registry
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
     Enable Model Registry If Needed
-    Sleep    90s
+    Set DSC Component Managed State And Wait For Completion   modelregistry
+    ...    model-registry-operator-controller-manager
+    ...    control-plane=model-registry-operator
     Component Should Be Enabled    modelregistry
-    Apply Db Config Samples    namespace=${NAMESPACE_MODEL_REGISTRY}
+    Apply Db Config Samples    namespace=${NAMESPACE_MODEL_REGISTRY}    samples=${MODEL_REGISTRY_DB_SAMPLES}
+    Wait Until Keyword Succeeds    10 s    2 s    Verify Model Registry Can Accept Requests
 
 Registering A Model In The Registry
     [Documentation]    Registers a model in the model registry
@@ -38,9 +47,10 @@ Registering A Model In The Registry
     Register A Model    ${URL}
 
 Verify Model Registry
-    [Documentation]    Deploy Python Client And Register Model.
+    [Documentation]    Verify the registered model.
     [Tags]    Smoke    MR1302    ModelRegistry
-    Run Curl Command And Verify Response    ${URL}
+    Log    Attempting to verify Model Registry
+    Wait Until Keyword Succeeds    10 s    2 s    Run Curl Command And Verify Response
 
 
 *** Keywords ***
@@ -68,7 +78,6 @@ Remove Model Registry Non UI
 
 Run Curl Command And Verify Response
     [Documentation]    Runs a curl command to verify response from server
-    [Arguments]    ${URL}
     ${result}=     Run Process    curl    -H    Authorization: Bearer ${TOKEN}
     ...        ${URL}    stdout=stdout    stderr=stderr
     Log    ${result.stderr}
@@ -78,6 +87,17 @@ Run Curl Command And Verify Response
     Should Contain    ${result.stdout}    test-model
     Should Contain    ${result.stdout}    name
     Should Contain    ${result.stdout}    model-name
+    Should Not Contain    ${result.stdout}    error
+
+Verify Model Registry Can Accept Requests
+    [Documentation]    Runs a curl command to verify response from server
+    ${result}=     Run Process    curl    -H    Authorization: Bearer ${TOKEN}
+    ...        ${URL}    stdout=stdout    stderr=stderr
+    Log    ${result.stderr}
+    Log    ${result.stdout}
+    Should Contain    ${result.stdout}    items
+    Should Contain    ${result.stdout}    nextPageToken
+    Should Contain    ${result.stdout}    pageSize
     Should Not Contain    ${result.stdout}    error
 
 Register A Model

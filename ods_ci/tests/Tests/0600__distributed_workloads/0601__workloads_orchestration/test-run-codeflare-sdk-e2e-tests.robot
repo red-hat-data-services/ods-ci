@@ -14,23 +14,41 @@ ${CODEFLARE-SDK-HTC-RELEASE-TAG}             heterogeneous-clusters
 ${CODEFLARE-SDK_HTC_DIR}                     codeflare-sdk-htc
 
 *** Test Cases ***
-Run TestRayClusterSDKOauth test
+Run TestRayClusterSDKOauth test with Python 3.9
     [Documentation]    Run Python E2E test: TestRayClusterSDKOauth
     [Tags]
     ...     Tier1
     ...     DistributedWorkloads
     ...     WorkloadsOrchestration
     ...     Codeflare-sdk
-    Run Codeflare-SDK Test    e2e    mnist_raycluster_sdk_oauth_test.py
+    Run Codeflare-SDK Test    e2e    mnist_raycluster_sdk_oauth_test.py    3.9    ${RAY_IMAGE_3.9}
 
-Run TestRayLocalInteractiveOauth test
+Run TestRayClusterSDKOauth test with Python 3.11
+    [Documentation]    Run Python E2E test: TestRayClusterSDKOauth
+    [Tags]
+    ...     Tier1
+    ...     DistributedWorkloads
+    ...     WorkloadsOrchestration
+    ...     Codeflare-sdk
+    Run Codeflare-SDK Test    e2e    mnist_raycluster_sdk_oauth_test.py    3.11    ${RAY_IMAGE_3.11}
+
+Run TestRayLocalInteractiveOauth test with Python 3.9
     [Documentation]    Run Python E2E test: TestRayLocalInteractiveOauth
     [Tags]
     ...     Tier1
     ...     DistributedWorkloads
     ...     WorkloadsOrchestration
     ...     Codeflare-sdk
-    Run Codeflare-SDK Test    e2e    local_interactive_sdk_oauth_test.py
+    Run Codeflare-SDK Test    e2e    local_interactive_sdk_oauth_test.py    3.9    ${RAY_IMAGE_3.9}
+
+Run TestRayLocalInteractiveOauth test with Python 3.11
+    [Documentation]    Run Python E2E test: TestRayLocalInteractiveOauth
+    [Tags]
+    ...     Tier1
+    ...     DistributedWorkloads
+    ...     WorkloadsOrchestration
+    ...     Codeflare-sdk
+    Run Codeflare-SDK Test    e2e    local_interactive_sdk_oauth_test.py    3.11    ${RAY_IMAGE_3.11}
 
 Run TestHeterogenousClustersOauth
     [Documentation]    Run Python E2E test: TestHeterogenousClustersOauth (workaround for 2.15)

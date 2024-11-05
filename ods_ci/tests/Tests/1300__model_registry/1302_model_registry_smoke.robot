@@ -7,6 +7,7 @@ Library            OperatingSystem
 Library            Process
 Library            OpenShiftLibrary
 Library            RequestsLibrary
+Library            BuiltIn
 Resource           ../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
@@ -43,12 +44,12 @@ Registering A Model In The Registry
     [Documentation]    Registers a model in the model registry
     [Tags]    Smoke    MR1302    ModelRegistry
     Register A Model    ${URL}
-    Sleep    5s
 
 Verify Model Registry
     [Documentation]    Verify the registered model.
     [Tags]    Smoke    MR1302    ModelRegistry
-    Run Curl Command And Verify Response    ${URL}
+    Log    Attempting to verify Model Registry
+    Wait Until Keyword Succeeds    10 s    200 ms    Run Curl Command And Verify Response
 
 
 *** Keywords ***
@@ -76,7 +77,6 @@ Remove Model Registry Non UI
 
 Run Curl Command And Verify Response
     [Documentation]    Runs a curl command to verify response from server
-    [Arguments]    ${URL}
     ${result}=     Run Process    curl    -H    Authorization: Bearer ${TOKEN}
     ...        ${URL}    stdout=stdout    stderr=stderr
     Log    ${result.stderr}

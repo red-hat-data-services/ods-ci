@@ -102,7 +102,8 @@ Reset Culler Timeout
 
 Resetting Pod Toleration Via UI
     [Documentation]    Sets a Pod toleration via the admin UI
-    [Tags]  Upgrade
+    ...                Product Bug: RHOAIENG-12826
+    [Tags]  Upgrade ProductBug
     [Setup]    Begin Web Test
     Menu.Navigate To Page    Settings    Cluster settings
     Wait Until Page Contains    Notebook pod tolerations

@@ -91,6 +91,7 @@ Run Codeflare E2E Test
     ...    env:CODEFLARE_TEST_TIMEOUT_MEDIUM=10m
     ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
     ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-e2e-logs
+    ...    env:MNIST_DATASET_URL=https://ossci-datasets.s3.amazonaws.com/mnist/
     Log To Console    ${result.stdout}
     IF    ${result.rc} != 0
         FAIL    ${TEST_NAME} failed

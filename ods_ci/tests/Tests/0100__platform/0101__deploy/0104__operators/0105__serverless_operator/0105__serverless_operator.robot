@@ -101,7 +101,7 @@ Validate DSC Kserve Serving Removed State
 
 Check value for serverless cert on CSV
     [Documentation]     Check value for serverless cert on CSV
-    [Tags]      Operator    RHOAIENG-14530      Smoke
+    [Tags]      Operator    RHOAIENG-14530      Smoke       ExcludeOnODH
     ${rc}    ${json_derulo}=    Run And Return Rc And Output
     ...    oc get ClusterServiceVersion -l ${OPERATOR_SUBSCRIPTION_LABEL} -n ${OPERATOR_NAMESPACE} -o jsonpath='{.items[].metadata.annotations.operatorframework\\.io/initialization-resource}'
     Log To Console      ${json_derulo}

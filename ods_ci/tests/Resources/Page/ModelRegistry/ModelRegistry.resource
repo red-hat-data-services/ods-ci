@@ -59,7 +59,7 @@ Prepare Model Registry Test Setup
     Get Cluster Domain And Token
     Run Update Notebook Script
     Generate ModelRegistry Certificates
-    Apply Db Config Samples    namespace=${NAMESPACE_MODEL_REGISTRY}
+    Apply Db Config Samples    namespace=${NAMESPACE_MODEL_REGISTRY}    samples=${MODEL_REGISTRY_DB_SAMPLES}
     Create Model Registry Secrets
     Fetch CA Certificate If RHODS Is Self-Managed
 
@@ -151,9 +151,9 @@ Create Generic Secret
 
 Apply Db Config Samples
     [Documentation]    Applying the db config samples from https://github.com/opendatahub-io/model-registry-operator
-    [Arguments]    ${namespace}
+    [Arguments]    ${namespace}    ${samples}
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc apply -k ${MODEL_REGISTRY_DB_SAMPLES} -n ${namespace}
+    ...    oc apply -k ${samples} -n ${namespace}
     Should Be Equal As Integers	  ${rc}	 0   msg=${out}
     Wait For Model Registry Containers To Be Ready
 

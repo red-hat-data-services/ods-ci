@@ -348,7 +348,8 @@ Stop Workbench From Projects Home Page
         ${stop_button}=    Set Variable    xpath=//a[@data-testid="notebook-route-link" and text()="${workbench_title}"]/ancestor::tr[@data-testid="project-notebooks-table-row"]//button[@data-testid="notebook-stop-action"]
         Wait Until Element Is Visible    ${stop_button}    timeout=10s
         Click Element    ${stop_button}
-        Handle Stop Workbench Confirmation Modal    press_cancel=${press_cancel}
+        Handle Stop Workbench Confirmation Modal    workbench_title=${workbench_title}
+        ...    press_cancel=${press_cancel}
     ELSE
         Fail     msg=Cannot stop ${workbench_title} workbench because it is neither starting nor running.
     END

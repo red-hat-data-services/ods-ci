@@ -406,7 +406,8 @@ Stop Workbench
     IF    ${is_started} == ${TRUE} or ${is_starting} == ${TRUE}
         Click Button    xpath=//div[@data-testid="table-row-title"]//*[text()="${workbench_title}"]/ancestor::tr//button[@data-testid="notebook-stop-action"]
         Wait Until Generic Modal Appears
-        Handle Stop Workbench Confirmation Modal    press_cancel=${press_cancel}
+        Handle Stop Workbench Confirmation Modal    workbench_title=${workbench_title}
+        ...    press_cancel=${press_cancel}
         ...    from_running=${from_running}
     ELSE
         Fail   msg=Cannot stop workbench ${workbench_title} because it is not neither running or starting...
@@ -414,13 +415,15 @@ Stop Workbench
 
 Handle Stop Workbench Confirmation Modal
     [Documentation]    Handles modal to stop workbench
-    [Arguments]    ${press_cancel}=${FALSE}    ${from_running}=${TRUE}
+    [Arguments]    ${workbench_title}    ${press_cancel}=${FALSE}    ${from_running}=${TRUE}
     Run Keyword And Continue On Failure    Page Should Contain    Stop workbench?
     IF    ${from_running} == ${TRUE}
         Run Keyword And Continue On Failure
-        ...    Page Should Contain    Are you sure you want to stop the workbench? Any changes without saving will be erased.
-        Run Keyword And Continue On Failure    Page Should Contain    To save changes, access your
-        Run Keyword And Continue On Failure    Page Should Contain Element    xpath=//a[.="workbench"]
+        ...    Page Should Contain    Any unsaved changes to the ${workbench_title} workbench will be lost.
+        Run Keyword And Continue On Failure
+        ...    Page Should Contain    To save changes, open the workbench.
+        Run Keyword And Continue On Failure
+        ...    Page Should Contain Element    xpath=//a[.="open the workbench"]
     END
     Run Keyword And Continue On Failure    Page Should Contain Element    xpath=//input[@id="dont-show-again"]
     Run Keyword And Continue On Failure    Click Element    xpath=//input[@id="dont-show-again"]

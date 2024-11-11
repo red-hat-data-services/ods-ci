@@ -26,6 +26,7 @@ ${KSERVE_MODAL_HEADER}=    //header[@class="pf-v5-c-modal-box__header"]/h1[.="De
 ${KSERVE_RUNTIME_DROPDOWN}=    //button[@data-testid="serving-runtime-template-selection"]
 ${LLM_RESOURCES_DIRPATH}=    tests/Resources/Files/llm
 ${DEPLOY_SINGLE_SV_MODEL_BTN}=    //button[contains(@data-testid,"single-serving-select-button")]
+${DEPLOY_SINGLE_MODEL_BTN}=    //button[contains(@data-testid,"deploy-button")]
 ${DEPLOY_MODEL_BTN}=    //button[contains(@data-testid,"deploy-button")]
 ${TOKEN_AUTH_CHECKBOX_XP}=    xpath://input[@id="alt-form-checkbox-auth"]
 ${GRPC_URL_REGEX}=  https:\/\/([^\/:]+)
@@ -446,9 +447,13 @@ Deploy Kserve Model Via UI  #robocop: disable
     [Arguments]    ${model_name}    ${serving_runtime}    ${data_connection}    ${path}
     ...    ${model_framework}=caikit    ${replicas}=1    ${size}=Small    ${no_gpus}=${0}
     ...    ${token}=${FALSE}    ${multi_token}=${FALSE}    ${multi_service_account_name}=default-name2
-    ...    ${public_endpoint}=${TRUE}    ${service_account_name}=${NONE}
+    ...    ${public_endpoint}=${TRUE}    ${service_account_name}=${NONE}    ${existing_server}=${FALSE}
     Move To Tab    Models
-    SeleniumLibrary.Click Button    ${DEPLOY_SINGLE_SV_MODEL_BTN}
+    IF    ${existing_server} == False
+        SeleniumLibrary.Click Button    ${DEPLOY_SINGLE_SV_MODEL_BTN}
+    END
+    SeleniumLibrary.Wait Until Page Contains Element    ${DEPLOY_SINGLE_MODEL_BTN}
+    SeleniumLibrary.Click Button    ${DEPLOY_SINGLE_MODEL_BTN}
     SeleniumLibrary.Wait Until Page Contains Element    xpath=${KSERVE_MODAL_HEADER}
     Set Model Name   ${model_name}
     Set Model Server Runtime    ${serving_runtime}

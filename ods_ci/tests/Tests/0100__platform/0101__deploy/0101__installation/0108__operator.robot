@@ -29,7 +29,7 @@ Verify That DSC And DSCI Release.Version Attribute matches the value in the subs
     ...       Operator
     ...       RHOAIENG-8082
     ${rc}    ${csv_name}=    Run And Return Rc And Output
-    ...    oc get subscription -n ${OPERATOR_NAMESPACE} -l ${OPERATOR_SUBSCRIPTION_LABEL} -ojson | jq '.items[0].status.currentCSV' | tr -d '"'
+    ...    oc get subscription -n ${OPERATOR_NAMESPACE} -l ${OPERATOR_SUBSCRIPTION_LABEL} -ojson | jq '.items[0].status.installedCSV' | tr -d '"'
 
     Should Be Equal As Integers    ${rc}    ${0}    ${rc}
 

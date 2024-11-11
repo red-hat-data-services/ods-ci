@@ -193,7 +193,7 @@ Select An Existent PV
     Run Keyword And Continue On Failure
     ...    Wait Until Element Is Enabled    xpath=//input[@placeholder="Select a persistent storage"]
     Click Element    xpath=//input[@placeholder="Select a persistent storage"]
-    ${existing_pv_xpath}=    Set Variable    xpath=//ul/li/button[string()="${name}"]
+    ${existing_pv_xpath}=    Set Variable    xpath=//button//span[text()="${name}"]
     Wait Until Page Contains Element    ${existing_pv_xpath}
     Click Element   ${existing_pv_xpath}
 

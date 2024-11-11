@@ -19,14 +19,16 @@ ${S3_REGION_DC_INPUT_XP}=          xpath=//input[@aria-label="Field list AWS_DEF
 ${S3_BUCKET_DC_INPUT_XP}=     xpath=//input[@aria-label="Field list AWS_S3_BUCKET"]
 ${S3_DEFAULT_BUCKET}=    ods-ci-s3
 ${MS_TABLE_PROJECT}=    /../../td[@data-label="Project"]
-${MS_TABLE_ENDPOINT_INPUT}=    /ancestor::tr//td[@data-label="Inference endpoint"]//button[@data-testid='internal-service-button']
+${MS_TABLE_ENDPOINT_INPUT}=    /ancestor::tr//td[@data-label="Inference endpoint"]//button[@id='copy-button-4']
 ${MS_TABLE_STATUS_SUCCESS}=     /ancestor::tr//td[@data-label="Status"]//span[contains(@class,"pf-m-success")]
 ${MS_TABLE_STATUS_FAILURE}=     /ancestor::tr//td[@data-label="Status"]//span[contains(@class,"pf-m-danger")]
 ${KSERVE_MODAL_HEADER}=    //header[@class="pf-v5-c-modal-box__header"]/h1[.="Deploy model"]
 ${KSERVE_RUNTIME_DROPDOWN}=    //button[@data-testid="serving-runtime-template-selection"]
 ${LLM_RESOURCES_DIRPATH}=    tests/Resources/Files/llm
-${DEPLOY_MODEL_BTN}=    //button[contains(@data-testid,"deploy-model-button")]
+${DEPLOY_SINGLE_SV_MODEL_BTN}=    //button[contains(@data-testid,"single-serving-select-button")]
+${DEPLOY_MODEL_BTN}=    //button[contains(@data-testid,"deploy-button")]
 ${TOKEN_AUTH_CHECKBOX_XP}=    xpath://input[@id="alt-form-checkbox-auth"]
+${GRPC_URL_REGEX}=  https:\/\/([^\/:]+)
 
 
 *** Keywords ***
@@ -119,7 +121,7 @@ Select Model Server
     ...    Selects the given one
     [Arguments]    ${model_server}
     ${selectable}=    Run Keyword And Return Status
-    ...    Wait Until Element Is Visible    xpath://span[.="Model servers"]/../../..//button[@aria-label="Options menu"]    timeout=1
+    ...    Wait Until Element Is Visible    xpath://span[.="Model servers"]/../../..//button[@aria-label="Options menu"]    timeout=3
     IF    ${selectable}==True
         Open Model servers Options Menu  # robocop:disable
         Click Element    xpath://li/button[.="${model_server}"]
@@ -131,7 +133,6 @@ Select Framework
     [Arguments]    ${framework}
     TRY
         Open Model framework (name - version) Options Menu
-        SeleniumLibrary.Wait Until Page Contains Element    xpath://span[.="Model framework (name - version)"]
         Page Should Contain Element    xpath://li/button[contains(., "${framework}")]
         Click Element    xpath://li/button[contains(., "${framework}")]
     EXCEPT
@@ -222,6 +223,12 @@ Get Model Route Via UI
     END
     RETURN    ${url}
 
+Get Model Route for gRPC Via UI
+    [Arguments]    ${model_name}    
+    ${host_url}=    Get Model Route Via UI       model_name=${model_name}
+    ${host}=    Evaluate    re.search(r"${GRPC_URL_REGEX}", r"${host_url}").group(1)    re
+    RETURN    ${host}
+
 Get Model Route Via CLI
     [Documentation]    Grabs the serving route (URL) of an already deployed model from CLI.
     [Arguments]    ${model_name}    ${project_name}
@@ -245,6 +252,7 @@ Get Access Token Via UI
     ...    by using the UI of DSP
     [Arguments]    ${project_name}    ${service_account_name}=default-name    ${single_model}=${FALSE}
     ...            ${model_name}=${NONE}
+    Log     ${service_account_name}
     Open Data Science Project Details Page    ${project_name}    tab_id=model-server
     ${token}=    Get Model Serving Access Token via UI    ${service_account_name}    ${single_model}    ${model_name}
     RETURN    ${token}
@@ -264,7 +272,7 @@ Get Model Inference
     ...    set to ${TRUE}.
     [Arguments]    ${model_name}    ${inference_input}    ${token_auth}=${FALSE}   ${project_title}=${NONE}
     ...    ${kserve_mode}=Serverless   ${deployment_mode}=UI   ${service_port}=8888   ${end_point}=${NONE}
-    ...    ${service_account_name}=${NONE}    ${token}=${NONE}
+    ...    ${service_account_name}=default-name   ${token}=${NONE}
     ${curl_cmd}=     Set Variable    ${NONE}
     ${self_managed}=    Is RHODS Self-Managed
     IF    $deployment_mode == 'UI'
@@ -335,7 +343,7 @@ Verify Model Inference
     ${inference_output}=    Get Model Inference    model_name=${model_name}   inference_input=${inference_input}
     ...    token_auth=${token_auth}    kserve_mode=${kserve_mode}    project_title=${project_title}
     ...    deployment_mode=${deployment_mode}    service_port=${service_port}    end_point=${end_point}
-    ...    token=${token}    # robocop: disable
+    ...    token=${token}      # robocop: disable
     Log    ${inference_output}
     ${result}    ${list}=    Inference Comparison    ${expected_inference_output}    ${inference_output}
     Log    ${result}
@@ -440,10 +448,32 @@ Deploy Kserve Model Via UI  #robocop: disable
     ...    ${token}=${FALSE}    ${multi_token}=${FALSE}    ${multi_service_account_name}=default-name2
     ...    ${public_endpoint}=${TRUE}    ${service_account_name}=${NONE}
     Move To Tab    Models
-    SeleniumLibrary.Click Button    ${DEPLOY_MODEL_BTN}
+    SeleniumLibrary.Click Button    ${DEPLOY_SINGLE_SV_MODEL_BTN}
     SeleniumLibrary.Wait Until Page Contains Element    xpath=${KSERVE_MODAL_HEADER}
     Set Model Name   ${model_name}
+    Set Model Server Runtime    ${serving_runtime}
     Select Framework    ${model_framework}
+    Set Replicas Number With Buttons    ${replicas}
+    Set Server Size    ${size}
+    IF    ${public_endpoint}
+        Enable External Serving Route
+        # By default this also enables Token Authentication. Let's disable it and let it get re-enable by the next
+        # IF block if needed.
+        ${token_enabled}=     Run Keyword And Return Status    SeleniumLibrary.Checkbox Should Be Selected
+        ...    ${TOKEN_AUTH_CHECKBOX_XP}
+        IF    ${token_enabled}
+            Disable Token Authentication
+        ELSE
+            Log    Token Authentication was supposed to be automatically enabled, but it wasn't    level=ERROR
+            ...    console=${True}
+        END
+    END
+    IF    ${token}
+        Enable Token Authentication    service_account_name=${service_account_name}
+        IF    ${multi_token}
+            Add Another Service Account    ${multi_service_account_name}
+        END
+    END
     Select Existing Data Connection    ${data_connection}
     Set Folder Path    ${path}
     IF    ${no_gpus} > ${0}
@@ -464,7 +494,7 @@ Set Model Server Runtime
     [Arguments]    ${runtime}=Caikit TGIS
     Page Should Contain Element    ${KSERVE_RUNTIME_DROPDOWN}
     Click Element    ${KSERVE_RUNTIME_DROPDOWN}
-    Click Element    ${KSERVE_RUNTIME_DROPDOWN}/..//*[@data-testid="ovms"]
+    Click Element    ${KSERVE_RUNTIME_DROPDOWN}/..//*[@data-testid="kserve-ovms"]
 
 Get Kserve Inference Host Via UI
     [Documentation]    Fetches the host of the model's URL from the Data Science Project UI

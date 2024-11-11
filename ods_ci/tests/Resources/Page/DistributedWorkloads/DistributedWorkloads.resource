@@ -5,14 +5,14 @@ Library          Process
 
 
 *** Variables ***
-${VIRTUAL_ENV_NAME}                      venv3.9
-${CODEFLARE-SDK-RELEASE-TAG}             v0.21.1
+${CODEFLARE-SDK-RELEASE-TAG}             v0.22.0
 ${CODEFLARE-SDK_DIR}                     codeflare-sdk
 ${CODEFLARE-SDK_REPO_URL}                %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
 ${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}  https://github.com/opendatahub-io/distributed-workloads/releases/latest/download
-${RAY_IMAGE}                             quay.io/modh/ray@sha256:0d715f92570a2997381b7cafc0e224cfa25323f18b9545acfd23bc2b71576d06
+${RAY_IMAGE_3.11}                        quay.io/modh/ray@sha256:db667df1bc437a7b0965e8031e905d3ab04b86390d764d120e05ea5a5c18d1b4
+${RAY_IMAGE_3.9}                         quay.io/modh/ray@sha256:0d715f92570a2997381b7cafc0e224cfa25323f18b9545acfd23bc2b71576d06
 ${FMS_HF_TUNING_IMAGE}                   quay.io/modh/fms-hf-tuning@sha256:73bcd66500b8637a9db1339f64c3217212ef74700a22a790f78e9a1f26b8b71a
-${NOTEBOOK_IMAGE}                        quay.io/modh/odh-generic-data-science-notebook@sha256:9d7f80080a453bcf7dee01b986df9ee811ee74f6f433c601a8b67d283c160547
+${NOTEBOOK_IMAGE}                        quay.io/modh/odh-generic-data-science-notebook@sha256:16fc91984a9baf7765a6362493906a2c726b9906031711e2e55d686d296e6b3a
 ${NOTEBOOK_USER_NAME}                    ${TEST_USER_3.USERNAME}
 ${NOTEBOOK_USER_PASSWORD}                ${TEST_USER_3.PASSWORD}
 ${KFTO_CORE_BINARY_NAME}                 kfto
@@ -41,21 +41,13 @@ Clone Git Repository
 Prepare Codeflare-SDK Test Setup
     [Documentation]   Prepare codeflare-sdk tests by cloning codeflare-sdk repo and python virtual environmnet
 
-
     Clone Git Repository    ${CODEFLARE-SDK_REPO_URL}    ${CODEFLARE-SDK-RELEASE-TAG}    ${CODEFLARE-SDK_DIR}
-
-    ${result} =    Run Process  virtualenv -p python3.9 ${VIRTUAL_ENV_NAME}
-    ...    shell=true    stderr=STDOUT
-    Log To Console    ${result.stdout}
-    IF    ${result.rc} != 0
-        FAIL    Unable to setup Python virtual environment
-    END
 
 Run Codeflare-SDK Test
     [Documentation]   Run codeflare-sdk Test
-    [Arguments]    ${TEST_TYPE}    ${TEST_NAME}
+    [Arguments]    ${TEST_TYPE}    ${TEST_NAME}    ${PYTHON_VERSION}    ${RAY_IMAGE}
     Log To Console    "Running codeflare-sdk test: ${TEST_NAME}"
-    ${result} =    Run Process  source ${VIRTUAL_ENV_NAME}/bin/activate && cd ${CODEFLARE-SDK_DIR} && poetry env use 3.9 && poetry install --with test,docs && poetry run pytest -v -s ./tests/${TEST_TYPE}/${TEST_NAME} --timeout\=300 && deactivate
+    ${result} =    Run Process  cd ${CODEFLARE-SDK_DIR} && poetry env use ${PYTHON_VERSION} && poetry install --with test,docs && poetry run pytest -v -s ./tests/${TEST_TYPE}/${TEST_NAME} --timeout\=420
     ...    env:RAY_IMAGE=${RAY_IMAGE}
     ...    env:AWS_DEFAULT_ENDPOINT=${AWS_DEFAULT_ENDPOINT}
     ...    env:AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
@@ -82,8 +74,6 @@ Codeflare Upgrade Tests Teardown
 
 Cleanup Codeflare-SDK Setup
     [Documentation]   cleanup codeflare repository cloned and python setup
-    Log To Console     "Removing Python virtual environment directory ${VIRTUAL_ENV_NAME}"
-    Remove Directory        ${VIRTUAL_ENV_NAME}    recursive=True
 
     Log To Console     "Removing directory ${CODEFLARE-SDK_DIR}"
     Remove Directory        ${CODEFLARE-SDK_DIR}    recursive=True
@@ -149,6 +139,7 @@ Run Training Operator ODH Test
     ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-${test_binary}-logs
     ...    env:FMS_HF_TUNING_IMAGE=${FMS_HF_TUNING_IMAGE}
     Log To Console    ${result.stdout}
+    Check missing Go test    ${result.stdout}
     IF    ${result.rc} != 0
         FAIL    ${TEST_NAME} failed
     END
@@ -212,6 +203,12 @@ Run DistributedWorkloads ODH Test
     ...    env:PIP_INDEX_URL=${PIP_INDEX_URL}
     ...    env:PIP_TRUSTED_HOST=${PIP_TRUSTED_HOST}
     Log To Console    ${result.stdout}
+    Check missing Go test    ${result.stdout}
     IF    ${result.rc} != 0
         FAIL    ${TEST_NAME} failed
     END
+
+Check missing Go test
+    [Documentation]    Check that upstream Go test is not missing
+    [Arguments]    ${test_run_output}
+    Should Not Contain    ${test_run_output}    testing: warning: no tests to run    No Go tests were run

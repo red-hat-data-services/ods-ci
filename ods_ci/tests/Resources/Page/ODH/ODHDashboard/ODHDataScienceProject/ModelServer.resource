@@ -24,14 +24,14 @@ ${SERVING_MODEL_SERVERS_SIDE_MENU}=    xpath=//span[text()='Models and model ser
 ${TOKEN_AUTH_CHECKBOX_XP}=    xpath://input[@id="alt-form-checkbox-auth"]
 ${ADD_SERVICE_ACCOUNT_BUTTON}=    xpath://button[text()='Add a service account']
 ${SERVICE_ACCOUNT_INPUT}=    xpath://input[@data-testid='service-account-form-name']
-${REPLICAS_COUNT_XP}=     xpath://section[@class='pf-v5-c-form__section']//span[@class='pf-v5-c-form-control']/input
+${REPLICAS_COUNT_XP}=     xpath=//input[@id='model-server-replicas']
 ${PROJECT_SELECTOR_XP}=    xpath://main[contains(@id, 'dashboard-page-main')]//*[@data-testid="project-selector-toggle"]
 
 
 *** Keywords ***
 Create Model Server
     [Documentation]    Keyword to create a Model Server in a Data Science Project
-    [Arguments]    ${no_replicas}=1    ${server_size}=Small    ${ext_route}=${FALSE}
+    [Arguments]    ${no_replicas}=1    ${server_size}=Small    ${ext_route}=${TRUE}
     ...    ${token}=${TRUE}    ${runtime}=OpenVINO Model Server    ${server_name}=Model Serving Test
     ...    ${no_gpus}=0    ${existing_server}=${FALSE}
     Move To Tab    Models
@@ -221,7 +221,7 @@ Get Model Serving Access Token via UI
         SeleniumLibrary.Wait Until Page Contains Element    xpath://td[@data-label="Tokens"]/button
         SeleniumLibrary.Click Element    xpath://td[@data-label="Tokens"]/button
         ${token}=    SeleniumLibrary.Get Element Attribute
-        ...    xpath://div[.="${service_account_name} "]/../../td[@data-label="Token Secret"]//input    value
+        ...    xpath://div[.="${service_account_name} "]/../../td[@data-label="Token Secret"]//span/input    value
     END
     RETURN    ${token}
 
@@ -229,7 +229,7 @@ Get Single Model Token
     [Documentation]    Gets the (Single Model) Token of an specific Service Account
     [Arguments]    ${service_account_name}
     ${token}=    Get Element Attribute
-            ...    xpath://div[text()='${service_account_name}']/parent::td[@data-label='Token Name']/following-sibling::td[@data-label='Token Secret']//input   value
+    ...    xpath://div[text()='${service_account_name}']/parent::td[@data-label='Token Name']/following-sibling::td[@data-label='Token Secret']//input   value
     RETURN    ${token}
 
 Click Plus Button

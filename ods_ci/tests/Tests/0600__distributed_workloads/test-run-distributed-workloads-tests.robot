@@ -9,8 +9,9 @@ Resource          ../../Resources/Page/DistributedWorkloads/DistributedWorkloads
 
 
 *** Variables ***
-${RAY_CUDA_IMAGE}                    quay.io/modh/ray@sha256:0d715f92570a2997381b7cafc0e224cfa25323f18b9545acfd23bc2b71576d06
-${RAY_TORCH_CUDA_IMAGE}              quay.io/rhoai/ray@sha256:158b481b8e9110008d60ac9fb8d156eadd71cb057ac30382e62e3a231ceb39c0
+${RAY_CUDA_IMAGE}                    quay.io/modh/ray@sha256:db667df1bc437a7b0965e8031e905d3ab04b86390d764d120e05ea5a5c18d1b4
+${RAY_TORCH_CUDA_IMAGE}              quay.io/rhoai/ray@sha256:5077f9bb230dfa88f34089fecdfcdaa8abc6964716a8a8325c7f9dcdf11bbbb3
+${RAY_ROCM_IMAGE}                    quay.io/modh/ray@sha256:f8b4f2b1c954187753c1f5254f7bb6a4286cec5a4f1b43def7ef4e009f2d28cb
 
 
 *** Test Cases ***
@@ -23,14 +24,23 @@ Run TestKueueRayCpu ODH test
     ...     WorkloadsOrchestration
     Run DistributedWorkloads ODH Test    TestMnistRayCpu    ${RAY_CUDA_IMAGE}
 
-Run TestKueueRayGpu ODH test
-    [Documentation]    Run Go ODH test: TestKueueRayGpu
-    [Tags]  Resources-GPU
+Run TestKueueRayCudaGpu ODH test
+    [Documentation]    Run Go ODH test: TestKueueRayCudaGpu
+    [Tags]  Resources-GPU    NVIDIA-GPUs
     ...     Tier1
     ...     DistributedWorkloads
     ...     Training
     ...     WorkloadsOrchestration
-    Run DistributedWorkloads ODH Test    TestMnistRayGpu    ${RAY_CUDA_IMAGE}
+    Run DistributedWorkloads ODH Test    TestMnistRayCudaGpu    ${RAY_CUDA_IMAGE}
+
+Run TestKueueRayROCmGpu ODH test
+    [Documentation]    Run Go ODH test: TestKueueRayROCmGpu
+    [Tags]  Resources-GPU    AMD-GPUs    DW-ROCm
+    ...     Tier1
+    ...     DistributedWorkloads
+    ...     Training
+    ...     WorkloadsOrchestration
+    Run DistributedWorkloads ODH Test    TestMnistRayROCmGpu    ${RAY_ROCM_IMAGE}
 
 Run TestRayTuneHPOCpu ODH test
     [Documentation]    Run Go ODH test: TestMnistRayTuneHpoCpu
@@ -43,7 +53,7 @@ Run TestRayTuneHPOCpu ODH test
 
 Run TestRayTuneHPOGpu ODH test
     [Documentation]    Run Go ODH test: TestMnistRayTuneHpoGpu
-    [Tags]  Resources-GPU
+    [Tags]  Resources-GPU    NVIDIA-GPUs
     ...     Tier1
     ...     DistributedWorkloads
     ...     Training
@@ -62,7 +72,7 @@ Run TestKueueCustomRayCpu ODH test
 Run TestKueueCustomRayGpu ODH test
     [Documentation]    Run Go ODH test: TestKueueCustomRayGpu
     [Tags]  RHOAIENG-10013
-    ...     Resources-GPU
+    ...     Resources-GPU    NVIDIA-GPUs
     ...     Tier1
     ...     DistributedWorkloads
     ...     Training

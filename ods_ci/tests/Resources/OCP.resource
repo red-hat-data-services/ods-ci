@@ -107,16 +107,19 @@ Get Events And Pod Logs
     RETURN    ${events}    ${podlogs}
 
 Wait For Pods To Be Ready
+    [Documentation]    Waits until the pods with given label selector in the given namespace have `condition=ready`.
+    ...                This keyword can also check for the expected number of the pod replicas using `${exp_replicas}`
+    ...                argument.
     [Arguments]    ${label_selector}    ${namespace}    ${timeout}=600s    ${exp_replicas}=${NONE}
     Wait Until Keyword Succeeds    ${timeout}    3s
     ...    Check If Pod Exists    namespace=${namespace}    label_selector=${label_selector}
     ...    status_only=${FALSE}
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc wait --for=condition=ready pod -l ${label_selector} -n ${namespace} --timeout=${timeout}
+    ...    oc wait --for=condition=ready=true pod -l ${label_selector} -n ${namespace} --timeout=${timeout}
     IF    ${rc} != ${0}
         ${events}    ${podlogs}=    Get Events And Pod Logs    ${namespace}    ${label_selector}
 
-        Fail    msg=Pod is not ready by timeout
+        Fail    msg=Pod defined by selector "${label_selector}" in "${namespace}" namespace is not ready by timeout.
     END
     IF    "${exp_replicas}" != "${NONE}"
         @{replicas}=    Oc Get    kind=Pod    namespace=${namespace}
@@ -125,14 +128,22 @@ Wait For Pods To Be Ready
     END
 
 Wait For Deployment Replica To Be Ready
-  [Documentation]   Wait for Deployment of ${label_selector} in ${namespace} to have the Replica-Set Ready
-  [Arguments]     ${namespace}     ${label_selector}    ${timeout}=600s
-  Log To Console    Waiting for Deployment with label "${label_selector}" in Namespace "${namespace}", to have desired Replica-Set
-  ${output} =    Wait Until Keyword Succeeds    ${timeout}   3s    Run And Verify Command
-  ...    oc wait -n ${namespace} --for condition\=ready pod -l "${label_selector}" --timeout\=${timeout}
-  ...    print_to_log=${FALSE}
-  Run And Verify Command
-  ...    oc get deployment -l ${label_selector} -n ${namespace} -o json | jq -e '.status | .replicas \=\= .readyReplicas'
+    [Documentation]   Wait for Deployment of ${label_selector} in ${namespace} to have the Replica-Set Ready
+    [Arguments]     ${label_selector}    ${namespace}     ${timeout}=600s    ${exp_replicas}=${NONE}
+    Log To Console
+    ...    Waiting for Deployment with label "${label_selector}" in Namespace "${namespace}", to have desired Replica-Set ready  #robocop: disable:line-too-long
+    IF    "${exp_replicas}" != "${NONE}"
+        # Check the expected number of pods replica in Deployment if desired
+        Run And Verify Command
+        ...    oc get deployment -l ${label_selector} -n ${namespace} -o json | jq -e '.items[].spec | .replicas == ${exp_replicas}'  #robocop: disable:line-too-long
+        ...    print_to_log=${FALSE}
+    END
+    # Wait until pods for the replica are ready
+    Wait For Pods To Be Ready    ${label_selector}    ${namespace}    ${timeout}    ${exp_replicas}
+    # Now the status should match the number of expected replicas with ready replicas
+    Run And Verify Command
+    ...    oc get deployment -l ${label_selector} -n ${namespace} -o json | jq -e '.status | .replicas == .readyReplicas'  #robocop: disable:line-too-long
+    ...    print_to_log=${FALSE}
 
 Wait For Pods To Succeed
     [Arguments]    ${label_selector}    ${namespace}    ${timeout}=300s    ${exp_replicas}=${NONE}

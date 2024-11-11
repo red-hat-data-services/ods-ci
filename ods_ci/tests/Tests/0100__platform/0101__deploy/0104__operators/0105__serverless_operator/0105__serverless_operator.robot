@@ -99,6 +99,23 @@ Validate DSC Kserve Serving Removed State
     Wait For Pods Numbers  0    namespace=${KNATIVESERVING_NS}
     ...    label_selector=${KNATIVE_SERVING_CONTROLLER_LABEL_SELECTOR}    timeout=300
 
+Check value for serverless cert on CSV
+    [Documentation]     Check value for serverless cert on CSV
+    [Tags]      Operator    RHOAIENG-14530      Smoke       ExcludeOnODH
+    ${rc}    ${json_derulo}=    Run And Return Rc And Output
+    ...    oc get ClusterServiceVersion -l ${OPERATOR_SUBSCRIPTION_LABEL} -n ${OPERATOR_NAMESPACE} -o jsonpath='{.items[].metadata.annotations.operatorframework\\.io/initialization-resource}'
+    Log To Console      ${json_derulo}
+    &{my_dict}=        Create Dictionary
+    ${my_dict}=     Load Json String        ${json_derulo}
+    ${spec}=            Get From Dictionary 	${my_dict} 	spec
+    ${components}=      Get From Dictionary 	${spec} 	components
+    ${kserve}=          Get From Dictionary 	${components} 	kserve
+    ${serving}=         Get From Dictionary 	${kserve} 	serving
+    ${ingressGateway}=  Get From Dictionary 	${serving} 	ingressGateway
+    ${certificate}=     Get From Dictionary 	${ingressGateway} 	certificate
+    ${type}=            Get From Dictionary 	${certificate} 	type
+    Should Be Equal 	${type} 	OpenshiftDefaultIngress
+
 
 *** Keywords ***
 Suite Setup

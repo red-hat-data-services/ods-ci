@@ -104,7 +104,7 @@ Verify Multiple Projects With Same Model (OVMS on Kserve)
 
 Verify GPU Model Deployment Via UI (OVMS on Kserve)    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Test the deployment of an openvino_ir model on a model server with GPUs attached
-    [Tags]    Tier1    Resources-GPU
+    [Tags]    Tier1    Resources-GPU    NVIDIA-GPUs
     ...       ODS-2630    ODS-2631    ProductBug    RHOAIENG-3355
     ${requests}=    Create Dictionary    nvidia.com/gpu=1
     ${limits}=    Create Dictionary    nvidia.com/gpu=1
@@ -170,12 +170,10 @@ Create Openvino Models For Kserve    # robocop: off=too-many-calls-in-keyword
         Recreate S3 Data Connection    project_title=${new_project}    dc_name=model-serving-connection
         ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
         ...            aws_bucket_name=ods-ci-s3
-        Create Model Server    token=${TRUE}    server_name=test-server    existing_server=${TRUE}
-        Wait Until Element Is Visible    ${DEPLOY_MODEL_BTN}
         Deploy Kserve Model Via UI    model_name=${model_name}    serving_runtime=OpenVINO Model Server
         ...    data_connection=model-serving-connection    path=kserve-openvino-test/openvino-example-model
         ...    model_framework=openvino_ir
-        Wait For Pods To Be Ready    label_selector=name=modelmesh-serving-test-server
+        Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
         ...    namespace=${new_project}
         Verify Model Status    ${model_name}    success
         ${project_postfix}=    Evaluate  ${idx}+1

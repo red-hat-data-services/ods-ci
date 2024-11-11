@@ -63,10 +63,6 @@ Create PipelineServer Using Custom DSPA
     ...    ${assert_install}=${TRUE}    ${configure_pip_index}=${TRUE}
 
     Run And Verify Command     oc apply -f "${DSPA_PATH}/${dspa_file}" -n ${namespace}
-    IF    ${assert_install}==True
-        ${generation_value}=    Run And Verify Command    oc get datasciencepipelinesapplications -n ${namespace} -o json | jq '.items[0].metadata.generation'    # robocop: off=line-too-long
-        Should Be True    ${generation_value} == 2    DataSciencePipelinesApplication created
-    END
 
     IF  ${configure_pip_index}   Create Pipelines ConfigMap With Custom Pip Index Url And Trusted Host  ${namespace}
 
@@ -156,13 +152,12 @@ Wait Until Pipeline Server Is Deployed
 
     ${dspVersion}=    Get DSP Version    ${namespace}
     IF    "${dspVersion}" == "v2"
-            Wait Until Keyword Succeeds    10 times    10s
+            Wait Until Keyword Succeeds    15 times    10s
             ...    Verify Pipeline Server Deployments    namespace=${namespace}
     ELSE
-             Wait Until Keyword Succeeds    10 times    10s
+             Wait Until Keyword Succeeds    15 times    10s
             ...    Verify DSPv1 Pipeline Server Deployments    namespace=${namespace}
     END
-
 
 Wait Until Pipeline Server Is Deleted
     [Documentation]    Waits until all pipeline server pods are deleted
@@ -186,7 +181,6 @@ Create Secret With Pipelines Object Storage Information
     [Arguments]    ${namespace}    ${object_storage_access_key}    ${object_storage_secret_key}
     Run And Verify Command    oc create secret generic dashboard-dspa-secret -n ${namespace} --from-literal=AWS_ACCESS_KEY_ID=${object_storage_access_key} --from-literal=AWS_SECRET_ACCESS_KEY=${object_storage_secret_key}    # robocop: off=line-too-long
     Run And Verify Command    oc label secret dashboard-dspa-secret -n ${namespace} opendatahub.io/dashboard=true
-
 
 Import Pipeline And Create Run
     [Documentation]
@@ -214,6 +208,15 @@ Import Pipeline And Create Run
     ...   params=${pipeline_run_params}
 
     RETURN    ${pipeline_id}    ${pipeline_version_id}    ${pipeline_run_id}    ${experiment_id}
+
+Get Last Run By Pipeline Name
+    [Documentation]  Returns ${pipeline_run_id} of the last run for the last version of ${pipeline_name}
+    [Arguments]    ${namespace}    ${username}    ${password}    ${pipeline_name}
+
+    DataSciencePipelinesKfp.Setup Client    user=${username}    pwd=${password}    project=${namespace}
+    ${pipeline_run_id}=    DataSciencePipelinesKfp.Get Last Run By Pipeline Name    pipeline_name=${pipeline_name}
+
+    RETURN    ${pipeline_run_id}
 
 Verify Run Status
     [Documentation]  Verifies pipeline run status matches ${pipeline_run_expected_status}

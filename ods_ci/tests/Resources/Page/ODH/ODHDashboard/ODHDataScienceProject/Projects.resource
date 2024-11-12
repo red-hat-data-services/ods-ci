@@ -17,7 +17,7 @@ ${PROJECT_CREATE_BTN_XP}=     xpath=//button[text()="Create data science project
 ${ACTIONS_BTN_XP}=    xpath=//div/button[@aria-label="Actions"]
 ${DELETE_ACTION_BTN_XP}=  xpath=//div/ul/li/button[text()="Delete project"]
 ${EDIT_ACTION_BTN_XP}=    xpath=//div/ul/li/button[text()="Edit project"]
-${SPAWNER_LINK}=        //*[@data-testid="launch-standalone-notebook-server"]
+${SPAWNER_LINK}=        xpath=//a[@data-testid="launch-standalone-notebook-server"]
 ${PROJECT_SEARCH_BAR}=    [data-testid="projects-table-toolbar"]
 ${PROJECT_FILTER_TYPE}=    ${PROJECT_SEARCH_BAR} [data-testid="filter-toolbar-dropdown"]
 ${PROJECT_SEARCH_INPUT}=    ${PROJECT_SEARCH_BAR} [data-testid="filter-toolbar-text-field"] input
@@ -25,6 +25,8 @@ ${PROJECT_SEARCH_INPUT}=    ${PROJECT_SEARCH_BAR} [data-testid="filter-toolbar-t
 *** Keywords ***
 Open Data Science Projects Home Page
     [Documentation]    Open "Data Science Projects" page from the sidebar
+    Wait Until Page Contains    Data Science Projects
+    Click Link      Data Science Projects
     Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     Maybe Wait For Dashboard Loading Spinner Page
 

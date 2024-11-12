@@ -13,7 +13,6 @@ ${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}  https://github.com/opendatahub-io/distr
 ${RAY_IMAGE_3.11}                        quay.io/modh/ray@sha256:db667df1bc437a7b0965e8031e905d3ab04b86390d764d120e05ea5a5c18d1b4
 ${RAY_IMAGE_3.9}                         quay.io/modh/ray@sha256:0d715f92570a2997381b7cafc0e224cfa25323f18b9545acfd23bc2b71576d06
 ${FMS_HF_TUNING_IMAGE}                   quay.io/modh/fms-hf-tuning@sha256:73bcd66500b8637a9db1339f64c3217212ef74700a22a790f78e9a1f26b8b71a
-${NOTEBOOK_IMAGE}                        quay.io/modh/odh-generic-data-science-notebook@sha256:16fc91984a9baf7765a6362493906a2c726b9906031711e2e55d686d296e6b3a
 ${NOTEBOOK_USER_NAME}                    ${TEST_USER_3.USERNAME}
 ${NOTEBOOK_USER_PASSWORD}                ${TEST_USER_3.PASSWORD}
 ${KFTO_CORE_BINARY_NAME}                 kfto
@@ -189,7 +188,7 @@ Generate User Token
 
 Run DistributedWorkloads ODH Test
     [Documentation]    Run DistributedWorkloads ODH Test
-    [Arguments]    ${TEST_NAME}    ${DW_RAY_IMAGE}
+    [Arguments]    ${TEST_NAME}    ${DW_RAY_IMAGE}    ${NOTEBOOK_IMAGE}
     Log To Console    "Running test: ${TEST_NAME}"
     ${result} =    Run Process    ./${ODH_BINARY_NAME} -test.run ${TEST_NAME}
     ...    shell=true

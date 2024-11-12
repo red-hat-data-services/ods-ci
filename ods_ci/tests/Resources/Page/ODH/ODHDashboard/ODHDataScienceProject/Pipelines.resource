@@ -85,8 +85,6 @@ Create Pipeline Run
     ...            ${end_time}=${NONE}    ${cron_expr}=${NONE}    ${press_cancel}=${FALSE}    &{model_param}
     Projects.Move To Tab    Pipelines
     Pipelines.Click Action From Pipeline Actions Menu    pipeline_name=${pipeline_name}    action=Create run
-    Wait For RHODS Dashboard To Load    expected_page=Create run
-    ...    wait_for_cards=${FALSE}
     Fill In Run Creation Form    name=${name}    pipeline_name=${pipeline_name}
     ...    run_type=${run_type}    trigger_type=Periodic    start_date=${start_date}
     ...    start_time=${start_time}    end_date=${end_date}    end_time=${end_time}

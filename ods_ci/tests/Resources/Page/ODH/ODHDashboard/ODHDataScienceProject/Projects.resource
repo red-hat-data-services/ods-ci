@@ -25,6 +25,8 @@ ${PROJECT_SEARCH_INPUT}=    ${PROJECT_SEARCH_BAR} [data-testid="filter-toolbar-t
 *** Keywords ***
 Open Data Science Projects Home Page
     [Documentation]    Open "Data Science Projects" page from the sidebar
+    Wait Until Page Contains    Data Science Projects
+    Click Link      Data Science Projects
     Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     Maybe Wait For Dashboard Loading Spinner Page
 

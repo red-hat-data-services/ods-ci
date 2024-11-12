@@ -25,7 +25,7 @@ ${MS_TABLE_STATUS_FAILURE}=     /ancestor::tr//td[@data-label="Status"]//span[co
 ${KSERVE_MODAL_HEADER}=    //header[@class="pf-v5-c-modal-box__header"]/h1[.="Deploy model"]
 ${KSERVE_RUNTIME_DROPDOWN}=    //button[@data-testid="serving-runtime-template-selection"]
 ${LLM_RESOURCES_DIRPATH}=    tests/Resources/Files/llm
-${DEPLOY_SINGLE_SV_MODEL_BTN}=    //button[contains(@data-testid,"single-serving-select-button")]
+${DEPLOY_SINGLE_SV_MODEL_BTN}=    //button[@data-testid="single-serving-select-button"]
 ${DEPLOY_MODEL_BTN}=    //button[contains(@data-testid,"deploy-button")]
 ${TOKEN_AUTH_CHECKBOX_XP}=    xpath://input[@id="alt-form-checkbox-auth"]
 ${GRPC_URL_REGEX}=  https:\/\/([^\/:]+)
@@ -142,14 +142,24 @@ Select Framework
 Select Existing Data Connection
     [Documentation]    Selects an existing data connection in the "deploy model" modal.
     [Arguments]    ${data_connection_name}    ${retries}=1
-    FOR  ${retry_idx}  IN RANGE  0  1+${retries}
-        Open Name Options Menu
-        Click Element    xpath://li/button[.="${data_connection_name}"]
-        ${selected}=    Run Keyword And Return Status
-        ...    Page Should Contain Element    //span[.="Name"]/../../..//button[@aria-label="Options menu"][.="${data_connection_name}"]  #robocop: disable
-        IF  ${selected}==${TRUE}
-            BREAK
+
+     ${is_enabled}=    Run Keyword And Return Status
+    ...    Element Should Be Enabled    xpath://button[@id="inference-service-data-connection"]
+
+    IF    ${is_enabled}
+        FOR  ${retry_idx}  IN RANGE  0  1+${retries}
+            Open Name Options Menu
+            Click Element    xpath://li/button[.="${data_connection_name}"]
+            ${selected}=    Run Keyword And Return Status
+            ...    Page Should Contain Element    //span[.="Name"]/../../..//button[@aria-label="Options menu"][.="${data_connection_name}"]  #robocop: disable
+            IF  ${selected}==${TRUE}
+                BREAK
+            END
         END
+    ELSE
+        Element Should Be Disabled    id:inference-service-data-connection
+        ${text}=    Get Text    xpath://button[@id="inference-service-data-connection"]/span/div/div
+        Should Be Equal    ${text}    ${data_connection_name}
     END
 
 Set Folder Path
@@ -209,22 +219,26 @@ Get Model Route Via UI
     [Documentation]    Grabs the serving route (URL) of an already deployed model from the Model Serving page.
     [Arguments]    ${model_name}
     # TODO: Open model serving home page if needed?
-    ${route_xpath}=    Set Variable    //a[.="${model_name}"]${MS_TABLE_ENDPOINT_INPUT}
-    ${loaded}=    Run Keyword And Return Status    SeleniumLibrary.Wait Until Page Contains Element    ${route_xpath}    timeout=15s
-    IF    ${loaded} == ${FALSE}
-        Log    message=Model Route was not loaded in UI (RHOAIENG-1919). Trying refreshing!    level=WARN
-        SeleniumLibrary.Reload Page
-        SeleniumLibrary.Wait Until Page Contains Element    ${route_xpath}    timeout=15s
-    END
-    ${url}=    SeleniumLibrary.Get Element Attribute    ${route_xpath}    value
-    ${kserve}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain    Single-model serving enabled
+    # Click on Inference Endpoints link
+    ${endpoint_link}=    Set Variable    //a[@data-testid="metrics-link-test-model" and text()="${model_name}"]/ancestor::tr//td//button[@data-testid="internal-external-service-button"]
+    SeleniumLibrary.Wait Until Page Contains Element    ${endpoint_link}
+    SeleniumLibrary.Click Button    ${endpoint_link}
+    # Get the external URL
+    ${route_xpath}=    Set Variable    //span[text()="External (can be accessed from inside or outside the cluster)"]/ancestor::dl//dd/div/div/span[1]
+    SeleniumLibrary.Wait Until Page Contains Element    //div[@data-testid="external-service-popover"]
+    SeleniumLibrary.Wait Until Page Contains Element    ${route_xpath}
+    # Get the URL
+    Sleep    2    reason=The element takes a little bit longer than expected rendering the url
+    ${url}=    Get Text    ${route_xpath}
+     ${kserve}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain    Single-model serving enabled
     IF    ${kserve}
         ${url}=    Catenate    SEPARATOR=    ${url}    /v2/models/${model_name}/infer
     END
     RETURN    ${url}
 
+
 Get Model Route for gRPC Via UI
-    [Arguments]    ${model_name}    
+    [Arguments]    ${model_name}
     ${host_url}=    Get Model Route Via UI       model_name=${model_name}
     ${host}=    Evaluate    re.search(r"${GRPC_URL_REGEX}", r"${host_url}").group(1)    re
     RETURN    ${host}
@@ -449,6 +463,8 @@ Deploy Kserve Model Via UI  #robocop: disable
     ...    ${public_endpoint}=${TRUE}    ${service_account_name}=${NONE}
     Move To Tab    Models
     SeleniumLibrary.Click Button    ${DEPLOY_SINGLE_SV_MODEL_BTN}
+    SeleniumLibrary.Wait Until Page Contains Element    ${DEPLOY_MODEL_BTN}
+    SeleniumLibrary.Click Button    ${DEPLOY_MODEL_BTN}
     SeleniumLibrary.Wait Until Page Contains Element    xpath=${KSERVE_MODAL_HEADER}
     Set Model Name   ${model_name}
     Set Model Server Runtime    ${serving_runtime}

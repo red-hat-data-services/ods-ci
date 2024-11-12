@@ -144,7 +144,7 @@ Select Existing Data Connection
     [Documentation]    Selects an existing data connection in the "deploy model" modal.
     [Arguments]    ${data_connection_name}    ${retries}=1
 
-     ${is_enabled}=    Run Keyword And Return Status
+    ${is_enabled}=    Run Keyword And Return Status
     ...    Element Should Be Enabled    xpath://button[@id="inference-service-data-connection"]
 
     IF    ${is_enabled}
@@ -153,9 +153,7 @@ Select Existing Data Connection
             Click Element    xpath://li/button[.="${data_connection_name}"]
             ${selected}=    Run Keyword And Return Status
             ...    Page Should Contain Element    //span[.="Name"]/../../..//button[@aria-label="Options menu"][.="${data_connection_name}"]  #robocop: disable
-            IF  ${selected}==${TRUE}
-                BREAK
-            END
+            IF  ${selected}==${TRUE}    BREAK
         END
     ELSE
         Element Should Be Disabled    id:inference-service-data-connection
@@ -231,7 +229,7 @@ Get Model Route Via UI
     # Get the URL
     Sleep    2    reason=The element takes a little bit longer than expected rendering the url
     ${url}=    Get Text    ${route_xpath}
-     ${kserve}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain    Single-model serving enabled
+    ${kserve}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain    Single-model serving enabled
     IF    ${kserve}
         ${url}=    Catenate    SEPARATOR=    ${url}    /v2/models/${model_name}/infer
     END

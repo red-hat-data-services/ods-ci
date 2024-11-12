@@ -53,6 +53,10 @@ ${KERAS_RUNTIME_NAME_GRPC}=    triton-keras-grpc
 ${KERAS_GRPC_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_keras_gRPC_servingruntime.yaml
 ${INFERENCE_GRPC_INPUT_KERAS}=    tests/Resources/Files/triton/kserve-triton-keras-gRPC-input.json
 ${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE_KERAS}=       tests/Resources/Files/triton/kserve-triton-keras-gRPC-output.json
+${FIL_MODEL_NAME}=    xgboost
+${FIL_RUNTIME_NAME_REST}=    triton-fil-rest
+${INFERENCE_REST_INPUT_FIL}=    tests/Resources/Files/triton/kserve-triton-fil-rest-input.json
+${EXPECTED_INFERENCE_REST_OUTPUT_FILE_FIL}=       tests/Resources/Files/triton/kserve-triton-fil-rest-output.json
 
 
 *** Test Cases ***
@@ -287,6 +291,36 @@ Test KERAS Model Inference Via UI(Triton on Kserve)
     ...  Clean All Models Of Current User
     ...  AND
     ...  Delete Serving Runtime Template From CLI    displayed_name=triton-keras-rest
+
+Test FIL Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
+    [Documentation]    Test the deployment of an fil model in Kserve using Triton
+    [Tags]    Sanity    RHOAIENG-15649
+    Open Data Science Projects Home Page
+    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
+    ...    existing_project=${FALSE}
+    Open Dashboard Settings    settings_page=Serving runtimes
+    Upload Serving Runtime Template    runtime_filepath=${ONNX_RUNTIME_FILEPATH}
+    ...    serving_platform=single      runtime_protocol=REST
+    Serving Runtime Template Should Be Listed    displayed_name=${ONNX_RUNTIME_NAME}
+    ...    serving_platform=single
+    Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
+    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
+    ...            aws_bucket_name=ods-ci-s3
+    Deploy Kserve Model Via UI    model_name=${FIL_MODEL_NAME}    serving_runtime=triton-kserve-rest
+    ...    data_connection=model-serving-connection    path=triton/model_repository/    model_framework=xgboost - 1
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${FIL_MODEL_NAME}
+    ...    namespace=${PRJ_TITLE}
+    ${EXPECTED_INFERENCE_REST_OUTPUT_FIL}=     Load Json File     file_path=${EXPECTED_INFERENCE_REST_OUTPUT_FILE_FIL}
+    ...     as_string=${TRUE}
+    Run Keyword And Continue On Failure    Verify Model Inference With Retries
+    ...    ${FIL_MODEL_NAME}    ${INFERENCE_REST_INPUT_FIL}    ${EXPECTED_INFERENCE_REST_OUTPUT_FIL}
+    ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}
+    [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${FIL_MODEL_NAME}
+    ...  project_title=${PRJ_TITLE}
+    ...  AND
+    ...  Clean All Models Of Current User
+    ...  AND
+    ...  Delete Serving Runtime Template From CLI    displayed_name=triton-kserve-rest
 
 *** Keywords ***
 Triton On Kserve Suite Setup

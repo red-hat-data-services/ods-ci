@@ -17,7 +17,7 @@ ${PROJECT_CREATE_BTN_XP}=     xpath=//button[text()="Create data science project
 ${ACTIONS_BTN_XP}=    xpath=//div/button[@aria-label="Actions"]
 ${DELETE_ACTION_BTN_XP}=  xpath=//div/ul/li/button[text()="Delete project"]
 ${EDIT_ACTION_BTN_XP}=    xpath=//div/ul/li/button[text()="Edit project"]
-${SPAWNER_LINK}=        xpath=//*[text()="Launch standalone notebook server"]
+${SPAWNER_LINK}=        xpath=//a[@data-testid="launch-standalone-notebook-server"]
 ${PROJECT_SEARCH_BAR}=    [data-testid="projects-table-toolbar"]
 ${PROJECT_FILTER_TYPE}=    ${PROJECT_SEARCH_BAR} [data-testid="filter-toolbar-dropdown"]
 ${PROJECT_SEARCH_INPUT}=    ${PROJECT_SEARCH_BAR} [data-testid="filter-toolbar-text-field"] input

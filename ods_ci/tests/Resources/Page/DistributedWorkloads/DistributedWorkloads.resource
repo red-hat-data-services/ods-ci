@@ -5,7 +5,8 @@ Library          Process
 
 
 *** Variables ***
-${CODEFLARE-SDK-RELEASE-TAG}             v0.22.0
+${CODEFLARE-SDK-RELEASE-TAG}             v0.23.1
+${CODEFLARE-SDK-RELEASE-TAG-3.9}         adjustments-release-0.21.1
 ${CODEFLARE-SDK_DIR}                     codeflare-sdk
 ${CODEFLARE-SDK_REPO_URL}                %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
 ${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}  https://github.com/opendatahub-io/distributed-workloads/releases/latest/download
@@ -25,6 +26,7 @@ ${AWS_STORAGE_BUCKET}                    ${S3.BUCKET_5.NAME}
 ${AWS_ACCESS_KEY_ID}                     ${S3.AWS_ACCESS_KEY_ID}
 ${AWS_SECRET_ACCESS_KEY}                 ${S3.AWS_SECRET_ACCESS_KEY}
 ${AWS_STORAGE_BUCKET_MNIST_DIR}          mnist-datasets
+${KUBECONFIGPATH}                        %{HOME}/.kube/config
 
 
 *** Keywords ***
@@ -43,11 +45,14 @@ Prepare Codeflare-SDK Test Setup
 
     Clone Git Repository    ${CODEFLARE-SDK_REPO_URL}    ${CODEFLARE-SDK-RELEASE-TAG}    ${CODEFLARE-SDK_DIR}
 
+    # Perform oc login with default kubeconfig
+    Login To OCP Using API And Kubeconfig    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}    ${KUBECONFIGPATH}
+
 Run Codeflare-SDK Test
     [Documentation]   Run codeflare-sdk Test
-    [Arguments]    ${TEST_TYPE}    ${TEST_NAME}    ${PYTHON_VERSION}    ${RAY_IMAGE}
+    [Arguments]    ${TEST_TYPE}    ${TEST_NAME}    ${PYTHON_VERSION}    ${RAY_IMAGE}    ${RELEASE_BRANCH}
     Log To Console    "Running codeflare-sdk test: ${TEST_NAME}"
-    ${result} =    Run Process  cd ${CODEFLARE-SDK_DIR} && poetry env use ${PYTHON_VERSION} && poetry install --with test,docs && poetry run pytest -v -s ./tests/${TEST_TYPE}/${TEST_NAME} --timeout\=420
+    ${result} =    Run Process  cd ${CODEFLARE-SDK_DIR} && git fetch origin && git checkout ${RELEASE_BRANCH} && git branch && poetry env use ${PYTHON_VERSION} && poetry install --with test,docs && poetry run pytest -v -s ./tests/${TEST_TYPE}/${TEST_NAME} --timeout\=420
     ...    env:RAY_IMAGE=${RAY_IMAGE}
     ...    env:AWS_DEFAULT_ENDPOINT=${AWS_DEFAULT_ENDPOINT}
     ...    env:AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
@@ -56,6 +61,9 @@ Run Codeflare-SDK Test
     ...    env:AWS_STORAGE_BUCKET_MNIST_DIR=${AWS_STORAGE_BUCKET_MNIST_DIR}
     ...    env:PIP_INDEX_URL=${PIP_INDEX_URL}
     ...    env:PIP_TRUSTED_HOST=${PIP_TRUSTED_HOST}
+    ...    env:CONTROL_LABEL=node-role.kubernetes.io/control-plane=
+    ...    env:WORKER_LABEL=node-role.kubernetes.io/worker=
+    ...    env:TOLERATION_KEY=node-role.kubernetes.io/master
     ...    shell=true
     ...    stderr=STDOUT
     Log To Console    ${result.stdout}

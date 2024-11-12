@@ -6,7 +6,7 @@ from ods_ci.utils.scripts.logger import log
 from ods_ci.utils.scripts.util import execute_command
 
 
-# function/method to get the available Azure/ARO versions
+# Get the available Azure/ARO versions
 def get_aro_version(version) -> str | None:
 
     char_to_count = "."
@@ -38,7 +38,7 @@ def get_aro_version(version) -> str | None:
          # this is expected/wanted behavior
     
 
-# function/method for cli login
+# ARO cli login
 def aro_cli_login(aro_client_id, aro_tenant_id, aro_secret_pwd):
 
     aro_cli_login_cmd=(f"az login --service-principal -u {aro_client_id} -p {aro_secret_pwd} --tenant {aro_tenant_id}")
@@ -49,20 +49,15 @@ def aro_cli_login(aro_client_id, aro_tenant_id, aro_secret_pwd):
         log.error("Invalid tenant id, client it and/or secret")
     else:
         print("LOGIN SUCCESSFUL")
-        # now, check the json. pick a few fields that will let you know if the login was successful
 
 
 def execute_terraform(cluster_name, subscription_id, version):
     print(">>>>> Here is the cluster name again: ", cluster_name)
     print(">>>>> Here is the version: ", version)
-
-    # pull_secret_path="~/Downloads/pull-secret.txt"
     execute_command(f"terraform init && terraform plan -out tf.plan -var=subscription_id={subscription_id} -var=cluster_name={cluster_name} -var=aro_version={version} && terraform apply tf.plan")
 
 
 def get_aro_cluster_info(my_cluster_name):
-    # resource_group = my_cluster_name + "-rg"
-
     api_server_profile_url = get_cluster_info_field_value(my_cluster_name, "apiserverProfile.url")
     console_profile_url = get_cluster_info_field_value(my_cluster_name, "consoleProfile.url")
     cluster_profile_version =  get_cluster_info_field_value(my_cluster_name, "clusterProfile.version")
@@ -103,18 +98,14 @@ def aro_cluster_login(my_cluster_name):
 
 
 def aro_cluster_delete(cluster_name):
-
-    # $ ARO_PASS=$(az aro list-credentials --name ${TF_VAR_cluster_name} --resource-group ${TF_VAR_cluster_name}-rg  -o tsv --query kubeadminPassword)
-    # $ oc login $(terraform output -raw api_url) --username kubeadmin --password "${ARO_PASS}" --insecure-skip-tls-verify=true
-    # oc get nodes
-    # oc get co; oc get clusterversion
     resource_group = cluster_name + "-rg"
     provisioning_state = get_cluster_info_field_value(cluster_name, "provisioningState")
     
-    provisioning_state_check = provisioning_state.strip()
+    # provisioning_state_check = provisioning_state.strip()
 
     time_count = 0
-    if provisioning_state_check == "Succeeded":
+    # if provisioning_state_check == "Succeeded":
+    if provisioning_state == "Succeeded":
         print("Deleting cluster: ", cluster_name)
         execute_command(f"az aro delete --name {cluster_name} --resource-group {resource_group} --yes -y --no-wait")
         delete_provisioning_state = get_cluster_info_field_value(cluster_name, "provisioningState")
@@ -127,9 +118,13 @@ def aro_cluster_delete(cluster_name):
             print("Cluster has been successfully deleted")
         elif time_count >= 3600:
             print("Time exceeded for cluster deletion. Please delete the cluster manually")
+            print("Exiting...")
+            sys.exit(1)
 
     else:
         print("Cannot find cluster. Check for the cluster and delete manually if present.")
+        print("Exiting...")
+        sys.exit(1)
 
     
 def get_cluster_info_field_value(my_cluster_name, cluster_info_field):
@@ -139,3 +134,15 @@ def get_cluster_info_field_value(my_cluster_name, cluster_info_field):
     my_command_output = re.sub("[\"\']", "", my_command_output)
 
     return my_command_output.strip()
+
+
+def check_for_existing_cluster(cluster_name):
+    provisioning_state = get_cluster_info_field_value(cluster_name, "provisioningState")
+
+    if ("ERROR: (ResourceNotFound)" in provisioning_state) or ("ERROR: (ResourceGroupNotFound)" in provisioning_state):
+        print(f"cluster does not exist. Proceeding with provisioning cluster {cluster_name}")
+        return None
+    else:
+        print(f"ERROR: cluster {cluster_name} exists.")
+        print("Exiting...")
+        sys.exit(1)

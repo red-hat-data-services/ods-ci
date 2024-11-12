@@ -9,7 +9,8 @@ from aroOps import (
     execute_terraform,
     get_aro_cluster_info,
     aro_cluster_login,
-    aro_cluster_delete
+    aro_cluster_delete,
+    check_for_existing_cluster,
 )
 
 from ods_ci.utils.scripts.logger import log
@@ -30,6 +31,7 @@ class AroClusterManager:
         aro_cli_login(self.aro_client_id, self.aro_tenant_id, self.aro_secret_pwd)
         my_version = get_aro_version(self.aro_ocp_version)
         print("OCP version selected for ARO cluster: ", my_version)
+        check_for_existing_cluster(self.aro_cluster_name)
         execute_terraform(self.aro_cluster_name, self.aro_subscription_id, str(my_version))
         get_aro_cluster_info(self.aro_cluster_name)
         aro_cluster_login(self.aro_cluster_name)
@@ -39,7 +41,6 @@ class AroClusterManager:
         aro_cli_login(self.aro_client_id, self.aro_tenant_id, self.aro_secret_pwd)
         get_aro_cluster_info(self.aro_cluster_name)
         aro_cluster_delete(self.aro_cluster_name)
-        print("It looks like something disappeared.")
 
 
 def main():

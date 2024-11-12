@@ -35,7 +35,7 @@ Run TestKueueRayCudaGpu ODH test
 
 Run TestKueueRayROCmGpu ODH test
     [Documentation]    Run Go ODH test: TestKueueRayROCmGpu
-    [Tags]  Resources-GPU    AMD-GPUs    DW-ROCm
+    [Tags]  Resources-GPU    AMD-GPUs    ROCm
     ...     Tier1
     ...     DistributedWorkloads
     ...     Training

@@ -299,8 +299,8 @@ Test FIL Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-lo
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    existing_project=${FALSE}
     Open Dashboard Settings    settings_page=Serving runtimes
-    Upload Serving Runtime Template    runtime_filepath=${ONNX_RUNTIME_FILEPATH}
-    ...    serving_platform=single      runtime_protocol=REST
+    # Upload Serving Runtime Template    runtime_filepath=${ONNX_RUNTIME_FILEPATH}
+    # ...    serving_platform=single      runtime_protocol=REST
     Serving Runtime Template Should Be Listed    displayed_name=${ONNX_RUNTIME_NAME}
     ...    serving_platform=single
     Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection

@@ -103,7 +103,6 @@ Wait For RHODS Dashboard To Load
     IF    "${expected_page}" == "${NONE}"
         Wait Until Page Contains Element    //div[@data-testid="home-page"]    timeout=${timeout}
     ELSE
-        Menu.Navigate To Page   ${expected_page}
         Wait Until Keyword Succeeds    3x    5s
         ...    Wait For Dashboard Page Title    ${expected_page}    timeout=${timeout}
     END

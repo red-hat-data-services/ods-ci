@@ -50,30 +50,24 @@ def main():
     )
     
 
-    # Argument parsers for  ARO cluster
     subparsers = parser.add_subparsers(title="Available sub commands", help="Available sub commands")
+   
+
+    # Argument parser for creating an ARO cluster
     aro_create_cluster_parser = subparsers.add_parser(
         "create_aro_cluster",
         help="create ARO clusters",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
-    # delete_subparsers = parser.add_subparsers(title="Available sub commands", help="sub-command help")
+    # Argument parser for deleting an ARO cluster
     aro_delete_cluster_parser = subparsers.add_parser(
         "delete_aro_cluster",
         help="delete ARO clusters",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
-
-    # aro_cluster_parser.add_argument(
-    #     "--my-create-phrase",
-    #     required=True,
-    #     action="store",
-    #     dest="my_create_phrase",
-    #     help="My Create Phrase",
-    # )
-
+    # aro_create_cluster_parser arguments/parameters
     aro_create_cluster_parser.add_argument(
         "--aro-cluster-name",
         required=True,
@@ -122,30 +116,7 @@ def main():
         help="ARO OCP Version",
     )
 
-    # aro_create_cluster_parser.add_argument(
-    #     "--aro-pull-secret-path",
-    #     required=True,
-    #     action="store",
-    #     dest="aro_pull_secret_path",
-    #     help="ARO pull secret path",
-    # )
-
-    # aro_cluster_parser.add_argument(
-    #     "--my-delete-phrase",
-    #     required=True,
-    #     action="store",
-    #     dest="my_delete_phrase",
-    #     help="My Delete Phrase",
-    # )
-
-    # aro_cluster_parser.add_argument(
-    #     "--aro-cluster-name",
-    #     required=True,
-    #     action="store",
-    #     dest="aro_cluster_name",
-    #     help="ARO Cluster Name",
-    # )
-
+    # aro_delete_cluster_parser arguments/parameters
     aro_delete_cluster_parser.add_argument(
         "--aro-cluster-name",
         required=True,

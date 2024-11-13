@@ -33,9 +33,8 @@ def get_aro_version(version) -> str | None:
         log.error("INVALID OCP VERSION FOR ARO CLUSTER: ", version)
         log.error("Versions available:")
         execute_command("az aro get-versions -l eastus")
-        return None
-        # exit out and the cluster build will fail
-         # this is expected/wanted behavior
+        print("Exiting...")
+        sys.exit(1)
     
 
 # ARO cli login
@@ -51,12 +50,14 @@ def aro_cli_login(aro_client_id, aro_tenant_id, aro_secret_pwd):
         print("LOGIN SUCCESSFUL")
 
 
+# Execute Terraform to create the cluster
 def execute_terraform(cluster_name, subscription_id, version):
     print(">>>>> Here is the cluster name again: ", cluster_name)
     print(">>>>> Here is the version: ", version)
     execute_command(f"terraform init && terraform plan -out tf.plan -var=subscription_id={subscription_id} -var=cluster_name={cluster_name} -var=aro_version={version} && terraform apply tf.plan")
 
 
+# Get information (api url, console url, cluster version, provisioning state, location) from the cluster
 def get_aro_cluster_info(my_cluster_name):
     api_server_profile_url = get_cluster_info_field_value(my_cluster_name, "apiserverProfile.url")
     console_profile_url = get_cluster_info_field_value(my_cluster_name, "consoleProfile.url")
@@ -77,6 +78,7 @@ def get_aro_cluster_info(my_cluster_name):
     print("API URL: ", api_server_profile_url)
 
 
+# Log into the ARO cluster
 def aro_cluster_login(my_cluster_name):
     resource_group = my_cluster_name + "-rg"
     print("Obtain cluster credentials...")
@@ -97,14 +99,12 @@ def aro_cluster_login(my_cluster_name):
     print("")
 
 
+# Delete the ARO cluster
 def aro_cluster_delete(cluster_name):
     resource_group = cluster_name + "-rg"
     provisioning_state = get_cluster_info_field_value(cluster_name, "provisioningState")
     
-    # provisioning_state_check = provisioning_state.strip()
-
     time_count = 0
-    # if provisioning_state_check == "Succeeded":
     if provisioning_state == "Succeeded":
         print("Deleting cluster: ", cluster_name)
         execute_command(f"az aro delete --name {cluster_name} --resource-group {resource_group} --yes -y --no-wait")
@@ -126,7 +126,8 @@ def aro_cluster_delete(cluster_name):
         print("Exiting...")
         sys.exit(1)
 
-    
+
+ # Get the value of a field from the cluster info json   
 def get_cluster_info_field_value(my_cluster_name, cluster_info_field):
     resource_group = my_cluster_name + "-rg"
 
@@ -136,6 +137,7 @@ def get_cluster_info_field_value(my_cluster_name, cluster_info_field):
     return my_command_output.strip()
 
 
+# Check for an existing cluster with the same name
 def check_for_existing_cluster(cluster_name):
     provisioning_state = get_cluster_info_field_value(cluster_name, "provisioningState")
 

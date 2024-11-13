@@ -13,7 +13,7 @@ Resource          ../../../Resources/OCP.resource
 Resource          ../../../Resources/CLI/ModelServing/modelmesh.resource
 Resource          ../../../Resources/Common.robot
 Suite Setup       Triton On Kserve Suite Setup
-Suite Teardown    Triton On Kserve Suite Teardown
+# Suite Teardown    Triton On Kserve Suite Teardown
 Test Tags         Kserve
 
 
@@ -317,22 +317,22 @@ Test FIL Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-lo
     ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}
     [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${FIL_MODEL_NAME}
     ...  project_title=${PRJ_TITLE}
-    ...  AND
-    ...  Clean All Models Of Current User
-    ...  AND
-    ...  Delete Serving Runtime Template From CLI    displayed_name=triton-kserve-rest
+    # ...  AND
+    # ...  Clean All Models Of Current User
+    # ...  AND
+    # ...  Delete Serving Runtime Template From CLI    displayed_name=triton-kserve-rest
 
 *** Keywords ***
 Triton On Kserve Suite Setup
     [Documentation]    Suite setup steps for testing Triton. It creates some test variables
     ...                and runs RHOSi setup
     Set Library Search Order    SeleniumLibrary
-    Skip If Component Is Not Enabled    kserve
-    RHOSi Setup
+    # Skip If Component Is Not Enabled    kserve
+    # RHOSi Setup
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
     Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
-    Clean All Models Of Current User
+    # Clean All Models Of Current User
 
 Triton On Kserve Suite Teardown
     [Documentation]    Suite teardown steps after testing DSG. It Deletes
@@ -340,14 +340,15 @@ Triton On Kserve Suite Teardown
     # Even if kw fails, deleting the whole project will also delete the model
     # Failure will be shown in the logs of the run nonetheless
     IF    ${MODEL_CREATED}
-        Clean All Models Of Current User
+        Log     skip
+    # Clean All Models Of Current User
     ELSE
         Log    Model not deployed, skipping deletion step during teardown    console=true
     END
     ${projects}=    Create List    ${PRJ_TITLE}
-    Delete List Of Projects Via CLI   ocp_projects=${projects}
+    # Delete List Of Projects Via CLI   ocp_projects=${projects}
     # Will only be present on SM cluster runs, but keyword passes
     # if file does not exist
     Remove File    openshift_ca_istio_knative.crt
     SeleniumLibrary.Close All Browsers
-    RHOSi Teardown
+    # RHOSi Teardown

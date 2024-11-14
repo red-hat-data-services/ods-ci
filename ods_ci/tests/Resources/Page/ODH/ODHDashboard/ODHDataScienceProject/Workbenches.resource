@@ -63,7 +63,7 @@ Create Workbench
     Input Text    ${WORKBENCH_NAME_INPUT_XP}    ${workbench_title}
     Input Text    ${WORKBENCH_DESCR_TXT_XP}    ${workbench_description}
     Run Keyword And Continue On Failure     Element Should Be Disabled    ${WORKBENCH_CREATE_BTN_2_XP}
-    Select Workbench Jupyter Image    image_name=${image_name}    version=${version}
+    Select Workbench Image    image_name=${image_name}    version=${version}
     IF    "${deployment_size}" != "${NONE}"    Select Workbench Container Size    size_name=${deployment_size}
     IF    "${gpus}" != "${NONE}"    Select Workbench Number Of GPUs    gpus=${gpus}
     IF    "${envs}" != "${NONE}"
@@ -193,11 +193,11 @@ Select An Existent PV
     Run Keyword And Continue On Failure
     ...    Wait Until Element Is Enabled    xpath=//input[@placeholder="Select a persistent storage"]
     Click Element    xpath=//input[@placeholder="Select a persistent storage"]
-    ${existing_pv_xpath}=    Set Variable    xpath=//ul/li/button[string()="${name}"]
+    ${existing_pv_xpath}=    Set Variable    xpath=//button//span[text()="${name}"]
     Wait Until Page Contains Element    ${existing_pv_xpath}
     Click Element   ${existing_pv_xpath}
 
-Select Workbench Jupyter Image
+Select Workbench Image
     [Documentation]    Selects a Jupyter image in the workbench creation page
     [Arguments]     ${image_name}    ${version}=default
     IF  "${PRODUCT}" == "ODH"
@@ -206,7 +206,6 @@ Select Workbench Jupyter Image
             ${image_name}=    Set Variable    Jupyter Data Science
         END
     END
-
     Click Element    //a[@href="#notebook-image"]
     Wait Until Page Contains Element    ${WORKBENCH_IMAGE_MENU_BTN_XP}
     Click Element    ${WORKBENCH_IMAGE_MENU_BTN_XP}
@@ -221,15 +220,15 @@ Select Workbench Jupyter Image
             Fail    ${version} does not exist, use default/previous
         END
     END
-
     IF  "${version}"=="previous"
         # Let's reset the JupyterLibrary settings so that global variables for Jupyter 3 (default) are in place.
         Update Globals For JupyterLab 3 Custom
-    ELSE
+    # TODO: Create the missing Keyword "Update Globals For JupyterLab 4"
+    # ELSE
         # For Jupyter 4, we need to update global default variable values (images 2024b and newer)
         # This calls method from JupyterLibrary Version.resource module
         # https://github.com/robots-from-jupyter/robotframework-jupyterlibrary/blob/9e25fcb89a5f1a723c59e9b96706e4c638e0d9be/src/JupyterLibrary/clients/jupyterlab/Version.resource
-        Update Globals For JupyterLab 4
+        # Update Globals For JupyterLab 4
     END
 
 Verify Version Selection Dropdown
@@ -407,7 +406,8 @@ Stop Workbench
     IF    ${is_started} == ${TRUE} or ${is_starting} == ${TRUE}
         Click Button    xpath=//div[@data-testid="table-row-title"]//*[text()="${workbench_title}"]/ancestor::tr//button[@data-testid="notebook-stop-action"]
         Wait Until Generic Modal Appears
-        Handle Stop Workbench Confirmation Modal    press_cancel=${press_cancel}
+        Handle Stop Workbench Confirmation Modal    workbench_title=${workbench_title}
+        ...    press_cancel=${press_cancel}
         ...    from_running=${from_running}
     ELSE
         Fail   msg=Cannot stop workbench ${workbench_title} because it is not neither running or starting...
@@ -415,13 +415,15 @@ Stop Workbench
 
 Handle Stop Workbench Confirmation Modal
     [Documentation]    Handles modal to stop workbench
-    [Arguments]    ${press_cancel}=${FALSE}    ${from_running}=${TRUE}
+    [Arguments]    ${workbench_title}    ${press_cancel}=${FALSE}    ${from_running}=${TRUE}
     Run Keyword And Continue On Failure    Page Should Contain    Stop workbench?
     IF    ${from_running} == ${TRUE}
         Run Keyword And Continue On Failure
-        ...    Page Should Contain    Are you sure you want to stop the workbench? Any changes without saving will be erased.
-        Run Keyword And Continue On Failure    Page Should Contain    To save changes, access your
-        Run Keyword And Continue On Failure    Page Should Contain Element    xpath=//a[.="workbench"]
+        ...    Page Should Contain    Any unsaved changes to the ${workbench_title} workbench will be lost.
+        Run Keyword And Continue On Failure
+        ...    Page Should Contain    To save changes, open the workbench.
+        Run Keyword And Continue On Failure
+        ...    Page Should Contain Element    xpath=//a[.="open the workbench"]
     END
     Run Keyword And Continue On Failure    Page Should Contain Element    xpath=//input[@id="dont-show-again"]
     Run Keyword And Continue On Failure    Click Element    xpath=//input[@id="dont-show-again"]
@@ -446,7 +448,7 @@ Edit Workbench
     # Also wait until the workbench name is populated in the text field - let's wait for DOM to finish
     Wait For Condition    return document.readyState == "complete"    timeout=5s
 
-Check Launched Workbench Is The Correct One
+Verify Workbench Image In Jupyter Lab
     [Documentation]    Checks if the launched workbench is the expected one
     [Arguments]     ${workbench_title}    ${image}    ${project_title}
     ${namespace}=    Get Openshift Namespace From Data Science Project   project_title=${project_title}

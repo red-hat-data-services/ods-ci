@@ -1347,7 +1347,7 @@ Set Runtime Image
     [Arguments]    ${gpu_type}
     IF  "${RUNTIME_IMAGE}" == "${EMPTY}"
          IF  "${gpu_type}" == "nvidia"
-            Set Test Variable    ${runtime_image}    quay.io/modh/vllm@sha256:94e2d256da29891a865103f7e92a1713f0fd385ef611c6162526f4a297e70916
+            Set Test Variable    ${runtime_image}    quay.io/modh/vllm@sha256:a8ba53e1b12309913cd958331dd8dda7f2b1fad39f5350d3c722608835e14512
          ELSE IF    "${gpu_type}" == "amd"
             Set Test Variable    ${runtime_image}    quay.io/modh/vllm@sha256:9969e5273a492132b39ce25165c94480393bb87628f50c30d4de26a0afa56abd
          ELSE

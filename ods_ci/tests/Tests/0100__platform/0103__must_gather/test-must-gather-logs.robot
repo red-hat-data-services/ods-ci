@@ -15,6 +15,7 @@ Verify that the must-gather image provides RHODS logs and info
     ...      Operator
     ...      MustGather
     ...      ExcludeOnODH
+    ...      ExcludeOnDisconnected
     Get must-gather Logs
     Verify logs for ${APPLICATIONS_NAMESPACE}
     IF  "${PRODUCT}" == "RHODS"

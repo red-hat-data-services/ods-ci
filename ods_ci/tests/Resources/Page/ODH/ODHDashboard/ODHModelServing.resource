@@ -475,10 +475,9 @@ Deploy Kserve Model Via UI  #robocop: disable
     Move To Tab    Models
     IF    ${existing_server} == False
         SeleniumLibrary.Click Button    ${DEPLOY_SINGLE_SV_MODEL_BTN}
-    ELSE
-        SeleniumLibrary.Wait Until Page Contains Element    ${DEPLOY_SINGLE_MODEL_BTN}
-        SeleniumLibrary.Click Button    ${DEPLOY_SINGLE_MODEL_BTN}
     END
+    SeleniumLibrary.Wait Until Page Contains Element    ${DEPLOY_SINGLE_MODEL_BTN}
+    SeleniumLibrary.Click Button    ${DEPLOY_SINGLE_MODEL_BTN}
     SeleniumLibrary.Wait Until Page Contains Element    xpath=${KSERVE_MODAL_HEADER}
     Set Model Name   ${model_name}
     Set Model Server Runtime    ${serving_runtime}
@@ -542,7 +541,7 @@ Set Model Server Runtime
     EXCEPT
         Log    framework ${runtime} does not appear to be supported by the chosen model server
     END
-    
+
 Get Kserve Inference Host Via UI
     [Documentation]    Fetches the host of the model's URL from the Data Science Project UI
     [Arguments]    ${model_name}    ${retries}=1

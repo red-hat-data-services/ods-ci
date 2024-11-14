@@ -268,10 +268,10 @@ Test FIL Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-lo
     ${EXPECTED_INFERENCE_GRPC_OUTPUT_FIL}=     Evaluate    json.dumps(${EXPECTED_INFERENCE_GRPC_OUTPUT_FIL})
     Log     ${EXPECTED_INFERENCE_GRPC_OUTPUT_FIL}
     Open Model Serving Home Page
-    ${host_url}=    Get Model Route Via UI       model_name=${PYTHON_MODEL_NAME}
+    ${host_url}=    Get Model Route Via UI       model_name=${FIL_MODEL_NAME}
     ${host}=    Evaluate    re.search(r"${PATTERN}", r"${host_url}").group(1)    re
     Log    ${host}
-    ${token}=   Get Access Token Via UI    single_model=${TRUE}      model_name=python   project_name=${PRJ_TITLE}
+    ${token}=   Get Access Token Via UI    single_model=${TRUE}      model_name=fil   project_name=${PRJ_TITLE}
     ${inference_output}=    Query Model With GRPCURL   host=${host}    port=443
     ...    endpoint=inference.GRPCInferenceService/ModelInfer
     ...    json_body=@      input_filepath=${INFERENCE_GRPC_INPUT_FIL}
@@ -282,8 +282,8 @@ Test FIL Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-lo
     ${result}    ${list}=    Inference Comparison    ${EXPECTED_INFERENCE_GRPC_OUTPUT_FIL}    ${inference_output}
     Log    ${result}
     Log    ${list}
-    [Teardown]  Run Keywords    Get Kserve Events And Logs     model_name=${FIL_MODEL_NAME}
-    ...  project_title=${PRJ_TITLE}
+    # [Teardown]  Run Keywords    Get Kserve Events And Logs     model_name=${FIL_MODEL_NAME}
+    # ...  project_title=${PRJ_TITLE}
    # ...  AND
    # ...  Clean All Models Of Current User
    # ...  AND

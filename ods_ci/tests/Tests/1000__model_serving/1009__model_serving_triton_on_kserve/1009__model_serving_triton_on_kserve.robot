@@ -315,8 +315,8 @@ Test FIL Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-lo
     Run Keyword And Continue On Failure    Verify Model Inference With Retries
     ...    ${FIL_MODEL_NAME}    ${INFERENCE_REST_INPUT_FIL}    ${EXPECTED_INFERENCE_REST_OUTPUT_FIL}
     ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}
-    [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${FIL_MODEL_NAME}
-    ...  project_title=${PRJ_TITLE}
+    # [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${FIL_MODEL_NAME}
+    # ...  project_title=${PRJ_TITLE}
     # ...  AND
     # ...  Clean All Models Of Current User
     # ...  AND

@@ -67,6 +67,7 @@ Verify Model Registry Integration With Secured-DB
     IF  ${self_managed}    Upload Certificate To Jupyter Notebook    openshift_ca.crt
     Jupyter Notebook Can Query Model Registry     ${JUPYTER_NOTEBOOK}
     SeleniumLibrary.Switch Window    ${handle}
+    Add User To Model Registry Default Group    ${TEST_USER.USERNAME}
     Open Model Registry Dashboard Page
     SeleniumLibrary.Page Should Contain Element    xpath:${MR_TABLE_XPATH}/tbody/tr/td[@data-label="Model name"]//a[.="${MR_REGISTERED_MODEL_NAME}"]
     SeleniumLibrary.Page Should Contain Element    xpath:${MR_TABLE_XPATH}/tbody/tr/td[@data-label="Owner"]//p[.="${MR_REGISTERED_MODEL_AUTHOR}"]

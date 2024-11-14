@@ -28,16 +28,19 @@ Deploy Model Registry
     RHOSi Setup
     Enable Model Registry If Needed
     Component Should Be Enabled    modelregistry
+    Sleep    60s    reason=Wait for webhook endpoint
     Apply Db Config Samples
 
 Registering A Model In The Registry
     [Documentation]    Registers a model in the model registry
     [Tags]    Smoke    MR1302    ModelRegistry
+    Depends On Test    Deploy Model Registry
     Register A Model    ${URL}
 
 Verify Model Registry
     [Documentation]    Deploy Python Client And Register Model.
     [Tags]    Smoke    MR1302    ModelRegistry
+    Depends On Test    Registering A Model In The Registry
     Run Curl Command And Verify Response    ${URL}
 
 

@@ -59,8 +59,8 @@ Prepare Model Registry Test Setup
     Get Cluster Domain And Token
     Run Update Notebook Script
     Generate ModelRegistry Certificates
-    Apply Db Config Samples    namespace=${NAMESPACE_MODEL_REGISTRY}    samples=${MODEL_REGISTRY_DB_SAMPLES}
     Create Model Registry Secrets
+    Apply Db Config Samples    namespace=${NAMESPACE_MODEL_REGISTRY}    samples=${MODEL_REGISTRY_DB_SAMPLES}
     Fetch CA Certificate If RHODS Is Self-Managed
 
 Teardown Model Registry Test Setup

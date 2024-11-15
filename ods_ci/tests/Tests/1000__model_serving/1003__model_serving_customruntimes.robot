@@ -71,7 +71,7 @@ Verify RHODS Users Can Deploy A Model Using A Custom Serving Runtime    # roboco
     ${model_name}=    Set Variable    test-model-csr
     ${inference_input}=    Set Variable    @tests/Resources/Files/modelmesh-mnist-input.json
     ${exp_inference_output}=    Set Variable    {"model_name":"test-model-csr__isvc-85fe09502b","model_version":"1","outputs":[{"name":"Plus214_Output_0","datatype":"FP32","shape":[1,10],"data":[-8.233053,-7.7497034,-3.4236815,12.3630295,-12.079103,17.266596,-10.570976,0.7130762,3.321715,1.3621228]}]}    # robocop: off=line-too-long
-    Open Data Science Project Details Page    project_title=${PRJ_TITLE}    tab_id=data-connections
+    Open Data Science Project Details Page    project_title=${PRJ_TITLE}    tab_id=connections
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3

@@ -166,4 +166,5 @@ Select Connection Type From Add Connection Modal
     Wait Until Page Contains Element    xpath=//header/h1/span[text()="Add connection"]
     Wait Until Page Contains Element    ${CONNECTION_TYPE_DROPDOWN}
     Click Element    ${CONNECTION_TYPE_DROPDOWN}
+    Sleep    1    reason=Sometimes it takes a little bit longer to finish rendering all the dropdown content
     Click Element    xpath=//div[@id="connection-type"]//button//span[text()="${connection_type}"]

@@ -36,7 +36,9 @@ ${EXPECTED_INFERENCE_REST_OUTPUT_FILE_PYTORCH}=       tests/Resources/Files/trit
 ${INFERENCE_REST_INPUT_TENSORFLOW_FILE}=    @${RESOURCES_DIRPATH}/modelmesh-triton-tensorflow-input.json
 ${EXPECTED_INFERENCE_TENSORFLOW_OUTPUT_FILE}=      ${RESOURCES_DIRPATH}/modelmesh-triton-tensorflow-output.json
 ${TENSORFLOW_RUNTIME_FILEPATH}=      ${RESOURCES_DIRPATH}/triton_tensorflow_modelmesh_runtime.yaml
-
+${FIL_MODEL_NAME}=       fil
+${INFERENCE_REST_INPUT_FIL_FILE}=    @${RESOURCES_DIRPATH}/modelmesh-triton-fil-input.json
+${EXPECTED_INFERENCE_FIL_OUTPUT_FILE}=      ${RESOURCES_DIRPATH}/modelmesh-triton-fil-output.json
 
 *** Test Cases ***
 Test Onnx Model Rest Inference Via UI (Triton on Modelmesh)
@@ -146,6 +148,41 @@ Test Tensorflow Model Rest Inference Via UI (Triton on Modelmesh)
     ...    token_auth=${TRUE}
     ...    project_title=${PRJ_TITLE}
     [Teardown]  Run Keywords    Get Modelmesh Events And Logs      model_name=${TENSORFLOW_MODEL_NAME}
+    ...  project_title=${PRJ_TITLE}
+    ...  AND
+    ...  Clean All Models Of Current User
+
+Test Tensorflow Model Rest Inference Via UI (Triton on Modelmesh)
+    [Documentation]    Test the deployment of an onnx model in Kserve using Triton
+    [Tags]    Sanity    RHOAIENG-9069
+
+    Open Data Science Projects Home Page
+    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
+    ...    existing_project=${FALSE}
+    Open Dashboard Settings    settings_page=Serving runtimes
+    Upload Serving Runtime Template    runtime_filepath=${TENSORFLOW_RUNTIME_FILEPATH}
+    ...    serving_platform=multi      runtime_protocol=REST
+    Serving Runtime Template Should Be Listed    displayed_name=${ONNX_RUNTIME_NAME}
+    ...    serving_platform=multi
+    Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
+    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
+    ...            aws_bucket_name=ods-ci-s3
+    Create Model Server    token=${TRUE}    runtime=${ONNX_RUNTIME_NAME}    server_name=${ONNX_RUNTIME_NAME}    existing_server=${TRUE}
+    Sleep    10s
+    Serve Model    project_name=${PRJ_TITLE}    model_name=${FIL_MODEL_NAME}    framework=xgboost - 1
+    ...    existing_data_connection=${TRUE}    data_connection_name=model-serving-connection
+    ...    model_path=triton/model_repository/fil/        model_server=${ONNX_RUNTIME_NAME}
+    Wait Until Runtime Pod Is Running    server_name=${ONNX_RUNTIME_NAME}
+    ...    project_title=${PRJ_TITLE}    timeout=5m
+    Verify Model Status    ${FIL_MODEL_NAME}    success
+    ${EXPECTED_INFERENCE_REST_OUTPUT_FIL}=     Load Json File      file_path=${EXPECTED_INFERENCE_FIL_OUTPUT_FILE}
+    ...     as_string=${TRUE}
+    Log     ${EXPECTED_INFERENCE_REST_OUTPUT_FIL}
+    Verify Model Inference With Retries    ${FIL_MODEL_NAME}    ${INFERENCE_REST_INPUT_FIL_FILE}
+    ...    ${EXPECTED_INFERENCE_REST_OUTPUT_FIL}
+    ...    token_auth=${TRUE}
+    ...    project_title=${PRJ_TITLE}
+    [Teardown]  Run Keywords    Get Modelmesh Events And Logs      model_name=${FIL_MODEL_NAME}
     ...  project_title=${PRJ_TITLE}
     ...  AND
     ...  Clean All Models Of Current User

@@ -2,6 +2,8 @@ import sys
 import argparse
 from time import sleep
 import re
+import os
+from pathlib import Path
 
 from aroOps import (
     get_aro_version,
@@ -27,6 +29,8 @@ class AroClusterManager:
 
 
     def create_aro_cluster(self):
+        terraform_path = os.path.dirname(os.path.abspath(__file__)) + "/terraform"
+        os.chdir(terraform_path)
         print("Name of cluster to be created", self.aro_cluster_name)
         aro_cli_login(self.aro_client_id, self.aro_tenant_id, self.aro_secret_pwd)
         my_version = get_aro_version(self.aro_ocp_version)

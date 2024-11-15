@@ -1,6 +1,7 @@
 import sys
 from time import sleep
 import re
+import os
 
 from ods_ci.utils.scripts.logger import log
 from ods_ci.utils.scripts.util import execute_command
@@ -46,6 +47,7 @@ def aro_cli_login(aro_client_id, aro_tenant_id, aro_secret_pwd):
     if "ERROR" in ret:
         log.error("LOGIN UNSUCCESSFUL")
         log.error("Invalid tenant id, client it and/or secret")
+        sys.exit(1)
     else:
         print("LOGIN SUCCESSFUL")
 
@@ -68,7 +70,9 @@ def get_aro_cluster_info(my_cluster_name):
     if provisioning_state == "Succeeded":
         print("cluster is up and running")
     else:
-        print("what happened")
+        print("Provisioning state: ", provisioning_state)
+        print("The cluster is not in a healthy state. Please manually delete all resources from the Azure portal")
+        sys.exit(1)
 
     print("Cluster name: ", my_cluster_name)
     print("Provisioning status: ", provisioning_state)
@@ -87,16 +91,20 @@ def aro_cluster_login(my_cluster_name):
     aro_cluster_pwd = execute_command(f"az aro list-credentials --name {my_cluster_name} --resource-group {resource_group} -o tsv --query kubeadminPassword")
 
     print("Login to the cluster...")
-    execute_command(f"oc login -u kubeadmin -p {aro_cluster_pwd} {api_server_profile_url} --insecure-skip-tls-verify=true")
+    ret = os.system(f"oc login -u kubeadmin -p {aro_cluster_pwd} {api_server_profile_url} --insecure-skip-tls-verify=true")
 
-    print("")
-    print("Check the cluster nodes...")
-    execute_command(f"oc get nodes")
+    if ret != 0:
+        print("unable to log into cluster")
+        print("get the cluster credentials with the command:")
+        print("az aro list-credentials --name <cluster name> --resource-group <resource group> -o tsv --query kubeadminPassword")
+        sys.exit(1)
+    else:
+        print("")
+        print("Check the cluster nodes...")
+        execute_command(f"oc get nodes")
 
-    print("")
-    print("Check the cluster operators...")
-    execute_command(f"oc get co; oc get clusterversion")
-    print("")
+        print("Check the cluster operators...")
+        execute_command(f"oc get co; oc get clusterversion")
 
 
 # Delete the ARO cluster

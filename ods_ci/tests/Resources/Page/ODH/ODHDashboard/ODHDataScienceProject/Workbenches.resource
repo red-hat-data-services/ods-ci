@@ -42,7 +42,7 @@ ${WORKBENCH_IMAGE_VER_DROPDOWN}=     //*[@id="workbench-image-version-selection"
 ${KEYVALUE_TYPE}=        Key / value
 ${UPLOAD_TYPE}=        Upload
 ${ENV_VARIABLES_SECTION_XP}=        xpath=//section[@aria-label="Environment variables"]
-${ENV_DATA_CONNECTION_SECTION_XP}=   xpath=//section[@aria-label="Data connections"]
+${ENV_DATA_CONNECTION_SECTION_XP}=   xpath=//section[@aria-label="Connections"]
 ${ERROR_ICON_XP}=        span[contains(@class,'pf-m-danger')]
 
 

@@ -88,7 +88,7 @@ Pipelines Suite Setup
 
     Create Data Science Project    title=${PRJ_TITLE}
     ...    description=${PRJ_DESCRIPTION}
-    Projects.Move To Tab    Data connections
+    Projects.Move To Tab    Connections
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_NAME}
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-ds-pipelines

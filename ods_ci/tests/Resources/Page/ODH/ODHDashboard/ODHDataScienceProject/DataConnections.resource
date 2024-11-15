@@ -129,12 +129,12 @@ Get Data Connection Form Values
     [Arguments]    ${dc_name}
     ODHDashboard.Click Action From Actions Menu    item_title=${dc_name}    action=Edit
     Wait Until Page Contains Element    ${S3_NAME_DC_INPUT}
-    ${s3_name}   get element attribute    ${S3_NAME_DC_INPUT}      value
-    ${s3_key}   get element attribute    ${S3_KEY_DC_INPUT}      value
-    ${s3_secret}   get element attribute    ${S3_SECRET_DC_INPUT}      value
-    ${s3_endpoint}   get element attribute    ${S3_ENDPOINT_DC_INPUT}      value
-    ${s3_region}   get element attribute    ${S3_REGION_DC_INPUT}      value
-    ${s3_bucket}   get element attribute    ${S3_BUCKET_DC_INPUT}      value
+    ${s3_name}   Get Element Attribute    ${S3_NAME_DC_INPUT}      value
+    ${s3_key}   Get Element Attribute    ${S3_KEY_DC_INPUT}      value
+    ${s3_secret}   Get Element Attribute    ${S3_SECRET_DC_INPUT}      value
+    ${s3_endpoint}   Get Element Attribute    ${S3_ENDPOINT_DC_INPUT}      value
+    ${s3_region}   Get Element Attribute    ${S3_REGION_DC_INPUT}      value
+    ${s3_bucket}   Get Element Attribute    ${S3_BUCKET_DC_INPUT}      value
     [return]    ${s3_name}    ${s3_key}    ${s3_secret}    ${s3_endpoint}    ${s3_region}    ${s3_bucket}
 
 Recreate S3 Data Connection
@@ -161,6 +161,7 @@ Recreate S3 Data Connection
     END
 
 Select Connection Type From Add Connection Modal
+    [Documentation]    Select connection type from Add Connection modal
     [Arguments]    ${connection_type}
     Wait Until Page Contains Element    xpath=//header/h1/span[text()="Add connection"]
     Wait Until Page Contains Element    ${CONNECTION_TYPE_DROPDOWN}

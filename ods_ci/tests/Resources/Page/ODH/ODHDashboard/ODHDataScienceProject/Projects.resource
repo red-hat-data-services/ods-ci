@@ -38,7 +38,7 @@ Is Data Science Projects Page Open
 
 Open Data Science Project Details Page
     [Documentation]    Open project ${project_title} in the "Data Science Projects" page, and an optional Tab by ID:
-    ...    overview | workbenches | cluster-storages | data-connections | pipelines-projects | model-server | permissions    # robocop: disable
+    ...    overview | workbenches | cluster-storages | connections | pipelines-projects | model-server | permissions    # robocop: disable
     [Arguments]     ${project_title}    ${tab_id}=${NONE}
     ${is_project_open}=    Is Data Science Project Details Page Open    project_title=${project_title}
     IF    ${is_project_open} == ${FALSE}

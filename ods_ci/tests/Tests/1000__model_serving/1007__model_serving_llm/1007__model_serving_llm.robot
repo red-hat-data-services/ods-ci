@@ -364,7 +364,7 @@ Verify Model Can Be Served And Query On A GPU Node    # robocop: off=too-long-te
     Query Model Multiple Times    model_name=${model_name}    n_times=5
     ...    namespace=${test_namespace}    inference_type=streaming
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
-    ...    isvc_names=${model_name}    wait_prj_deletion=${FALSE}
+    ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
 Verify Non Admin Can Serve And Query A Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Basic tests leveraging on a non-admin user for preparing, deploying and querying a LLM model

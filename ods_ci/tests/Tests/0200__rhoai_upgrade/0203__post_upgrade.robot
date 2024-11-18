@@ -246,7 +246,7 @@ Data Science Pipelines Post Upgrade Verifications
 
 Model Registry Post Upgrade Verification
     [Documentation]    Verifies that registered model/version in pre-upgrade is present after the upgrade
-    [Tags]             Upgrade    ModelRegistryPostUpgrade
+    [Tags]             Upgrade    ModelRegistryUpgrade
     ...                ProductBug    RHOAIENG-15033
     ${check}=    Is Starting Version Supported    minimum_version=2.14.0
     Skip If    ${check}==${FALSE}

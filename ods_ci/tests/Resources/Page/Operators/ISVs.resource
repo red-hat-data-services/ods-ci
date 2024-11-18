@@ -10,6 +10,7 @@ ${FILES_RESOURCES_DIRPATH}=    tests/Resources/Files
 ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}=    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
 ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}=   ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
 ${IS_PRESENT}=                           0
+${installplan_name}                     ${EMPTY}
 
 
 *** Keywords ***
@@ -19,6 +20,7 @@ Install ISV Operator From OperatorHub Via CLI    # robocop: disable
     ...            ${channel}=stable    ${catalog_source_name}=certified-operators
     ...            ${cs_namespace}=openshift-marketplace    ${operator_group_name}=${NONE}
     ...            ${operator_group_ns}=${NONE}    ${operator_group_target_ns}=${NONE}
+    [Timeout]    10 minutes
     Log To Console    message=Installing the '${operator_name}' Operator
     IF    "${operator_group_name}" != "${NONE}"
         Create Operator Group    name=${operator_group_name}
@@ -36,9 +38,11 @@ Install ISV Operator From OperatorHub Via CLI    # robocop: disable
     Oc Apply    kind=Subscription    src=${operator_sub_filepath}
     Wait Until Keyword Succeeds    1 min    0 sec
     ...    Is Resource Present    Subscription    ${subscription_name}     ${namespace}    ${IS_PRESENT}
-    Sleep    30s
-    ${installplan_name}=     Get Resource Attribute      ${namespace}
-    ...      Subscription       ${subscription_name}        .status.installPlanRef.name
+    WHILE   "${installplan_name}" == "${EMPTY}"     limit=5m
+        ${installplan_name}=       Get Resource Attribute      ${namespace}
+        ...      Subscription       ${subscription_name}        .status.installPlanRef.name
+        Sleep       20s
+    END
     ${installplan_approval}=     Get Resource Attribute      ${namespace}
     ...      InstallPlan       ${installplan_name}        .spec.approval
     IF    "${installplan_approval}" == "Manual"

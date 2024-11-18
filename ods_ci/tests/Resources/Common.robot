@@ -550,3 +550,18 @@ Clone Git Repository
     IF    ${result.rc} != 0
         FAIL    Unable to clone DW repo ${REPO_URL}:${REPO_BRANCH}:${DIR}
     END
+
+Get Operator Starting Version
+    [Documentation]    Returns the starting version of the operator in the upgrade chain
+    ${rc}    ${out}=    Run And Return RC And Output
+    ...    oc get subscription rhods-operator -n redhat-ods-operator -o yaml | yq '.spec.startingCSV' | awk -F. '{print $2"."$3"."$4}'    # robocop: disable
+    Should Be Equal As Integers    ${rc}    0
+    RETURN    ${out}
+
+Is Starting Version Supported
+    [Documentation]    Returns ${TRUE} if the starting version of the upgrade chain is allowed (i.e. >= minimum allowed
+    ...    version), ${FALSE} otherwise.
+    [Arguments]    ${minimum_version}
+    ${starting_ver}=    Get Operator Starting Version
+    ${out}=     Gte    ${starting_ver}    ${minimum_version}
+    RETURN    ${out}

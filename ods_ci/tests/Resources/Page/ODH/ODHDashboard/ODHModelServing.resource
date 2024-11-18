@@ -463,9 +463,11 @@ Deploy Kserve Model Via UI  #robocop: disable
     Move To Tab    Models
     IF    ${existing_server} == False
         SeleniumLibrary.Click Button    ${DEPLOY_SINGLE_SV_MODEL_BTN}
+    ELSE
+        SeleniumLibrary.Wait Until Page Contains Element    ${DEPLOY_SINGLE_MODEL_BTN}
+        SeleniumLibrary.Click Button    ${DEPLOY_SINGLE_MODEL_BTN}
     END
-    SeleniumLibrary.Wait Until Page Contains Element    ${DEPLOY_SINGLE_MODEL_BTN}
-    SeleniumLibrary.Click Button    ${DEPLOY_SINGLE_MODEL_BTN}
+
     Sleep    5s
     SeleniumLibrary.Wait Until Page Contains Element    xpath=${KSERVE_MODAL_HEADER}
     Set Model Name   ${model_name}

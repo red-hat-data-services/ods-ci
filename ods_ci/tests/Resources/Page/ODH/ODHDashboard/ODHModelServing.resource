@@ -93,7 +93,7 @@ Serve Model
         Set Folder Path    ${model_path}
     END
     SeleniumLibrary.Wait Until Element Is Enabled   //button[contains(text(),"Deploy")]
-    SeleniumLibrary.Click Button    Deploy
+    SeleniumLibrary.Click Button    //button[@data-testid="modal-submit-button"]
     SeleniumLibrary.Wait Until Page Does Not Contain    xpath://h1[.="Deploy model"]
 
 Select Project
@@ -494,7 +494,7 @@ Set Model Server Runtime
     [Arguments]    ${runtime}=Caikit TGIS
     Page Should Contain Element    ${KSERVE_RUNTIME_DROPDOWN}
     Click Element    ${KSERVE_RUNTIME_DROPDOWN}
-    Click Element    ${KSERVE_RUNTIME_DROPDOWN}/..//*[@data-testid="kserve-ovms"]
+    Click Element    ${KSERVE_RUNTIME_DROPDOWN}/..//span[contains(text(),"${runtime}")]
 
 Get Kserve Inference Host Via UI
     [Documentation]    Fetches the host of the model's URL from the Data Science Project UI

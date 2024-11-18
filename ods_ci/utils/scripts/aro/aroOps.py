@@ -5,6 +5,7 @@ import os
 
 from ods_ci.utils.scripts.logger import log
 from ods_ci.utils.scripts.util import execute_command
+import subprocess
 
 
 # Get the available Azure/ARO versions
@@ -91,20 +92,17 @@ def aro_cluster_login(my_cluster_name):
     aro_cluster_pwd = execute_command(f"az aro list-credentials --name {my_cluster_name} --resource-group {resource_group} -o tsv --query kubeadminPassword")
 
     print("Login to the cluster...")
-    ret = os.system(f"oc login -u kubeadmin -p {aro_cluster_pwd} {api_server_profile_url} --insecure-skip-tls-verify=true")
 
-    if ret != 0:
+    output = subprocess.getoutput(f"oc login -u kubeadmin -p {aro_cluster_pwd} {api_server_profile_url} --insecure-skip-tls-verify=true 2>&1")
+    print(output)
+    if "Login successful" in output:
+        execute_command("oc get nodes")
+        execute_command("oc get co; oc get clusterversion")
+    else:
         print("unable to log into cluster")
         print("get the cluster credentials with the command:")
         print("az aro list-credentials --name <cluster name> --resource-group <resource group> -o tsv --query kubeadminPassword")
         sys.exit(1)
-    else:
-        print("")
-        print("Check the cluster nodes...")
-        execute_command(f"oc get nodes")
-
-        print("Check the cluster operators...")
-        execute_command(f"oc get co; oc get clusterversion")
 
 
 # Delete the ARO cluster

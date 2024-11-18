@@ -248,6 +248,8 @@ Model Registry Post Upgrade Verification
     [Documentation]    Verifies that registered model/version in pre-upgrade is present after the upgrade
     [Tags]             Upgrade    ModelRegistryUpgrade
     ...                ProductBug    RHOAIENG-15033
+    ${check}=    Is Starting Version Supported    minimum_version=2.14.0
+    Skip If    ${check}==${FALSE}
     Model Registry Post Upgrade Scenario
     [Teardown]    Post Upgrade Scenario Teardown
 

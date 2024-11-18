@@ -246,8 +246,10 @@ Data Science Pipelines Post Upgrade Verifications
 
 Model Registry Post Upgrade Verification
     [Documentation]    Verifies that registered model/version in pre-upgrade is present after the upgrade
-    [Tags]             Upgrade    ModelRegistryUpgrade
+    [Tags]             Upgrade    ModelRegistryPostUpgrade
     ...                ProductBug    RHOAIENG-15033
+    ${check}=    Is Starting Version Supported    minimum_version=2.14.0
+    Skip If    ${check}==${FALSE}
     Model Registry Post Upgrade Scenario
     [Teardown]    Post Upgrade Scenario Teardown
 
@@ -306,3 +308,18 @@ Upgrade Suite Setup
     Set Suite Variable    ${IS_SELF_MANAGED}
     Gather Release Attributes From DSC And DSCI
     Set Expected Value For Release Name
+
+Get Operator Starting Version
+    [Documentation]    Returns the starting version of the operator in the upgrade chain
+    ${rc}    ${out}=    Run And Return RC And Output
+    ...    oc get subscription rhods-operator -n redhat-ods-operator -o yaml | yq '.spec.startingCSV' | awk -F. '{print $2"."$3"."$4}'    # robocop: disable
+    Should Be Equal As Integers    ${rc}    0
+    RETURN    ${out}
+
+Is Starting Version Supported
+    [Documentation]    Returns ${TRUE} if the starting version of the upgrade chain is allowed (i.e. >= minimum allowed
+    ...    version), ${FALSE} otherwise.
+    [Arguments]    ${minimum_version}
+    ${starting_ver}=    Get Operator Starting Version
+    ${out}=     Gte    ${starting_ver}    ${minimum_version}
+    RETURN    ${out}

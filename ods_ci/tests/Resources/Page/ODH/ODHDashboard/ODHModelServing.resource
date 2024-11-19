@@ -179,12 +179,12 @@ Verify Model Status
     [Arguments]    ${model_name}    ${expected_status}=success
     IF    "${expected_status}"=="success"
         SeleniumLibrary.Wait Until Page Contains Element
-        ...    //a[@data-testid='metrics-link-test-model' and text()='${model_name}']${MS_TABLE_STATUS_SUCCESS}    timeout=2m
-        Page Should Not Contain Element    //a[@data-testid='metrics-link-test-model' and text()='${model_name}']${MS_TABLE_STATUS_FAILURE}
+        ...    //td[@data-label="Name"]//div[@class and text()='${model_name}']${MS_TABLE_STATUS_SUCCESS}    timeout=2m
+        Page Should Not Contain Element    //td[@data-label="Name"]//div[@class and text()='${model_name}']${MS_TABLE_STATUS_FAILURE}
     ELSE
         SeleniumLibrary.Wait Until Page Contains Element
-        ...    //a[@data-testid='metrics-link-test-model' and text()='${model_name}']${MS_TABLE_STATUS_FAILURE}    timeout=2m
-        Page Should Not Contain Element    //a[@data-testid='metrics-link-test-model' and text()='${model_name}']${MS_TABLE_STATUS_SUCCESS}
+        ...    //td[@data-label="Name"]//div[@class and text()='${model_name}']${MS_TABLE_STATUS_FAILURE}    timeout=2m
+        Page Should Not Contain Element    //td[@data-label="Name"]//div[@class and text()='${model_name}']${MS_TABLE_STATUS_SUCCESS}    timeout=2m
     END
 
 Delete Model Via UI
@@ -224,7 +224,7 @@ Get Model Route Via UI
     RETURN    ${url}
 
 Get Model Route for gRPC Via UI
-    [Arguments]    ${model_name}    
+    [Arguments]    ${model_name}
     ${host_url}=    Get Model Route Via UI       model_name=${model_name}
     ${host}=    Evaluate    re.search(r"${GRPC_URL_REGEX}", r"${host_url}").group(1)    re
     RETURN    ${host}

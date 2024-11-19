@@ -155,6 +155,7 @@ Apply Db Config Samples
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc apply -k ${samples} -n ${namespace}
     Should Be Equal As Integers	  ${rc}	 0   msg=${out}
+    Wait For Model Registry Containers To Be Ready
 
 Jupyter Notebook Can Query Model Registry
     [Documentation]    Runs the test workbench and check if there was no error during execution
@@ -171,12 +172,13 @@ Jupyter Notebook Can Query Model Registry
 
 Wait For Model Registry Containers To Be Ready
     [Documentation]    Wait for model-registry-deployment to be ready
+    ${NAMESPACE_MODEL_REGISTRY}=    Get Model Registry Namespace From DSC
     ${result}=    Run Process
-    ...        oc wait --for\=condition\=Available --timeout\=5m -n ${PRJ_TITLE} deployment/model-registry-db
+    ...        oc wait --for\=condition\=Available --timeout\=5m -n ${NAMESPACE_MODEL_REGISTRY} deployment/model-registry-db      # robocop: disable:line-too-long
     ...        shell=true    stderr=STDOUT
     Log To Console    ${result.stdout}
     ${result}=    Run Process
-    ...        oc wait --for\=condition\=Available --timeout\=5m -n ${PRJ_TITLE} deployment/model-registry-deployment
+    ...        oc wait --for\=condition\=Available --timeout\=5m -n ${NAMESPACE_MODEL_REGISTRY} deployment/modelregistry-sample     # robocop: disable:line-too-long
     ...        shell=true    stderr=STDOUT
     Log To Console    ${result.stdout}
 

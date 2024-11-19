@@ -17,9 +17,9 @@ ${FMS_HF_TUNING_IMAGE}                   quay.io/modh/fms-hf-tuning@sha256:31489
 ${KFTO_UPGRADE_BINARY_NAME}              kfto-upgrade
 ${VIRTUAL_ENV_NAME}                      venv3.9
 # Supported codeflare-sdk version for 2.10 release is "v0.16.1"
-${CODEFLARE-SDK-API_URL}                 %{CODEFLARE-SDK-API_URL=https://api.github.com/repos/project-codeflare/codeflare-sdk/releases/155520501}
 ${CODEFLARE-SDK_DIR}                     codeflare-sdk
 ${CODEFLARE-SDK_REPO_URL}                %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
+${CODEFLARE-SDK-RELEASE-TAG}             adjustments-release-0.16.1
 
 
 *** Keywords ***
@@ -130,14 +130,7 @@ Prepare Codeflare-SDK Test Setup
     Log To Console    "Restarting kueue"
     Restart Kueue
 
-    ${latest_tag} =    Run Process   curl -s "${CODEFLARE-SDK-API_URL}" | grep '"tag_name":' | cut -d '"' -f 4
-    ...    shell=True    stderr=STDOUT
-    Log To Console  codeflare-sdk latest tag is : ${latest_tag.stdout}
-    IF    ${latest_tag.rc} != 0
-        FAIL    Unable to fetch codeflare-sdk latest tag
-    END
-
-    Clone Git Repository    ${CODEFLARE-SDK_REPO_URL}    ${latest_tag.stdout}    ${CODEFLARE-SDK_DIR}
+    Clone Git Repository    ${CODEFLARE-SDK_REPO_URL}    ${CODEFLARE-SDK-RELEASE-TAG}    ${CODEFLARE-SDK_DIR}
 
     ${result} =    Run Process  virtualenv -p python3.9 ${VIRTUAL_ENV_NAME}
     ...    shell=true    stderr=STDOUT

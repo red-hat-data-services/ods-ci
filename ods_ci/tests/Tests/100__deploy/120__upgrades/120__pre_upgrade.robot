@@ -141,7 +141,7 @@ Verify Distributed Workload Metrics Resources By Creating Ray Cluster Workload
     Wait Until Element Is Visible    xpath=//*[text()="Running"]    timeout=30
 
     ${cpu_requested} =   Get CPU Requested    ${PRJ_UPGRADE}    local-queue-mnist
-    ${memory_requested} =   Get Memory Requested    ${PRJ_UPGRADE}    local-queue-mnist    Upgrade
+    ${memory_requested} =   Get Memory Requested    ${PRJ_UPGRADE}    local-queue-mnist    RayCluster
     Check Requested Resources Chart    ${PRJ_UPGRADE}    ${cpu_requested}    ${memory_requested}
     Check Requested Resources    ${PRJ_UPGRADE}    ${CPU_SHARED_QUOTA}
     ...    ${MEMEORY_SHARED_QUOTA}    ${cpu_requested}    ${memory_requested}    RayCluster

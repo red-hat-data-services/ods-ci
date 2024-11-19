@@ -179,12 +179,12 @@ Verify Model Status
     [Arguments]    ${model_name}    ${expected_status}=success
     IF    "${expected_status}"=="success"
         SeleniumLibrary.Wait Until Page Contains Element
-        ...    //a[@data-testid='metrics-link-test-model' and text()='${model_name}']${MS_TABLE_STATUS_SUCCESS}    timeout=2m
-        Page Should Not Contain Element    //a[@data-testid='metrics-link-test-model' and text()='${model_name}']${MS_TABLE_STATUS_FAILURE}
+        ...    //td[@data-label="Name"]//div[@class and text()='${model_name}']${MS_TABLE_STATUS_SUCCESS}    timeout=2m
+        Page Should Not Contain Element    //td[@data-label="Name"]//div[@class and text()='${model_name}']${MS_TABLE_STATUS_FAILURE}
     ELSE
         SeleniumLibrary.Wait Until Page Contains Element
-        ...    //a[@data-testid='metrics-link-test-model' and text()='${model_name}']${MS_TABLE_STATUS_FAILURE}    timeout=2m
-        Page Should Not Contain Element    //a[@data-testid='metrics-link-test-model' and text()='${model_name}']${MS_TABLE_STATUS_SUCCESS}
+        ...    //td[@data-label="Name"]//div[@class and text()='${model_name}']${MS_TABLE_STATUS_FAILURE}    timeout=2m
+        Page Should Not Contain Element    //td[@data-label="Name"]//div[@class and text()='${model_name}']${MS_TABLE_STATUS_SUCCESS}    timeout=2m
     END
 
 Delete Model Via UI
@@ -209,14 +209,17 @@ Get Model Route Via UI
     [Documentation]    Grabs the serving route (URL) of an already deployed model from the Model Serving page.
     [Arguments]    ${model_name}
     # TODO: Open model serving home page if needed?
-    ${route_xpath}=    Set Variable    //a[.="${model_name}"]${MS_TABLE_ENDPOINT_INPUT}
-    ${loaded}=    Run Keyword And Return Status    SeleniumLibrary.Wait Until Page Contains Element    ${route_xpath}    timeout=15s
-    IF    ${loaded} == ${FALSE}
-        Log    message=Model Route was not loaded in UI (RHOAIENG-1919). Trying refreshing!    level=WARN
-        SeleniumLibrary.Reload Page
-        SeleniumLibrary.Wait Until Page Contains Element    ${route_xpath}    timeout=15s
-    END
-    ${url}=    SeleniumLibrary.Get Element Attribute    ${route_xpath}    value
+    # Click on Inference Endpoints link
+    ${endpoint_link}=    Set Variable    //td[@data-label='Name']//div[@class and text()='${model_name}']//ancestor::tr//td[@data-label='Inference endpoint']//button
+    SeleniumLibrary.Wait Until Page Contains Element    ${endpoint_link}
+    SeleniumLibrary.Click Button    ${endpoint_link}
+    # Get the external URL
+    ${route_xpath}=    Set Variable    //span[text()="External (can be accessed from inside or outside the cluster)"]/ancestor::dl//dd/div/div/span[1]
+    SeleniumLibrary.Wait Until Page Contains Element    //div[@data-testid="external-service-popover"]
+    SeleniumLibrary.Wait Until Page Contains Element    ${route_xpath}
+    # Get the URL
+    Sleep    2    reason=The element takes a little bit longer than expected rendering the url
+    ${url}=    Get Text    ${route_xpath}
     ${kserve}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain    Single-model serving enabled
     IF    ${kserve}
         ${url}=    Catenate    SEPARATOR=    ${url}    /v2/models/${model_name}/infer
@@ -224,7 +227,7 @@ Get Model Route Via UI
     RETURN    ${url}
 
 Get Model Route for gRPC Via UI
-    [Arguments]    ${model_name}    
+    [Arguments]    ${model_name}
     ${host_url}=    Get Model Route Via UI       model_name=${model_name}
     ${host}=    Evaluate    re.search(r"${GRPC_URL_REGEX}", r"${host_url}").group(1)    re
     RETURN    ${host}

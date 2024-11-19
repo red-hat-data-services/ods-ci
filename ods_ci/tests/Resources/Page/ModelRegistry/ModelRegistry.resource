@@ -151,9 +151,9 @@ Create Generic Secret
 
 Apply Db Config Samples
     [Documentation]    Applying the db config samples from https://github.com/opendatahub-io/model-registry-operator
-    [Arguments]    ${namespace}
+    [Arguments]    ${namespace}    ${samples}
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc apply -k ${MODEL_REGISTRY_DB_SAMPLES} -n ${namespace}
+    ...    oc apply -k ${samples} -n ${namespace}
     Should Be Equal As Integers	  ${rc}	 0   msg=${out}
 
 Jupyter Notebook Can Query Model Registry

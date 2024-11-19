@@ -10,9 +10,9 @@ ${GO_TEST_TIMEOUT}    1h
 ${JOB_GO_BIN}    %{WORKSPACE=.}/go-bin
 ${GO_JUNIT_REPORT_TOOL}    github.com/jstemmer/go-junit-report/v2@latest
 ${VIRTUAL_ENV_NAME}    venv3.9
-${CODEFLARE-SDK-API_URL}            %{CODEFLARE-SDK-API_URL=https://api.github.com/repos/project-codeflare/codeflare-sdk/releases/latest}
 ${CODEFLARE-SDK_DIR}    codeflare-sdk-upgrade
 ${CODEFLARE-SDK_REPO_URL}    %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
+${CODEFLARE-SDK-RELEASE-TAG}     adjustments-release-0.16.4
 
 
 *** Keywords ***
@@ -61,14 +61,7 @@ Convert Go Test Results To Junit
 Run Codeflare Upgrade Tests
     [Documentation]   Run codeflare upgrade tests by cloning codeflare-sdk repo
     [Arguments]    ${TEST_NAME}
-    ${latest_tag} =    Run Process   curl -s "${CODEFLARE-SDK-API_URL}" | grep '"tag_name":' | cut -d '"' -f 4
-    ...    shell=True    stderr=STDOUT
-    Log To Console  codeflare-sdk latest tag is : ${latest_tag.stdout}
-    IF    ${latest_tag.rc} != 0
-        FAIL    Unable to fetch codeflare-sdk latest tag
-    END
-
-    Clone Git Repository    ${CODEFLARE-SDK_REPO_URL}    ${latest_tag.stdout}    ${CODEFLARE-SDK_DIR}
+    Clone Git Repository    ${CODEFLARE-SDK_REPO_URL}    ${CODEFLARE-SDK-RELEASE-TAG}    ${CODEFLARE-SDK_DIR}
 
     ${result} =    Run Process  virtualenv -p python3.9 ${VIRTUAL_ENV_NAME}
     ...    shell=true    stderr=STDOUT

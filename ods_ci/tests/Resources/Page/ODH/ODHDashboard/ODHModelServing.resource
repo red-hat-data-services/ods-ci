@@ -133,12 +133,26 @@ Select Framework
     ...    Possible values for now: "onnx", "openvino_ir"
     [Arguments]    ${framework}
     TRY
-        Open Model framework (name - version) Options Menu
-        Page Should Contain Element    xpath://li/button[contains(., "${framework}")]
-        Click Element    xpath://li/button[contains(., "${framework}")]
+        ${is_enabled}=    Run Keyword And Return Status
+        ...    Element Should Be Enabled    xpath://button[@id="inference-service-framework-selection"]
+
+        IF    ${is_enabled}
+            FOR  ${retry_idx}  IN RANGE  0  1+${retries}
+                Open Model framework (name - version) Options Menu
+                Page Should Contain Element    xpath://li/button[contains(., "${framework}")]
+                ${selected}=    Run Keyword And Return Status
+                ...    Click Element    xpath://li/button[contains(., "${framework}")]  #robocop: disable
+                IF  ${selected}==${TRUE}    BREAK
+            END
+        ELSE
+            Element Should Be Disabled    id:inference-service-framework-selection
+            ${text}=    Get Text    xpath://button[@id="inference-service-framework-selection"]/span
+            Should Be True    ${framework} in ${text}
+        END
     EXCEPT
         Log    framework ${framework} does not appear to be supported by the chosen model server
-    END
+    END        
+
 
 Select Existing Data Connection
     [Documentation]    Selects an existing data connection in the "deploy model" modal.

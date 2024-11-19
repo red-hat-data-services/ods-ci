@@ -152,7 +152,7 @@ Test Tensorflow Model Rest Inference Via UI (Triton on Modelmesh)
     ...  AND
     ...  Clean All Models Of Current User
 
-Test Tensorflow Model Rest Inference Via UI (Triton on Modelmesh)
+Test FIL Model Rest Inference Via UI (Triton on Modelmesh)
     [Documentation]    Test the deployment of an onnx model in Kserve using Triton
     [Tags]    Sanity    RHOAIENG-9069
 

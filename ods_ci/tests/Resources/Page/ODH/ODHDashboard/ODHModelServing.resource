@@ -7,6 +7,7 @@ Resource       ODHDataScienceProject/ModelServer.resource
 Resource       ODHDataScienceProject/DataConnections.resource
 Resource       ../../../CLI/ModelServing/llm.resource
 Library        ../../../../../libs/Helpers.py
+Library    RPA.Desktop
 
 
 *** Variables ***
@@ -131,17 +132,17 @@ Select Model Server
 Select Framework
     [Documentation]    Selects the framework in the "deploy model" modal.
     ...    Possible values for now: "onnx", "openvino_ir"
-    [Arguments]    ${framework}
+    [Arguments]    ${framework}    ${retries}=1
     TRY
         ${is_enabled}=    Run Keyword And Return Status
         ...    Element Should Be Enabled    xpath://button[@id="inference-service-framework-selection"]
 
         IF    ${is_enabled}
             FOR  ${retry_idx}  IN RANGE  0  1+${retries}
-                Open Model framework (name - version) Options Menu
-                Page Should Contain Element    xpath://li/button[contains(., "${framework}")]
+                Click Element    xpath://button[@id="inference-service-framework-selection"]
+                Page Should Contain Element    xpath://span[contains(., "${framework}")]
                 ${selected}=    Run Keyword And Return Status
-                ...    Click Element    xpath://li/button[contains(., "${framework}")]  #robocop: disable
+                ...    Click Element    xpath://span[contains(., "${framework}")]
                 IF  ${selected}==${TRUE}    BREAK
             END
         ELSE
@@ -158,21 +159,13 @@ Select Existing Data Connection
     [Documentation]    Selects an existing data connection in the "deploy model" modal.
     [Arguments]    ${data_connection_name}    ${retries}=1
 
-    ${is_enabled}=    Run Keyword And Return Status
-    ...    Element Should Be Enabled    xpath://button[@id="inference-service-data-connection"]
-
-    IF    ${is_enabled}
-        FOR  ${retry_idx}  IN RANGE  0  1+${retries}
-            Open Name Options Menu
-            Click Element    xpath://li/button[.="${data_connection_name}"]
-            ${selected}=    Run Keyword And Return Status
-            ...    Page Should Contain Element    //span[.="Name"]/../../..//button[@aria-label="Options menu"][.="${data_connection_name}"]  #robocop: disable
-            IF  ${selected}==${TRUE}    BREAK
+    FOR  ${retry_idx}  IN RANGE  0  1+${retries}
+        Click Element    xpath://button[@class="pf-v5-c-menu-toggle__button"]
+        Click Element    xpath://button[@class="pf-v5-c-menu__item"]/span/span[contains(., "${data_connection_name}")]
+        ${selected}=    Get Element Attribute    //span[@class="pf-v5-c-text-input-group__text"]/input    value
+        IF  "${selected}"=="${data_connection_name}"
+            BREAK
         END
-    ELSE
-        Element Should Be Disabled    id:inference-service-data-connection
-        ${text}=    Get Text    xpath://button[@id="inference-service-data-connection"]/span/div/div
-        Should Be Equal    ${text}    ${data_connection_name}
     END
 
 Set Folder Path

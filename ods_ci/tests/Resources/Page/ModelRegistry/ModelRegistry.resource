@@ -59,8 +59,8 @@ Prepare Model Registry Test Setup
     Get Cluster Domain And Token
     Run Update Notebook Script
     Generate ModelRegistry Certificates
-    Apply Db Config Samples    namespace=${NAMESPACE_MODEL_REGISTRY}
     Create Model Registry Secrets
+    Apply Db Config Samples    namespace=${NAMESPACE_MODEL_REGISTRY}    samples=${MODEL_REGISTRY_DB_SAMPLES}
     Fetch CA Certificate If RHODS Is Self-Managed
 
 Teardown Model Registry Test Setup
@@ -294,12 +294,13 @@ Open Model Registry Dashboard Page
     Maybe Wait For Dashboard Loading Spinner Page
     ${loaded}=    Run Keyword And Return Status
     ...    SeleniumLibrary.Page Should Not Contain    Request access to model registries
-    WHILE    ${loaded}!=${TRUE}    limit=5
+    WHILE    ${loaded}!=${TRUE}    limit=12    # Retries for 2 minutes - wait for user group to reconcile
         SeleniumLibrary.Reload Page
         SeleniumLibrary.Wait Until Page Contains    Model Registry
         SeleniumLibrary.Wait Until Page Contains    Select a model registry to view and manage your registered models.
         ${loaded}=    Run Keyword And Return Status
         ...    SeleniumLibrary.Page Should Not Contain    Request access to model registries
+        Sleep    10s
     END
     Maybe Wait For Dashboard Loading Spinner Page
 
@@ -374,6 +375,7 @@ Model Registry Post Upgrade Scenario
     Component Should Be Enabled    modelregistry
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
+    Add User To Model Registry Default Group    ${TEST_USER.USERNAME}
     Open Model Registry Dashboard Page
     SeleniumLibrary.Page Should Contain Element
     ...    xpath:${MR_TABLE_XPATH}/tbody/tr/td[@data-label="Model name"]//a[.="${MR_REGISTERED_MODEL_NAME}"]
@@ -404,3 +406,47 @@ Post Upgrade Scenario Teardown
     Remove Deployment Files    ${MODELREGISTRY_BASE_FOLDER}/Python_Dependencies
     Disable Model Registry If Needed
     RHOSi Teardown
+
+Get Model Registry Operator Pod
+    [Documentation]    Returns the name of the operator pod for model registry
+    ${rc}    ${name} =    Run And Return Rc And Output
+    ...    oc get pod -l component.opendatahub.io/name=model-registry-operator -n ${APPLICATIONS_NAMESPACE} -o yaml | yq '.items[0].metadata.name'
+    Should Be Equal As Integers    ${rc}    0
+    RETURN    ${name}
+
+Get Model Registry Operator ${type} Image
+    [Documentation]    Returns the GRPC image defined in the operator, type should be either GRPC or REST (case 
+    ...    sensitive)
+    IF    "${type}"!="GRPC" and "${type}"!="REST"
+        Log To Console    "Failing, `type` should be either REST or GRPC"
+        Fail
+    END
+    ${pod_name}=    Get Model Registry Operator Pod
+    ${rc}    ${img}=    Run And Return RC And Output
+    ...    oc get pod ${pod_name} -o yaml -n ${APPLICATIONS_NAMESPACE} | yq '.spec.containers[0].env[] | select(.name == "${type}_IMAGE").value'
+    Should Be Equal As Integers    ${rc}    0
+    RETURN    ${img}
+
+Get Model Registry Instance ${type} Image
+    [Documentation]    Returns the GRPC/REST image defined in a MR instance, type should be either grpc or rest (case
+    ...    sensitive)
+    [Arguments]    ${instance_name}=modelregistry-sample
+    ${ns}=    Get Model Registry Namespace From DSC
+    IF    "${type}"!="grpc" and "${type}"!="rest"
+        Log To Console    "Failing, `type` should be either rest or grpc"
+        Fail
+    END
+    ${rc}    ${img}=    Run And Return RC And Output
+    ...    oc get pod -l app=${instance_name} -n ${ns} -o yaml | yq '.items[].spec.containers[] | select(.name=="${type}-container").image'
+    Should Be Equal As Integers    ${rc}    0
+    RETURN    ${img}
+
+Add User To Model Registry Default Group
+    [Documentation]    Dashboard creates a default user group to give read/write permissions to a MR instance. We need
+    ...    to add our test user to this group in order to be able to interact with it.
+    [Arguments]    ${user}    ${model_registry_name}=modelregistry-sample
+    ${rc}=    Run And Return Rc    oc get group ${model_registry_name}-users
+    Should Be Equal As Integers    ${rc}    0
+    ${rc}    ${out}=    Run And Return Rc And Output    oc adm groups add-users ${model_registry_name}-users ${user}
+    Should Be Equal As Integers    ${rc}    0
+    Should Be Equal As Strings    ${out}    group.user.openshift.io/${model_registry_name}-users added: "${user}"

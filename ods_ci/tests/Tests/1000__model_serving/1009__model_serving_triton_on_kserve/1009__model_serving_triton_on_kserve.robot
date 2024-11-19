@@ -21,7 +21,7 @@ Test Tags         Kserve
 ${INFERENCE_GRPC_INPUT_ONNX}=    tests/Resources/Files/triton/kserve-triton-onnx-gRPC-input.json
 ${INFERENCE_REST_INPUT_ONNX}=    @tests/Resources/Files/triton/kserve-triton-onnx-rest-input.json
 ${PROTOBUFF_FILE}=      tests/Resources/Files/triton/grpc_predict_v2.proto
-${PRJ_TITLE}=    ms-triton-project5
+${PRJ_TITLE}=    ms-triton-project
 ${PRJ_DESCRIPTION}=    project used for model serving triton runtime tests
 ${MODEL_CREATED}=    ${FALSE}
 ${PATTERN}=     https:\/\/([^\/:]+)
@@ -246,13 +246,13 @@ Test KERAS Model Inference Via UI(Triton on Kserve)
 
 Test Python Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of an onnx model in Kserve using Triton
-    [Tags]    Sanity    RHOAIENG-15374      RunThisTest
+    [Tags]    Sanity    RHOAIENG-15374
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    existing_project=${FALSE}
     Open Dashboard Settings    settings_page=Serving runtimes
-    #Upload Serving Runtime Template    runtime_filepath=${ONNX_GRPC_RUNTIME_FILEPATH}
-    #...    serving_platform=single      runtime_protocol=gRPC
+    Upload Serving Runtime Template    runtime_filepath=${ONNX_GRPC_RUNTIME_FILEPATH}
+    ...    serving_platform=single      runtime_protocol=gRPC
     Serving Runtime Template Should Be Listed    displayed_name=${ONNX_GRPC_RUNTIME_NAME}
     ...    serving_platform=single
     Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
@@ -283,7 +283,7 @@ Test Python Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too
     ${result}    ${list}=    Inference Comparison    ${EXPECTED_INFERENCE_GRPC_OUTPUT_PYTHON}    ${inference_output}
     Log    ${result}
     Log    ${list}
-    [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=  ${PYTHON_MODEL_NAME}
+    [Teardown]  Run Keywords    Get Kserve Events And Logs          model_name=     ${PYTHON_MODEL_NAME}
     ...   project_title=  ${PRJ_TITLE}
    # ...  AND
    # ...  Clean All Models Of Current User

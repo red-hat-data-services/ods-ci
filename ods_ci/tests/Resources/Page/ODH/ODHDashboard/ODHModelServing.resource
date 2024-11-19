@@ -467,8 +467,6 @@ Deploy Kserve Model Via UI  #robocop: disable
         SeleniumLibrary.Wait Until Page Contains Element    ${DEPLOY_SINGLE_MODEL_BTN}
         SeleniumLibrary.Click Button    ${DEPLOY_SINGLE_MODEL_BTN}
     END
-
-    Sleep    5s
     SeleniumLibrary.Wait Until Page Contains Element    xpath=${KSERVE_MODAL_HEADER}
     Set Model Name   ${model_name}
     Set Model Server Runtime    ${serving_runtime}
@@ -514,6 +512,7 @@ Set Model Server Runtime
     [Arguments]    ${runtime}=Caikit TGIS
     Page Should Contain Element    ${KSERVE_RUNTIME_DROPDOWN}
     Click Element    ${KSERVE_RUNTIME_DROPDOWN}
+    Sleep   5s
     Click Element    ${KSERVE_RUNTIME_DROPDOWN}/..//span[contains(text(),"${runtime}")]
 
 Get Kserve Inference Host Via UI

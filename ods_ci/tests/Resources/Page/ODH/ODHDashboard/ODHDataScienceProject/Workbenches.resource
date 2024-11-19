@@ -82,8 +82,8 @@ Create Workbench
         IF    ${pv_existent} == ${TRUE}
             # Use the `Jump to section` links in the page to scroll the section into view
             Click Element    //a[@href="#cluster-storage"]
-            Click Element    xpath=//input[@name="persistent-existing-storage-type-radio"]
-            Select An Existent PV   name=${pv_name}
+            Click Element    //*[@data-testid="existing-storage-button"]
+            Select An Existent PV   ${pv_name}   ods-ci-test-path
         ELSE IF   ${pv_existent} == ${FALSE}
             # Use the `Jump to section` links in the page to scroll the section into view
             Click Element    //a[@href="#cluster-storage"]
@@ -189,13 +189,17 @@ Remove All Environment Variables
 
 Select An Existent PV
     [Documentation]    Selects an existent PV Storage in the workbench creation page
-    [Arguments]    ${name}
+    [Arguments]    ${name}  ${path}
     Run Keyword And Continue On Failure
     ...    Wait Until Element Is Enabled    xpath=//input[@placeholder="Select a persistent storage"]
     Click Element    xpath=//input[@placeholder="Select a persistent storage"]
     ${existing_pv_xpath}=    Set Variable    xpath=//button//span[text()="${name}"]
     Wait Until Page Contains Element    ${existing_pv_xpath}
     Click Element   ${existing_pv_xpath}
+    Input Text    //*[@data-testid="mount-path-folder-value"]    ${path}
+    Click Element    //*[@data-testid="modal-submit-button"]
+
+
 
 Select Workbench Image
     [Documentation]    Selects a Jupyter image in the workbench creation page

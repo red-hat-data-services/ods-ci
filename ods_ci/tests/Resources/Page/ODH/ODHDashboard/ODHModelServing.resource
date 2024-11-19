@@ -209,14 +209,17 @@ Get Model Route Via UI
     [Documentation]    Grabs the serving route (URL) of an already deployed model from the Model Serving page.
     [Arguments]    ${model_name}
     # TODO: Open model serving home page if needed?
-    ${route_xpath}=    Set Variable    //a[.="${model_name}"]${MS_TABLE_ENDPOINT_INPUT}
-    ${loaded}=    Run Keyword And Return Status    SeleniumLibrary.Wait Until Page Contains Element    ${route_xpath}    timeout=15s
-    IF    ${loaded} == ${FALSE}
-        Log    message=Model Route was not loaded in UI (RHOAIENG-1919). Trying refreshing!    level=WARN
-        SeleniumLibrary.Reload Page
-        SeleniumLibrary.Wait Until Page Contains Element    ${route_xpath}    timeout=15s
-    END
-    ${url}=    SeleniumLibrary.Get Element Attribute    ${route_xpath}    value
+    # Click on Inference Endpoints link
+    ${endpoint_link}=    Set Variable    //a[@data-testid="metrics-link-test-model" and text()="${model_name}"]/ancestor::tr//td//button[@data-testid="internal-external-service-button"]
+    SeleniumLibrary.Wait Until Page Contains Element    ${endpoint_link}
+    SeleniumLibrary.Click Button    ${endpoint_link}
+    # Get the external URL
+    ${route_xpath}=    Set Variable    //span[text()="External (can be accessed from inside or outside the cluster)"]/ancestor::dl//dd/div/div/span[1]
+    SeleniumLibrary.Wait Until Page Contains Element    //div[@data-testid="external-service-popover"]
+    SeleniumLibrary.Wait Until Page Contains Element    ${route_xpath}
+    # Get the URL
+    Sleep    2    reason=The element takes a little bit longer than expected rendering the url
+    ${url}=    Get Text    ${route_xpath}
     ${kserve}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain    Single-model serving enabled
     IF    ${kserve}
         ${url}=    Catenate    SEPARATOR=    ${url}    /v2/models/${model_name}/infer
@@ -224,7 +227,7 @@ Get Model Route Via UI
     RETURN    ${url}
 
 Get Model Route for gRPC Via UI
-    [Arguments]    ${model_name}    
+    [Arguments]    ${model_name}
     ${host_url}=    Get Model Route Via UI       model_name=${model_name}
     ${host}=    Evaluate    re.search(r"${GRPC_URL_REGEX}", r"${host_url}").group(1)    re
     RETURN    ${host}
@@ -448,7 +451,17 @@ Deploy Kserve Model Via UI  #robocop: disable
     ...    ${token}=${FALSE}    ${multi_token}=${FALSE}    ${multi_service_account_name}=default-name2
     ...    ${public_endpoint}=${TRUE}    ${service_account_name}=${NONE}
     Move To Tab    Models
+<<<<<<< HEAD
     SeleniumLibrary.Click Button    ${DEPLOY_SINGLE_SV_MODEL_BTN}
+=======
+    IF    ${existing_server} == False
+        SeleniumLibrary.Click Button    ${DEPLOY_SINGLE_SV_MODEL_BTN}
+    ELSE
+        SeleniumLibrary.Wait Until Page Contains Element    ${DEPLOY_SINGLE_MODEL_BTN}
+        SeleniumLibrary.Click Button    ${DEPLOY_SINGLE_MODEL_BTN}
+    END
+
+>>>>>>> da912116 (Model serving UI Fix)
     SeleniumLibrary.Wait Until Page Contains Element    xpath=${KSERVE_MODAL_HEADER}
     Set Model Name   ${model_name}
     Set Model Server Runtime    ${serving_runtime}

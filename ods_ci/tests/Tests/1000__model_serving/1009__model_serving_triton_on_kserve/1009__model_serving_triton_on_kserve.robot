@@ -21,7 +21,7 @@ Test Tags         Kserve
 ${INFERENCE_GRPC_INPUT_ONNX}=    tests/Resources/Files/triton/kserve-triton-onnx-gRPC-input.json
 ${INFERENCE_REST_INPUT_ONNX}=    @tests/Resources/Files/triton/kserve-triton-onnx-rest-input.json
 ${PROTOBUFF_FILE}=      tests/Resources/Files/triton/grpc_predict_v2.proto
-${PRJ_TITLE}=    ms-triton-project2
+${PRJ_TITLE}=    ms-triton-project5
 ${PRJ_DESCRIPTION}=    project used for model serving triton runtime tests
 ${MODEL_CREATED}=    ${FALSE}
 ${PATTERN}=     https:\/\/([^\/:]+)
@@ -283,8 +283,8 @@ Test Python Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too
     ${result}    ${list}=    Inference Comparison    ${EXPECTED_INFERENCE_GRPC_OUTPUT_PYTHON}    ${inference_output}
     Log    ${result}
     Log    ${list}
-    [Teardown]  Run Keywords    Get Kserve Events And Logs     model_name=${PYTHON_MODEL_NAME}
-    ...  project_title=${PRJ_TITLE}
+    [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=  ${PYTHON_MODEL_NAME}
+    ...   project_title=  ${PRJ_TITLE}
    # ...  AND
    # ...  Clean All Models Of Current User
    # ...  AND

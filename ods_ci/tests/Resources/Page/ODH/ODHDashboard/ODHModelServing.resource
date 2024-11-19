@@ -219,7 +219,7 @@ Get Model Route Via UI
     [Arguments]    ${model_name}
     # TODO: Open model serving home page if needed?
     # Click on Inference Endpoints link
-    ${endpoint_link}=    Set Variable    //a[@data-testid="metrics-link-test-model" and text()="${model_name}"]/ancestor::tr//td//button[@data-testid="internal-external-service-button"]
+    ${endpoint_link}=    Set Variable    //a[@data-testid="metrics-link-${model_name}" and text()="${model_name}"]/ancestor::tr//td//button[@data-testid="internal-external-service-button"]
     SeleniumLibrary.Wait Until Page Contains Element    ${endpoint_link}
     SeleniumLibrary.Click Button    ${endpoint_link}
     # Get the external URL

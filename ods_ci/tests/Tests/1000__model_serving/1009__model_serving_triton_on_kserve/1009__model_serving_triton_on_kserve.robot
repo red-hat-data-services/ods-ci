@@ -283,12 +283,12 @@ Test Python Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too
     ${result}    ${list}=    Inference Comparison    ${EXPECTED_INFERENCE_GRPC_OUTPUT_PYTHON}    ${inference_output}
     Log    ${result}
     Log    ${list}
-    [Teardown]  Run Keywords    Get Kserve Events And Logs          model_name=     ${PYTHON_MODEL_NAME}
-    ...   project_title=  ${PRJ_TITLE}
-   # ...  AND
-   # ...  Clean All Models Of Current User
-   # ...  AND
-   # ...  Delete Serving Runtime Template From CLI    displayed_name=triton-kserve-grpc
+    [Teardown]  Run Keywords    Get Kserve Events And Logs    model_name= ${PYTHON_MODEL_NAME}
+    ...   project_title= ${PRJ_TITLE}
+    ...  AND
+    ...  Clean All Models Of Current User
+    ...  AND
+    ...  Delete Serving Runtime Template From CLI    displayed_name=triton-kserve-grpc
 
 
 *** Keywords ***

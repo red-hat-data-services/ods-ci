@@ -309,7 +309,7 @@ Triton On Kserve Suite Teardown
     # Even if kw fails, deleting the whole project will also delete the model
     # Failure will be shown in the logs of the run nonetheless
     IF    ${MODEL_CREATED}
-       Clean All Models Of Current User
+        Clean All Models Of Current User
     ELSE
         Log    Model not deployed, skipping deletion step during teardown    console=true
     END

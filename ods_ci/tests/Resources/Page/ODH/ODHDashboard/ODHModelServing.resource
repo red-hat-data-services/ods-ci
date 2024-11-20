@@ -452,7 +452,7 @@ Deploy Kserve Model Via UI  #robocop: disable
     ...    ${public_endpoint}=${TRUE}    ${service_account_name}=${NONE}
     Move To Tab    Models
     IF    ${existing_server} == False
-        SeleniumLibrary.Click Button    ${DEPLOY_SINGLE_SV_MODEL_BTN}
+        SeleniumLibrary.Click Button    ${DEPLOY_SINGLE_MODEL_BTN}
     ELSE
         SeleniumLibrary.Wait Until Page Contains Element    ${DEPLOY_SINGLE_MODEL_BTN}
         SeleniumLibrary.Click Button    ${DEPLOY_SINGLE_MODEL_BTN}

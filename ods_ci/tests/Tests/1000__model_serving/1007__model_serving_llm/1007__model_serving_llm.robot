@@ -141,14 +141,14 @@ Verify User Can Deploy Raw and Serverless Models In The Same Namespace    # robo
     Query Model Multiple Times    model_name=${model_two_name}
     ...    n_times=10    namespace=${test_namespace}
     ...    protocol=http
-    ...    port_forwarding=TRUE
+    ...    port_forwarding=${TRUE}
     Query Model Multiple Times    model_name=${model_one_name}
     ...    n_times=5    namespace=${test_namespace}
     ...    protocol=http
     Query Model Multiple Times    model_name=${model_two_name}
     ...    n_times=10    namespace=${test_namespace}
     ...    protocol=http
-    ...    port_forwarding=TRUE
+    ...    port_forwarding=${TRUE}
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 

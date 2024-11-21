@@ -46,13 +46,13 @@ Serving Runtime Template Should Be Listed
     [Arguments]    ${displayed_name}    ${serving_platform}
     Run Keyword And Continue On Failure
     ...    Wait Until Page Contains Element
-    ...    //*[@data-testid="serving-runtime ovms-ods-ci"]
+    ...    //*[@data-testid="serving-runtime kserve-ovms"]
     ...    timeout=10s
     Run Keyword And Continue On Failure
     ...    Wait Until Page Contains Element
-    ...    //*[@data-testid="serving-runtime ovms-ods-ci"]//ancestor::*[@data-testid="serving-runtime-platform-label"]    # robocop: disable
+    ...    //*[@data-testid="serving-runtime kserve-ovms"]//ancestor::*[@data-testid="serving-runtime-platform-label"]    # robocop: disable
     ${actual_platform_labels_str}=    Get Text
-    ...    //*[@data-testid="serving-runtime ovms-ods-ci"]//ancestor::*[@data-testid="serving-runtime-platform-label"]    # robocop: disable
+    ...    //*[@data-testid="serving-runtime kserve-ovms"]//ancestor::*[@data-testid="serving-runtime-platform-label"]    # robocop: disable
     ${actual_platform_labels}=    Split To Lines    ${actual_platform_labels_str}
     IF    "${serving_platform}" == "both"
         Run Keyword And Continue On Failure    Length Should Be    ${actual_platform_labels}    ${2}

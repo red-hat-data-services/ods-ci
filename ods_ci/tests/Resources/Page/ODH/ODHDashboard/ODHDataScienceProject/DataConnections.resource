@@ -142,7 +142,7 @@ Recreate S3 Data Connection
     [Arguments]    ${project_title}    ${dc_name}    ${aws_access_key}    ${aws_secret_access}
     ...            ${aws_s3_endpoint}=${S3.AWS_DEFAULT_ENDPOINT}    ${aws_region}=${S3.AWS_DEFAULT_REGION}
     ...            ${connected_workbench}=${NONE}    ${press_cancel}=${FALSE}    ${aws_bucket_name}=${NONE}
-    Open Data Science Project Details Page       project_title=${project_title}    tab_id=connections
+    Open Data Science Project Details Page       project_title=${project_title}    tab_id= data-connections
     ${is_exist}=  Run Keyword And Return Status
     ...    Wait Until Page Contains Element    ${DC_SECTION}//tr[td[@data-label="Name"]/*/div[.="${dc_name}"]]
     IF  ${is_exist}

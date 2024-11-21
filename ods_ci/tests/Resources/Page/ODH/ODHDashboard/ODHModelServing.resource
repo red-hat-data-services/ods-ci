@@ -180,12 +180,12 @@ Verify Model Status
     [Arguments]    ${model_name}    ${expected_status}=success
     IF    "${expected_status}"=="success"
         SeleniumLibrary.Wait Until Page Contains Element
-        ...    //a[@data-testid='metrics-link-test-model' and text()='${model_name}']${MS_TABLE_STATUS_SUCCESS}    timeout=2m
-        Page Should Not Contain Element    //a[@data-testid='metrics-link-test-model' and text()='${model_name}']${MS_TABLE_STATUS_FAILURE}
+        ...    //td[@data-label="Name"]//div[@class and text()='${model_name}']${MS_TABLE_STATUS_SUCCESS}    timeout=2m
+        Page Should Not Contain Element    //td[@data-label="Name"]//div[@class and text()='${model_name}']${MS_TABLE_STATUS_FAILURE}
     ELSE
         SeleniumLibrary.Wait Until Page Contains Element
-        ...    //a[@data-testid='metrics-link-test-model' and text()='${model_name}']${MS_TABLE_STATUS_FAILURE}    timeout=2m
-        Page Should Not Contain Element    //a[@data-testid='metrics-link-test-model' and text()='${model_name}']${MS_TABLE_STATUS_SUCCESS}
+        ...    //td[@data-label="Name"]//div[@class and text()='${model_name}']${MS_TABLE_STATUS_FAILURE}    timeout=2m
+        Page Should Not Contain Element    //td[@data-label="Name"]//div[@class and text()='${model_name}']${MS_TABLE_STATUS_SUCCESS}    timeout=2m
     END
 
 Delete Model Via UI
@@ -211,7 +211,7 @@ Get Model Route Via UI
     [Arguments]    ${model_name}
     # TODO: Open model serving home page if needed?
     # Click on Inference Endpoints link
-    ${endpoint_link}=    Set Variable    //a[@data-testid="metrics-link-${model_name}" and text()="${model_name}"]/ancestor::tr//td//button[@data-testid="internal-external-service-button"]
+    ${endpoint_link}=    Set Variable    //td[@data-label='Name']//div[@class and text()='${model_name}']//ancestor::tr//td[@data-label='Inference endpoint']//button
     SeleniumLibrary.Wait Until Page Contains Element    ${endpoint_link}
     SeleniumLibrary.Click Button    ${endpoint_link}
     # Get the external URL

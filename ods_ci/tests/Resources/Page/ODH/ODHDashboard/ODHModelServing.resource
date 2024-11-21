@@ -25,7 +25,8 @@ ${MS_TABLE_STATUS_FAILURE}=     /ancestor::tr//td[@data-label="Status"]//span[co
 ${KSERVE_MODAL_HEADER}=    //header[@class="pf-v5-c-modal-box__header"]/h1[.="Deploy model"]
 ${KSERVE_RUNTIME_DROPDOWN}=    //button[@data-testid="serving-runtime-template-selection"]
 ${LLM_RESOURCES_DIRPATH}=    tests/Resources/Files/llm
-${DEPLOY_SINGLE_SV_MODEL_BTN}=    //button[contains(@data-testid,"single-serving-deploy-button")]
+${DEPLOY_SINGLE_SV_MODEL_BTN}=    //button[@data-testid="single-serving-select-button"]
+${DEPLOY_SINGLE_MODEL_BTN}=    //button[contains(@data-testid,"deploy-button")]
 ${DEPLOY_MODEL_BTN}=    //button[contains(@data-testid,"deploy-button")]
 ${TOKEN_AUTH_CHECKBOX_XP}=    xpath://input[@id="alt-form-checkbox-auth"]
 ${GRPC_URL_REGEX}=  https:\/\/([^\/:]+)
@@ -210,7 +211,7 @@ Get Model Route Via UI
     [Arguments]    ${model_name}
     # TODO: Open model serving home page if needed?
     # Click on Inference Endpoints link
-    ${endpoint_link}=    Set Variable    //a[@data-testid="metrics-link-test-model" and text()="${model_name}"]/ancestor::tr//td//button[@data-testid="internal-external-service-button"]
+    ${endpoint_link}=    Set Variable    //a[@data-testid="metrics-link-${model_name}" and text()="${model_name}"]/ancestor::tr//td//button[@data-testid="internal-external-service-button"]
     SeleniumLibrary.Wait Until Page Contains Element    ${endpoint_link}
     SeleniumLibrary.Click Button    ${endpoint_link}
     # Get the external URL
@@ -449,7 +450,7 @@ Deploy Kserve Model Via UI  #robocop: disable
     [Arguments]    ${model_name}    ${serving_runtime}    ${data_connection}    ${path}
     ...    ${model_framework}=caikit    ${replicas}=1    ${size}=Small    ${no_gpus}=${0}
     ...    ${token}=${FALSE}    ${multi_token}=${FALSE}    ${multi_service_account_name}=default-name2
-    ...    ${public_endpoint}=${TRUE}    ${service_account_name}=${NONE}
+    ...    ${public_endpoint}=${TRUE}    ${service_account_name}=${NONE}    ${existing_server}=${FALSE}
     Move To Tab    Models
     IF      ${existing_server} == False
         SeleniumLibrary.Click Button    ${DEPLOY_SINGLE_MODEL_BTN}

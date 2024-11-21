@@ -516,9 +516,26 @@ Set Model Server Runtime
     [Documentation]    Opens the Serving runtime dropdown in the deploy model modal window for models
     ...    and select the given runtime
     [Arguments]    ${runtime}=Caikit TGIS
-    Page Should Contain Element    ${KSERVE_RUNTIME_DROPDOWN}
-    Click Element    ${KSERVE_RUNTIME_DROPDOWN}
-    Click Element    //span[contains(text(),"${runtime}")]
+    TRY
+        ${is_enabled}=    Run Keyword And Return Status
+        ...    Element Should Be Enabled    xpath://button[@id="serving-runtime-template-selection"]
+
+        IF    ${is_enabled}
+            FOR  ${retry_idx}  IN RANGE  0  1+${retries}
+                Click Element    xpath://button[@id="serving-runtime-template-selection"]
+                Page Should Contain Element    xpath://span[contains(., "${runtime}")]
+                ${selected}=    Run Keyword And Return Status
+                ...    Click Element    xpath://span[contains(., "${runtime}")]
+                IF  ${selected}==${TRUE}    BREAK
+            END
+        ELSE
+            Element Should Be Disabled    id:serving-runtime-template-selection
+            ${text}=    Get Text    xpath://button[@id="serving-runtime-template-selection"]/span
+            Should Be True    ${runtime} in ${text}
+        END
+    EXCEPT
+        Log    framework ${runtime} does not appear to be supported by the chosen model server
+    END
 
 Get Kserve Inference Host Via UI
     [Documentation]    Fetches the host of the model's URL from the Data Science Project UI

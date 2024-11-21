@@ -73,7 +73,7 @@ Verify Tensorflow Model Via UI    # robocop: off=too-long-test-case,too-many-cal
     Recreate S3 Data Connection    project_title=${PRJ_TITLE}-2268    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
-    Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}    existing_server=${TRUE}
+    Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}    existing_server=${FALSE}
     Serve Model    project_name=${PRJ_TITLE}-2268    model_name=${MODEL_NAME}    framework=tensorflow
     ...    existing_data_connection=${TRUE}    data_connection_name=model-serving-connection
     ...    model_path=inception_resnet_v2.pb
@@ -102,7 +102,7 @@ Verify Secure Model Can Be Deployed In Same Project    # robocop: off=too-long-t
     Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
-    Create Model Server    token=${TRUE}    server_name=${SECURED_RUNTIME}    existing_server=${TRUE}
+    Create Model Server    token=${TRUE}    server_name=${SECURED_RUNTIME}    existing_server=${FALSE}
     Serve Model    project_name=${PRJ_TITLE}    model_name=${SECURED_MODEL}    model_server=${SECURED_RUNTIME}
     ...    existing_data_connection=${TRUE}    data_connection_name=model-serving-connection    existing_model=${TRUE}
     ...    framework=onnx    model_path=mnist-8.onnx
@@ -127,7 +127,7 @@ Test Inference With Token Authentication    # robocop: off=too-long-test-case
     Recreate S3 Data Connection    project_title=${SECOND_PROJECT}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
-    Create Model Server    token=${TRUE}    server_name=${SECURED_RUNTIME}    existing_server=${TRUE}
+    Create Model Server    token=${TRUE}    server_name=${SECURED_RUNTIME}    existing_server=${FALSE}
     Serve Model    project_name=${SECOND_PROJECT}    model_name=${SECURED_MODEL}    model_server=${SECURED_RUNTIME}
     ...    existing_data_connection=${TRUE}    data_connection_name=model-serving-connection    existing_model=${TRUE}
     ...    framework=onnx    model_path=mnist-8.onnx
@@ -218,7 +218,7 @@ Create Openvino Models    # robocop: off=too-many-calls-in-keyword
         Recreate S3 Data Connection    project_title=${new_project}    dc_name=model-serving-connection
         ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
         ...            aws_bucket_name=ods-ci-s3
-        Create Model Server    token=${FALSE}    server_name=${server_name}    existing_server=${TRUE}
+        Create Model Server    token=${FALSE}    server_name=${server_name}    existing_server=${FALSE}
         Serve Model    project_name=${new_project}    model_name=${model_name}    framework=openvino_ir
         ...    existing_data_connection=${TRUE}    data_connection_name=model-serving-connection
         ...    model_path=openvino-example-model    existing_model=${TRUE}

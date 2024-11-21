@@ -405,7 +405,7 @@ Verify User With Edit Permission Can Deploy Query And Delete A LLM    # robocop:
     ${test_namespace}=    Set Variable     ${TEST_NS}-edit-permission
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
     Move To Tab    Permissions
-    Assign Edit Permissions To User ${TEST_USER_3.USERNAME}
+    Assign Contributor Permissions To User ${TEST_USER_3.USERNAME}
     Move To Tab    Overview
     Logout From RHODS Dashboard
     Login To RHODS Dashboard    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}    ${TEST_USER_3.AUTH_TYPE}

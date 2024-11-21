@@ -52,7 +52,7 @@ Create Workbench
     ...                 the DS Project data. It allows to add new or existent PV storage,
     ...                 add Environment variables and select Jupyter image
     [Arguments]     ${workbench_title}  ${workbench_description}  ${prj_title}   ${image_name}   ${deployment_size}
-    ...             ${storage}  ${pv_existent}   ${pv_name}  ${pv_description}  ${pv_size}    ${gpus}=${NONE}
+    ...             ${storage}  ${pv_existent}   ${pv_name}  ${pv_description}  ${pv_path}   ${pv_size}    ${gpus}=${NONE}
     ...             ${press_cancel}=${FALSE}  ${version}=default  ${envs}=${NONE}
     ...             ${data_connection}=${NONE}
     Open Data Science Project Details Page       project_title=${prj_title}    tab_id=workbenches
@@ -83,7 +83,7 @@ Create Workbench
             # Use the `Jump to section` links in the page to scroll the section into view
             Click Element    //a[@href="#cluster-storage"]
             Click Element    //*[@data-testid="existing-storage-button"]
-            Select An Existent PV   ${pv_name}   ods-ci-test-path
+            Select An Existent PV   ${pv_name}   ${pv_path}
         ELSE IF   ${pv_existent} == ${FALSE}
             # Use the `Jump to section` links in the page to scroll the section into view
             Click Element    //a[@href="#cluster-storage"]
@@ -198,8 +198,6 @@ Select An Existent PV
     Click Element   ${existing_pv_xpath}
     Input Text    //*[@data-testid="mount-path-folder-value"]    ${path}
     Click Element    //*[@data-testid="modal-submit-button"]
-
-
 
 Select Workbench Image
     [Documentation]    Selects a Jupyter image in the workbench creation page

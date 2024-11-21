@@ -38,6 +38,7 @@ ${PV_BASENAME}=         ods-ci-pv
 ${PV_DESCRIPTION}=         ods-ci-pv is a PV created to test DS Projects feature
 # PV size are in GB
 ${PV_SIZE}=         2
+${PV_PATH}=    ods-ci-test-path
 ${DC_S3_NAME}=    ods-ci-s3
 ${DC_2_S3_NAME}=    ods-ci-s3-connected
 ${DC_3_S3_NAME}=    ods-ci-s3-delete
@@ -122,7 +123,7 @@ Verify User Can Create And Start A Workbench With Existent PV Storage
     ...                               size=${PV_SIZE}    connected_workbench=${NONE}   existing_storage=${TRUE}
     Create Workbench    workbench_title=${WORKBENCH_2_TITLE}  workbench_description=${WORKBENCH_2_DESCRIPTION}
     ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
-    ...                 storage=Persistent  pv_existent=${TRUE}    pv_name=${pv_name}  pv_description=${NONE}  pv_size=${NONE}
+    ...                 storage=Persistent  pv_existent=${TRUE}    pv_name=${pv_name}  pv_description=${NONE}  pv_path=${PV_PATH}  pv_size=${NONE}
     Workbench Should Be Listed      workbench_title=${WORKBENCH_2_TITLE}
     Workbench Status Should Be      workbench_title=${WORKBENCH_2_TITLE}      status=${WORKBENCH_STATUS_STARTING}
     Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_2_TITLE}

@@ -313,8 +313,7 @@ Wait Notebook To Be Loaded
 
     IF  "${ide}"=="VSCode"
         Wait Until Page Contains Element  xpath://div[@class="menubar-menu-button"]  timeout=60s
-        Wait Until Page Contains Element  xpath://div[@class="monaco-dialog-box"]  timeout=60s
-        Wait Until Page Contains  Do you trust the authors of the files in this folder?
+        Wait Until Page Contains  Get Started with VS Code for the Web
     ELSE IF  "${ide}"=="JupyterLab"
         Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
         Sleep    2s    reason=Wait for a possible popup

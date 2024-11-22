@@ -32,7 +32,6 @@ Validate Service Mesh Control Plane Already Created
     [Tags]      RHOAIENG-2517       Operator
     Fetch Image Url And Update Channel
     Check Whether DSC Exists And Save Component Statuses
-    Fetch Cluster Type By Domain
     IF    "${CLUSTER_TYPE}" == "selfmanaged"
         Uninstall RHODS In Self Managed Cluster
         Create Smcp From Template

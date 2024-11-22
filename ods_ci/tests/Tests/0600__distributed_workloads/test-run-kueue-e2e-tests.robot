@@ -21,6 +21,7 @@ Run Kueue E2E test
     [Tags]  Tier1
     ...     Kueue
     ...     DistributedWorkloads
+    ...     ExcludeOnDisconnected
     Run Kueue E2E Test    e2e_test.go
 
 Run Sanity test

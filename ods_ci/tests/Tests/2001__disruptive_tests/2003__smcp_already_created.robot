@@ -105,16 +105,6 @@ Fetch Image Url And Update Channel
     Should Be Equal As Integers    ${rc}    0
     Set Global Variable    ${UPDATE_CHANNEL}    ${out}
 
-Fetch Cluster Type By Domain
-    [Documentation]    This Keyword outputs the kind of cluster depending on the console URL domain
-    ${matches}=    Get Regexp Matches    ${OCP_CONSOLE_URL}    rh-ods
-    ${domain}=    Get From List    ${matches}    0
-    IF    "${domain}" == "rh-ods"
-        Set Global Variable    ${CLUSTER_TYPE}    selfmanaged
-    ELSE
-        Set Global Variable    ${CLUSTER_TYPE}    managed
-    END
-
 Create Smcp From Template
     [Documentation]    Create a default ServiceMeshControlPlane from a template
     ${file_path}=    Set Variable    ./tasks/Resources/Files/

@@ -61,7 +61,7 @@ Verify User Can Deploy Multiple Models In The Same Namespace Using The UI    # r
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
     ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Deploy Kserve Model Via UI    ${model_two_name}    serving_runtime=Caikit TGIS    data_connection=kserve-connection
-    ...    path=flan-t5-small/${model_two_name}
+    ...    path=flan-t5-small/${model_two_name}    existing_server=${TRUE}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
     ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Query Model Multiple Times    inference_type=all-tokens    model_name=${model_one_name}

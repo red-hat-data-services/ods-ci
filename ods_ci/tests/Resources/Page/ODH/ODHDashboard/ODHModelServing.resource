@@ -226,7 +226,7 @@ Get Model Route Via UI
     [Arguments]    ${model_name}
     # TODO: Open model serving home page if needed?
     # Click on Inference Endpoints link
-    ${endpoint_link}=    Set Variable    //a[@data-testid="metrics-link-test-model" and text()="${model_name}"]/ancestor::tr//td//button[@data-testid="internal-external-service-button"]
+    ${endpoint_link}=    Set Variable    //a[contains(@data-testid, 'metrics-link')][text() = '${model_name}']/ancestor::tr//td//button[@data-testid="internal-external-service-button"]
     SeleniumLibrary.Wait Until Page Contains Element    ${endpoint_link}
     SeleniumLibrary.Click Button    ${endpoint_link}
     # Get the external URL
@@ -515,7 +515,7 @@ Deploy Kserve Model Via UI  #robocop: disable
 Set Model Server Runtime
     [Documentation]    Opens the Serving runtime dropdown in the deploy model modal window for models
     ...    and select the given runtime
-    [Arguments]    ${runtime}=Caikit TGIS
+    [Arguments]    ${runtime}=Caikit TGIS    ${retries}=1
     TRY
         ${is_enabled}=    Run Keyword And Return Status
         ...    Element Should Be Enabled    xpath://button[@id="serving-runtime-template-selection"]

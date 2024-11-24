@@ -33,7 +33,6 @@ Verify Openvino Deployment
     [Arguments]    ${runtime_name}    ${project_name}=${PRJ_TITLE}    ${num_replicas}=1
     ${pod_selector}=    Set Variable    name=modelmesh-serving-${runtime_name}
     @{ovms} =  Oc Get    kind=Pod    namespace=${project_name}   label_selector=${pod_selector}
-    Log    message=${ovms}    console=True
     ${containerNames} =  Create List  rest-proxy  oauth-proxy  ovms  ovms-adapter  mm
     ${pass}=    Run Keyword And Return Status    Verify Deployment    ${ovms}  ${num_replicas}  5  ${containerNames}
     IF    not ${pass}

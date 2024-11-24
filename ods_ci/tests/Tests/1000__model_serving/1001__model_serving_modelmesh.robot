@@ -69,26 +69,27 @@ Verify Tensorflow Model Via UI    # robocop: off=too-long-test-case,too-many-cal
     [Tags]    Sanity
     ...       ODS-2268
     Open Data Science Projects Home Page
-    Create Data Science Project    title=${PRJ_TITLE}-2268    description=${PRJ_DESCRIPTION}
-    Recreate S3 Data Connection    project_title=${PRJ_TITLE}-2268    dc_name=model-serving-connection
+    ${namespace}=    Set Variable    ${PRJ_TITLE}-2268
+    Create Data Science Project    title=${namespace}    description=${PRJ_DESCRIPTION}
+    Recreate S3 Data Connection    project_title=${namespace}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
     Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}    existing_server=${FALSE}
-    Serve Model    project_name=${PRJ_TITLE}-2268    model_name=${MODEL_NAME}    framework=tensorflow
+    Serve Model    project_name=${namespace}    model_name=${MODEL_NAME}    framework=tensorflow
     ...    existing_data_connection=${TRUE}    data_connection_name=model-serving-connection
     ...    model_path=inception_resnet_v2.pb
     ${runtime_pod_name}=    Replace String Using Regexp    string=${RUNTIME_NAME}    pattern=\\s    replace_with=-
     ${runtime_pod_name}=    Convert To Lower Case    ${runtime_pod_name}
-    Wait Until Keyword Succeeds    5 min  10 sec  Verify Openvino Deployment    runtime_name=${RUNTIME_POD_NAME}
-    Wait Until Keyword Succeeds    5 min  10 sec  Verify Serving Service
+    Wait Until Keyword Succeeds    5 min  10 sec  Verify Openvino Deployment    runtime_name=${RUNTIME_POD_NAME}    project_name=${namespace}
+    Wait Until Keyword Succeeds    5 min  10 sec  Verify Serving Service    project_name=${namespace}
     Verify Model Status    ${MODEL_NAME}    success
     Set Suite Variable    ${MODEL_CREATED}    ${TRUE}
     ${url}=    Get Model Route Via UI    ${MODEL_NAME}
-    ${status_code}    ${response_text}=    Send Random Inference Request     endpoint=${url}    name=input
+    ${status_code}    ${response_text}=    Send Random Inference Request     endpoint=${url}    name=input:0
     ...    shape={"B": 1, "H": 299, "W": 299, "C": 3}    no_requests=1
     Should Be Equal As Strings    ${status_code}    200
     [Teardown]   Run Keywords    Run Keyword If Test Failed    Get Modelmesh Events And Logs
-    ...    server_name=${RUNTIME_NAME}    project_title=${PRJ_TITLE}-2869
+    ...    server_name=${RUNTIME_NAME}    project_title=${namespace}
     ...    AND
     ...    Model Serving Test Teardown
 
@@ -113,7 +114,7 @@ Verify Secure Model Can Be Deployed In Same Project    # robocop: off=too-long-t
     Verify Model Status    ${SECURED_MODEL}    success
     Set Suite Variable    ${MODEL_CREATED}    ${TRUE}
     [Teardown]   Run Keywords    Run Keyword If Test Failed    Get Modelmesh Events And Logs
-    ...    server_name=${RUNTIME_NAME}    project_title=${PRJ_TITLE}-2869
+    ...    server_name=${RUNTIME_NAME}    project_title=${PRJ_TITLE}
     ...    AND
     ...    Model Serving Test Teardown
 
@@ -139,7 +140,7 @@ Test Inference With Token Authentication    # robocop: off=too-long-test-case
     ${out}=    Get Model Inference   ${SECURED_MODEL}    ${INFERENCE_INPUT}    token_auth=${FALSE}
     Should Contain    ${out}    <button type="submit" class="btn btn-lg btn-primary">Log in with OpenShift</button>
     [Teardown]   Run Keywords    Run Keyword If Test Failed    Get Modelmesh Events And Logs
-    ...    server_name=${RUNTIME_NAME}    project_title=${PRJ_TITLE}-2869
+    ...    server_name=${RUNTIME_NAME}    project_title=${SECOND_PROJECT}
     ...    AND
     ...    Model Serving Test Teardown
 
@@ -157,37 +158,38 @@ Verify Editing Existing Model Deployment    # robocop: off=too-long-test-case,to
     [Tags]    Tier1
     ...       RHOAIENG-2869
     Open Data Science Projects Home Page
-    Create Data Science Project    title=${PRJ_TITLE}-2869    description=${PRJ_DESCRIPTION}
-    Recreate S3 Data Connection    project_title=${PRJ_TITLE}-2869    dc_name=model-serving-connection
+    ${namespace}=    Set Variable    ${PRJ_TITLE}-2869
+    Create Data Science Project    title=${namespace}    description=${PRJ_DESCRIPTION}
+    Recreate S3 Data Connection    project_title=${namespace}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
     Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}    existing_server=${TRUE}
-    Serve Model    project_name=${PRJ_TITLE}-2869    model_name=${MODEL_NAME}    framework=tensorflow
+    Serve Model    project_name=${namespace}    model_name=${MODEL_NAME}    framework=tensorflow
     ...    existing_data_connection=${TRUE}    data_connection_name=model-serving-connection
     ...    model_path=inception_resnet_v2.pb
     ${runtime_pod_name}=    Replace String Using Regexp    string=${RUNTIME_NAME}    pattern=\\s    replace_with=-
     ${runtime_pod_name}=    Convert To Lower Case    ${runtime_pod_name}
-    Wait Until Keyword Succeeds    5 min  10 sec  Verify Openvino Deployment    runtime_name=${RUNTIME_POD_NAME}
-    Wait Until Keyword Succeeds    5 min  10 sec  Verify Serving Service
+    Wait Until Keyword Succeeds    5 min  10 sec  Verify Openvino Deployment    runtime_name=${RUNTIME_POD_NAME}    project_name=${namespace}
+    Wait Until Keyword Succeeds    5 min  10 sec  Verify Serving Service    project_name=${namespace}
     Verify Model Status    ${MODEL_NAME}    success
     Set Suite Variable    ${MODEL_CREATED}    ${TRUE}
     ${url}=    Get Model Route Via UI    ${MODEL_NAME}
     ${status_code}    ${response_text}=    Send Random Inference Request     endpoint=${url}    name=input
     ...    shape={"B": 1, "H": 299, "W": 299, "C": 3}    no_requests=1
     Should Be Equal As Strings    ${status_code}    200
-    Serve Model    project_name=${PRJ_TITLE}-2869    model_name=${MODEL_NAME}    framework=openvino_ir
+    Serve Model    project_name=${namespace}    model_name=${MODEL_NAME}    framework=openvino_ir
     ...    existing_data_connection=${TRUE}    data_connection_name=model-serving-connection
     ...    model_path=openvino-example-model    existing_model=${TRUE}
     ${runtime_pod_name}=    Replace String Using Regexp    string=${RUNTIME_NAME}    pattern=\\s    replace_with=-
     ${runtime_pod_name}=    Convert To Lower Case    ${runtime_pod_name}
     Wait Until Keyword Succeeds    5 min  10 sec  Verify Openvino Deployment    runtime_name=${runtime_pod_name}
-    ...    project_name=${PRJ_TITLE}-2869
-    Wait Until Keyword Succeeds    5 min  10 sec  Verify Serving Service    ${PRJ_TITLE}-2869
+    ...    project_name=${namespace}
+    Wait Until Keyword Succeeds    5 min  10 sec  Verify Serving Service    ${namespace}
     Verify Model Status    ${MODEL_NAME}    success
     Run Keyword And Continue On Failure    Verify Model Inference    ${MODEL_NAME}    ${INFERENCE_INPUT_OPENVINO}
     ...    ${EXPECTED_INFERENCE_OUTPUT_OPENVINO}    token_auth=${FALSE}
     [Teardown]   Run Keywords    Run Keyword If Test Failed    Get Modelmesh Events And Logs
-    ...    server_name=${RUNTIME_NAME}    project_title=${PRJ_TITLE}-2869
+    ...    server_name=${RUNTIME_NAME}    project_title=${namespace}
     ...    AND
     ...    Model Serving Test Teardown
 

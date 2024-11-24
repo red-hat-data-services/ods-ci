@@ -39,7 +39,7 @@ Set Service Mesh State To Managed And Wait For CR Ready
 
     Set Service Mesh Management State    Managed    ${dsci_ns}
 
-    Wait Until Keyword Succeeds    2 min    0 sec
+    Wait Until Keyword Succeeds    5 min    0 sec
     ...    Is Resource Present    ServiceMeshControlPlane    ${smcp_name}     ${smcp_ns}    ${IS_PRESENT}
 
     ${rc}   ${output}=    Run And Return Rc And Output

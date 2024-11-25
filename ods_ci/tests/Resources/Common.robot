@@ -567,7 +567,7 @@ Clone Git Repository
 Get Operator Starting Version
     [Documentation]    Returns the starting version of the operator in the upgrade chain
     ${rc}    ${out}=    Run And Return RC And Output
-    ...    oc get subscription rhods-operator -n redhat-ods-operator -o yaml | yq '.spec.startingCSV' | awk -F. '{print $2"."$3"."$4}'    # robocop: disable
+    ...    oc get subscription rhods-operator -n ${OPERATOR_NAMESPACE} -o yaml | yq '.spec.startingCSV' | awk -F. '{print $2"."$3"."$4}'    # robocop: disable
     Should Be Equal As Integers    ${rc}    0
     RETURN    ${out}
 
@@ -578,3 +578,12 @@ Is Starting Version Supported
     ${starting_ver}=    Get Operator Starting Version
     ${out}=     Gte    ${starting_ver}    ${minimum_version}
     RETURN    ${out}
+
+Skip If Operator Starting Version Is Not Supported
+    [Documentation]    Skips test if ODH/RHOAI operator starting version is < ${minimum_version}
+    ...    Usage example: add    Skip If Operator Starting Version Is Not Supported    minimum_version=2.14.0
+    ...    in your post-upgrade tests if the resources needed by them were added in the pre-upgrade suite
+    ...    in ods-ci releases/2.14.0
+    [Arguments]    ${minimum_version}
+    ${supported}=    Is Starting Version Supported    minimum_version=${minimum_version}
+    Skip If    condition="${supported}"=="${FALSE}"    msg=This test is skipped because starting operator version < ${minimum_version}

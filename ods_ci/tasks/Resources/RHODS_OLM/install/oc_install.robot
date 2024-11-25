@@ -91,7 +91,7 @@ Verify RHODS Installation
         IF    "${TEST_ENV.lower()}" == "crc"
             ${timeout_in_seconds} =   Set Variable   180
         ELSE
-            ${timeout_in_seconds} =   Set Variable   30
+            ${timeout_in_seconds} =   Set Variable   60
         END
         Wait For DSCInitialization CustomResource To Be Ready    timeout=${timeout_in_seconds}
     END

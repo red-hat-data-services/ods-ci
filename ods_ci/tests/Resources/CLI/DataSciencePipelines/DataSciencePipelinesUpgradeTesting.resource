@@ -23,8 +23,8 @@ Verify Resources After Upgrade
     [Documentation]    Verifies the status of the resources created in ${PROJECT} after the upgrade
     ...    Deletes ${PROJECT} if all verifications are correct (leaving for debugging purposes if not)
 
+    Skip If Operator Starting Version Is Not Supported    minimum_version=2.14.0
     Skip If Namespace Does Not Exist    ${PROJECT}
-
     DataSciencePipelinesBackend.Wait Until Pipeline Server Is Deployed    namespace=${PROJECT}
 
     ${take_nap_run_id}=    DataSciencePipelinesBackend.Get Last Run By Pipeline Name

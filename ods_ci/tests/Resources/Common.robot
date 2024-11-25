@@ -316,6 +316,16 @@ Skip If RHODS Is Managed
        Skip If    condition=${is_self_managed}==False    msg=This test is skipped for Managed RHODS
     END
 
+Skip If Namespace Does Not Exist
+    [Documentation]    Skips test if ${namespace} does not exist in the cluster
+    [Arguments]    ${namespace}    ${msg}=${EMPTY}
+    ${rc}=    Run And Return Rc    oc get project ${namespace}
+    IF    "${msg}" != "${EMPTY}"
+       Skip If    condition="${rc}"!="${0}"    msg=${msg}
+    ELSE
+       Skip If    condition="${rc}"!="${0}"    msg=This test is skipped because namespace ${namespace} does not exist
+    END
+
 Run Keyword If RHODS Is Managed
     [Documentation]    Runs keyword ${name} using  @{arguments} if RHODS is Managed (Cloud Version)
     [Arguments]    ${name}    @{arguments}
@@ -451,7 +461,7 @@ Run And Verify Command
     IF    ${print_to_log}    Log    ${result.stdout}     console=True
     Should Be True    ${result.rc} == ${expected_rc}
     RETURN    ${result.stdout}
-  
+
 Run And Watch Command
   [Documentation]    Run any shell command (including args) with optional:
   ...    Timeout: 10 minutes by default.

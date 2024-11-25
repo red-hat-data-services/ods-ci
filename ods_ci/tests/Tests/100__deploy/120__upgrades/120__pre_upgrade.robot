@@ -22,7 +22,7 @@ Resource           ../../../Resources/Page/DistributedWorkloads/DistributedWorkl
 Resource           ../../../Resources/Page/DistributedWorkloads/WorkloadMetricsUI.resource
 Suite Setup        Dashboard Suite Setup
 Suite Teardown     RHOSi Teardown
-Test Tags          PreUpgradeKobi
+Test Tags          PreUpgrade
 
 
 *** Variables ***
@@ -39,11 +39,6 @@ ${MODEL_CREATED}=    ${FALSE}
 ${RUNTIME_NAME}=    Model Serving Test
 
 *** Test Cases ***
-Test PreUpgrade
-    [Documentation]    Test for pre upgrade
-    [Tags]  PreUpgrade
-    Log To Console    This is test of PreUpgrade
-
 Set PVC Size Via UI
     [Documentation]    Sets a Pod toleration via the admin UI
     [Tags]  Upgrade

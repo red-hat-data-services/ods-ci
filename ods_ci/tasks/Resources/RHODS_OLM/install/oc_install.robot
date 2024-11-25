@@ -231,7 +231,6 @@ Wait For Pods Numbers
   ${status}   Set Variable   False
   FOR    ${counter}    IN RANGE   ${timeout}
          ${return_code}    ${output}    Run And Return Rc And Output   oc get pod -n ${namespace} -l ${label_selector} | tail -n +2 | wc -l
-         Log To Console    Output: ${output} RC: ${return_code} counter: ${counter} timeout: ${timeout} NS: ${namespace} label: ${label_selector}
          IF    ${output} == ${count}
                ${status}  Set Variable  True
                Log To Console  pods ${label_selector} created

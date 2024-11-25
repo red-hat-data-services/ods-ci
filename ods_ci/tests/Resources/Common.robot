@@ -183,7 +183,7 @@ Wait Until Csv Is Ready
     Sleep  ${check_interval}
     ${csv_created}=    Run Process    oc get csv --no-headers -n ${operators_namespace} | awk '/${display_name}/ {print \$1}'    shell=yes
     Log To Console    The Result of csv_created Output is: ${csv_created.stdout} RC: ${csv_created.rc}
-    IF  '${csv_created.stdout}' == '${EMPTY}'    CONTINUE
+    IF  '$csv_created.stdout' == '${EMPTY}'    CONTINUE
     #  In case of upgrade there are 2 operators, we need to wait until only one will be available
     ${lines}=     Split String    ${csv_created.stdout}    \n
     ${line_count}=    Get Length    ${lines}

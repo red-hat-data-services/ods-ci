@@ -38,19 +38,7 @@ Install ISV Operator From OperatorHub Via CLI    # robocop: disable
     Oc Apply    kind=Subscription    src=${operator_sub_filepath}
     Wait Until Keyword Succeeds    1 min    0 sec
     ...    Is Resource Present    Subscription    ${subscription_name}     ${namespace}    ${IS_PRESENT}
-#    Wait For Installplan And Approve It    ${namespace}    ${operator_name}
-    WHILE   "${installplan_name}" == "${EMPTY}"     limit=5m
-        ${installplan_name}=       Get Resource Attribute      ${namespace}
-        ...      Subscription       ${subscription_name}        .status.installPlanRef.name
-        Sleep       20s
-    END
-    ${installplan_approval}=     Get Resource Attribute      ${namespace}
-    ...      InstallPlan       ${installplan_name}        .spec.approval
-    IF    "${installplan_approval}" == "Manual"
-          ${return_code}    ${out}=     Run And Return Rc And Output   oc patch installplan ${installplan_name} -n ${namespace} --type='json' -p '[{"op": "replace", "path": "/spec/approved", "value": true}]'  #robocop:disable
-          Should Be Equal As Integers    ${return_code}     0   msg=Error while approving installplan
-    END
-#   until here
+    Wait For Installplan And Approve It    ${namespace}    ${operator_name}
 
 Create Operator Group
     [Documentation]    Creates the Operator Group object which might be needed by an operator.

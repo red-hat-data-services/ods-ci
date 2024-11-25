@@ -9,7 +9,7 @@ Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDashboardSetting
 Resource            ../../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
 Library             DebugLibrary
 Library             JupyterLibrary
-Test Tags           DuringUpgradeKobi
+Test Tags           DuringUpgrade
 
 
 *** Variables ***
@@ -18,11 +18,6 @@ ${UPGRADE_TO_IIB}=    ${EMPTY}
 
 
 *** Test Cases ***
-Test DuringUpgrade
-    [Documentation]    Test for during upgrade
-    [Tags]  DuringUpgrade
-    Log To Console    This is test of DuringUpgrade
-
 Long Running Jupyter Notebook
     [Documentation]    Launch a long running notebook before the upgrade
     [Tags]  Upgrade
@@ -37,7 +32,6 @@ Upgrade RHODS
     [Documentation]    Approve the install plan for the upgrade and make sure that upgrade has completed
     [Tags]  ODS-1766
     ...     Upgrade
-    ...     DuringUpgrade
     ${initial_version} =  Get RHODS Version
     ${initial_creation_date} =  Get Operator Pod Creation Date
     Set Suite Variable    ${UPDATE_CHANNEL}    ${UPGRADE_TO_UPDATE_CHANNEL}

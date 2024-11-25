@@ -174,18 +174,18 @@ Add Spawner Environment Variable
 
 Remove All Spawner Environment Variables
    [Documentation]  Removes all existing environment variables in the Spawner
-   @{env_vars_list} =    Create List
-   @{env_elements} =    Get WebElements    xpath://*[.='Variable name']/../../div[2]/input
+   ${remove_env_btn_xpath} =    Set Variable    //*[@data-id="remove-env-var-button"]
+   ${first_remove_env_btn_xpath} =    Set Variable
+   ...    //*[@class="odh-notebook-controller__env-var-row"][1]${remove_env_btn_xpath}
 
-   # We need to fist get the env values and remove them later to avoid a
-   # selenium error due to modifiying the DOM while iterating its contents
-   FOR    ${element}    IN    @{env_elements}
-       ${txt} =   Get Value  ${element}
-       Append To List  ${env_vars_list}   ${txt}
-   END
-
-   FOR    ${env}    IN    @{env_vars_list}
-       Remove Spawner Environment Variable   ${env}
+   WHILE    ${TRUE}
+       ${remove_btn_number} =    Get Element Count    ${remove_env_btn_xpath}
+       IF    ${remove_btn_number} > 0
+           Click Button    ${first_remove_env_btn_xpath}
+           Sleep    0.5s    # Give browser time to react
+       ELSE
+           BREAK
+       END
    END
 
 Remove Spawner Environment Variable
@@ -313,8 +313,7 @@ Wait Notebook To Be Loaded
 
     IF  "${ide}"=="VSCode"
         Wait Until Page Contains Element  xpath://div[@class="menubar-menu-button"]  timeout=60s
-        Wait Until Page Contains Element  xpath://div[@class="monaco-dialog-box"]  timeout=60s
-        Wait Until Page Contains  Do you trust the authors of the files in this folder?
+        Wait Until Page Contains  Get Started with VS Code for the Web
     ELSE IF  "${ide}"=="JupyterLab"
         Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
         Sleep    2s    reason=Wait for a possible popup
@@ -360,8 +359,8 @@ Spawn Notebook With Arguments  # robocop: disable
                 Capture Page Screenshot    reload.png
                 Wait Until JupyterHub Spawner Is Ready
             END
+            Remove All Spawner Environment Variables
             IF  &{envs}
-                Remove All Spawner Environment Variables
                 FOR  ${key}  ${value}  IN  &{envs}[envs]
                     Sleep  1
                     Add Spawner Environment Variable  ${key}  ${value}

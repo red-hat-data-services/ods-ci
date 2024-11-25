@@ -13,13 +13,13 @@ Resource          ../../../Resources/OCP.resource
 Resource          ../../../Resources/CLI/ModelServing/modelmesh.resource
 Resource          ../../../Resources/Common.robot
 Suite Setup       Triton On Kserve Suite Setup
-#Suite Teardown    Triton On Kserve Suite Teardown
+Suite Teardown    Triton On Kserve Suite Teardown
 Test Tags         Kserve
 
 
 *** Variables ***
 ${INFERENCE_REST_INPUT_ONNX_FILE}=    @${RESOURCES_DIRPATH}/kserve-triton-onnx-rest-input.json
-${PRJ_TITLE}=    ms-triton-project-mm6
+${PRJ_TITLE}=    ms-triton-project-mm
 ${PRJ_DESCRIPTION}=    project used for model serving triton runtime tests
 ${MODEL_CREATED}=    ${FALSE}
 ${ONNX_MODEL_NAME}=    densenet_onnx

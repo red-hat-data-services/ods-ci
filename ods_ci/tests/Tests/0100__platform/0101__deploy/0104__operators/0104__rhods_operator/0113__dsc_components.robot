@@ -269,8 +269,8 @@ Validate Workbenches Managed State
 
     [Teardown]     Restore DSC Component State    workbenches    ${NOTEBOOK_DEPLOYMENT_NAME}    ${NOTEBOOK_CONTROLLER_DEPLOYMENT_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.WORKBENCHES}
 
-Validate Workbenches Controller Manager Removed State
-    [Documentation]    Validate that Workbenches Controller Manager management state Removed does remove relevant resources.
+Validate Workbenches Removed State
+    [Documentation]    Validate that Workbenches component management state Removed does remove relevant resources.
     [Tags]    Operator    Tier1   workbenches-removed
 
     Set DSC Component Removed State And Wait For Completion   workbenches    ${NOTEBOOK_DEPLOYMENT_NAME}    ${NOTEBOOK_CONTROLLER_MANAGER_LABEL_SELECTOR}

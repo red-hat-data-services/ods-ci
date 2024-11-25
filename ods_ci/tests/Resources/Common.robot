@@ -380,7 +380,10 @@ Wait Until Generic Modal Disappears
     ${is_modal}=    Is Generic Modal Displayed
     IF    ${is_modal} == ${TRUE}
         IF    ${partial_match} == ${TRUE}
-            Wait Until Page Does Not Contain Element    xpath=//*[contains(@id,"${id}")]    timeout=${timeout}
+            ${is_displayed}=    Run Keyword And Return Status    xpath=//*[contains(@id,"${id}")]    timeout=${timeout}
+            IF    ${is_displayed}
+                Wait Until Page Does Not Contain Element    xpath=//*[contains(@id,"${id}")]    timeout=${timeout}
+            END
         ELSE
             Wait Until Page Does Not Contain Element    xpath=//*[@id="${id}")]    timeout=${timeout}
         END

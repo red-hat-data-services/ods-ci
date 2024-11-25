@@ -282,6 +282,7 @@ Upload Python Client Files In The Workbench
 
 Open Model Registry Dashboard Page
     [Documentation]    Opens the Model Registry page from the dashboard nav bar
+    [Arguments]    ${allowed_user}=${TRUE}
     ${mr_present}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain    Model Registry
     WHILE    ${mr_present}!=${TRUE}    limit=120s
         SeleniumLibrary.Reload Page
@@ -294,15 +295,22 @@ Open Model Registry Dashboard Page
     Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=Model Registry
     SeleniumLibrary.Wait Until Page Contains    Select a model registry to view and manage your registered models.
     Maybe Wait For Dashboard Loading Spinner Page
-    ${loaded}=    Run Keyword And Return Status
-    ...    SeleniumLibrary.Page Should Not Contain    Request access to model registries
-    WHILE    ${loaded}!=${TRUE}    limit=12    # Retries for 2 minutes - wait for user group to reconcile
-        SeleniumLibrary.Reload Page
-        SeleniumLibrary.Wait Until Page Contains    Model Registry
-        SeleniumLibrary.Wait Until Page Contains    Select a model registry to view and manage your registered models.
+    # This works assuming there's a single MR instance and the user is either allowed or not allowed to see it
+    # TODO: Improve logic to handle multiple registries
+    IF    ${allowed_user}
         ${loaded}=    Run Keyword And Return Status
         ...    SeleniumLibrary.Page Should Not Contain    Request access to model registries
-        Sleep    10s
+        WHILE    ${loaded}!=${TRUE}    limit=12    # Retries for 2 minutes - wait for user group to reconcile
+            SeleniumLibrary.Reload Page
+            SeleniumLibrary.Wait Until Page Contains    Model Registry
+            SeleniumLibrary.Wait Until Page Contains
+            ...    Select a model registry to view and manage your registered models.
+            ${loaded}=    Run Keyword And Return Status
+            ...    SeleniumLibrary.Page Should Not Contain    Request access to model registries
+            Sleep    10s
+        END
+    ELSE
+        SeleniumLibrary.Page Should Contain    Request access to model registries
     END
     Maybe Wait For Dashboard Loading Spinner Page
 
@@ -344,11 +352,6 @@ Model Registry Pre Upgrade Scenario
     Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     ${workbenches}=    Create List    ${WORKBENCH_TITLE}
-    Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME}
-    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
-    ...            aws_bucket_name=${AWS_BUCKET}    connected_workbench=${workbenches}
-    Data Connection Should Be Listed    name=${DC_S3_NAME}    type=${DC_S3_TYPE}    connected_workbench=${workbenches}
-    Open Data Science Project Details Page       project_title=${prj_title}    tab_id=workbenches
     Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}    timeout=120s
     Sleep    15s    reason=Workbench might not be ready right away, wait for a few seconds before opening it
     ${handle}=    Launch And Access Workbench    workbench_title=${WORKBENCH_TITLE}

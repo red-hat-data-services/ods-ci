@@ -1347,9 +1347,9 @@ Set Runtime Image
     [Arguments]    ${gpu_type}
     IF  "${RUNTIME_IMAGE}" == "${EMPTY}"
          IF  "${gpu_type}" == "nvidia"
-            Set Test Variable    ${runtime_image}    quay.io/modh/vllm@sha256:167aa05982214c3941afbdde7c5aff6f81040193a0db1dc06a5ad16af0a8780e
+            Set Test Variable    ${runtime_image}    quay.io/modh/vllm@sha256:c86ff1e89c86bc9821b75d7f2bbc170b3c13e3ccf538bf543b1110f23e056316
          ELSE IF    "${gpu_type}" == "amd"
-            Set Test Variable    ${runtime_image}    quay.io/modh/vllm@sha256:1db9fc11f3cac723dee8c4de71fd36aafc94c6ff4d9f51cb785a6f4461f027af
+            Set Test Variable    ${runtime_image}    quay.io/modh/vllm@sha256:10f09eeca822ebe77e127aad7eca2571f859a5536a6023a1baffc6764bcadc6e
          ELSE
              FAIL   msg=Provided GPU type is not yet supported. Only nvidia and amd gpu type are supported
          END

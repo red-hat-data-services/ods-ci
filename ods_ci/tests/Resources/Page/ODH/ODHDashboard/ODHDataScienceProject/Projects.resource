@@ -51,7 +51,9 @@ Open Data Science Project Details Page
     END
     IF  "${tab_id}" != "${NONE}"
         Log    ${tab_id}
-        Wait Until Element Is Visible    //button[@role="tab" and @aria-controls="${tab_id}"]   timeout=10s
+        Sleep    20s
+        Wait Until Page Contains         Data connections
+        Wait Until Element Is Visible    //button[@role="tab" and @aria-controls="${tab_id}"]
         Click Button    //button[@role="tab" and @aria-controls="${tab_id}"]
         Element Should Be Visible   //button[@role="tab" and @aria-controls="${tab_id}" and @aria-selected="true"]
         Sleep    1s    reason=The tab page needs to load content according to user permissions

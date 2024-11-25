@@ -19,7 +19,7 @@ Test Tags         Kserve
 
 *** Variables ***
 ${INFERENCE_REST_INPUT_ONNX_FILE}=    @${RESOURCES_DIRPATH}/kserve-triton-onnx-rest-input.json
-${PRJ_TITLE}=    ms-triton-project-mm
+${PRJ_TITLE}=    ms-triton-project-mm5
 ${PRJ_DESCRIPTION}=    project used for model serving triton runtime tests
 ${MODEL_CREATED}=    ${FALSE}
 ${ONNX_MODEL_NAME}=    densenet_onnx
@@ -161,11 +161,11 @@ Test Python Model Rest Inference Via UI (Triton on Modelmesh)
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    existing_project=${FALSE}
-    #Open Dashboard Settings    settings_page=Serving runtimes
+    Open Dashboard Settings    settings_page=Serving runtimes
     #Upload Serving Runtime Template    runtime_filepath=${ONNX_MODELMESH_RUNTIME_FILEPATH}
     #...    serving_platform=multi      runtime_protocol=REST
-    #Serving Runtime Template Should Be Listed    displayed_name=${ONNX_RUNTIME_NAME}
-    #...    serving_platform=multi
+    Serving Runtime Template Should Be Listed    displayed_name=${ONNX_RUNTIME_NAME}
+    ...    serving_platform=multi
     Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3

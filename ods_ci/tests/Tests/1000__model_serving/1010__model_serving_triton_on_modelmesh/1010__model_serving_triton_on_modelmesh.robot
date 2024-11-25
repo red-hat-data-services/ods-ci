@@ -19,7 +19,7 @@ Test Tags         Kserve
 
 *** Variables ***
 ${INFERENCE_REST_INPUT_ONNX_FILE}=    @${RESOURCES_DIRPATH}/kserve-triton-onnx-rest-input.json
-${PRJ_TITLE}=    ms-triton-project-mm5
+${PRJ_TITLE}=    ms-triton-project-mm
 ${PRJ_DESCRIPTION}=    project used for model serving triton runtime tests
 ${MODEL_CREATED}=    ${FALSE}
 ${ONNX_MODEL_NAME}=    densenet_onnx

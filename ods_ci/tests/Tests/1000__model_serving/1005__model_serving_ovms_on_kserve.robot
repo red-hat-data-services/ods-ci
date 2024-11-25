@@ -64,7 +64,7 @@ Verify Tensorflow Model Via UI (OVMS on Kserve)    # robocop: off=too-long-test-
     Verify Model Status    ${MODEL_NAME}    success
     Set Suite Variable    ${MODEL_CREATED}    ${TRUE}
     ${url}=    Get Model Route Via UI    ${MODEL_NAME}
-    ${status_code}    ${response_text}=    Send Random Inference Request     endpoint=${url}    name=input
+    ${status_code}    ${response_text}=    Send Random Inference Request     endpoint=${url}    name=input:0
     ...    shape={"B": 1, "H": 299, "W": 299, "C": 3}    no_requests=1
     Should Be Equal As Strings    ${status_code}    200
     [Teardown]    Run Keywords    Clean All Models Of Current User    AND

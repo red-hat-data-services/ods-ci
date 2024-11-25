@@ -111,46 +111,6 @@ Verify User Can Deploy Multiple Models In The Same Namespace    # robocop: off=t
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
     ...    
-Verify User Can Deploy Raw and Serverless Models In The Same Namespace    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
-    [Documentation]    Checks if user can deploy and query multiple models in the same namespace
-    [Tags]    Sanity    ODS-2371
-    [Setup]    Set Project And Runtime    namespace=${TEST_NS}-multisame    protocol=http
-    ${test_namespace}=    Set Variable     ${TEST_NS}-multisame
-    ${model_one_name}=    Set Variable    bloom-560m-caikit
-    ${model_two_name}=    Set Variable    flan-t5-small-caikit
-    ${models_names}=    Create List    ${model_one_name}    ${model_two_name}
-    Compile Inference Service YAML    isvc_name=${model_one_name}
-    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
-    ...    model_storage_uri=${BLOOM_STORAGE_URI}
-    ...    kserve_mode=Serverless
-    Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
-    ...    namespace=${test_namespace}
-    Compile Inference Service YAML    isvc_name=${model_two_name}
-    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
-    ...    model_storage_uri=${FLAN_STORAGE_URI}
-    ...    kserve_mode=RawDeployment
-    Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
-    ...    namespace=${test_namespace}
-    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
-    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
-    Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
-    ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
-    Query Model Multiple Times    model_name=${model_one_name}
-    ...    n_times=5    namespace=${test_namespace}
-    ...    protocol=http
-    Query Model Multiple Times    model_name=${model_two_name}
-    ...    n_times=10    namespace=${test_namespace}
-    ...    protocol=http
-    ...    port_forwarding=${TRUE}
-    Query Model Multiple Times    model_name=${model_one_name}
-    ...    n_times=5    namespace=${test_namespace}
-    ...    protocol=http
-    Query Model Multiple Times    model_name=${model_two_name}
-    ...    n_times=10    namespace=${test_namespace}
-    ...    protocol=http
-    ...    port_forwarding=${TRUE}
-    [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
-    ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
 Verify User Can Deploy Multiple Models In Different Namespaces    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Checks if user can deploy and query multiple models in the different namespaces

@@ -206,7 +206,7 @@ Verify Model Status
 Delete Model Via UI
     [Documentation]    Deletes a deployed model from the Model Serving page in the dashboard.
     [Arguments]    ${model_name}
-    ${model_row_xpath}=    Set Variable    xpath://tr[starts-with(., '${model_name} ')]
+    ${model_row_xpath}=    Set Variable    xpath://tr[starts-with(., '${model_name}')]
     Wait Until Element Is Visible       ${model_row_xpath}
     ODHDashboard.Click Action From Actions Menu    item_title=${model_name}    action=Delete
     Wait Until Page Contains Element    xpath://input[@id="delete-modal-input"]

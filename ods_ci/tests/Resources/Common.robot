@@ -316,6 +316,16 @@ Skip If RHODS Is Managed
        Skip If    condition=${is_self_managed}==False    msg=This test is skipped for Managed RHODS
     END
 
+Skip If Namespace Does Not Exist
+    [Documentation]    Skips test if ${namespace} does not exist in the cluster
+    [Arguments]    ${namespace}    ${msg}=${EMPTY}
+    ${rc}=    Run And Return Rc    oc get project ${namespace}
+    IF    "${msg}" != "${EMPTY}"
+       Skip If    condition="${rc}"!="${0}"    msg=${msg}
+    ELSE
+       Skip If    condition="${rc}"!="${0}"    msg=This test is skipped because namespace ${namespace} does not exist
+    END
+
 Run Keyword If RHODS Is Managed
     [Documentation]    Runs keyword ${name} using  @{arguments} if RHODS is Managed (Cloud Version)
     [Arguments]    ${name}    @{arguments}
@@ -451,7 +461,7 @@ Run And Verify Command
     IF    ${print_to_log}    Log    ${result.stdout}     console=True
     Should Be True    ${result.rc} == ${expected_rc}
     RETURN    ${result.stdout}
-  
+
 Run And Watch Command
   [Documentation]    Run any shell command (including args) with optional:
   ...    Timeout: 10 minutes by default.
@@ -557,7 +567,7 @@ Clone Git Repository
 Get Operator Starting Version
     [Documentation]    Returns the starting version of the operator in the upgrade chain
     ${rc}    ${out}=    Run And Return RC And Output
-    ...    oc get subscription rhods-operator -n redhat-ods-operator -o yaml | yq '.spec.startingCSV' | awk -F. '{print $2"."$3"."$4}'    # robocop: disable
+    ...    oc get subscription rhods-operator -n ${OPERATOR_NAMESPACE} -o yaml | yq '.spec.startingCSV' | awk -F. '{print $2"."$3"."$4}'    # robocop: disable
     Should Be Equal As Integers    ${rc}    0
     RETURN    ${out}
 
@@ -568,3 +578,12 @@ Is Starting Version Supported
     ${starting_ver}=    Get Operator Starting Version
     ${out}=     Gte    ${starting_ver}    ${minimum_version}
     RETURN    ${out}
+
+Skip If Operator Starting Version Is Not Supported
+    [Documentation]    Skips test if ODH/RHOAI operator starting version is < ${minimum_version}
+    ...    Usage example: add    Skip If Operator Starting Version Is Not Supported    minimum_version=2.14.0
+    ...    in your post-upgrade tests if the resources needed by them were added in the pre-upgrade suite
+    ...    in ods-ci releases/2.14.0
+    [Arguments]    ${minimum_version}
+    ${supported}=    Is Starting Version Supported    minimum_version=${minimum_version}
+    Skip If    condition="${supported}"=="${FALSE}"    msg=This test is skipped because starting operator version < ${minimum_version}

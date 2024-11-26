@@ -204,7 +204,7 @@ Model Serving Suite Setup
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
     Fetch CA Certificate If RHODS Is Self-Managed
-    Clean All Models Of Current User
+    Delete Project Via CLI By Display Name    project_title="ALL"
 
 Create Openvino Models    # robocop: off=too-many-calls-in-keyword
     [Documentation]    Create Openvino model in N projects (more than 1 will add index to project name)

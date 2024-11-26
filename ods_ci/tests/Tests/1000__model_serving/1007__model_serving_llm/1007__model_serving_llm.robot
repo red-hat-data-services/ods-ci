@@ -110,7 +110,6 @@ Verify User Can Deploy Multiple Models In The Same Namespace    # robocop: off=t
     ...    n_times=10    namespace=${test_namespace}
     [Teardown]    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
-    ...    
 
 Verify User Can Deploy Multiple Models In Different Namespaces    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Checks if user can deploy and query multiple models in the different namespaces

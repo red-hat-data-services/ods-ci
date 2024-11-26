@@ -414,8 +414,9 @@ Clean Up Model Serving Page
     [Documentation]    Deletes all currently deployed models, if any are present.
     # Returns an empty list if no matching elements found
     Switch Model Serving Project    project_name=All projects
-    ${projects}=    Get WebElements    xpath://table/tbody/tr/td[@data-label="Project"]
-    FOR    ${project}    IN    @{projects}
+    @{projects}=    Get WebElements    xpath://table/tbody/tr/td[@data-label="Project"]
+    WHILE    len(@{projects}) > 0
+        ${project}=    Set Variable    ${projects}[0]
         ${project}=    Get Text   ${project}
         @{project description}=  Split String    ${project}
         Switch Model Serving Project    ${project description}[0]
@@ -426,6 +427,7 @@ Clean Up Model Serving Page
             Sleep    1s
         END
         Switch Model Serving Project    project_name=All projects
+        @{projects}=    Get WebElements    xpath://table/tbody/tr/td[@data-label="Project"]
     END
 
 Add Namespace To ServiceMeshMemberRoll

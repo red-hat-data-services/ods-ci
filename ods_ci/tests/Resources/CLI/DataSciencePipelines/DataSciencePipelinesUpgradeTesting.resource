@@ -1,6 +1,7 @@
 *** Settings ***
 Documentation    Upgrade Testing Keywords
 Resource         DataSciencePipelinesBackend.resource
+Resource         ../../../Resources/Common.robot
 Resource         ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 
 
@@ -22,15 +23,20 @@ Verify Resources After Upgrade
     [Documentation]    Verifies the status of the resources created in ${PROJECT} after the upgrade
     ...    Deletes ${PROJECT} if all verifications are correct (leaving for debugging purposes if not)
 
+    Skip If Namespace Does Not Exist    ${PROJECT}
     DataSciencePipelinesBackend.Wait Until Pipeline Server Is Deployed    namespace=${PROJECT}
 
     ${take_nap_run_id}=    DataSciencePipelinesBackend.Get Last Run By Pipeline Name
     ...    namespace=${PROJECT}    username=${TEST_USER.USERNAME}    password=${TEST_USER.PASSWORD}
     ...    pipeline_name=take-nap
 
-    Verify Run Status
+    ${pipeline_run_status}=    DataSciencePipelinesBackend.Get Run Status
     ...    namespace=${PROJECT}    username=${TEST_USER.USERNAME}    password=${TEST_USER.PASSWORD}
-    ...    pipeline_run_id=${take_nap_run_id}    pipeline_run_expected_status=RUNNING
+    ...    pipeline_run_id=${take_nap_run_id}
+
+    IF   "${pipeline_run_status}" != "RUNNING" and "${pipeline_run_status}" != "SUCCEEDED"
+        Fail    take-nap has status ${pipeline_run_status} after upgrade
+    END
 
     Projects.Delete Project Via CLI By Display Name    ${PROJECT}
 

@@ -81,7 +81,7 @@ Cross Auth On Kserve Suite Setup
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
     Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
-    Delete Project Via CLI By Display Name    displayed_name="ALL"
+    Delete Project Via CLI By Display Name    displayed_name=ALL
 
 Cross Auth On Kserve Suite Teardown
     [Documentation]    Suite teardown steps after testing DSG. It Deletes
@@ -89,7 +89,7 @@ Cross Auth On Kserve Suite Teardown
     # Even if kw fails, deleting the whole project will also delete the model
     # Failure will be shown in the logs of the run nonetheless
     IF    ${MODEL_CREATED}
-        Delete Project Via CLI By Display Name    displayed_name="ALL"
+        Delete Project Via CLI By Display Name    displayed_name=ALL
     ELSE
         Log    Model not deployed, skipping deletion step during teardown    console=true
     END

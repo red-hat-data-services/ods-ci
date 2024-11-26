@@ -63,7 +63,7 @@ Check If Pod Exists
     [Arguments]    ${namespace}    ${label_selector}    ${status_only}=${TRUE}
     ${status}    ${val}=    Run Keyword And Ignore Error    Oc Get    kind=Pod    namespace=${namespace}
         ...    label_selector=${label_selector}
-    Log    message=status:${status}, val=${val}    console=TRUE
+    Log    message=status:${status}    console=TRUE
     IF    ${status_only} == ${TRUE}
         RETURN    ${status}
     ELSE

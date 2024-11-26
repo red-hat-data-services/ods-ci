@@ -279,7 +279,6 @@ Validate Workbenches Removed State
 
     [Teardown]     Restore DSC Component State    workbenches    ${NOTEBOOK_DEPLOYMENT_NAME}    ${NOTEBOOK_CONTROLLER_MANAGER_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.WORKBENCHES}
 
-
 Validate Support For Configuration Of Controller Resources
     [Documentation]    Validate support for configuration of controller resources in component deployments
     [Tags]    Operator    Tier1    ODS-2664

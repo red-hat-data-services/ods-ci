@@ -53,7 +53,7 @@ Check A RHODS Family Operator Is Installed
   [Arguments]    ${namespace}  ${subscription}
   Log   Getting CSV from subscription ${subscription} namespace ${namespace}      console=yes
   ${rc}    ${current_csv_name} =    Run And Return Rc And Output
-  ...    oc get subscription ${subscription} -n ${namespace} -ojson | jq '.status.currentCSV' | tr -d '"'
+  ...    oc get subscription ${subscription} -n ${namespace} -ojson | jq '.status.installedCSV' | tr -d '"'
   Log   Got CSV ${current_csv_name} from subscription ${subscription}, result: ${rc}      console=yes
   IF  "${rc}" == "0" and "${current_csv_name}" != "${EMPTY}"
       ${result} =  Run Keyword And Return Status

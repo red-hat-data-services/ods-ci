@@ -24,7 +24,7 @@ ${SERVING_MODEL_SERVERS_SIDE_MENU}=    xpath=//span[text()='Models and model ser
 ${TOKEN_AUTH_CHECKBOX_XP}=    xpath://input[@id="alt-form-checkbox-auth"]
 ${ADD_SERVICE_ACCOUNT_BUTTON}=    xpath://button[text()='Add a service account']
 ${SERVICE_ACCOUNT_INPUT}=    xpath://input[@data-testid='service-account-form-name']
-${REPLICAS_COUNT_XP}=     xpath=//input[@id='model-server-replicas']
+${REPLICAS_COUNT_XP}=     xpath=//input[@aria-label="model server replicas number input"]
 ${PROJECT_SELECTOR_XP}=    xpath://main[contains(@id, 'dashboard-page-main')]//*[@data-testid="project-selector-toggle"]
 
 
@@ -40,6 +40,9 @@ Create Model Server
         IF  ${existing_server}    Run Keyword And Return
         ...    Log    Model Server '${server_name}' already exists, reusing server    console=True
     END
+    SeleniumLibrary.Wait Until Page Contains        Select multi-model
+    SeleniumLibrary.Click Button        Select multi-model
+    SeleniumLibrary.Wait Until Page Contains        Add model server
     SeleniumLibrary.Click Button    Add model server
     SeleniumLibrary.Wait Until Page Contains Element    //span[.="Add model server"]
     Set Model Server Name    ${server_name}
@@ -220,8 +223,9 @@ Get Model Serving Access Token via UI
     ELSE
         SeleniumLibrary.Wait Until Page Contains Element    xpath://td[@data-label="Tokens"]/button
         SeleniumLibrary.Click Element    xpath://td[@data-label="Tokens"]/button
+        SeleniumLibrary.Wait Until Page Contains Element    xpath://div[text()='${service_account_name}']/parent::td[@data-label='Token Name']/following-sibling::td[@data-label='Token Secret']//input
         ${token}=    SeleniumLibrary.Get Element Attribute
-        ...    xpath://div[.="${service_account_name} "]/../../td[@data-label="Token Secret"]//span/input    value
+        ...    xpath://div[text()='${service_account_name}']/parent::td[@data-label='Token Name']/following-sibling::td[@data-label='Token Secret']//input   value
     END
     RETURN    ${token}
 

@@ -24,8 +24,9 @@ ${SERVING_MODEL_SERVERS_SIDE_MENU}=    xpath=//span[text()='Models and model ser
 ${TOKEN_AUTH_CHECKBOX_XP}=    xpath://input[@id="alt-form-checkbox-auth"]
 ${ADD_SERVICE_ACCOUNT_BUTTON}=    xpath://button[text()='Add a service account']
 ${SERVICE_ACCOUNT_INPUT}=    xpath://input[@data-testid='service-account-form-name']
-${REPLICAS_COUNT_XP}=     xpath=//input[@aria-label="model server replicas number input"]
+${REPLICAS_COUNT_XP}=     xpath=//input[@aria-label='model server replicas number input']
 ${PROJECT_SELECTOR_XP}=    xpath://main[contains(@id, 'dashboard-page-main')]//*[@data-testid="project-selector-toggle"]
+${DEPLOY_MULTI_MODEL_BTN}=    //button[contains(@data-testid,"add-server-button")]
 
 
 *** Keywords ***
@@ -39,6 +40,8 @@ Create Model Server
         ${existing_server}=  Run Keyword And Return Status     Wait Until Page Contains Element    //button[.="${server_name}"]
         IF  ${existing_server}    Run Keyword And Return
         ...    Log    Model Server '${server_name}' already exists, reusing server    console=True
+    ELSE
+        SeleniumLibrary.Click Button    //button[@data-testid="multi-serving-select-button"]
     END
     SeleniumLibrary.Wait Until Page Contains        Select multi-model
     SeleniumLibrary.Click Button        Select multi-model

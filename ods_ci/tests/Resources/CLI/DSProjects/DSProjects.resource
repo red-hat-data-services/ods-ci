@@ -16,6 +16,6 @@ Delete All DS Projects With Name Like
     Log     List of DS Projects to be deleted: @{dsp_list}    console=yes
     FOR    ${dsp_name}    IN    @{dsp_list}
         ${return_code}=    Run And Return Rc
-        ...    oc delete project ${dsp_name}
+        ...    oc delete project ${dsp_name} --force
         Should Be Equal As Integers  ${return_code}   0   msg=Error deleting DS Project ${dsp_name}
     END

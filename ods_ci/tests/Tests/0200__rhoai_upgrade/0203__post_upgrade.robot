@@ -242,14 +242,14 @@ Verify That DSC And DSCI Release.Version Attribute matches the value in the subs
 Data Science Pipelines Post Upgrade Verifications
     [Documentation]    Verifies the status of the resources created in project dsp-test-upgrade after the upgradea
     [Tags]             Upgrade    DataSciencePipelines-Backend
+    Skip If Operator Starting Version Is Not Supported    minimum_version=2.14.0
     DataSciencePipelinesUpgradeTesting.Verify Resources After Upgrade
 
 Model Registry Post Upgrade Verification
     [Documentation]    Verifies that registered model/version in pre-upgrade is present after the upgrade
     [Tags]             Upgrade    ModelRegistryUpgrade
     ...                ProductBug    RHOAIENG-15033
-    ${check}=    Is Starting Version Supported    minimum_version=2.14.0
-    Skip If    ${check}==${FALSE}
+    Skip If Operator Starting Version Is Not Supported    minimum_version=2.14.0
     Model Registry Post Upgrade Scenario
     [Teardown]    Post Upgrade Scenario Teardown
 

@@ -47,11 +47,6 @@ Verify Model Registry Integration With Secured-DB
     Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     ${workbenches}=    Create List    ${WORKBENCH_TITLE}
-    Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME}
-    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
-    ...            aws_bucket_name=${AWS_BUCKET}    connected_workbench=${workbenches}
-    Data Connection Should Be Listed    name=${DC_S3_NAME}    type=${DC_S3_TYPE}    connected_workbench=${workbenches}
-    Open Data Science Project Details Page       project_title=${prj_title}    tab_id=workbenches
     Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}    timeout=120s
     ${handle}=    Launch And Access Workbench    workbench_title=${WORKBENCH_TITLE}
     ...    username=${TEST_USER.USERNAME}     password=${TEST_USER.PASSWORD}
@@ -76,3 +71,14 @@ Verify Model Registry Integration With Secured-DB
     Maybe Wait For Dashboard Loading Spinner Page
     SeleniumLibrary.Page Should Contain Element    xpath:${MR_VERSION_TABLE_XPATH}/tbody/tr/td[@data-label="Version name"]//a[.="${MR_REGISTERED_MODEL_VERSION}"]
     SeleniumLibrary.Page Should Contain Element    xpath:${MR_VERSION_TABLE_XPATH}/tbody/tr/td[@data-label="Author" and .="${MR_REGISTERED_MODEL_AUTHOR}"]
+    SeleniumLibrary.Close All Browsers
+
+Verify Unallowed User Cannot See Model Registry From The Dashboard
+    [Documentation]    Negative path test for dashboard RBAC on the Model Registry. User not part of the group that is
+    ...    allowed to use a Model Registry instace should not be able to see it from the dashboard.
+    [Tags]    Smoke    MRMS1301    ModelRegistry
+    Depends On Test    Verify Model Registry Integration With Secured-DB
+    Launch Dashboard    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}    ${TEST_USER_3.AUTH_TYPE}
+    ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
+    Open Model Registry Dashboard Page    allowed_user=${FALSE}
+    SeleniumLibrary.Page Should Contain    Request access to model registries

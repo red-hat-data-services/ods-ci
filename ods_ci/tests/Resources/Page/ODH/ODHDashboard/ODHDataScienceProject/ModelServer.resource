@@ -223,9 +223,8 @@ Get Model Serving Access Token via UI
     ELSE
         SeleniumLibrary.Wait Until Page Contains Element    xpath://td[@data-label="Tokens"]/button
         SeleniumLibrary.Click Element    xpath://td[@data-label="Tokens"]/button
-        SeleniumLibrary.Wait Until Page Contains Element    xpath://div[text()='${service_account_name}']/parent::td[@data-label='Token Name']/following-sibling::td[@data-label='Token Secret']//input
         ${token}=    SeleniumLibrary.Get Element Attribute
-        ...    xpath://div[text()='${service_account_name}']/parent::td[@data-label='Token Name']/following-sibling::td[@data-label='Token Secret']//input   value
+        ...    xpath://td[@data-label='Token Secret']//input   value
     END
     RETURN    ${token}
 

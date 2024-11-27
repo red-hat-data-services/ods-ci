@@ -28,7 +28,7 @@ ${IS_NOT_PRESENT}                           1
 Validate DSC and DSCI Created With Errors When Service Mesh Operator Is Not Installed    #robocop:disable
     [Documentation]    The purpose of this Test Case is to validate that DSC and DSCI are created
     ...                without Service Mesh Operator installed, but with errors
-    [Tags]    Operator    Tier3    ODS-2584    RHOAIENG-2514
+    [Tags]    Operator    Tier3    ODS-2584    RHOAIENG-2514    OperatorExclude
 
     Remove DSC And DSCI Resources
     Uninstall Service Mesh Operator CLI
@@ -50,7 +50,7 @@ Validate DSC and DSCI Created With Errors When Service Mesh Operator Is Not Inst
 Validate DSC and DSCI Created With Errors When Serverless Operator Is Not Installed    #robocop:disable
     [Documentation]    The purpose of this Test Case is to validate that DSC and DSCI are created
     ...                without Serverless Operator installed, but with errors
-    [Tags]    Operator    Tier3    ODS-2586    RHOAIENG-2512
+    [Tags]    Operator    Tier3    ODS-2586    RHOAIENG-2512    OperatorExclude
 
     Remove DSC And DSCI Resources
     Uninstall Serverless Operator CLI
@@ -70,7 +70,7 @@ Validate DSC and DSCI Created With Errors When Serverless Operator Is Not Instal
 Validate DSC and DSCI Created With Errors When Service Mesh And Serverless Operators Are Not Installed   #robocop:disable
     [Documentation]    The purpose of this Test Case is to validate that DSC and DSCI are created
     ...                without dependant operators ((servicemesh, serverless) installed, but with errors
-    [Tags]    Operator    Tier3    ODS-2527     RHOAIENG-2518
+    [Tags]    Operator    Tier3    ODS-2527     RHOAIENG-2518    OperatorExclude
 
     Remove DSC And DSCI Resources
     Uninstall Service Mesh Operator CLI
@@ -96,7 +96,7 @@ Validate DSC and DSCI Created With No Errors When Kserve Serving Is Unmanaged An
     [Documentation]    The purpose of this Test Case is to validate that DSC and DSCI are created
     ...                without dependant operators ((servicemesh, serverless) installed and with no errors
     ...                because the Kserve component serving is unmanaged
-    [Tags]    Operator    Tier3     RHOAIENG-3472
+    [Tags]    Operator    Tier3     RHOAIENG-3472    OperatorExclude
 
     Remove DSC And DSCI Resources
     Uninstall Service Mesh Operator CLI

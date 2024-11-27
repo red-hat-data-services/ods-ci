@@ -30,15 +30,6 @@ Test Tags          PostUpgrade
 
 *** Variables ***
 ${S_SIZE}       25
-${INFERENCE_INPUT}=    @tests/Resources/Files/modelmesh-mnist-input.json
-${INFERENCE_INPUT_OPENVINO}=    @tests/Resources/Files/openvino-example-input.json
-${EXPECTED_INFERENCE_OUTPUT}=    {"model_name":"test-model__isvc-83d6fab7bd","model_version":"1","outputs":[{"name":"Plus214_Output_0","datatype":"FP32","shape":[1,10],"data":[-8.233053,-7.7497034,-3.4236815,12.3630295,-12.079103,17.266596,-10.570976,0.7130762,3.321715,1.3621228]}]}
-${EXPECTED_INFERENCE_OUTPUT_OPENVINO}=    {"model_name":"test-model__isvc-8655dc7979","model_version":"1","outputs":[{"name":"Func/StatefulPartitionedCall/output/_13:0","datatype":"FP32","shape":[1,1],"data":[0.99999994]}]}
-${PRJ_TITLE}=    model-serving-upgrade
-${PRJ_DESCRIPTION}=    project used for model serving tests
-${MODEL_NAME}=    test-model
-${MODEL_CREATED}=    ${FALSE}
-${RUNTIME_NAME}=    Model Serving Test
 ${DW_PROJECT_CREATED}=    False
 
 
@@ -138,6 +129,15 @@ Test Inference Post RHODS Upgrade
     [Documentation]    Test the inference result after having deployed a model that requires Token Authentication
     [Tags]  Upgrade
     [Setup]  Begin Web Test
+    ${PRJ_TITLE}=    Set Variable    model-serving-upgrade
+    ${PRJ_DESCRIPTION}=    Set Variable    project used for model serving tests
+    ${MODEL_NAME}=    Set Variable    test-model
+    ${MODEL_CREATED}=    Set Variable    ${FALSE}
+    ${RUNTIME_NAME}=    Set Variable    Model Serving Test
+    ${INFERENCE_INPUT}=    Set Variable    @tests/Resources/Files/modelmesh-mnist-input.json
+    ${INFERENCE_INPUT_OPENVINO}=    Set Variable    @tests/Resources/Files/openvino-example-input.json
+    ${EXPECTED_INFERENCE_OUTPUT}=    Set Variable    {"model_name":"test-model__isvc-83d6fab7bd","model_version":"1","outputs":[{"name":"Plus214_Output_0","datatype":"FP32","shape":[1,10],"data":[-8.233053,-7.7497034,-3.4236815,12.3630295,-12.079103,17.266596,-10.570976,0.7130762,3.321715,1.3621228]}]}
+    ${EXPECTED_INFERENCE_OUTPUT_OPENVINO}=    Set Variable    {"model_name":"test-model__isvc-8655dc7979","model_version":"1","outputs":[{"name":"Func/StatefulPartitionedCall/output/_13:0","datatype":"FP32","shape":[1,1],"data":[0.99999994]}]}
     Fetch CA Certificate If RHODS Is Self-Managed
     Open Model Serving Home Page
     Verify Model Status    ${MODEL_NAME}    success

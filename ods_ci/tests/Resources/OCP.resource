@@ -332,3 +332,18 @@ Wait For Namespace To Be Active
     Log    ${rc}
     Log    ${value}
     Should Be Equal As Integers    ${rc}    0
+
+Is Cluster Type Self-Managed
+    [Documentation]    Get the value of cluster type depending on the console URL domain
+    ...    Returns ${TRUE} if cluster type is Self-Managed
+    ...    Returns ${FALSE} if cluster type is Managed
+    ${matches}=    Get Regexp Matches    ${OCP_CONSOLE_URL}    rh-ods
+    ${size}=    Get Length    ${matches}
+    IF    ${size}>0
+        ${domain}=    Get From List    ${matches}    0
+        IF    "${domain}" == "rh-ods"
+            RETURN    ${TRUE}
+        END
+    ELSE
+        RETURN    ${FALSE}
+    END

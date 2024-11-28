@@ -66,6 +66,7 @@ Verify Tensorflow Model Via UI (OVMS on Kserve)    # robocop: off=too-long-test-
     ${url}=    Get Model Route Via UI    ${MODEL_NAME}
     ${status_code}    ${response_text}=    Send Random Inference Request     endpoint=${url}    name=input:0
     ...    shape={"B": 1, "H": 299, "W": 299, "C": 3}    no_requests=1
+    ...    deployment_type=kserve
     Should Be Equal As Strings    ${status_code}    200
     [Teardown]    Run Keywords    Delete Project Via CLI By Display Name    displayed_name=ALL    AND
     ...    Run Keyword If Test Failed    Get Kserve Events And Logs
@@ -131,7 +132,7 @@ Verify GPU Model Deployment Via UI (OVMS on Kserve)    # robocop: off=too-long-t
     Verify Model Status    ${MODEL_NAME_GPU}    success
     Set Suite Variable    ${MODEL_CREATED}    True
     ${url}=    Get Model Route Via UI    ${MODEL_NAME_GPU}
-    Send Random Inference Request     endpoint=${url}    no_requests=100
+    Send Random Inference Request     endpoint=${url}    no_requests=100    deployment_type=kserve
     # Verify metric DCGM_FI_PROF_GR_ENGINE_ACTIVE goes over 0
     ${prometheus_route}=    Get OpenShift Prometheus Route
     ${sa_token}=    Get OpenShift Prometheus Service Account Token

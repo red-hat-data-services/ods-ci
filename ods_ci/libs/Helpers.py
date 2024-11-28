@@ -223,8 +223,14 @@ class Helpers:
         value_range=[0, 255],
         shape={"B": 1, "C": 3, "H": 512, "W": 512},
         no_requests=100,
-        cert_file=None,
+        deployment_type=None,
     ):
+        supported_deployment_types = ("kserve", "modelmesh")
+        if deployment_type and deployment_type not in supported_deployment_types:
+            self.BuiltIn.fail(
+                f"Unsupported deployment type: {deployment_type}. Supported types: {supported_deployment_types}"
+            )
+
         for _ in range(no_requests):
             data_img = [
                 random.randrange(value_range[0], value_range[1]) for _ in range(shape["C"] * shape["H"] * shape["W"])
@@ -246,14 +252,11 @@ class Helpers:
 
             request_kwargs = {"url": endpoint, "headers": headers, "data": data}
 
-            if cert_file is not None:
-                request_kwargs["verify"] = cert_file
-
             # This file only exists when running on self-managed clusters
-            elif ca_bundle := Path("openshift_ca.crt"):
+            if deployment_type == "modelmesh" and (ca_bundle := Path("openshift_ca.crt")):
                 request_kwargs["verify"] = ca_bundle
 
-            elif knative_ca_bundle := Path("openshift_ca_istio_knative.crt"):
+            elif deployment_type == "kserve" and (knative_ca_bundle := Path("openshift_ca_istio_knative.crt")):
                 request_kwargs["verify"] = knative_ca_bundle
 
             response = requests.post(**request_kwargs)

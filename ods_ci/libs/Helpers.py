@@ -223,6 +223,7 @@ class Helpers:
         value_range=[0, 255],
         shape={"B": 1, "C": 3, "H": 512, "W": 512},
         no_requests=100,
+        cert_file=None,
     ):
         for _ in range(no_requests):
             data_img = [
@@ -243,25 +244,20 @@ class Helpers:
                 + " }]}"
             )
 
+            request_kwargs = {"url": endpoint, "headers": headers, "data": data}
+
+            if cert_file is not None:
+                request_kwargs["verify"] = cert_file
+
             # This file only exists when running on self-managed clusters
-            ca_bundle = Path("openshift_ca.crt")
-            knative_ca_bundle = Path("openshift_ca_istio_knative.crt")
-            if ca_bundle.is_file():
-                response = requests.post(
-                    endpoint,
-                    headers=headers,
-                    data=data,
-                    verify="openshift_ca.crt",
-                )
-            elif knative_ca_bundle.is_file():
-                response = requests.post(
-                    endpoint,
-                    headers=headers,
-                    data=data,
-                    verify="openshift_ca_istio_knative.crt",
-                )
-            else:
-                response = requests.post(endpoint, headers=headers, data=data)
+            elif ca_bundle := Path("openshift_ca.crt"):
+                request_kwargs["verify"] = ca_bundle
+
+            elif knative_ca_bundle := Path("openshift_ca_istio_knative.crt"):
+                request_kwargs["verify"] = knative_ca_bundle
+
+            response = requests.post(**request_kwargs)
+
         return response.status_code, response.text  # pyright: ignore [reportPossiblyUnboundVariable]
 
     @keyword

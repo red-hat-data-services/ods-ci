@@ -43,8 +43,10 @@ Create Model Server
     ELSE
         SeleniumLibrary.Click Button    //button[@data-testid="multi-serving-select-button"]
     END
-    SeleniumLibrary.Wait Until Page Contains Element    ${DEPLOY_MULTI_MODEL_BTN}
-    SeleniumLibrary.Click Button    ${DEPLOY_MULTI_MODEL_BTN}
+    SeleniumLibrary.Wait Until Page Contains        Select multi-model
+    SeleniumLibrary.Click Button        Select multi-model
+    SeleniumLibrary.Wait Until Page Contains        Add model server
+    SeleniumLibrary.Click Button    Add model server
     SeleniumLibrary.Wait Until Page Contains Element    //span[.="Add model server"]
     Set Model Server Name    ${server_name}
     Set Replicas Number With Buttons    ${no_replicas}

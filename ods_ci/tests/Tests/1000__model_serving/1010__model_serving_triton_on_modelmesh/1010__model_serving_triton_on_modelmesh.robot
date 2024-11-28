@@ -54,7 +54,7 @@ Test Onnx Model Rest Inference Via UI (Triton on Modelmesh)
     Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
-    Create Model Server    token=${TRUE}    runtime=${ONNX_RUNTIME_NAME}    server_name=${ONNX_RUNTIME_NAME}    existing_server=${TRUE}
+    Create Model Server    token=${TRUE}    runtime=${ONNX_RUNTIME_NAME}    server_name=${ONNX_RUNTIME_NAME}    existing_server=${FALSE}
     Sleep    10s
     Serve Model    project_name=${PRJ_TITLE}    model_name=${ONNX_MODEL_NAME}    framework=onnx - 1
     ...    existing_data_connection=${TRUE}    data_connection_name=model-serving-connection
@@ -130,7 +130,7 @@ Test Tensorflow Model Rest Inference Via UI (Triton on Modelmesh)
     Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
-    Create Model Server    token=${TRUE}    runtime=${ONNX_RUNTIME_NAME}    server_name=${ONNX_RUNTIME_NAME}    existing_server=${TRUE}
+    Create Model Server    token=${TRUE}    runtime=${ONNX_RUNTIME_NAME}    server_name=${ONNX_RUNTIME_NAME}    existing_server=${FALSE}
     Sleep    10s
     Serve Model    project_name=${PRJ_TITLE}    model_name=${TENSORFLOW_MODEL_NAME}    framework=tensorflow - 2
     ...    existing_data_connection=${TRUE}    data_connection_name=model-serving-connection

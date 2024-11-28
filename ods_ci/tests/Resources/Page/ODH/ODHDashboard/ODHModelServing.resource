@@ -206,7 +206,7 @@ Verify Model Status
 Delete Model Via UI
     [Documentation]    Deletes a deployed model from the Model Serving page in the dashboard.
     [Arguments]    ${model_name}
-    ${model_row_xpath}=    Set Variable    xpath://tr[starts-with(., '${model_name} ')]
+    ${model_row_xpath}=    Set Variable    xpath://tr[starts-with(., '${model_name}')]
     Wait Until Element Is Visible       ${model_row_xpath}
     ODHDashboard.Click Action From Actions Menu    item_title=${model_name}    action=Delete
     Wait Until Page Contains Element    xpath://input[@id="delete-modal-input"]
@@ -226,7 +226,7 @@ Get Model Route Via UI
     [Arguments]    ${model_name}
     # TODO: Open model serving home page if needed?
     # Click on Inference Endpoints link
-    ${endpoint_link}=    Set Variable    //a[@data-testid="metrics-link-test-model" and text()="${model_name}"]/ancestor::tr//td//button[@data-testid="internal-external-service-button"]
+    ${endpoint_link}=    Set Variable    //a[contains(@data-testid, 'metrics-link')][text() = '${model_name}']/ancestor::tr//td//button[@data-testid="internal-external-service-button"]
     SeleniumLibrary.Wait Until Page Contains Element    ${endpoint_link}
     SeleniumLibrary.Click Button    ${endpoint_link}
     # Get the external URL
@@ -414,8 +414,9 @@ Clean Up Model Serving Page
     [Documentation]    Deletes all currently deployed models, if any are present.
     # Returns an empty list if no matching elements found
     Switch Model Serving Project    project_name=All projects
-    ${projects}=    Get WebElements    xpath://table/tbody/tr/td[@data-label="Project"]
-    FOR    ${project}    IN    @{projects}
+    @{projects}=    Get WebElements    xpath://table/tbody/tr/td[@data-label="Project"]
+    WHILE    len(@{projects}) > 0
+        ${project}=    Set Variable    ${projects}[0]
         ${project}=    Get Text   ${project}
         @{project description}=  Split String    ${project}
         Switch Model Serving Project    ${project description}[0]
@@ -426,6 +427,7 @@ Clean Up Model Serving Page
             Sleep    1s
         END
         Switch Model Serving Project    project_name=All projects
+        @{projects}=    Get WebElements    xpath://table/tbody/tr/td[@data-label="Project"]
     END
 
 Add Namespace To ServiceMeshMemberRoll
@@ -515,10 +517,27 @@ Deploy Kserve Model Via UI  #robocop: disable
 Set Model Server Runtime
     [Documentation]    Opens the Serving runtime dropdown in the deploy model modal window for models
     ...    and select the given runtime
-    [Arguments]    ${runtime}=Caikit TGIS
-    Page Should Contain Element    ${KSERVE_RUNTIME_DROPDOWN}
-    Click Element    ${KSERVE_RUNTIME_DROPDOWN}
-    Click Element    //span[contains(text(),"${runtime}")]
+    [Arguments]    ${runtime}=Caikit TGIS    ${retries}=1
+    TRY
+        ${is_enabled}=    Run Keyword And Return Status
+        ...    Element Should Be Enabled    xpath://button[@id="serving-runtime-template-selection"]
+
+        IF    ${is_enabled}
+            FOR  ${retry_idx}  IN RANGE  0  1+${retries}
+                Click Element    xpath://button[@id="serving-runtime-template-selection"]
+                Page Should Contain Element    xpath://span[contains(., "${runtime}")]
+                ${selected}=    Run Keyword And Return Status
+                ...    Click Element    xpath://span[contains(., "${runtime}")]
+                IF  ${selected}==${TRUE}    BREAK
+            END
+        ELSE
+            Element Should Be Disabled    id:serving-runtime-template-selection
+            ${text}=    Get Text    xpath://button[@id="serving-runtime-template-selection"]/span
+            Should Be True    ${runtime} in ${text}
+        END
+    EXCEPT
+        Log    framework ${runtime} does not appear to be supported by the chosen model server
+    END
 
 Get Kserve Inference Host Via UI
     [Documentation]    Fetches the host of the model's URL from the Data Science Project UI

@@ -7,6 +7,7 @@ Resource       Projects.resource
 
 
 *** Variables ***
+${PV_MOUNT_PATH}=    ods-ci-test-path
 ${WORKBENCH_SECTION_XP}=             xpath=//div[@data-testid="section-workbenches"]
 ${WORKBENCH_CREATE_BTN_XP}=           xpath=//button[text()="Create workbench"]
 ${WORKBENCH_CREATE_BTN_2_XP}=         xpath=//button[@id="create-button"]
@@ -42,7 +43,7 @@ ${WORKBENCH_IMAGE_VER_DROPDOWN}=     //*[@id="workbench-image-version-selection"
 ${KEYVALUE_TYPE}=        Key / value
 ${UPLOAD_TYPE}=        Upload
 ${ENV_VARIABLES_SECTION_XP}=        xpath=//section[@aria-label="Environment variables"]
-${ENV_DATA_CONNECTION_SECTION_XP}=   xpath=//section[@aria-label="Data connections"]
+${ENV_DATA_CONNECTION_SECTION_XP}=   xpath=//section[@aria-label="Connections"]
 ${ERROR_ICON_XP}=        span[contains(@class,'pf-m-danger')]
 
 
@@ -82,8 +83,8 @@ Create Workbench
         IF    ${pv_existent} == ${TRUE}
             # Use the `Jump to section` links in the page to scroll the section into view
             Click Element    //a[@href="#cluster-storage"]
-            Click Element    xpath=//input[@name="persistent-existing-storage-type-radio"]
-            Select An Existent PV   name=${pv_name}
+            Click Element    //*[@data-testid="existing-storage-button"]
+            Select An Existent PV   ${pv_name}   ${PV_MOUNT_PATH}
         ELSE IF   ${pv_existent} == ${FALSE}
             # Use the `Jump to section` links in the page to scroll the section into view
             Click Element    //a[@href="#cluster-storage"]
@@ -189,13 +190,15 @@ Remove All Environment Variables
 
 Select An Existent PV
     [Documentation]    Selects an existent PV Storage in the workbench creation page
-    [Arguments]    ${name}
+    [Arguments]    ${name}  ${path}
     Run Keyword And Continue On Failure
     ...    Wait Until Element Is Enabled    xpath=//input[@placeholder="Select a persistent storage"]
     Click Element    xpath=//input[@placeholder="Select a persistent storage"]
     ${existing_pv_xpath}=    Set Variable    xpath=//button//span[text()="${name}"]
     Wait Until Page Contains Element    ${existing_pv_xpath}
     Click Element   ${existing_pv_xpath}
+    Input Text    //*[@data-testid="mount-path-folder-value"]    ${path}
+    Click Element    //*[@data-testid="modal-submit-button"]
 
 Select Workbench Image
     [Documentation]    Selects a Jupyter image in the workbench creation page

@@ -71,3 +71,6 @@ spec:
     - autoSelect: false
       name: lightgbm
       version: "3"
+    - autoSelect: true
+      name: python
+      version: "1"

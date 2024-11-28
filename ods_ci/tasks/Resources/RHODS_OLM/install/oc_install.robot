@@ -52,7 +52,7 @@ Install RHODS
           IF  "${PRODUCT}" == "ODH"
               Run    sed -i'' -e 's/<CATALOG_SOURCE>/community-operators/' ${file_path}cs_apply.yaml
           ELSE
-              Run    sed -i'' -e 's/<CATALOG_SOURCE>/redhat-operators/' ${file_path}cs_apply.yaml
+              Run    sed -i'' -e 's/<CATALOG_SOURCE>/${CATALOG_SOURCE}/' ${file_path}cs_apply.yaml
           END
           Run    sed -i'' -e 's/<OPERATOR_NAME>/${OPERATOR_NAME}/' ${file_path}cs_apply.yaml
           Run    sed -i'' -e 's/<OPERATOR_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}cs_apply.yaml

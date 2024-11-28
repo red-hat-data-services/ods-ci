@@ -1,0 +1,1 @@
+{"model_name":"python__isvc-ff65c777d4","model_version":"1","outputs":[{"name":"OUTPUT0","datatype":"FP32","shape":[4],"data":[0.921443,0.6223347,0.80593854,1.2578542]},{"name":"OUTPUT1","datatype":"FP32","shape":[4],"data":[0.49091366,-0.027157962,-0.5641784,0.690631]}]}

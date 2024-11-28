@@ -152,7 +152,7 @@ Select Framework
         END
     EXCEPT
         Log    framework ${framework} does not appear to be supported by the chosen model server
-    END        
+    END
 
 
 Select Existing Data Connection
@@ -195,11 +195,11 @@ Verify Model Status
     [Arguments]    ${model_name}    ${expected_status}=success
     IF    "${expected_status}"=="success"
         SeleniumLibrary.Wait Until Page Contains Element
-        ...    //a[@data-testid='metrics-link-test-model' and text()='${model_name}']${MS_TABLE_STATUS_SUCCESS}    timeout=2m
+        ...    //a[@data-testid='metrics-link-${model_name}' and text()='${model_name}']${MS_TABLE_STATUS_SUCCESS}    timeout=2m
         Page Should Not Contain Element    //a[@data-testid='metrics-link-test-model' and text()='${model_name}']${MS_TABLE_STATUS_FAILURE}
     ELSE
         SeleniumLibrary.Wait Until Page Contains Element
-        ...    //a[@data-testid='metrics-link-test-model' and text()='${model_name}']${MS_TABLE_STATUS_FAILURE}    timeout=2m
+        ...    //a[@data-testid='metrics-link-${model_name}' and text()='${model_name}']${MS_TABLE_STATUS_FAILURE}    timeout=2m
         Page Should Not Contain Element    //a[@data-testid='metrics-link-test-model' and text()='${model_name}']${MS_TABLE_STATUS_SUCCESS}
     END
 
@@ -226,7 +226,7 @@ Get Model Route Via UI
     [Arguments]    ${model_name}
     # TODO: Open model serving home page if needed?
     # Click on Inference Endpoints link
-    ${endpoint_link}=    Set Variable    //a[contains(@data-testid, 'metrics-link')][text() = '${model_name}']/ancestor::tr//td//button[@data-testid="internal-external-service-button"]
+    ${endpoint_link}=    Set Variable    //a[@data-testid="metrics-link-${model_name}" and text()="${model_name}"]/ancestor::tr//td//button[@data-testid="internal-external-service-button"]
     SeleniumLibrary.Wait Until Page Contains Element    ${endpoint_link}
     SeleniumLibrary.Click Button    ${endpoint_link}
     # Get the external URL
@@ -414,20 +414,23 @@ Clean Up Model Serving Page
     [Documentation]    Deletes all currently deployed models, if any are present.
     # Returns an empty list if no matching elements found
     Switch Model Serving Project    project_name=All projects
-    @{projects}=    Get WebElements    xpath://table/tbody/tr/td[@data-label="Project"]
-    WHILE    len(@{projects}) > 0
+    ${projects}=    Get WebElements    xpath://table/tbody/tr/td[@data-label="Project"]
+    Log    ${projects}
+    ${projects_length}=      Get length     ${projects}
+    WHILE     ${projects_length} > 0
         ${project}=    Set Variable    ${projects}[0]
         ${project}=    Get Text   ${project}
         @{project description}=  Split String    ${project}
         Switch Model Serving Project    ${project description}[0]
-        ${models}=    Get WebElements    xpath://table/tbody/tr/td[@data-label="Name"]/div/a
+        ${models}=    Get WebElements    xpath://table/tbody/tr/td[@data-label="Name"]
         FOR    ${model}    IN    @{models}
             ${model}=    Get Text   ${model}
             Delete Model Via UI    ${model}
             Sleep    1s
         END
         Switch Model Serving Project    project_name=All projects
-        @{projects}=    Get WebElements    xpath://table/tbody/tr/td[@data-label="Project"]
+        ${projects}=    Get WebElements    xpath://table/tbody/tr/td[@data-label="Project"]
+        ${projects_length}=    Get length   ${projects}
     END
 
 Add Namespace To ServiceMeshMemberRoll

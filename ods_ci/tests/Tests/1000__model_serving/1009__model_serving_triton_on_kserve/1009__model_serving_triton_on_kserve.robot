@@ -244,7 +244,7 @@ Test KERAS Model Inference Via UI(Triton on Kserve)
 
 Test Python Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of an python model in Kserve using Triton
-    [Tags]    Sanity    RHOAIENG-15374
+    [Tags]    Tier2    RHOAIENG-15374
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    existing_project=${FALSE}

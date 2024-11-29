@@ -132,7 +132,7 @@ Verify Distributed Workload Metrics Resources By Creating Ray Cluster Workload
     [Setup]    Prepare Codeflare-SDK Test Setup
     ${PRJ_UPGRADE}    Set Variable    test-ns-rayupgrade
     ${JOB_NAME}    Set Variable    mnist
-    Run Codeflare-SDK Test    upgrade    raycluster_sdk_upgrade_test.py::TestMNISTRayClusterUp    3.11    ${RAY_IMAGE_3.11}    ${CODEFLARE-SDK-RELEASE-TAG}
+    Run Codeflare-SDK Test    upgrade    raycluster_sdk_upgrade_test.py::TestMNISTRayClusterUp    3.11    ${RAY_CUDA_IMAGE_3.11}    ${CODEFLARE-SDK-RELEASE-TAG}
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}

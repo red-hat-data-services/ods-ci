@@ -120,7 +120,7 @@ Operator Deployment Should Be Ready
     ${rc}=    Set Variable    1
     TRY
         WHILE    ${rc} != 0    limit=10m
-            Sleep    5s
+            Sleep    15s
             ${rc}    ${output}=    Run And Return Rc And Output
             ...    oc wait --for condition=available -n ${OPERATOR_NAMESPACE} deploy/${OPERATOR_DEPLOYMENT_NAME}
         END

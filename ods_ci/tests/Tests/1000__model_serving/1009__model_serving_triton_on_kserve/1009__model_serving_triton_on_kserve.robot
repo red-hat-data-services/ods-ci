@@ -245,7 +245,7 @@ Test KERAS Model Inference Via UI(Triton on Kserve)
 
 
 Test Python Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
-    [Documentation]    Test the deployment of an onnx model in Kserve using Triton
+    [Documentation]    Test the deployment of an python model in Kserve using Triton
     [Tags]    Tier2    RHOAIENG-15374
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}

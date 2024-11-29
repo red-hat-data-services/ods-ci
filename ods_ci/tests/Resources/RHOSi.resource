@@ -97,7 +97,7 @@ Fetch Cluster Type By Domain
     [Documentation]    This Keyword outputs the kind of cluster depending on the console URL domain
     ${matches}=    Get Regexp Matches    ${OCP_CONSOLE_URL}    rh-ods
     ${matches_len}=     Get Length      ${matches}
-    IF  '${matches_len}' == 0
+    IF  '${matches_len}' == '0'
         Set Global Variable    ${CLUSTER_TYPE}    managed
     ELSE
         ${domain}=    Get From List    ${matches}    0

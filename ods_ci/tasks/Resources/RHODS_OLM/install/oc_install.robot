@@ -19,6 +19,7 @@ ${DSCI_NAME} =    default-dsci
 ...    trainingoperator
 ...    trustyai
 ...    workbenches
+...    modelregistry
 ${SERVERLESS_OP_NAME}=     serverless-operator
 ${SERVERLESS_SUB_NAME}=    serverless-operator
 ${SERVERLESS_NS}=    openshift-serverless
@@ -51,7 +52,7 @@ Install RHODS
           IF  "${PRODUCT}" == "ODH"
               Run    sed -i'' -e 's/<CATALOG_SOURCE>/community-operators/' ${file_path}cs_apply.yaml
           ELSE
-              Run    sed -i'' -e 's/<CATALOG_SOURCE>/redhat-operators/' ${file_path}cs_apply.yaml
+              Run    sed -i'' -e 's/<CATALOG_SOURCE>/${CATALOG_SOURCE}/' ${file_path}cs_apply.yaml
           END
           Run    sed -i'' -e 's/<OPERATOR_NAME>/${OPERATOR_NAME}/' ${file_path}cs_apply.yaml
           Run    sed -i'' -e 's/<OPERATOR_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}cs_apply.yaml
@@ -79,109 +80,115 @@ Verify RHODS Installation
   Set Global Variable    ${DASHBOARD_APP_NAME}    ${PRODUCT.lower()}-dashboard
   Log  Verifying RHODS installation  console=yes
   Log To Console    Waiting for all RHODS resources to be up and running
-  Wait For Pods Numbers  1
-  ...                   namespace=${OPERATOR_NAMESPACE}
-  ...                   label_selector=name=${OPERATOR_NAME_LABEL}
-  ...                   timeout=2000
+  Wait For Deployment Replica To Be Ready    namespace=${OPERATOR_NAMESPACE}
+  ...    label_selector=name=${OPERATOR_NAME_LABEL}    timeout=2000s
   Wait For Pods Status  namespace=${OPERATOR_NAMESPACE}  timeout=1200
   Log  Verified ${OPERATOR_NAMESPACE}  console=yes
 
   IF  "${UPDATE_CHANNEL}" == "odh-nightlies" or "${cluster_type}" != "managed"
     IF  "${PRODUCT}" == "ODH"
         Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
-        Wait For DSCInitialization CustomResource To Be Ready    timeout=30
+        IF    "${TEST_ENV.lower()}" == "crc"
+            ${timeout_in_seconds} =   Set Variable   180
+        ELSE
+            ${timeout_in_seconds} =   Set Variable   60
+        END
+        Wait For DSCInitialization CustomResource To Be Ready    timeout=${timeout_in_seconds}
     END
     Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
   END
+
   ${dashboard} =    Is Component Enabled    dashboard    ${DSC_NAME}
-  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${dashboard}" == "true"
-    # Needs to be removed ASAP
+  IF    "${dashboard}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app=${DASHBOARD_APP_NAME}    timeout=1200s
     IF  "${PRODUCT}" == "ODH"
-        Log To Console    "Waiting for 2 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app=odh-dashboard"
-        Wait For Pods Numbers  2
-        ...                   namespace=${APPLICATIONS_NAMESPACE}
-        ...                   label_selector=app=odh-dashboard
-        ...                   timeout=1200
         #This line of code is strictly used for the exploratory cluster to accommodate UI/UX team requests
         Add UI Admin Group To Dashboard Admin
-
-    ELSE
-        Log To Console    "Waiting for 5 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app=${DASHBOARD_APP_NAME}"
-        Wait For Pods Numbers  5
-        ...                   namespace=${APPLICATIONS_NAMESPACE}
-        ...                   label_selector=app=${DASHBOARD_APP_NAME}
-        ...                   timeout=1200
     END
   END
+
   ${workbenches} =    Is Component Enabled    workbenches    ${DSC_NAME}
-  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${workbenches}" == "true"
-    Log To Console    "Waiting for 1 pod in ${APPLICATIONS_NAMESPACE}, label_selector=app=notebook-controller"
-    Wait For Pods Numbers  1
-    ...                   namespace=${APPLICATIONS_NAMESPACE}
-    ...                   label_selector=app=notebook-controller
-    ...                   timeout=400
-    Log To Console    "Waiting for 1 pod in ${APPLICATIONS_NAMESPACE}, label_selector=app=odh-notebook-controller"
-    Wait For Pods Numbers  1
-    ...                   namespace=${APPLICATIONS_NAMESPACE}
-    ...                   label_selector=app=odh-notebook-controller
-    ...                   timeout=400
-  END
-  ${modelmeshserving} =    Is Component Enabled    modelmeshserving    ${DSC_NAME}
-  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${modelmeshserving}" == "true"
-    Log To Console    "Waiting for 3 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app=odh-model-controller"
-    Wait For Pods Numbers   3
-    ...                   namespace=${APPLICATIONS_NAMESPACE}
-    ...                   label_selector=app=odh-model-controller
-    ...                   timeout=400
-    Log To Console    "Waiting for 1 pod in ${APPLICATIONS_NAMESPACE}, label_selector=component=model-mesh-etcd"
-    Wait For Pods Numbers   1
-    ...                   namespace=${APPLICATIONS_NAMESPACE}
-    ...                   label_selector=component=model-mesh-etcd
-    ...                   timeout=400
-    Log To Console    "Waiting for 3 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app.kubernetes.io/name=modelmesh-controller"
-    Wait For Pods Numbers   3
-    ...                   namespace=${APPLICATIONS_NAMESPACE}
-    ...                   label_selector=app.kubernetes.io/name=modelmesh-controller
-    ...                   timeout=400
-  END
-  ${datasciencepipelines} =    Is Component Enabled    datasciencepipelines    ${DSC_NAME}
-  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${datasciencepipelines}" == "true"
-    Log To Console    "Waiting for 1 pod in ${APPLICATIONS_NAMESPACE}, label_selector=app.kubernetes.io/name=data-science-pipelines-operator"
-    Wait For Pods Numbers   1
-    ...                   namespace=${APPLICATIONS_NAMESPACE}
-    ...                   label_selector=app.kubernetes.io/name=data-science-pipelines-operator
-    ...                   timeout=400
-  END
-  ${kserve} =    Is Component Enabled    kserve    ${DSC_NAME}
-  IF    "${kserve}" == "true"
-    Log To Console    "Waiting for 3 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app=odh-model-controller"
-    Wait For Pods Numbers   3
-    ...                   namespace=${APPLICATIONS_NAMESPACE}
-    ...                   label_selector=app=odh-model-controller
-    ...                   timeout=400
-    Log To Console    "Waiting for 1 pods in ${APPLICATIONS_NAMESPACE}, label_selector=control-plane=kserve-controller-manager"
-    Wait For Pods Numbers   1
-       ...                   namespace=${APPLICATIONS_NAMESPACE}
-       ...                   label_selector=control-plane=kserve-controller-manager
-       ...                   timeout=400
+  IF    "${workbenches}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app=notebook-controller    timeout=400s
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app=odh-notebook-controller    timeout=400s
+    Oc Get  kind=Namespace  field_selector=metadata.name=${NOTEBOOKS_NAMESPACE}
+    Log  Verified Notebooks NS: ${NOTEBOOKS_NAMESPACE}
   END
 
-  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${dashboard}" == "true" or "${workbenches}" == "true" or "${modelmeshserving}" == "true" or "${datasciencepipelines}" == "true"  # robocop: disable
-    Log To Console    "Waiting for pod status in ${APPLICATIONS_NAMESPACE}"
-    Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=200
-    Log  Verified Applications NS: ${APPLICATIONS_NAMESPACE}  console=yes
+  ${modelmeshserving} =    Is Component Enabled    modelmeshserving    ${DSC_NAME}
+  IF    "${modelmeshserving}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app=odh-model-controller    timeout=400s
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=component=model-mesh-etcd    timeout=400s
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/name=modelmesh-controller    timeout=400s
+  END
+
+  ${datasciencepipelines} =    Is Component Enabled    datasciencepipelines    ${DSC_NAME}
+  IF    "${datasciencepipelines}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/name=data-science-pipelines-operator    timeout=400s
+  END
+
+  ${kserve} =    Is Component Enabled    kserve    ${DSC_NAME}
+  IF    "${kserve}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app=odh-model-controller    timeout=400s
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=control-plane=kserve-controller-manager    timeout=400s
+  END
+
+  ${kueue} =     Is Component Enabled     kueue    ${DSC_NAME}
+  IF    "${kueue}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/part-of=kueue   timeout=400s
+  END
+
+  ${codeflare} =     Is Component Enabled     codeflare    ${DSC_NAME}
+  IF    "${codeflare}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/part-of=codeflare   timeout=400s
+  END
+
+  ${ray} =     Is Component Enabled     ray    ${DSC_NAME}
+  IF    "${ray}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/part-of=ray   timeout=400s
+  END
+
+  ${trustyai} =    Is Component Enabled    trustyai    ${DSC_NAME}
+  IF    "${trustyai}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/part-of=trustyai    timeout=400s
+  END
+
+  ${modelregistry} =    Is Component Enabled    modelregistry    ${DSC_NAME}
+  IF    "${modelregistry}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/part-of=model-registry-operator    timeout=400s
+  END
+
+  ${trainingoperator} =    Is Component Enabled    trainingoperator    ${DSC_NAME}
+  IF    "${trainingoperator}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/part-of=trainingoperator   timeout=400s
+  END
+
+  IF    "${dashboard}" == "true" or "${workbenches}" == "true" or "${modelmeshserving}" == "true" or "${datasciencepipelines}" == "true" or "${kserve}" == "true" or "${kueue}" == "true" or "${codeflare}" == "true" or "${ray}" == "true" or "${trustyai}" == "true" or "${modelregistry}" == "true" or "${trainingoperator}" == "true"    # robocop: disable
+      Log To Console    Waiting for pod status in ${APPLICATIONS_NAMESPACE}
+      Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=200
+      Log  Verified Applications NS: ${APPLICATIONS_NAMESPACE}  console=yes
   END
 
   # Monitoring stack only deployed for managed, as modelserving monitoring stack is no longer deployed
   IF  "${cluster_type}" == "managed"
-     Log To Console    "Waiting for pod status in ${MONITORING_NAMESPACE}"
+     Log To Console    Waiting for pod status in ${MONITORING_NAMESPACE}
      Wait For Pods Status  namespace=${MONITORING_NAMESPACE}  timeout=600
      Log  Verified Monitoring NS: ${MONITORING_NAMESPACE}  console=yes
-  END
-
-  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${workbenches}" == "true"
-    Oc Get  kind=Namespace  field_selector=metadata.name=${NOTEBOOKS_NAMESPACE}
-    Log  Verified Notebooks NS: ${NOTEBOOKS_NAMESPACE}
   END
 
 Verify Builds In redhat-ods-applications
@@ -256,53 +263,59 @@ Create DSCInitialization CustomResource Using Test Variables
     Run    sed -i'' -e 's/<monitoring_namespace>/${MONITORING_NAMESPACE}/' ${file_path}dsci_apply.yml
 
 Wait For DSCInitialization CustomResource To Be Ready
-  [Documentation]   Wait for DSCInitialization CustomResource To Be Ready
-  [Arguments]     ${timeout}
-  Log To Console    Waiting for DSCInitialization CustomResource To Be Ready
-  ${status}   Set Variable   False
-  FOR    ${counter}    IN RANGE   ${timeout}
-         ${return_code}    ${output} =    Run And Return Rc And Output   oc get DSCInitialization --no-headers -o custom-columns=":status.phase"
-         IF    '${output}' == 'Ready'
-               ${status} =  Set Variable  True
-               Log To Console  DSCInitialization CustomResource is Ready
-               BREAK
-         END
-         Sleep    1 sec
-  END
-  IF    '${status}' == 'False'
-        Run Keyword And Continue On Failure    FAIL    Timeout- DSCInitialization CustomResource is not Ready
-  END
+    [Documentation]   Wait ${timeout} seconds for DSCInitialization CustomResource To Be Ready
+    [Arguments]     ${timeout}
+    Log To Console    Waiting ${timeout} seconds for DSCInitialization CustomResource To Be Ready
+    ${result} =    Run Process    oc wait DSCInitialization --timeout\=${timeout}s --for jsonpath\='{.status.phase}'\=Ready --all
+    ...    shell=true    stderr=STDOUT
+    IF    ${result.rc} != 0
+        Run Keyword And Continue On Failure    FAIL    ${result.stdout}
+    END
 
 Apply DataScienceCluster CustomResource
     [Documentation]
-    [Arguments]        ${dsc_name}=${DSC_NAME}
+    [Arguments]        ${dsc_name}=${DSC_NAME}      ${custom}=False       ${custom_cmp}=''
     ${file_path} =    Set Variable    tasks/Resources/Files/
-    Log to Console    Requested Configuration:
-    FOR    ${cmp}    IN    @{COMPONENT_LIST}
-         TRY
-               Log To Console    ${cmp} - ${COMPONENTS.${cmp}}
-         EXCEPT
-               Log To Console    ${cmp} - Removed
-         END
-    END
-    Log to Console    message=Creating DataScience Cluster using yml template
-    Create DataScienceCluster CustomResource Using Test Variables
-    Apply Custom Manifest in DataScienceCluster CustomResource Using Test Variables
-    ${yml} =    Get File    ${file_path}dsc_apply.yml
-    Log To Console    Applying DSC yaml
-    Log To Console    ${yml}
-    ${return_code}    ${output} =    Run And Return Rc And Output    oc apply -f ${file_path}dsc_apply.yml
-    Log To Console    ${output}
-    Should Be Equal As Integers  ${return_code}  0  msg=Error detected while applying DSC CR
-    Remove File    ${file_path}dsc_apply.yml
-    FOR    ${cmp}    IN    @{COMPONENT_LIST}
-           IF    $cmp not in $COMPONENTS
-                Component Should Not Be Enabled    ${cmp}
-           ELSE IF    '${COMPONENTS.${cmp}}' == 'Managed'
-                Component Should Be Enabled    ${cmp}
-           ELSE IF    '${COMPONENTS.${cmp}}' == 'Removed'
-                Component Should Not Be Enabled    ${cmp}
-           END
+    IF      ${custom} == True
+        Log to Console    message=Creating DataScience Cluster using custom configuration
+        Generate CustomManifest In DSC YAML
+        Rename DevFlags in DataScienceCluster CustomResource
+        ${yml} =    Get File    ${file_path}dsc_apply.yml
+        Log To Console    Applying DSC yaml
+        Log To Console    ${yml}
+        ${return_code}    ${output} =    Run And Return Rc And Output    oc apply -f ${file_path}dsc_apply.yml
+        Log To Console    ${output}
+        Should Be Equal As Integers  ${return_code}  0  msg=Error detected while applying DSC CR
+        #Remove File    ${file_path}dsc_apply.yml
+        Wait For DSC Conditions Reconciled    ${OPERATOR_NS}     ${DSC_NAME}
+    ELSE
+        Log to Console    Requested Configuration:
+        FOR    ${cmp}    IN    @{COMPONENT_LIST}
+            TRY
+                Log To Console    ${cmp} - ${COMPONENTS.${cmp}}
+            EXCEPT
+                Log To Console    ${cmp} - Removed
+            END
+        END
+        Log to Console    message=Creating DataScience Cluster using yml template
+        Create DataScienceCluster CustomResource Using Test Variables
+        Apply Custom Manifest in DataScienceCluster CustomResource Using Test Variables
+        ${yml} =    Get File    ${file_path}dsc_apply.yml
+        Log To Console    Applying DSC yaml
+        Log To Console    ${yml}
+        ${return_code}    ${output} =    Run And Return Rc And Output    oc apply -f ${file_path}dsc_apply.yml
+        Log To Console    ${output}
+        Should Be Equal As Integers  ${return_code}  0  msg=Error detected while applying DSC CR
+        Remove File    ${file_path}dsc_apply.yml
+        FOR    ${cmp}    IN    @{COMPONENT_LIST}
+            IF    $cmp not in $COMPONENTS
+                    Component Should Not Be Enabled    ${cmp}
+            ELSE IF    '${COMPONENTS.${cmp}}' == 'Managed'
+                    Component Should Be Enabled    ${cmp}
+            ELSE IF    '${COMPONENTS.${cmp}}' == 'Removed'
+                    Component Should Not Be Enabled    ${cmp}
+            END
+        END
     END
 
 Create DataScienceCluster CustomResource Using Test Variables
@@ -319,6 +332,31 @@ Create DataScienceCluster CustomResource Using Test Variables
             ELSE IF    '${COMPONENTS.${cmp}}' == 'Removed'
                 Run    sed -i'' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
             END
+            # The model registry component needs to set the namespace used, so adding this special statement just for it
+            IF    '${cmp}' == 'modelregistry'
+                Run    sed -i'' -e 's/<${cmp}_namespace>/${MODEL_REGISTRY_NAMESPACE}/' ${file_path}dsc_apply.yml
+            END
+    END
+
+Generate CustomManifest In DSC YAML
+    [Arguments]    ${dsc_name}=${DSC_NAME}
+    Log To Console      ${custom_cmp}.items
+    ${file_path} =    Set Variable    tasks/Resources/Files/
+    Copy File    source=${file_path}dsc_template.yml    destination=${file_path}dsc_apply.yml
+    Run    sed -i'' -e 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
+    FOR    ${cmp}    IN    @{COMPONENT_LIST}
+            ${value}=       Get From Dictionary 	${custom_cmp} 	${cmp}
+            ${status}=       Get From Dictionary 	${value} 	managementState
+            Log To Console      ${status}
+            IF    '${status}' == 'Managed'
+                Run    sed -i'' -e 's/<${cmp}_value>/Managed/' ${file_path}dsc_apply.yml
+            ELSE IF    '${status}' == 'Removed'
+                Run    sed -i'' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
+            END
+            # The model registry component needs to set the namespace used, so adding this special statement just for it
+            IF    '${cmp}' == 'modelregistry'
+                Run    sed -i'' -e 's/<${cmp}_namespace>/${MODEL_REGISTRY_NAMESPACE}/' ${file_path}dsc_apply.yml
+            END
     END
 
 Apply Custom Manifest in DataScienceCluster CustomResource Using Test Variables
@@ -333,6 +371,14 @@ Apply Custom Manifest in DataScienceCluster CustomResource Using Test Variables
          ELSE
               Run    sed -i'' -e "s|<${cmp}_devflags>||g" ${file_path}dsc_apply.yml
          END
+    END
+
+Rename DevFlags in DataScienceCluster CustomResource
+    [Documentation]     Filling devFlags fields for every component in DSC
+    Log To Console    Filling devFlags fields for every component in DSC
+    ${file_path} =    Set Variable    tasks/Resources/Files/
+    FOR    ${cmp}    IN    @{COMPONENT_LIST}
+        Run     sed -i'' -e "s|<${cmp}_devflags>||g" ${file_path}dsc_apply.yml
     END
 
 Wait For DataScienceCluster CustomResource To Be Ready

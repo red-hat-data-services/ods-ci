@@ -41,8 +41,8 @@ Select Distributed Workload Project By Name
     [Documentation]    Select the project in distributed workload metrics page by project name
     [Arguments]    ${project_name}
     Wait Until Element Is Visible    ${PROJECT_XP}   timeout=20
-    Click Element    xpath://*[@data-testid="project-selector-dropdown"]
-    Click Element    xpath://*[@role="menuitem" and string()="${project_name}"]
+    Click Element    xpath://button[@id='project-selector']
+    Click Element    xpath://button[@role="menuitem" and string()="${project_name}"]
 
 Check Expected String Contains
     [Documentation]    Check Expected String Contains with the xpath prvoided get text
@@ -267,6 +267,12 @@ Check Distributed Workload Resource Metrics Status
     Check Expected String Contains    //td[@data-label="Name"]    ${job_name}
     Check Expected String Equals    //td[@data-label="Status"]//span[@class="pf-v5-c-label__text"]    ${job_status}
 
+Compare Workload Created Date With Current Date
+    [Documentation]    Check Workload Created Date To Be Less Than Equal To Current Date
+    [Arguments]    ${workload_created_date}    ${current_date}
+    ${check_workload_created_date}    Evaluate    datetime.datetime.strptime('${workload_created_date}','%m/%d/%Y') <= datetime.datetime.strptime('${current_date}','%m/%d/%Y')
+    Should Be True    ${check_workload_created_date}    Workload created date (${workload_created_date}) should be less than or equal to the current date (${current_date}).
+
 Check Requested Resources Chart
     [Documentation]    checks Requested Resources Chart
     [Arguments]    ${project}    ${cpu_requested}   ${memory_requested}
@@ -328,8 +334,10 @@ Check Distributed Worklaod Status Overview
     Page Should Contain    text=${JOB_STATUS}: 1
     Check Expected String Contains    //td[@data-label="Name"]    ${job_name}
     Check Expected String Equals    //td[@data-label="Priority"]    0
-    ${get_date} =    Get Current Date    result_format=%-m/%-d/%Y
-    Check Expected String Contains    //td[@data-label="Created"]    ${get_date}
+    ${get_current_date} =    Get Current Date    result_format=%-m/%-d/%Y
+    ${get_created_datetime} =    Get Text    xpath=//td[@data-label="Created"]
+    ${get_created_date} =    Evaluate    re.search(r'[^,]+','''${get_created_datetime}''').group(0)
+    Compare Workload Created Date With Current Date    ${get_created_date}    ${get_current_date}
     Check Expected String Equals    //td[@data-label="Status"]//span[@class="pf-v5-c-label__text"]    ${job_status}
     Check Expected String Equals    //td[@data-label="Latest Message"]    ${job_status_message}
 

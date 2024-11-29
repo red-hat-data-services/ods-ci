@@ -7,6 +7,7 @@ Resource       Projects.resource
 
 
 *** Variables ***
+${PV_MOUNT_PATH}=    ods-ci-test-path
 ${WORKBENCH_SECTION_XP}=             xpath=//div[@data-testid="section-workbenches"]
 ${WORKBENCH_CREATE_BTN_XP}=           xpath=//button[text()="Create workbench"]
 ${WORKBENCH_CREATE_BTN_2_XP}=         xpath=//button[@id="create-button"]
@@ -28,7 +29,7 @@ ${WORKBENCH_USE_CONNECTION_CHK_XP}=           xpath=//input[@name="enable-data-c
 ${WORKBENCH_EXISTING_CONNECTION_RAD_XP}=      xpath=//input[@name="existing-data-connection-type-radio"]
 ${WORKBENCH_STATUS_STOPPED}=                  Stopped
 ${WORKBENCH_STATUS_RUNNING}=                  Running
-${WORKBENCH_STATUS_STARTING}=                 Starting...
+${WORKBENCH_STATUS_STARTING}=                 Starting
 ${WORKBENCH_STOP_BTN_XP}=                 xpath=//button[text()="Stop workbench"]
 ${WORKBENCH_IMAGE_VER_LABEL}=        //label[@for="workbench-image-version-selection"]
 ${WORKBENCH_IMAGE_VER_BUTTON}=       ${WORKBENCH_IMAGE_VER_LABEL}/../..//button
@@ -42,7 +43,7 @@ ${WORKBENCH_IMAGE_VER_DROPDOWN}=     //*[@id="workbench-image-version-selection"
 ${KEYVALUE_TYPE}=        Key / value
 ${UPLOAD_TYPE}=        Upload
 ${ENV_VARIABLES_SECTION_XP}=        xpath=//section[@aria-label="Environment variables"]
-${ENV_DATA_CONNECTION_SECTION_XP}=   xpath=//section[@aria-label="Data connections"]
+${ENV_DATA_CONNECTION_SECTION_XP}=   xpath=//section[@aria-label="Connections"]
 ${ERROR_ICON_XP}=        span[contains(@class,'pf-m-danger')]
 
 
@@ -63,7 +64,7 @@ Create Workbench
     Input Text    ${WORKBENCH_NAME_INPUT_XP}    ${workbench_title}
     Input Text    ${WORKBENCH_DESCR_TXT_XP}    ${workbench_description}
     Run Keyword And Continue On Failure     Element Should Be Disabled    ${WORKBENCH_CREATE_BTN_2_XP}
-    Select Workbench Jupyter Image    image_name=${image_name}    version=${version}
+    Select Workbench Image    image_name=${image_name}    version=${version}
     IF    "${deployment_size}" != "${NONE}"    Select Workbench Container Size    size_name=${deployment_size}
     IF    "${gpus}" != "${NONE}"    Select Workbench Number Of GPUs    gpus=${gpus}
     IF    "${envs}" != "${NONE}"
@@ -82,8 +83,8 @@ Create Workbench
         IF    ${pv_existent} == ${TRUE}
             # Use the `Jump to section` links in the page to scroll the section into view
             Click Element    //a[@href="#cluster-storage"]
-            Click Element    xpath=//input[@name="persistent-existing-storage-type-radio"]
-            Select An Existent PV   name=${pv_name}
+            Click Element    //*[@data-testid="existing-storage-button"]
+            Select An Existent PV   ${pv_name}   ${PV_MOUNT_PATH}
         ELSE IF   ${pv_existent} == ${FALSE}
             # Use the `Jump to section` links in the page to scroll the section into view
             Click Element    //a[@href="#cluster-storage"]
@@ -189,15 +190,17 @@ Remove All Environment Variables
 
 Select An Existent PV
     [Documentation]    Selects an existent PV Storage in the workbench creation page
-    [Arguments]    ${name}
+    [Arguments]    ${name}  ${path}
     Run Keyword And Continue On Failure
     ...    Wait Until Element Is Enabled    xpath=//input[@placeholder="Select a persistent storage"]
     Click Element    xpath=//input[@placeholder="Select a persistent storage"]
-    ${existing_pv_xpath}=    Set Variable    xpath=//ul/li/button[string()="${name}"]
+    ${existing_pv_xpath}=    Set Variable    xpath=//button//span[text()="${name}"]
     Wait Until Page Contains Element    ${existing_pv_xpath}
     Click Element   ${existing_pv_xpath}
+    Input Text    //*[@data-testid="mount-path-folder-value"]    ${path}
+    Click Element    //*[@data-testid="modal-submit-button"]
 
-Select Workbench Jupyter Image
+Select Workbench Image
     [Documentation]    Selects a Jupyter image in the workbench creation page
     [Arguments]     ${image_name}    ${version}=default
     IF  "${PRODUCT}" == "ODH"
@@ -206,7 +209,6 @@ Select Workbench Jupyter Image
             ${image_name}=    Set Variable    Jupyter Data Science
         END
     END
-
     Click Element    //a[@href="#notebook-image"]
     Wait Until Page Contains Element    ${WORKBENCH_IMAGE_MENU_BTN_XP}
     Click Element    ${WORKBENCH_IMAGE_MENU_BTN_XP}
@@ -220,6 +222,16 @@ Select Workbench Jupyter Image
         ELSE
             Fail    ${version} does not exist, use default/previous
         END
+    END
+    IF  "${version}"=="previous"
+        # Let's reset the JupyterLibrary settings so that global variables for Jupyter 3 (default) are in place.
+        Update Globals For JupyterLab 3 Custom
+    # TODO: Create the missing Keyword "Update Globals For JupyterLab 4"
+    # ELSE
+        # For Jupyter 4, we need to update global default variable values (images 2024b and newer)
+        # This calls method from JupyterLibrary Version.resource module
+        # https://github.com/robots-from-jupyter/robotframework-jupyterlibrary/blob/9e25fcb89a5f1a723c59e9b96706e4c638e0d9be/src/JupyterLibrary/clients/jupyterlab/Version.resource
+        # Update Globals For JupyterLab 4
     END
 
 Verify Version Selection Dropdown
@@ -264,14 +276,14 @@ Workbench Should Be Listed
     [Arguments]     ${workbench_title}    ${timeout}=10s
     Run keyword And Continue On Failure
     ...    Wait Until Page Contains Element
-    ...    ${WORKBENCH_SECTION_XP}//td[@data-label="Name"]/*[div[text()="${workbench_title}"]]    timeout=${timeout}
+    ...    ${WORKBENCH_SECTION_XP}//td[@data-label="Name"]//*[.="${workbench_title}"]    timeout=${timeout}
 
 Workbench With Description Should Be Listed
     [Documentation]    Checks a workbench with particular name and description is listed in the DS Project details page
     [Arguments]     ${workbench_title}  ${workbench_description}    ${timeout}=10s
     Run keyword And Continue On Failure
     ...    Wait Until Page Contains Element
-    ...    ${WORKBENCH_SECTION_XP}//td[@data-label="Name"][//div[text()="${workbench_title}"] and //p[text()="${workbench_description}"]]
+    ...    ${WORKBENCH_SECTION_XP}//td[@data-label="Name"][//*[text()="${workbench_title}"] and //p[text()="${workbench_description}"]]
     ...    timeout=${timeout}
 
 Workbench Should Not Be Listed
@@ -286,7 +298,7 @@ Workbench Status Should Be
     [Arguments]     ${workbench_title}      ${status}    ${timeout}=10
     Run keyword And Continue On Failure
     ...    Wait Until Page Contains Element
-    ...    ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p[text()="${status}"]
+    ...    ${WORKBENCH_SECTION_XP}//td[@data-label="Name"]//*[.="${workbench_title}"]/../../../td[@data-label="Status"]//span[text()="${status}"]
     ...    timeout=${timeout}
 
 Status Error Icon Should Appear
@@ -301,7 +313,7 @@ Wait Until Workbench Is Started
     [Documentation]    Waits until workbench status is "RUNNING" in the DS Project details page
     [Arguments]     ${workbench_title}    ${timeout}=60s    ${status}=${WORKBENCH_STATUS_RUNNING}
     Wait Until Page Contains Element
-    ...    ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p[text()="${status}"]
+    ...    ${WORKBENCH_SECTION_XP}//td[@data-label="Name"]//*[.="${workbench_title}"]/../../../td[@data-label="Status"]//span[text()="${status}"]
     ...    timeout=${timeout}
 
 Wait Until Workbench Is Stopped
@@ -323,7 +335,7 @@ Start Workbench
     ${is_stopped}=      Run Keyword And Return Status   Workbench Status Should Be
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STOPPED}
     IF    ${is_stopped} == ${TRUE}
-        Click Element       ${WORKBENCH_SECTION_XP}//div[text()="${workbench_title}"]/ancestor::tr/td[@data-label="Status"]//label[@data-ouia-component-type="PF5/Switch"]
+        Click Button    xpath=//div[@data-testid="table-row-title"]//*[text()="${workbench_title}"]/ancestor::tr//button[@data-testid="notebook-start-action"]
     ELSE
         Log     msg=Cannot start ${workbench_title} workbench because it is not stopped.
     END
@@ -350,27 +362,42 @@ Access To Workbench
     END
 
 Launch And Access Workbench
-    [Documentation]    Launches a workbench from DS Project details page
+    [Documentation]    Launches a workbench from DS Project details page and returns the handle of the current tab
     [Arguments]     ${workbench_title}    ${username}=${TEST_USER_3.USERNAME}
     ...    ${password}=${TEST_USER_3.PASSWORD}  ${auth_type}=${TEST_USER_3.AUTH_TYPE}
     ${is_started}=      Run Keyword And Return Status   Workbench Status Should Be
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}
     IF    ${is_started} == ${TRUE}
-        Open Workbench    workbench_title=${workbench_title}
+        ${previous_handle}=    Open Workbench    workbench_title=${workbench_title}
         Access To Workbench    username=${username}    password=${password}
         ...    auth_type=${auth_type}
     ELSE
         Fail   msg=Cannot Launch And Access Workbench ${workbench_title} because it is not running...
     END
+    RETURN    ${previous_handle}
 
 Open Workbench
-    [Documentation]    Clicks on "open" link for a given workbench
+    [Documentation]    Clicks on "open" link for a given workbench and returns the handle of the current tab
     [Arguments]    ${workbench_title}
+    ${desc}=    Does Workbench Have A Description    ${workbench_title}
     ${open_workbench_link}=    Set Variable
-    ...    ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td//a[text()="Open"]
-    Wait Until Page Contains Element    ${open_workbench_link}    timeout=30s
-    Click Link    ${open_workbench_link}
-    Switch Window    NEW
+    ...    ${WORKBENCH_SECTION_XP}//td[@data-label="Name"]//*[.="${workbench_title}"]
+    IF    ${desc}
+        ${open_workbench_link}=    Catenate    ${open_workbench_link}    /../../../td//a[.="Open"]
+    ELSE
+        ${open_workbench_link}=    Catenate    ${open_workbench_link}    /../../td//a[.="Open"]
+    END
+    SeleniumLibrary.Wait Until Page Contains Element    ${open_workbench_link}    timeout=30s
+    SeleniumLibrary.Click Link    ${open_workbench_link}
+    ${previous_handle}=    SeleniumLibrary.Switch Window    NEW
+    RETURN    ${previous_handle}
+
+Does Workbench Have A Description
+    [Documentation]    Checks if a Workbench has a description in the list view of the project
+    [Arguments]    ${workbench_title}
+    ${has_description}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain Element
+    ...    ${WORKBENCH_SECTION_XP}//td[@data-label="Name"]//*[.="${workbench_title}"]/../span[@data-testid="table-row-title-description"]    # robocop: disable
+    RETURN    ${has_description}
 
 Stop Workbench
     [Documentation]    Stops a workbench from DS Project details page
@@ -380,9 +407,10 @@ Stop Workbench
     ${is_starting}=      Run Keyword And Return Status   Workbench Status Should Be
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STARTING}
     IF    ${is_started} == ${TRUE} or ${is_starting} == ${TRUE}
-        Click Element       ${WORKBENCH_SECTION_XP}//div[text()="${workbench_title}"]/ancestor::tr/td[@data-label="Status"]//label[@data-ouia-component-type="PF5/Switch"]
+        Click Button    xpath=//div[@data-testid="table-row-title"]//*[text()="${workbench_title}"]/ancestor::tr//button[@data-testid="notebook-stop-action"]
         Wait Until Generic Modal Appears
-        Handle Stop Workbench Confirmation Modal    press_cancel=${press_cancel}
+        Handle Stop Workbench Confirmation Modal    workbench_title=${workbench_title}
+        ...    press_cancel=${press_cancel}
         ...    from_running=${from_running}
     ELSE
         Fail   msg=Cannot stop workbench ${workbench_title} because it is not neither running or starting...
@@ -390,13 +418,15 @@ Stop Workbench
 
 Handle Stop Workbench Confirmation Modal
     [Documentation]    Handles modal to stop workbench
-    [Arguments]    ${press_cancel}=${FALSE}    ${from_running}=${TRUE}
+    [Arguments]    ${workbench_title}    ${press_cancel}=${FALSE}    ${from_running}=${TRUE}
     Run Keyword And Continue On Failure    Page Should Contain    Stop workbench?
     IF    ${from_running} == ${TRUE}
         Run Keyword And Continue On Failure
-        ...    Page Should Contain    Are you sure you want to stop the workbench? Any changes without saving will be erased.
-        Run Keyword And Continue On Failure    Page Should Contain    To save changes, access your
-        Run Keyword And Continue On Failure    Page Should Contain Element    xpath=//a[.="workbench"]
+        ...    Page Should Contain    Any unsaved changes to the ${workbench_title} workbench will be lost.
+        Run Keyword And Continue On Failure
+        ...    Page Should Contain    To save changes, open the workbench.
+        Run Keyword And Continue On Failure
+        ...    Page Should Contain Element    xpath=//a[.="open the workbench"]
     END
     Run Keyword And Continue On Failure    Page Should Contain Element    xpath=//input[@id="dont-show-again"]
     Run Keyword And Continue On Failure    Click Element    xpath=//input[@id="dont-show-again"]
@@ -421,7 +451,7 @@ Edit Workbench
     # Also wait until the workbench name is populated in the text field - let's wait for DOM to finish
     Wait For Condition    return document.readyState == "complete"    timeout=5s
 
-Check Launched Workbench Is The Correct One
+Verify Workbench Image In Jupyter Lab
     [Documentation]    Checks if the launched workbench is the expected one
     [Arguments]     ${workbench_title}    ${image}    ${project_title}
     ${namespace}=    Get Openshift Namespace From Data Science Project   project_title=${project_title}

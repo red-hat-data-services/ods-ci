@@ -1,5 +1,7 @@
 *** Settings ***
 Resource  ../../OCPDashboard/Pods/Pods.robot
+Resource  ./Icons.resource
+
 Library  JupyterLibrary
 Library  jupyter-helper.py
 Library  OperatingSystem
@@ -10,17 +12,14 @@ Library  SeleniumLibrary
 
 
 *** Variables ***
-${JL_TABBAR_CONTENT_XPATH} =  //div[contains(@class,"lm-DockPanel-tabBar")]/ul[@class="lm-TabBar-content p-TabBar-content"]
-${JL_TABBAR_SELECTED_XPATH} =  ${JL_TABBAR_CONTENT_XPATH}/li[contains(@class,"lm-mod-current p-mod-current")]
-${JL_TABBAR_NOT_SELECTED_XPATH} =  ${JL_TABBAR_CONTENT_XPATH}/li[not(contains(@class,"lm-mod-current p-mod-current"))]
+${JL_TABBAR_CONTENT_XPATH}    //div[contains(@class,"lm-DockPanel-tabBar")]
+${JL_TABBAR_SELECTED_XPATH}    ${JL_TABBAR_CONTENT_XPATH}//li[@aria-selected="true"]
+${JL_TABBAR_NOT_SELECTED_XPATH}    ${JL_TABBAR_CONTENT_XPATH}//li[@aria-selected="false"]
 ${JLAB CSS ACTIVE DOC}    .jp-Document:not(.jp-mod-hidden)
 ${JLAB CSS ACTIVE CELL}    ${JLAB CSS ACTIVE DOC} .jp-Cell.jp-mod-active
-${JLAB CSS ACTIVE INPUT}    ${JLAB CSS ACTIVE CELL} .CodeMirror
 ${JLAB XP NB TOOLBAR FRAG}    [contains(@class, 'jp-NotebookPanel-toolbar')]
-${JLAB CSS ACTIVE DOC}    .jp-Document:not(.jp-mod-hidden)
 ${JLAB CSS ACTIVE DOC CELLS}    ${JLAB CSS ACTIVE DOC} .jp-Cell
 ${JLAB CSS ACTIVE CELL}    ${JLAB CSS ACTIVE DOC} .jp-Cell.jp-mod-active
-${JLAB CSS ACTIVE INPUT}    ${JLAB CSS ACTIVE CELL} .CodeMirror
 ${REPO_URL}             https://github.com/sclorg/nodejs-ex.git
 ${FILE_NAME}            nodejs-ex
 
@@ -30,14 +29,14 @@ Get JupyterLab Selected Tab Label
   RETURN  ${tab_label}
 
 JupyterLab Launcher Tab Is Visible
-  Get WebElement  xpath:${JL_TABBAR_CONTENT_XPATH}/li/div[.="Launcher"]
+  Get WebElement  xpath:${JL_TABBAR_CONTENT_XPATH}//li/div[.="Launcher"]
 
 JupyterLab Launcher Tab Is Selected
   Get WebElement  xpath:${JL_TABBAR_SELECTED_XPATH}/div[.="Launcher"]
 
 Open JupyterLab Launcher
   Maybe Select Kernel
-  Open With JupyterLab Menu  File  New Launcher
+  Click Element    //div[@title="New Launcher"]
   JupyterLab Launcher Tab Is Visible
   JupyterLab Launcher Tab Is Selected
 
@@ -45,8 +44,7 @@ Wait Until ${filename} JupyterLab Tab Is Selected
   Wait Until Page Contains Element  xpath:${JL_TABBAR_SELECTED_XPATH}/div[.="${filename}"]
 
 Close Other JupyterLab Tabs
-  ${original_tab} =  Get WebElement  xpath:${JL_TABBAR_SELECTED_XPATH}/div[contains(@class, "p-TabBar-tabLabel")]
-  #${original_tab} =  Get WebElement  xpath:${JL_TABBAR_SELECTED_XPATH}/div[contains(concat(' ',normalize-space(@class),' '),' p-TabBar-tabLabel ')]
+  ${original_tab} =  Get WebElement  xpath:${JL_TABBAR_SELECTED_XPATH}/div[contains(@class, "-TabBar-tabLabel")]
 
   ${xpath_background_tab} =  Set Variable  xpath:${JL_TABBAR_NOT_SELECTED_XPATH}
   ${jl_tabs} =  Get WebElements  ${xpath_background_tab}
@@ -70,7 +68,12 @@ Close JupyterLab Selected Tab
   Maybe Close Popup
 
 JupyterLab Code Cell Error Output Should Not Be Visible
-  Element Should Not Be Visible  xpath://div[contains(@class,"jp-OutputArea-output") and @data-mime-type="application/vnd.jupyter.stderr"]  A JupyterLab code cell output returned an error
+  ${failure}=    Run Keyword And Return Status
+  ...    SeleniumLibrary.Element Should Be Visible    xpath://div[contains(@class,"jp-OutputArea-output") and @data-mime-type="application/vnd.jupyter.stderr"]  A JupyterLab code cell output returned an error  # robocop: disable
+  IF    ${failure}
+      Capture Element Screenshot    xpath://div[contains(@class,"jp-OutputArea-output") and @data-mime-type="application/vnd.jupyter.stderr"]  # robocop: disable
+      Fail    msg=A JupyterLab code cell output returned an error, see screenshot
+  END
 
 Get JupyterLab Code Cell Error Text
   ${error_txt} =  Get Text  //div[contains(@class,"jp-OutputArea-output") and @data-mime-type="application/vnd.jupyter.stderr"]
@@ -89,6 +92,11 @@ Wait Until JupyterLab Code Cell Is Not Active
   Wait Until Element Is Not Visible
   ...    //div[contains(@class,"jp-Cell-inputArea")]/div[contains(@class,"jp-InputArea-prompt") and (.="[*]:")][1]
   ...    ${timeout}
+
+Scroll At The End Of The Notebook
+  [Documentation]  Scrolls at the end of the opened Notebook so that
+  ...    the button for addition of a new cell is visible.
+  Scroll Element Into View    //button[string()="Click to add a cell."]
 
 Select Empty JupyterLab Code Cell
   Click Element  //div[contains(@class,"jp-mod-noOutputs jp-Notebook-cell")]
@@ -132,21 +140,24 @@ Run Cell And Get Output
     RETURN    ${output}
 
 Python Version Check
-  [Arguments]  ${expected_version}=3.8
-  Add And Run JupyterLab Code Cell In Active Notebook  !python --version
-  Wait Until JupyterLab Code Cell Is Not Active
-  #Get the text of the last output cell
-  ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
-  #start is inclusive, end exclusive, get x.y from Python x.y.z string
-  ${output} =  Fetch From Right  ${output}  ${SPACE}
-  ${vers} =  Get Substring  ${output}  0  3
-  ${status} =  Run Keyword And Return Status  Should Match  ${vers}  ${expected_version}
-  IF  '${status}' == 'FAIL'  Run Keyword And Continue On Failure  FAIL  "Expected Python at version ${expected_version}, but found at v ${vers}"
+    [Documentation]    Checks that the X.Y python version of the current Jupyterlab instance matches an expected one
+    [Arguments]    ${expected_version}=3.8
+    ${vers} =  Get XY Python Version From Jupyterlab
+    ${status} =  Run Keyword And Return Status  Should Match  ${vers}  ${expected_version}
+    IF  '${status}' == 'FAIL'  Run Keyword And Continue On Failure  FAIL  "Expected Python at version ${expected_version}, but found at v ${vers}"    # robocop: disable
 
+Get XY Python Version From Jupyterlab
+    [Documentation]    Fetches the X.Y Python version from the current Jupyterlab instance
+    ${output}=    Run Cell And Get Output    !python --version
+    ${output}=    Fetch From Right    ${output}    ${SPACE}
+    # Y and Z can be > len 1, split on "." instead of getting substring from indices
+    @{split_out}=    Split String    ${output}   separator=.
+    ${vers}=    Set Variable   ${split_out}[0].${split_out}[1]
+    RETURN    ${vers}
 
 Maybe Select Kernel
-  ${is_kernel_selected} =  Run Keyword And Return Status  Page Should Not Contain Element  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]
-  IF  not ${is_kernel_selected}  Click Button  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]/..
+    ${is_kernel_selected} =  Run Keyword And Return Status  Page Should Not Contain Element  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]
+    IF  not ${is_kernel_selected}  SeleniumLibrary.Click Button  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]/..
 
 Clean Up Server
     [Documentation]    Cleans up user server and checks that everything has been removed
@@ -329,32 +340,84 @@ Maybe Close Popup
       Capture Page Screenshot
     END
 
-Add And Run JupyterLab Code Cell In Active Notebook    # robocop:disable
+Add And Run JupyterLab Code Cell In Active Notebook
     [Arguments]    @{code}    ${n}=1
     [Documentation]    Add a ``code`` cell to the ``n`` th notebook on the page and run it.
     ...    ``code`` is a list of strings to set as lines in the code editor.
     ...    ``n`` is the 1-based index of the notebook, usually in order of opening.
-    ${add icon} =    Get JupyterLab Icon XPath    add
+    ...    This keyword should work on both JupyterLab 3.x and JupyterLab 4.x
+    # JupyterLab 3.x uses CodeMirror 5; JupyterLab 4.x uses CodeMirror 6
+    # CM VERSION variable is set via JupyterLibrary - we have to run
+    # Update Globals For JupyterLab 4 keyword in case we're running JupyterLab 4.x image.
+    IF  "${CM VERSION}"=="6"
+        Add And Run JupyterLab Code Cell 6 In Active Notebook    @{code}    n=${n}
+    ELSE
+        Add And Run JupyterLab Code Cell 5 In Active Notebook    @{code}    n=${n}
+    END
 
+Add And Run JupyterLab Code Cell 5 In Active Notebook
+    [Documentation]    Add a ``code`` cell to the ``n`` th notebook on the page and run it.
+    ...    ``code`` is a list of strings to set as lines in the code editor.
+    ...    ``n`` is the 1-based index of the notebook, usually in order of opening.
+    [Arguments]    @{code}    ${n}=1
+    # This keyword was copied and amended from JupyterLibrary resources - Notebook.Add And Run JupyterLab Code Cell.
+
+    ${add icon} =    Get JupyterLab Icon XPath Custom    add
     ${nb} =    Get WebElement    xpath://div${JLAB XP NB FRAG}\[${n}]
     ${nbid} =    Get Element Attribute    ${nb}    id
-
     ${active-nb-tab} =    Get WebElement    xpath:${JL_TABBAR_SELECTED_XPATH}
     ${tab-id} =    Get Element Attribute    ${active-nb-tab}    id
-
-    Click Element    xpath://div[@aria-labelledby="${tab-id}"]/div[1]//${add icon}
+    Click Element    xpath://div[@aria-labelledby="${tab-id}"]//*[@data-jp-item-name="insert"]
     Sleep    0.1s
     Click Element    xpath://div[@aria-labelledby="${tab-id}"]//div[contains(concat(' ',normalize-space(@class),' '),' jp-mod-selected ')]
-    Set CodeMirror Value    \#${nbid}${JLAB CSS ACTIVE INPUT}    @{code}
-    Run Current JupyterLab Code Cell MOD  ${tab-id}
+    Press Keys    None   @{code}
+    Click Element    xpath://div[@aria-labelledby="${tab-id}"]//*[@data-jp-item-name="run"]
     Click Element    xpath://div[@aria-labelledby="${tab-id}"]//div[contains(concat(' ',normalize-space(@class),' '),' jp-mod-selected ')]
 
-Run Current JupyterLab Code Cell MOD
-    [Arguments]  ${tab-id}
+Add And Run JupyterLab Code Cell 6 In Active Notebook
+    [Documentation]    Add a ``code`` cell to the ``n`` th notebook on the page and run it.
+    ...    ``code`` is a list of strings to set as lines in the code editor.
+    ...    ``n`` is the 1-based index of the notebook, usually in order of opening.
+    # This keyword was copied and amended from JupyterLibrary resources - Notebook.Add And Run JupyterLab Code Cell.
+
+    [Arguments]    @{code}    ${n}=1
+    ${add icon} =    Get JupyterLab Icon XPath Custom    add
+    ${nb} =    Get WebElement    xpath://div${JLAB XP NB FRAG}\[${n}]
+    # rely on main area widgets all having ids
+    ${nbid} =    JupyterLibrary.Get Element Attribute    ${nb}    id
+    ${icon} =    Get WebElement Relative To    ${nb}
+    ...    xpath://*[@aria-label="notebook actions"]//*[contains(@class, "jp-CommandToolbarButton") and .//${add icon}]
+    Click Element    ${icon}
+    Sleep    0.1s
+    ${cell} =    Get WebElement Relative To    ${nb}
+    ...    css:${JLAB CSS ACTIVE INPUT.replace('''${JLAB CSS ACTIVE DOC}''', '')}
+    Click Element    ${cell}
+    Set CodeMirror Value    \#${nbid}${JLAB CSS ACTIVE INPUT}    @{code}
+    Run Current JupyterLab Code Cell 6    ${n}
+    Click Element    ${cell}
+
+Run Current JupyterLab Code Cell 5
     [Documentation]    Run the currently-selected cell(s) in the ``n`` th notebook.
     ...    ``n`` is the 1-based index of the notebook, usually in order of opening.
-    ${run icon} =    Get JupyterLab Icon XPath    run
+    [Arguments]  ${tab-id}
+    # This keyword was copied and amended from JupyterLibrary resources - Notebook.Run Current JupyterLab Code Cell
+
+    ${run icon} =    Get JupyterLab Icon XPath Custom    run
     Click Element    xpath://div[@aria-labelledby="${tab-id}"]/div[1]//${run icon}
+    Sleep    0.5s
+
+Run Current JupyterLab Code Cell 6
+    [Documentation]    Run the currently-selected cell(s) in the ``n`` th notebook.
+    ...    ``n`` is the 1-based index of the notebook, usually in order of opening.
+    [Arguments]    ${n}=1
+    # This keyword was copied and amended from JupyterLibrary resources - Notebook.Run Current JupyterLab Code Cell
+
+    ${run icon} =    Get JupyterLab Icon XPath Custom    run
+    ${nb} =    Get WebElement    xpath://div${JLAB XP NB FRAG}\[${n}]
+    # ${run btn} =    Get WebElement Relative To    ${nb}    xpath:div${JLAB XP NB TOOLBAR FRAG}//${run icon}
+    ${run btn} =    Get WebElement Relative To    ${nb}
+    ...    xpath://*[@aria-label="notebook actions"]//*[contains(@class, "jp-CommandToolbarButton") and .//${run icon}]  # Edited
+    Click Element    ${run btn}
     Sleep    0.5s
 
 Wait Until JupyterLab Code Cell Is Not Active In a Given Tab
@@ -392,7 +455,6 @@ Verify Installed Labextension Version
 Check Versions In JupyterLab
     [Arguments]  ${libraries-to-check}
     ${return_status} =    Set Variable    PASS
-    @{packages} =    Create List    Python    Boto3    Kafka-Python    Matplotlib    Scikit-learn    Pandas    Scipy    Numpy
     FOR  ${libString}  IN  @{libraries-to-check}
         # libString = LibName vX.Y -> libDetail= [libName, X.Y]
         @{libDetail} =  Split String  ${libString}  ${SPACE}v
@@ -426,6 +488,11 @@ Check Versions In JupyterLab
         # CUDA version is checked in GPU-specific test cases, we can skip it here.
         ELSE IF  "${libDetail}[0]" == "CUDA"
             CONTINUE
+        ELSE IF  "${libDetail}[0]" == "Nvidia-CUDA-CU12-Bundle"
+            ${status}  ${value} =  Verify Installed Library Version  nvidia-cuda-nvcc-cu12  ${libDetail}[1]
+            IF  '${status}' == 'FAIL'
+              ${return_status} =    Set Variable    FAIL
+            END
         ELSE IF  "${libDetail}[0]" == "Elyra"
             ${status}  ${value} =  Verify Installed Library Version  elyra-code-snippet-extension  ${libDetail}[1]
             IF  '${status}' == 'FAIL'
@@ -465,12 +532,18 @@ Check Versions In JupyterLab
               ${return_status} =    Set Variable    FAIL
             END
         END
+
+        # Now check that selected list of packages has same version among all the images.
+        @{packages} =    Create List    Python    Boto3    Kafka-Python    Scipy
+
         Continue For Loop If  "${libDetail}[0]" not in ${packages}
         IF    "${libDetail}[0]" not in ${package_versions}
         ...    Set To Dictionary    ${package_versions}    ${libDetail}[0]=${libDetail}[1]
         IF    "${package_versions["${libDetail}[0]"]}" != "${libDetail}[1]"
              ${return_status} =    Set Variable    FAIL
-             Run Keyword And Continue On Failure  FAIL  "${package_versions["${libDetail}[0]"]} != ${libDetail}[1]"
+             Run Keyword And Continue On Failure    Fail
+             ...    Version of this library in this image doesn't align with versions in other images
+             ...    "${package_versions["${libDetail}[0]"]} != ${libDetail}[1]"
         END
     END
     RETURN  ${return_status}

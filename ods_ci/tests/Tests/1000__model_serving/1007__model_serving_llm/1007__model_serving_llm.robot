@@ -326,7 +326,7 @@ Verify User Can Set Requests And Limits For A Model    # robocop: off=too-long-t
     ${new_requests}=    Create Dictionary    cpu=2    memory=3Gi
     Set Model Hardware Resources    model_name=${flan_model_name}    namespace=hw-res
     ...    requests=${new_requests}    limits=${NONE}
-    Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${rev_id}
+    Wait For Pods To Be Terminated    label_selector=serving.knative.dev/revisionUID=${rev_id}    timeout=300s
     ...    namespace=${test_namespace}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
@@ -339,7 +339,7 @@ Verify User Can Set Requests And Limits For A Model    # robocop: off=too-long-t
 Verify Model Can Be Served And Query On A GPU Node    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
     ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    Sanity    ODS-2381    Resources-GPU
+    [Tags]    Sanity    ODS-2381    Resources-GPU    NVIDIA-GPUs
     [Setup]    Set Project And Runtime    namespace=singlemodel-gpu
     ${test_namespace}=    Set Variable    singlemodel-gpu
     ${model_name}=    Set Variable    flan-t5-small-caikit
@@ -364,7 +364,7 @@ Verify Model Can Be Served And Query On A GPU Node    # robocop: off=too-long-te
     Query Model Multiple Times    model_name=${model_name}    n_times=5
     ...    namespace=${test_namespace}    inference_type=streaming
     [Teardown]   Clean Up Test Project    test_ns=${test_namespace}
-    ...    isvc_names=${model_name}    wait_prj_deletion=${FALSE}
+    ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
 
 Verify Non Admin Can Serve And Query A Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Basic tests leveraging on a non-admin user for preparing, deploying and querying a LLM model

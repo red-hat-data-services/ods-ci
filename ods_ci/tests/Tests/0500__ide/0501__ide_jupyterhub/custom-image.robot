@@ -18,7 +18,7 @@ Test Tags        JupyterHub
 *** Variables ***
 ${YAML} =         tests/Resources/Files/custom_image.yaml
 ${IMG_NAME} =            custom-test-image
-${IMG_URL} =             quay.io/opendatahub-contrib/workbench-images:jupyter-datascience-c9s-py311_2023c_latest
+${IMG_URL} =             quay.io/opendatahub/workbench-images:jupyter-minimal-ubi9-python-3.11-2024b-20241004
 ${IMG_DESCRIPTION} =     Testing Only This image is only for illustration purposes, and comes with no support. Do not use.
 &{IMG_SOFTWARE} =        Software1=x.y.z
 &{IMG_PACKAGES} =        elyra=2.2.4    foo-pkg=a.b.c
@@ -62,7 +62,7 @@ Verify Custom Image Can Be Added
 
 Test Duplicate Image
     [Documentation]  Test adding two images with the same name (should fail)
-    ...       ProductBug - https://issues.redhat.com/browse/RHOAIENG-1192
+    ...       There was a bug related https://issues.redhat.com/browse/RHOAIENG-1192
     [Tags]    Tier1    ExcludeOnDisconnected
     ...       ODS-1368
     Sleep  1
@@ -71,10 +71,9 @@ Test Duplicate Image
     Import New Custom Image    ${IMG_URL}    ${IMG_NAME}    ${IMG_DESCRIPTION}
     ...    software=${IMG_SOFTWARE}
     ...    packages=${IMG_PACKAGES}
-    # Workaround for https://issues.redhat.com/browse/RHOAIENG-1192
-    # To be removed ASAP
-    Wait Until Page Contains    Unable to add notebook image: HTTP request failed
-    Log    Unable to add second image with error message "Unable to add notebook image: HTTP request failed" due to RHOAIENG-1192    level=WARN  # robocop: disable
+    # Assure that the expected error message is shown in the modal window
+    ${image_name_id}=  Replace String  ${IMG_NAME}  ${SPACE}  -
+    Wait Until Page Contains    Unable to add notebook image: imagestreams.image.openshift.io "custom-${image_name_id}" already exists
     # Since the image cannot be created, we need to cancel the modal window now
     Click Button    ${GENERIC_CANCEL_BTN_XP}
     [Teardown]  Duplicate Image Teardown
@@ -94,9 +93,11 @@ Test Bad Image URL
 
 Test Image From Local registry
     [Documentation]  Try creating a custom image using a local registry URL (i.e. OOTB image)
-    ...       Issue reported for this test in the past - https://github.com/opendatahub-io/odh-dashboard/issues/2185
     [Tags]    Tier1
     ...       ODS-2470
+    ...       ExcludeOnDisconnected    # Since we don't have internal image registry enabled there usually
+    ...       InternalImageRegistry    # Requires internal image registry enabled
+    ...       ProductBug               # https://issues.redhat.com/browse/RHOAIENG-1193
     ${CLEANUP}=  Set Variable  False
     Open Notebook Images Page
     ${local_url} =    Get Standard Data Science Local Registry URL
@@ -198,6 +199,6 @@ Reset Image Name
 
 Get Standard Data Science Local Registry URL
     [Documentation]    Fetches the local URL for the SDS image
-    ${registry} =    Run    oc get imagestream s2i-generic-data-science-notebook -n redhat-ods-applications -o json | jq '.status.dockerImageRepository' | sed 's/"//g'  # robocop: disable
-    ${tag} =    Run    oc get imagestream s2i-generic-data-science-notebook -n redhat-ods-applications -o json | jq '.status.tags[-1].tag' | sed 's/"//g'  # robocop: disable
+    ${registry} =    Run    oc get imagestream s2i-generic-data-science-notebook -n ${APPLICATIONS_NAMESPACE} -o json | jq '.status.dockerImageRepository' | sed 's/"//g'  # robocop: disable
+    ${tag} =    Run    oc get imagestream s2i-generic-data-science-notebook -n ${APPLICATIONS_NAMESPACE} -o json | jq '.status.tags[-1].tag' | sed 's/"//g'  # robocop: disable
     RETURN    ${registry}:${tag}

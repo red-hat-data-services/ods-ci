@@ -24,8 +24,9 @@ ${SERVING_MODEL_SERVERS_SIDE_MENU}=    xpath=//span[text()='Models and model ser
 ${TOKEN_AUTH_CHECKBOX_XP}=    xpath://input[@id="alt-form-checkbox-auth"]
 ${ADD_SERVICE_ACCOUNT_BUTTON}=    xpath://button[text()='Add a service account']
 ${SERVICE_ACCOUNT_INPUT}=    xpath://input[@data-testid='service-account-form-name']
-${REPLICAS_COUNT_XP}=     xpath://section[@class='pf-v5-c-form__section']//span[@class='pf-v5-c-form-control']/input
-${PROJECT_SELECTOR_XP}=     xpath://main[contains(@id, 'dashboard-page-main')]//*[@data-testid="project-selector-dropdown"]
+${REPLICAS_COUNT_XP}=     xpath=//input[@aria-label='model server replicas number input']
+${PROJECT_SELECTOR_XP}=    xpath://main[contains(@id, 'dashboard-page-main')]//*[@data-testid="project-selector-toggle"]
+${DEPLOY_MULTI_MODEL_BTN}=    //button[contains(@data-testid,"add-server-button")]
 
 
 *** Keywords ***
@@ -39,7 +40,12 @@ Create Model Server
         ${existing_server}=  Run Keyword And Return Status     Wait Until Page Contains Element    //button[.="${server_name}"]
         IF  ${existing_server}    Run Keyword And Return
         ...    Log    Model Server '${server_name}' already exists, reusing server    console=True
+    ELSE
+        SeleniumLibrary.Click Button    //button[@data-testid="multi-serving-select-button"]
     END
+    SeleniumLibrary.Wait Until Page Contains        Select multi-model
+    SeleniumLibrary.Click Button        Select multi-model
+    SeleniumLibrary.Wait Until Page Contains        Add model server
     SeleniumLibrary.Click Button    Add model server
     SeleniumLibrary.Wait Until Page Contains Element    //span[.="Add model server"]
     Set Model Server Name    ${server_name}
@@ -57,6 +63,7 @@ Create Model Server
     END
     IF    ${ext_route}==${TRUE}
         Enable External Serving Route
+        Wait Until Page Contains Element   ${TOKEN_AUTH_CHECKBOX_XP}   timeout=10s
         IF    ${token}==${FALSE}
             Disable Token Authentication
         ELSE
@@ -221,7 +228,7 @@ Get Model Serving Access Token via UI
         SeleniumLibrary.Click Element    xpath://td[@data-label="Tokens"]/button
         Log    ${service_account_name}
         ${token}=    SeleniumLibrary.Get Element Attribute
-        ...    xpath://div[.="${service_account_name} "]/../../td[@data-label="Token Secret"]//input    value
+        ...    xpath://div[.="${service_account_name}"]/../../td[@data-label="Token Secret"]//span/input    value
     END
     RETURN    ${token}
 
@@ -229,7 +236,7 @@ Get Single Model Token
     [Documentation]    Gets the (Single Model) Token of an specific Service Account
     [Arguments]    ${service_account_name}
     ${token}=    Get Element Attribute
-            ...    xpath://div[text()='${service_account_name}']/parent::td[@data-label='Token Name']/following-sibling::td[@data-label='Token Secret']//input   value
+    ...    xpath://div[text()='${service_account_name}']/parent::td[@data-label='Token Name']/following-sibling::td[@data-label='Token Secret']//input   value
     RETURN    ${token}
 
 Click Plus Button

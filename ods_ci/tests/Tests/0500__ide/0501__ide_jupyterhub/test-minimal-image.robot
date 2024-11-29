@@ -14,8 +14,6 @@ Test Tags          Sanity    JupyterHub      OpenDataHub
 
 
 *** Variables ***
-${RequirementsFileRepo}=    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main.git
-${RequirementsFilePath}=    ods-ci-notebooks-main/notebooks/500__jupyterhub/test-minimal-image/
 
 
 *** Test Cases ***
@@ -73,22 +71,29 @@ Can Launch Python3 Smoke Test Notebook
     Open With JupyterLab Menu    Run    Run All Cells
     Wait Until JupyterLab Code Cell Is Not Active    timeout=300
     JupyterLab Code Cell Error Output Should Not Be Visible
+    Scroll At The End Of The Notebook    # Just the screenshot can catch the actual value eventually
 
-    #Get the text of the last output cell
-    ${output} =   Get Text    (//div[contains(@class,"jp-OutputArea-output")])[last()]
-    Should Not Match    ${output}    ERROR*
-    Should Be Equal As Strings    ${output}
+    # Check the final value in the last output cell
+    ${last_result_element} =    Set Variable    (//div[contains(@class,"jp-OutputArea-output")])[last()]
+    ${expected_value} =    Set Variable
     ...    [0.40201256371442895, 0.8875, 0.846875, 0.875, 0.896875, np.float64(0.9116818405511811)]
+
+    # Let's give some time to render properly.
+    Wait Until Page Contains    ${expected_value}    timeout=10s
+
+    # Get the text of the last output cell
+    ${output} =   Get Text    ${last_result_element}
+    Should Not Match    ${output}    ERROR*
+    Should Be Equal As Strings    ${output}    ${expected_value}
 
 Verify Tensorflow Can Be Installed In The Minimal Python Image Via Pip
     [Documentation]    Verify Tensorflow Can Be Installed In The Minimal Python image via pip
     [Tags]    ODS-555    ODS-908    ODS-535
-    Clone Git Repository And Open    ${RequirementsFileRepo}    ${RequirementsFilePath}
     Open New Notebook
     Close Other JupyterLab Tabs
-    Add And Run JupyterLab Code Cell In Active Notebook    !pip install -r requirements.txt --progress-bar off
+    Add And Run JupyterLab Code Cell In Active Notebook    !pip install tensorflow~=2.16.0 --progress-bar off
     Wait Until JupyterLab Code Cell Is Not Active
-    ${version} =    Verify Installed Library Version    tensorflow    2.7
+    ${version} =    Verify Installed Library Version    tensorflow    2.16
     Add And Run JupyterLab Code Cell In Active Notebook    !pip install --upgrade tensorflow --progress-bar off
     Wait Until JupyterLab Code Cell Is Not Active
     ${updated_version} =  Run Cell And Get Output  !pip show tensorflow | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'

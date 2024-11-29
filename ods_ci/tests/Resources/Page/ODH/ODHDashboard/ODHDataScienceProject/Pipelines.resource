@@ -85,8 +85,6 @@ Create Pipeline Run
     ...            ${end_time}=${NONE}    ${cron_expr}=${NONE}    ${press_cancel}=${FALSE}    &{model_param}
     Projects.Move To Tab    Pipelines
     Pipelines.Click Action From Pipeline Actions Menu    pipeline_name=${pipeline_name}    action=Create run
-    Wait For RHODS Dashboard To Load    expected_page=Create run
-    ...    wait_for_cards=${FALSE}
     Fill In Run Creation Form    name=${name}    pipeline_name=${pipeline_name}
     ...    run_type=${run_type}    trigger_type=Periodic    start_date=${start_date}
     ...    start_time=${start_time}    end_date=${end_date}    end_time=${end_time}
@@ -195,13 +193,13 @@ Pipeline Should Be Listed
     [Arguments]     ${pipeline_name}    ${pipeline_description}=${EMPTY}
 
     Projects.Move To Tab    Pipelines
-    ${pipeline_title_xp}=    Set Variable      //*[@data-testid="table-row-title"]/a/span[text()="${pipeline_name}"]
+    ${pipeline_title_xp}=    Set Variable      //*[@data-testid="table-row-title"]//span[text()="${pipeline_name}"]
     Run Keyword And Continue On Failure    Wait Until Page Contains Element    ${pipeline_title_xp}
 
     IF    "${pipeline_description}" != "${EMPTY}"
         Run Keyword And Continue On Failure
         ...    Wait Until Page Contains Element
-        ...        ${pipeline_title_xp}/ancestor::b/following-sibling::*[p[text()="${pipeline_description}"]]
+        ...        ${pipeline_title_xp}/ancestor::td//div[@class="odh-markdown-view"]/p[text()="${pipeline_description}"]
     END
 
 Pipeline Should Not Be Listed

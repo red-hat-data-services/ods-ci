@@ -17,6 +17,7 @@ ${INSTALL_TYPE}                 OperatorHub
 ${UPDATE_CHANNEL}               odh-nightlies
 ${OLM_DIR}                      rhodsolm
 ${RHODS_VERSION}                None
+${CATALOG_SOURCE}               redhat-operators
 
 *** Tasks ***
 Can Install RHODS Operator
@@ -24,6 +25,7 @@ Can Install RHODS Operator
   IF  "${PRODUCT}" == "ODH"
       Set Global Variable  ${OPERATOR_NAMESPACE}  opendatahub-operators
       Set Global Variable  ${OPERATOR_NAME_LABEL}  opendatahub-operator
+      Set Global Variable  ${MODEL_REGISTRY_NAMESPACE}    odh-model-registries
       IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
           Set Global Variable  ${OPERATOR_NAME}  rhods-operator
       ELSE
@@ -32,6 +34,7 @@ Can Install RHODS Operator
   ELSE
       Set Global Variable  ${OPERATOR_NAME}  rhods-operator
       Set Global Variable  ${OPERATOR_NAME_LABEL}  rhods-operator
+      Set Global Variable  ${MODEL_REGISTRY_NAMESPACE}    rhoai-model-registries
   END
   Given Selected Cluster Type ${cluster_type}
   When Installing RHODS Operator ${image_url}

@@ -53,7 +53,7 @@ Verify Notebook Controller Deployment
 Verify GPU Operator Deployment  # robocop: disable
     [Documentation]  Verifies Nvidia GPU Operator is correctly installed
     [Tags]  Sanity    Tier1
-    ...     Resources-GPU  # Not actually needed, but we first need to enable operator install by default
+    ...     Resources-GPU    NVIDIA-GPUs  # Not actually needed, but we first need to enable operator install by default
     ...     ODS-1157
 
     # Before GPU Node is added to the cluster

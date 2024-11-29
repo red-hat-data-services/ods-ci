@@ -22,7 +22,10 @@ Resource           ../../Resources/Page/HybridCloudConsole/OCM.robot
 Resource           ../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 Resource           ../../Resources/Page/DistributedWorkloads/WorkloadMetricsUI.resource
 Resource           ../../Resources/CLI/MustGather/MustGather.resource
-Suite Setup    Upgrade Suite Setup
+Resource           ../../Resources/CLI/DataSciencePipelines/DataSciencePipelinesUpgradeTesting.resource
+Resource           ../../Resources/Page/ModelRegistry/ModelRegistry.resource
+Suite Setup        Upgrade Suite Setup
+Test Tags          PostUpgrade
 
 
 *** Variables ***
@@ -159,7 +162,7 @@ Verify Ray Cluster Exists And Monitor Workload Metrics By Submitting Ray Job Aft
     ${PRJ_UPGRADE}    Set Variable    test-ns-rayupgrade
     ${LOCAL_QUEUE}    Set Variable    local-queue-mnist
     ${JOB_NAME}    Set Variable    mnist
-    Run Codeflare-SDK Test    upgrade    raycluster_sdk_upgrade_test.py::TestMnistJobSubmit
+    Run Codeflare-SDK Test    upgrade    raycluster_sdk_upgrade_test.py::TestMnistJobSubmit    3.11    ${RAY_IMAGE_3.11}    ${CODEFLARE-SDK-RELEASE-TAG}
     Set Global Variable    ${DW_PROJECT_CREATED}    True
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
@@ -213,7 +216,6 @@ Verify that the must-gather image provides RHODS logs and info
     END
     [Teardown]  Cleanup must-gather Logs
 
-
 Verify That DSC And DSCI Release.Name Attribute matches ${expected_release_name}
     [Documentation]    Tests the release.name attribute from the DSC and DSCI matches the desired value.
     ...                ODH: Open Data Hub
@@ -236,6 +238,20 @@ Verify That DSC And DSCI Release.Version Attribute matches the value in the subs
 
     Should Be Equal As Strings    ${DSC_RELEASE_VERSION}    ${csv_version}
     Should Be Equal As Strings    ${DSCI_RELEASE_VERSION}    ${csv_version}
+
+Data Science Pipelines Post Upgrade Verifications
+    [Documentation]    Verifies the status of the resources created in project dsp-test-upgrade after the upgradea
+    [Tags]             Upgrade    DataSciencePipelines-Backend
+    Skip If Operator Starting Version Is Not Supported    minimum_version=2.14.0
+    DataSciencePipelinesUpgradeTesting.Verify Resources After Upgrade
+
+Model Registry Post Upgrade Verification
+    [Documentation]    Verifies that registered model/version in pre-upgrade is present after the upgrade
+    [Tags]             Upgrade    ModelRegistryUpgrade
+    ...                ProductBug    RHOAIENG-15033
+    Skip If Operator Starting Version Is Not Supported    minimum_version=2.14.0
+    Model Registry Post Upgrade Scenario
+    [Teardown]    Post Upgrade Scenario Teardown
 
 
 *** Keywords ***

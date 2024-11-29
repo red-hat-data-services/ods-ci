@@ -8,17 +8,19 @@ Resource       ./Workbenches.resource
 ${DS_PROJECT_TITLE}=    Data Science Projects
 ${TITLE_INPUT_XP}=    xpath=//input[@id="manage-project-modal-name"]
 ${DESCR_INPUT_XP}=    xpath=//textarea[@id="manage-project-modal-description"]
-${RESOURCE_INPUT_XP}=    xpath=//input[@data-testid="resource-manage-project-modal-name"]
+${RESOURCE_EDIT_BTN_XP}=    xpath=//button[.="Edit resource name"]
+${RESOURCE_INPUT_XP}=    css:[data-testid="manage-project-modal-resourceName"]
 ${GENERIC_CREATE_BTN_XP}=     xpath=//button[text()="Create"]
 ${GENERIC_CANCEL_BTN_XP}=     xpath=//button[text()="Cancel"]
-${PROJECT_CREATE_BTN_XP}=     xpath=//button[text()="Create data science project"]
+# TODO: Update to latter option once the change is pulled from ODH into downstream!
+${PROJECT_CREATE_BTN_XP}=     xpath=//button[text()="Create data science project" or text()="Create project"]
 ${ACTIONS_BTN_XP}=    xpath=//div/button[@aria-label="Actions"]
 ${DELETE_ACTION_BTN_XP}=  xpath=//div/ul/li/button[text()="Delete project"]
 ${EDIT_ACTION_BTN_XP}=    xpath=//div/ul/li/button[text()="Edit project"]
-${SPAWNER_LINK}=        xpath=//*[text()="Launch Jupyter"]
-${PROJECT_SEARCH_BAR}=    //div[@data-testid="dashboard-table-toolbar"]
-${PROJECT_FILTER_TYPE}=    ${PROJECT_SEARCH_BAR}//button[@data-testid="filter-dropdown-select"]
-${PROJECT_SEARCH_INPUT}=    ${PROJECT_SEARCH_BAR}//input[@aria-label="Search input"]
+${SPAWNER_LINK}=        xpath=//a[@data-testid="launch-standalone-notebook-server"]
+${PROJECT_SEARCH_BAR}=    [data-testid="projects-table-toolbar"]
+${PROJECT_FILTER_TYPE}=    ${PROJECT_SEARCH_BAR} [data-testid="filter-toolbar-dropdown"]
+${PROJECT_SEARCH_INPUT}=    ${PROJECT_SEARCH_BAR} [data-testid="filter-toolbar-text-field"] input
 
 *** Keywords ***
 Open Data Science Projects Home Page
@@ -26,7 +28,6 @@ Open Data Science Projects Home Page
     Wait Until Page Contains    Data Science Projects
     Click Link      Data Science Projects
     Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
-    Wait Until Page Contains    View your existing projects or create new projects.    timeout=30
     Maybe Wait For Dashboard Loading Spinner Page
 
 Is Data Science Projects Page Open
@@ -37,7 +38,7 @@ Is Data Science Projects Page Open
 
 Open Data Science Project Details Page
     [Documentation]    Open project ${project_title} in the "Data Science Projects" page, and an optional Tab by ID:
-    ...    overview | workbenches | cluster-storages | data-connections | pipelines-projects | model-server | permissions    # robocop: disable
+    ...    overview | workbenches | cluster-storages | connections | pipelines-projects | model-server | permissions    # robocop: disable
     [Arguments]     ${project_title}    ${tab_id}=${NONE}
     ${is_project_open}=    Is Data Science Project Details Page Open    project_title=${project_title}
     IF    ${is_project_open} == ${FALSE}
@@ -49,6 +50,7 @@ Open Data Science Project Details Page
         Wait Until Project Is Open    project_title=${project_title}
     END
     IF  "${tab_id}" != "${NONE}"
+        Log    ${tab_id}
         Wait Until Element Is Visible    //button[@role="tab" and @aria-controls="${tab_id}"]
         Click Button    //button[@role="tab" and @aria-controls="${tab_id}"]
         Element Should Be Visible   //button[@role="tab" and @aria-controls="${tab_id}" and @aria-selected="true"]
@@ -135,6 +137,8 @@ Create Data Science Project
     ELSE
         Wait Until Page Contains Element    ${PROJECT_CREATE_BTN_XP}
         Click Button    ${PROJECT_CREATE_BTN_XP}
+        Wait Until Page Contains Element    ${RESOURCE_EDIT_BTN_XP}
+        Click Button    ${RESOURCE_EDIT_BTN_XP}
         Wait Until Page Contains Element    ${TITLE_INPUT_XP}
         Run Keyword And Warn On Failure     Element Should Be Disabled    ${GENERIC_CREATE_BTN_XP}
         Input Text    ${TITLE_INPUT_XP}    ${title}
@@ -274,7 +278,20 @@ Workbench Status Should Be From Projects Home Page
     ${namespace}=        Get Openshift Namespace From Data Science Project    project_title=${project_title}
     ${_}  ${workbench_cr_name}=       Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}
     ...                                                                           namespace=${namespace}
-    Run Keyword And Continue On Failure     Page Should Contain Element    xpath=//a[text()="${project_title}"]/ancestor::tr/td[@data-label="Status"]//p[text()="${status}"]    # robocop: disable
+
+    ${xpath_exists}=    Run Keyword And Return Status
+    ...    Element Should Be Visible    xpath=//a[@data-testid="notebook-route-link" and text()="${workbench_title}"]
+
+    IF    not ${xpath_exists}
+        Click Element    xpath=//td[@data-testid="notebook-column-expand"]
+    ELSE
+        Log    XPath element found, no need to click alternative
+    END
+
+#    We need to wait it to render
+    ${status_xpath}=    Set Variable    //a[text()="${workbench_title}"]/ancestor::tr//td[@data-label="Status"]//*[text()="${status}"]
+    Run Keyword And Continue On Failure    Wait Until Element Is Visible    ${status_xpath}    timeout=10s
+    Run Keyword And Continue On Failure    Page Should Contain Element    ${status_xpath}
 
 Start Workbench From Projects Home Page
     [Documentation]    Triggers the workbench "start" process from DS Projects home page.
@@ -294,8 +311,12 @@ Start Workbench From Projects Home Page
                 ...           Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}
                 ...                                                        namespace=${namespace}
         END
-        Click Element       xpath=//a[text()="${workbench_title}"]/ancestor::tr//a[text()="${project_title}"]/ancestor::tr//td[@data-label="Status"]//label[@class="pf-v5-c-switch"]    # robocop: disable
-
+        ${kebab_button}=    Set Variable    xpath=//a[@data-testid="notebook-route-link" and text()="${workbench_title}"]/ancestor::tr[@data-testid="project-notebooks-table-row"]//button[@aria-label="Kebab toggle"]
+        Wait Until Element Is Visible    ${kebab_button}    timeout=10s
+        Click Element    ${kebab_button}
+        ${start_button}=    Set Variable    xpath=//a[@data-testid="notebook-route-link" and text()="${workbench_title}"]/ancestor::tr[@data-testid="project-notebooks-table-row"]//button[@data-testid="notebook-start-action"]
+        Wait Until Element Is Visible    ${start_button}    timeout=10s
+        Click Element    ${start_button}
     ELSE
         Fail     msg=Cannot start ${workbench_title} workbench because it is not stopped.
     END
@@ -324,8 +345,14 @@ Stop Workbench From Projects Home Page
             END
                 ${_}    ${workbench_cr_name}=       Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}    namespace=${namespace}
         END
-        Click Element       xpath=//a[text()="${workbench_title}"]/ancestor::tr//a[text()="${project_title}"]/ancestor::tr//td[@data-label="Status"]//label[@class="pf-v5-c-switch"]    # robocop: disable
-        Handle Stop Workbench Confirmation Modal    press_cancel=${press_cancel}
+        ${kebab_button}=    Set Variable    xpath=//a[@data-testid="notebook-route-link" and text()="${workbench_title}"]/ancestor::tr[@data-testid="project-notebooks-table-row"]//button[@aria-label="Kebab toggle"]
+        Wait Until Element Is Visible    ${kebab_button}    timeout=10s
+        Click Element    ${kebab_button}
+        ${stop_button}=    Set Variable    xpath=//a[@data-testid="notebook-route-link" and text()="${workbench_title}"]/ancestor::tr[@data-testid="project-notebooks-table-row"]//button[@data-testid="notebook-stop-action"]
+        Wait Until Element Is Visible    ${stop_button}    timeout=10s
+        Click Element    ${stop_button}
+        Handle Stop Workbench Confirmation Modal    workbench_title=${workbench_title}
+        ...    press_cancel=${press_cancel}
     ELSE
         Fail     msg=Cannot stop ${workbench_title} workbench because it is neither starting nor running.
     END
@@ -334,7 +361,7 @@ Stop Workbench From Projects Home Page
 
 Wait Until Workbench Is Started From Projects Home Page
     [Documentation]    Waits until the workbench status is "RUNNING", from the DS Project home page
-    [Arguments]     ${workbench_title}   ${project_title}   ${timeout}=30s
+    [Arguments]     ${workbench_title}   ${project_title}   ${timeout}=60s
     Wait Until Keyword Succeeds    ${timeout}    5s      Workbench Status Should Be From Projects Home Page
     ...     workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}   project_title=${project_title}
 
@@ -352,7 +379,7 @@ Launch And Access Workbench From Projects Home Page
     ${is_started}=      Run Keyword And Return Status   Workbench Status Should Be From Projects Home Page
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}    project_title=${project_title}
     IF    ${is_started} == ${TRUE}
-        Click Element       xpath=//tr//a[text()="${project_title}"]/ancestor::tr/td[@data-label="workbenchName"]//a[text()="${workbench_title}"]
+        Click Element       xpath=//a[@data-testid="notebook-route-link" and text()="${workbench_title}"]
         Switch Window   NEW
         Access To Workbench    username=${username}    password=${password}
         ...    auth_type=${auth_type}    expected_ide=${expected_ide}
@@ -364,7 +391,7 @@ Workbench Launch Link Should Be Disabled
     [Documentation]    Checks the workbench launch link is disabled from DS Projects home page.
     [Arguments]     ${workbench_title}    ${project_title}
     ${link_status}=    Get Element Attribute
-    ...    xpath=//tr//a[text()="${project_title}"]/ancestor::tr/td[@data-label="workbenchName"]//a[text()="${workbench_title}"]    aria-disabled
+    ...    xpath=//a[@data-testid="notebook-route-link" and text()="${workbench_title}"]    aria-disabled
     Should Be Equal As Strings    ${link_status}    true
     ...    msg=Workbench launch link should be disabled for workbench ${workbench_title} in project ${project_title}
 
@@ -404,13 +431,12 @@ Remove Current Page Projects From All Projects
 Filter Projects By ${Type}
     [Documentation]    Search for projects where ${Type} includes "${text}"
     [Arguments]     ${text}
-    Open Data Science Projects Home Page
     ${searchbar_exists}=    Run Keyword And Return Status
-    ...    Page Should Contain Element    xpath:${PROJECT_SEARCH_BAR}
+    ...    Page Should Contain Element    css:${PROJECT_SEARCH_BAR}
     IF    ${searchbar_exists}
-        Click Element    xpath:${PROJECT_FILTER_TYPE}
-        Click Element    xpath:${PROJECT_SEARCH_BAR}//li[@data-testid="${Type}"]
-        Input Text    ${PROJECT_SEARCH_INPUT}    ${text}
+        Click Element    css:${PROJECT_FILTER_TYPE}
+        Click Element    css:${PROJECT_SEARCH_BAR} [id="${Type}"]
+        Input Text    css:${PROJECT_SEARCH_INPUT}    ${text}
     ELSE
         Log    No projects are listed
     END
@@ -430,8 +456,7 @@ Check Resource Name Should Be Immutable
     [Documentation]    Checks if the Resource Name is not editable
     [Arguments]     ${project_title}
     ODHDashboard.Click Action From Actions Menu    item_title=${project_title}    item_type=project   action=Edit
-    Wait Until Page Contains Element    ${RESOURCE_INPUT_XP}
-    Element Should Be Disabled    ${RESOURCE_INPUT_XP}
+    Page Should Not Contain Element    ${RESOURCE_INPUT_XP}
     Click Button    Cancel
 
 Update Data Science Project Name

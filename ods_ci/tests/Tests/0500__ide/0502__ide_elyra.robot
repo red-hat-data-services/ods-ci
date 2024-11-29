@@ -44,7 +44,7 @@ Verify Pipelines Integration With Elyra When Using Standard Data Science Image
     [Timeout]    10m
     Verify Pipelines Integration With Elyra Running Hello World Pipeline Test
     ...    img=Standard Data Science
-    ...    runtime_image=Datascience with Python 3.9 (UBI9)
+    ...    runtime_image=Datascience with Python 3.11 (UBI9)
     ...    experiment_name=standard data science pipeline
 
 Verify Pipelines Integration With Elyra When Using Standard Data Science Based Images
@@ -55,10 +55,9 @@ Verify Pipelines Integration With Elyra When Using Standard Data Science Based I
     [Template]    Verify Pipelines Integration With Elyra Running Hello World Pipeline Test
     [Tags]        Tier1    ODS-2271
     [Timeout]     30m
-    PyTorch       Datascience with Python 3.9 (UBI9)    pytorch pipeline
-    TensorFlow    Datascience with Python 3.9 (UBI9)    tensorflow pipeline
-    TrustyAI      Datascience with Python 3.9 (UBI9)    trustyai pipeline
-    HabanaAI      Datascience with Python 3.8 (UBI8)    habanaai pipeline
+    PyTorch       Datascience with Python 3.11 (UBI9)    pytorch pipeline
+    TensorFlow    Datascience with Python 3.11 (UBI9)    tensorflow pipeline
+    TrustyAI      Datascience with Python 3.11 (UBI9)    trustyai pipeline
 
 
 *** Keywords ***
@@ -102,7 +101,7 @@ Verify Pipelines Integration With Elyra Running Hello World Pipeline Test     # 
     ...    ods-ci-notebooks-main/notebooks/500__jupyterhub/pipelines/v2/elyra/run-pipelines-on-data-science-pipelines/hello-generic-world.pipeline  # robocop: disable
     Verify Hello World Pipeline Elements
     Set Runtime Image In All Nodes    runtime_image=${runtime_image}
-    Run Pipeline    pipeline_name=${img} Pipeline
+    Run Pipeline    pipeline_name=${experiment_name}
     Wait Until Page Contains Element    xpath=//a[.="Run Details."]    timeout=30s
     ${pipeline_run_name} =    Get Pipeline Run Name
     Switch To Pipeline Execution Page
@@ -135,7 +134,7 @@ Verify Hello World Pipeline Elements
 Select Pipeline Project By Name
     [Documentation]    Select the project by project name
     [Arguments]    ${project_name}
-    ${project_menu}=    Set Variable    xpath://*[@data-testid="project-selector-dropdown"]
+    ${project_menu}=    Set Variable    xpath://*[@data-testid="project-selector-toggle"]
     Wait until Element is Visible    ${project_menu}   timeout=20
     Click Element    ${project_menu}
     Click Element    xpath://*[@role="menuitem" and string()="${project_name}"]

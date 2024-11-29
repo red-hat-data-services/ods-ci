@@ -79,7 +79,7 @@ Prepare DistributedWorkloads Integration Test Suite for 3.9
     [Documentation]    Prepare DistributedWorkloads Integration Test Suite for 3.9
     # The bug fix for self signed certificate error is not available in codeflare-sdk version "v0.21.1" which is the
     # last supported release for python 3.9 and hence skipping tests for self managed installtion
-    Skip If RHODS Is Self-Managed
+    Skip If Cluster Type Is Self-Managed
     Log To Console    "Downloading compiled test binary ${ODH_BINARY_NAME}"
 
     ${result} =    Run Process    curl --location --silent --output ${ODH_BINARY_NAME} ${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS_3.9}/${ODH_BINARY_NAME} && chmod +x ${ODH_BINARY_NAME}

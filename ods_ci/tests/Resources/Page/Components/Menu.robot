@@ -10,7 +10,7 @@ Navigate To Page
    ...    ${timeout}=10s
    Wait Until Element Is Visible    //div[@id="page-sidebar"]    timeout=${timeout}
    Wait Until Page Contains    ${menu}
-   ${menu}=    Set Variable If    "${menu}" == "Deployed models"    Model Serving    ${menu}
+   ${menu}=     Set Variable If     "${menu}" == "Deployed models"      Model Serving    ${menu}
    IF  "${submenu}" == "${NONE}"    Run Keyword And Return
    ...    Click Link    ${menu}
    ${is_menu_expanded}=    Menu.Is Menu Expanded  ${menu}

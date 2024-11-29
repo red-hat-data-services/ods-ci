@@ -542,6 +542,7 @@ Set Model Server Runtime
         Log    framework ${runtime} does not appear to be supported by the chosen model server
     END
 
+
 Get Kserve Inference Host Via UI
     [Documentation]    Fetches the host of the model's URL from the Data Science Project UI
     [Arguments]    ${model_name}    ${retries}=1

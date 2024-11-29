@@ -300,9 +300,6 @@ Get Model Inference
         ${kserve}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain
         ...    Single-model serving enabled
         ${curl_cmd}=     Set Variable    curl -s ${url} -d ${inference_input}
-        IF    ${application_type}
-            ${curl_cmd}=    Catenate    ${curl_cmd}    -H "Content-Type: application/json"
-        END
         IF    ${token_auth}
             IF    "${project_title}" == "${NONE}"
                 ${project_title}=    Get Model Project    ${model_name}

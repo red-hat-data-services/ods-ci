@@ -103,7 +103,6 @@ Wait For RHODS Dashboard To Load
     IF    "${expected_page}" == "${NONE}"
         Wait Until Page Contains Element    //div[@data-testid="home-page"]    timeout=${timeout}
     ELSE
-        Menu.Navigate To Page   ${expected_page}
         Wait Until Keyword Succeeds    3x    5s
         ...    Wait For Dashboard Page Title    ${expected_page}    timeout=${timeout}
     END
@@ -831,7 +830,7 @@ Open Application Switcher Menu
 Maybe Wait For Dashboard Loading Spinner Page
     [Documentation]     Detecs the loading symbol (spinner) and wait for it to disappear.
     ...                 If the spinner does not appear, the keyword ignores the error.
-    [Arguments]    ${timeout-pre}=3s    ${timeout}=5s
+    [Arguments]    ${timeout-pre}=3s    ${timeout}=10s
     ${do not wait for spinner}=    Get Variable Value    ${ODH_DASHBOARD_DO_NOT_WAIT_FOR_SPINNER_PAGE}  # defaults to None if undefined
     IF   ${do not wait for spinner} == ${true}
       RETURN

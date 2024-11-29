@@ -78,7 +78,7 @@ Verify User Can Edit A Workbench
 Verify User Can Edit A S3 Data Connection
     [Tags]    Sanity    Tier1    ODS-1932
     [Documentation]    Verifies users can add a Data connection to AWS S3
-    [Setup]    Open Data Science Project Details Page    project_title=${PRJ_TITLE}    tab_id=data-connections
+    [Setup]    Open Data Science Project Details Page    project_title=${PRJ_TITLE}    tab_id=connections
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME}
     ...                          aws_access_key=${DC_S3_AWS_SECRET_ACCESS_KEY}
     ...                          aws_secret_access=${DC_S3_AWS_SECRET_ACCESS_KEY}

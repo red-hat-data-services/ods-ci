@@ -43,6 +43,7 @@ Fill In Run Creation Form    # robocop: disable
     [Arguments]    ${name}    ${pipeline_name}=${NONE}    ${from_actions}=${TRUE}    ${run_type}=Immediate
     ...            ${trigger_type}=Periodic    ${start_date}=${NONE}    ${start_time}=${NONE}
     ...            ${end_date}=${NONE}    ${end_time}=${NONE}    ${cron_expr}=${NONE}&{model_param}
+    Wait Until Page Contains Element    ${PIPELINE_RUN_CREATE_BTN_XP}
     Element Should Be Disabled    ${PIPELINE_RUN_CREATE_BTN_XP}
     Input Text    ${PIPELINE_RUN_NAME_INPUT_XP}    ${name}
     Input Text    ${PIPELINE_RUN_DESC_INPUT_XP}    ${name}

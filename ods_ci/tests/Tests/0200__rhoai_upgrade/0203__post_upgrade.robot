@@ -162,7 +162,7 @@ Verify Ray Cluster Exists And Monitor Workload Metrics By Submitting Ray Job Aft
     ${PRJ_UPGRADE}    Set Variable    test-ns-rayupgrade
     ${LOCAL_QUEUE}    Set Variable    local-queue-mnist
     ${JOB_NAME}    Set Variable    mnist
-    Run Codeflare-SDK Test    upgrade    raycluster_sdk_upgrade_test.py::TestMnistJobSubmit    3.11    ${RAY_IMAGE_3.11}
+    Run Codeflare-SDK Test    upgrade    raycluster_sdk_upgrade_test.py::TestMnistJobSubmit    3.11    ${RAY_IMAGE_3.11}    ${CODEFLARE-SDK-RELEASE-TAG}
     Set Global Variable    ${DW_PROJECT_CREATED}    True
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
@@ -242,12 +242,14 @@ Verify That DSC And DSCI Release.Version Attribute matches the value in the subs
 Data Science Pipelines Post Upgrade Verifications
     [Documentation]    Verifies the status of the resources created in project dsp-test-upgrade after the upgradea
     [Tags]             Upgrade    DataSciencePipelines-Backend
+    Skip If Operator Starting Version Is Not Supported    minimum_version=2.14.0
     DataSciencePipelinesUpgradeTesting.Verify Resources After Upgrade
 
 Model Registry Post Upgrade Verification
     [Documentation]    Verifies that registered model/version in pre-upgrade is present after the upgrade
     [Tags]             Upgrade    ModelRegistryUpgrade
     ...                ProductBug    RHOAIENG-15033
+    Skip If Operator Starting Version Is Not Supported    minimum_version=2.14.0
     Model Registry Post Upgrade Scenario
     [Teardown]    Post Upgrade Scenario Teardown
 

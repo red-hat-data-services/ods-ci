@@ -1,5 +1,5 @@
 # PIPELINE DEFINITION
-# Name: iris-training-pipeline
+# Name: iris-training-pipeline-kfp-2-7
 # Inputs:
 #    neighbors: int [Default: 3.0]
 #    standard_scaler: bool [Default: True]
@@ -192,20 +192,18 @@ deploymentSpec:
           \ \"wb\") as f:\n        pickle.dump(clf, f)\n\n"
         image: registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61
 pipelineInfo:
-  name: iris-training-pipeline
+  name: iris-training-pipeline-kfp-2-7
 root:
   dag:
     tasks:
       create-dataset:
-        cachingOptions:
-          enableCache: true
+        cachingOptions: {}
         componentRef:
           name: comp-create-dataset
         taskInfo:
           name: create-dataset
       normalize-dataset:
-        cachingOptions:
-          enableCache: true
+        cachingOptions: {}
         componentRef:
           name: comp-normalize-dataset
         dependentTasks:
@@ -222,8 +220,7 @@ root:
         taskInfo:
           name: normalize-dataset
       train-model:
-        cachingOptions:
-          enableCache: true
+        cachingOptions: {}
         componentRef:
           name: comp-train-model
         dependentTasks:

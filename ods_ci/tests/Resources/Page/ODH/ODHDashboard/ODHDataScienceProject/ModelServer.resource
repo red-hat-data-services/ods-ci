@@ -221,7 +221,7 @@ Get Model Serving Access Token via UI
     [Arguments]    ${service_account_name}=default-name    ${single_model}=${FALSE}    ${model_name}=${NONE}
     IF    ${single_model}
         # Expand the model
-        SeleniumLibrary.Click Button    xpath: //a[text()='${model_name}']/parent::div/parent::td[@data-label='Name']/preceding-sibling::td/button  # robocop: off=line-too-long
+        SeleniumLibrary.Click Button      xpath://button[@id="kserve-model-row-item0"]       # robocop: off=line-too-long
         ${token}=    Get Single Model Token    ${service_account_name}
     ELSE
         SeleniumLibrary.Wait Until Page Contains Element    xpath://td[@data-label="Tokens"]/button
@@ -235,7 +235,8 @@ Get Single Model Token
     [Documentation]    Gets the (Single Model) Token of an specific Service Account
     [Arguments]    ${service_account_name}
     ${token}=    Get Element Attribute
-    ...    xpath://div[text()='${service_account_name}']/parent::td[@data-label='Token Name']/following-sibling::td[@data-label='Token Secret']//input   value
+    ...    xpath://td[@data-label="Token Secret"]//input    value
+
     RETURN    ${token}
 
 Click Plus Button

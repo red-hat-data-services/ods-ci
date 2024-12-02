@@ -7,6 +7,7 @@ Resource       ODHDataScienceProject/ModelServer.resource
 Resource       ODHDataScienceProject/DataConnections.resource
 Resource       ../../../CLI/ModelServing/llm.resource
 Library        ../../../../../libs/Helpers.py
+Library    RPA.Desktop
 
 
 *** Variables ***
@@ -124,41 +125,47 @@ Select Model Server
     ${selectable}=    Run Keyword And Return Status
     ...    Wait Until Element Is Visible    xpath://span[.="Model servers"]/../../..//button[@aria-label="Options menu"]    timeout=3
     IF    ${selectable}==True
-        Open Model servers Options Menu  # robocop:disable
+        Click Element    xpath://button[@id="serving-runtime-template-selection"]
         Click Element    xpath://li/button[.="${model_server}"]
     END
 
 Select Framework
     [Documentation]    Selects the framework in the "deploy model" modal.
     ...    Possible values for now: "onnx", "openvino_ir"
-    [Arguments]    ${framework}
+    [Arguments]    ${framework}    ${retries}=1
     TRY
-        Open Model framework (name - version) Options Menu
-        Page Should Contain Element    xpath://li/button[contains(., "${framework}")]
-        Click Element    xpath://li/button[contains(., "${framework}")]
+        ${is_enabled}=    Run Keyword And Return Status
+        ...    Element Should Be Enabled    xpath://button[@id="inference-service-framework-selection"]
+
+        IF    ${is_enabled}
+            FOR  ${retry_idx}  IN RANGE  0  1+${retries}
+                Click Element    xpath://button[@id="inference-service-framework-selection"]
+                Page Should Contain Element    xpath://span[contains(., "${framework}")]
+                ${selected}=    Run Keyword And Return Status
+                ...    Click Element    xpath://span[contains(., "${framework}")]
+                IF  ${selected}==${TRUE}    BREAK
+            END
+        ELSE
+            Element Should Be Disabled    id:inference-service-framework-selection
+            ${text}=    Get Text    xpath://button[@id="inference-service-framework-selection"]/span
+            Should Be True    ${framework} in ${text}
+        END
     EXCEPT
         Log    framework ${framework} does not appear to be supported by the chosen model server
     END
+
 
 Select Existing Data Connection
     [Documentation]    Selects an existing data connection in the "deploy model" modal.
     [Arguments]    ${data_connection_name}    ${retries}=1
 
-    ${is_enabled}=    Run Keyword And Return Status
-    ...    Element Should Be Enabled    xpath://button[@id="inference-service-data-connection"]
-
-    IF    ${is_enabled}
-        FOR  ${retry_idx}  IN RANGE  0  1+${retries}
-            Open Name Options Menu
-            Click Element    xpath://li/button[.="${data_connection_name}"]
-            ${selected}=    Run Keyword And Return Status
-            ...    Page Should Contain Element    //span[.="Name"]/../../..//button[@aria-label="Options menu"][.="${data_connection_name}"]  #robocop: disable
-            IF  ${selected}==${TRUE}    BREAK
+    FOR  ${retry_idx}  IN RANGE  0  1+${retries}
+        Click Element    xpath://button[@class="pf-v5-c-menu-toggle__button"]
+        Click Element    xpath://button[@class="pf-v5-c-menu__item"]/span/span[contains(., "${data_connection_name}")]
+        ${selected}=    Get Element Attribute    //span[@class="pf-v5-c-text-input-group__text"]/input    value
+        IF  "${selected}"=="${data_connection_name}"
+            BREAK
         END
-    ELSE
-        Element Should Be Disabled    id:inference-service-data-connection
-        ${text}=    Get Text    xpath://button[@id="inference-service-data-connection"]/span/div/div
-        Should Be Equal    ${text}    ${data_connection_name}
     END
 
 Set Folder Path
@@ -188,18 +195,18 @@ Verify Model Status
     [Arguments]    ${model_name}    ${expected_status}=success
     IF    "${expected_status}"=="success"
         SeleniumLibrary.Wait Until Page Contains Element
-        ...    //a[@data-testid='metrics-link-test-model' and text()='${model_name}']${MS_TABLE_STATUS_SUCCESS}    timeout=2m
+        ...    //a[@data-testid='metrics-link-${model_name}' and text()='${model_name}']${MS_TABLE_STATUS_SUCCESS}    timeout=2m
         Page Should Not Contain Element    //a[@data-testid='metrics-link-test-model' and text()='${model_name}']${MS_TABLE_STATUS_FAILURE}
     ELSE
         SeleniumLibrary.Wait Until Page Contains Element
-        ...    //a[@data-testid='metrics-link-test-model' and text()='${model_name}']${MS_TABLE_STATUS_FAILURE}    timeout=2m
+        ...    //a[@data-testid='metrics-link-${model_name}' and text()='${model_name}']${MS_TABLE_STATUS_FAILURE}    timeout=2m
         Page Should Not Contain Element    //a[@data-testid='metrics-link-test-model' and text()='${model_name}']${MS_TABLE_STATUS_SUCCESS}
     END
 
 Delete Model Via UI
     [Documentation]    Deletes a deployed model from the Model Serving page in the dashboard.
     [Arguments]    ${model_name}
-    ${model_row_xpath}=    Set Variable    xpath://tr[starts-with(., '${model_name} ')]
+    ${model_row_xpath}=    Set Variable    xpath://tr[starts-with(., '${model_name}')]
     Wait Until Element Is Visible       ${model_row_xpath}
     ODHDashboard.Click Action From Actions Menu    item_title=${model_name}    action=Delete
     Wait Until Page Contains Element    xpath://input[@id="delete-modal-input"]
@@ -219,7 +226,7 @@ Get Model Route Via UI
     [Arguments]    ${model_name}
     # TODO: Open model serving home page if needed?
     # Click on Inference Endpoints link
-    ${endpoint_link}=    Set Variable    //a[@data-testid="metrics-link-test-model" and text()="${model_name}"]/ancestor::tr//td//button[@data-testid="internal-external-service-button"]
+    ${endpoint_link}=    Set Variable    //a[@data-testid="metrics-link-${model_name}" and text()="${model_name}"]/ancestor::tr//td//button[@data-testid="internal-external-service-button"]
     SeleniumLibrary.Wait Until Page Contains Element    ${endpoint_link}
     SeleniumLibrary.Click Button    ${endpoint_link}
     # Get the external URL
@@ -408,17 +415,22 @@ Clean Up Model Serving Page
     # Returns an empty list if no matching elements found
     Switch Model Serving Project    project_name=All projects
     ${projects}=    Get WebElements    xpath://table/tbody/tr/td[@data-label="Project"]
-    FOR    ${project}    IN    @{projects}
+    Log    ${projects}
+    ${projects_length}=      Get length     ${projects}
+    WHILE     ${projects_length} > 0
+        ${project}=    Set Variable    ${projects}[0]
         ${project}=    Get Text   ${project}
         @{project description}=  Split String    ${project}
         Switch Model Serving Project    ${project description}[0]
-        ${models}=    Get WebElements    xpath://table/tbody/tr/td[@data-label="Name"]/div/a
+        ${models}=    Get WebElements    xpath://table/tbody/tr/td[@data-label="Name"]
         FOR    ${model}    IN    @{models}
             ${model}=    Get Text   ${model}
             Delete Model Via UI    ${model}
             Sleep    1s
         END
         Switch Model Serving Project    project_name=All projects
+        ${projects}=    Get WebElements    xpath://table/tbody/tr/td[@data-label="Project"]
+        ${projects_length}=    Get length   ${projects}
     END
 
 Add Namespace To ServiceMeshMemberRoll
@@ -508,10 +520,28 @@ Deploy Kserve Model Via UI  #robocop: disable
 Set Model Server Runtime
     [Documentation]    Opens the Serving runtime dropdown in the deploy model modal window for models
     ...    and select the given runtime
-    [Arguments]    ${runtime}=Caikit TGIS
-    Page Should Contain Element    ${KSERVE_RUNTIME_DROPDOWN}
-    Click Element    ${KSERVE_RUNTIME_DROPDOWN}
-    Click Element    ${KSERVE_RUNTIME_DROPDOWN}/..//span[contains(text(),"${runtime}")]
+    [Arguments]    ${runtime}=Caikit TGIS    ${retries}=1
+    TRY
+        ${is_enabled}=    Run Keyword And Return Status
+        ...    Element Should Be Enabled    xpath://button[@id="serving-runtime-template-selection"]
+
+        IF    ${is_enabled}
+            FOR  ${retry_idx}  IN RANGE  0  1+${retries}
+                Click Element    xpath://button[@id="serving-runtime-template-selection"]
+                Page Should Contain Element    xpath://span[contains(., "${runtime}")]
+                ${selected}=    Run Keyword And Return Status
+                ...    Click Element    xpath://span[contains(., "${runtime}")]
+                IF  ${selected}==${TRUE}    BREAK
+            END
+        ELSE
+            Element Should Be Disabled    id:serving-runtime-template-selection
+            ${text}=    Get Text    xpath://button[@id="serving-runtime-template-selection"]/span
+            Should Be True    ${runtime} in ${text}
+        END
+    EXCEPT
+        Log    framework ${runtime} does not appear to be supported by the chosen model server
+    END
+
 
 Get Kserve Inference Host Via UI
     [Documentation]    Fetches the host of the model's URL from the Data Science Project UI

@@ -38,7 +38,7 @@ Is Data Science Projects Page Open
 
 Open Data Science Project Details Page
     [Documentation]    Open project ${project_title} in the "Data Science Projects" page, and an optional Tab by ID:
-    ...    overview | workbenches | cluster-storages | data-connections | pipelines-projects | model-server | permissions    # robocop: disable
+    ...    overview | workbenches | cluster-storages | connections | pipelines-projects | model-server | permissions    # robocop: disable
     [Arguments]     ${project_title}    ${tab_id}=${NONE}
     ${is_project_open}=    Is Data Science Project Details Page Open    project_title=${project_title}
     IF    ${is_project_open} == ${FALSE}
@@ -50,6 +50,7 @@ Open Data Science Project Details Page
         Wait Until Project Is Open    project_title=${project_title}
     END
     IF  "${tab_id}" != "${NONE}"
+        Log    ${tab_id}
         Wait Until Element Is Visible    //button[@role="tab" and @aria-controls="${tab_id}"]
         Click Button    //button[@role="tab" and @aria-controls="${tab_id}"]
         Element Should Be Visible   //button[@role="tab" and @aria-controls="${tab_id}" and @aria-selected="true"]

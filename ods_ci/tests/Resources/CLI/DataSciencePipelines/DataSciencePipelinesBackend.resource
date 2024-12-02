@@ -218,14 +218,22 @@ Get Last Run By Pipeline Name
 
     RETURN    ${pipeline_run_id}
 
+Get Run Status
+    [Documentation]  Returns run status for ${pipeline_run_id}
+    [Arguments]    ${namespace}    ${username}    ${password}    ${pipeline_run_id}
+
+    DataSciencePipelinesKfp.Setup Client    user=${username}    pwd=${password}    project=${namespace}
+    ${pipeline_run_status}=    DataSciencePipelinesKfp.Get Run Status    run_id=${pipeline_run_id}
+    RETURN    ${pipeline_run_status}
+
 Verify Run Status
     [Documentation]  Verifies pipeline run status matches ${pipeline_run_expected_status}
     [Arguments]    ${namespace}           ${username}                  ${password}
     ...    ${pipeline_run_id}    ${pipeline_run_expected_status}="SUCCEEDED"
 
-    DataSciencePipelinesKfp.Setup Client    user=${username}    pwd=${password}    project=${namespace}
+    ${pipeline_run_status}=    DataSciencePipelinesBackend.Get Run Status
+    ...        ${namespace}    ${username}    ${password}    ${pipeline_run_id}
 
-    ${pipeline_run_status}=    DataSciencePipelinesKfp.Get Run Status    run_id=${pipeline_run_id}
     IF   "${pipeline_run_status}" != "${pipeline_run_expected_status}"
         ${error_msg}=    Catenate    Expected pipeline status was ${pipeline_run_expected_status} but pipeline run
         ...    has status=${pipeline_run_status}

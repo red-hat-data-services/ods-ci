@@ -204,7 +204,7 @@ Verify User Can Create A S3 Data Connection And Connect It To Workbenches
     Stop Workbench    workbench_title=${WORKBENCH_2_TITLE}    from_running=${FALSE}
     Wait Until Workbench Is Started    workbench_title=${WORKBENCH_TITLE}
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=data-connections
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=connections
     Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME}
     ...                          aws_access_key=${DC_S3_AWS_SECRET_ACCESS_KEY}
     ...                          aws_secret_access=${DC_S3_AWS_SECRET_ACCESS_KEY}
@@ -273,7 +273,7 @@ Verify user can create a workbench with an existing data connection
     Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
     # The data connection has the workbench name in the "Connected workbenches" column
     ${workbenches}=    Create List    ${WORKBENCH_TITLE}
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=data-connections
+    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=connections
     Data Connection Should Be Listed    name=${data_connection_name}    type=${DC_S3_TYPE}
     ...                connected_workbench=${workbenches}
 

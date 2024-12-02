@@ -38,9 +38,10 @@ Install ISV Operator From OperatorHub Via CLI    # robocop: disable
     Oc Apply    kind=Subscription    src=${operator_sub_filepath}
     Wait Until Keyword Succeeds    1 min    0 sec
     ...    Is Resource Present    Subscription    ${subscription_name}     ${namespace}    ${IS_PRESENT}
-    WHILE   "${installplan_name}" == "${EMPTY}"
+    WHILE   "${installplan_name}" == "${EMPTY}"     limit=5m
         ${installplan_name}=       Get Resource Attribute      ${namespace}
         ...      Subscription       ${subscription_name}        .status.installPlanRef.name
+        Sleep       20s
     END
     ${installplan_approval}=     Get Resource Attribute      ${namespace}
     ...      InstallPlan       ${installplan_name}        .spec.approval

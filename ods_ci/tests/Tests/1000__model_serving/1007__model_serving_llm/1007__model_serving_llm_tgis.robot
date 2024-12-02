@@ -424,7 +424,7 @@ Verify Model Can Be Served And Query On A GPU Node    # robocop: off=too-long-te
     ...    port_forwarding=${IS_KSERVE_RAW}
     [Teardown]   Run Keywords
     ...    Clean Up Test Project    test_ns=${test_namespace}
-    ...    isvc_names=${model_name}    wait_prj_deletion=${FALSE}
+    ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
     ...    AND
     ...    Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-query-process    kill=true
 

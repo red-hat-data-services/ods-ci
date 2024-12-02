@@ -311,7 +311,11 @@ Get Resource Attribute
     ${rc}   ${value}=    Run And Return Rc And Output
     ...    oc get ${resource_type}/${resource_name} -n ${namespace} -o 'jsonpath={${attribute_path}}'
     Should Be Equal    "${rc}"    "0"    msg=${value}
-    Log To Console    ${resource_type} ${resource_name} in the namespace ${namespace} attribute ${attribute_path} value is ${value}
+    IF    "${value}" != "${EMPTY}"
+        Log To Console    ${resource_type} ${resource_name} in the namespace ${namespace} attribute ${attribute_path} value is ${value}
+    ELSE 
+        Log To Console    ${resource_type} ${resource_name} in the namespace ${namespace} attribute ${attribute_path} value is EMPTY
+    END
     RETURN    ${value}
 
 Wait For Namespace To Be Active
@@ -328,3 +332,18 @@ Wait For Namespace To Be Active
     Log    ${rc}
     Log    ${value}
     Should Be Equal As Integers    ${rc}    0
+
+Is Cluster Type Self-Managed
+    [Documentation]    Get the value of cluster type depending on the console URL domain
+    ...    Returns ${TRUE} if cluster type is Self-Managed
+    ...    Returns ${FALSE} if cluster type is Managed
+    ${matches}=    Get Regexp Matches    ${OCP_CONSOLE_URL}    rh-ods
+    ${size}=    Get Length    ${matches}
+    IF    ${size}>0
+        ${domain}=    Get From List    ${matches}    0
+        IF    "${domain}" == "rh-ods"
+            RETURN    ${TRUE}
+        END
+    ELSE
+        RETURN    ${FALSE}
+    END

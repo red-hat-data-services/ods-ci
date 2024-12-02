@@ -1,24 +1,18 @@
 # PIPELINE DEFINITION
-# Name: version-test-pipeline
-# Description: Pipeline that prints a hello message
-# Inputs:
-#    message: str [Default: 'Hello world']
+# Name: fail-pipeline
+# Description: Pipeline that prints a message and fails
 components:
-  comp-print-message:
-    executorLabel: exec-print-message
-    inputDefinitions:
-      parameters:
-        message:
-          parameterType: STRING
+  comp-print-message-and-fail:
+    executorLabel: exec-print-message-and-fail
 deploymentSpec:
   executors:
-    exec-print-message:
+    exec-print-message-and-fail:
       container:
         args:
         - --executor_input
         - '{{$}}'
         - --function_to_execute
-        - print_message
+        - print_message_and_fail
         command:
         - sh
         - -c
@@ -38,30 +32,21 @@ deploymentSpec:
 
           '
         - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
-          \ *\n\ndef print_message(message: str):\n    \"\"\"Prints a message\"\"\"\
-          \n    print(message + \" (step 1)\")\n\n"
+          \ *\n\ndef print_message_and_fail():\n    \"\"\"Prints a message and fails\"\
+          \"\"\n    print(\"This is a test of failing task\")\n    raise ValueError(\"\
+          Task failed!\")\n\n"
         image: registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61
 pipelineInfo:
-  description: Pipeline that prints a hello message
-  name: version-test-pipeline
+  description: Pipeline that prints a message and fails
+  name: fail-pipeline
 root:
   dag:
     tasks:
-      print-message:
+      print-message-and-fail:
         cachingOptions: {}
         componentRef:
-          name: comp-print-message
-        inputs:
-          parameters:
-            message:
-              componentInputParameter: message
+          name: comp-print-message-and-fail
         taskInfo:
-          name: print-message
-  inputDefinitions:
-    parameters:
-      message:
-        defaultValue: Hello world
-        isOptional: true
-        parameterType: STRING
+          name: print-message-and-fail
 schemaVersion: 2.1.0
 sdkVersion: kfp-2.10.1

@@ -100,10 +100,7 @@ Fetch Cluster Type By Domain
     IF  '${matches_len}' == '0'
         Set Global Variable    ${CLUSTER_TYPE}    managed
     ELSE
-        ${domain}=    Get From List    ${matches}    0
-        IF    "${domain}" == "rh-ods"
-            Set Global Variable    ${CLUSTER_TYPE}    selfmanaged
-        END
+        Set Global Variable    ${CLUSTER_TYPE}    selfmanaged
     END
 
 Assign Vars According To Product

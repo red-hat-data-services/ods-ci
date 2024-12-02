@@ -59,6 +59,9 @@ spec:
     - autoSelect: true
       name: xgboost
       version: "1"
+    - autoSelect: true
+      name: python
+      version: "1"
 volumes:
   - emptyDir: null
     medium: Memory

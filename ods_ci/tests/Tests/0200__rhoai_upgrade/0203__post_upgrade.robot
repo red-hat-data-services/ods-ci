@@ -30,15 +30,6 @@ Test Tags          PostUpgrade
 
 *** Variables ***
 ${S_SIZE}       25
-${INFERENCE_INPUT}=    @tests/Resources/Files/modelmesh-mnist-input.json
-${INFERENCE_INPUT_OPENVINO}=    @tests/Resources/Files/openvino-example-input.json
-${EXPECTED_INFERENCE_OUTPUT}=    {"model_name":"test-model__isvc-83d6fab7bd","model_version":"1","outputs":[{"name":"Plus214_Output_0","datatype":"FP32","shape":[1,10],"data":[-8.233053,-7.7497034,-3.4236815,12.3630295,-12.079103,17.266596,-10.570976,0.7130762,3.321715,1.3621228]}]}
-${EXPECTED_INFERENCE_OUTPUT_OPENVINO}=    {"model_name":"test-model__isvc-8655dc7979","model_version":"1","outputs":[{"name":"Func/StatefulPartitionedCall/output/_13:0","datatype":"FP32","shape":[1,1],"data":[0.99999994]}]}
-${PRJ_TITLE}=    model-serving-upgrade
-${PRJ_DESCRIPTION}=    project used for model serving tests
-${MODEL_NAME}=    test-model
-${MODEL_CREATED}=    ${FALSE}
-${RUNTIME_NAME}=    Model Serving Test
 ${DW_PROJECT_CREATED}=    False
 
 
@@ -138,6 +129,15 @@ Test Inference Post RHODS Upgrade
     [Documentation]    Test the inference result after having deployed a model that requires Token Authentication
     [Tags]  Upgrade
     [Setup]  Begin Web Test
+    ${PRJ_TITLE}=    Set Variable    model-serving-upgrade
+    ${PRJ_DESCRIPTION}=    Set Variable    project used for model serving tests
+    ${MODEL_NAME}=    Set Variable    test-model
+    ${MODEL_CREATED}=    Set Variable    ${FALSE}
+    ${RUNTIME_NAME}=    Set Variable    Model Serving Test
+    ${INFERENCE_INPUT}=    Set Variable    @tests/Resources/Files/modelmesh-mnist-input.json
+    ${INFERENCE_INPUT_OPENVINO}=    Set Variable    @tests/Resources/Files/openvino-example-input.json
+    ${EXPECTED_INFERENCE_OUTPUT}=    Set Variable    {"model_name":"test-model__isvc-83d6fab7bd","model_version":"1","outputs":[{"name":"Plus214_Output_0","datatype":"FP32","shape":[1,10],"data":[-8.233053,-7.7497034,-3.4236815,12.3630295,-12.079103,17.266596,-10.570976,0.7130762,3.321715,1.3621228]}]}
+    ${EXPECTED_INFERENCE_OUTPUT_OPENVINO}=    Set Variable    {"model_name":"test-model__isvc-8655dc7979","model_version":"1","outputs":[{"name":"Func/StatefulPartitionedCall/output/_13:0","datatype":"FP32","shape":[1,1],"data":[0.99999994]}]}
     Fetch CA Certificate If RHODS Is Self-Managed
     Open Model Serving Home Page
     Verify Model Status    ${MODEL_NAME}    success
@@ -162,7 +162,7 @@ Verify Ray Cluster Exists And Monitor Workload Metrics By Submitting Ray Job Aft
     ${PRJ_UPGRADE}    Set Variable    test-ns-rayupgrade
     ${LOCAL_QUEUE}    Set Variable    local-queue-mnist
     ${JOB_NAME}    Set Variable    mnist
-    Run Codeflare-SDK Test    upgrade    raycluster_sdk_upgrade_test.py::TestMnistJobSubmit    3.11    ${RAY_IMAGE_3.11}
+    Run Codeflare-SDK Test    upgrade    raycluster_sdk_upgrade_test.py::TestMnistJobSubmit    3.11    ${RAY_IMAGE_3.11}    ${CODEFLARE-SDK-RELEASE-TAG}
     Set Global Variable    ${DW_PROJECT_CREATED}    True
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
@@ -242,12 +242,14 @@ Verify That DSC And DSCI Release.Version Attribute matches the value in the subs
 Data Science Pipelines Post Upgrade Verifications
     [Documentation]    Verifies the status of the resources created in project dsp-test-upgrade after the upgradea
     [Tags]             Upgrade    DataSciencePipelines-Backend
+    Skip If Operator Starting Version Is Not Supported    minimum_version=2.14.0
     DataSciencePipelinesUpgradeTesting.Verify Resources After Upgrade
 
 Model Registry Post Upgrade Verification
     [Documentation]    Verifies that registered model/version in pre-upgrade is present after the upgrade
     [Tags]             Upgrade    ModelRegistryUpgrade
     ...                ProductBug    RHOAIENG-15033
+    Skip If Operator Starting Version Is Not Supported    minimum_version=2.14.0
     Model Registry Post Upgrade Scenario
     [Teardown]    Post Upgrade Scenario Teardown
 

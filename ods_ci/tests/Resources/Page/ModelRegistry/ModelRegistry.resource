@@ -59,8 +59,8 @@ Prepare Model Registry Test Setup
     Get Cluster Domain And Token
     Run Update Notebook Script
     Generate ModelRegistry Certificates
-    Apply Db Config Samples    namespace=${NAMESPACE_MODEL_REGISTRY}    samples=${MODEL_REGISTRY_DB_SAMPLES}
     Create Model Registry Secrets
+    Apply Db Config Samples    namespace=${NAMESPACE_MODEL_REGISTRY}    samples=${MODEL_REGISTRY_DB_SAMPLES}
     Fetch CA Certificate If RHODS Is Self-Managed
 
 Teardown Model Registry Test Setup
@@ -282,6 +282,7 @@ Upload Python Client Files In The Workbench
 
 Open Model Registry Dashboard Page
     [Documentation]    Opens the Model Registry page from the dashboard nav bar
+    [Arguments]    ${allowed_user}=${TRUE}
     ${mr_present}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain    Model Registry
     WHILE    ${mr_present}!=${TRUE}    limit=120s
         SeleniumLibrary.Reload Page
@@ -294,14 +295,22 @@ Open Model Registry Dashboard Page
     Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=Model Registry
     SeleniumLibrary.Wait Until Page Contains    Select a model registry to view and manage your registered models.
     Maybe Wait For Dashboard Loading Spinner Page
-    ${loaded}=    Run Keyword And Return Status
-    ...    SeleniumLibrary.Page Should Not Contain    Request access to model registries
-    WHILE    ${loaded}!=${TRUE}    limit=5
-        SeleniumLibrary.Reload Page
-        SeleniumLibrary.Wait Until Page Contains    Model Registry
-        SeleniumLibrary.Wait Until Page Contains    Select a model registry to view and manage your registered models.
+    # This works assuming there's a single MR instance and the user is either allowed or not allowed to see it
+    # TODO: Improve logic to handle multiple registries
+    IF    ${allowed_user}
         ${loaded}=    Run Keyword And Return Status
         ...    SeleniumLibrary.Page Should Not Contain    Request access to model registries
+        WHILE    ${loaded}!=${TRUE}    limit=12    # Retries for 2 minutes - wait for user group to reconcile
+            SeleniumLibrary.Reload Page
+            SeleniumLibrary.Wait Until Page Contains    Model Registry
+            SeleniumLibrary.Wait Until Page Contains
+            ...    Select a model registry to view and manage your registered models.
+            ${loaded}=    Run Keyword And Return Status
+            ...    SeleniumLibrary.Page Should Not Contain    Request access to model registries
+            Sleep    10s
+        END
+    ELSE
+        SeleniumLibrary.Page Should Contain    Request access to model registries
     END
     Maybe Wait For Dashboard Loading Spinner Page
 
@@ -343,11 +352,6 @@ Model Registry Pre Upgrade Scenario
     Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}
     ${workbenches}=    Create List    ${WORKBENCH_TITLE}
-    Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_S3_NAME}
-    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
-    ...            aws_bucket_name=${AWS_BUCKET}    connected_workbench=${workbenches}
-    Data Connection Should Be Listed    name=${DC_S3_NAME}    type=${DC_S3_TYPE}    connected_workbench=${workbenches}
-    Open Data Science Project Details Page       project_title=${prj_title}    tab_id=workbenches
     Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}    timeout=120s
     Sleep    15s    reason=Workbench might not be ready right away, wait for a few seconds before opening it
     ${handle}=    Launch And Access Workbench    workbench_title=${WORKBENCH_TITLE}
@@ -383,6 +387,7 @@ Model Registry Post Upgrade Scenario
     Should Be Equal As Strings    ${operator_grpc}    ${instance_grpc}
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
+    Add User To Model Registry Default Group    ${TEST_USER.USERNAME}
     Open Model Registry Dashboard Page
     SeleniumLibrary.Page Should Contain Element
     ...    xpath:${MR_TABLE_XPATH}/tbody/tr/td[@data-label="Model name"]//a[.="${MR_REGISTERED_MODEL_NAME}"]
@@ -447,3 +452,13 @@ Get Model Registry Instance ${type} Image
     ...    oc get pod -l app=${instance_name} -n ${ns} -o yaml | yq '.items[].spec.containers[] | select(.name=="${type}-container").image'
     Should Be Equal As Integers    ${rc}    0
     RETURN    ${img}
+
+Add User To Model Registry Default Group
+    [Documentation]    Dashboard creates a default user group to give read/write permissions to a MR instance. We need
+    ...    to add our test user to this group in order to be able to interact with it.
+    [Arguments]    ${user}    ${model_registry_name}=modelregistry-sample
+    ${rc}=    Run And Return Rc    oc get group ${model_registry_name}-users
+    Should Be Equal As Integers    ${rc}    0
+    ${rc}    ${out}=    Run And Return Rc And Output    oc adm groups add-users ${model_registry_name}-users ${user}
+    Should Be Equal As Integers    ${rc}    0
+    Should Be Equal As Strings    ${out}    group.user.openshift.io/${model_registry_name}-users added: "${user}"

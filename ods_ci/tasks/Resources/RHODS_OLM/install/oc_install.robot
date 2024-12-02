@@ -52,7 +52,7 @@ Install RHODS
           IF  "${PRODUCT}" == "ODH"
               Run    sed -i'' -e 's/<CATALOG_SOURCE>/community-operators/' ${file_path}cs_apply.yaml
           ELSE
-              Run    sed -i'' -e 's/<CATALOG_SOURCE>/redhat-operators/' ${file_path}cs_apply.yaml
+              Run    sed -i'' -e 's/<CATALOG_SOURCE>/${CATALOG_SOURCE}/' ${file_path}cs_apply.yaml
           END
           Run    sed -i'' -e 's/<OPERATOR_NAME>/${OPERATOR_NAME}/' ${file_path}cs_apply.yaml
           Run    sed -i'' -e 's/<OPERATOR_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}cs_apply.yaml
@@ -91,7 +91,7 @@ Verify RHODS Installation
         IF    "${TEST_ENV.lower()}" == "crc"
             ${timeout_in_seconds} =   Set Variable   180
         ELSE
-            ${timeout_in_seconds} =   Set Variable   30
+            ${timeout_in_seconds} =   Set Variable   60
         END
         Wait For DSCInitialization CustomResource To Be Ready    timeout=${timeout_in_seconds}
     END
@@ -99,29 +99,27 @@ Verify RHODS Installation
   END
 
   ${dashboard} =    Is Component Enabled    dashboard    ${DSC_NAME}
-  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${dashboard}" == "true"
-    # Needs to be removed ASAP
+  IF    "${dashboard}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app=${DASHBOARD_APP_NAME}    timeout=1200s
     IF  "${PRODUCT}" == "ODH"
-        Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-        ...    label_selector=app=odh-dashboard    timeout=1200s
         #This line of code is strictly used for the exploratory cluster to accommodate UI/UX team requests
         Add UI Admin Group To Dashboard Admin
-    ELSE
-        Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-        ...    label_selector=app=${DASHBOARD_APP_NAME}    timeout=1200s
     END
   END
 
   ${workbenches} =    Is Component Enabled    workbenches    ${DSC_NAME}
-  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${workbenches}" == "true"
+  IF    "${workbenches}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app=notebook-controller    timeout=400s
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app=odh-notebook-controller    timeout=400s
+    Oc Get  kind=Namespace  field_selector=metadata.name=${NOTEBOOKS_NAMESPACE}
+    Log  Verified Notebooks NS: ${NOTEBOOKS_NAMESPACE}
   END
 
   ${modelmeshserving} =    Is Component Enabled    modelmeshserving    ${DSC_NAME}
-  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${modelmeshserving}" == "true"
+  IF    "${modelmeshserving}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app=odh-model-controller    timeout=400s
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
@@ -131,7 +129,7 @@ Verify RHODS Installation
   END
 
   ${datasciencepipelines} =    Is Component Enabled    datasciencepipelines    ${DSC_NAME}
-  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${datasciencepipelines}" == "true"
+  IF    "${datasciencepipelines}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app.kubernetes.io/name=data-science-pipelines-operator    timeout=400s
   END
@@ -142,6 +140,24 @@ Verify RHODS Installation
     ...    label_selector=app=odh-model-controller    timeout=400s
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=control-plane=kserve-controller-manager    timeout=400s
+  END
+
+  ${kueue} =     Is Component Enabled     kueue    ${DSC_NAME}
+  IF    "${kueue}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/part-of=kueue   timeout=400s
+  END
+
+  ${codeflare} =     Is Component Enabled     codeflare    ${DSC_NAME}
+  IF    "${codeflare}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/part-of=codeflare   timeout=400s
+  END
+
+  ${ray} =     Is Component Enabled     ray    ${DSC_NAME}
+  IF    "${ray}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/part-of=ray   timeout=400s
   END
 
   ${trustyai} =    Is Component Enabled    trustyai    ${DSC_NAME}
@@ -156,10 +172,16 @@ Verify RHODS Installation
     ...    label_selector=app.kubernetes.io/part-of=model-registry-operator    timeout=400s
   END
 
-  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${dashboard}" == "true" or "${workbenches}" == "true" or "${modelmeshserving}" == "true" or "${datasciencepipelines}" == "true"  # robocop: disable
-    Log To Console    Waiting for pod status in ${APPLICATIONS_NAMESPACE}
-    Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=200
-    Log  Verified Applications NS: ${APPLICATIONS_NAMESPACE}  console=yes
+  ${trainingoperator} =    Is Component Enabled    trainingoperator    ${DSC_NAME}
+  IF    "${trainingoperator}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/part-of=trainingoperator   timeout=400s
+  END
+
+  IF    "${dashboard}" == "true" or "${workbenches}" == "true" or "${modelmeshserving}" == "true" or "${datasciencepipelines}" == "true" or "${kserve}" == "true" or "${kueue}" == "true" or "${codeflare}" == "true" or "${ray}" == "true" or "${trustyai}" == "true" or "${modelregistry}" == "true" or "${trainingoperator}" == "true"    # robocop: disable
+      Log To Console    Waiting for pod status in ${APPLICATIONS_NAMESPACE}
+      Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=200
+      Log  Verified Applications NS: ${APPLICATIONS_NAMESPACE}  console=yes
   END
 
   # Monitoring stack only deployed for managed, as modelserving monitoring stack is no longer deployed
@@ -167,11 +189,6 @@ Verify RHODS Installation
      Log To Console    Waiting for pod status in ${MONITORING_NAMESPACE}
      Wait For Pods Status  namespace=${MONITORING_NAMESPACE}  timeout=600
      Log  Verified Monitoring NS: ${MONITORING_NAMESPACE}  console=yes
-  END
-
-  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${workbenches}" == "true"
-    Oc Get  kind=Namespace  field_selector=metadata.name=${NOTEBOOKS_NAMESPACE}
-    Log  Verified Notebooks NS: ${NOTEBOOKS_NAMESPACE}
   END
 
 Verify Builds In redhat-ods-applications

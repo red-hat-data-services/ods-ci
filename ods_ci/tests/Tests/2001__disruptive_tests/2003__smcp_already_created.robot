@@ -29,7 +29,7 @@ ${MSG_REGEX}                                denied the request: only one service
 *** Test Cases ***
 Validate Service Mesh Control Plane Already Created
     [Documentation]    This Test Case validates that only one ServiceMeshControlPlane is allowed to be installed per project/namespace
-    [Tags]      RHOAIENG-2517       Operator    OperatorExclude
+    [Tags]      RHOAIENG-2517       Operator    Tier3
     Fetch Image Url And Update Channel
     Check Whether DSC Exists And Save Component Statuses
     IF    "${CLUSTER_TYPE}" == "selfmanaged"

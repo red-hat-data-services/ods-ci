@@ -13,7 +13,7 @@ Test Tags         Dashboard
 ${RESOURCES_DIRPATH}=        tests/Resources/Files
 ${OVMS_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/ovms_servingruntime.yaml
 ${UPLOADED_OVMS_DISPLAYED_NAME}=    ODS-CI Custom OpenVINO Model Server
-${UPLOADED_OVMS_XPATH_NAME}=    ovms-ods-ci
+${UPLOADED_OVMS_YAML_NAME}=    ovms-ods-ci
 ${PRJ_TITLE}=    CustomServingRuntimesProject
 ${PRJ_DESCRIPTION}=    ODS-CI DS Project for testing of Custom Serving Runtimes
 ${MODEL_SERVER_NAME}=    ODS-CI CustomServingRuntime Server

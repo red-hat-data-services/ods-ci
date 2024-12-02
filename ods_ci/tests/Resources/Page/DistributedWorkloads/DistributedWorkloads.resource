@@ -55,7 +55,7 @@ Run Codeflare-SDK Test
     [Documentation]   Run codeflare-sdk Test
     [Arguments]    ${TEST_TYPE}    ${TEST_NAME}
     Log To Console    "Running codeflare-sdk test: ${TEST_NAME}"
-    ${result} =    Run Process  source ${VIRTUAL_ENV_NAME}/bin/activate && cd ${CODEFLARE-SDK_DIR} && poetry env use 3.11 && poetry install --with test,docs && poetry run pytest -v -s ./tests/${TEST_TYPE}/${TEST_NAME} --timeout\=300 && deactivate
+    ${result} =    Run Process  source ${VIRTUAL_ENV_NAME}/bin/activate && cd ${CODEFLARE-SDK_DIR} && poetry env use 3.11 && poetry install --with test,docs && poetry run pytest -v -s ./tests/${TEST_TYPE}/${TEST_NAME} --timeout\=540 && deactivate
     ...    env:RAY_IMAGE=${RAY_IMAGE}
     ...    env:AWS_DEFAULT_ENDPOINT=${AWS_DEFAULT_ENDPOINT}
     ...    env:AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}

@@ -313,9 +313,11 @@ Get Model Inference
         IF  ${kserve}
             Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
             ${curl_cmd}=     Catenate    ${curl_cmd}    --cacert openshift_ca_istio_knative.crt
+            Log     ${curl_cmd}
         ELSE IF  ${self_managed}
             Fetch Openshift CA Bundle
             ${curl_cmd}=     Catenate    ${curl_cmd}    --cacert openshift_ca.crt
+            Log     ${curl_cmd}
         END
     ELSE IF    $deployment_mode == 'Cli'
         ${rc}   ${cmd_op}=  Run And Return Rc And Output

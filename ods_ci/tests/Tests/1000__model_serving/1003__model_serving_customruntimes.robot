@@ -5,7 +5,7 @@ Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDashboardSettingsRunt
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Resource          ../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
 Suite Setup       Custom Serving Runtime Suite Setup
-#Suite Teardown    Custom Serving Runtime Suite Teardown
+Suite Teardown    Custom Serving Runtime Suite Teardown
 Test Tags         Dashboard
 
 

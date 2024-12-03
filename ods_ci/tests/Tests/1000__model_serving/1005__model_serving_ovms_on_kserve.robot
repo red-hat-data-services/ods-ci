@@ -52,6 +52,7 @@ Verify Tensorflow Model Via UI (OVMS on Kserve)    # robocop: off=too-long-test-
     [Documentation]    Test the deployment of a tensorflow (.pb) model in Kserve using OVMS
     [Tags]    Sanity
     ...       ODS-2627
+    Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}    existing_project=${TRUE}
     Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
@@ -109,6 +110,7 @@ Verify GPU Model Deployment Via UI (OVMS on Kserve)    # robocop: off=too-long-t
     ...       ODS-2630    ODS-2631    ProductBug    RHOAIENG-3355
     ${requests}=    Create Dictionary    nvidia.com/gpu=1
     ${limits}=    Create Dictionary    nvidia.com/gpu=1
+    Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
     Clean All Models Of Current User
     Open Data Science Projects Home Page
     Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects

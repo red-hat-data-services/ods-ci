@@ -257,8 +257,6 @@ Test KERAS Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-
     ${inference_output}=    Evaluate    json.dumps(${inference_output})
     Log    ${inference_output}
     ${result}    ${list}=    Inference Comparison    ${EXPECTED_INFERENCE_GRPC_OUTPUT_KERAS}    ${inference_output}
-    Log    ${result}
-    Log    ${list}
     [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${PYTORCH_MODEL_NAME}
     ...  project_title=${PRJ_TITLE}
     ...  AND

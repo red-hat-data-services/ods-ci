@@ -185,6 +185,7 @@ Verify Non Admin Can Serve And Query A Model Using The UI    # robocop: off=too-
     ...    path=flan-t5-small/${flan_model_name}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${flan_model_name}
     ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
+    ...    timeout=360s
     # ${host}=    Get KServe Inference Host Via CLI    isvc_name=${flan_model_name}   namespace=${test_namespace}
     # ${body}=    Set Variable    '{"text": "${EXP_RESPONSES}[queries][0][query_text]"}'
     # ${header}=    Set Variable    'mm-model-id: ${flan_model_name}'

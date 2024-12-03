@@ -37,6 +37,9 @@ ${KSERVE_CONTROLLER_MANAGER_LABEL_SELECTOR}    control-plane=kserve-controller-m
 ${KSERVE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}   kserve-controller-manager
 ${TRUSTYAI_CONTROLLER_MANAGER_LABEL_SELECTOR}    app.kubernetes.io/part-of=trustyai
 ${TRUSTYAI_CONTROLLER_MANAGER_DEPLOYMENT_NAME}   trustyai-service-operator-controller-manager
+${NOTEBOOK_CONTROLLER_DEPLOYMENT_LABEL_SELECTOR}    component.opendatahub.io/name=kf-notebook-controller
+${NOTEBOOK_CONTROLLER_MANAGER_LABEL_SELECTOR}       component.opendatahub.io/name=odh-notebook-controller
+${NOTEBOOK_DEPLOYMENT_NAME}                         notebook-controller-deployment
 ${IS_PRESENT}        0
 ${IS_NOT_PRESENT}    1
 &{SAVED_MANAGEMENT_STATES}
@@ -50,6 +53,7 @@ ${IS_NOT_PRESENT}    1
 ...  MODELREGISTRY=${EMPTY}
 ...  KSERVE=${EMPTY}
 ...  TRUSTYAI=${EMPTY}
+...  WORKBENCHES=${EMPTY}
 
 @{CONTROLLERS_LIST}    kserve-controller-manager    odh-model-controller    modelmesh-controller
 @{REDHATIO_PATH_CHECK_EXCLUSTION_LIST}    kserve-controller-manager
@@ -254,6 +258,27 @@ Validate KServe Controller Manager Removed State
 
     [Teardown]     Restore DSC Component State    kserve    ${KSERVE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${KSERVE_CONTROLLER_MANAGER_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.KSERVE}
 
+Validate Workbenches Managed State
+    [Documentation]    Validate that the DSC Workbenches component Managed state creates the expected resources,
+    ...    check that Workbenches deployment is created and pods are in Ready state
+    [Tags]    Operator    Tier1    workbenches-managed
+
+    Set DSC Component Managed State And Wait For Completion   workbenches    ${NOTEBOOK_DEPLOYMENT_NAME}    ${NOTEBOOK_CONTROLLER_MANAGER_LABEL_SELECTOR}
+
+    Wait For Resources To Be Available    ${NOTEBOOK_DEPLOYMENT_NAME}    ${NOTEBOOK_CONTROLLER_DEPLOYMENT_LABEL_SELECTOR}
+
+    [Teardown]     Restore DSC Component State    workbenches    ${NOTEBOOK_DEPLOYMENT_NAME}    ${NOTEBOOK_CONTROLLER_DEPLOYMENT_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.WORKBENCHES}
+
+Validate Workbenches Removed State
+    [Documentation]    Validate that Workbenches component management state Removed does remove relevant resources.
+    [Tags]    Operator    Tier1   workbenches-removed
+
+    Set DSC Component Removed State And Wait For Completion   workbenches    ${NOTEBOOK_DEPLOYMENT_NAME}    ${NOTEBOOK_CONTROLLER_MANAGER_LABEL_SELECTOR}
+
+    Wait For Resources To Be Removed    ${NOTEBOOK_DEPLOYMENT_NAME}    ${NOTEBOOK_CONTROLLER_DEPLOYMENT_LABEL_SELECTOR}
+
+    [Teardown]     Restore DSC Component State    workbenches    ${NOTEBOOK_DEPLOYMENT_NAME}    ${NOTEBOOK_CONTROLLER_MANAGER_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.WORKBENCHES}
+
 Validate Support For Configuration Of Controller Resources
     [Documentation]    Validate support for configuration of controller resources in component deployments
     [Tags]    Operator    Tier1    ODS-2664
@@ -296,6 +321,7 @@ Suite Setup
     ${SAVED_MANAGEMENT_STATES.MODELREGISTRY}=     Get DSC Component State    ${DSC_NAME}    modelregistry    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.KSERVE}=     Get DSC Component State    ${DSC_NAME}    kserve    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.TRUSTYAI}=     Get DSC Component State    ${DSC_NAME}    trustyai    ${OPERATOR_NS}
+    ${SAVED_MANAGEMENT_STATES.WORKBENCHES}=    Get DSC Component State    ${DSC_NAME}    workbenches    ${OPERATOR_NS}
     Set Suite Variable    ${SAVED_MANAGEMENT_STATES}
 
 Suite Teardown

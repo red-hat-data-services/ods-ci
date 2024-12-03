@@ -7,10 +7,10 @@ Library         SeleniumLibrary
 
 *** Keywords ***
 Wait Until OCM Cluster Page Is Loaded
-    [Documentation]     wait until the OCM page loads for ${cluster_name}
-    [Arguments]    ${cluster_name}
+    [Documentation]     wait until the OCM page includes ClusterID ${cluster_id}
+    [Arguments]    ${cluster_id}
     Wait OCM Splash Page
-    Element Should Contain    //div[@class="pf-v5-l-split__item"]/h1    ${cluster_name}
+    Wait Until Page Contains Element    xpath=//*[@data-testid="clusterID" and text()="${cluster_id}"]    timeout=30s
 
 Login To OCM
     [Documentation]    Login to the OpenShift Cluster Manager

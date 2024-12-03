@@ -5,14 +5,16 @@ Library          Process
 
 
 *** Variables ***
-${CODEFLARE-SDK-RELEASE-TAG}             v0.22.0
+${CODEFLARE-SDK-RELEASE-TAG}             v0.23.1
+${CODEFLARE-SDK-RELEASE-TAG-3.9}         adjustments-release-0.21.1
 ${CODEFLARE-SDK_DIR}                     codeflare-sdk
 ${CODEFLARE-SDK_REPO_URL}                %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
 ${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}  https://github.com/opendatahub-io/distributed-workloads/releases/latest/download
 ${RAY_IMAGE_3.11}                        quay.io/modh/ray@sha256:db667df1bc437a7b0965e8031e905d3ab04b86390d764d120e05ea5a5c18d1b4
 ${RAY_IMAGE_3.9}                         quay.io/modh/ray@sha256:0d715f92570a2997381b7cafc0e224cfa25323f18b9545acfd23bc2b71576d06
-${FMS_HF_TUNING_IMAGE}                   quay.io/modh/fms-hf-tuning@sha256:73bcd66500b8637a9db1339f64c3217212ef74700a22a790f78e9a1f26b8b71a
-${NOTEBOOK_IMAGE}                        quay.io/modh/odh-generic-data-science-notebook@sha256:16fc91984a9baf7765a6362493906a2c726b9906031711e2e55d686d296e6b3a
+${FMS_HF_TUNING_IMAGE}                   quay.io/modh/fms-hf-tuning@sha256:6f98907f9095db72932caa54094438eae742145f4b66c28d15887d5303ff1186
+${CUDA_TRAINING_IMAGE}                   quay.io/modh/training@sha256:b98e373a972ff6f896a9dc054d56920e915675339c02ea7fa123e0f4bbef4d74
+${ROCM_TRAINING_IMAGE}                   quay.io/modh/training@sha256:2efb6efba4ec08e63847d701e3062a5f6ddf51c91af5fbcef6378b9e6520a3bb
 ${NOTEBOOK_USER_NAME}                    ${TEST_USER_3.USERNAME}
 ${NOTEBOOK_USER_PASSWORD}                ${TEST_USER_3.PASSWORD}
 ${KFTO_CORE_BINARY_NAME}                 kfto
@@ -25,6 +27,7 @@ ${AWS_STORAGE_BUCKET}                    ${S3.BUCKET_5.NAME}
 ${AWS_ACCESS_KEY_ID}                     ${S3.AWS_ACCESS_KEY_ID}
 ${AWS_SECRET_ACCESS_KEY}                 ${S3.AWS_SECRET_ACCESS_KEY}
 ${AWS_STORAGE_BUCKET_MNIST_DIR}          mnist-datasets
+${KUBECONFIGPATH}                        %{HOME}/.kube/config
 
 
 *** Keywords ***
@@ -43,11 +46,14 @@ Prepare Codeflare-SDK Test Setup
 
     Clone Git Repository    ${CODEFLARE-SDK_REPO_URL}    ${CODEFLARE-SDK-RELEASE-TAG}    ${CODEFLARE-SDK_DIR}
 
+    # Perform oc login with default kubeconfig
+    Login To OCP Using API And Kubeconfig    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}    ${KUBECONFIGPATH}
+
 Run Codeflare-SDK Test
     [Documentation]   Run codeflare-sdk Test
-    [Arguments]    ${TEST_TYPE}    ${TEST_NAME}    ${PYTHON_VERSION}    ${RAY_IMAGE}
+    [Arguments]    ${TEST_TYPE}    ${TEST_NAME}    ${PYTHON_VERSION}    ${RAY_IMAGE}    ${RELEASE_BRANCH}
     Log To Console    "Running codeflare-sdk test: ${TEST_NAME}"
-    ${result} =    Run Process  cd ${CODEFLARE-SDK_DIR} && poetry env use ${PYTHON_VERSION} && poetry install --with test,docs && poetry run pytest -v -s ./tests/${TEST_TYPE}/${TEST_NAME} --timeout\=420
+    ${result} =    Run Process  cd ${CODEFLARE-SDK_DIR} && git fetch origin && git checkout ${RELEASE_BRANCH} && git branch && poetry env use ${PYTHON_VERSION} && poetry install --with test,docs && poetry run pytest -v -s ./tests/${TEST_TYPE}/${TEST_NAME} --timeout\=540
     ...    env:RAY_IMAGE=${RAY_IMAGE}
     ...    env:AWS_DEFAULT_ENDPOINT=${AWS_DEFAULT_ENDPOINT}
     ...    env:AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
@@ -56,6 +62,9 @@ Run Codeflare-SDK Test
     ...    env:AWS_STORAGE_BUCKET_MNIST_DIR=${AWS_STORAGE_BUCKET_MNIST_DIR}
     ...    env:PIP_INDEX_URL=${PIP_INDEX_URL}
     ...    env:PIP_TRUSTED_HOST=${PIP_TRUSTED_HOST}
+    ...    env:CONTROL_LABEL=node-role.kubernetes.io/control-plane=
+    ...    env:WORKER_LABEL=node-role.kubernetes.io/worker=
+    ...    env:TOLERATION_KEY=node-role.kubernetes.io/master
     ...    shell=true
     ...    stderr=STDOUT
     Log To Console    ${result.stdout}
@@ -144,6 +153,24 @@ Run Training Operator ODH Test
         FAIL    ${TEST_NAME} failed
     END
 
+Run Training Operator KFTO Test
+    [Documentation]    Run Training Operator KFTO Test
+    [Arguments]    ${TEST_NAME}    ${TRAINING_IMAGE}
+    Log To Console    "Running test: ${TEST_NAME}"
+    ${result} =    Run Process    ./${KFTO_CORE_BINARY_NAME} -test.run ${TEST_NAME}
+    ...    shell=true
+    ...    stderr=STDOUT
+    ...    env:CODEFLARE_TEST_TIMEOUT_SHORT=5m
+    ...    env:CODEFLARE_TEST_TIMEOUT_MEDIUM=10m
+    ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
+    ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-${KFTO_CORE_BINARY_NAME}-logs
+    ...    env:CODEFLARE_TEST_TRAINING_IMAGE=${TRAINING_IMAGE}
+    Log To Console    ${result.stdout}
+    Check missing Go test    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    ${TEST_NAME} failed
+    END
+
 Prepare DistributedWorkloads Integration Test Suite
     [Documentation]    Prepare DistributedWorkloads Integration Test Suite
     Log To Console    "Downloading compiled test binary ${ODH_BINARY_NAME}"
@@ -181,7 +208,7 @@ Generate User Token
 
 Run DistributedWorkloads ODH Test
     [Documentation]    Run DistributedWorkloads ODH Test
-    [Arguments]    ${TEST_NAME}    ${DW_RAY_IMAGE}
+    [Arguments]    ${TEST_NAME}    ${DW_RAY_IMAGE}    ${NOTEBOOK_IMAGE}
     Log To Console    "Running test: ${TEST_NAME}"
     ${result} =    Run Process    ./${ODH_BINARY_NAME} -test.run ${TEST_NAME}
     ...    shell=true

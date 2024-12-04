@@ -17,7 +17,7 @@ ${PROJECT_CREATE_BTN_XP}=     xpath=//button[text()="Create data science project
 ${ACTIONS_BTN_XP}=    xpath=//div/button[@aria-label="Actions"]
 ${DELETE_ACTION_BTN_XP}=  xpath=//div/ul/li/button[text()="Delete project"]
 ${EDIT_ACTION_BTN_XP}=    xpath=//div/ul/li/button[text()="Edit project"]
-${SPAWNER_LINK}=        xpath=//*[text()="Launch standalone notebook server"]
+${SPAWNER_LINK}=        xpath=//a[@data-testid="launch-standalone-notebook-server"]
 ${PROJECT_SEARCH_BAR}=    [data-testid="projects-table-toolbar"]
 ${PROJECT_FILTER_TYPE}=    ${PROJECT_SEARCH_BAR} [data-testid="filter-toolbar-dropdown"]
 ${PROJECT_SEARCH_INPUT}=    ${PROJECT_SEARCH_BAR} [data-testid="filter-toolbar-text-field"] input
@@ -25,6 +25,8 @@ ${PROJECT_SEARCH_INPUT}=    ${PROJECT_SEARCH_BAR} [data-testid="filter-toolbar-t
 *** Keywords ***
 Open Data Science Projects Home Page
     [Documentation]    Open "Data Science Projects" page from the sidebar
+    Wait Until Page Contains    Data Science Projects
+    Click Link      Data Science Projects
     Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
     Maybe Wait For Dashboard Loading Spinner Page
 
@@ -36,7 +38,7 @@ Is Data Science Projects Page Open
 
 Open Data Science Project Details Page
     [Documentation]    Open project ${project_title} in the "Data Science Projects" page, and an optional Tab by ID:
-    ...    overview | workbenches | cluster-storages | data-connections | pipelines-projects | model-server | permissions    # robocop: disable
+    ...    overview | workbenches | cluster-storages | connections | pipelines-projects | model-server | permissions    # robocop: disable
     [Arguments]     ${project_title}    ${tab_id}=${NONE}
     ${is_project_open}=    Is Data Science Project Details Page Open    project_title=${project_title}
     IF    ${is_project_open} == ${FALSE}
@@ -48,6 +50,7 @@ Open Data Science Project Details Page
         Wait Until Project Is Open    project_title=${project_title}
     END
     IF  "${tab_id}" != "${NONE}"
+        Log    ${tab_id}
         Wait Until Element Is Visible    //button[@role="tab" and @aria-controls="${tab_id}"]
         Click Button    //button[@role="tab" and @aria-controls="${tab_id}"]
         Element Should Be Visible   //button[@role="tab" and @aria-controls="${tab_id}" and @aria-selected="true"]
@@ -348,7 +351,8 @@ Stop Workbench From Projects Home Page
         ${stop_button}=    Set Variable    xpath=//a[@data-testid="notebook-route-link" and text()="${workbench_title}"]/ancestor::tr[@data-testid="project-notebooks-table-row"]//button[@data-testid="notebook-stop-action"]
         Wait Until Element Is Visible    ${stop_button}    timeout=10s
         Click Element    ${stop_button}
-        Handle Stop Workbench Confirmation Modal    press_cancel=${press_cancel}
+        Handle Stop Workbench Confirmation Modal    workbench_title=${workbench_title}
+        ...    press_cancel=${press_cancel}
     ELSE
         Fail     msg=Cannot stop ${workbench_title} workbench because it is neither starting nor running.
     END

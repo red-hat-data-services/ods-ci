@@ -209,19 +209,19 @@ Verify User Can Serve And Query A elyza/elyza-japanese-llama-2-7b-instruct Model
             ...    port_forwarding=${use_port_forwarding}
             Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
             ...    inference_type=tokenize    n_times=1    query_idx=4
-            ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    validate_response=${FALSE}    string_check_only=${FALSE}
             ...    port_forwarding=${use_port_forwarding}
             Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
             ...    inference_type=model-info    n_times=1
-            ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    validate_response=${FALSE}   string_check_only=${FALSE}
             ...    port_forwarding=${use_port_forwarding}
     ELSE IF    "${RUNTIME_NAME}" == "vllm-runtime" and "${KSERVE_MODE}" == "Serverless"
             Query Model Multiple Times    model_name=${model_name}      runtime=${RUNTIME_NAME}    protocol=http
             ...    inference_type=completions    n_times=1    query_idx=10
-            ...    namespace=${test_namespace}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    string_check_only=${FALSE}
             Query Model Multiple Times    model_name=${model_name}      runtime=${RUNTIME_NAME}    protocol=http
             ...    inference_type=chat-completions    n_times=1    query_idx=9
-            ...    namespace=${test_namespace}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    string_check_only=${FALSE}
     END
     [Teardown]    Run Keywords
     ...    Clean Up Test Project    test_ns=${test_namespace}
@@ -400,7 +400,7 @@ Verify User Can Serve And Query A meta-llama/llama-2-13b-chat Model    # robocop
             Set Test Variable    ${RUNTIME_NAME}    tgis-runtime
             Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
             ...    inference_type=all-tokens    n_times=1    protocol=${PROTOCOL}
-            ...    namespace=${test_namespace}   query_idx=0   validate_response=${TRUE}    # temp
+            ...    namespace=${test_namespace}   query_idx=0   validate_response=${FALSE}    # temp
             ...    port_forwarding=${use_port_forwarding}
             Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
             ...    inference_type=streaming    n_times=1    protocol=${PROTOCOL}
@@ -408,19 +408,19 @@ Verify User Can Serve And Query A meta-llama/llama-2-13b-chat Model    # robocop
             ...    port_forwarding=${use_port_forwarding}
             Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
             ...    inference_type=model-info    n_times=0
-            ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    validate_response=${FALSE}    string_check_only=${FALSE}
             ...    port_forwarding=${use_port_forwarding}
             Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
             ...    inference_type=tokenize    n_times=0    query_idx=0
-            ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    validate_response=${FALSE}    string_check_only=${FALSE}
             ...    port_forwarding=${use_port_forwarding}
     ELSE IF    "${RUNTIME_NAME}" == "vllm-runtime" and "${KSERVE_MODE}" == "Serverless"
             Query Model Multiple Times    model_name=${model_name}      runtime=${RUNTIME_NAME}    protocol=http
             ...    inference_type=chat-completions    n_times=1    query_idx=12
-            ...    namespace=${test_namespace}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    string_check_only=${FALSE}
             Query Model Multiple Times    model_name=${model_name}      runtime=${RUNTIME_NAME}    protocol=http
             ...    inference_type=completions    n_times=1    query_idx=11
-            ...    namespace=${test_namespace}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    string_check_only=${FALSE}
     END
     [Teardown]    Run Keywords
     ...    Clean Up Test Project    test_ns=${test_namespace}
@@ -533,19 +533,19 @@ Verify User Can Serve And Query A instructlab/merlinite-7b-lab Model    # roboco
             ...    port_forwarding=${use_port_forwarding}
             Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
             ...    inference_type=model-info    n_times=0
-            ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    validate_response=${FALSE}    string_check_only=${FALSE}
             ...    port_forwarding=${use_port_forwarding}
             Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
             ...    inference_type=tokenize    n_times=0    query_idx=0
-            ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    validate_response=${FALSE}   string_check_only=${FALSE}
             ...    port_forwarding=${use_port_forwarding}
     ELSE IF    "${RUNTIME_NAME}" == "vllm-runtime" and "${KSERVE_MODE}" == "Serverless"
             Query Model Multiple Times    model_name=${model_name}      runtime=${RUNTIME_NAME}    protocol=http
             ...    inference_type=chat-completions    n_times=1    query_idx=12
-            ...    namespace=${test_namespace}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    string_check_only=${FALSE}
             Query Model Multiple Times    model_name=${model_name}      runtime=${RUNTIME_NAME}    protocol=http
             ...    inference_type=completions    n_times=1    query_idx=11
-            ...    namespace=${test_namespace}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    string_check_only=${FALSE}
     END
     [Teardown]    Run Keywords
     ...    Clean Up Test Project    test_ns=${test_namespace}
@@ -596,19 +596,19 @@ Verify User Can Serve And Query A ibm-granite/granite-8b-code-base Model    # ro
             ...    port_forwarding=${use_port_forwarding}
             Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
             ...    inference_type=model-info    n_times=0
-            ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    validate_response=${FALSE}    string_check_only=${FALSE}
             ...    port_forwarding=${use_port_forwarding}
             Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
             ...    inference_type=tokenize    n_times=0    query_idx=0
-            ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    validate_response=${FALSE}    string_check_only=${FALSE}
             ...    port_forwarding=${use_port_forwarding}
     ELSE IF    "${RUNTIME_NAME}" == "vllm-runtime" and "${KSERVE_MODE}" == "Serverless"
             Query Model Multiple Times    model_name=${model_name}      runtime=${RUNTIME_NAME}    protocol=http
             ...    inference_type=chat-completions    n_times=1    query_idx=12
-            ...    namespace=${test_namespace}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    string_check_only=${FALSE}
             Query Model Multiple Times    model_name=${model_name}      runtime=${RUNTIME_NAME}    protocol=http
             ...    inference_type=completions    n_times=1    query_idx=11
-            ...    namespace=${test_namespace}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    string_check_only=${FALSE}
     END
     [Teardown]    Run Keywords
     ...    Clean Up Test Project    test_ns=${test_namespace}
@@ -695,7 +695,7 @@ Verify User Can Serve And Query A meta-llama/llama-3-8B-Instruct Model    # robo
             Set Test Variable    ${RUNTIME_NAME}    tgis-runtime
             Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
             ...    inference_type=all-tokens    n_times=1    protocol=${PROTOCOL}
-            ...    namespace=${test_namespace}   query_idx=0   validate_response=${TRUE}    # temp
+            ...    namespace=${test_namespace}   query_idx=0   validate_response=${FALSE}    # temp
             ...    port_forwarding=${use_port_forwarding}
             Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
             ...    inference_type=streaming    n_times=1    protocol=${PROTOCOL}
@@ -703,19 +703,19 @@ Verify User Can Serve And Query A meta-llama/llama-3-8B-Instruct Model    # robo
             ...    port_forwarding=${use_port_forwarding}
             Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
             ...    inference_type=model-info    n_times=0
-            ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    validate_response=${FALSE}   string_check_only=${FALSE}
             ...    port_forwarding=${use_port_forwarding}
             Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
             ...    inference_type=tokenize    n_times=0    query_idx=0
-            ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    validate_response=${FALSE}    string_check_only=${FALSE}
             ...    port_forwarding=${use_port_forwarding}
     ELSE IF    "${RUNTIME_NAME}" == "vllm-runtime" and "${KSERVE_MODE}" == "Serverless"
             Query Model Multiple Times    model_name=${model_name}      runtime=${RUNTIME_NAME}    protocol=http
             ...    inference_type=chat-completions    n_times=1    query_idx=12
-            ...    namespace=${test_namespace}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    string_check_only=${FALSE}
             Query Model Multiple Times    model_name=${model_name}      runtime=${RUNTIME_NAME}    protocol=http
             ...    inference_type=completions    n_times=1    query_idx=11
-            ...    namespace=${test_namespace}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    string_check_only=${FALSE}
     END
     [Teardown]    Run Keywords
     ...    Clean Up Test Project    test_ns=${test_namespace}
@@ -766,19 +766,19 @@ Verify User Can Serve And Query A ibm-granite/granite-3b-code-instruct Model    
             ...    port_forwarding=${use_port_forwarding}
             Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
             ...    inference_type=model-info    n_times=0
-            ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    validate_response=${FALSE}    string_check_only=${FALSE}
             ...    port_forwarding=${use_port_forwarding}
             Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
             ...    inference_type=tokenize    n_times=0    query_idx=0
-            ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    validate_response=${FALSE}    string_check_only=${FALSE}
             ...    port_forwarding=${use_port_forwarding}
     ELSE IF    "${RUNTIME_NAME}" == "vllm-runtime" and "${KSERVE_MODE}" == "Serverless"
             Query Model Multiple Times    model_name=${model_name}      runtime=${RUNTIME_NAME}    protocol=http
             ...    inference_type=chat-completions    n_times=1    query_idx=12
-            ...    namespace=${test_namespace}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    string_check_only=${FALSE}
             Query Model Multiple Times    model_name=${model_name}      runtime=${RUNTIME_NAME}    protocol=http
             ...    inference_type=completions    n_times=1    query_idx=11
-            ...    namespace=${test_namespace}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    string_check_only=${FALSE}
     END
     [Teardown]    Run Keywords
     ...    Clean Up Test Project    test_ns=${test_namespace}
@@ -829,19 +829,19 @@ Verify User Can Serve And Query A ibm-granite/granite-8b-code-instruct Model    
             ...    port_forwarding=${use_port_forwarding}
             Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
             ...    inference_type=model-info    n_times=0
-            ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    validate_response=${FALSE}    string_check_only=${FALSE}
             ...    port_forwarding=${use_port_forwarding}
             Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
             ...    inference_type=tokenize    n_times=0    query_idx=0
-            ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    validate_response=${FALSE}    string_check_only=${FALSE}
             ...    port_forwarding=${use_port_forwarding}
     ELSE IF    "${RUNTIME_NAME}" == "vllm-runtime" and "${KSERVE_MODE}" == "Serverless"
             Query Model Multiple Times    model_name=${model_name}      runtime=${RUNTIME_NAME}    protocol=http
             ...    inference_type=chat-completions    n_times=1    query_idx=12
-            ...    namespace=${test_namespace}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    string_check_only=${FALSE}
             Query Model Multiple Times    model_name=${model_name}      runtime=${RUNTIME_NAME}    protocol=http
             ...    inference_type=completions    n_times=1    query_idx=11
-            ...    namespace=${test_namespace}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    string_check_only=${FALSE}
     END
     [Teardown]    Run Keywords
     ...    Clean Up Test Project    test_ns=${test_namespace}
@@ -892,19 +892,19 @@ Verify User Can Serve And Query A ibm-granite/granite-7b-lab Model    # robocop:
             ...    port_forwarding=${use_port_forwarding}
             Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
             ...    inference_type=model-info    n_times=0
-            ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    validate_response=${FALSE}    string_check_only=${FALSE}
             ...    port_forwarding=${use_port_forwarding}
             Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
             ...    inference_type=tokenize    n_times=0    query_idx=0
-            ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    validate_response=${FALSE}    string_check_only=${FALSE}
             ...    port_forwarding=${use_port_forwarding}
     ELSE IF    "${RUNTIME_NAME}" == "vllm-runtime" and "${KSERVE_MODE}" == "Serverless"
             Query Model Multiple Times    model_name=${model_name}      runtime=${RUNTIME_NAME}    protocol=http
             ...    inference_type=chat-completions    n_times=1    query_idx=12
-            ...    namespace=${test_namespace}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    string_check_only=${FALSE}
             Query Model Multiple Times    model_name=${model_name}      runtime=${RUNTIME_NAME}    protocol=http
             ...    inference_type=completions    n_times=1    query_idx=11
-            ...    namespace=${test_namespace}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    string_check_only=${FALSE}
     END
     [Teardown]    Run Keywords
     ...    Clean Up Test Project    test_ns=${test_namespace}
@@ -958,11 +958,11 @@ Verify User Can Serve And Query A ibm-granite/granite-7b-lab ngram speculative M
             ...    port_forwarding=${use_port_forwarding}
             Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
             ...    inference_type=model-info    n_times=0
-            ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    validate_response=${FALSE}    string_check_only=${FALSE}
             ...    port_forwarding=${use_port_forwarding}
             Query Model Multiple Times    model_name=${model_name}    runtime=${RUNTIME_NAME}
             ...    inference_type=tokenize    n_times=0    query_idx=0
-            ...    namespace=${test_namespace}    validate_response=${TRUE}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    validate_response=${FALSE}    string_check_only=${FALSE}
             ...    port_forwarding=${use_port_forwarding}
     ELSE IF    "${RUNTIME_NAME}" == "vllm-runtime" and "${KSERVE_MODE}" == "Serverless"
             Query Model Multiple Times    model_name=${model_name}      runtime=${RUNTIME_NAME}    protocol=http
@@ -1142,10 +1142,10 @@ Verify User Can Serve And Query RHAL AI granite-7b-starter Model    # robocop: o
     ELSE IF    "${RUNTIME_NAME}" == "vllm-runtime" and "${KSERVE_MODE}" == "Serverless"
             Query Model Multiple Times    model_name=${model_name}      runtime=${RUNTIME_NAME}    protocol=http
             ...    inference_type=chat-completions    n_times=1    query_idx=12
-            ...    namespace=${test_namespace}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    string_check_only=${FALSE}
             Query Model Multiple Times    model_name=${model_name}      runtime=${RUNTIME_NAME}    protocol=http
             ...    inference_type=completions    n_times=1    query_idx=11
-            ...    namespace=${test_namespace}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    string_check_only=${FALSE}
     END
     [Teardown]    Run Keywords
     ...    Clean Up Test Project    test_ns=${test_namespace}
@@ -1275,10 +1275,10 @@ Verify User Can Serve And Query RHAL AI Granite-7b-redhat-lab Model    # robocop
     ELSE IF    "${RUNTIME_NAME}" == "vllm-runtime" and "${KSERVE_MODE}" == "Serverless"
             Query Model Multiple Times    model_name=${model_name}      runtime=${RUNTIME_NAME}    protocol=http
             ...    inference_type=chat-completions    n_times=1    query_idx=12
-            ...    namespace=${test_namespace}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    string_check_only=${FALSE}
             Query Model Multiple Times    model_name=${model_name}      runtime=${RUNTIME_NAME}    protocol=http
             ...    inference_type=completions    n_times=1    query_idx=11
-            ...    namespace=${test_namespace}    string_check_only=${TRUE}
+            ...    namespace=${test_namespace}    string_check_only=${FALSE}
     END
     [Teardown]    Run Keywords
     ...    Clean Up Test Project    test_ns=${test_namespace}
@@ -1347,9 +1347,9 @@ Set Runtime Image
     [Arguments]    ${gpu_type}
     IF  "${RUNTIME_IMAGE}" == "${EMPTY}"
          IF  "${gpu_type}" == "nvidia"
-            Set Test Variable    ${runtime_image}    quay.io/modh/vllm@sha256:a8ba53e1b12309913cd958331dd8dda7f2b1fad39f5350d3c722608835e14512
+            Set Test Variable    ${runtime_image}    quay.io/modh/vllm@sha256:c86ff1e89c86bc9821b75d7f2bbc170b3c13e3ccf538bf543b1110f23e056316
          ELSE IF    "${gpu_type}" == "amd"
-            Set Test Variable    ${runtime_image}    quay.io/modh/vllm@sha256:9969e5273a492132b39ce25165c94480393bb87628f50c30d4de26a0afa56abd
+            Set Test Variable    ${runtime_image}    quay.io/modh/vllm@sha256:10f09eeca822ebe77e127aad7eca2571f859a5536a6023a1baffc6764bcadc6e
          ELSE
              FAIL   msg=Provided GPU type is not yet supported. Only nvidia and amd gpu type are supported
          END

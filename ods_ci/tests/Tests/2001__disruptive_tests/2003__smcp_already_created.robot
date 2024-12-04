@@ -23,16 +23,15 @@ ${INSTALL_TYPE}                             CLi
 ${TEST_ENV}                                 PSI
 ${IS_PRESENT}                               0
 ${IS_NOT_PRESENT}                           1
-${MSSG_REGEX}                               denied the request: only one service mesh may be installed per project/namespace
+${MSG_REGEX}                                denied the request: only one service mesh may be installed per project/namespace
 
 
 *** Test Cases ***
 Validate Service Mesh Control Plane Already Created
     [Documentation]    This Test Case validates that only one ServiceMeshControlPlane is allowed to be installed per project/namespace
-    [Tags]      RHOAIENG-2517
+    [Tags]      RHOAIENG-2517       Operator    Tier3
     Fetch Image Url And Update Channel
     Check Whether DSC Exists And Save Component Statuses
-    Fetch Cluster Type By Domain
     IF    "${CLUSTER_TYPE}" == "selfmanaged"
         Uninstall RHODS In Self Managed Cluster
         Create Smcp From Template
@@ -105,16 +104,6 @@ Fetch Image Url And Update Channel
     Should Be Equal As Integers    ${rc}    0
     Set Global Variable    ${UPDATE_CHANNEL}    ${out}
 
-Fetch Cluster Type By Domain
-    [Documentation]    This Keyword outputs the kind of cluster depending on the console URL domain
-    ${matches}=    Get Regexp Matches    ${OCP_CONSOLE_URL}    rh-ods
-    ${domain}=    Get From List    ${matches}    0
-    IF    "${domain}" == "rh-ods"
-        Set Global Variable    ${CLUSTER_TYPE}    selfmanaged
-    ELSE
-        Set Global Variable    ${CLUSTER_TYPE}    managed
-    END
-
 Create Smcp From Template
     [Documentation]    Create a default ServiceMeshControlPlane from a template
     ${file_path}=    Set Variable    ./tasks/Resources/Files/
@@ -131,7 +120,7 @@ Operator Deployment Should Be Ready
     ${rc}=    Set Variable    1
     TRY
         WHILE    ${rc} != 0    limit=10m
-            Sleep    5s
+            Sleep    15s
             ${rc}    ${output}=    Run And Return Rc And Output
             ...    oc wait --for condition=available -n ${OPERATOR_NAMESPACE} deploy/${OPERATOR_DEPLOYMENT_NAME}
         END
@@ -142,17 +131,20 @@ Operator Deployment Should Be Ready
 Verify Pod Logs Contain Error
     [Documentation]    Checks whether there is a SMCP related error on the Pod Logs
     ${pod_name}=    Get Pod Name    ${OPERATOR_NAMESPACE}    ${OPERATOR_LABEL_SELECTOR}
-    ${pod_logs}=    Oc Get Pod Logs
-    ...    name=${pod_name}
-    ...    namespace=${OPERATOR_NAMESPACE}
-    ...    container=${OPERATOR_POD_CONTAINER_NAME}
-    ${match_list}=    Get Regexp Matches    ${pod_logs}    ${MSSG_REGEX}
-    ${entry_msg}=    Remove Duplicates    ${match_list}
-    ${length}=    Get Length    ${entry_msg}
-    IF    ${length} == ${0}
-        FAIL    Pod ${pod_name} logs should contain message ${MSSG_REGEX}.
-    ELSE
-        Log    message=Pod ${pod_name} logs contain error message '${MSSG_REGEX}'    level=INFO
+    ${length}=    Set Variable    0
+    TRY
+        WHILE       ${length} == 0        limit=5m
+            ${pod_logs}=    Oc Get Pod Logs
+            ...    name=${pod_name}
+            ...    namespace=${OPERATOR_NAMESPACE}
+            ...    container=${OPERATOR_POD_CONTAINER_NAME}
+            ${match_list}=    Get Regexp Matches    ${pod_logs}    ${MSG_REGEX}
+            ${entry_msg}=    Remove Duplicates    ${match_list}
+            ${length}=    Get Length    ${entry_msg}
+            Sleep    10s
+        END
+    EXCEPT
+        Fail    msg=Pod ${pod_name} logs should contain message '${MSG_REGEX}'
     END
 
 Cleanup Olm Install Dir

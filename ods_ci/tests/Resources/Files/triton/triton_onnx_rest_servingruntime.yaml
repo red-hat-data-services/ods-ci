@@ -52,3 +52,9 @@ spec:
       name: triton
       priority: 1
       version: "2"
+    - autoSelect: true
+      name: xgboost
+      version: "1"
+    - autoSelect: true
+      name: python
+      version: "1"

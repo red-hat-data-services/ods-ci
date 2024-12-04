@@ -134,11 +134,13 @@ Verify Model Can Be Deployed Via UI For Upgrade
     ...    10 sec
     ...    Verify Openvino Deployment
     ...    runtime_name=${runtime_pod_name}
+    ...    project_name=${PRJ_TITLE}
     Run Keyword And Continue On Failure
     ...    Wait Until Keyword Succeeds
     ...    5 min
     ...    10 sec
     ...    Verify Serving Service
+    ...    project_name=${PRJ_TITLE}
     Verify Model Status     ${MODEL_NAME}           success
     Set Suite Variable      ${MODEL_CREATED}        ${TRUE}     # robocop: disable:replace-set-variable-with-var
     Run Keyword And Continue On Failure

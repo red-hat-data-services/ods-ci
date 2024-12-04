@@ -13,7 +13,7 @@ Run Training operator KFTO test with NVIDIA CUDA image
     [Documentation]    Run Go KFTO tests for Training operator using PyTorch job with NVIDIA CUDA image
     [Tags]  Resources-GPU    NVIDIA-GPUs
     ...     RHOAIENG-16035
-    ...     Tier1
+    ...     Sanity
     ...     DistributedWorkloads
     ...     Training
     ...     TrainingOperator
@@ -23,7 +23,7 @@ Run Training operator KFTO test with AMD ROCm image
     [Documentation]    Run Go KFTO tests for Training operator using PyTorch job with AMD ROCm image
     [Tags]  Resources-GPU    AMD-GPUs    ROCm
     ...     RHOAIENG-16035
-    ...     Tier1
+    ...     Sanity
     ...     DistributedWorkloads
     ...     Training
     ...     TrainingOperator

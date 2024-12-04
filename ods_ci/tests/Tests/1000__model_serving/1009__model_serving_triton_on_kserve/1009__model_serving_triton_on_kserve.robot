@@ -126,7 +126,7 @@ Test PYTORCH Model Rest Inference Via UI(Triton on Kserve)
     Log    ${EXPECTED_INFERENCE_REST_OUTPUT_PYTORCH}
     Run Keyword And Continue On Failure    Verify Model Inference With Retries
     ...    ${PYTORCH_MODEL_NAME}    ${INFERENCE_REST_INPUT_PYTORCH}    ${EXPECTED_INFERENCE_REST_OUTPUT_PYTORCH}
-    ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}
+    ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}    application_type=${FALSE}
     [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${PYTORCH_MODEL_NAME}
     ...  project_title=${PRJ_TITLE}
     ...  AND
@@ -369,7 +369,7 @@ Test Python Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too
     ...     as_string=${TRUE}
     Run Keyword And Continue On Failure    Verify Model Inference With Retries
     ...    ${PYTHON_MODEL_NAME}    ${INFERENCE_REST_INPUT_PYTHON}    ${EXPECTED_INFERENCE_REST_OUTPUT_PYTHON}
-    ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}
+    ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}     application_type=${FALSE}
     [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${PYTHON_MODEL_NAME}
     ...  project_title=${PRJ_TITLE}
     ...  AND
@@ -399,7 +399,7 @@ Test FIL Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-lo
     ...     as_string=${TRUE}
     Run Keyword And Continue On Failure    Verify Model Inference With Retries
     ...    ${FIL_MODEL_NAME}    ${INFERENCE_REST_INPUT_FIL}    ${EXPECTED_INFERENCE_REST_OUTPUT_FIL}
-    ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}
+    ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}        application_type=${FALSE}
     [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${FIL_MODEL_NAME}
     ...  project_title=${PRJ_TITLE}
     ...  AND

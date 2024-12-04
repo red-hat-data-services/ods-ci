@@ -227,8 +227,7 @@ Test Tensorflow Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off
 
 Test KERAS Model Rest Inference Via UI(Triton on Kserve)
     [Documentation]    Test the deployment of an keras model in Kserve using Triton
-    [Tags]    Tier2           RHOAIENG-10328
-
+    [Tags]    Tier2      RHOAIENG-10328
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    existing_project=${FALSE}
@@ -256,7 +255,7 @@ Test KERAS Model Rest Inference Via UI(Triton on Kserve)
     ...  Clean All Models Of Current User
     ...  AND
     ...  Delete Serving Runtime Template From CLI    displayed_name=triton-keras-rest
-    
+
    Test KERAS Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of an keras model in Kserve using Triton
     [Tags]    Tier2    RHOAIENG-10327
@@ -346,7 +345,7 @@ Test Python Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too
     ...  Clean All Models Of Current User
     ...  AND
     ...  Delete Serving Runtime Template From CLI    displayed_name=triton-kserve-grpc
-    
+
 Test Python Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of an python model in Kserve using Triton
     [Tags]    Tier2    RHOAIENG-15374
@@ -406,8 +405,8 @@ Test FIL Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-lo
     ...  Clean All Models Of Current User
     ...  AND
     ...  Delete Serving Runtime Template From CLI    displayed_name=triton-kserve-rest
-    
-    Test Tensorflow Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
+
+Test Tensorflow Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of an tensorflow model in Kserve using Triton
     [Tags]    Tier2    RHOAIENG-11568
     Open Data Science Projects Home Page

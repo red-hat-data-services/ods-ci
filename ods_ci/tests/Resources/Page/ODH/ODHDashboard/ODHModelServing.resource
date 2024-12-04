@@ -292,7 +292,7 @@ Get Model Inference
     ...    set to ${TRUE}.
     [Arguments]    ${model_name}    ${inference_input}    ${token_auth}=${FALSE}   ${project_title}=${NONE}
     ...    ${kserve_mode}=Serverless   ${deployment_mode}=UI   ${service_port}=8888   ${end_point}=${NONE}
-    ...    ${service_account_name}=default-name   ${token}=${NONE}
+    ...    ${service_account_name}=default-name   ${token}=${NONE}      ${application_type}=${FALSE}
     ${curl_cmd}=     Set Variable    ${NONE}
     ${self_managed}=    Is RHODS Self-Managed
     IF    $deployment_mode == 'UI'
@@ -300,6 +300,9 @@ Get Model Inference
         ${kserve}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain
         ...    Single-model serving enabled
         ${curl_cmd}=     Set Variable    curl -s ${url} -d ${inference_input}
+        IF    ${application_type}
+            ${curl_cmd}=     Catenate    ${curl_cmd}    -H 'Content-Type: application/json'
+        END
         IF    ${token_auth}
             IF    "${project_title}" == "${NONE}"
                 ${project_title}=    Get Model Project    ${model_name}
@@ -365,7 +368,7 @@ Verify Model Inference
     ${inference_output}=    Get Model Inference    model_name=${model_name}   inference_input=${inference_input}
     ...    token_auth=${token_auth}    kserve_mode=${kserve_mode}    project_title=${project_title}
     ...    deployment_mode=${deployment_mode}    service_port=${service_port}    end_point=${end_point}
-    ...    token=${token}      # robocop: disable
+    ...    token=${token}      application_type=${application_type}           # robocop: disable
     Log    ${inference_output}
     ${result}    ${list}=    Inference Comparison    ${expected_inference_output}    ${inference_output}
     Log    ${result}

@@ -21,7 +21,7 @@ Test Tags         Kserve
 ${INFERENCE_GRPC_INPUT_ONNX}=    tests/Resources/Files/triton/kserve-triton-onnx-gRPC-input.json
 ${INFERENCE_REST_INPUT_ONNX}=    @tests/Resources/Files/triton/kserve-triton-onnx-rest-input.json
 ${PROTOBUFF_FILE}=      tests/Resources/Files/triton/grpc_predict_v2.proto
-${PRJ_TITLE}=    ms-triton-project4
+${PRJ_TITLE}=    ms-triton-project
 ${PRJ_DESCRIPTION}=    project used for model serving triton runtime tests
 ${MODEL_CREATED}=    ${FALSE}
 ${PATTERN}=     https:\/\/([^\/:]+)
@@ -86,7 +86,7 @@ Test Onnx Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-l
     ...     as_string=${TRUE}
     Run Keyword And Continue On Failure    Verify Model Inference With Retries
     ...    ${ONNX_MODEL_NAME}    ${INFERENCE_REST_INPUT_ONNX}    ${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}
-    ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}
+    ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}    application_type=${FALSE}
     [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${ONNX_MODEL_NAME}
     ...  project_title=${PRJ_TITLE}
     ...  AND
@@ -95,9 +95,9 @@ Test Onnx Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-l
     ...  Delete Serving Runtime Template From CLI    displayed_name=triton-kserve-rest
 
 
-Test PYTORCH Model Inference Via UI(Triton on Kserve)
+Test PYTORCH Model Rest Inference Via UI(Triton on Kserve)
     [Documentation]    Test the deployment of an pytorch model in Kserve using Triton
-    [Tags]    Sanity           RHOAIENG-11561
+    [Tags]    Tier2           RHOAIENG-11561
 
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
@@ -129,7 +129,7 @@ Test PYTORCH Model Inference Via UI(Triton on Kserve)
 
 Test Onnx Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of an onnx model in Kserve using Triton
-    [Tags]    Sanity    RHOAIENG-9053
+    [Tags]    Tier2    RHOAIENG-9053
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    existing_project=${FALSE}
@@ -175,7 +175,7 @@ Test Onnx Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-l
 
 Test Tensorflow Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of an tensorflow model in Kserve using Triton
-    [Tags]    Sanity    RHOAIENG-9052
+    [Tags]    Tier2    RHOAIENG-9052
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    existing_project=${FALSE}
@@ -218,9 +218,9 @@ Test Tensorflow Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off
     ...  AND
     ...  Delete Serving Runtime Template From CLI    displayed_name=triton-tensorflow-grpc
 
-Test KERAS Model Inference Via UI(Triton on Kserve)
+Test KERAS Model Rest Inference Via UI(Triton on Kserve)
     [Documentation]    Test the deployment of an keras model in Kserve using Triton
-    [Tags]    Sanity           RHOAIENG-10328
+    [Tags]    Tier2           RHOAIENG-10328
 
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
@@ -242,7 +242,7 @@ Test KERAS Model Inference Via UI(Triton on Kserve)
     Log    ${EXPECTED_INFERENCE_REST_OUTPUT_KERAS}
     Run Keyword And Continue On Failure    Verify Model Inference With Retries
     ...    ${KERAS_MODEL_NAME}    ${INFERENCE_REST_INPUT_KERAS}    ${EXPECTED_INFERENCE_REST_OUTPUT_KERAS}
-    ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}
+    ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}       application_type=${TRUE}
     [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${KERAS_MODEL_NAME}
     ...  project_title=${PRJ_TITLE}
     ...  AND
@@ -318,7 +318,7 @@ Test Python Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too
     ...     as_string=${TRUE}
     Run Keyword And Continue On Failure    Verify Model Inference With Retries
     ...    ${PYTHON_MODEL_NAME}    ${INFERENCE_REST_INPUT_PYTHON}    ${EXPECTED_INFERENCE_REST_OUTPUT_PYTHON}
-    ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}
+    ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}     application_type=${FALSE}
     [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${PYTHON_MODEL_NAME}
     ...  project_title=${PRJ_TITLE}
     ...  AND
@@ -327,14 +327,14 @@ Test Python Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too
     ...  Delete Serving Runtime Template From CLI    displayed_name=triton-kserve-rest
 
 Test Tensorflow Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
-    [Documentation]    Test the deployment of an onnx model in Kserve using Triton
-    [Tags]    Sanity    RHOAIENG-11568
+    [Documentation]    Test the deployment of an tensorflow model in Kserve using Triton
+    [Tags]    Tier2    RHOAIENG-11568
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    existing_project=${FALSE}
     Open Dashboard Settings    settings_page=Serving runtimes
-    #Upload Serving Runtime Template    runtime_filepath=${TENSORFLOW_RUNTIME_FILEPATH}
-    #...    serving_platform=single      runtime_protocol=REST
+    Upload Serving Runtime Template    runtime_filepath=${TENSORFLOW_RUNTIME_FILEPATH}
+    ...    serving_platform=single      runtime_protocol=REST
     Serving Runtime Template Should Be Listed    displayed_name=${PYTORCH_RUNTIME_NAME}
     ...    serving_platform=single
     Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection

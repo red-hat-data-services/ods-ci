@@ -24,6 +24,7 @@ ${PROTOBUFF_FILE}=      tests/Resources/Files/triton/grpc_predict_v2.proto
 ${PRJ_TITLE}=    ms-triton-project
 ${PRJ_DESCRIPTION}=    project used for model serving triton runtime tests
 ${MODEL_CREATED}=    ${FALSE}
+${PATTERN}=     https:\/\/([^\/:]+)
 ${ONNX_MODEL_NAME}=    densenet_onnx
 ${ONNX_MODEL_LABEL}=     densenetonnx
 ${ONNX_GRPC_RUNTIME_NAME}=    triton-kserve-grpc
@@ -50,13 +51,17 @@ ${TENSORFLOW_RUNTIME_NAME}=    triton-tensorflow-grpc
 ${TENSORFLOW_GRPC_RUNTIME_NAME}=    triton-tensorflow-grpc
 ${TENSORFLOW_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_tensorflow_gRPC_servingruntime.yaml
 ${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE_TENSORFLOW}=       tests/Resources/Files/triton/kserve-triton-inception_graphdef-gRPC-output.json
+${PYTHON_MODEL_NAME}=    python
+${EXPECTED_INFERENCE_PYTHON_REST_OUTPUT_FILE}=      tests/Resources/Files/triton/kserve-triton-python-rest-output.json
+${INFERENCE_REST_INPUT_PYTHON}=    @tests/Resources/Files/triton/kserve-triton-python-rest-input.json
 ${KERAS_RUNTIME_NAME}=    triton-keras-rest
 ${KERAS_MODEL_NAME}=      resnet50
 ${KERAS_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_keras_rest_servingruntime.yaml
 ${INFERENCE_REST_INPUT_KERAS}=    @tests/Resources/Files/triton/kserve-triton-keras-rest-input.json
 ${EXPECTED_INFERENCE_REST_OUTPUT_FILE_KERAS}=       tests/Resources/Files/triton/kserve-triton-keras-rest-output.json
-
-
+${PYTHON_MODEL_NAME}=   python
+${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE_PYTHON}=       tests/Resources/Files/triton/kserve-triton-python-gRPC-output.json
+${INFERENCE_GRPC_INPUT_PYTHON}=     tests/Resources/Files/triton/kserve-triton-python-gRPC-input.json
 
 *** Test Cases ***
 Test Onnx Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
@@ -244,7 +249,6 @@ Test KERAS Model Rest Inference Via UI(Triton on Kserve)
     ...  Clean All Models Of Current User
     ...  AND
     ...  Delete Serving Runtime Template From CLI    displayed_name=triton-keras-rest
-
 
 Test KERAS Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of an keras model in Kserve using Triton

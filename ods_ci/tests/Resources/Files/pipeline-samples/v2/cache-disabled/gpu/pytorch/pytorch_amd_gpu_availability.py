@@ -3,7 +3,7 @@ from kfp.dsl import PipelineTask
 
 #  Runtime: Pytorch with ROCm and Python 3.9 (UBI 9)
 common_base_image = (
-    "quay.io/modh/runtime-images@sha256:a1cfb7bfcff3b2aae2b20b17da83b6683d632403f674a51af6efdfe809a6fc10"
+    "quay.io/modh/runtime-images@sha256:6340efaa92bc54bcede518e890492db626fb9fe96f028c2cd5251f286b2b2852"
 )
 
 
@@ -14,11 +14,9 @@ def add_gpu_toleration(task: PipelineTask, accelerator_type: str, accelerator_li
     kubernetes.add_toleration(task, key=accelerator_type, operator="Exists", effect="NoSchedule")
 
 
-@dsl.component(
-    base_image=common_base_image
-)
+@dsl.component(base_image=common_base_image)
 def verify_gpu_availability(gpu_toleration: bool):
-    import torch
+    import torch  # noqa: PLC0415
 
     cuda_available = torch.cuda.is_available()
     device_count = torch.cuda.device_count()
@@ -30,7 +28,7 @@ def verify_gpu_availability(gpu_toleration: bool):
     if gpu_toleration:
         assert torch.cuda.is_available()
         assert torch.cuda.device_count() > 0
-        t = torch.tensor([5, 5, 5], dtype=torch.int64, device='cuda')
+        t = torch.tensor([5, 5, 5], dtype=torch.int64, device="cuda")
     else:
         assert not torch.cuda.is_available()
         assert torch.cuda.device_count() == 0

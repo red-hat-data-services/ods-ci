@@ -20,7 +20,7 @@ Verify Pytorch Can See GPU
     [Arguments]    ${install}=False
     IF  ${install}==True
         # TODO: use Install And Import Package In JupyterLab after #202 is merged
-        Run Cell And Check For Errors    !pip install torch==1.8 numpy==1.24.4    timeout=300s
+        Run Cell And Check For Errors    !pip install torch==2.4.1 numpy==2.1.3    timeout=300s
     END
     Run Cell And Check Output
     ...    import torch; device = "cuda" if torch.cuda.is_available() else "cpu"; print(f"Using {device} device")
@@ -52,7 +52,8 @@ Find Max Number Of GPUs In One Node
 
 Get GPU nodes
     [Documentation]    Returns a list containing all nodes with GPUs
-    ${nodes_from_oc} =    Run    oc get nodes -l nvidia.com/gpu.present=true | grep ip | awk '{split($0,a); print a[1]}'
+    # TODO: we will need to adjust e.g. for AMD in the future...
+    ${nodes_from_oc} =    Run    oc get nodes -l nvidia.com/gpu.present=true --no-headers=true | awk '{split($0,a); print a[1]}'
     @{node_names} =    Split To Lines    ${nodes_from_oc}
     RETURN    @{node_names}
 

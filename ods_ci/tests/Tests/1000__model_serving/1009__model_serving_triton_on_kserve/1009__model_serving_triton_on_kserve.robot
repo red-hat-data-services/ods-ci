@@ -93,14 +93,13 @@ Test Onnx Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-l
     ...     as_string=${TRUE}
     Run Keyword And Continue On Failure    Verify Model Inference With Retries
     ...    ${ONNX_MODEL_NAME}    ${INFERENCE_REST_INPUT_ONNX}    ${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}
-    ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}    application_type=${FALSE}
+    ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}
     [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${ONNX_MODEL_NAME}
     ...  project_title=${PRJ_TITLE}
     ...  AND
     ...  Clean All Models Of Current User
     ...  AND
     ...  Delete Serving Runtime Template From CLI    displayed_name=triton-kserve-rest
-
 
 Test PYTORCH Model Rest Inference Via UI(Triton on Kserve)
     [Documentation]    Test the deployment of an pytorch model in Kserve using Triton
@@ -126,7 +125,7 @@ Test PYTORCH Model Rest Inference Via UI(Triton on Kserve)
     Log    ${EXPECTED_INFERENCE_REST_OUTPUT_PYTORCH}
     Run Keyword And Continue On Failure    Verify Model Inference With Retries
     ...    ${PYTORCH_MODEL_NAME}    ${INFERENCE_REST_INPUT_PYTORCH}    ${EXPECTED_INFERENCE_REST_OUTPUT_PYTORCH}
-    ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}    application_type=${FALSE}
+    ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}
     [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${PYTORCH_MODEL_NAME}
     ...  project_title=${PRJ_TITLE}
     ...  AND
@@ -248,7 +247,7 @@ Test KERAS Model Rest Inference Via UI(Triton on Kserve)
     Log    ${EXPECTED_INFERENCE_REST_OUTPUT_KERAS}
     Run Keyword And Continue On Failure    Verify Model Inference With Retries
     ...    ${KERAS_MODEL_NAME}    ${INFERENCE_REST_INPUT_KERAS}    ${EXPECTED_INFERENCE_REST_OUTPUT_KERAS}
-    ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}       application_type=${TRUE}
+    ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}      set_json_content_type=${TRUE}
     [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${KERAS_MODEL_NAME}
     ...  project_title=${PRJ_TITLE}
     ...  AND
@@ -368,7 +367,7 @@ Test Python Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too
     ...     as_string=${TRUE}
     Run Keyword And Continue On Failure    Verify Model Inference With Retries
     ...    ${PYTHON_MODEL_NAME}    ${INFERENCE_REST_INPUT_PYTHON}    ${EXPECTED_INFERENCE_REST_OUTPUT_PYTHON}
-    ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}     application_type=${FALSE}
+    ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}
     [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${PYTHON_MODEL_NAME}
     ...  project_title=${PRJ_TITLE}
     ...  AND
@@ -398,7 +397,7 @@ Test FIL Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-lo
     ...     as_string=${TRUE}
     Run Keyword And Continue On Failure    Verify Model Inference With Retries
     ...    ${FIL_MODEL_NAME}    ${INFERENCE_REST_INPUT_FIL}    ${EXPECTED_INFERENCE_REST_OUTPUT_FIL}
-    ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}        application_type=${FALSE}
+    ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}
     [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${FIL_MODEL_NAME}
     ...  project_title=${PRJ_TITLE}
     ...  AND
@@ -429,7 +428,7 @@ Test Tensorflow Model Rest Inference Via UI (Triton on Kserve)    # robocop: off
     ...     as_string=${TRUE}
     Run Keyword And Continue On Failure    Verify Model Inference With Retries
     ...    ${TENSORFLOW_MODEL_NAME}    ${INFERENCE_REST_INPUT_TENSORFLOW}    ${EXPECTED_INFERENCE_REST_OUTPUT_TENSORFLOW}
-    ...    token_auth=${TRUE}    project_title=${PRJ_TITLE}    application_type=${TRUE}
+    ...    token_auth=${TRUE}    project_title=${PRJ_TITLE}    set_json_content_type=${TRUE}
     [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${TENSORFLOW_MODEL_NAME}
     ...  project_title=${PRJ_TITLE}
     ...  AND

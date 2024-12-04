@@ -26,7 +26,7 @@ spec:
     - name: fix-volume-permissions
       image: quay.io/quay/busybox@sha256:92f3298bf80a1ba949140d77987f5de081f010337880cd771f7e7fc928f8c74d 
       command: ["sh"]
-      args: ["-c", "mkdir -p /mnt/models/${model_path} && chmod -R 777 /mnt/models/${model_path}"]
+      args: ["-c", "mkdir -p /mnt/models/${model_path} && chmod -R 777 /mnt/models"]
       volumeMounts:
         - mountPath: "/mnt/models/"
           name: model-volume

@@ -256,7 +256,7 @@ Test KERAS Model Rest Inference Via UI(Triton on Kserve)
     ...  AND
     ...  Delete Serving Runtime Template From CLI    displayed_name=triton-keras-rest
 
-   Test KERAS Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
+Test KERAS Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of an keras model in Kserve using Triton
     [Tags]    Tier2    RHOAIENG-10327
     Open Data Science Projects Home Page

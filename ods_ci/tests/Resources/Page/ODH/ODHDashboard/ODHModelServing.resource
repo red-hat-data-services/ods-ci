@@ -406,7 +406,7 @@ Verify Model Inference With Retries
             ${status}=    Run Keyword And Return Status    Verify Model Inference
             ...    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}
             ...    project_title=${project_title}     deployment_mode=${deployment_mode}  kserve_mode=${kserve_mode}
-            ...    service_port=${service_port}   end_point=${end_point}    application_type=${application_type}
+            ...    service_port=${service_port}   end_point=${end_point}    ${set_json_content_type}=${FALSE}
             IF    ${status}
                 BREAK
             END

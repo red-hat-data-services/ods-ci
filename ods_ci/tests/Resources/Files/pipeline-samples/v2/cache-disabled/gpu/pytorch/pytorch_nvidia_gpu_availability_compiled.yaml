@@ -28,7 +28,7 @@ deploymentSpec:
         - -c
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
-          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.9.0'\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.10.1'\
           \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
           $0\" \"$@\"\n"
         - sh
@@ -42,18 +42,18 @@ deploymentSpec:
 
           '
         - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
-          \ *\n\ndef verify_gpu_availability(gpu_toleration: bool):\n    import torch\n\
-          \n    cuda_available = torch.cuda.is_available()\n    device_count = torch.cuda.device_count()\n\
-          \    print(\"------------------------------\")\n    print(\"GPU availability\"\
-          )\n    print(\"------------------------------\")\n    print(f\"cuda available:\
-          \ {cuda_available}\")\n    print(f\"device count: {device_count}\")\n  \
-          \  if gpu_toleration:\n        assert torch.cuda.is_available()\n      \
-          \  assert torch.cuda.device_count() > 0\n        t = torch.tensor([5, 5,\
-          \ 5], dtype=torch.int64, device='cuda')\n    else:\n        assert not torch.cuda.is_available()\n\
-          \        assert torch.cuda.device_count() == 0\n        t = torch.tensor([5,\
-          \ 5, 5], dtype=torch.int64)\n    print(f\"tensor: {t}\")\n    print(\"GPU\
-          \ availability test: PASS\")\n\n"
-        image: quay.io/modh/runtime-images@sha256:7d1b065f100666fe46f64a2e8aae888cb41a38b5482bb9b9343b14db05c2a14a
+          \ *\n\ndef verify_gpu_availability(gpu_toleration: bool):\n    import torch\
+          \  # noqa: PLC0415\n\n    cuda_available = torch.cuda.is_available()\n \
+          \   device_count = torch.cuda.device_count()\n    print(\"------------------------------\"\
+          )\n    print(\"GPU availability\")\n    print(\"------------------------------\"\
+          )\n    print(f\"cuda available: {cuda_available}\")\n    print(f\"device\
+          \ count: {device_count}\")\n    if gpu_toleration:\n        assert torch.cuda.is_available()\n\
+          \        assert torch.cuda.device_count() > 0\n        t = torch.tensor([5,\
+          \ 5, 5], dtype=torch.int64, device=\"cuda\")\n    else:\n        assert\
+          \ not torch.cuda.is_available()\n        assert torch.cuda.device_count()\
+          \ == 0\n        t = torch.tensor([5, 5, 5], dtype=torch.int64)\n    print(f\"\
+          tensor: {t}\")\n    print(\"GPU availability test: PASS\")\n\n"
+        image: quay.io/modh/runtime-images@sha256:e1f7ad986f694236a818796af290a99b4e7f73d44cd39ca45860087644d136dd
     exec-verify-gpu-availability-2:
       container:
         args:
@@ -66,7 +66,7 @@ deploymentSpec:
         - -c
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
-          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.9.0'\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.10.1'\
           \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
           $0\" \"$@\"\n"
         - sh
@@ -80,21 +80,23 @@ deploymentSpec:
 
           '
         - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
-          \ *\n\ndef verify_gpu_availability(gpu_toleration: bool):\n    import torch\n\
-          \n    cuda_available = torch.cuda.is_available()\n    device_count = torch.cuda.device_count()\n\
-          \    print(\"------------------------------\")\n    print(\"GPU availability\"\
-          )\n    print(\"------------------------------\")\n    print(f\"cuda available:\
-          \ {cuda_available}\")\n    print(f\"device count: {device_count}\")\n  \
-          \  if gpu_toleration:\n        assert torch.cuda.is_available()\n      \
-          \  assert torch.cuda.device_count() > 0\n        t = torch.tensor([5, 5,\
-          \ 5], dtype=torch.int64, device='cuda')\n    else:\n        assert not torch.cuda.is_available()\n\
-          \        assert torch.cuda.device_count() == 0\n        t = torch.tensor([5,\
-          \ 5, 5], dtype=torch.int64)\n    print(f\"tensor: {t}\")\n    print(\"GPU\
-          \ availability test: PASS\")\n\n"
-        image: quay.io/modh/runtime-images@sha256:7d1b065f100666fe46f64a2e8aae888cb41a38b5482bb9b9343b14db05c2a14a
+          \ *\n\ndef verify_gpu_availability(gpu_toleration: bool):\n    import torch\
+          \  # noqa: PLC0415\n\n    cuda_available = torch.cuda.is_available()\n \
+          \   device_count = torch.cuda.device_count()\n    print(\"------------------------------\"\
+          )\n    print(\"GPU availability\")\n    print(\"------------------------------\"\
+          )\n    print(f\"cuda available: {cuda_available}\")\n    print(f\"device\
+          \ count: {device_count}\")\n    if gpu_toleration:\n        assert torch.cuda.is_available()\n\
+          \        assert torch.cuda.device_count() > 0\n        t = torch.tensor([5,\
+          \ 5, 5], dtype=torch.int64, device=\"cuda\")\n    else:\n        assert\
+          \ not torch.cuda.is_available()\n        assert torch.cuda.device_count()\
+          \ == 0\n        t = torch.tensor([5, 5, 5], dtype=torch.int64)\n    print(f\"\
+          tensor: {t}\")\n    print(\"GPU availability test: PASS\")\n\n"
+        image: quay.io/modh/runtime-images@sha256:e1f7ad986f694236a818796af290a99b4e7f73d44cd39ca45860087644d136dd
         resources:
           accelerator:
             count: '1'
+            resourceCount: '1'
+            resourceType: nvidia.com/gpu
             type: nvidia.com/gpu
 pipelineInfo:
   description: Verifies pipeline tasks run on GPU nodes only when tolerations are
@@ -126,7 +128,7 @@ root:
         taskInfo:
           name: verify-gpu-availability-2
 schemaVersion: 2.1.0
-sdkVersion: kfp-2.9.0
+sdkVersion: kfp-2.10.1
 ---
 platforms:
   kubernetes:

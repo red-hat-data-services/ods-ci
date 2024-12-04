@@ -29,10 +29,9 @@ ${MSG_REGEX}                                denied the request: only one service
 *** Test Cases ***
 Validate Service Mesh Control Plane Already Created
     [Documentation]    This Test Case validates that only one ServiceMeshControlPlane is allowed to be installed per project/namespace
-    [Tags]      RHOAIENG-2517       Operator
+    [Tags]      RHOAIENG-2517       Operator    Tier3
     Fetch Image Url And Update Channel
     Check Whether DSC Exists And Save Component Statuses
-    Fetch Cluster Type By Domain
     IF    "${CLUSTER_TYPE}" == "selfmanaged"
         Uninstall RHODS In Self Managed Cluster
         Create Smcp From Template
@@ -105,16 +104,6 @@ Fetch Image Url And Update Channel
     Should Be Equal As Integers    ${rc}    0
     Set Global Variable    ${UPDATE_CHANNEL}    ${out}
 
-Fetch Cluster Type By Domain
-    [Documentation]    This Keyword outputs the kind of cluster depending on the console URL domain
-    ${matches}=    Get Regexp Matches    ${OCP_CONSOLE_URL}    rh-ods
-    ${domain}=    Get From List    ${matches}    0
-    IF    "${domain}" == "rh-ods"
-        Set Global Variable    ${CLUSTER_TYPE}    selfmanaged
-    ELSE
-        Set Global Variable    ${CLUSTER_TYPE}    managed
-    END
-
 Create Smcp From Template
     [Documentation]    Create a default ServiceMeshControlPlane from a template
     ${file_path}=    Set Variable    ./tasks/Resources/Files/
@@ -131,7 +120,7 @@ Operator Deployment Should Be Ready
     ${rc}=    Set Variable    1
     TRY
         WHILE    ${rc} != 0    limit=10m
-            Sleep    5s
+            Sleep    15s
             ${rc}    ${output}=    Run And Return Rc And Output
             ...    oc wait --for condition=available -n ${OPERATOR_NAMESPACE} deploy/${OPERATOR_DEPLOYMENT_NAME}
         END

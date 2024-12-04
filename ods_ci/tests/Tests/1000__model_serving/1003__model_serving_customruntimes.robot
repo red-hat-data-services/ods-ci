@@ -13,6 +13,7 @@ Test Tags         Dashboard
 ${RESOURCES_DIRPATH}=        tests/Resources/Files
 ${OVMS_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/ovms_servingruntime.yaml
 ${UPLOADED_OVMS_DISPLAYED_NAME}=    ODS-CI Custom OpenVINO Model Server
+${UPLOADED_OVMS_YAML_NAME}=    ovms-ods-ci
 ${PRJ_TITLE}=    CustomServingRuntimesProject
 ${PRJ_DESCRIPTION}=    ODS-CI DS Project for testing of Custom Serving Runtimes
 ${MODEL_SERVER_NAME}=    ODS-CI CustomServingRuntime Server
@@ -25,7 +26,7 @@ Verify RHODS Admins Can Import A Custom Serving Runtime Template By Uploading A 
     Open Dashboard Settings    settings_page=Serving runtimes
     Upload Serving Runtime Template    runtime_filepath=${OVMS_RUNTIME_FILEPATH}
     ...    serving_platform=multi      runtime_protocol=gRPC
-    Serving Runtime Template Should Be Listed    displayed_name=${UPLOADED_OVMS_DISPLAYED_NAME}
+    Serving Runtime Template Should Be Listed    displayed_name=${UPLOADED_OVMS_YAML_NAME}
     ...    serving_platform=multi
 
 Verify RHODS Admins Can Delete A Custom Serving Runtime Template

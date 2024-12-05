@@ -81,7 +81,7 @@ Test Onnx Model Rest Inference Via UI (Triton on Modelmesh)
 
 Test Pytorch Model Rest Inference Via UI (Triton on Modelmesh)
     [Documentation]    Test the deployment of an onnx model in Kserve using Triton
-    [Tags]    Sanity    RHOAIENG-11561
+    [Tags]    Tier2    RHOAIENG-11561
 
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
@@ -120,7 +120,7 @@ Test Pytorch Model Rest Inference Via UI (Triton on Modelmesh)
 
 Test Tensorflow Model Rest Inference Via UI (Triton on Modelmesh)
     [Documentation]    Test the deployment of an onnx model in Kserve using Triton
-    [Tags]    Sanity    RHOAIENG-9069
+    [Tags]    Tier2    RHOAIENG-9069
 
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
@@ -156,7 +156,7 @@ Test Tensorflow Model Rest Inference Via UI (Triton on Modelmesh)
 
 Test Python Model Rest Inference Via UI (Triton on Modelmesh)
     [Documentation]    Test the deployment of an python model in Kserve using Triton
-    [Tags]    Sanity    RHOAIENG-11564
+    [Tags]    Tier2    RHOAIENG-11564
 
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}

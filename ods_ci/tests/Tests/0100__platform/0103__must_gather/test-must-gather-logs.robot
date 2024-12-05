@@ -15,14 +15,9 @@ Verify that the must-gather image provides RHODS logs and info
     ...      Operator
     ...      MustGather
     ...      ExcludeOnODH
-<<<<<<< HEAD
-    Get must-gather Logs
-    Verify logs for ${APPLICATIONS_NAMESPACE}
-=======
     ...      ExcludeOnDisconnected
     Get Must-Gather Logs
     Verify Logs For ${APPLICATIONS_NAMESPACE}
->>>>>>> f286be7d (chores on upgrade test suite)
     IF  "${PRODUCT}" == "RHODS"
         Verify Logs For ${OPERATOR_NAMESPACE}
         Run Keyword If RHODS Is Managed    Verify Logs For ${MONITORING_NAMESPACE}

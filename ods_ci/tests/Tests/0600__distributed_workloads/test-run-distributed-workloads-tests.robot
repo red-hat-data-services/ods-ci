@@ -55,21 +55,41 @@ Run TestRayTuneHPOGpu ODH test with Python 3.11
     ...     WorkloadsOrchestration
     Run DistributedWorkloads ODH Test    TestMnistRayTuneHpoGpu    ${RAY_CUDA_IMAGE_3.11}    ${NOTEBOOK_IMAGE_3.11}
 
-Run TestKueueCustomRayCpu ODH test with Python 3.11
-    [Documentation]    Run Go ODH test: TestKueueCustomRayCpu
+Run TestKueueCustomRayCudaCpu ODH test with Python 3.11
+    [Documentation]    Run Go ODH test: TestKueueCustomRayCudaCpu
     [Tags]  RHOAIENG-10013
     ...     Tier1
     ...     DistributedWorkloads
     ...     Training
     ...     WorkloadsOrchestration
-    Run DistributedWorkloads ODH Test    TestMnistCustomRayImageCpu    ${RAY_TORCH_CUDA_IMAGE_3.11}    ${NOTEBOOK_IMAGE_3.11}
+    Run DistributedWorkloads ODH Test    TestMnistCustomRayCudaCpu    ${RAY_TORCH_CUDA_IMAGE_3.11}    ${NOTEBOOK_IMAGE_3.11}
 
-Run TestKueueCustomRayGpu ODH test with Python 3.11
-    [Documentation]    Run Go ODH test: TestKueueCustomRayGpu
+Run TestKueueCustomRayCudaGpu ODH test with Python 3.11
+    [Documentation]    Run Go ODH test: TestKueueCustomRayCudaGpu
     [Tags]  RHOAIENG-10013
     ...     Resources-GPU    NVIDIA-GPUs
     ...     Tier1
     ...     DistributedWorkloads
     ...     Training
     ...     WorkloadsOrchestration
-    Run DistributedWorkloads ODH Test    TestMnistCustomRayImageGpu    ${RAY_TORCH_CUDA_IMAGE_3.11}    ${NOTEBOOK_IMAGE_3.11}
+    Run DistributedWorkloads ODH Test    TestMnistCustomRayCudaGpu    ${RAY_TORCH_CUDA_IMAGE_3.11}    ${NOTEBOOK_IMAGE_3.11}
+
+Run TestKueueCustomRayRocmCpu ODH test with Python 3.11
+    [Documentation]    Run Go ODH test: TestKueueCustomRayRocmCpu
+    [Tags]  RHOAIENG-12484
+    ...     ROCm
+    ...     Tier1
+    ...     DistributedWorkloads
+    ...     Training
+    ...     WorkloadsOrchestration
+    Run DistributedWorkloads ODH Test    TestMnistCustomRayRocmCpu    ${RAY_TORCH_ROCM_IMAGE_3.11}    ${NOTEBOOK_IMAGE_3.11}
+
+Run TestKueueCustomRayRocmGpu ODH test with Python 3.11
+    [Documentation]    Run Go ODH test: TestKueueCustomRayRocmGpu
+    [Tags]  RHOAIENG-12484
+    ...     Resources-GPU    AMD-GPUs    ROCm
+    ...     Tier1
+    ...     DistributedWorkloads
+    ...     Training
+    ...     WorkloadsOrchestration
+    Run DistributedWorkloads ODH Test    TestMnistCustomRayRocmGpu    ${RAY_TORCH_ROCM_IMAGE_3.11}    ${NOTEBOOK_IMAGE_3.11}

@@ -53,6 +53,9 @@ ${KERAS_RUNTIME_NAME}=    triton-keras-rest
 ${KERAS_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_keras_rest_servingruntime.yaml
 ${INFERENCE_REST_INPUT_KERAS}=    @tests/Resources/Files/triton/kserve-triton-keras-rest-input.json
 ${EXPECTED_INFERENCE_REST_OUTPUT_FILE_KERAS}=       tests/Resources/Files/triton/kserve-triton-keras-rest-output.json
+${INFERENCE_GRPC_INPUT_FIL}=    tests/Resources/Files/triton/kserve-triton-fil-grpc-input.json
+${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE_FIL}=       tests/Resources/Files/triton/kserve-triton-fil-grpc-output.json
+${FIL_MODEL_NAME}=    xgboost
 ${KERAS_RUNTIME_NAME_GRPC}=    triton-keras-grpc
 ${KERAS_GRPC_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_keras_gRPC_servingruntime.yaml
 ${INFERENCE_GRPC_INPUT_KERAS}=    tests/Resources/Files/triton/kserve-triton-keras-gRPC-input.json
@@ -401,6 +404,51 @@ Test FIL Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-lo
     ...  Clean All Models Of Current User
     ...  AND
     ...  Delete Serving Runtime Template From CLI    displayed_name=triton-kserve-rest
+    
+Test FIL Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
+    [Documentation]    Test the deployment of an fil model in Kserve using Triton
+    [Tags]    Sanity    RHOAIENG-15823
+    Open Data Science Projects Home Page
+    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
+    ...    existing_project=${FALSE}
+    Open Dashboard Settings    settings_page=Serving runtimes
+    Upload Serving Runtime Template    runtime_filepath=${ONNX_GRPC_RUNTIME_FILEPATH}
+    ...    serving_platform=single      runtime_protocol=gRPC
+    Serving Runtime Template Should Be Listed    displayed_name=${ONNX_GRPC_RUNTIME_NAME}
+    ...    serving_platform=single
+    Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
+    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
+    ...            aws_bucket_name=ods-ci-s3oject_title=${PRJ_TITLE}
+    Deploy Kserve Model Via UI    model_name=${FIL_MODEL_NAME}    serving_runtime=triton-kserve-grpc
+    ...    data_connection=model-serving-connection    path=triton/model_repository/    model_framework=xgboost - 1
+    ...    token=${TRUE}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${FIL_MODEL_NAME}
+    ...    namespace=${PRJ_TITLE}
+    ${EXPECTED_INFERENCE_GRPC_OUTPUT_FIL}=     Load Json File     file_path=${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE_FIL}
+    ...     as_string=${TRUE}
+    ${EXPECTED_INFERENCE_GRPC_OUTPUT_FIL}=     Load Json String    ${EXPECTED_INFERENCE_GRPC_OUTPUT_FIL}
+    ${EXPECTED_INFERENCE_GRPC_OUTPUT_FIL}=     Evaluate    json.dumps(${EXPECTED_INFERENCE_GRPC_OUTPUT_FIL})
+    Log     ${EXPECTED_INFERENCE_GRPC_OUTPUT_FIL}
+    Open Model Serving Home Page
+    ${host_url}=    Get Model Route Via UI       model_name=${FIL_MODEL_NAME}
+    ${host}=    Evaluate    re.search(r"${PATTERN}", r"${host_url}").group(1)    re
+    Log    ${host}
+    ${token}=   Get Access Token Via UI    single_model=${TRUE}      model_name=fil   project_name=${PRJ_TITLE}
+    ${inference_output}=    Query Model With GRPCURL   host=${host}    port=443
+    ...    endpoint=inference.GRPCInferenceService/ModelInfer
+    ...    json_body=@      input_filepath=${INFERENCE_GRPC_INPUT_FIL}
+    ...    insecure=${True}    protobuf_file=${PROTOBUFF_FILE}      json_header="Authorization: Bearer ${token}"
+    Log    ${inference_output}
+    ${inference_output}=    Evaluate    json.dumps(${inference_output})
+    Log    ${inference_output}
+    ${result}    ${list}=    Inference Comparison    ${EXPECTED_INFERENCE_GRPC_OUTPUT_FIL}    ${inference_output}
+    [Teardown]  Run Keywords    Get Kserve Events And Logs     model_name=${FIL_MODEL_NAME}
+    ...  project_title=${PRJ_TITLE}
+    ...  AND
+    ...  Clean All Models Of Current User
+    ...  AND
+    ...  Delete Serving Runtime Template From CLI    displayed_name=triton-kserve-grpc
+
 
 *** Keywords ***
 Triton On Kserve Suite Setup

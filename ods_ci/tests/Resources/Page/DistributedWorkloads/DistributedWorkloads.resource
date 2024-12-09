@@ -9,7 +9,7 @@ ${CODEFLARE-SDK-RELEASE-TAG}             v0.23.1
 ${CODEFLARE-SDK-RELEASE-TAG-3.9}         adjustments-release-0.21.1
 ${CODEFLARE-SDK_DIR}                     codeflare-sdk
 ${CODEFLARE-SDK_REPO_URL}                %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
-${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}  https://github.com/opendatahub-io/distributed-workloads/releases/latest/download
+${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}  https://github.com/opendatahub-io/distributed-workloads/releases/download/v2.16.0-RC4-05-12-2024
 ${RAY_IMAGE_3.11}                        quay.io/modh/ray@sha256:db667df1bc437a7b0965e8031e905d3ab04b86390d764d120e05ea5a5c18d1b4
 ${RAY_IMAGE_3.9}                         quay.io/modh/ray@sha256:0d715f92570a2997381b7cafc0e224cfa25323f18b9545acfd23bc2b71576d06
 ${FMS_HF_TUNING_IMAGE}                   quay.io/modh/fms-hf-tuning@sha256:6f98907f9095db72932caa54094438eae742145f4b66c28d15887d5303ff1186

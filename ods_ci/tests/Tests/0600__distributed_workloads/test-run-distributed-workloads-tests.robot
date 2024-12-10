@@ -77,7 +77,6 @@ Run TestKueueCustomRayCudaGpu ODH test with Python 3.11
 Run TestKueueCustomRayRocmCpu ODH test with Python 3.11
     [Documentation]    Run Go ODH test: TestKueueCustomRayRocmCpu
     [Tags]  RHOAIENG-12484
-    ...     ROCm
     ...     Tier1
     ...     DistributedWorkloads
     ...     Training

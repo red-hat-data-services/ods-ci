@@ -450,6 +450,34 @@ if [ "${USE_OCM_IDP}" -eq 1 ]
       then
           perform_ocm_login
 fi
+
+function update_test_config(){
+    echo "Update test config file..."
+    TEST_VARIABLES_FILE="test-variables.yml"
+
+    AWS_SHARED_CREDENTIALS_FILE="${CLUSTER_PROFILE_DIR}/.awscred"
+    AWS_ACCESS_KEY_ID=$(cat $AWS_SHARED_CREDENTIALS_FILE | grep aws_access_key_id | tr -d ' ' | cut -d '=' -f 2)
+    AWS_SECRET_ACCESS_KEY=$(cat $AWS_SHARED_CREDENTIALS_FILE | grep aws_secret_access_key | tr -d ' ' | cut -d '=' -f 2)
+    yq -i '.OCP_API_URL=env(OC_HOST)' $TEST_VARIABLES_FILE
+    yq -i '.OCP_CONSOLE_URL=env(OCP_CONSOLE)' $TEST_VARIABLES_FILE
+    yq -i '.ODH_DASHBOARD_URL=env(RHODS_DASHBOARD)' $TEST_VARIABLES_FILE
+    yq -i '.BROWSER.NAME="firefox"' $TEST_VARIABLES_FILE
+    yq -i '.S3.AWS_ACCESS_KEY_ID=env(AWS_ACCESS_KEY_ID)' $TEST_VARIABLES_FILE
+    yq -i '.S3.AWS_SECRET_ACCESS_KEY=env(AWS_SECRET_ACCESS_KEY)' $TEST_VARIABLES_FILE
+}
+
 validate_user_config_file
 check_installation
 install_identity_provider
+update_test_config
+
+echo "Performing oc login using TEST username and password"
+username=$(yq eval '.TEST_USER.USERNAME' test-variables.yml)
+password=$(yq eval '.TEST_USER.PASSWORD' test-variables.yml)
+oc login "$OC_HOST" --username $username --password $password --insecure-skip-tls-verify=true
+retVal=$?
+if [ $retVal -ne 0 ]; then
+    echo "The oc login command seems to have failed"
+    echo "Please review the content of $TEST_VARIABLES_FILE"
+    exit "$retVal"
+fi

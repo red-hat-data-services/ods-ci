@@ -57,7 +57,7 @@ ${NEW_PRJ_TITLE}=   ODS-CI DS Project Updated
 Verify Data Science Projects Page Is Accessible
     [Documentation]    Verifies "Data Science Projects" page is accessible from
     ...                the navigation menu on the left
-    [Tags]    Smoke
+    [Tags]    Smoke   Interop
     ...       ODS-1876
     Open Data Science Projects Home Page
     Page Should Contain Element     ${PROJECT_CREATE_BTN_XP}
@@ -65,7 +65,7 @@ Verify Data Science Projects Page Is Accessible
 Verify User Can Access Jupyter Launcher From DS Project Page
     [Documentation]    Verifies Data Science Projects home page contains
     ...                a link to Jupyter Spawner and it is working
-    [Tags]    Smoke
+    [Tags]    Smoke   Interop
     ...       ODS-1877
     Open Data Science Projects Home Page
     Page Should Contain Element     ${SPAWNER_LINK}
@@ -104,7 +104,7 @@ Verify User Cannot Create Project Using Special Chars In Resource Name
     Close Generic Modal If Present
 
 Verify User Can Create A Data Science Project
-    [Tags]    Smoke
+    [Tags]    Smoke   Interop
     ...       ODS-1775
     [Documentation]    Verifies users can create a DS project
     Open Data Science Projects Home Page
@@ -114,7 +114,7 @@ Verify User Can Create A Data Science Project
     ${ns_name}=    Check Corresponding Namespace Exists    project_title=${PRJ_TITLE}
 
 Verify User Can Create And Start A Workbench With Existent PV Storage
-    [Tags]    Smoke
+    [Tags]    Smoke   Interop
     ...       ODS-1814
     [Documentation]    Verifies users can create a workbench and connect an existent PersistenVolume
     ${pv_name}=    Set Variable    ${PV_BASENAME}-existent

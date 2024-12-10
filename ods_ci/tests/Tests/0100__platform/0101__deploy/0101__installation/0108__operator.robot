@@ -17,7 +17,7 @@ Verify That DSC And DSCI Release.Name Attribute matches ${expected_release_name}
     ...                ODH: Open Data Hub
     ...                RHOAI managed: OpenShift AI Cloud Service
     ...                RHOAI selfmanaged: OpenShift AI Self-Managed
-    [Tags]    Smoke
+    [Tags]    Smoke   Interop
     ...       Operator
     ...       RHOAIENG-9760
     Should Be Equal As Strings    ${DSC_RELEASE_NAME}     ${expected_release_name}
@@ -25,7 +25,7 @@ Verify That DSC And DSCI Release.Name Attribute matches ${expected_release_name}
 
 Verify That DSC And DSCI Release.Version Attribute matches the value in the subscription
     [Documentation]    Tests the release.version attribute from the DSC and DSCI matches the value in the subscription.
-    [Tags]    Smoke
+    [Tags]    Smoke   Interop
     ...       Operator
     ...       RHOAIENG-8082
     ${rc}    ${csv_name}=    Run And Return Rc And Output

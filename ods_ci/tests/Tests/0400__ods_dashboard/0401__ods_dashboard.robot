@@ -116,7 +116,7 @@ Verify Documentation Links HTTP Status Code
     [Documentation]    It verifies the documentation links present in question mark and
     ...    also checks the RHODS dcoumentation link present in resource page.
     ...    ProductBug: RHOAIENG-11451 (on ODH only)
-    [Tags]    Smoke
+    [Tags]    Smoke   Interop
     ...       ODS-327    ODS-492
     ${links}=  Get RHODS Documentation Links From Dashboard
     # Compare Doc Links only by number, since ODH and RHOAI have diffrent URLs (but same count)
@@ -254,7 +254,7 @@ Verify Dashboard Pod Is Not Getting Restarted
 
 Check Application Switcher Links
     [Documentation]    Checks the Application Switcher Links to OpenShift Console and to Openshift Cluster Manager
-    [Tags]    ODS-771
+    [Tags]    ODS-771   Interop
     ...       Smoke
     Open Application Switcher Menu
     Check Application Switcher Link To Openshift Console

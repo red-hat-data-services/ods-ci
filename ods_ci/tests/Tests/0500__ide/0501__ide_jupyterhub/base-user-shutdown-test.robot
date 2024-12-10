@@ -12,7 +12,7 @@ Suite Teardown   End Web Test
 Verify Base User Can Stop A Running Server
     [Documentation]    Verifies that a base user has enough permission to start
     ...                and stop a notebook server
-    [Tags]    Smoke
+    [Tags]    Smoke   Interop
     ...       OpenDataHub
     ...       ODS-1978
     Launch KFNBC Spawner As Base User

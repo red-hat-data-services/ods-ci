@@ -54,7 +54,8 @@ Maybe Skip Tour
         RETURN
     END
     ${tour_modal} =  Run Keyword And Return Status  Wait Until Page Contains Element  xpath=//div[@id='guided-tour-modal']  timeout=5s
-    IF  ${tour_modal}  Click Element  xpath=//div[@id='guided-tour-modal']/button
+#    IF  ${tour_modal}  Click Element  xpath=//div[@id='guided-tour-modal']/button
+    IF  ${tour_modal}  Click Element  xpath=//button[text()='Skip tour']
 
 Get OpenShift Version
     [Documentation]   Get the installed openshitf version on the cluster.

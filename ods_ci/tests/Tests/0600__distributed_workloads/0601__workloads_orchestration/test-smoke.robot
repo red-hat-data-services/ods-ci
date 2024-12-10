@@ -10,7 +10,7 @@ Kueue smoke test
     [Tags]    Smoke
     ...       DistributedWorkloads
     ...       WorkloadsOrchestration
-    ...       ODS-2676
+    ...       ODS-2676   Interop
     Log To Console    Waiting for kueue-controller-manager to be available
     ${result} =    Run Process    oc wait --for\=condition\=Available --timeout\=300s -n ${APPLICATIONS_NAMESPACE} deployment/kueue-controller-manager
     ...    shell=true    stderr=STDOUT

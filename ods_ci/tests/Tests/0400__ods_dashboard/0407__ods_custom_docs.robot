@@ -27,7 +27,7 @@ ${CUSTOM_APP_DICT_PATH}=        tests/Resources/Files/CustomAppInfoDictionary.js
 Verify Custom "QuickStart" Resource Creation
     [Documentation]     Create a Custom Resource "QuickStart" by using Dashboard CRDs: OdhQuickStart,
     ...                 and verify steps execution in Sidebar.
-    [Tags]    Smoke
+    [Tags]    Smoke   Interop
     ...       ODS-697
     ${exp_titles}=      Create List    ${EXPECTED_ITEMS_TITLES["quickstart"]}
     Check Items Have Been Displayed In Resources Page     resource_filter=QuickStart

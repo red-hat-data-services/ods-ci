@@ -9,7 +9,7 @@ Suite Teardown    Teardown Codeflare E2E Test Suite
 *** Test Cases ***
 Ray smoke test
     [Documentation]    Check that Kuberay deployment and service are up and running
-    [Tags]    Smoke
+    [Tags]    Smoke   Interop
     ...       DistributedWorkloads
     ...       Training
     ...       ODS-2648
@@ -36,7 +36,7 @@ Ray smoke test
 
 Codeflare smoke test
     [Documentation]    Check that Codeflare deployment and its monitoring service are up and running
-    [Tags]    Smoke
+    [Tags]    Smoke    Interop
     ...       DistributedWorkloads
     ...       Training
     ...       ODS-2675

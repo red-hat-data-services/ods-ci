@@ -283,6 +283,12 @@ class DataSciencePipelinesKfp:
         return response.state
 
     @keyword
+    def get_run_status(self, run_id):
+        """###Gets run status"""
+        response = self.client.get_run(run_id)
+        return response.state
+
+    @keyword
     def check_run_status(self, run_id, timeout=160):
         """Waits for a run to complete"""
         count = 0
@@ -297,6 +303,22 @@ class DataSciencePipelinesKfp:
             time.sleep(1)
             count += 1
         return run_status  # pyright: ignore [reportPossiblyUnboundVariable]
+
+    @keyword
+    def get_last_run_by_pipeline_name(self, pipeline_name: str | None = None, namespace: str | None = None):
+        """
+        Gets run_id of the last run created for pipeline_name
+        :param pipeline_name:
+        :param namespace:
+        :return:
+            run_id
+        """
+        pipeline_id = self.client.get_pipeline_id(pipeline_name)
+        pipeline_version_id = self.get_last_pipeline_version(pipeline_id)
+        all_runs = self.get_all_runs(namespace=namespace, pipeline_version_id=pipeline_version_id)
+        if len(all_runs) > 0:
+            return all_runs[-1].run_id
+        return None
 
     @keyword
     def delete_pipeline(self, pipeline_id):
@@ -455,7 +477,6 @@ class DataSciencePipelinesKfp:
             current_path = os.getcwd()
         my_source = self.import_souce_code(f"{current_path}/tests/Resources/Files/pipeline-samples/v2/{source_code}")
         pipeline_func = getattr(my_source, fn)
-
         # pipeline_params
         # there are some special keys to retrieve argument values dynamically
         # in pipeline v2, we must match the parameters names

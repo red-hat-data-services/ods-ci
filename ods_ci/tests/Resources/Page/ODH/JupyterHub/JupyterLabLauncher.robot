@@ -68,7 +68,12 @@ Close JupyterLab Selected Tab
   Maybe Close Popup
 
 JupyterLab Code Cell Error Output Should Not Be Visible
-  Element Should Not Be Visible  xpath://div[contains(@class,"jp-OutputArea-output") and @data-mime-type="application/vnd.jupyter.stderr"]  A JupyterLab code cell output returned an error
+  ${failure}=    Run Keyword And Return Status
+  ...    SeleniumLibrary.Element Should Be Visible    xpath://div[contains(@class,"jp-OutputArea-output") and @data-mime-type="application/vnd.jupyter.stderr"]  A JupyterLab code cell output returned an error  # robocop: disable
+  IF    ${failure}
+      Capture Element Screenshot    xpath://div[contains(@class,"jp-OutputArea-output") and @data-mime-type="application/vnd.jupyter.stderr"]  # robocop: disable
+      Fail    msg=A JupyterLab code cell output returned an error, see screenshot
+  END
 
 Get JupyterLab Code Cell Error Text
   ${error_txt} =  Get Text  //div[contains(@class,"jp-OutputArea-output") and @data-mime-type="application/vnd.jupyter.stderr"]
@@ -87,6 +92,11 @@ Wait Until JupyterLab Code Cell Is Not Active
   Wait Until Element Is Not Visible
   ...    //div[contains(@class,"jp-Cell-inputArea")]/div[contains(@class,"jp-InputArea-prompt") and (.="[*]:")][1]
   ...    ${timeout}
+
+Scroll At The End Of The Notebook
+  [Documentation]  Scrolls at the end of the opened Notebook so that
+  ...    the button for addition of a new cell is visible.
+  Scroll Element Into View    //button[string()="Click to add a cell."]
 
 Select Empty JupyterLab Code Cell
   Click Element  //div[contains(@class,"jp-mod-noOutputs jp-Notebook-cell")]
@@ -130,21 +140,24 @@ Run Cell And Get Output
     RETURN    ${output}
 
 Python Version Check
-  [Arguments]  ${expected_version}=3.8
-  Add And Run JupyterLab Code Cell In Active Notebook  !python --version
-  Wait Until JupyterLab Code Cell Is Not Active
-  #Get the text of the last output cell
-  ${output} =  Get Text  (//div[contains(@class,"jp-OutputArea-output")])[last()]
-  #start is inclusive, end exclusive, get x.y from Python x.y.z string
-  ${output} =  Fetch From Right  ${output}  ${SPACE}
-  ${vers} =  Get Substring  ${output}  0  3
-  ${status} =  Run Keyword And Return Status  Should Match  ${vers}  ${expected_version}
-  IF  '${status}' == 'FAIL'  Run Keyword And Continue On Failure  FAIL  "Expected Python at version ${expected_version}, but found at v ${vers}"
+    [Documentation]    Checks that the X.Y python version of the current Jupyterlab instance matches an expected one
+    [Arguments]    ${expected_version}=3.8
+    ${vers} =  Get XY Python Version From Jupyterlab
+    ${status} =  Run Keyword And Return Status  Should Match  ${vers}  ${expected_version}
+    IF  '${status}' == 'FAIL'  Run Keyword And Continue On Failure  FAIL  "Expected Python at version ${expected_version}, but found at v ${vers}"    # robocop: disable
 
+Get XY Python Version From Jupyterlab
+    [Documentation]    Fetches the X.Y Python version from the current Jupyterlab instance
+    ${output}=    Run Cell And Get Output    !python --version
+    ${output}=    Fetch From Right    ${output}    ${SPACE}
+    # Y and Z can be > len 1, split on "." instead of getting substring from indices
+    @{split_out}=    Split String    ${output}   separator=.
+    ${vers}=    Set Variable   ${split_out}[0].${split_out}[1]
+    RETURN    ${vers}
 
 Maybe Select Kernel
-  ${is_kernel_selected} =  Run Keyword And Return Status  Page Should Not Contain Element  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]
-  IF  not ${is_kernel_selected}  Click Button  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]/..
+    ${is_kernel_selected} =  Run Keyword And Return Status  Page Should Not Contain Element  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]
+    IF  not ${is_kernel_selected}  SeleniumLibrary.Click Button  xpath=//div[@class="jp-Dialog-buttonLabel"][.="Select"]/..
 
 Clean Up Server
     [Documentation]    Cleans up user server and checks that everything has been removed
@@ -350,18 +363,15 @@ Add And Run JupyterLab Code Cell 5 In Active Notebook
     # This keyword was copied and amended from JupyterLibrary resources - Notebook.Add And Run JupyterLab Code Cell.
 
     ${add icon} =    Get JupyterLab Icon XPath Custom    add
-
     ${nb} =    Get WebElement    xpath://div${JLAB XP NB FRAG}\[${n}]
     ${nbid} =    Get Element Attribute    ${nb}    id
-
     ${active-nb-tab} =    Get WebElement    xpath:${JL_TABBAR_SELECTED_XPATH}
     ${tab-id} =    Get Element Attribute    ${active-nb-tab}    id
-
-    Click Element    xpath://div[@aria-labelledby="${tab-id}"]/div[1]//${add icon}
+    Click Element    xpath://div[@aria-labelledby="${tab-id}"]//*[@data-jp-item-name="insert"]
     Sleep    0.1s
     Click Element    xpath://div[@aria-labelledby="${tab-id}"]//div[contains(concat(' ',normalize-space(@class),' '),' jp-mod-selected ')]
-    Set CodeMirror Value    \#${nbid}${JLAB CSS ACTIVE INPUT}    @{code}
-    Run Current JupyterLab Code Cell 5  ${tab-id}
+    Press Keys    None   @{code}
+    Click Element    xpath://div[@aria-labelledby="${tab-id}"]//*[@data-jp-item-name="run"]
     Click Element    xpath://div[@aria-labelledby="${tab-id}"]//div[contains(concat(' ',normalize-space(@class),' '),' jp-mod-selected ')]
 
 Add And Run JupyterLab Code Cell 6 In Active Notebook
@@ -445,7 +455,6 @@ Verify Installed Labextension Version
 Check Versions In JupyterLab
     [Arguments]  ${libraries-to-check}
     ${return_status} =    Set Variable    PASS
-    @{packages} =    Create List    Python    Boto3    Kafka-Python    Matplotlib    Scikit-learn    Pandas    Scipy    Numpy
     FOR  ${libString}  IN  @{libraries-to-check}
         # libString = LibName vX.Y -> libDetail= [libName, X.Y]
         @{libDetail} =  Split String  ${libString}  ${SPACE}v
@@ -479,6 +488,11 @@ Check Versions In JupyterLab
         # CUDA version is checked in GPU-specific test cases, we can skip it here.
         ELSE IF  "${libDetail}[0]" == "CUDA"
             CONTINUE
+        ELSE IF  "${libDetail}[0]" == "Nvidia-CUDA-CU12-Bundle"
+            ${status}  ${value} =  Verify Installed Library Version  nvidia-cuda-nvcc-cu12  ${libDetail}[1]
+            IF  '${status}' == 'FAIL'
+              ${return_status} =    Set Variable    FAIL
+            END
         ELSE IF  "${libDetail}[0]" == "Elyra"
             ${status}  ${value} =  Verify Installed Library Version  elyra-code-snippet-extension  ${libDetail}[1]
             IF  '${status}' == 'FAIL'
@@ -518,12 +532,18 @@ Check Versions In JupyterLab
               ${return_status} =    Set Variable    FAIL
             END
         END
+
+        # Now check that selected list of packages has same version among all the images.
+        @{packages} =    Create List    Python    Boto3    Kafka-Python    Scipy
+
         Continue For Loop If  "${libDetail}[0]" not in ${packages}
         IF    "${libDetail}[0]" not in ${package_versions}
         ...    Set To Dictionary    ${package_versions}    ${libDetail}[0]=${libDetail}[1]
         IF    "${package_versions["${libDetail}[0]"]}" != "${libDetail}[1]"
              ${return_status} =    Set Variable    FAIL
-             Run Keyword And Continue On Failure  FAIL  "${package_versions["${libDetail}[0]"]} != ${libDetail}[1]"
+             Run Keyword And Continue On Failure    Fail
+             ...    Version of this library in this image doesn't align with versions in other images
+             ...    "${package_versions["${libDetail}[0]"]} != ${libDetail}[1]"
         END
     END
     RETURN  ${return_status}

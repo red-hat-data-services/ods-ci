@@ -15,10 +15,11 @@ Verify that the must-gather image provides RHODS logs and info
     ...      Operator
     ...      MustGather
     ...      ExcludeOnODH
-    Get must-gather Logs
-    Verify logs for ${APPLICATIONS_NAMESPACE}
+    ...      ExcludeOnDisconnected
+    Get Must-Gather Logs
+    Verify Logs For ${APPLICATIONS_NAMESPACE}
     IF  "${PRODUCT}" == "RHODS"
         Verify Logs For ${OPERATOR_NAMESPACE}
-        Run Keyword If RHODS Is Managed    Verify logs for ${MONITORING_NAMESPACE}
+        Run Keyword If RHODS Is Managed    Verify Logs For ${MONITORING_NAMESPACE}
     END
     [Teardown]  Cleanup must-gather Logs

@@ -52,7 +52,7 @@ Install RHODS
           IF  "${PRODUCT}" == "ODH"
               Run    sed -i'' -e 's/<CATALOG_SOURCE>/community-operators/' ${file_path}cs_apply.yaml
           ELSE
-              Run    sed -i'' -e 's/<CATALOG_SOURCE>/redhat-operators/' ${file_path}cs_apply.yaml
+              Run    sed -i'' -e 's/<CATALOG_SOURCE>/${CATALOG_SOURCE}/' ${file_path}cs_apply.yaml
           END
           Run    sed -i'' -e 's/<OPERATOR_NAME>/${OPERATOR_NAME}/' ${file_path}cs_apply.yaml
           Run    sed -i'' -e 's/<OPERATOR_NAMESPACE>/${OPERATOR_NAMESPACE}/' ${file_path}cs_apply.yaml
@@ -80,10 +80,8 @@ Verify RHODS Installation
   Set Global Variable    ${DASHBOARD_APP_NAME}    ${PRODUCT.lower()}-dashboard
   Log  Verifying RHODS installation  console=yes
   Log To Console    Waiting for all RHODS resources to be up and running
-  Wait For Pods Numbers  1
-  ...                   namespace=${OPERATOR_NAMESPACE}
-  ...                   label_selector=name=${OPERATOR_NAME_LABEL}
-  ...                   timeout=2000
+  Wait For Deployment Replica To Be Ready    namespace=${OPERATOR_NAMESPACE}
+  ...    label_selector=name=${OPERATOR_NAME_LABEL}    timeout=2000s
   Wait For Pods Status  namespace=${OPERATOR_NAMESPACE}  timeout=1200
   Log  Verified ${OPERATOR_NAMESPACE}  console=yes
 
@@ -93,109 +91,104 @@ Verify RHODS Installation
         IF    "${TEST_ENV.lower()}" == "crc"
             ${timeout_in_seconds} =   Set Variable   180
         ELSE
-            ${timeout_in_seconds} =   Set Variable   30
+            ${timeout_in_seconds} =   Set Variable   60
         END
         Wait For DSCInitialization CustomResource To Be Ready    timeout=${timeout_in_seconds}
     END
     Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
   END
+
   ${dashboard} =    Is Component Enabled    dashboard    ${DSC_NAME}
-  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${dashboard}" == "true"
-    # Needs to be removed ASAP
+  IF    "${dashboard}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app=${DASHBOARD_APP_NAME}    timeout=1200s
     IF  "${PRODUCT}" == "ODH"
-        Log To Console    "Waiting for 2 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app=odh-dashboard"
-        Wait For Pods Numbers  2
-        ...                   namespace=${APPLICATIONS_NAMESPACE}
-        ...                   label_selector=app=odh-dashboard
-        ...                   timeout=1200
         #This line of code is strictly used for the exploratory cluster to accommodate UI/UX team requests
         Add UI Admin Group To Dashboard Admin
-
-    ELSE
-        Log To Console    "Waiting for 5 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app=${DASHBOARD_APP_NAME}"
-        Wait For Pods Numbers  5
-        ...                   namespace=${APPLICATIONS_NAMESPACE}
-        ...                   label_selector=app=${DASHBOARD_APP_NAME}
-        ...                   timeout=1200
     END
   END
+
   ${workbenches} =    Is Component Enabled    workbenches    ${DSC_NAME}
-  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${workbenches}" == "true"
-    Log To Console    "Waiting for 1 pod in ${APPLICATIONS_NAMESPACE}, label_selector=app=notebook-controller"
-    Wait For Pods Numbers  1
-    ...                   namespace=${APPLICATIONS_NAMESPACE}
-    ...                   label_selector=app=notebook-controller
-    ...                   timeout=400
-    Log To Console    "Waiting for 1 pod in ${APPLICATIONS_NAMESPACE}, label_selector=app=odh-notebook-controller"
-    Wait For Pods Numbers  1
-    ...                   namespace=${APPLICATIONS_NAMESPACE}
-    ...                   label_selector=app=odh-notebook-controller
-    ...                   timeout=400
-  END
-  ${modelmeshserving} =    Is Component Enabled    modelmeshserving    ${DSC_NAME}
-  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${modelmeshserving}" == "true"
-    Log To Console    "Waiting for 3 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app=odh-model-controller"
-    Wait For Pods Numbers   3
-    ...                   namespace=${APPLICATIONS_NAMESPACE}
-    ...                   label_selector=app=odh-model-controller
-    ...                   timeout=400
-    Log To Console    "Waiting for 1 pod in ${APPLICATIONS_NAMESPACE}, label_selector=component=model-mesh-etcd"
-    Wait For Pods Numbers   1
-    ...                   namespace=${APPLICATIONS_NAMESPACE}
-    ...                   label_selector=component=model-mesh-etcd
-    ...                   timeout=400
-    Log To Console    "Waiting for 3 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app.kubernetes.io/name=modelmesh-controller"
-    Wait For Pods Numbers   3
-    ...                   namespace=${APPLICATIONS_NAMESPACE}
-    ...                   label_selector=app.kubernetes.io/name=modelmesh-controller
-    ...                   timeout=400
-  END
-  ${datasciencepipelines} =    Is Component Enabled    datasciencepipelines    ${DSC_NAME}
-  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${datasciencepipelines}" == "true"
-    Log To Console    "Waiting for 1 pod in ${APPLICATIONS_NAMESPACE}, label_selector=app.kubernetes.io/name=data-science-pipelines-operator"
-    Wait For Pods Numbers   1
-    ...                   namespace=${APPLICATIONS_NAMESPACE}
-    ...                   label_selector=app.kubernetes.io/name=data-science-pipelines-operator
-    ...                   timeout=400
-  END
-  ${modelregistry} =    Is Component Enabled    modelregistry    ${DSC_NAME}
-  IF    "${modelregistry}" == "true"
-    Log To Console    "Waiting for 1 pod in ${APPLICATIONS_NAMESPACE}, label_selector=app.kubernetes.io/part-of=model-registry-operator"
-    Wait For Pods Numbers   1
-    ...                   namespace=${APPLICATIONS_NAMESPACE}
-    ...                   label_selector=app.kubernetes.io/part-of=model-registry-operator
-    ...                   timeout=400
-  END
-  ${kserve} =    Is Component Enabled    kserve    ${DSC_NAME}
-  IF    "${kserve}" == "true"
-    Log To Console    "Waiting for 3 pods in ${APPLICATIONS_NAMESPACE}, label_selector=app=odh-model-controller"
-    Wait For Pods Numbers   3
-    ...                   namespace=${APPLICATIONS_NAMESPACE}
-    ...                   label_selector=app=odh-model-controller
-    ...                   timeout=400
-    Log To Console    "Waiting for 1 pods in ${APPLICATIONS_NAMESPACE}, label_selector=control-plane=kserve-controller-manager"
-    Wait For Pods Numbers   1
-       ...                   namespace=${APPLICATIONS_NAMESPACE}
-       ...                   label_selector=control-plane=kserve-controller-manager
-       ...                   timeout=400
+  IF    "${workbenches}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app=notebook-controller    timeout=400s
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app=odh-notebook-controller    timeout=400s
+    Oc Get  kind=Namespace  field_selector=metadata.name=${NOTEBOOKS_NAMESPACE}
+    Log  Verified Notebooks NS: ${NOTEBOOKS_NAMESPACE}
   END
 
-  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${dashboard}" == "true" or "${workbenches}" == "true" or "${modelmeshserving}" == "true" or "${datasciencepipelines}" == "true"  # robocop: disable
-    Log To Console    "Waiting for pod status in ${APPLICATIONS_NAMESPACE}"
-    Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=200
-    Log  Verified Applications NS: ${APPLICATIONS_NAMESPACE}  console=yes
+  ${modelmeshserving} =    Is Component Enabled    modelmeshserving    ${DSC_NAME}
+  IF    "${modelmeshserving}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app=odh-model-controller    timeout=400s
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=component=model-mesh-etcd    timeout=400s
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/name=modelmesh-controller    timeout=400s
+  END
+
+  ${datasciencepipelines} =    Is Component Enabled    datasciencepipelines    ${DSC_NAME}
+  IF    "${datasciencepipelines}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/name=data-science-pipelines-operator    timeout=400s
+  END
+
+  ${kserve} =    Is Component Enabled    kserve    ${DSC_NAME}
+  IF    "${kserve}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app=odh-model-controller    timeout=400s
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=control-plane=kserve-controller-manager    timeout=400s
+  END
+
+  ${kueue} =     Is Component Enabled     kueue    ${DSC_NAME}
+  IF    "${kueue}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/part-of=kueue   timeout=400s
+  END
+
+  ${codeflare} =     Is Component Enabled     codeflare    ${DSC_NAME}
+  IF    "${codeflare}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/part-of=codeflare   timeout=400s
+  END
+
+  ${ray} =     Is Component Enabled     ray    ${DSC_NAME}
+  IF    "${ray}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/part-of=ray   timeout=400s
+  END
+
+  ${trustyai} =    Is Component Enabled    trustyai    ${DSC_NAME}
+  IF    "${trustyai}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/part-of=trustyai    timeout=400s
+  END
+
+  ${modelregistry} =    Is Component Enabled    modelregistry    ${DSC_NAME}
+  IF    "${modelregistry}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/part-of=model-registry-operator    timeout=400s
+  END
+
+  ${trainingoperator} =    Is Component Enabled    trainingoperator    ${DSC_NAME}
+  IF    "${trainingoperator}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/part-of=trainingoperator   timeout=400s
+  END
+
+  IF    "${dashboard}" == "true" or "${workbenches}" == "true" or "${modelmeshserving}" == "true" or "${datasciencepipelines}" == "true" or "${kserve}" == "true" or "${kueue}" == "true" or "${codeflare}" == "true" or "${ray}" == "true" or "${trustyai}" == "true" or "${modelregistry}" == "true" or "${trainingoperator}" == "true"    # robocop: disable
+      Log To Console    Waiting for pod status in ${APPLICATIONS_NAMESPACE}
+      Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=200
+      Log  Verified Applications NS: ${APPLICATIONS_NAMESPACE}  console=yes
   END
 
   # Monitoring stack only deployed for managed, as modelserving monitoring stack is no longer deployed
   IF  "${cluster_type}" == "managed"
-     Log To Console    "Waiting for pod status in ${MONITORING_NAMESPACE}"
+     Log To Console    Waiting for pod status in ${MONITORING_NAMESPACE}
      Wait For Pods Status  namespace=${MONITORING_NAMESPACE}  timeout=600
      Log  Verified Monitoring NS: ${MONITORING_NAMESPACE}  console=yes
-  END
-
-  IF    ("${UPDATE_CHANNEL}" == "stable" or "${UPDATE_CHANNEL}" == "beta") or "${workbenches}" == "true"
-    Oc Get  kind=Namespace  field_selector=metadata.name=${NOTEBOOKS_NAMESPACE}
-    Log  Verified Notebooks NS: ${NOTEBOOKS_NAMESPACE}
   END
 
 Verify Builds In redhat-ods-applications

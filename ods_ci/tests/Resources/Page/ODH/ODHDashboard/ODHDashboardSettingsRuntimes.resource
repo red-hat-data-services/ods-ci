@@ -46,13 +46,13 @@ Serving Runtime Template Should Be Listed
     [Arguments]    ${displayed_name}    ${serving_platform}
     Run Keyword And Continue On Failure
     ...    Wait Until Page Contains Element
-    ...    //table//tr/td[@data-label="Name"]//div[text()="${displayed_name}"]
+    ...    //*[@data-testid="serving-runtime ${displayed_name}"]
     ...    timeout=10s
     Run Keyword And Continue On Failure
     ...    Wait Until Page Contains Element
-    ...    xpath=//table//tr[td[@data-label="Name"]//div[text()="${displayed_name}"]]/td[@data-label="Serving platforms supported"]    # robocop: disable
+    ...    //*[@data-testid="serving-runtime ${displayed_name}"]//ancestor::*[@data-testid="serving-runtime-platform-label"]    # robocop: disable
     ${actual_platform_labels_str}=    Get Text
-    ...    xpath=//table//tr[td[@data-label="Name"]//div[text()="${displayed_name}"]]/td[@data-label="Serving platforms supported"]    # robocop: disable
+    ...    //*[@data-testid="serving-runtime ${displayed_name}"]//ancestor::*[@data-testid="serving-runtime-platform-label"]    # robocop: disable
     ${actual_platform_labels}=    Split To Lines    ${actual_platform_labels_str}
     IF    "${serving_platform}" == "both"
         Run Keyword And Continue On Failure    Length Should Be    ${actual_platform_labels}    ${2}

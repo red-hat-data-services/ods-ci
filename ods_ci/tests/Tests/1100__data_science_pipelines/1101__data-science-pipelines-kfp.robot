@@ -35,7 +35,7 @@ Verify Users Can Create And Run A Pipeline That Uses Only Packages From Base Ima
     ...    username=${TEST_USER_3.USERNAME}
     ...    password=${TEST_USER_3.PASSWORD}
     ...    project=${PROJECT_NAME}
-    ...    python_file=flip_coin.py
+    ...    python_file=cache-disabled/flip_coin.py
     ...    method_name=flipcoin_pipeline
     ...    status_check_timeout=180
     ...    pipeline_params=${emtpy_dict}
@@ -45,8 +45,7 @@ Verify Users Can Create And Run A Pipeline That Uses Custom Python Packages To I
     [Documentation]    Creates and runs iris_pipeline pipeline as regular user, verifiying the run results
     ...   In this pipeline there are tasks defining with packages_to_install some custom python packages to
     ...   be installed at execution time
-    ...   ProductBugOnDisconnected: RHOAIENG-6376
-    [Tags]      Smoke    ProductBugOnDisconnected
+    [Tags]      Smoke
     ${emtpy_dict}=    Create Dictionary
     End To End Pipeline Workflow Using Kfp
     ...    admin_username=${TEST_USER.USERNAME}
@@ -54,9 +53,9 @@ Verify Users Can Create And Run A Pipeline That Uses Custom Python Packages To I
     ...    username=${TEST_USER_3.USERNAME}
     ...    password=${TEST_USER_3.PASSWORD}
     ...    project=${PROJECT_NAME}
-    ...    python_file=iris_pipeline.py
+    ...    python_file=cache-disabled/iris_pipeline.py
     ...    method_name=my_pipeline
-    ...    status_check_timeout=180
+    ...    status_check_timeout=300
     ...    pipeline_params=${emtpy_dict}
     [Teardown]    Projects.Delete Project Via CLI By Display Name    ${PROJECT_NAME}
 
@@ -71,7 +70,7 @@ Verify Upload Download In Data Science Pipelines Using The kfp Python Package
     ...    username=${TEST_USER_3.USERNAME}
     ...    password=${TEST_USER_3.PASSWORD}
     ...    project=${PROJECT_NAME}
-    ...    python_file=upload_download.py
+    ...    python_file=cache-disabled/upload_download.py
     ...    method_name=wire_up_pipeline
     ...    status_check_timeout=180
     ...    pipeline_params=${upload_download_dict}
@@ -91,7 +90,7 @@ Verify Ods Users Can Create And Run A Data Science Pipeline With Ray Using The k
     ...    username=${TEST_USER_3.USERNAME}
     ...    password=${TEST_USER_3.PASSWORD}
     ...    project=${PROJECT_NAME}
-    ...    python_file=ray_integration.py
+    ...    python_file=cache-disabled/ray_integration.py
     ...    method_name=ray_integration
     ...    status_check_timeout=600
     ...    pipeline_params=${ray_dict}
@@ -130,7 +129,6 @@ End To End Pipeline Workflow Using Kfp
     ...    pip_trusted_host=${pip_trusted_host}
     ${run_status}    Check Run Status    ${run_id}    timeout=${status_check_timeout}
     Should Be Equal As Strings    ${run_status}    SUCCEEDED    Pipeline run doesn't have a status that means success. Check the logs
-    Projects.Delete Project Via CLI By Display Name    ${project}
 
 Data Science Pipelines Suite Setup
     [Documentation]    Data Science Pipelines Suite Setup

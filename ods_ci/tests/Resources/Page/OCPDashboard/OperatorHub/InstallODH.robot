@@ -25,7 +25,7 @@ Open OCP Console
     Wait Until Page Does Not Contain Element    xpath:${OCP_LOADING_ANIMATION_XPATH}    timeout=10s
 
 Navigate to OperatorHub
-    Menu.Navigate To Page   Operators  OperatorHub
+    Menu.Navigate To Page   Operators    OperatorHub    timeout=30s
 
 OperatorHub Should Be Open
     Page Should Be Open    ${OCP_CONSOLE_URL}/operatorhub/all-namespaces

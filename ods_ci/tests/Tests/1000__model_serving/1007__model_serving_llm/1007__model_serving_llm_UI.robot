@@ -61,7 +61,7 @@ Verify User Can Deploy Multiple Models In The Same Namespace Using The UI    # r
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_one_name}
     ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Deploy Kserve Model Via UI    ${model_two_name}    serving_runtime=Caikit TGIS    data_connection=kserve-connection
-    ...    path=flan-t5-small/${model_two_name}
+    ...    path=flan-t5-small/${model_two_name}    existing_server=${TRUE}
     Wait For Model KServe Deployment To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_two_name}
     ...    namespace=${test_namespace}    runtime=${CAIKIT_TGIS_RUNTIME_NAME}
     Query Model Multiple Times    inference_type=all-tokens    model_name=${model_one_name}
@@ -151,7 +151,7 @@ Verify User Can Set Requests And Limits For A Model Using The UI    # robocop: o
 Verify Model Can Be Served And Query On A GPU Node Using The UI    # robocop: off=too-long-test-case
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
     ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    Sanity    ODS-2523   Resources-GPU
+    [Tags]    Sanity    ODS-2523   Resources-GPU    NVIDIA-GPUs
     [Setup]    Set Up Project    namespace=singlemodel-gpu
     ${test_namespace}=    Set Variable    singlemodel-gpu
     ${model_name}=    Set Variable    flan-t5-small-caikit
@@ -405,7 +405,7 @@ Verify User With Edit Permission Can Deploy Query And Delete A LLM    # robocop:
     ${test_namespace}=    Set Variable     ${TEST_NS}-edit-permission
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
     Move To Tab    Permissions
-    Assign Edit Permissions To User ${TEST_USER_3.USERNAME}
+    Assign Contributor Permissions To User ${TEST_USER_3.USERNAME}
     Move To Tab    Overview
     Logout From RHODS Dashboard
     Login To RHODS Dashboard    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}    ${TEST_USER_3.AUTH_TYPE}

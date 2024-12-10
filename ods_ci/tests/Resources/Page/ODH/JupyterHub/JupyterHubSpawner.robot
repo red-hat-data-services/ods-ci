@@ -23,17 +23,17 @@ ${KFNBC_ACCELERATOR_DROPDOWN_XPATH} =    //label[@for='modal-notebook-accelerato
 ${KFNBC_ACCELERATOR_INPUT_XPATH} =    //input[@aria-label='Number of accelerators']
 ${KFNBC_ACCELERATOR_LESS_BUTTON_XPATH} =    ${KFNBC_ACCELERATOR_INPUT_XPATH}/parent::*/parent::*/preceding-sibling::*//button
 ${KFNBC_ACCELERATOR_PLUS_BUTTON_XPATH} =    ${KFNBC_ACCELERATOR_INPUT_XPATH}/parent::*/parent::*/following-sibling::*//button
-${KFNBC_MAX_ACCELERATOR_WARNING_XPATH} =    //div[contains(@class, 'pf-m-warning')]//h4[contains(text(), 'accelerator detected')]
+${KFNBC_MAX_ACCELERATOR_WARNING_XPATH} =    //div[contains(@class, 'pf-m-warning')]//h4[contains(text(), 'accelerator detected') or contains(text(),'accelerators detected')]
 ${KFNBC_MODAL_HEADER_XPATH} =    //div[@aria-label="Starting server modal"]
 ${KFNBC_MODAL_CANCEL_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Cancel"]
 ${KFNBC_MODAL_CLOSE_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Close"]
 ${KFNBC_MODAL_X_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[@aria-label="Close"]
 ${KFNBC_CONTROL_PANEL_HEADER_XPATH} =    //h1[.="Notebook server control panel"]
 ${KFNBC_ENV_VAR_NAME_PRE} =    //span[.="Variable name"]/../../../div[@class="pf-v5-c-form__group-control"]
-${DEFAULT_PYTHON_VER} =    3.9
+${DEFAULT_PYTHON_VER} =    3.11
 ${PREVIOUS_PYTHON_VER} =    3.9
-${DEFAULT_NOTEBOOK_VER} =    2024.1
-${PREVIOUS_NOTEBOOK_VER} =    2023.2
+${DEFAULT_NOTEBOOK_VER} =    2024.2
+${PREVIOUS_NOTEBOOK_VER} =    2024.1
 
 
 *** Keywords ***
@@ -77,6 +77,26 @@ Select Notebook Image
             Fail    Unknown image version requested
         END
     END
+
+    IF  "${version}"=="previous"
+        # Let's reset the JupyterLibrary settings so that global variables for Jupyter 3 (default) are in place.
+        Update Globals For JupyterLab 3 Custom
+    ELSE
+        # For Jupyter 4, we need to update global default variable values (images 2024b and newer)
+        # This calls method from JupyterLibrary Version.resource module
+        # https://github.com/robots-from-jupyter/robotframework-jupyterlibrary/blob/9e25fcb89a5f1a723c59e9b96706e4c638e0d9be/src/JupyterLibrary/clients/jupyterlab/Version.resource
+        Update Globals For JupyterLab 4
+    END
+
+Update Globals For JupyterLab 3 Custom
+    [Documentation]    Replace current selectors with JupyterLab 3-specific ones.
+    ...    This is the custom implementation since the original one doesn't really
+    ...    reverts defaults if they had been set to Jupyter 4 in the past already.
+    Set Global Variable    ${CM VERSION}    ${5}
+    Set Global Variable    ${CM CSS EDITOR}    .CodeMirror
+    Set Global Variable    ${CM JS INSTANCE}    .CodeMirror
+    Set Global Variable    ${JLAB CSS ACTIVE INPUT}    ${JLAB CSS ACTIVE CELL} ${CM CSS EDITOR}
+    Log    JupyterLab 3 is now the current version.
 
 Verify Version Dropdown Is Present
     [Documentation]    Validates the version dropdown for a given Notebook image
@@ -154,18 +174,18 @@ Add Spawner Environment Variable
 
 Remove All Spawner Environment Variables
    [Documentation]  Removes all existing environment variables in the Spawner
-   @{env_vars_list} =    Create List
-   @{env_elements} =    Get WebElements    xpath://*[.='Variable name']/../../div[2]/input
+   ${remove_env_btn_xpath} =    Set Variable    //*[@data-id="remove-env-var-button"]
+   ${first_remove_env_btn_xpath} =    Set Variable
+   ...    //*[@class="odh-notebook-controller__env-var-row"][1]${remove_env_btn_xpath}
 
-   # We need to fist get the env values and remove them later to avoid a
-   # selenium error due to modifiying the DOM while iterating its contents
-   FOR    ${element}    IN    @{env_elements}
-       ${txt} =   Get Value  ${element}
-       Append To List  ${env_vars_list}   ${txt}
-   END
-
-   FOR    ${env}    IN    @{env_vars_list}
-       Remove Spawner Environment Variable   ${env}
+   WHILE    ${TRUE}
+       ${remove_btn_number} =    Get Element Count    ${remove_env_btn_xpath}
+       IF    ${remove_btn_number} > 0
+           Click Button    ${first_remove_env_btn_xpath}
+           Sleep    0.5s    # Give browser time to react
+       ELSE
+           BREAK
+       END
    END
 
 Remove Spawner Environment Variable
@@ -293,8 +313,7 @@ Wait Notebook To Be Loaded
 
     IF  "${ide}"=="VSCode"
         Wait Until Page Contains Element  xpath://div[@class="menubar-menu-button"]  timeout=60s
-        Wait Until Page Contains Element  xpath://div[@class="monaco-dialog-box"]  timeout=60s
-        Wait Until Page Contains  Do you trust the authors of the files in this folder?
+        Wait Until Page Contains  Get Started with VS Code for the Web
     ELSE IF  "${ide}"=="JupyterLab"
         Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
         Sleep    2s    reason=Wait for a possible popup
@@ -340,8 +359,8 @@ Spawn Notebook With Arguments  # robocop: disable
                 Capture Page Screenshot    reload.png
                 Wait Until JupyterHub Spawner Is Ready
             END
+            Remove All Spawner Environment Variables
             IF  &{envs}
-                Remove All Spawner Environment Variables
                 FOR  ${key}  ${value}  IN  &{envs}[envs]
                     Sleep  1
                     Add Spawner Environment Variable  ${key}  ${value}
@@ -354,11 +373,6 @@ Spawn Notebook With Arguments  # robocop: disable
             Run Keyword And Warn On Failure   Login To Openshift  ${username}  ${password}  ${auth_type}
             ${authorization_required} =  Is Service Account Authorization Required
             IF  ${authorization_required}  Authorize jupyterhub service account
-
-            # For Jupyter 4, we need to update global default variable values (images 2024b and newer)
-            # This calls method from JupyterLibrary Version.resource module
-            # TODO - shall be uncommented once the 2024b images will land into the product
-            # IF  "${version}"=="default"  Update Globals For JupyterLab 4
 
             Wait Notebook To Be Loaded  ${image}    ${version}
             ${spawn_fail} =  Has Spawn Failed
@@ -547,7 +561,7 @@ Get Container Size
    ...    timeout=30   error=Container size selector is not present in KFNBC Spawner
    Click Element    xpath:${KFNBC_CONTAINER_SIZE_DROPDOWN_XPATH}
    Wait Until Page Contains Element    xpath://span[.="${container_size}"]/../..  timeout=10
-   ${data}   Get Text  xpath://span[.="${container_size}"]/../span[2]
+   ${data}   Get Text  xpath://li[@data-testid="${container_size}"]//span[contains(text(), "Limits")]
    ${l_data}   Convert To Lower Case    ${data}
    ${data}    Get Formated Container Size To Dictionary     ${l_data}
    RETURN  ${data}

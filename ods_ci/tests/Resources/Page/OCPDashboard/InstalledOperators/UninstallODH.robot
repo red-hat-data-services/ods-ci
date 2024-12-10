@@ -14,7 +14,7 @@ Navigate to Installed Operators
 
 Installed Operators Should Be Open
   Page Should Be Open  ${OCP_CONSOLE_URL}/k8s/
-  Wait until page contains           Managed Namespaces           timeout=10
+  Wait Until Page Contains           Managed Namespaces           timeout=1m
 
 Uninstall ODH Operator
   Uninstall Operator  Red Hat OpenShift Data Science

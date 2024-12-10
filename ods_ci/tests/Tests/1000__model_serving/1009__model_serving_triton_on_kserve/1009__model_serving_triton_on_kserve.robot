@@ -24,6 +24,7 @@ ${PROTOBUFF_FILE}=      tests/Resources/Files/triton/grpc_predict_v2.proto
 ${PRJ_TITLE}=    ms-triton-project
 ${PRJ_DESCRIPTION}=    project used for model serving triton runtime tests
 ${MODEL_CREATED}=    ${FALSE}
+${PATTERN}=     https:\/\/([^\/:]+)
 ${ONNX_MODEL_NAME}=    densenet_onnx
 ${ONNX_MODEL_LABEL}=     densenetonnx
 ${ONNX_GRPC_RUNTIME_NAME}=    triton-kserve-grpc
@@ -33,16 +34,46 @@ ${ONNX_GRPC_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_onnx_gRPC_servingr
 ${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE}=     tests/Resources/Files/triton/kserve-triton-onnx-gRPC-output.json
 ${ONNX_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_onnx_rest_servingruntime.yaml
 ${EXPECTED_INFERENCE_REST_OUTPUT_FILE}=      tests/Resources/Files/triton/kserve-triton-onnx-rest-output.json
-${PATTERN}=  https:\/\/([^\/:]+)
 ${INFERENCE_REST_INPUT_PYTORCH}=    @tests/Resources/Files/triton/kserve-triton-resnet-rest-input.json
 ${INFERENCE_GRPC_INPUT_PYTORCH}=    tests/Resources/Files/triton/kserve-triton-resnet-gRPC-input.json
 ${PYTORCH_MODEL_NAME}=    resnet50
+${TENSORFLOW_MODEL_NAME}=   inception_graphdef
+${TENSORFLOW_MODEL_LABEL}=    inceptiongraphdef
 ${PYTORCH_RUNTIME_NAME}=    triton-kserve-rest
 ${PYTORCH_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_onnx_rest_servingruntime.yaml
 ${EXPECTED_INFERENCE_REST_OUTPUT_FILE_PYTORCH}=       tests/Resources/Files/triton/kserve-triton-resnet-rest-output.json
 ${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE_PYTORCH}=       tests/Resources/Files/triton/kserve-triton-resnet-gRPC-output.json
-
-
+${INFERENCE_REST_INPUT_TENSORFLOW}=    @tests/Resources/Files/triton/kserve-triton-tensorflow-rest-input.json
+${TENSORFLOW_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_tensorflow_rest_servingruntime.yaml
+${EXPECTED_INFERENCE_REST_OUTPUT_FILE_TENSORFLOW}=       tests/Resources/Files/triton/kserve-triton-tensorflow-rest-output.json
+${INFERENCE_GRPC_INPUT_TENSORFLOW}=    tests/Resources/Files/triton/kserve-triton-inception_graphdef-gRPC-input.json
+${TENSORFLOW_MODEL_NAME}=    inception_graphdef
+${TENSORFLOW_MODEL_LABEL}=     inceptiongraphdef
+${TENSORFLOW_RUNTIME_NAME}=    triton-tensorflow-grpc
+${TENSORFLOW_GRPC_RUNTIME_NAME}=    triton-tensorflow-grpc
+${TENSORFLOW_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_tensorflow_gRPC_servingruntime.yaml
+${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE_TENSORFLOW}=       tests/Resources/Files/triton/kserve-triton-inception_graphdef-gRPC-output.json
+${PYTHON_MODEL_NAME}=    python
+${EXPECTED_INFERENCE_PYTHON_REST_OUTPUT_FILE}=      tests/Resources/Files/triton/kserve-triton-python-rest-output.json
+${INFERENCE_REST_INPUT_PYTHON}=    @tests/Resources/Files/triton/kserve-triton-python-rest-input.json
+${KERAS_RUNTIME_NAME}=    triton-keras-rest
+${KERAS_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_keras_rest_servingruntime.yaml
+${INFERENCE_REST_INPUT_KERAS}=    @tests/Resources/Files/triton/kserve-triton-keras-rest-input.json
+${EXPECTED_INFERENCE_REST_OUTPUT_FILE_KERAS}=       tests/Resources/Files/triton/kserve-triton-keras-rest-output.json
+${INFERENCE_GRPC_INPUT_FIL}=    tests/Resources/Files/triton/kserve-triton-fil-grpc-input.json
+${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE_FIL}=       tests/Resources/Files/triton/kserve-triton-fil-grpc-output.json
+${FIL_MODEL_NAME}=    xgboost
+${KERAS_RUNTIME_NAME_GRPC}=    triton-keras-grpc
+${KERAS_GRPC_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_keras_gRPC_servingruntime.yaml
+${INFERENCE_GRPC_INPUT_KERAS}=    tests/Resources/Files/triton/kserve-triton-keras-gRPC-input.json
+${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE_KERAS}=       tests/Resources/Files/triton/kserve-triton-keras-gRPC-output.json
+${FIL_MODEL_NAME}=    fil
+${FIL_RUNTIME_NAME_REST}=    triton-fil-rest
+${INFERENCE_REST_INPUT_FIL}=    @tests/Resources/Files/triton/kserve-triton-fil-rest-input.json
+${EXPECTED_INFERENCE_REST_OUTPUT_FILE_FIL}=       tests/Resources/Files/triton/kserve-triton-fil-rest-output.json
+${PYTHON_MODEL_NAME}=   python
+${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE_PYTHON}=       tests/Resources/Files/triton/kserve-triton-python-gRPC-output.json
+${INFERENCE_GRPC_INPUT_PYTHON}=     tests/Resources/Files/triton/kserve-triton-python-gRPC-input.json
 
 *** Test Cases ***
 Test Onnx Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
@@ -76,9 +107,9 @@ Test Onnx Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-l
     ...  Delete Serving Runtime Template From CLI    displayed_name=triton-kserve-rest
 
 
-Test PYTORCH Model Inference Via UI(Triton on Kserve)    # robocop: off=too-long-test-case
+Test PYTORCH Model Rest Inference Via UI(Triton on Kserve)
     [Documentation]    Test the deployment of an pytorch model in Kserve using Triton
-    [Tags]    Sanity           RHOAIENG-11561
+    [Tags]    Tier2           RHOAIENG-11561
 
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
@@ -110,7 +141,7 @@ Test PYTORCH Model Inference Via UI(Triton on Kserve)    # robocop: off=too-long
 
 Test Onnx Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of an onnx model in Kserve using Triton
-    [Tags]    Sanity    RHOAIENG-9054
+    [Tags]    Tier2    RHOAIENG-9053
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    existing_project=${FALSE}
@@ -199,6 +230,307 @@ Test PYTORCH Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=to
     ...  Clean All Models Of Current User
     ...  AND
     ...  Delete Serving Runtime Template From CLI    displayed_name=triton-kserve-grpc
+
+Test Tensorflow Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
+    [Documentation]    Test the deployment of an tensorflow model in Kserve using Triton
+    [Tags]    Tier2    RHOAIENG-9052
+    Open Data Science Projects Home Page
+    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
+    ...    existing_project=${FALSE}
+    Open Dashboard Settings    settings_page=Serving runtimes
+    Upload Serving Runtime Template    runtime_filepath=${TENSORFLOW_RUNTIME_FILEPATH}
+    ...    serving_platform=single      runtime_protocol=gRPC
+    Serving Runtime Template Should Be Listed    displayed_name=${TENSORFLOW_GRPC_RUNTIME_NAME}
+    ...    serving_platform=single
+    Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
+    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
+    ...            aws_bucket_name=ods-ci-s3
+    Deploy Kserve Model Via UI    model_name=${TENSORFLOW_MODEL_NAME}    serving_runtime=triton-tensorflow-grpc
+    ...    data_connection=model-serving-connection    path=triton/model_repository/    model_framework=tensorflow - 2
+    ...    token=${TRUE}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${TENSORFLOW_MODEL_LABEL}
+    ...    namespace=${PRJ_TITLE}    timeout=180s
+    ${EXPECTED_INFERENCE_GRPC_OUTPUT_TENSORFLOW}=     Load Json File     file_path=${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE_TENSORFLOW}
+    ...     as_string=${TRUE}
+    ${EXPECTED_INFERENCE_GRPC_OUTPUT_TENSORFLOW}=     Load Json String    ${EXPECTED_INFERENCE_GRPC_OUTPUT_TENSORFLOW}
+    ${EXPECTED_INFERENCE_GRPC_OUTPUT_TENSORFLOW}=     Evaluate    json.dumps(${EXPECTED_INFERENCE_GRPC_OUTPUT_TENSORFLOW})
+    Log     ${EXPECTED_INFERENCE_GRPC_OUTPUT_TENSORFLOW}
+    Open Model Serving Home Page
+    ${host}=    Get Model Route for gRPC Via UI    model_name=${TENSORFLOW_MODEL_NAME}
+    Log    ${host}
+    ${token}=   Get Access Token Via UI    single_model=${TRUE}      model_name=${TENSORFLOW_MODEL_NAME}   project_name=${PRJ_TITLE}
+    ${inference_output}=    Query Model With GRPCURL   host=${host}    port=443
+    ...    endpoint=inference.GRPCInferenceService/ModelInfer
+    ...    json_body=@      input_filepath=${INFERENCE_GRPC_INPUT_TENSORFLOW}
+    ...    insecure=${True}    protobuf_file=${PROTOBUFF_FILE}      json_header="Authorization: Bearer ${token}"
+    Log    ${inference_output}
+    ${inference_output}=    Evaluate    json.dumps(${inference_output})
+    Log    ${inference_output}
+    ${result}    ${list}=    Inference Comparison    ${EXPECTED_INFERENCE_GRPC_OUTPUT_TENSORFLOW}    ${inference_output}
+    Log    ${result}
+    Log    ${list}
+    [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${TENSORFLOW_MODEL_NAME}
+    ...  project_title=${PRJ_TITLE}
+    ...  AND
+    ...  Clean All Models Of Current User
+    ...  AND
+    ...  Delete Serving Runtime Template From CLI    displayed_name=triton-tensorflow-grpc
+
+Test KERAS Model Rest Inference Via UI(Triton on Kserve)
+    [Documentation]    Test the deployment of an keras model in Kserve using Triton
+    [Tags]    Tier2      RHOAIENG-10328
+    Open Data Science Projects Home Page
+    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
+    ...    existing_project=${FALSE}
+    Open Dashboard Settings    settings_page=Serving runtimes
+    Upload Serving Runtime Template    runtime_filepath=${KERAS_RUNTIME_FILEPATH}
+    ...    serving_platform=single     runtime_protocol=REST
+    Serving Runtime Template Should Be Listed    displayed_name=${KERAS_RUNTIME_NAME}
+    ...    serving_platform=single
+    Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
+    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
+    ...            aws_bucket_name=ods-ci-s3
+    Deploy Kserve Model Via UI    model_name=${KERAS_MODEL_NAME}    serving_runtime=triton-keras-rest
+    ...    data_connection=model-serving-connection    path=tritonkeras/model_repository/    model_framework=tensorflow - 2
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${KERAS_MODEL_NAME}
+    ...    namespace=${PRJ_TITLE}    timeout=180s
+    ${EXPECTED_INFERENCE_REST_OUTPUT_KERAS}=     Load Json File
+    ...    file_path=${EXPECTED_INFERENCE_REST_OUTPUT_FILE_KERAS}    as_string=${TRUE}
+    Log    ${EXPECTED_INFERENCE_REST_OUTPUT_KERAS}
+    Run Keyword And Continue On Failure    Verify Model Inference With Retries
+    ...    ${KERAS_MODEL_NAME}    ${INFERENCE_REST_INPUT_KERAS}    ${EXPECTED_INFERENCE_REST_OUTPUT_KERAS}
+    ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}      set_json_content_type=${TRUE}
+    [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${KERAS_MODEL_NAME}
+    ...  project_title=${PRJ_TITLE}
+    ...  AND
+    ...  Clean All Models Of Current User
+    ...  AND
+    ...  Delete Serving Runtime Template From CLI    displayed_name=triton-keras-rest
+
+Test KERAS Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
+    [Documentation]    Test the deployment of an keras model in Kserve using Triton
+    [Tags]    Tier2    RHOAIENG-10327
+    Open Data Science Projects Home Page
+    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
+    ...    existing_project=${FALSE}
+    Open Dashboard Settings    settings_page=Serving runtimes
+    Upload Serving Runtime Template    runtime_filepath=${KERAS_GRPC_RUNTIME_FILEPATH}
+    ...    serving_platform=single      runtime_protocol=gRPC
+    Serving Runtime Template Should Be Listed    displayed_name=${KERAS_RUNTIME_NAME_GRPC}
+    ...    serving_platform=single
+    Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
+    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
+    ...            aws_bucket_name=ods-ci-s3
+    Deploy Kserve Model Via UI    model_name=${PYTORCH_MODEL_NAME}    serving_runtime=triton-keras-grpc
+    ...    data_connection=model-serving-connection    path=tritonkeras/model_repository/    model_framework=tensorflow - 2
+    ...    token=${TRUE}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${PYTORCH_MODEL_NAME}
+    ...    namespace=${PRJ_TITLE}
+    ${EXPECTED_INFERENCE_GRPC_OUTPUT_KERAS}=     Load Json File     file_path=${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE_KERAS}
+    ...     as_string=${TRUE}
+    ${EXPECTED_INFERENCE_GRPC_OUTPUT_KERAS}=     Load Json String    ${EXPECTED_INFERENCE_GRPC_OUTPUT_KERAS}
+    ${EXPECTED_INFERENCE_GRPC_OUTPUT_KERAS}=     Evaluate    json.dumps(${EXPECTED_INFERENCE_GRPC_OUTPUT_KERAS})
+    Log     ${EXPECTED_INFERENCE_GRPC_OUTPUT_KERAS}
+    Open Model Serving Home Page
+    ${host_url}=    Get Model Route Via UI       model_name=${PYTORCH_MODEL_NAME}
+    ${host}=    Evaluate    re.search(r"${PATTERN}", r"${host_url}").group(1)    re
+    Log    ${host}
+    ${token}=   Get Access Token Via UI    single_model=${TRUE}      model_name=resnet50   project_name=${PRJ_TITLE}
+    ${inference_output}=    Query Model With GRPCURL   host=${host}    port=443
+    ...    endpoint=inference.GRPCInferenceService/ModelInfer
+    ...    json_body=@      input_filepath=${INFERENCE_GRPC_INPUT_KERAS}
+    ...    insecure=${True}    protobuf_file=${PROTOBUFF_FILE}      json_header="Authorization: Bearer ${token}"
+    Log    ${inference_output}
+    ${inference_output}=    Evaluate    json.dumps(${inference_output})
+    Log    ${inference_output}
+    ${result}    ${list}=    Inference Comparison    ${EXPECTED_INFERENCE_GRPC_OUTPUT_KERAS}    ${inference_output}
+    [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${PYTORCH_MODEL_NAME}
+    ...  project_title=${PRJ_TITLE}
+    ...  AND
+    ...  Clean All Models Of Current User
+    ...  AND
+    ...  Delete Serving Runtime Template From CLI    displayed_name=triton-keras-grpc
+
+Test Python Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
+    [Documentation]    Test the deployment of an python model in Kserve using Triton
+    [Tags]    Tier2    RHOAIENG-15374
+    Open Data Science Projects Home Page
+    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
+    ...    existing_project=${FALSE}
+    Open Dashboard Settings    settings_page=Serving runtimes
+    Upload Serving Runtime Template    runtime_filepath=${ONNX_GRPC_RUNTIME_FILEPATH}
+    ...    serving_platform=single      runtime_protocol=gRPC
+    Serving Runtime Template Should Be Listed    displayed_name=${ONNX_GRPC_RUNTIME_NAME}
+    ...    serving_platform=single
+    Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
+    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
+    ...            aws_bucket_name=ods-ci-s3
+    Deploy Kserve Model Via UI    model_name=${PYTHON_MODEL_NAME}    serving_runtime=triton-kserve-grpc
+    ...    data_connection=model-serving-connection    path=triton/model_repository/    model_framework=python - 1
+    ...    token=${TRUE}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${PYTHON_MODEL_NAME}
+    ...    namespace=${PRJ_TITLE}
+    ${EXPECTED_INFERENCE_GRPC_OUTPUT_PYTHON}=     Load Json File     file_path=${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE_PYTHON}
+    ...     as_string=${TRUE}
+    ${EXPECTED_INFERENCE_GRPC_OUTPUT_PYTHON}=     Load Json String    ${EXPECTED_INFERENCE_GRPC_OUTPUT_PYTHON}
+    ${EXPECTED_INFERENCE_GRPC_OUTPUT_PYTHON}=     Evaluate    json.dumps(${EXPECTED_INFERENCE_GRPC_OUTPUT_PYTHON})
+    Log     ${EXPECTED_INFERENCE_GRPC_OUTPUT_PYTHON}
+    Open Model Serving Home Page
+    ${host_url}=    Get Model Route Via UI       model_name=${PYTHON_MODEL_NAME}
+    ${host}=    Evaluate    re.search(r"${PATTERN}", r"${host_url}").group(1)    re
+    Log    ${host}
+    ${token}=   Get Access Token Via UI    single_model=${TRUE}      model_name=python   project_name=${PRJ_TITLE}
+    ${inference_output}=    Query Model With GRPCURL   host=${host}    port=443
+    ...    endpoint=inference.GRPCInferenceService/ModelInfer
+    ...    json_body=@      input_filepath=${INFERENCE_GRPC_INPUT_PYTHON}
+    ...    insecure=${True}    protobuf_file=${PROTOBUFF_FILE}      json_header="Authorization: Bearer ${token}"
+    Log    ${inference_output}
+    ${inference_output}=    Evaluate    json.dumps(${inference_output})
+    Log    ${inference_output}
+    ${result}    ${list}=    Inference Comparison    ${EXPECTED_INFERENCE_GRPC_OUTPUT_PYTHON}    ${inference_output}
+    Log    ${result}
+    Log    ${list}
+    [Teardown]  Run Keywords    Get Kserve Events And Logs    model_name= ${PYTHON_MODEL_NAME}
+    ...   project_title= ${PRJ_TITLE}
+    ...  AND
+    ...  Clean All Models Of Current User
+    ...  AND
+    ...  Delete Serving Runtime Template From CLI    displayed_name=triton-kserve-grpc
+
+Test Python Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
+    [Documentation]    Test the deployment of an python model in Kserve using Triton
+    [Tags]    Tier2    RHOAIENG-15374
+    Open Data Science Projects Home Page
+    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
+    ...    existing_project=${FALSE}
+    Open Dashboard Settings    settings_page=Serving runtimes
+    Upload Serving Runtime Template    runtime_filepath=${ONNX_RUNTIME_FILEPATH}
+    ...    serving_platform=single      runtime_protocol=REST
+    Serving Runtime Template Should Be Listed    displayed_name=${ONNX_RUNTIME_NAME}
+    ...    serving_platform=single
+    Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
+    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
+    ...            aws_bucket_name=ods-ci-s3
+    Deploy Kserve Model Via UI    model_name=${PYTHON_MODEL_NAME}    serving_runtime=triton-kserve-rest
+    ...    data_connection=model-serving-connection    path=triton/model_repository/    model_framework=python - 1
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${PYTHON_MODEL_NAME}
+    ...    namespace=${PRJ_TITLE}
+    ${EXPECTED_INFERENCE_REST_OUTPUT_PYTHON}=     Load Json File     file_path=${EXPECTED_INFERENCE_PYTHON_REST_OUTPUT_FILE}
+    ...     as_string=${TRUE}
+    Run Keyword And Continue On Failure    Verify Model Inference With Retries
+    ...    ${PYTHON_MODEL_NAME}    ${INFERENCE_REST_INPUT_PYTHON}    ${EXPECTED_INFERENCE_REST_OUTPUT_PYTHON}
+    ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}
+    [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${PYTHON_MODEL_NAME}
+    ...  project_title=${PRJ_TITLE}
+    ...  AND
+    ...  Clean All Models Of Current User
+    ...  AND
+    ...  Delete Serving Runtime Template From CLI    displayed_name=triton-kserve-rest
+
+Test FIL Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
+    [Documentation]    Test the deployment of an fil model in Kserve using Triton
+    [Tags]    Tier2    RHOAIENG-15649
+    Open Data Science Projects Home Page
+    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
+    ...    existing_project=${FALSE}
+    Open Dashboard Settings    settings_page=Serving runtimes
+    Upload Serving Runtime Template    runtime_filepath=${ONNX_RUNTIME_FILEPATH}
+    ...    serving_platform=single      runtime_protocol=REST
+    Serving Runtime Template Should Be Listed    displayed_name=${ONNX_RUNTIME_NAME}
+    ...    serving_platform=single
+    Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
+    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
+    ...            aws_bucket_name=ods-ci-s3
+    Deploy Kserve Model Via UI    model_name=${FIL_MODEL_NAME}    serving_runtime=triton-kserve-rest
+    ...    data_connection=model-serving-connection    path=triton/model_repository/    model_framework=xgboost - 1
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${FIL_MODEL_NAME}
+    ...    namespace=${PRJ_TITLE}
+    ${EXPECTED_INFERENCE_REST_OUTPUT_FIL}=     Load Json File     file_path=${EXPECTED_INFERENCE_REST_OUTPUT_FILE_FIL}
+    ...     as_string=${TRUE}
+    Run Keyword And Continue On Failure    Verify Model Inference With Retries
+    ...    ${FIL_MODEL_NAME}    ${INFERENCE_REST_INPUT_FIL}    ${EXPECTED_INFERENCE_REST_OUTPUT_FIL}
+    ...    token_auth=${FALSE}    project_title=${PRJ_TITLE}
+    [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${FIL_MODEL_NAME}
+    ...  project_title=${PRJ_TITLE}
+    ...  AND
+    ...  Clean All Models Of Current User
+    ...  AND
+    ...  Delete Serving Runtime Template From CLI    displayed_name=triton-kserve-rest
+    
+Test FIL Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
+    [Documentation]    Test the deployment of an fil model in Kserve using Triton
+    [Tags]    Sanity    RHOAIENG-15823
+    Open Data Science Projects Home Page
+    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
+    ...    existing_project=${FALSE}
+    Open Dashboard Settings    settings_page=Serving runtimes
+    Upload Serving Runtime Template    runtime_filepath=${ONNX_GRPC_RUNTIME_FILEPATH}
+    ...    serving_platform=single      runtime_protocol=gRPC
+    Serving Runtime Template Should Be Listed    displayed_name=${ONNX_GRPC_RUNTIME_NAME}
+    ...    serving_platform=single
+    Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
+    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
+    ...            aws_bucket_name=ods-ci-s3oject_title=${PRJ_TITLE}
+    Deploy Kserve Model Via UI    model_name=${FIL_MODEL_NAME}    serving_runtime=triton-kserve-grpc
+    ...    data_connection=model-serving-connection    path=triton/model_repository/    model_framework=xgboost - 1
+    ...    token=${TRUE}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${FIL_MODEL_NAME}
+    ...    namespace=${PRJ_TITLE}
+    ${EXPECTED_INFERENCE_GRPC_OUTPUT_FIL}=     Load Json File     file_path=${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE_FIL}
+    ...     as_string=${TRUE}
+    ${EXPECTED_INFERENCE_GRPC_OUTPUT_FIL}=     Load Json String    ${EXPECTED_INFERENCE_GRPC_OUTPUT_FIL}
+    ${EXPECTED_INFERENCE_GRPC_OUTPUT_FIL}=     Evaluate    json.dumps(${EXPECTED_INFERENCE_GRPC_OUTPUT_FIL})
+    Log     ${EXPECTED_INFERENCE_GRPC_OUTPUT_FIL}
+    Open Model Serving Home Page
+    ${host_url}=    Get Model Route Via UI       model_name=${FIL_MODEL_NAME}
+    ${host}=    Evaluate    re.search(r"${PATTERN}", r"${host_url}").group(1)    re
+    Log    ${host}
+    ${token}=   Get Access Token Via UI    single_model=${TRUE}      model_name=fil   project_name=${PRJ_TITLE}
+    ${inference_output}=    Query Model With GRPCURL   host=${host}    port=443
+    ...    endpoint=inference.GRPCInferenceService/ModelInfer
+    ...    json_body=@      input_filepath=${INFERENCE_GRPC_INPUT_FIL}
+    ...    insecure=${True}    protobuf_file=${PROTOBUFF_FILE}      json_header="Authorization: Bearer ${token}"
+    Log    ${inference_output}
+    ${inference_output}=    Evaluate    json.dumps(${inference_output})
+    Log    ${inference_output}
+    ${result}    ${list}=    Inference Comparison    ${EXPECTED_INFERENCE_GRPC_OUTPUT_FIL}    ${inference_output}
+    [Teardown]  Run Keywords    Get Kserve Events And Logs     model_name=${FIL_MODEL_NAME}
+    ...  project_title=${PRJ_TITLE}
+    ...  AND
+    ...  Clean All Models Of Current User
+    ...  AND
+    ...  Delete Serving Runtime Template From CLI    displayed_name=triton-kserve-grpc
+
+Test Tensorflow Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
+    [Documentation]    Test the deployment of an tensorflow model in Kserve using Triton
+    [Tags]    Tier2    RHOAIENG-11568
+    Open Data Science Projects Home Page
+    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
+    ...    existing_project=${FALSE}
+    Open Dashboard Settings    settings_page=Serving runtimes
+    Upload Serving Runtime Template    runtime_filepath=${TENSORFLOW_RUNTIME_FILEPATH}
+    ...    serving_platform=single      runtime_protocol=REST
+    Serving Runtime Template Should Be Listed    displayed_name=${PYTORCH_RUNTIME_NAME}
+    ...    serving_platform=single
+    Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
+    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
+    ...            aws_bucket_name=ods-ci-s3
+    Deploy Kserve Model Via UI    model_name=${TENSORFLOW_MODEL_NAME}    serving_runtime=triton-kserve-rest
+    ...    data_connection=model-serving-connection    path=triton/model_repository/
+    ...    model_framework=tensorflow - 2      token=${TRUE}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${TENSORFLOW_MODEL_LABEL}
+    ...    namespace=${PRJ_TITLE}
+    ${EXPECTED_INFERENCE_REST_OUTPUT_TENSORFLOW}=     Load Json File     file_path=${EXPECTED_INFERENCE_REST_OUTPUT_FILE_TENSORFLOW}
+    ...     as_string=${TRUE}
+    Run Keyword And Continue On Failure    Verify Model Inference With Retries
+    ...    ${TENSORFLOW_MODEL_NAME}    ${INFERENCE_REST_INPUT_TENSORFLOW}    ${EXPECTED_INFERENCE_REST_OUTPUT_TENSORFLOW}
+    ...    token_auth=${TRUE}    project_title=${PRJ_TITLE}     set_json_content_type=${TRUE}
+    [Teardown]  Run Keywords    Get Kserve Events And Logs      model_name=${TENSORFLOW_MODEL_NAME}
+    ...  project_title=${PRJ_TITLE}
+    ...  AND
+    ...  Clean All Models Of Current User
+    ...  AND
+    ...  Delete Serving Runtime Template From CLI    displayed_name=triton-kserve-rest
 
 
 *** Keywords ***

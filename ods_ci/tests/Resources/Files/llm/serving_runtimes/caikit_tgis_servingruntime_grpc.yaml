@@ -10,7 +10,7 @@ spec:
       name: caikit
   containers:
     - name: kserve-container
-      image: quay.io/modh/text-generation-inference@sha256:792e1500548c293eae428cf079fce836e68fbf7d4f7a53b5958c5158a70edfbf
+      image: quay.io/modh/text-generation-inference@sha256:bb36bb41cc744a8ff94d537f74c228e8b4e17c2468c50ccd89fc21ecc3940a70
       command: ["text-generation-launcher"]
       args: ["--model-name=/mnt/models/artifacts/"]
       env:
@@ -23,7 +23,7 @@ spec:
       ## Note: cannot add readiness/liveness probes to this container because knative will refuse them.
       # multi-container probing will be available after https://github.com/knative/serving/pull/14853 is merged
     - name: transformer-container
-      image: quay.io/modh/caikit-tgis-serving@sha256:3a2477e143c494280a81e50c31adb54fc9f2fd0a84dde3b31cf9f6929fb2d1f9
+      image: quay.io/modh/caikit-tgis-serving@sha256:fe0d1f1233d0b056ca7c690f765b20611e20837465674998e3d293df9b95e838
       env:
         - name: RUNTIME_LOCAL_MODELS_DIR
           value: /mnt/models

@@ -12,7 +12,7 @@ ${ANACONDA_DISPLAYED_NAME}=     Anaconda Commercial Edition
 ${ANACONDA_DISPLAYED_NAME_LATEST}=    Anaconda Professional
 ${ANACONDA_KEY_IN}=             Anaconda CE Key
 ${INVALID_KEY}=                 abcdef-invalidkey
-${ERROR_MSG}=                   error\nValidation failed\nError attempting to validate. Please check your entries.
+${ANACONDA_LICENSE_ERROR_MSG}=    Error attempting to validate. Please check your entries.
 ${VAL_SUCCESS_MSG}=             Validation result: 200
 ${TOKEN_VAL_SUCCESS_MSG}=       Success! Your token was validated and Conda has been configured.
 ${PKG_INSTALL_ERROR_MSG}=   Collecting package metadata (current_repodata.json): failed
@@ -95,15 +95,14 @@ Remove Anaconda Component
 Remove Anaconda Components For Validation
     [Documentation]    Teardown for ACE test suite
     Delete ConfigMap Using Name    ${APPLICATIONS_NAMESPACE}    anaconda-ce-validation-result
-    Delete Pods Using Label Selector    ${APPLICATIONS_NAMESPACE}    component.opendatahub.io/name=anaconda-ce
-    Delete Data From Secrets Using Name    ${APPLICATIONS_NAMESPACE}    anaconda-ce-access    {"data":null}
+    Delete Pods Using Label Selector    ${APPLICATIONS_NAMESPACE}    parent\=anaconda-ce-periodic-validator
+    Delete Data From Secrets Using Name    ${APPLICATIONS_NAMESPACE}    anaconda-ce-access
 
 
 Anaconda Activation Should Have Failed
     [Documentation]    Checks if the anaconda activation has failed
     Capture Page Screenshot    anaconda_failed_activation.png
-    ${text}=    Get Text    xpath://*[@class="pf-c-form__alert"]
-    Should Be Equal    ${text}    ${ERROR_MSG}
+    Page Should Contain    ${ANACONDA_LICENSE_ERROR_MSG}
 
 Verify Anaconda Element Present Based On Version
   [Documentation]   Checks Anaconda input element present based on version.

@@ -42,7 +42,7 @@ ${CUSTOM_INEXISTENT_GROUP}              inexistent-group
 
 *** Test Cases ***
 Verify That Login Page Is Shown When Reaching The RHODS Page
-    [Tags]      Sanity    Tier1
+    [Tags]      Tier1
     ...         ODS-694
     ...         ODS-355
     [Setup]     Test Setup For Login Page
@@ -54,10 +54,9 @@ Verify Content In RHODS Explore Section
     ...    It compares the actual data with the one registered in a JSON file. The checks are about:
     ...    - Card's details (text, badges, images)
     ...    - Sidebar (titles, links text, links status)
-    ...    ProductBug: RHOAIENG-10901, RHOAIENG-10875, RHOAIENG-1087
-    [Tags]    Sanity    Tier1
+    [Tags]    Sanity
     ...       ODS-488    ODS-993    ODS-749    ODS-352    ODS-282
-    ...       AutomationBugOnODH    ProductBug
+    ...       AutomationBugOnODH
     # TODO: In ODH there are only 2 Apps, we excpect 7 Apps according to:
     # tests/Resources/Files/AppsInfoDictionary_latest.json
     ${EXP_DATA_DICT}=    Load Expected Data Of RHODS Explore Section
@@ -69,7 +68,6 @@ Verify Content In RHODS Explore Section
 Verify RHODS Explore Section Contains Only Expected ISVs
     [Documentation]    It verifies if the ISV reported in Explore section of RHODS corresponds to expected ones
     [Tags]    Smoke
-    ...       Tier1
     ...       ODS-1890
     ...       AutomationBugOnODH
     # TODO: In ODH there are only 2 Apps, we excpect 7 Apps according to:
@@ -80,28 +78,12 @@ Verify RHODS Explore Section Contains Only Expected ISVs
     Check Number Of Displayed Cards Is Correct    expected_data=${EXP_DATA_DICT}
     Check Dashboard Diplayes Expected ISVs    expected_data=${EXP_DATA_DICT}
 
-Verify Disabled Cards Can Be Removed
-    [Documentation]     Verifies it is possible to remove a disabled card from Enabled page.
-    ...                 It uses a custom App as example to test the feature
-    ...                 ProductBug: RHODS-2902 - still present, but the test will
-    ...                 only trigger warning when issue happens
-    ...                 AutomationBug: implementation is to be refactored after RHOSAK removal
-    ...                 for ods-ci
-    [Tags]    Sanity    Tier1
-    ...       ODS-1081    ODS-1092
-    # Enable Custom App
-    # Remove Custom App From Dashboard
-    Run Keyword And Warn On Failure    Success Message Should Contain    ODS-CI Custom App
-    Verify Service Is Not Enabled    app_name=ODS-CI Custom App
-    Capture Page Screenshot    after_removal.png
-
 Verify License Of Disabled Cards Can Be Re-validated
     [Documentation]   Verifies it is possible to re-validate the license of a disabled card
     ...               from Enabled page. it uses Anaconda CE as example to test the feature.
-    ...               ProductBug: RHODS-6539
-    [Tags]    Sanity    Tier1
+    ...               It also verifies if it is possible to remove a disabled card.
+    [Tags]    Tier1
     ...       ODS-1097   ODS-357
-    ...       ProductBug
     Enable Anaconda    license_key=${ANACONDA_CE.ACTIVATION_KEY}
     Menu.Navigate To Page    Applications    Enabled
     Wait Until RHODS Dashboard Jupyter Is Visible
@@ -134,7 +116,7 @@ Verify Documentation Links HTTP Status Code
     [Documentation]    It verifies the documentation links present in question mark and
     ...    also checks the RHODS dcoumentation link present in resource page.
     ...    ProductBug: RHOAIENG-11451 (on ODH only)
-    [Tags]    Sanity    Tier1
+    [Tags]    Smoke
     ...       ODS-327    ODS-492
     ${links}=  Get RHODS Documentation Links From Dashboard
     # Compare Doc Links only by number, since ODH and RHOAI have diffrent URLs (but same count)
@@ -145,14 +127,12 @@ Verify Logged In Users Are Displayed In The Dashboard
     [Documentation]    It verifies that logged in users username is displayed on RHODS Dashboard.
     [Tags]    Sanity
     ...       ODS-354
-    ...       Tier1
     Verify Username Displayed On RHODS Dashboard   ${TEST_USER.USERNAME}
 
 Search and Verify GPU Items Appears In Resources Page
     [Documentation]    Verifies if all the expected learning items for GPU are listed
     ...                in RHODS Dashboard > Resources page
     [Tags]    Sanity
-    ...       Tier1
     ...       ODS-1226
     ...       ExcludeOnODH
     Search Items In Resources Section    GPU
@@ -160,7 +140,7 @@ Search and Verify GPU Items Appears In Resources Page
 
 Verify Favorite Resource Cards
     [Tags]    ODS-389    ODS-384
-    ...       Sanity
+    ...       Tier1
     [Documentation]    Verifies the item in Resource page can be marked se favorite.
     ...                It checks if favorite items are always listed as first regardless
     ...                the view type or sorting
@@ -169,18 +149,14 @@ Verify Favorite Resource Cards
     Sort Resources By    name
     ${list_of_tile_ids} =    Get List Of Ids Of Tiles
     Verify Star Icons Are Clickable    ${list_of_tile_ids}
-
     ${favorite_ids} =    Get Slice From List    ${list_of_tile_ids}    ${2}    ${7}
     Add The Items In Favorites    @{favorite_ids}
-
     ${list_of_tile_ids} =    Get List Of Ids Of Tiles
     Favorite Items Should Be Listed First    ${favorite_ids}    ${list_of_tile_ids}    ${5}
-
     Click Button    //*[@id="list-view"]
     Sleep    0.5s
     ${list_view_tiles} =    Get The List Of Ids of Tiles In List View
     Favorite Items Should Be Listed First    ${favorite_ids}    ${list_view_tiles}    ${5}
-
     Click Button    //*[@id="card-view"]
     Sleep    0.5s
     Favorite Items Should Be Listed First When Sorted By    ${favorite_ids}    type
@@ -208,26 +184,24 @@ Verify Notifications Are Shown When Notebook Builds Have Not Started
 
 Verify "Enabled" Keeps Being Available After One Of The ISV Operators If Uninstalled
    [Documentation]     Verify "Enabled" keeps being available after one of the ISV operators if uninstalled
-   ...                 ProductBug: RHODS-3985
-   [Tags]      Sanity
+   [Tags]      Tier3
    ...         ODS-1491
-   ...         Tier1
-   ...         ProductBug
    Check And Install Operator in Openshift    ${openvino_operator_name}   ${openvino_appname}
    Close All Browsers
    Verify Operator Is Added On ODS Dashboard  operator_name=${openvino_container_name}
-   Uninstall Operator And Check Enabled Page Is Rendering  operator_name=${openvino_operator_name}  operator_appname=${openvino_appname}
-   [Teardown]    Check And Uninstall Operator In Openshift    ${openvino_operator_name}   ${openvino_appname}    ${openvino_dashboard_app_id}
+   Uninstall Operator And Check Enabled Page Is Rendering
+   ...    operator_name=${openvino_operator_name}  operator_appname=${openvino_appname}
+   [Teardown]    Run Keyword And Ignore Error
+   ...    Check And Uninstall Operator In Openshift    
+   ...    ${openvino_operator_name}   ${openvino_appname}    ${openvino_dashboard_app_id}
 
 Verify Error Message In Logs When A RHODS Group Is Empty
     [Documentation]     Verifies the messages printed out in the logs of
     ...                 dashboard pods are the ones expected when an empty group
     ...                 is set as admin in OdhDashboardConfig CRD
-    ...                 ProductBug: RHODS-5420
-    [Tags]  Sanity
-    ...     Tier1
+    [Tags]  Tier2
     ...     ODS-1408
-    ...     ProductBug
+    ...     AutomationBug
     [Setup]     Set Variables For Group Testing
     Create Group    group_name=${CUSTOM_EMPTY_GROUP}
     ${lengths_dict_before}=     Get Lengths Of Dashboard Pods Logs
@@ -242,11 +216,9 @@ Verify Error Message In Logs When A RHODS Group Does Not Exist
     [Documentation]     Verifies the messages printed out in the logs of
     ...                 dashboard pods are the ones expected when an inexistent group
     ...                 is set as admin in OdhDashboardConfig CRD
-    ...                 ProductBug:  RHODS-5088
-    [Tags]  Sanity
-    ...     Tier1
+    [Tags]  Tier2
     ...     ODS-1494
-    ...     ProductBug
+    ...     AutomationBug
     [Setup]     Set Variables For Group Testing
     ${lengths_dict_before}=     Get Lengths Of Dashboard Pods Logs
     Set RHODS Admins Group To Inexistent Group
@@ -262,11 +234,9 @@ Verify Error Message In Logs When All Authenticated Users Are Set As RHODS Admin
     [Documentation]     Verifies the messages printed out in the logs of
     ...                 dashboard pods are the ones expected when 'system:authenticated'
     ...                 is set as admin in OdhDashboardConfig CRD
-    ...                 ProductBug:  RHODS-5088
-    [Tags]    Sanity
-    ...       Tier1
+    [Tags]    Tier2
     ...       ODS-1500
-    ...       ProductBug
+    ...       AutomationBug
     [Setup]     Set Variables For Group Testing
     ${lengths_dict_before}=     Get Lengths Of Dashboard Pods Logs
     Set RHODS Admins Group To system:authenticated
@@ -278,19 +248,17 @@ Verify Error Message In Logs When All Authenticated Users Are Set As RHODS Admin
 Verify Dashboard Pod Is Not Getting Restarted
     [Documentation]    Verify Dashboard Pod container doesn't restarted
     [Tags]    Sanity
-    ...       Tier1
     ...       ODS-374
     ${pod_names}    Get POD Names    ${APPLICATIONS_NAMESPACE}    app=${DASHBOARD_APP_NAME}
     Verify Containers Have Zero Restarts    ${pod_names}    ${APPLICATIONS_NAMESPACE}
 
-Verify Switcher to Masterhead
+Check Application Switcher Links
+    [Documentation]    Checks the Application Switcher Links to OpenShift Console and to Openshift Cluster Manager
     [Tags]    ODS-771
-    ...       Tier2
-    [Documentation]    Checks the link in switcher and also check the link of OCM in staging
-    Go To RHODS Dashboard
+    ...       Smoke
     Open Application Switcher Menu
-    Check Application Switcher Links To Openshift Console
-    Check Application Switcher Links To Openshift Cluster Manager
+    Check Application Switcher Link To Openshift Console
+    Check Application Switcher Link To Openshift Cluster Manager
 
 
 *** Keywords ***
@@ -608,7 +576,6 @@ Check And Uninstall Operator In Openshift
             Uninstall Operator    ${operator_name}
         ELSE
             FAIL      Only ${actual_no_of_operator} ${operator_name} is found in Operatorhub
-
         END
     END
     Close All Browsers
@@ -617,32 +584,32 @@ Check And Uninstall Operator In Openshift
     ...    browser_options=${BROWSER.OPTIONS}
     Remove Disabled Application From Enabled Page    app_id=${dashboard_app_id}
 
-Check Application Switcher Links To Openshift Cluster Manager
-    [Documentation]    Checks for HTTP status of OCM link in application switcher
-    Skip If RHODS Is Self-Managed
-    ${cluster_id}=    Get Cluster ID
-    ${cluster_name}=    Get Cluster Name By Cluster ID    ${cluster_id}
-    ${cluster_env}=    Fetch ODS Cluster Environment
-    IF    "${cluster_env}" == "stage"
-        ${ocm_staging_link}=    Set Variable    https://console.dev.redhat.com/openshift/details/${cluster_id}
-        Check HTTP Status Code    link_to_check=${ocm_staging_link}    verify_ssl=${False}
-        Go To   ${ocm_staging_link}
-    ELSE
-        ${list_of_links}=    Get Links From Switcher
-        ${ocm_prod_link}=    Set Variable    ${list_of_links}[1]
-        Check HTTP Status Code    ${ocm_prod_link}
-        Click Link    xpath://a[*[text()="OpenShift Cluster Manager"]]
-        Switch Window   NEW
-    END
-    Sleep  1
-    Login To OCM
-    Reload Page
-    Wait Until OCM Cluster Page Is Loaded    ${cluster_name}
-
-Check Application Switcher Links To Openshift Console
+Check Application Switcher Link To Openshift Console
     [Documentation]    Checks the HTTP status of OpenShift Console
     ${list_of_links}=    Get Links From Switcher
     ${status}=    Check HTTP Status Code    link_to_check=${list_of_links}[0]     verify_ssl=${False}
     Should Be Equal    ${list_of_links}[0]    ${OCP_CONSOLE_URL}/
     Should Be Equal    ${status}    ${200}
 
+Check Application Switcher Link To Openshift Cluster Manager
+    [Documentation]    Checks for HTTP status of OCM link and verify the Cluster in OCM
+    ${ocm_link}=    Get Element Attribute    xpath://a[contains(.,"OpenShift Cluster Manager")]    href 
+    ${is_self_managed}=    Is RHODS Self-Managed
+    IF    ${is_self_managed}
+        # For Self-Managed cluster there's no need to verify the cluster in OCM
+        Check HTTP Status Code    ${ocm_link}
+    ELSE
+        ${cluster_id}=    Get Cluster ID
+        ${cluster_env}=    Fetch ODS Cluster Environment
+        IF    "${cluster_env}" == "stage"
+            ${ocm_link}=    Set Variable    https://console.dev.redhat.com/openshift/details/${cluster_id}
+            Check HTTP Status Code    ${ocm_link}    verify_ssl=${False}
+        ELSE
+            Check HTTP Status Code    ${ocm_link}
+        END
+        Go To   ${ocm_link}
+        Sleep  1
+        Login To OCM
+        Reload Page
+        Wait Until OCM Cluster Page Is Loaded    ${cluster_id}
+    END

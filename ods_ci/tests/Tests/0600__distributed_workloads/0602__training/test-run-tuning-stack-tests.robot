@@ -31,7 +31,7 @@ Run Training operator ODH test base LoRA use case
 # Run Training operator ODH test base QLoRA use case
 #     [Documentation]    Run Go ODH tests for Training operator base QLoRA use case
 #     [Tags]  RHOAIENG-13142
-#     ...     Resources-GPU
+#     ...     Resources-GPU    NVIDIA-GPUs
 #     ...     Tier1
 #     ...     DistributedWorkloads
 #     ...     Training

@@ -1,6 +1,7 @@
 *** Settings ***
 Documentation       Collcetion of keywords to manage ISV operators via CLI
 Resource            ../../RHOSi.resource
+Resource            ../../OCP.resource
 Library             OperatingSystem
 
 
@@ -8,6 +9,8 @@ Library             OperatingSystem
 ${FILES_RESOURCES_DIRPATH}=    tests/Resources/Files
 ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}=    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
 ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}=   ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
+${IS_PRESENT}=                           0
+${installplan_name}                     ${EMPTY}
 
 
 *** Keywords ***
@@ -17,6 +20,7 @@ Install ISV Operator From OperatorHub Via CLI    # robocop: disable
     ...            ${channel}=stable    ${catalog_source_name}=certified-operators
     ...            ${cs_namespace}=openshift-marketplace    ${operator_group_name}=${NONE}
     ...            ${operator_group_ns}=${NONE}    ${operator_group_target_ns}=${NONE}
+    [Timeout]    10 minutes
     Log To Console    message=Installing the '${operator_name}' Operator
     IF    "${operator_group_name}" != "${NONE}"
         Create Operator Group    name=${operator_group_name}
@@ -32,7 +36,19 @@ Install ISV Operator From OperatorHub Via CLI    # robocop: disable
     ${rc}    ${out}=    Run And Return Rc And Output    sed -i'' -e "s/<CATALOG_SOURCE>/${catalog_source_name}/g" ${operator_sub_filepath}    # robocop: disable
     ${rc}    ${out}=    Run And Return Rc And Output    sed -i'' -e "s/<CS_NAMESPACE>/${cs_namespace}/g" ${operator_sub_filepath}    # robocop: disable
     Oc Apply    kind=Subscription    src=${operator_sub_filepath}
-
+    Wait Until Keyword Succeeds    1 min    0 sec
+    ...    Is Resource Present    Subscription    ${subscription_name}     ${namespace}    ${IS_PRESENT}
+    WHILE   "${installplan_name}" == "${EMPTY}"     limit=5m
+        ${installplan_name}=       Get Resource Attribute      ${namespace}
+        ...      Subscription       ${subscription_name}        .status.installPlanRef.name
+        Sleep       20s
+    END
+    ${installplan_approval}=     Get Resource Attribute      ${namespace}
+    ...      InstallPlan       ${installplan_name}        .spec.approval
+    IF    "${installplan_approval}" == "Manual"
+          ${return_code}    ${out}=     Run And Return Rc And Output   oc patch installplan ${installplan_name} -n ${namespace} --type='json' -p '[{"op": "replace", "path": "/spec/approved", "value": true}]'  #robocop:disable
+          Should Be Equal As Integers    ${return_code}     0   msg=Error while approving installplan
+    END
 
 Create Operator Group
     [Documentation]    Creates the Operator Group object which might be needed by an operator.

@@ -44,16 +44,18 @@ Verify User Can Set Custom RHODS Groups
 
 
 *** Keywords ***
+Create Custom Group
+    [Documentation]    Creates a custom group using oc cli command
+    [Arguments]    ${group_name}
+    ${group_created}=    Run Keyword And Return Status    Create Group    group_name=${group_name}
+    IF    ${group_created} == False
+          FAIL  Creation of ${group_name} group failed. Check the logs
+    END
+
 Create Custom Groups
     [Documentation]    Creates two user groups: custom-admins and customer-users
-    ${admin_created}=    Run Keyword And Return Status    Create Group  group_name=${CUSTOM_ADMINS_GROUP}
-    IF    $admin_created == False
-          FAIL  Creation of ${CUSTOM_ADMINS_GROUP} group failed. Check the logs
-    END
-    ${user_created}=     Run Keyword And Return Status    Create Group  group_name=${CUSTOM_USERS_GROUP}
-    IF    $user_created == False
-        FAIL    Creation of ${CUSTOM_USERS_GROUP} group failed. Check the logs
-    END
+    Create Custom Group    group_name=${CUSTOM_ADMINS_GROUP}
+    Create Custom Group    group_name=${CUSTOM_USERS_GROUP}
     OpenshiftLibrary.Oc Get    kind=Group   name=${CUSTOM_ADMINS_GROUP}
     OpenshiftLibrary.Oc Get    kind=Group   name=${CUSTOM_USERS_GROUP}
 
@@ -61,8 +63,10 @@ Delete Custom Groups
     [Documentation]    Deletes two user groups: custom-admins and customer-users
     Delete Group  group_name=${CUSTOM_ADMINS_GROUP}
     Delete Group  group_name=${CUSTOM_USERS_GROUP}
-    Run Keyword And Expect Error    EQUALS:ResourceOperationFailed: Get failed\nReason: Not Found    OpenshiftLibrary.Oc Get    kind=Group   name=${CUSTOM_ADMINS_GROUP}
-    Run Keyword And Expect Error    EQUALS:ResourceOperationFailed: Get failed\nReason: Not Found    OpenshiftLibrary.Oc Get    kind=Group   name=${CUSTOM_USERS_GROUP}
+    Run Keyword And Expect Error    EQUALS:ResourceOperationFailed: Get failed\nReason: Not Found
+    ...    OpenshiftLibrary.Oc Get    kind=Group   name=${CUSTOM_ADMINS_GROUP}
+    Run Keyword And Expect Error    EQUALS:ResourceOperationFailed: Get failed\nReason: Not Found
+    ...    OpenshiftLibrary.Oc Get    kind=Group   name=${CUSTOM_USERS_GROUP}
 
 Add Test Users To Custom Groups
     [Documentation]    Adds two tests users to custom-admins and customer-users groups
@@ -108,27 +112,31 @@ Set Custom Access Groups
 Check New Access Configuration Works As Expected
     [Documentation]    Checks if the new access configuration (using two custom groups)
     ...                works as expected in JH
-    Launch Dashboard   ocp_user_name=${TEST_USER_4.USERNAME}  ocp_user_pw=${TEST_USER_4.PASSWORD}
-    ...    ocp_user_auth_type=${TEST_USER_4.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}
-    ...    browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
-    ...    expected_page=${NONE}    wait_for_cards=${FALSE}
-    ${status}=    Run Keyword And Return Status     Launch Jupyter From RHODS Dashboard Link
-    Run Keyword And Continue On Failure    Should Be Equal    ${status}    ${FALSE}
-    Run Keyword And Continue On Failure    Page Should Contain    Access permissions needed
-    Run Keyword And Continue On Failure    Page Should Contain    ask your administrator to adjust your permissions.
+    Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}    alias=${NONE}
 
+    # Login with user that isn't part of any RHOAI group (neither admin nor user group)
+    Login To RHODS Dashboard    ${TEST_USER_4.USERNAME}    ${TEST_USER_4.PASSWORD}    ${TEST_USER_4.AUTH_TYPE}
+    Run Keyword And Continue On Failure
+    ...    Wait Until Page Contains    text=Access permissions needed    timeout=30s
+    Run Keyword And Continue On Failure
+    ...    Wait Until Page Contains    text=ask your administrator to adjust your permissions.    timeout=30s
     Capture Page Screenshot    perm_denied_custom.png
     Logout From RHODS Dashboard
-    Login To RHODS Dashboard  ${TEST_USER_2.USERNAME}  ${TEST_USER_2.PASSWORD}  ${TEST_USER_2.AUTH_TYPE}
+
+    # Login with user with admin permissions
+    Login To RHODS Dashboard    ${TEST_USER_2.USERNAME}    ${TEST_USER_2.PASSWORD}    ${TEST_USER_2.AUTH_TYPE}
     Wait For RHODS Dashboard To Load
     Launch Jupyter From RHODS Dashboard Link
-    Run Keyword And Continue On Failure   Verify Jupyter Access Level    expected_result=admin
+    Run Keyword And Continue On Failure    Verify Jupyter Access Level    expected_result=admin
     Capture Page Screenshot    perm_admin_custom.png
     Logout From RHODS Dashboard
-    Login To RHODS Dashboard  ${TEST_USER_3.USERNAME}  ${TEST_USER_3.PASSWORD}  ${TEST_USER_3.AUTH_TYPE}
-    Wait For RHODS Dashboard To Load    expected_page=Start a notebook server
-    ...    wait_for_cards=${FALSE}
-    Run Keyword And Continue On Failure   Verify Jupyter Access Level     expected_result=user
+
+    # Login with user with user permissions
+    Login To RHODS Dashboard    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}    ${TEST_USER_3.AUTH_TYPE}
+    # Note: we expect the Jupyter notebook spawner page because in previous step we logged out from this particular
+    # page and since it is preserved in the URL, we will be navigated to that page after the login again.
+    Wait For RHODS Dashboard To Load    expected_page=Start a notebook server    wait_for_cards=${FALSE}
+    Run Keyword And Continue On Failure    Verify Jupyter Access Level    expected_result=user
     Capture Page Screenshot    perm_user_custom.png
     Logout From RHODS Dashboard
 

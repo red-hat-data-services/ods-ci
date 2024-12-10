@@ -13,8 +13,8 @@ Test Tags       JupyterHub
 
 *** Variables ***
 ${NOTEBOOK_IMAGE} =         minimal-gpu
-${EXPECTED_CUDA_VERSION} =  12.1
-${EXPECTED_CUDA_VERSION_N_1} =  11.8
+${EXPECTED_CUDA_VERSION} =  12.4
+${EXPECTED_CUDA_VERSION_N_1} =  12.1
 
 
 *** Test Cases ***
@@ -22,35 +22,35 @@ Verify CUDA Image Can Be Spawned With GPU
     [Documentation]    Spawns CUDA image with 1 GPU and verifies that the GPU is
     ...    not available for other users.
     [Tags]  Sanity
-    ...     Resources-GPU
+    ...     Resources-GPU    NVIDIA-GPUs
     ...     ODS-1141    ODS-346    ODS-1359
     Pass Execution    Passing tests, as suite setup ensures that image can be spawned
 
 Verify CUDA Image Includes Expected CUDA Version
     [Documentation]    Checks CUDA version
     [Tags]  Sanity
-    ...     Resources-GPU
+    ...     Resources-GPU    NVIDIA-GPUs
     ...     ODS-1142
     Verify Installed CUDA Version    ${EXPECTED_CUDA_VERSION}
 
 Verify PyTorch Library Can See GPUs In Minimal CUDA
     [Documentation]    Installs PyTorch and verifies it can see the GPU
     [Tags]  Sanity
-    ...     Resources-GPU
+    ...     Resources-GPU    NVIDIA-GPUs
     ...     ODS-1144
     Verify Pytorch Can See GPU    install=True
 
 Verify Tensorflow Library Can See GPUs In Minimal CUDA
     [Documentation]    Installs Tensorflow and verifies it can see the GPU
     [Tags]  Sanity
-    ...     Resources-GPU
+    ...     Resources-GPU    NVIDIA-GPUs
     ...     ODS-1143
     Verify Tensorflow Can See GPU    install=True
 
 Verify Cuda Image Has NVCC Installed
     [Documentation]     Verifies NVCC Version in Minimal CUDA Image
     [Tags]  Sanity
-    ...     Resources-GPU
+    ...     Resources-GPU    NVIDIA-GPUs
     ...     ODS-483
     ${nvcc_version} =  Run Cell And Get Output    input=!nvcc --version
     Should Not Contain    ${nvcc_version}  /usr/bin/sh: nvcc: command not found
@@ -58,7 +58,7 @@ Verify Cuda Image Has NVCC Installed
 Verify Previous CUDA Notebook Image With GPU
     [Documentation]    Runs a workload after spawning the N-1 CUDA Notebook
     [Tags]    Tier2    LiveTesting
-    ...       Resources-GPU
+    ...       Resources-GPU    NVIDIA-GPUs
     ...       ODS-2128
     [Setup]    N-1 CUDA Setup
     Spawn Notebook With Arguments    image=${NOTEBOOK_IMAGE}    size=Small    gpus=1    version=previous
@@ -90,7 +90,7 @@ Verify CUDA Image Suite Setup
     # This will fail in case there are two nodes with the same number of GPUs
     # Since the overall available number won't change even after 1 GPU is assigned
     # However I can't think of a better way to execute this check, under the assumption that
-    # the Resources-GPU tag will always ensure there is 1 node with 1 GPU on the cluster.
+    # the Resources-GPU will always ensure there is 1 node with 1 GPU on the cluster.
     ${maxNo} =    Find Max Number Of GPUs In One Node
     ${maxSpawner} =    Fetch Max Number Of GPUs In Spawner Page
     # Need to continue execution even on failure or the whole suite will be failed

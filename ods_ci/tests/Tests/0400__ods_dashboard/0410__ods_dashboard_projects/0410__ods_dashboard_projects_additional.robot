@@ -14,7 +14,7 @@ Test Tags          Dashboard
 *** Variables ***
 ${PRJ_TITLE}=   ODS-CI DS Project 2
 ${PRJ_TITLE_GPU}=   ODS-CI DS Project GPU
-${PRJ_RESOURCE_NAME}=   ods-ci-ds-project-test-additional
+${PRJ_RESOURCE_NAME}=   ods-ci-ds-pr-test-0410
 ${PRJ_DESCRIPTION}=   ${PRJ_TITLE} is a test project for validating DS Project feature
 ${TOLERATIONS}=    workbench-tolerations
 ${TOLERATIONS_2}=    workbench-tolerations-two
@@ -84,7 +84,7 @@ Verify Notebook Tolerations Are Applied To Workbenches
 Verify User Can Add GPUs To Workbench
     [Documentation]    Verifies user can add GPUs to an already started workbench
     [Tags]    Tier1    Sanity
-    ...       ODS-2013    Resources-GPU
+    ...       ODS-2013    Resources-GPU    NVIDIA-GPUs
     Launch Data Science Project Main Page
     Create Workbench    workbench_title=${WORKBENCH_TITLE_GPU}  workbench_description=${EMPTY}
     ...    prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE_GPU}   deployment_size=Small
@@ -108,7 +108,7 @@ Verify User Can Add GPUs To Workbench
 Verify User Can Remove GPUs From Workbench
     [Documentation]    Verifies user can remove GPUs from an already started workbench
     [Tags]    Tier1    Sanity
-    ...       ODS-2014    Resources-GPU
+    ...       ODS-2014    Resources-GPU    NVIDIA-GPUs
     Launch Data Science Project Main Page
     Create Workbench    workbench_title=${WORKBENCH_TITLE_GPU}  workbench_description=${EMPTY}
     ...    prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE_GPU}   deployment_size=Small

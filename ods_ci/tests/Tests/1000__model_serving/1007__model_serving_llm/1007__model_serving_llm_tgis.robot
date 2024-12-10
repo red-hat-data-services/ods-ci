@@ -393,7 +393,7 @@ Verify User Can Set Requests And Limits For A Model    # robocop: off=too-long-t
 Verify Model Can Be Served And Query On A GPU Node    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
     ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    Tier1    ODS-2381    Resources-GPU
+    [Tags]    Tier1    ODS-2381    Resources-GPU    NVIDIA-GPUs
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=singlemodel-gpu
     ${test_namespace}=    Set Variable    singlemodel-gpu
     ${model_name}=    Set Variable    flan-t5-small-caikit
@@ -424,7 +424,7 @@ Verify Model Can Be Served And Query On A GPU Node    # robocop: off=too-long-te
     ...    port_forwarding=${IS_KSERVE_RAW}
     [Teardown]   Run Keywords
     ...    Clean Up Test Project    test_ns=${test_namespace}
-    ...    isvc_names=${model_name}    wait_prj_deletion=${FALSE}
+    ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}
     ...    AND
     ...    Run Keyword If    ${IS_KSERVE_RAW}    Terminate Process    llm-query-process    kill=true
 

@@ -59,6 +59,17 @@ ${KERAS_MODEL_NAME}=      resnet50
 ${KERAS_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_keras_rest_servingruntime.yaml
 ${INFERENCE_REST_INPUT_KERAS}=    @tests/Resources/Files/triton/kserve-triton-keras-rest-input.json
 ${EXPECTED_INFERENCE_REST_OUTPUT_FILE_KERAS}=       tests/Resources/Files/triton/kserve-triton-keras-rest-output.json
+${INFERENCE_GRPC_INPUT_FIL}=    tests/Resources/Files/triton/kserve-triton-fil-grpc-input.json
+${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE_FIL}=       tests/Resources/Files/triton/kserve-triton-fil-grpc-output.json
+${FIL_MODEL_NAME}=    xgboost
+${KERAS_RUNTIME_NAME_GRPC}=    triton-keras-grpc
+${KERAS_GRPC_RUNTIME_FILEPATH}=    ${RESOURCES_DIRPATH}/triton_keras_gRPC_servingruntime.yaml
+${INFERENCE_GRPC_INPUT_KERAS}=    tests/Resources/Files/triton/kserve-triton-keras-gRPC-input.json
+${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE_KERAS}=       tests/Resources/Files/triton/kserve-triton-keras-gRPC-output.json
+${FIL_MODEL_NAME}=    fil
+${FIL_RUNTIME_NAME_REST}=    triton-fil-rest
+${INFERENCE_REST_INPUT_FIL}=    @tests/Resources/Files/triton/kserve-triton-fil-rest-input.json
+${EXPECTED_INFERENCE_REST_OUTPUT_FILE_FIL}=       tests/Resources/Files/triton/kserve-triton-fil-rest-output.json
 ${PYTHON_MODEL_NAME}=   python
 ${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE_PYTHON}=       tests/Resources/Files/triton/kserve-triton-python-gRPC-output.json
 ${INFERENCE_GRPC_INPUT_PYTHON}=     tests/Resources/Files/triton/kserve-triton-python-gRPC-input.json
@@ -399,6 +410,7 @@ Test FIL Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-lo
     ...  Clean All Models Of Current User
     ...  AND
     ...  Delete Serving Runtime Template From CLI    displayed_name=triton-kserve-rest
+
 
 Test FIL Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of an fil model in Kserve using Triton

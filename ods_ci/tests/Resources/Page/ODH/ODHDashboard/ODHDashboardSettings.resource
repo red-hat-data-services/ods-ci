@@ -55,7 +55,7 @@ Launch Dashboard And Check User Management Option Is Available For The User
     IF    ${settings_should_be}
         # Wait up to 2 minutes as a workaround for bug RHOAIENG-11116
         Menu.Navigate To Page    Settings    User management    timeout=2m
-        Wait Until Element Is Visible    //button[@aria-label="Select the OpenShift groups that contain all Data Science administrators."]    timeout=10s        # This locator is failing
+        Wait Until Element Is Visible    //button[@aria-label="Select the OpenShift groups that contain all Data Science administrators."]    timeout=10s
     ELSE
         Verify Cluster Settings Is Not Available
     END

@@ -254,7 +254,7 @@ Verify Dashboard Pod Is Not Getting Restarted
 
 Check Application Switcher Links
     [Documentation]    Checks the Application Switcher Links to OpenShift Console and to Openshift Cluster Manager
-    [Tags]    ODS-771
+    [Tags]    ODS-771   Interop
     ...       Smoke
     Open Application Switcher Menu
     Check Application Switcher Link To Openshift Console

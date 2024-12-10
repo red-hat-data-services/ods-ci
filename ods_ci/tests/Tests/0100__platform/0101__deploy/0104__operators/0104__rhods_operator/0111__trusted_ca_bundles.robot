@@ -24,7 +24,7 @@ Validate Trusted CA Bundles State Managed
     [Documentation]  The purpose of this test case is to validate Trusted CA Bundles when in state Managed
     ...    With Trusted CA Bundles Managed, ConfigMap odh-trusted-ca-bundle is expected to be created in
     ...    each non-reserved namespace.
-    [Tags]    Operator    Smoke    ODS-2638    TrustedCABundle-Managed
+    [Tags]    Operator    Smoke    Interop    ODS-2638    TrustedCABundle-Managed
 
     Wait Until Keyword Succeeds    10 min    0 sec
     ...    Is Resource Present    project    ${TEST_NS}    ${TEST_NS}    ${IS_PRESENT}
@@ -45,7 +45,7 @@ Validate Trusted CA Bundles State Managed
 Validate Trusted CA Bundles State Unmanaged
     [Documentation]  The purpose of this test case is to validate Trusted CA Bundles when in state Unmanaged
     ...    With Trusted CA Bundles Unmanaged, ConfigMap odh-trusted-ca-bundle will not be managed by the operator.
-    [Tags]    Operator    Smoke    ODS-2638    TrustedCABundle-Unmanaged
+    [Tags]    Operator    Smoke    Interop    ODS-2638    TrustedCABundle-Unmanaged
 
     Set Trusted CA Bundle Management State    ${DSCI_NAME}    Unmanaged    ${OPERATOR_NS}
 
@@ -60,7 +60,7 @@ Validate Trusted CA Bundles State Unmanaged
 Validate Trusted CA Bundles State Removed
     [Documentation]  The purpose of this test case is to validate Trusted CA Bundles when in state Removed
     ...    With Trusted CA Bundles Removed, all odh-trusted-ca-bundle ConfigMaps will be removed.
-    [Tags]    Operator    Smoke    ODS-2638    TrustedCABundle-Removed
+    [Tags]    Operator    Smoke    Interop    ODS-2638    TrustedCABundle-Removed
 
     Set Trusted CA Bundle Management State    ${DSCI_NAME}    Removed    ${OPERATOR_NS}
 

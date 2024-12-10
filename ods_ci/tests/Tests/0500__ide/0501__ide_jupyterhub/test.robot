@@ -40,7 +40,7 @@ Can Login To Jupyterhub
     Wait Until Page Contains  Start a notebook server
 
 Can Spawn Notebook
-    [Tags]  Smoke
+    [Tags]  Smoke   Interop
     ...     ODS-1808
     Fix Spawner Status
     Select Notebook Image  science-notebook

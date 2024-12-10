@@ -16,14 +16,14 @@ Test Tags        JupyterHub
 
 *** Test Cases ***
 Logged Into OpenShift
-    [Tags]   Smoke
+    [Tags]   Smoke   Interop
     ...      ODS-127
     Open OCP Console
     Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     Wait Until OpenShift Console Is Loaded
 
 Can Launch Jupyterhub
-    [Tags]   Smoke
+    [Tags]   Smoke   Interop
     ...      ODS-935
     #This keyword will work with accounts that are not cluster admins.
     Launch RHOAI Via OCP Application Launcher
@@ -32,7 +32,7 @@ Can Launch Jupyterhub
     Launch Jupyter From RHODS Dashboard Link
 
 Can Login To Jupyterhub
-    [Tags]   Smoke
+    [Tags]   Smoke   Interop
     ...      ODS-936
     Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =  Is Service Account Authorization Required

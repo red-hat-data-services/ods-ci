@@ -21,7 +21,7 @@ Test Tags       JupyterHub
 Verify All OOTB Images Have Version Dropdowns
     [Documentation]    Verifies all images in ${IMAGE_LIST} have a version dropdown
     ...                with an N and N-1 pick.
-    [Tags]    Smoke
+    [Tags]    Smoke   Interop
     ...       ODS-2125
     [Setup]    Multiple Image Tags Suite Setup
     FOR    ${image}    IN    @{IMAGE_LIST}

@@ -20,7 +20,7 @@ Verify Anaconda Professional Is Available In RHODS Dashboard Explore/Enabled Pag
   [Documentation]  Tests if ACE and its Activation button are present in Explore page.
   ...              If the button is not there, it checks if ACE is already enabled
   [Tags]  Smoke
-  ...     ODS-262
+  ...     ODS-262   Interop
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Wait For RHODS Dashboard To Load

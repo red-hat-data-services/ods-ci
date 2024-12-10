@@ -252,7 +252,7 @@ Verify RHODS Dashboard Explore And Enabled Page Has No Message With No Component
 Verify RHODS Display Name and Version
     [Documentation]   Verify consistent rhods display name and version using
     ...    ClusterServiceVersion CR
-    [Tags]    Smoke
+    [Tags]    Smoke   Interop
     ...       Tier1
     ...       ODS-1862
     IF  "${PRODUCT}" == "${None}" or "${PRODUCT}" == "RHODS"
@@ -289,7 +289,7 @@ Verify RHODS Notebooks Network Policies
 
 Verify All The Pods Are Using Image Digest Instead Of Tags
     [Documentation]    Verifies that the all the rhods pods are using image digest
-    [Tags]    Smoke
+    [Tags]    Smoke   Interop
     ...       Tier1
     ...       ODS-2406
     ...       Operator

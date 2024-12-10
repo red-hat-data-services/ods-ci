@@ -19,7 +19,7 @@ ${image_path}                   image-registry.openshift-image-registry.svc:5000
 *** Test Cases ***
 Verify Intel AIKIT Is Available In RHODS Dashboard Explore Page
   [Tags]  Smoke
-  ...     ODS-1017
+  ...     ODS-1017   Interop
   Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
   Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Wait For RHODS Dashboard To Load

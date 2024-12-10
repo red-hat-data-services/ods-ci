@@ -33,7 +33,7 @@ ${EXPECTED_INFERENCE_OUTPUT_OPENVINO}=    {"model_name":"${MODEL_NAME}__isvc-865
 Verify Model Serving Installation
     [Documentation]    Verifies that the core components of model serving have been
     ...    deployed in the ${APPLICATIONS_NAMESPACE} namespace
-    [Tags]    Smoke
+    [Tags]    Smoke   Interop
     ...       OpenDataHub
     ...       ODS-1919
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec

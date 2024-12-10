@@ -116,7 +116,7 @@ Verify Documentation Links HTTP Status Code
     [Documentation]    It verifies the documentation links present in question mark and
     ...    also checks the RHODS dcoumentation link present in resource page.
     ...    ProductBug: RHOAIENG-11451 (on ODH only)
-    [Tags]    Smoke
+    [Tags]    Smoke   Interop
     ...       ODS-327    ODS-492
     ${links}=  Get RHODS Documentation Links From Dashboard
     # Compare Doc Links only by number, since ODH and RHOAI have diffrent URLs (but same count)

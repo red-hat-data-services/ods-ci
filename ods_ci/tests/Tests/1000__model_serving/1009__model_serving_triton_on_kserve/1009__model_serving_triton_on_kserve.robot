@@ -12,8 +12,9 @@ Resource          ../../../Resources/Page/ODH/Monitoring/Monitoring.resource
 Resource          ../../../Resources/OCP.resource
 Resource          ../../../Resources/CLI/ModelServing/modelmesh.resource
 Resource          ../../../Resources/Common.robot
+Resource          ../../../Resources/CLI/ModelServing/llm.resource
 Suite Setup       Triton On Kserve Suite Setup
-Suite Teardown    Triton On Kserve Suite Teardown
+#Suite Teardown    Triton On Kserve Suite Teardown
 Test Tags         Kserve
 
 
@@ -72,6 +73,15 @@ ${EXPECTED_INFERENCE_REST_OUTPUT_FILE_FIL}=       tests/Resources/Files/triton/k
 ${PYTHON_MODEL_NAME}=   python
 ${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE_PYTHON}=       tests/Resources/Files/triton/kserve-triton-python-gRPC-output.json
 ${INFERENCE_GRPC_INPUT_PYTHON}=     tests/Resources/Files/triton/kserve-triton-python-gRPC-input.json
+${KSERVE_MODE}=    RawDeployment   # Serverless
+${DALI_MODEL_NAME}=    dali
+${PROTOCOL}=     http
+${TEST_NS}=        tritonmodel
+${DOWNLOAD_IN_PVC}=    ${FALSE}
+${LLM_RESOURCES_DIRPATH}=    tests/Resources/Files/llm
+${INFERENCESERVICE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/serving_runtimes/base/isvc.yaml
+${INFERENCESERVICE_FILEPATH_NEW}=    ${LLM_RESOURCES_DIRPATH}/serving_runtimes/isvc
+${INFERENCESERVICE_FILLED_FILEPATH}=    ${INFERENCESERVICE_FILEPATH_NEW}/isvc_filled.yaml
 
 *** Test Cases ***
 Test Onnx Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
@@ -407,7 +417,7 @@ Test FIL Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-lo
     ...  Clean All Models Of Current User
     ...  AND
     ...  Delete Serving Runtime Template From CLI    displayed_name=triton-kserve-rest
-    
+
 Test FIL Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of an fil model in Kserve using Triton
     [Tags]    Sanity    RHOAIENG-15823
@@ -484,17 +494,90 @@ Test Tensorflow Model Rest Inference Via UI (Triton on Kserve)    # robocop: off
     ...  Delete Serving Runtime Template From CLI    displayed_name=triton-kserve-rest
 
 
+
+Test Dali Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
+    [Documentation]    Test the deployment of an Dali model in Kserve using Triton
+    [Tags]    Tier2    Resources-GPU    NVIDIA-GPUs     RunThisTest
+
+    Setup Test Variables    model_name=${DALI_MODEL_NAME}    use_pvc=${FALSE}    use_gpu=${TRUE}
+    ...    kserve_mode=${KSERVE_MODE}
+    Set Project And Runtime    runtime=${ONNX_RUNTIME_NAME}     protocol=${PROTOCOL}     namespace=${test_namespace}
+    ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${DALI_MODEL_NAME}
+    ...    storage_size=100Mi    memory_request=100Mi
+    ${requests}=    Create Dictionary    memory=1Gi
+    Compile Inference Service YAML    isvc_name=${DALI_MODEL_NAME}
+    ...    sa_name=${EMPTY}
+    ...    model_storage_uri=${storage_uri}
+    ...    model_format=python - 1    serving_runtime=${ONNX_RUNTIME_NAME}
+    ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
+    Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
+    ...    namespace=${test_namespace}
+    # File is not needed anymore after applying
+    Remove File    ${INFERENCESERVICE_FILLED_FILEPATH}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${DALI_MODEL_NAME}
+    ...    namespace=${test_namespace}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${DALI_MODEL_NAME}
+    ${service_port}=    Extract Service Port    service_name=${DALI_MODEL_NAME}-predictor    protocol=TCP
+    ...    namespace=${test_namespace}
+    IF   "${KSERVE_MODE}"=="RawDeployment"
+        Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}  local_port=${service_port}
+        ...    remote_port=${service_port}    process_alias=triton-process
+    END
+    Verify Model Inference With Retries   model_name=${DALI_MODEL_NAME}    inference_input=${INFERENCE_INPUT}
+    ...    expected_inference_output=${EXPECTED_INFERENCE_OUTPUT}   project_title=${test_namespace}
+    ...    deployment_mode=Cli  kserve_mode=${KSERVE_MODE}    service_port=${service_port}
+    ...    end_point=/v2/models/${model_name}/infer  retries=10
+    #[Teardown]    Run Keywords
+    #...    Clean Up Test Project    test_ns=${test_namespace}
+    #...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}    kserve_mode=${KSERVE_MODE}
+    #...    AND
+    #...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    triton-process    kill=true
+
+
 *** Keywords ***
 Triton On Kserve Suite Setup
     [Documentation]    Suite setup steps for testing Triton. It creates some test variables
     ...                and runs RHOSi setup
     Set Library Search Order    SeleniumLibrary
-    Skip If Component Is Not Enabled    kserve
-    RHOSi Setup
-    Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
-    ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
+    #Skip If Component Is Not Enabled    kserve
+    #RHOSi Setup
+    #Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
+    #...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
     Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
-    Clean All Models Of Current User
+    #Clean All Models Of Current User
+
+Setup Test Variables    # robocop: off=too-many-calls-in-keyword
+    [Documentation]    Sets variables for the Suite
+    [Arguments]    ${model_name}    ${kserve_mode}=Serverless    ${use_pvc}=${FALSE}    ${use_gpu}=${FALSE}
+    ...    ${model_path}=${model_name}
+    Set Test Variable    ${model_name}
+    ${models_names}=    Create List    ${model_name}
+    Set Test Variable    ${models_names}
+    Set Test Variable    ${model_path}
+    Set Test Variable    ${test_namespace}     ${TEST_NS}-${model_name}
+    IF    ${use_pvc}
+        Set Test Variable    ${storage_uri}    pvc://${model_name}-claim/${model_path}
+    ELSE
+        Set Test Variable    ${storage_uri}    s3://${S3.BUCKET_3.NAME}/${model_path}
+    END
+    IF   ${use_gpu}
+        ${limits}=    Create Dictionary    nvidia.com/gpu=1
+        Set Test Variable    ${limits}
+    ELSE
+        Set Test Variable    ${limits}    &{EMPTY}
+    END
+    IF    "${KSERVE_MODE}" == "RawDeployment"
+        Set Test Variable    ${use_port_forwarding}    ${TRUE}
+    ELSE
+        Set Test Variable    ${use_port_forwarding}    ${FALSE}
+    END
+    Set Log Level    NONE
+    Set Test Variable    ${access_key_id}    ${S3.AWS_ACCESS_KEY_ID}
+    Set Test Variable    ${access_key}    ${S3.AWS_SECRET_ACCESS_KEY}
+    Set Test Variable    ${endpoint}    ${MODELS_BUCKET.ENDPOINT}
+    Set Test Variable    ${region}    ${MODELS_BUCKET.REGION}
+    Set Log Level    INFO
 
 Triton On Kserve Suite Teardown
     [Documentation]    Suite teardown steps after testing DSG. It Deletes
@@ -502,14 +585,15 @@ Triton On Kserve Suite Teardown
     # Even if kw fails, deleting the whole project will also delete the model
     # Failure will be shown in the logs of the run nonetheless
     IF    ${MODEL_CREATED}
-        Clean All Models Of Current User
+        #Clean All Models Of Current User
+        Log    SKIP
     ELSE
         Log    Model not deployed, skipping deletion step during teardown    console=true
     END
     ${projects}=    Create List    ${PRJ_TITLE}
-    Delete List Of Projects Via CLI   ocp_projects=${projects}
+    #Delete List Of Projects Via CLI   ocp_projects=${projects}
     # Will only be present on SM cluster runs, but keyword passes
     # if file does not exist
     Remove File    openshift_ca_istio_knative.crt
     SeleniumLibrary.Close All Browsers
-    RHOSi Teardown
+    #RHOSi Teardown

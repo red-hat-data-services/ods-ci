@@ -27,9 +27,9 @@ ${SERVICEMESH_CR_NS}=    istio-system
 ...                      vllm-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/vllm_servingruntime_{{protocol}}.yaml
 ...                      ovms-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/ovms_servingruntime_{{protocol}}.yaml
 ...                      caikit-standalone-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/caikit_standalone_servingruntime_{{protocol}}.yaml     # robocop: disable
+...                      triton-kserve-rest=tests/Resources/Files/triton/triton_onnx_rest_servingruntime.yaml
 ${DOWNLOAD_PVC_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_model_in_pvc.yaml
 ${DOWNLOAD_PVC_FILLED_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_model_in_pvc_filled.yaml
-
 ${DOWNLOAD_PROMPTS_PVC_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_prompts_in_pvc.yaml
 ${DOWNLOAD_PROMPTS_PVC_FILLED_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_prompts_in_pvc_filled.yaml
 ${MATCHING_RATIO}=    ${60}

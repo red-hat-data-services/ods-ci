@@ -61,6 +61,7 @@ Delete Pods Using Label Selector
 Check If Pod Exists
     [Documentation]    Check existence of an openshift pod by label selector
     [Arguments]    ${namespace}    ${label_selector}    ${status_only}=${TRUE}
+    Log    ${label_selector}
     ${status}    ${val}=    Run Keyword And Ignore Error    Oc Get    kind=Pod    namespace=${namespace}
         ...    label_selector=${label_selector}
     Log    message=status:${status}    console=TRUE

@@ -21,7 +21,7 @@ ${SAVE_BUTTON}=    //button[@data-testid="save-new-button"]
 Add OpenShift Groups To Data Science Administrators
     [Documentation]  Add OpenShift Groups to Data Science administrators From RHODS Dashboard
     [Arguments]     @{admin_groups}
-    Click Button   ${ADMIN_GROUPS_SECTION}//button[@aria-label="Options menu"]
+    Click Button   ${ADMIN_GROUPS_SECTION}//button[@aria-label="Select the OpenShift groups that contain all Data Science administrators."]
     FOR    ${group}    IN    @{admin_groups}
         ${present}=    Run Keyword And Return Status    Element Should Be Visible
         ...    ${ADMIN_GROUPS_LIST}//*[text()="${group}"]
@@ -34,7 +34,7 @@ Add OpenShift Groups To Data Science Administrators
 Add OpenShift Groups To Data Science User Groups
     [Documentation]  Add OpenShift Groups to Data Science User From RHODS Dashboard
     [Arguments]     @{user_groups}
-    Click Button   ${USER_GROUPS_SECTION}//button[@aria-label="Options menu"]
+    Click Button   ${USER_GROUPS_SECTION}//button[@aria-label="Select the OpenShift groups that contain all Data Science users."]
     FOR    ${group}    IN    @{user_groups}
         ${present}=    Run Keyword And Return Status    Element Should Be Visible
         ...    ${USER_GROUPS_LIST}//*[text()="${group}"]
@@ -55,7 +55,7 @@ Launch Dashboard And Check User Management Option Is Available For The User
     IF    ${settings_should_be}
         # Wait up to 2 minutes as a workaround for bug RHOAIENG-11116
         Menu.Navigate To Page    Settings    User management    timeout=2m
-        Wait Until Element Is Visible    //button[@aria-label="Options menu"]    timeout=10s
+        Wait Until Element Is Visible    //button[@aria-label="Select the OpenShift groups that contain all Data Science administrators."]    timeout=10s
     ELSE
         Verify Cluster Settings Is Not Available
     END

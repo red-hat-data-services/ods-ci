@@ -53,7 +53,7 @@ Verify Pod Toleration
 
 Verify RHODS User Groups
     [Documentation]    Verify User Configuration after the upgrade
-    [Tags]      Upgrade     AutomationBug
+    [Tags]      Upgrade
     ${admin}        Set Variable        ${payload[0]['spec']['groupsConfig']['adminGroups']}
     ${user}     Set Variable        ${payload[0]['spec']['groupsConfig']['allowedGroups']}
     Should Be Equal As Strings      '${admin}'      'rhods-admins,rhods-users'

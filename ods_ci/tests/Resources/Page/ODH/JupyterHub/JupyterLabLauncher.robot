@@ -167,10 +167,9 @@ Clean Up Server
     Should Match    "${ls_server}"    "${EMPTY}"
 
 Get User Notebook Pod Name
-  [Documentation]   Returns notebook pod name for given username  (e.g. for user ldap-admin1 it will be jupyterhub-nb-ldap-2dadmin1)
+  [Documentation]   Returns notebook pod name for given username  (e.g. for user ldap-admin1 it will be jupyter-nb-ldap-2dadmin1-0)
   [Arguments]  ${username}
   ${safe_username}=  Get Safe Username    ${username}
-  #${notebook_pod_name}=   Set Variable  jupyterhub-nb-${safe_username}
   ${notebook_pod_name}=   Set Variable  jupyter-nb-${safe_username}-0
   RETURN  ${notebook_pod_name}
 

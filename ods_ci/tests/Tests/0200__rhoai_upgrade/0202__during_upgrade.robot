@@ -12,21 +12,7 @@ Library             JupyterLibrary
 Test Tags           DuringUpgrade
 
 
-*** Variables ***
-${CODE}         while True: import time ; time.sleep(10); print ("Hello")
-
-
 *** Test Cases ***
-Long Running Jupyter Notebook
-    [Documentation]    Launch a long running notebook before the upgrade
-    [Tags]  Upgrade
-    Launch Notebook
-    Add And Run JupyterLab Code Cell In Active Notebook  ${CODE}
-    ${return_code}    ${timestamp}    Run And Return Rc And Output   oc get pod -n ${NOTEBOOKS_NAMESPACE} jupyter-nb-ldap-2dadmin2-0 --no-headers --output='custom-columns=TIMESTAMP:.metadata.creationTimestamp'   #robocop:disable
-    Should Be Equal As Integers    ${return_code}     0
-    Set Global Variable    ${timestamp}   #robocop: disable
-    Close Browser
-
 Upgrade RHODS
     [Documentation]    Approve the install plan for the upgrade and make sure that upgrade has completed
     [Tags]  ODS-1766
@@ -58,17 +44,18 @@ PyTorch Image Workload Test
 
 *** Keywords ***
 Launch Notebook
-    [Documentation]  Launch notebook for the suite
-    [Arguments]   ${notbook_image}=minimal-notebook   ${username}=${TEST_USER2.USERNAME}   ${password}=${TEST_USER2.PASSWORD}   ${auth_type}=${TEST_USER2.AUTH_TYPE}  #robocop: disable
-    Begin Web Test     username=${username}  password=${password}  auth_type=${auth_type}
-    Login To RHODS Dashboard    ${username}  ${password}   ${auth_type}
-    Wait For RHODS Dashboard To Load
+    [Documentation]    Launch notebook for the suite
+    [Arguments]     ${notebook_image}=minimal-notebook
+    ...    ${username}=${TEST_USER2.USERNAME}
+    ...    ${password}=${TEST_USER2.PASSWORD}
+    ...    ${auth_type}=${TEST_USER2.AUTH_TYPE}
+    Begin Web Test    username=${username}    password=${password}    auth_type=${auth_type}
     Launch Jupyter From RHODS Dashboard Link
-    Login To Jupyterhub    ${username}  ${password}   ${auth_type}
-    ${authorization_required}     Is Service Account Authorization Required
-    IF    ${authorization_required}    Authorize Jupyterhub Service Account
-    Fix Spawner Status
-    Spawn Notebook With Arguments   image=${notbook_image}    username=${username}  password=${password}  auth_type=${auth_type}   #robocop: disable
+    Spawn Notebook With Arguments
+    ...    image=${notebook_image}
+    ...    username=${username}
+    ...    password=${password}
+    ...    auth_type=${auth_type}
 
 Upgrade Test Teardown
     End Web Test

@@ -81,7 +81,7 @@ Verify Culler is Enabled
 
 Verify Notebook Has Not Restarted
     [Documentation]    Verify Notbook pod has not restarted after the upgrade
-    [Tags]      Upgrade
+    [Tags]      Upgrade     AutomationBug       RHOAIENG-14840
     # robocop:disable
     ${return_code}    ${new_timestamp}    Run And Return Rc And Output
     ...    oc get pod -n ${NOTEBOOKS_NAMESPACE} jupyter-nb-ldap-2dadmin2-0 --no-headers --output='custom-columns=TIMESTAMP:.metadata.creationTimestamp'

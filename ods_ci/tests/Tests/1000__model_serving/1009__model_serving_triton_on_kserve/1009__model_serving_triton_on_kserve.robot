@@ -14,7 +14,7 @@ Resource          ../../../Resources/CLI/ModelServing/modelmesh.resource
 Resource          ../../../Resources/Common.robot
 Resource          ../../../Resources/CLI/ModelServing/llm.resource
 Suite Setup       Triton On Kserve Suite Setup
-#Suite Teardown    Triton On Kserve Suite Teardown
+Suite Teardown    Triton On Kserve Suite Teardown
 Test Tags         Kserve
 
 
@@ -497,7 +497,7 @@ Test Tensorflow Model Rest Inference Via UI (Triton on Kserve)    # robocop: off
 
 Test Dali Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of an Dali model in Kserve using Triton
-    [Tags]    Tier2    Resources-GPU    NVIDIA-GPUs     RunThisTest
+    [Tags]    Tier2    Resources-GPU    NVIDIA-GPUs    RunThisTest
 
     Setup Test Variables    model_name=${DALI_MODEL_NAME}    use_pvc=${FALSE}    use_gpu=${TRUE}
     ...    kserve_mode=${KSERVE_MODE}
@@ -528,11 +528,11 @@ Test Dali Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-l
     ...    expected_inference_output=${EXPECTED_INFERENCE_OUTPUT}   project_title=${test_namespace}
     ...    deployment_mode=Cli  kserve_mode=${KSERVE_MODE}    service_port=${service_port}
     ...    end_point=/v2/models/${model_name}/infer  retries=10
-    #[Teardown]    Run Keywords
-    #...    Clean Up Test Project    test_ns=${test_namespace}
-    #...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}    kserve_mode=${KSERVE_MODE}
-    #...    AND
-    #...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    triton-process    kill=true
+    [Teardown]    Run Keywords
+    ...    Clean Up Test Project    test_ns=${test_namespace}
+    ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}    kserve_mode=${KSERVE_MODE}
+    ...    AND
+    ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    triton-process    kill=true
 
 
 *** Keywords ***
@@ -540,12 +540,12 @@ Triton On Kserve Suite Setup
     [Documentation]    Suite setup steps for testing Triton. It creates some test variables
     ...                and runs RHOSi setup
     Set Library Search Order    SeleniumLibrary
-    #Skip If Component Is Not Enabled    kserve
-    #RHOSi Setup
-    #Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
-    #...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
+    Skip If Component Is Not Enabled    kserve
+    RHOSi Setup
+    Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
+    ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
     Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
-    #Clean All Models Of Current User
+    Clean All Models Of Current User
 
 Setup Test Variables    # robocop: off=too-many-calls-in-keyword
     [Documentation]    Sets variables for the Suite
@@ -585,15 +585,14 @@ Triton On Kserve Suite Teardown
     # Even if kw fails, deleting the whole project will also delete the model
     # Failure will be shown in the logs of the run nonetheless
     IF    ${MODEL_CREATED}
-        #Clean All Models Of Current User
-        Log    SKIP
+        Clean All Models Of Current User
     ELSE
         Log    Model not deployed, skipping deletion step during teardown    console=true
     END
     ${projects}=    Create List    ${PRJ_TITLE}
-    #Delete List Of Projects Via CLI   ocp_projects=${projects}
+    Delete List Of Projects Via CLI   ocp_projects=${projects}
     # Will only be present on SM cluster runs, but keyword passes
     # if file does not exist
     Remove File    openshift_ca_istio_knative.crt
     SeleniumLibrary.Close All Browsers
-    #RHOSi Teardown
+    RHOSi Teardown

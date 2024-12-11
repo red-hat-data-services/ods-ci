@@ -43,6 +43,8 @@ ${MODEL_NAME}=    test-model
 ${MODEL_CREATED}=    ${FALSE}
 ${RUNTIME_NAME}=    Model Serving Test
 ${DW_PROJECT_CREATED}=    False
+${UPGRADE_NS}    upgrade
+${UPGRADE_CONFIG_MAP}    upgrade-config-map
 
 
 *** Test Cases ***
@@ -80,13 +82,26 @@ Verify Culler is Enabled
     END
 
 Verify Notebook Has Not Restarted
-    [Documentation]    Verify Notbook pod has not restarted after the upgrade
+    [Documentation]    Verify Notebook pod has not restarted after the upgrade
     [Tags]      Upgrade
-    # robocop:disable
+    ${notebook_name}=    Get User CR Notebook Name    ${TEST_USER2.USERNAME}
+    ${notebook_pod_name}=    Get User Notebook Pod Name    ${TEST_USER2.USERNAME}
+
+    # Get the running notebook creation timestamp
     ${return_code}    ${new_timestamp}    Run And Return Rc And Output
-    ...    oc get pod -n ${NOTEBOOKS_NAMESPACE} jupyter-nb-ldap-2dadmin2-0 --no-headers --output='custom-columns=TIMESTAMP:.metadata.creationTimestamp'
-    Should Be Equal As Integers     ${return_code}      0
-    Should Be Equal     ${timestamp}        ${new_timestamp}        msg=Running notebook pod has restarted
+    ...    oc get pod -n ${NOTEBOOKS_NAMESPACE} ${notebook_pod_name} --no-headers --output='custom-columns=TIMESTAMP:.metadata.creationTimestamp'    # robocop: disable: line-too-long
+    Should Be Equal As Integers    ${return_code}    0    msg=${new_timestamp}
+
+    # Get the running notebook creation timestamp from the upgrade ConfigMap safed in the previous
+    # phase (before the actual RHOAI upgrade)
+    ${return_code}    ${ntb_creation_timestamp}    Run And Return Rc And Output
+    ...    oc get configmap ${UPGRADE_CONFIG_MAP} -n ${UPGRADE_NS} -o jsonpath='{.data.ntb_creation_timestamp}'
+    Should Be Equal As Integers    ${return_code}    0    msg=${ntb_creation_timestamp}
+
+    # The timestamps should be equal
+    Should Be Equal    ${ntb_creation_timestamp}    ${new_timestamp}    msg=Running notebook pod has restarted
+
+    [Teardown]    Terminate Running Notebook    ${notebook_name}
 
 Verify Custom Image Is Present
     [Documentation]    Verify Custom Noteboook is not deleted after the upgrade
@@ -315,6 +330,13 @@ Delete OOTB Image
     ...    namespace=${APPLICATIONS_NAMESPACE}
     IF    not ${status}    Fail    Notebook image is deleted after the upgrade
     IF    not ${IS_SELF_MANAGED}    Managed RHOAI Upgrade Test Teardown
+
+Terminate Running Notebook
+    [Documentation]    Terminates the running notebook instance
+    [Arguments]     ${notebook_name}
+    ${return_code}    ${cmd_output}    Run And Return Rc And Output
+    ...    oc delete Notebook.kubeflow.org -n ${NOTEBOOKS_NAMESPACE} ${notebook_name}
+    Should Be Equal As Integers    ${return_code}    0    msg=${cmd_output}
 
 Managed RHOAI Upgrade Test Teardown
     # robocop: off=too-many-calls-in-keyword

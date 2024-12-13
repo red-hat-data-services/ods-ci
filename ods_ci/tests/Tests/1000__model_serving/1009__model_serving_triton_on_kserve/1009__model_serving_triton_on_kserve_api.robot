@@ -30,23 +30,23 @@ ${LLM_RESOURCES_DIRPATH}=    tests/Resources/Files/llm
 ${INFERENCESERVICE_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/serving_runtimes/base/isvc.yaml
 ${INFERENCESERVICE_FILEPATH_NEW}=    ${LLM_RESOURCES_DIRPATH}/serving_runtimes/isvc
 ${INFERENCESERVICE_FILLED_FILEPATH}=    ${INFERENCESERVICE_FILEPATH_NEW}/isvc_filled.yaml
-${ONNX_RUNTIME_NAMEs}=  triton-kserve-runtime
+${KSERVE_RUNTIME_REST_NAME}=  triton-kserve-runtime
 
 
 *** Test Cases ***
 Test Python Model Rest Inference Via API (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of python model in Kserve using Triton
-    [Tags]    Tier2    Resources-GPU    NVIDIA-GPUs    RunThisTest
+    [Tags]    Tier2    RHOAIENG-16912
     Setup Test Variables    model_name=${PYTHON_MODEL_NAME}    use_pvc=${FALSE}    use_gpu=${FALSE}
     ...    kserve_mode=${KSERVE_MODE}   model_path=triton/model_repository/
-    Set Project And Runtime    runtime=${ONNX_RUNTIME_NAMEs}     protocol=${PROTOCOL}     namespace=${test_namespace}
+    Set Project And Runtime    runtime=${KSERVE_RUNTIME_REST_NAME}     protocol=${PROTOCOL}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${PYTHON_MODEL_NAME}
     ...    storage_size=100Mi    memory_request=100Mi
     ${requests}=    Create Dictionary    memory=1Gi
     Compile Inference Service YAML    isvc_name=${PYTHON_MODEL_NAME}
     ...    sa_name=models-bucket-sa
     ...    model_storage_uri=${storage_uri}
-    ...    model_format=python  serving_runtime=${ONNX_RUNTIME_NAMEs}
+    ...    model_format=python  serving_runtime=${KSERVE_RUNTIME_REST_NAME}
     ...    version="1"
     ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}

@@ -2,6 +2,8 @@
 set -e
 
 GPU_INSTALL_DIR="$(dirname "$0")"
+AMD_DC_NS="kube-amd-gpu"
+ROCM_VERSION="6.2.2"
 
 function create_registry_network() {
     oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"storage":{"emptyDir":{}}}}'
@@ -57,18 +59,28 @@ has_csv_succeeded() {
 
 function create_devconfig() {
   dc_name="dc-internal-registry"
-  dc=$(oc get DeviceConfig $dc_name -n openshift-amd-gpu -oname --ignore-not-found)
+  dc=$(oc get DeviceConfig $dc_name -n $AMD_DC_NS -oname --ignore-not-found)
   if [[ -n $dc ]];
     then
       echo "AMD DeviceConfig $dc_name already exists". Skipping creation
     else
       echo "Creating AMD DeviceConfig..."
       oc create -f - <<EOF
+apiVersion: amd.com/v1alpha1
 kind: DeviceConfig
-apiVersion: amd.io/v1alpha1
 metadata:
   name: $dc_name
-  namespace: openshift-amd-gpu
+  namespace: $AMD_DC_NS
+spec:
+  devicePlugin:
+    enableNodeLabeller: true
+    devicePluginImage: 'rocm/k8s-device-plugin:latest'
+    nodeLabellerImage: 'rocm/k8s-device-plugin:labeller-latest'
+  driver:
+    enable: true
+    version: $ROCM_VERSION
+  selector:
+    feature.node.kubernetes.io/pci-1002.present: 'true'
 EOF
   fi
 }
@@ -118,18 +130,18 @@ function monitor_logs() {
 function wait_until_driver_image_is_built() {
   startup_timeout=$1
   build_timeout=$2
-  name=$(oc get pod -n openshift-amd-gpu -l openshift.io/build.name -oname)
+  name=$(oc get pod -n $AMD_DC_NS -l openshift.io/build.name -oname)
   echo Builder pod name: $name
-  oc wait --timeout="${startup_timeout}s" --for=condition=ready pod -n openshift-amd-gpu -l openshift.io/build.name
+  oc wait --timeout="${startup_timeout}s" --for=condition=ready pod -n $AMD_DC_NS -l openshift.io/build.name
   echo "Wait for the image build to finish"
-  oc wait --timeout="${build_timeout}s" --for=delete pod -n openshift-amd-gpu -l openshift.io/build.name
+  oc wait --timeout="${build_timeout}s" --for=delete pod -n $AMD_DC_NS -l openshift.io/build.name
   echo "Checking the image stream got created"
-  image=$(oc get is amd_gpu_kmm_modules -n openshift-amd-gpu -oname)
+  image=$(oc get is amdgpu_kmod -n $AMD_DC_NS -oname)
   if [[ $? -eq 0 ]];
     then
       echo ".Image Stream $image found!"
     else
-      echo ".Image Stream amd_gpu_kmm_modules not found. Check the cluster"
+      echo ".Image Stream amdgpu_kmod not found. Check the cluster"
       exit 1
   fi
 }
@@ -179,18 +191,18 @@ oc apply -f "$GPU_INSTALL_DIR/kmm_operator_install.yaml"
 wait_while 360 ! has_csv_succeeded openshift-kmm kernel-module-management
 echo "Installing AMD operator"
 oc apply -f "$GPU_INSTALL_DIR/amd_gpu_install.yaml"
-wait_while 360 ! has_csv_succeeded openshift-amd-gpu amd-gpu-operator
+wait_while 360 ! has_csv_succeeded $AMD_DC_NS amd-gpu-operator
 create_devconfig
-image=$(oc get is amd_gpu_kmm_modules -n openshift-amd-gpu -oname --ignore-not-found)
+image=$(oc get is amdgpu_kmod -n $AMD_DC_NS -oname --ignore-not-found)
 if [[ -n $image ]];
   then
-      echo ".Image Stream amd_gpu_kmm_modules alredy present! Skipping waiting for builder pod";
+      echo ".Image Stream amdgpu_kmod alredy present! Skipping waiting for builder pod";
   else
-      wait_until_pod_is_created  openshift.io/build.name openshift-amd-gpu 180
+      wait_until_pod_is_created  openshift.io/build.name $AMD_DC_NS 180
       wait_until_driver_image_is_built 60 1200
 fi
 echo "Configuration of AMD GPU node and Operators completed"
 # the message appears in the logs, but the pod may get delete before our code next iteration checks the logs once again,
 # hence it'd fails to reach the pod. It happened to me
-# wait_while 1200 monitor_logs "$name" openshift-amd-gpu docker-build "Successfully pushed image-registry.openshift-image-registry.svc:5000/openshift-amd-gpu"
+# wait_while 1200 monitor_logs "$name" $AMD_DC_NS docker-build "Successfully pushed image-registry.openshift-image-registry.svc:5000/$AMD_DC_NS"
 create_acceleratorprofile

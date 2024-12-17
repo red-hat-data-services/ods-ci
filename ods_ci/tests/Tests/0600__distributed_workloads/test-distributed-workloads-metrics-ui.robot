@@ -202,8 +202,27 @@ Verify Requested resources When Multiple Local Queue Exists
     Wait For Job With Status    ${JOB_NAME_QUEUE}    Succeeded    180
     Wait For Job With Status   ${MULTIPLE_JOB_NAME}    Succeeded    180
 
-    [Teardown]    Run Process    oc delete LocalQueue ${MULTIPLE_LOCAL_QUEUE} -n ${PRJ_TITLE}
+    [Teardown]    Run Process    oc delete Job ${JOB_NAME_QUEUE} -n ${PRJ_TITLE} && oc delete Job ${MULTIPLE_JOB_NAME} -n ${PRJ_TITLE} && oc delete LocalQueue ${MULTIPLE_LOCAL_QUEUE} -n ${PRJ_TITLE}
     ...    shell=true
+
+Verify CPU And Memory Resource Usage Exceeds Warning Threshold
+    [Documentation]    Verify that CPU and memory resource usage surpass the warning threshold when the requested resources exceed 150% of the shared quota.
+    [Tags]    RHOAIENG-16160
+    ${WARNING_THRESHOLD}    Set Variable    Warning threshold (over 150%)
+    ${MEMORY_REQUESTING}    Set Variable    36864
+    ${ADD_ANNOTATION}    Set Variable    true
+    ${PARALLELISM}    Set Variable    2
+    Submit Kueue Workload    ${LOCAL_QUEUE_NAME}    ${PRJ_TITLE}    ${CPU_SHARED_QUOTA}    ${MEMORY_REQUESTING}    ${JOB_NAME_QUEUE}    ${ADD_ANNOTATION}    ${PARALLELISM}
+    Open Distributed Workload Metrics Home Page
+    Select Distributed Workload Project By Name    ${PRJ_TITLE}
+    Select Refresh Interval    15 seconds
+    Wait For Job With Status    ${JOB_NAME_QUEUE}    Admitted    180
+    Wait Until Element Is Visible    xpath=${CPU_WARNING_XP}   timeout=120
+    Wait Until Element Is Visible    xpath=${MEMORY_WARNING_XP}    timeout=120
+    Check Expected String Equals    ${CPU_WARNING_XP}    ${WARNING_THRESHOLD}
+    Check Expected String Equals    ${MEMORY_WARNING_XP}    ${WARNING_THRESHOLD}
+    Check Warning Threshold Chart
+    [Teardown]    Run Process     oc delete Job ${JOB_NAME_QUEUE} -n ${PRJ_TITLE}    shell=true
 
 *** Keywords ***
 Project Suite Setup

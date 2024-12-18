@@ -28,7 +28,8 @@ ${RAY_CR_FILE}=    tests/Resources/Page/DistributedWorkloads/ray_cluster_cr.yaml
 ${CPU_SHARED_QUOTA}=    9
 ${MEMEORY_SHARED_QUOTA}=    36
 ${tolerance}=    1
-
+${CPU_WARNING_XP}=    //*[@id="requested-resources-chart-CPU-ChartLegend-ChartLabel-3"]
+${MEMORY_WARNING_XP}=    //*[@id="requested-resources-chart-Memory-ChartLegend-ChartLabel-3"]
 
 *** Keywords ***
 Open Distributed Workload Metrics Home Page
@@ -354,8 +355,8 @@ Check Resource Consuming Usage
 
 Submit Kueue Workload
     [Documentation]    method for creating kueue workload
-    [Arguments]    ${local_queue}   ${project}    ${cpu_requested}    ${memory_requested}    ${job_name_queue}
-    ${result}=    Run Process    sh ${KUEUE_WORKLOADS_SETUP_FILEPATH} ${local_queue} ${project} ${cpu_requested} ${memory_requested} ${job_name_queue}
+    [Arguments]    ${local_queue}   ${project}    ${cpu_requested}    ${memory_requested}    ${job_name_queue}    ${add_annotation}=${False}    ${parallelism}=None
+    ${result}=    Run Process    sh ${KUEUE_WORKLOADS_SETUP_FILEPATH} ${local_queue} ${project} ${cpu_requested} ${memory_requested} ${job_name_queue} ${add_annotation} ${parallelism}
     ...    shell=true
     ...    stderr=STDOUT
     Log To Console    ${result.stdout}
@@ -368,3 +369,14 @@ Wait For Job With Status
     [Arguments]    ${job_name}    ${job_status}    ${timeout}
     Wait Until Element Is Visible    //td[@class='pf-v5-c-table__td' and contains(text(), '${job_name}')]/following-sibling::td[@data-label='Status']/span/span/span[@class='pf-v5-c-label__text'and text()='${job_status}']    timeout=${timeout}
 
+Check Warning Threshold Chart
+    [Documentation]    verifies warning threshold of cpu and memory resources
+    Mouse Over    xpath=(//*[name()='svg']//*[local-name()='g']//*[local-name()='path'])[4]
+    ${hover_cpu_warning} =  Get Requested Resources Tooltip Text
+    Should Match   ${hover_cpu_warning}   Requested resources have surpassed 150%
+    Mouse Over    xpath=//*[@id="requested-resources-chart-CPU-ChartLegend-ChartLabel-0"]
+
+    Mouse Over    xpath=(//*[name()='svg']//*[local-name()='g']//*[local-name()='path'])[12]
+    ${hover_memory_warning} =  Get Requested Resources Tooltip Text
+    Should Match   ${hover_memory_warning}   Requested resources have surpassed 150%
+    Mouse Over    xpath=//*[@id="requested-resources-chart-Memory-ChartLegend-ChartLabel-0"]

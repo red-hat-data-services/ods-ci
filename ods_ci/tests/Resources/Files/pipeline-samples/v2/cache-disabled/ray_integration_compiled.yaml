@@ -22,9 +22,9 @@ deploymentSpec:
         - -c
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
-          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.10.1'\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.11.0'\
           \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"'  &&\
-          \  python3 -m pip install --quiet --no-warn-script-location 'codeflare-sdk==0.21.1'\
+          \  python3 -m pip install --quiet --no-warn-script-location 'codeflare-sdk==v0.24.0'\
           \ && \"$0\" \"$@\"\n"
         - sh
         - -ec
@@ -38,14 +38,14 @@ deploymentSpec:
           '
         - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
           \ *\n\ndef ray_fn() -> int:\n    import ray  # noqa: PLC0415\n    from codeflare_sdk\
-          \ import generate_cert  # noqa: PLC0415\n    from codeflare_sdk.cluster.cluster\
+          \ import generate_cert  # noqa: PLC0415\n    from codeflare_sdk.ray.cluster\
           \ import Cluster, ClusterConfiguration  # noqa: PLC0415\n\n    cluster =\
           \ Cluster(\n        ClusterConfiguration(\n            name=\"raytest\"\
           ,\n            num_workers=1,\n            head_cpu_requests=1,\n      \
           \      head_cpu_limits=1,\n            head_memory_requests=4,\n       \
           \     head_memory_limits=4,\n            worker_cpu_requests=1,\n      \
           \      worker_cpu_limits=1,\n            worker_memory_requests=1,\n   \
-          \         worker_memory_limits=2,\n            image=\"quay.io/modh/ray:2.35.0-py39-cu121\"\
+          \         worker_memory_limits=2,\n            image=\"quay.io/modh/ray@sha256:0d715f92570a2997381b7cafc0e224cfa25323f18b9545acfd23bc2b71576d06\"\
           ,\n            verify_tls=False\n        )\n    )\n\n    # always clean\
           \ the resources\n    cluster.down()\n    print(cluster.status())\n    cluster.up()\n\
           \    cluster.wait_ready()\n    print(cluster.status())\n    print(cluster.details())\n\
@@ -76,4 +76,4 @@ root:
         taskInfo:
           name: ray-fn
 schemaVersion: 2.1.0
-sdkVersion: kfp-2.10.1
+sdkVersion: kfp-2.11.0

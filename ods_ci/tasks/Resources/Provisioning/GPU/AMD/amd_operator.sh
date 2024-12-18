@@ -193,7 +193,7 @@ metadata:
 spec:
   displayName: Certfied operator
   image: 'registry.redhat.io/redhat/certified-operator-index:v4.16'
-  publisher: Model RHAOI
+  publisher: RHOAI QE
   sourceType: grpc
 EOF
     oc wait --timeout="120s" --for=condition=ready=true pod -n openshift-marketplace -l olm.catalogSource=certified-operators-416-amd

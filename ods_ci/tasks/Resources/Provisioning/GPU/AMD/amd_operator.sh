@@ -215,10 +215,7 @@ fi
 sleep 120
 wait_while 1800 ! machineconfig_updates
 
-echo "Installing NFD operator"
-oc apply -f "$GPU_INSTALL_DIR/../nfd_operator.yaml"
-wait_while 360 ! has_csv_succeeded openshift-nfd nfd
-oc apply -f "$GPU_INSTALL_DIR/../nfd_deploy.yaml"
+/bin/bash tasks/Resources/Provisioning/GPU/NFD/install_nfd.sh
 echo "Installing KMM operator"
 oc apply -f "$GPU_INSTALL_DIR/kmm_operator_install.yaml"
 wait_while 360 ! has_csv_succeeded openshift-kmm kernel-module-management

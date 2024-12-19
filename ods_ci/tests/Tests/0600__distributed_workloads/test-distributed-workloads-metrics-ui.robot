@@ -190,13 +190,13 @@ Verify Requested resources When Multiple Local Queue Exists
     Wait Until Element Is Visible    xpath=//*[@id="topResourceConsumingCPU-ChartLabel-title"]    timeout=180
     Wait Until Element Is Visible    xpath=//*[@id="topResourceConsumingCPU-ChartLegend-ChartLabel-0"]   timeout=180
     ${cpu_usage} =    Get Current CPU Usage    ${PRJ_TITLE}    Job
-    ${cpu_consuming} =    Get Text    xpath:(//*[@style[contains(., 'var(--pf-v5-chart-donut--label--title--Fill')]])[1]
+    ${cpu_consuming} =    Get Text    xpath:(//*[@style[contains(., 'var(--pf-v6-chart-donut--label--title--Fill')]])[1]
     Check Resource Consuming Usage    ${cpu_usage}    ${cpu_consuming}    CPU
 
     Wait Until Element Is Visible    xpath=//*[@id="topResourceConsumingMemory-ChartLabel-title"]    timeout=180
     Wait Until Element Is Visible    xpath=//*[@id="topResourceConsumingMemory-ChartLegend-ChartLabel-0"]    timeout=180
     ${memory_usage} =    Get Current Memory Usage    ${PRJ_TITLE}    Job
-    ${memory_consuming} =    Get Text    xpath:(//*[@style[contains(., 'var(--pf-v5-chart-donut--label--title--Fill')]])[2]
+    ${memory_consuming} =    Get Text    xpath:(//*[@style[contains(., 'var(--pf-v6-chart-donut--label--title--Fill')]])[2]
     Check Resource Consuming Usage    ${memory_usage}    ${memory_consuming}    Memory
 
     Wait For Job With Status    ${JOB_NAME_QUEUE}    Succeeded    180

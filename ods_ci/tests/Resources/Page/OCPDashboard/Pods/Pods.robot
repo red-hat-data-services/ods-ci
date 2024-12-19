@@ -24,7 +24,7 @@ Get Pod Logs From UI
     ${log_lines_flag}=    Run Keyword And Return Status    Wait Until Page Contains Element
     ...    xpath://div[@class='log-window__lines']
     ${log_list_flag}=    Run Keyword And Return Status    Wait Until Page Contains Element
-    ...    xpath://div[@class='pf-v5-c-log-viewer__list']
+    ...    xpath://div[@class='pf-v6-c-log-viewer__list']
     IF    ${log_lines_flag} == ${TRUE}
         ${logs_text}=    Get Text    xpath://div[@class='log-window__lines']
     ELSE IF    ${log_list_flag} == ${TRUE}

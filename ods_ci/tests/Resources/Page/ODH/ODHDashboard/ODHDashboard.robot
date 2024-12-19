@@ -13,28 +13,28 @@ Library       JupyterLibrary
 # This variable is overriden for ODH runs via 'test-variables-odh-overwrite.yml'
 ${ODH_DASHBOARD_PROJECT_NAME}=   Red Hat OpenShift AI
 ${ODH_DASHBOARD_SPINNER_XP}=     xpath://*[@data-id="loading-empty-state" or @aria-valuetext="Loading..."]
-${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}=         //*[@class="pf-v5-c-drawer__panel-main"]//button[.='Enable']
-${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}=   //*[@class="pf-v5-c-drawer__panel-main"]//*[.='Get started']
-${CARDS_XP}=  //*[(contains(@class, 'odh-card')) and (contains(@class, 'pf-v5-c-card'))]
+${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}=         //*[@class="pf-v6-c-drawer__panel-main"]//button[.='Enable']
+${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}=   //*[@class="pf-v6-c-drawer__panel-main"]//*[.='Get started']
+${CARDS_XP}=  //*[(contains(@class, 'odh-card')) and (contains(@class, 'pf-v6-c-card'))]
 ${CARD_BUTTON_XP}=  //input[@name="odh-explore-selectable-card"]
 ${RES_CARDS_XP}=  //div[contains(@data-ouia-component-type, "Card")]
 ${JUPYTER_CARD_XP}=    //div[@data-testid="card jupyter"]
 ${EXPLORE_PANEL_XP}=    //div[@data-testid="explore-drawer-panel"]
-${HEADER_XP}=  div[@class='pf-v5-c-card__header']
-${TITLE_XP}=   div[@class='pf-v5-c-card__title']//span
-${TITLE_XP_OLD}=  div[@class='pf-v5-c-card__title']//div/div[1]
-${PROVIDER_XP}=  div[@class='pf-v5-c-card__title']//span[contains(@class, "provider")]
-${DESCR_XP}=  div[@class='pf-v5-c-card__body']
+${HEADER_XP}=  div[@class='pf-v6-c-card__header']
+${TITLE_XP}=   div[@class='pf-v6-c-card__title']//span
+${TITLE_XP_OLD}=  div[@class='pf-v6-c-card__title']//div/div[1]
+${PROVIDER_XP}=  div[@class='pf-v6-c-card__title']//span[contains(@class, "provider")]
+${DESCR_XP}=  div[@class='pf-v6-c-card__body']
 ${BADGES_XP}=  ${HEADER_XP}//div[contains(@class, 'badge') or contains(@class, 'coming-soon')]
 ${BADGES_XP_OLD}=  ${HEADER_XP}/div[contains(@class, 'badges')]/span[contains(@class, 'badge') or contains(@class, 'coming-soon')]
-${OFFICIAL_BADGE_XP}=  div[@class='pf-v5-c-card__title']//img
-${OFFICIAL_BADGE_XP_OLD}=  div[@class='pf-v5-c-card__title']//img[contains(@class, 'supported-image')]    # robocop: disable
+${OFFICIAL_BADGE_XP}=  div[@class='pf-v6-c-card__title']//img
+${OFFICIAL_BADGE_XP_OLD}=  div[@class='pf-v6-c-card__title']//img[contains(@class, 'supported-image')]    # robocop: disable
 ${FALLBK_IMAGE_XP}=  ${HEADER_XP}/svg[contains(@class, 'odh-card__header-fallback-img')]
 ${IMAGE_XP}=  ${HEADER_XP}//picture[contains(@class,'pf-m-picture')]/source
 ${IMAGE_XP_OLD}=  ${HEADER_XP}/img[contains(@class, 'odh-card__header-brand')]
 ${APPS_DICT_PATH_LATEST}=   tests/Resources/Files/AppsInfoDictionary_latest.json
 ${SIDEBAR_TEXT_CONTAINER_XP}=  //div[contains(@class,'odh-markdown-view')]
-${SUCCESS_MSG_XP}=  //div[@class='pf-v5-c-alert pf-m-success']
+${SUCCESS_MSG_XP}=  //div[@class='pf-v6-c-alert pf-m-success']
 ${PAGE_TITLE_XP}=  //*[@data-testid="app-page-title"]
 ${CLUSTER_SETTINGS_XP}=  //*[@data-testid="app-page-title" and text()="Cluster settings"]
 ${PVC_SIZE_INPUT_XP}=           xpath=//*[@data-testid="pvc-size-input"]
@@ -48,11 +48,11 @@ ${CUSTOM_IMAGE_LAST_ROW_NAME}=  tr[last()]/td[1]
 ${CUSTOM_IMAGE_LAST_ROW_VERSION}=  tr[last()]/td[2]
 ${CUSTOM_IMAGE_EDIT_BTN}=  button[@id="edit-package-software-button"]
 ${CUSTOM_IMAGE_REMOVE_BTN}=  button[@id="delete-package-software-button"]
-${NOTIFICATION_DRAWER_CLOSE_BTN}=  //div[@class="pf-v5-c-drawer__panel"]/div/div//button
-${NOTIFICATION_DRAWER_CLOSED}=  //div[@class="pf-v5-c-drawer__panel" and @hidden=""]
+${NOTIFICATION_DRAWER_CLOSE_BTN}=  //div[@class="pf-v6-c-drawer__panel"]/div/div//button
+${NOTIFICATION_DRAWER_CLOSED}=  //div[@class="pf-v6-c-drawer__panel" and @hidden=""]
 ${GROUPS_CONFIG_CM}=    groups-config
 ${RHODS_GROUPS_CONFIG_CM}=    rhods-groups-config
-${RHODS_LOGO_XPATH}=    //img[@alt="${ODH_DASHBOARD_PROJECT_NAME} Logo"]
+${RHODS_LOGO_XPATH}=    //img[@alt="${ODH_DASHBOARD_PROJECT_NAME}"]
 ${USER_MENU_TOGGLE}=    //button[@id="user-menu-toggle"]
 ${LOGOUT_BTN}=    //button[.="Log out"]
 @{ISV_TO_REMOVE_SELF_MANAGED}=      Create List     starburst   nvidia    rhoam
@@ -122,7 +122,7 @@ Wait For Dashboard Page Title
 Wait Until RHODS Dashboard ${dashboard_app} Is Visible
   # Ideally the timeout would be an arg but Robot does not allow "normal" and "embedded" arguments
   # Setting timeout to 30seconds since anything beyond that should be flagged as a UI bug
-  Wait Until Element Is Visible    xpath://div[contains(@class,'gallery')]/div//div[@class="pf-v5-c-card__title"]//*[text()="${dashboard_app}"]
+  Wait Until Element Is Visible    xpath://div[contains(@class,'gallery')]/div//div[@class="pf-v6-c-card__title"]//*[text()="${dashboard_app}"]
   ...    timeout=30s
 
 Launch ${dashboard_app} From RHODS Dashboard Link
@@ -134,9 +134,9 @@ Launch ${dashboard_app} From RHODS Dashboard Link
       Click Link   xpath:${CARDS_XP}//*[text()='${splits[0]} ']/../..//a
   ELSE
       IF    "${dashboard_app}" == "Jupyter"
-          Click Link    xpath://div[contains(@class,'pf-v5-l-gallery')]/div[contains(@class,'pf-v5-c-card')]/div[@class="pf-v5-c-card__title"]//span[text()="${dashboard_app}"]/../../..//div[contains(@class,"pf-v5-c-card__footer")]/a
+          Click Link    xpath://div[contains(@class,'pf-v6-l-gallery')]/div[contains(@class,'pf-v6-c-card')]/div[@class="pf-v6-c-card__title"]//span[text()="${dashboard_app}"]/../../..//div[contains(@class,"pf-v6-c-card__footer")]/a
       ELSE
-          Click Link    xpath://div[contains(@class,'pf-v5-l-gallery')]/div[contains(@class,'pf-v5-c-card')]/div[@class="pf-v5-c-card__title"]//span[text()="${dashboard_app}"]/../..//div[contains(@class,"pf-v5-c-card__footer")]/a
+          Click Link    xpath://div[contains(@class,'pf-v6-l-gallery')]/div[contains(@class,'pf-v6-c-card')]/div[@class="pf-v6-c-card__title"]//span[text()="${dashboard_app}"]/../..//div[contains(@class,"pf-v6-c-card__footer")]/a
       END
   END
   IF    "${dashboard_app}" != "Jupyter"
@@ -145,8 +145,8 @@ Launch ${dashboard_app} From RHODS Dashboard Link
 
 Launch ${dashboard_app} From RHODS Dashboard Dropdown
   Wait Until RHODS Dashboard ${dashboard_app} Is Visible
-  Click Button  xpath://div[@class="pf-v5-c-card__title" and .="${dashboard_app}"]/..//button[contains(@class,pf-v5-c-dropdown__toggle)]
-  Click Link  xpath://div[@class="pf-v5-c-card__title" and .="${dashboard_app}"]/..//a[.="Launch"]
+  Click Button  xpath://div[@class="pf-v6-c-card__title" and .="${dashboard_app}"]/..//button[contains(@class,pf-v6-c-dropdown__toggle)]
+  Click Link  xpath://div[@class="pf-v6-c-card__title" and .="${dashboard_app}"]/..//a[.="Launch"]
   Switch Window  NEW
 
 Verify Service Is Enabled
@@ -347,7 +347,7 @@ Open Get Started Sidebar And Return Status
     Mouse Down    ${card_locator}
     Mouse Up    ${card_locator}
     ${status}=    Run Keyword And Return Status    Wait Until Page Contains Element
-    ...    xpath://div[contains(@class,'pf-v5-c-drawer__panel-main')]
+    ...    xpath://div[contains(@class,'pf-v6-c-drawer__panel-main')]
     Sleep  1
     RETURN  ${status}
 
@@ -364,7 +364,7 @@ Check Get Started Sidebar Status
     END
 
 Get Sidebar Links
-    ${link_elements}=  Get WebElements    xpath://div[contains(@class,'pf-v5-c-drawer__panel-main')]//a
+    ${link_elements}=  Get WebElements    xpath://div[contains(@class,'pf-v6-c-drawer__panel-main')]//a
     RETURN  ${link_elements}
 
 Check Sidebar Links
@@ -409,7 +409,7 @@ Check Sidebar Header Text
     ...    message=Missing Sidebar Title for App Card ${app_id}
     ${header}=  Get Text    xpath:${SIDEBAR_TEXT_CONTAINER_XP}/h1
     Run Keyword And Continue On Failure  Should Be Equal  ${header}  ${sidebar_h1}
-    ${getstarted_title}=  Get Text  xpath://div[contains(@class,'pf-v5-c-drawer__head')]
+    ${getstarted_title}=  Get Text  xpath://div[contains(@class,'pf-v6-c-drawer__head')]
     ${titles}=    Split String    ${getstarted_title}   separator=\n    max_split=1
     Run Keyword And Continue On Failure  Should Be Equal   ${titles[0]}  ${expected_data}[${app_id}][title]
     Run Keyword And Continue On Failure  Should Be Equal   ${titles[1]}  ${expected_data}[${app_id}][provider]
@@ -538,9 +538,9 @@ Search Items In Resources Section
     Sleep   5
     ${version-check}=  Is RHODS Version Greater Or Equal Than    1.18.0
     IF    ${version-check} == True
-        Input Text  xpath://input[@class="pf-v5-c-text-input-group__text-input"]       ${element}
+        Input Text  xpath://input[@class="pf-v6-c-text-input-group__text-input"]       ${element}
     ELSE
-        Input Text  xpath://input[@class="pf-v5-c-search-input__text-input"]       ${element}
+        Input Text  xpath://input[@class="pf-v6-c-search-input__text-input"]       ${element}
     END
 
 Verify Username Displayed On RHODS Dashboard

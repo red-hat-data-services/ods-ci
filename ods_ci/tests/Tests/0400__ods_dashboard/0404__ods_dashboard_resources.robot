@@ -17,7 +17,7 @@ Test Tags         Dashboard
 ...                       pachyderm-beginner-tutorial-notebook    using-starburst-enterprise
 ...                       create-aikit-notebook    openvino-inference-notebook
 @{LIST_OF_IDS_FOR_COMBINATIONS}    documentation--check-box    Red Hat managed--check-box
-${SUCCESS_STEP}    h3[normalize-space(@class="pf-v5-c-title pf-m-md pfext-quick-start-task-header__title
+${SUCCESS_STEP}    h3[normalize-space(@class="pf-v6-c-title pf-m-md pfext-quick-start-task-header__title
 ...                pfext-quick-start-task-header__title-success")]
 
 
@@ -193,7 +193,7 @@ Set Expected Items Based On RHODS Type    # robocop: disable
 Validate App Name Is Present On Each Tile
     [Documentation]    Check that each Resource tile contains
     ...    the name of the application
-    ${elements}=    Get WebElements    //article[contains(@class, 'pf-v5-c-card')]//div[@class="pf-v5-c-content"]//small
+    ${elements}=    Get WebElements    //article[contains(@class, 'pf-v6-c-card')]//div[@class="pf-v6-c-content"]//small
     ${len}=    Get Length    ${elements}
     FOR    ${counter}    IN RANGE    ${len}
         ${name}=    Get Text    ${elements}[${counter}]
@@ -227,7 +227,7 @@ Verify Quick Starts Work As Expected When Restarted And Left In Between
         Run Keyword And Continue On Failure     Link Text On QuickStart Card Should Be  element=${element}
         ...    exp_link_text=Restart
         Open QuickStart Element In Resource Section By Name     ${element}
-        Page Should Not Contain    //article[@id="${element}"]//span[@class="pf-v5-c-label pf-m-green pf-m-outline"]
+        Page Should Not Contain    //article[@id="${element}"]//span[@class="pf-v6-c-label pf-m-green pf-m-outline"]
         ${count}=   Get The Count Of QuickStart Steps
         Run Keyword And Continue On Failure     Click Button    //button[@data-testid="qs-drawer-start"]
         Run Keyword And Continue On Failure     Wait Until Page Contains Element
@@ -247,7 +247,7 @@ Verify Quick Starts Work As Expected When Restarted And Left In Between
         Run Keyword And Continue On Failure     Click Element
         ...    //*[@id="${element}"]//button[@data-testid="quick-start-button"]
         Run Keyword And Continue On Failure     Wait Until Page Contains Element
-        ...    //div[@class="pf-v5-c-drawer__panel-main"]     5
+        ...    //div[@class="pf-v6-c-drawer__panel-main"]     5
         FOR     ${index}    IN RANGE    ${half_count}
             Run Keyword And Continue On Failure     Page Should Contain Element
             ...    //div[@class="pfext-quick-start-tasks__list"]//li[${index+1}]//${SUCCESS_STEP}
@@ -255,7 +255,7 @@ Verify Quick Starts Work As Expected When Restarted And Left In Between
         Run Keyword And Continue On Failure     Click Button    //button[@data-testid="qs-drawer-side-note-action"]
         FOR     ${index}    IN RANGE    ${count}
             Run Keyword And Continue On Failure     Page Should Contain Element
-            ...    //ul[@class="pf-v5-c-list pfext-quick-start-task-header__list"]/li[${index}+1]
+            ...    //ul[@class="pf-v6-c-list pfext-quick-start-task-header__list"]/li[${index}+1]
         END
         Run Keyword And Continue On Failure    Click Button        //button[@data-testid="qs-drawer-start"]
         FOR     ${index}    IN RANGE    ${count}

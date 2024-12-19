@@ -494,8 +494,7 @@ Get Question Mark Links
     [Documentation]      It returns the link elements from the question mark
     Click Button  id:help-icon-toggle
     @{links_list}=  Create List
-    @{link_elements}=  Get WebElements
-    ...    //button[@id="help-icon-toggle"]/following-sibling::div//a
+    @{link_elements}=  Get WebElements    //ul[@role="menu"]//a
     FOR  ${link}  IN  @{link_elements}
          ${href}=    Get Element Attribute    ${link}    href
          Append To List    ${links_list}    ${href}

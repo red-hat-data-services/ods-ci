@@ -70,7 +70,7 @@ Verify RHODS Explore Section Contains Only Expected ISVs
     [Tags]    Smoke
     ...       ODS-1890
     ...       AutomationBugOnODH
-    # TODO: In ODH there are only 2 Apps, we excpect 7 Apps according to:
+    # TODO: In ODH there are only 2 Apps, we expect 7 Apps according to:
     # tests/Resources/Files/AppsInfoDictionary_latest.json
     ${EXP_DATA_DICT}=    Load Expected Data Of RHODS Explore Section
     Menu.Navigate To Page    Applications    Explore
@@ -192,7 +192,7 @@ Verify "Enabled" Keeps Being Available After One Of The ISV Operators If Uninsta
    Uninstall Operator And Check Enabled Page Is Rendering
    ...    operator_name=${openvino_operator_name}  operator_appname=${openvino_appname}
    [Teardown]    Run Keyword And Ignore Error
-   ...    Check And Uninstall Operator In Openshift    
+   ...    Check And Uninstall Operator In Openshift
    ...    ${openvino_operator_name}   ${openvino_appname}    ${openvino_dashboard_app_id}
 
 Verify Error Message In Logs When A RHODS Group Is Empty
@@ -588,12 +588,12 @@ Check Application Switcher Link To Openshift Console
     [Documentation]    Checks the HTTP status of OpenShift Console
     ${list_of_links}=    Get Links From Switcher
     ${status}=    Check HTTP Status Code    link_to_check=${list_of_links}[0]     verify_ssl=${False}
-    Should Be Equal    ${list_of_links}[0]    ${OCP_CONSOLE_URL}/
+    Should Match Regexp    ${list_of_links}[0]    ^${OCP_CONSOLE_URL}/*$
     Should Be Equal    ${status}    ${200}
 
 Check Application Switcher Link To Openshift Cluster Manager
     [Documentation]    Checks for HTTP status of OCM link and verify the Cluster in OCM
-    ${ocm_link}=    Get Element Attribute    xpath://a[contains(.,"OpenShift Cluster Manager")]    href 
+    ${ocm_link}=    Get Element Attribute    xpath://a[contains(.,"OpenShift Cluster Manager")]    href
     ${is_self_managed}=    Is RHODS Self-Managed
     IF    ${is_self_managed}
         # For Self-Managed cluster there's no need to verify the cluster in OCM

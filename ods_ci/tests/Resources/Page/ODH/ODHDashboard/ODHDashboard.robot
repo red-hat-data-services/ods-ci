@@ -849,9 +849,6 @@ Reload RHODS Dashboard Page
 Handle Deletion Confirmation Modal
     [Documentation]    Handles confirmation modal on item deletion
     [Arguments]     ${item_title}    ${item_type}   ${press_cancel}=${FALSE}    ${additional_msg}=${NONE}
-    # Once fixed https://issues.redhat.com/browse/RHODS-9730 change the button xpath to
-    # xpath=//button[text()="Delete ${item_type}"]
-    ${delete_btn_xp}=    Set Variable    xpath=//button[contains(text(), 'Delete')]
     Wait Until Generic Modal Appears
     Run Keyword And Warn On Failure    Page Should Contain    Delete ${item_type}?
     Run Keyword And Warn On Failure    Page Should Contain    This action cannot be undone.
@@ -859,13 +856,13 @@ Handle Deletion Confirmation Modal
         Run Keyword And Continue On Failure    Page Should Contain    ${additional_msg}
     END
     Run Keyword And Continue On Failure    Page Should Contain    Type ${item_title} to confirm deletion:
-    Run Keyword And Continue On Failure    Element Should Be Disabled    ${delete_btn_xp}
+    Run Keyword And Continue On Failure    Element Should Be Disabled    ${GENERIC_DELETE_BTN_XP}
     Input Text    xpath=//input[@id="delete-modal-input"]    ${item_title}
-    Wait Until Element Is Enabled    ${delete_btn_xp}
+    Wait Until Element Is Enabled    ${GENERIC_DELETE_BTN_XP}
     IF    ${press_cancel} == ${TRUE}
         Click Button    ${GENERIC_CANCEL_BTN_XP}
     ELSE
-        Click Button    ${delete_btn_xp}
+        Click Button    ${GENERIC_DELETE_BTN_XP}
     END
     Wait Until Generic Modal Disappears
 
@@ -873,11 +870,11 @@ Click Action From Actions Menu
     [Documentation]    Clicks an action from Actions menu (3-dots menu on the right)
     [Arguments]    ${item_title}    ${action}    ${item_type}=${NONE}
     ${item_row}=    Set Variable    //tr[td[@data-label="Name"]//*[text()="${item_title}"]]
+    ${action_btn}=    Set Variable    //button[@role="menuitem"]//*[.="${action}"]
     Click Element       xpath=${item_row}//button[@aria-label="Kebab toggle"]
     IF    "${item_type}" != "${NONE}"
         ${action}=    Catenate    ${action}    ${item_type}
     END
-    Wait Until Page Contains Element
-    ...    xpath=${item_row}//button[@role="menuitem"]//*[.="${action}"]
+    Wait Until Page Contains Element    ${action_btn}
     Sleep    0.5    msg=Avoid element missclicking
-    Click Element    xpath=${item_row}//button[@role="menuitem"]//*[.="${action}"]
+    Click Element    ${action_btn}

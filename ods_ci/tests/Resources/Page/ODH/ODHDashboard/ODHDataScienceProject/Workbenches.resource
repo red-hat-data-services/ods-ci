@@ -9,7 +9,7 @@ Resource       Projects.resource
 *** Variables ***
 ${PV_MOUNT_PATH}=    ods-ci-test-path
 ${WORKBENCH_SECTION_XP}=             xpath=//div[@data-testid="section-workbenches"]
-${WORKBENCH_CREATE_BTN_XP}=           xpath=//button[text()="Create workbench"]
+${WORKBENCH_CREATE_BTN_XP}=           xpath=//button[@data-testid="create-workbench-button"]
 ${WORKBENCH_CREATE_BTN_2_XP}=         xpath=//button[@id="create-button"]
 ${WORKBENCH_NAME_INPUT_XP}=               xpath=//input[@name="workbench-name"]
 ${WORKBENCH_DESCR_TXT_XP}=                xpath=//textarea[@name="workbench-description"]
@@ -191,12 +191,7 @@ Remove All Environment Variables
 Select An Existent PV
     [Documentation]    Selects an existent PV Storage in the workbench creation page
     [Arguments]    ${name}  ${path}
-    Run Keyword And Continue On Failure
-    ...    Wait Until Element Is Enabled    xpath=//input[@placeholder="Select a persistent storage"]
-    Click Element    xpath=//input[@placeholder="Select a persistent storage"]
-    ${existing_pv_xpath}=    Set Variable    xpath=//button//span[text()="${name}"]
-    Wait Until Page Contains Element    ${existing_pv_xpath}
-    Click Element   ${existing_pv_xpath}
+    Wait Until Page Contains Element    //*[@data-testid="mount-path-folder-value"]
     Input Text    //*[@data-testid="mount-path-folder-value"]    ${path}
     Click Element    //*[@data-testid="modal-submit-button"]
 

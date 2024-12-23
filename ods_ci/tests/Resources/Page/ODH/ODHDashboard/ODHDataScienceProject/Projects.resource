@@ -155,7 +155,6 @@ Create Data Science Project
         Click Button    ${GENERIC_CREATE_BTN_XP}
         Wait Until Generic Modal Disappears
     END
-    Wait Until Project Is Open    project_title=${title}
     ${open}=    Run Keyword And Return Status    Wait Until Project Is Open    project_title=${title}
     IF    ${open} == ${FALSE}
         ${is_home_open}=    Is Data Science Projects Page Open
@@ -167,14 +166,14 @@ Create Data Science Project
     END
 
 Generate Unique Namespace
-    [Documentation]    If DS Project Namespace '${namespace}' already exists - Return the Namespace + Random Suffix.
+    [Documentation]    If DS Project Namespace '${namespace}' already exists - Return it with a Random digits suffix.
     ...                (DS Project Display Name does not need to be unique, but DS Project Namespace does).
     [Arguments]    ${namespace}
     ${rc}=    Run And Return Rc    oc get namespace ${namespace}
-    IF    "${rc}" == "${0}" and len("${namespace}") < 60
-        # Add unique string to Project resource name (max length is 63 chars)
-        ${suffix}=    Generate Random String    3   [LOWER]
-        ${namespace}=    Set Variable    ${namespace}-${suffix}
+    IF    "${rc}" == "${0}"
+        # Add Random 3-digits suffix, but trim characters above 30 (allowed namespace length)
+        ${suffix}=    Generate Random String    3    [NUMBERS]
+        ${namespace}=    Set Variable    ${namespace}[0:27]${suffix}
     END
     RETURN    ${namespace}
 

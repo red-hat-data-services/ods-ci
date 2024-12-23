@@ -30,7 +30,6 @@ ${WORKBENCH_EXISTING_CONNECTION_RAD_XP}=      xpath=//input[@name="existing-data
 ${WORKBENCH_STATUS_STOPPED}=                  Stopped
 ${WORKBENCH_STATUS_RUNNING}=                  Running
 ${WORKBENCH_STATUS_STARTING}=                 Starting
-${WORKBENCH_STOP_BTN_XP}=                 xpath=//button[text()="Stop workbench"]
 ${WORKBENCH_IMAGE_VER_LABEL}=        //label[@for="workbench-image-version-selection"]
 ${WORKBENCH_IMAGE_VER_BUTTON}=       ${WORKBENCH_IMAGE_VER_LABEL}/../..//button
 ${WORKBENCH_IMAGE_VER_DROPDOWN}=     //*[@id="workbench-image-version-selection"]
@@ -429,7 +428,7 @@ Handle Stop Workbench Confirmation Modal
     IF    ${press_cancel} == ${TRUE}
         Click Button    ${GENERIC_CANCEL_BTN_XP}
     ELSE
-        Click Button    ${WORKBENCH_STOP_BTN_XP}
+        Click Button    ${GENERIC_STOP_BTN_XP}
     END
 
 Delete Workbench

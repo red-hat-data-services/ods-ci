@@ -13,6 +13,7 @@ ${RESOURCE_INPUT_XP}=    css:[data-testid="manage-project-modal-resourceName"]
 ${GENERIC_CREATE_BTN_XP}=     xpath=//*[@role="dialog"]//button[.="Create" or starts-with(., "Create")]
 ${GENERIC_CANCEL_BTN_XP}=     xpath=//*[@role="dialog"]//button[.="Cancel" or starts-with(., "Cancel")]
 ${GENERIC_DELETE_BTN_XP}=     xpath=//*[@role="dialog"]//button[.="Delete" or starts-with(., "Delete")]
+${GENERIC_STOP_BTN_XP}=     xpath=//*[@role="dialog"]//button[.="Stop" or starts-with(., "Stop")]
 # TODO: Update to latter option once the change is pulled from ODH into downstream!
 ${PROJECT_CREATE_BTN_XP}=     xpath=//button[@data-testid="create-data-science-project"]
 ${ACTIONS_BTN_XP}=    xpath=//div/button[@aria-label="Actions"]

@@ -10,10 +10,12 @@ ${TITLE_INPUT_XP}=    xpath=//input[@id="manage-project-modal-name"]
 ${DESCR_INPUT_XP}=    xpath=//textarea[@id="manage-project-modal-description"]
 ${RESOURCE_EDIT_BTN_XP}=    xpath=//button[.="Edit resource name"]
 ${RESOURCE_INPUT_XP}=    css:[data-testid="manage-project-modal-resourceName"]
-${GENERIC_CREATE_BTN_XP}=     xpath=//button[text()="Create"]
-${GENERIC_CANCEL_BTN_XP}=     xpath=//button[text()="Cancel"]
+${GENERIC_CREATE_BTN_XP}=     xpath=//*[@role="dialog"]//button[.="Create" or starts-with(., "Create")]
+${GENERIC_CANCEL_BTN_XP}=     xpath=//*[@role="dialog"]//button[.="Cancel" or starts-with(., "Cancel")]
+${GENERIC_DELETE_BTN_XP}=     xpath=//*[@role="dialog"]//button[.="Delete" or starts-with(., "Delete")]
+${GENERIC_STOP_BTN_XP}=     xpath=//*[@role="dialog"]//button[.="Stop" or starts-with(., "Stop")]
 # TODO: Update to latter option once the change is pulled from ODH into downstream!
-${PROJECT_CREATE_BTN_XP}=     xpath=//button[text()="Create data science project" or text()="Create project"]
+${PROJECT_CREATE_BTN_XP}=     xpath=//button[@data-testid="create-data-science-project"]
 ${ACTIONS_BTN_XP}=    xpath=//div/button[@aria-label="Actions"]
 ${DELETE_ACTION_BTN_XP}=  xpath=//div/ul/li/button[text()="Delete project"]
 ${EDIT_ACTION_BTN_XP}=    xpath=//div/ul/li/button[text()="Edit project"]
@@ -153,7 +155,6 @@ Create Data Science Project
         Click Button    ${GENERIC_CREATE_BTN_XP}
         Wait Until Generic Modal Disappears
     END
-    Wait Until Project Is Open    project_title=${title}
     ${open}=    Run Keyword And Return Status    Wait Until Project Is Open    project_title=${title}
     IF    ${open} == ${FALSE}
         ${is_home_open}=    Is Data Science Projects Page Open
@@ -165,14 +166,14 @@ Create Data Science Project
     END
 
 Generate Unique Namespace
-    [Documentation]    If DS Project Namespace '${namespace}' already exists - Return the Namespace + Random Suffix.
+    [Documentation]    If DS Project Namespace '${namespace}' already exists - Return it with a Random digits suffix.
     ...                (DS Project Display Name does not need to be unique, but DS Project Namespace does).
     [Arguments]    ${namespace}
     ${rc}=    Run And Return Rc    oc get namespace ${namespace}
-    IF    "${rc}" == "${0}" and len("${namespace}") < 60
-        # Add unique string to Project resource name (max length is 63 chars)
-        ${suffix}=    Generate Random String    3   [LOWER]
-        ${namespace}=    Set Variable    ${namespace}-${suffix}
+    IF    "${rc}" == "${0}"
+        # Add Random 3-digits suffix, but trim characters above 30 (allowed namespace length)
+        ${suffix}=    Generate Random String    3    [NUMBERS]
+        ${namespace}=    Set Variable    ${namespace}[0:27]${suffix}
     END
     RETURN    ${namespace}
 

@@ -18,7 +18,7 @@ Assign ${permission_type} Permissions To User ${username}
     [Documentation]    Assign the user ${username} and level of permission ${permission_type}
     ...    to the currently open DS Project in UI
     Log     ${username} - ${permission_type}
-    Click Element    xpath://button[text()="Add user"]
+    Click Element    //button[@data-testid="add-button user"]
     Element Should Be Disabled    ${SAVE_BUTTON}
     Input Text    xpath:${INPUT_USER}    ${username}
     Select Permission Type    permission_type=${permission_type}
@@ -61,7 +61,7 @@ Assign ${permission_type} Permissions To Group ${group_name}
     [Documentation]    Assign the user ${group_name} and level of permission ${permission_type}
     ...    to the currently open DS Project in UI
     Log     ${group_name} - ${permission_type}
-    Click Element    xpath://button[text()="Add group"]
+    Click Element    //button[@data-testid="add-button group"]
     Element Should Be Disabled    ${SAVE_BUTTON}
     IF    ${IS_CLUSTER_ADMIN} == ${FALSE}
         Input Text    xpath:${INPUT_GROUP}    ${group_name}

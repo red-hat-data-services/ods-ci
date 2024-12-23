@@ -26,7 +26,7 @@ Verify RHODS Admins Can Import A Custom Serving Runtime Template By Uploading A 
     Open Dashboard Settings    settings_page=Serving runtimes
     Upload Serving Runtime Template    runtime_filepath=${OVMS_RUNTIME_FILEPATH}
     ...    serving_platform=multi      runtime_protocol=gRPC
-    Serving Runtime Template Should Be Listed    displayed_name=${UPLOADED_OVMS_YAML_NAME}
+    Serving Runtime Template Should Be Listed    displayed_name=${UPLOADED_OVMS_DISPLAYED_NAME}
     ...    serving_platform=multi
 
 Verify RHODS Admins Can Delete A Custom Serving Runtime Template

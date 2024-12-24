@@ -24,18 +24,20 @@ Begin Web Test
     ...              ODH dashboard, checking that the spawner is in a ready state before
     ...              handing control over to the test suites.
     [Arguments]    ${username}=${TEST_USER.USERNAME}    ${password}=${TEST_USER.PASSWORD}
-    ...            ${auth_type}=${TEST_USER.AUTH_TYPE}
+    ...            ${auth_type}=${TEST_USER.AUTH_TYPE}    ${jupyter_login}=${TRUE}
     Set Library Search Order  SeleniumLibrary
     RHOSi Setup
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard  ${username}  ${password}  ${auth_type}
     Wait For RHODS Dashboard To Load
-    Launch Jupyter From RHODS Dashboard Link
-    Login To Jupyterhub  ${username}  ${password}  ${auth_type}
-    ${authorization_required} =  Is Service Account Authorization Required
-    IF  ${authorization_required}  Authorize jupyterhub service account
-    Fix Spawner Status
-    Go To  ${ODH_DASHBOARD_URL}
+    IF    ${jupyter_login}
+        Launch Jupyter From RHODS Dashboard Link
+        Login To Jupyterhub  ${username}  ${password}  ${auth_type}
+        ${authorization_required} =  Is Service Account Authorization Required
+        IF  ${authorization_required}  Authorize jupyterhub service account
+        Fix Spawner Status
+        Go To  ${ODH_DASHBOARD_URL}
+    END
 
 End Web Test
     [Arguments]    ${username}=${TEST_USER.USERNAME}
@@ -597,3 +599,13 @@ Skip If Cluster Type Is Managed
     [Documentation]    Skips test if cluster type  is Managed
     ${cluster_type}=    Is Cluster Type Self-Managed
     Skip If    condition=${cluster_type}==False    msg=This test is skipped for Managed cluster
+
+Delete All ${resource_type} In Namespace By Name
+    [Documentation]    Force delete all ${resource_type} named '${resource_type}' in namespace '${namespace}'
+    [Arguments]    ${namespace}    ${resource_name}
+    ${list_resources} =    Set Variable    oc -n ${namespace} get ${resource_type} -o name | grep /${resource_name}
+    ${xargs_patch} =    Set Variable    xargs -rt oc -n ${namespace} patch --type=json -p '[{"op": "add", "path": "/metadata/ownerReferences", "value": null}]'
+    ${xargs_delete} =    Set Variable    xargs -rt oc -n ${namespace} delete
+    ${result} =    Run Process    ${list_resources} | ${xargs_patch} && ${list_resources} | ${xargs_delete}
+    ...    shell=true    stderr=STDOUT
+    Log    ${result.stdout}    console=yes

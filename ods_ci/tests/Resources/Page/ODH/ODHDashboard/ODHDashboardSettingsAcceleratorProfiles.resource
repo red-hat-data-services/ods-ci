@@ -185,6 +185,7 @@ Delete Accelerator Profile Tolerations
     ...                view: Edit Accelerator profile
     [Arguments]   ${display_name}
     Click On Edit Accelerator Profile    ${display_name}
+    ODHDashboard.Click Action From Actions Menu    ${display_name}    action=Delete
     Wait Until Element Is Visible    ${ACCELERATOR_EDIT_TOLERATION_KEBAB_BTN}
     Click Element     ${ACCELERATOR_EDIT_NAV_MENU_TOLERATIONS}
     ${tolerations_num}=  Get Element Count  ${ACCELERATOR_EDIT_TOLERATION_KEBAB_BTN}

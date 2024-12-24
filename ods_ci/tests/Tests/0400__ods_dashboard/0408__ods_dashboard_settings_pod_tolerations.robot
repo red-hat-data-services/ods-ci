@@ -3,9 +3,9 @@ Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
 Resource         ../../Resources/Page/OCPDashboard/Pods/Pods.robot
 Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDashboardSettings.resource
 Library          ../../../libs/Helpers.py
-Suite Setup      Begin Web Test
-Suite Teardown   Teardown
-Test Tags         Dashboard
+Suite Setup      Suite Setup
+Suite Teardown   Suite Teardown
+Test Tags        Dashboard
 
 
 *** Variables ***
@@ -17,6 +17,7 @@ Test Setting Unsupported Pod Toleration Via UI
     [Documentation]    Sets a Pod toleration via the admin UI
     [Tags]  Sanity
     ...     ODS-1788
+    Clean All Standalone Notebooks
     Menu.Navigate To Page    Settings    Cluster settings
     Wait Until Page Contains    Notebook pod tolerations
     FOR    ${toleration}    IN    @{UNSUPPORTED_TOLERATIONS}
@@ -27,6 +28,7 @@ Test Setting Pod Toleration Via UI
     [Documentation]    Sets a Pod toleration via the admin UI
     [Tags]  Sanity
     ...     ODS-1684
+    Menu.Navigate To Page    Settings    Cluster settings
     Set Pod Toleration Via UI    TestToleration
     Save Changes In Cluster Settings
 
@@ -50,16 +52,6 @@ Verify Server Pod Has The Expected Toleration
     List Should Contain Value  ${received}  ${expected}
     ...    msg=Unexpected Pod Toleration
 
-Teardown
-    [Documentation]    Removes tolerations and cleans up
-    Clean Up Server
-    Stop JupyterLab Notebook Server
-    Menu.Navigate To Page    Settings    Cluster settings
-    Wait Until Page Contains Element    xpath://input[@id="tolerations-enabled-checkbox"]
-    Click Element    xpath://input[@id="tolerations-enabled-checkbox"]
-    Save Changes In Cluster Settings
-    Close Browser
-
 Verify Unsupported Toleration Is Not Allowed
     [Documentation]    Test an unsupported pod toleration and expect it
     ...    to not be allowed.
@@ -67,3 +59,18 @@ Verify Unsupported Toleration Is Not Allowed
     Set Pod Toleration Via UI    ${toleration}
     Page Should Contain    Toleration key must consist of alphanumeric characters, '-', '_' or '.', and must start and end with an alphanumeric character.
     Element Should Be Disabled    xpath://button[.="Save changes"]
+
+Suite Setup
+    [Documentation]    Setup for the Toleration tests
+    Begin Web Test    jupyter_login=${FALSE}
+    Clean All Standalone Notebooks
+
+Suite Teardown
+    [Documentation]    Removes Tolerations and cleans up
+    Clean All Standalone Notebooks
+    Menu.Navigate To Page    Settings    Cluster settings
+    Reload Page
+    Wait Until Page Contains Element    xpath://input[@id="tolerations-enabled-checkbox"]
+    Click Element    xpath://input[@id="tolerations-enabled-checkbox"]
+    Save Changes In Cluster Settings
+    Close Browser

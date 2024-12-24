@@ -42,7 +42,7 @@ Install RHODS
       ${csv_display_name} =    Set Variable    ${RHODS_CSV_DISPLAY}
   END
   IF  "${cluster_type}" == "selfmanaged"
-      IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "CLi"
+      IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "Cli"
              Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
       ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "OperatorHub"
           ${file_path} =    Set Variable    tasks/Resources/RHODS_OLM/install/
@@ -61,11 +61,11 @@ Install RHODS
            FAIL    Provided test environment and install type is not supported
       END
   ELSE IF  "${cluster_type}" == "managed"
-      IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "CLi" and "${UPDATE_CHANNEL}" == "odh-nightlies"
+      IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "Cli" and "${UPDATE_CHANNEL}" == "odh-nightlies"
           # odh-nightly is not build for Managed, it is only possible for Self-Managed
           Set Global Variable    ${OPERATOR_NAMESPACE}    openshift-marketplace
           Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
-      ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "CLi"
+      ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "Cli"
           Install RHODS In Managed Cluster Using CLI  ${cluster_type}     ${image_url}
       ELSE
           FAIL    Provided test environment is not supported

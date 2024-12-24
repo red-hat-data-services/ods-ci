@@ -2,6 +2,7 @@
 Documentation    This is a resource file for Distributed Workloads.
 Library          OperatingSystem
 Library          Process
+Resource          ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 
 
 *** Variables ***
@@ -256,3 +257,17 @@ Check missing Go test
     [Documentation]    Check that upstream Go test is not missing
     [Arguments]    ${test_run_output}
     Should Not Contain    ${test_run_output}    testing: warning: no tests to run    No Go tests were run
+
+Verify container images
+    [Documentation]    Verify container images
+    [Arguments]    ${pod_name}    ${container}    ${expected_image}
+    ${test_env}=  Is Test Enviroment ROSA-HCP
+    # We use Kyverno custom policies to pull unreleased images from quay registry for hypershift clusters
+    ${registry_name} =   Set Variable If    ${test_env}==True
+    ...    quay.io
+    ...    registry.redhat.io
+    Log To Console    Verifying ${pod_name}'s container image is referred from ${registry_name}
+    ${pod} =    Find First Pod By Name  namespace=${APPLICATIONS_NAMESPACE}   pod_regex=${pod_name}
+    Container Image Url Should Contain      ${APPLICATIONS_NAMESPACE}     ${pod}      ${container}
+    ...     ${registry_name}/rhoai/${expected_image}
+    Log To Console    ${pod_name}'s container image is verified

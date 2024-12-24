@@ -2,6 +2,7 @@
 Documentation     Smoke tests for Workloads Orchestration
 Library           Process
 Resource          ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
+Resource          ../../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 
 
 *** Test Cases ***
@@ -25,8 +26,4 @@ Kueue smoke test
         FAIL    Can not find kueue-webhook-service service in ${APPLICATIONS_NAMESPACE}
     END
     Log To Console    kueue-webhook-service service exists
-    Log To Console    Verifying kueue-controller-manager's container image is referred from registry.redhat.io
-    ${pod} =    Find First Pod By Name  namespace=${APPLICATIONS_NAMESPACE}   pod_regex=kueue-controller-manager-
-    Container Image Url Should Contain      ${APPLICATIONS_NAMESPACE}     ${pod}      manager
-    ...     registry.redhat.io/rhoai/odh-kueue-controller
-    Log To Console    kueue-controller-manager's container image is verified
+    Verify container images    kueue-controller-manager    manager    odh-kueue-controller

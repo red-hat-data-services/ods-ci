@@ -15,7 +15,7 @@ Test Tags         Dashboard
 *** Test Cases ***
 Test Setting Unsupported Pod Toleration Via UI
     [Documentation]    Sets a Pod toleration via the admin UI
-    [Tags]  Sanity    Tier1
+    [Tags]  Sanity
     ...     ODS-1788
     Menu.Navigate To Page    Settings    Cluster settings
     Wait Until Page Contains    Notebook pod tolerations
@@ -25,14 +25,14 @@ Test Setting Unsupported Pod Toleration Via UI
 
 Test Setting Pod Toleration Via UI
     [Documentation]    Sets a Pod toleration via the admin UI
-    [Tags]  Sanity    Tier1
+    [Tags]  Sanity
     ...     ODS-1684
     Set Pod Toleration Via UI    TestToleration
     Save Changes In Cluster Settings
 
 Verify Toleration Is Applied To Pod
     [Documentation]    Verifies Pod spawns with toleration
-    [Tags]  Sanity    Tier1
+    [Tags]  Sanity
     ...     ODS-1685
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook With Arguments    image=minimal-notebook

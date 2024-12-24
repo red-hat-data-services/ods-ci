@@ -33,7 +33,7 @@ ${ACC_TOLERATION_SECONDS}=    15
 Create An Accelerator Profile From Accelerator Profiles Administration UI
     [Documentation]    Create an Accelerator Profile instance from the Administration UI and verify it's content
     [Tags]  RHOAIENG-3349
-    ...     Sanity    Tier1
+    ...     Sanity
     [Setup]  Open Dashboard And Navigate To Accelerator Profiles From Settings
     Create An Accelerator Profile Via UI   ${ACC_NAME}1   ${ACC_IDENTIFIER}
     ...                                    ${ACC_DESCRIPTION}   ${ACC_ENABLED}    tolerations=yes
@@ -54,7 +54,7 @@ Create An Accelerator Profile From Accelerator Profiles Administration UI
 Modify An Accelerator Profile Using Accelerator Profiles Administration UI
     [Documentation]    Modify an Accelerator Profile instance from the Administration UI and verify it's content
     [Tags]  RHOAIENG-3349
-    ...     Sanity    Tier1
+    ...     Sanity
     [Setup]  Run Keywords    Create An Accelerator Profile Via CLI    ${ACC_NAME}2
     ...    AND
     ...    Open Dashboard And Navigate to Accelerator Profiles From Settings
@@ -80,7 +80,7 @@ Delete Tolerations from an Accelerator Profile Using Accelerator Profiles Admini
     [Documentation]    Delete Tolerations from  an Accelerator Profile instance from the Administration UI and
     ...                verify it's content
     [Tags]  RHOAIENG-3349
-    ...     Sanity    Tier1
+    ...     Sanity
     [Setup]  Run Keywords    Create An Accelerator Profile Via CLI    ${ACC_NAME}3
     ...    AND
     ...    Open Dashboard And Navigate to Accelerator Profiles From Settings
@@ -91,7 +91,7 @@ Delete Tolerations from an Accelerator Profile Using Accelerator Profiles Admini
 Disable an Accelerator Profile From The Accelerator Profile Edit View
     [Documentation]    Disable an An accelerator profile from the Edit Accelerator Profile view
     [Tags]  RHOAIENG-3349
-    ...     Sanity    Tier1
+    ...     Sanity
     [Setup]  Run Keywords    Create An Accelerator Profile Via CLI    ${ACC_NAME}4
     ...    AND
     ...    Open Dashboard And Navigate to Accelerator Profiles From Settings
@@ -102,7 +102,7 @@ Disable an Accelerator Profile From The Accelerator Profile Edit View
 Enable an Accelerator Profile From The Accelerator Profile Edit View
     [Documentation]    Enable an An accelerator profile from the Edit Accelerator Profile view
     [Tags]  RHOAIENG-3349
-    ...     Sanity    Tier1
+    ...     Sanity
     [Setup]  Run Keywords    Create An Accelerator Profile Via CLI    ${ACC_NAME}5
     ...    AND
     ...    Open Dashboard And Navigate to Accelerator Profiles From Settings
@@ -113,7 +113,7 @@ Enable an Accelerator Profile From The Accelerator Profile Edit View
 Disable an Accelerator Profile From The Grid of the Accelerator Profile View
     [Documentation]    Disable an An accelerator profile from the Edit Accelerator Profile view
     [Tags]  RHOAIENG-3349
-    ...     Sanity    Tier1
+    ...     Sanity
     [Setup]  Run Keywords    Create An Accelerator Profile Via CLI    ${ACC_NAME}6
     ...    AND
     ...    Open Dashboard And Navigate to Accelerator Profiles From Settings
@@ -124,7 +124,7 @@ Disable an Accelerator Profile From The Grid of the Accelerator Profile View
 Enable an Accelerator Profile From The Grid of the Accelerator Profile View
     [Documentation]    Enable an An accelerator profile from the Accelerator Profile view
     [Tags]  RHOAIENG-3349
-    ...     Sanity    Tier1
+    ...     Sanity
     [Setup]  Run Keywords    Create An Accelerator Profile Via CLI    ${ACC_NAME}7
     ...    AND
     ...    Open Dashboard And Navigate to Accelerator Profiles From Settings
@@ -135,7 +135,7 @@ Enable an Accelerator Profile From The Grid of the Accelerator Profile View
 Delete an Accelerator Profile From The Grid of the Accelerator Profile View
     [Documentation]    Delete an An accelerator profile from the Accelerator Profile view
     [Tags]  RHOAIENG-3349
-    ...     Sanity    Tier1
+    ...     Sanity
     [Setup]  Run Keywords    Create An Accelerator Profile Via CLI    ${ACC_NAME}8
     ...    AND
     ...    Open Dashboard And Navigate to Accelerator Profiles From Settings

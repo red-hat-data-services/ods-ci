@@ -147,7 +147,7 @@ Delete an Accelerator Profile From The Grid of the Accelerator Profile View
 Teardown Settings Accelerator Profiles
     [Documentation]    Sets the default values In User Management Settings
     ...                and runs the RHOSi Teardown
-    Delete All Accelerator Profiles Which Starts With   ${ACC_NAME}
+    Run Keyword And Ignore Error    Delete All Accelerator Profiles Which Starts With   ${ACC_NAME}
     RHOSi Teardown
 
 Open Dashboard And Navigate to Accelerator Profiles From Settings

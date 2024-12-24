@@ -1,11 +1,12 @@
 *** Settings ***
 Resource      ../../../Page/Components/Components.resource
 Resource      ../../../Page/OCPDashboard/UserManagement/Groups.robot
-Resource       ../../../Common.robot
-Resource       ../JupyterHub/ODHJupyterhub.resource
+Resource      ../../../Common.robot
+Resource      ../JupyterHub/ODHJupyterhub.resource
 Resource      ../../../Page/ODH/ODHDashboard/ResourcesPage.resource
 Resource      ../../../Page/ODH/ODHDashboard/ODHDashboardSettings.resource
-Resource    ../../../OCP.resource
+Resource      ../../../Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
+Resource      ../../../OCP.resource
 Library       JupyterLibrary
 
 

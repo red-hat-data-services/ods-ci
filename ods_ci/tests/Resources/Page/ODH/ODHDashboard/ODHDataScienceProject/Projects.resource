@@ -14,6 +14,7 @@ ${GENERIC_CREATE_BTN_XP}=     xpath=//*[@role="dialog"]//button[.="Create" or st
 ${GENERIC_CANCEL_BTN_XP}=     xpath=//*[@role="dialog"]//button[.="Cancel" or starts-with(., "Cancel")]
 ${GENERIC_DELETE_BTN_XP}=     xpath=//*[@role="dialog"]//button[.="Delete" or starts-with(., "Delete")]
 ${GENERIC_STOP_BTN_XP}=     xpath=//*[@role="dialog"]//button[.="Stop" or starts-with(., "Stop")]
+${GENERIC_DISABLE_BTN_XP}=     xpath=//*[@role="dialog"]//button[.="Disable" or starts-with(., "Disable")]
 # TODO: Update to latter option once the change is pulled from ODH into downstream!
 ${PROJECT_CREATE_BTN_XP}=     xpath=//button[@data-testid="create-data-science-project"]
 ${ACTIONS_BTN_XP}=    xpath=//div/button[@aria-label="Actions"]

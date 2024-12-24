@@ -25,8 +25,18 @@ Kueue smoke test
         FAIL    Can not find kueue-webhook-service service in ${APPLICATIONS_NAMESPACE}
     END
     Log To Console    kueue-webhook-service service exists
-    Log To Console    Verifying kueue-controller-manager's container image is referred from registry.redhat.io
-    ${pod} =    Find First Pod By Name  namespace=${APPLICATIONS_NAMESPACE}   pod_regex=kueue-controller-manager-
-    Container Image Url Should Contain      ${APPLICATIONS_NAMESPACE}     ${pod}      manager
-    ...     registry.redhat.io/rhoai/odh-kueue-controller
-    Log To Console    kueue-controller-manager's container image is verified
+    ${test_env}=  Is Test Enviroment ROSA-HCP
+    IF    ${test_env}==True
+        # We use Kyverno custom policies to pull unreleased images from quay registry for hypershift clusters
+        Log To Console    Verifying kueue-controller-manager's container image is referred from quay.io
+        ${pod} =    Find First Pod By Name  namespace=${APPLICATIONS_NAMESPACE}   pod_regex=kueue-controller-manager-
+        Container Image Url Should Contain      ${APPLICATIONS_NAMESPACE}     ${pod}      manager
+        ...     quay.io/rhoai/odh-kueue-controller
+        Log To Console    kueue-controller-manager's container image is verified
+    ELSE
+        Log To Console    Verifying kueue-controller-manager's container image is referred from registry.redhat.io
+        ${pod} =    Find First Pod By Name  namespace=${APPLICATIONS_NAMESPACE}   pod_regex=kueue-controller-manager-
+        Container Image Url Should Contain      ${APPLICATIONS_NAMESPACE}     ${pod}      manager
+        ...     registry.redhat.io/rhoai/odh-kueue-controller
+        Log To Console    kueue-controller-manager's container image is verified
+    END

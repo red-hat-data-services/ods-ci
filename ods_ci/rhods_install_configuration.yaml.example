@@ -1,5 +1,5 @@
 RHODS_INSTALL:
-    INSTALL_TYPE: CLi
+    INSTALL_TYPE: Cli
     TEST_ENV: AWS
     cluster_type: managed
     operator_version: quay.io/modh/qe-catalog-source:latest

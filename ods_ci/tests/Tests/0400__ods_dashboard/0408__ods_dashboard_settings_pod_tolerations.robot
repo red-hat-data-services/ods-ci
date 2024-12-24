@@ -24,18 +24,13 @@ Test Setting Unsupported Pod Toleration Via UI
         Verify Unsupported Toleration Is Not Allowed    ${toleration}
     END
 
-Test Setting Pod Toleration Via UI
-    [Documentation]    Sets a Pod toleration via the admin UI
+Verify Toleration Is Applied To Pod
+    [Documentation]    Sets Toleration via the admin UI, and verifies Pod spawns with expected toleration
     [Tags]  Sanity
-    ...     ODS-1684
+    ...     ODS-1684    ODS-1685
     Menu.Navigate To Page    Settings    Cluster settings
     Set Pod Toleration Via UI    TestToleration
     Save Changes In Cluster Settings
-
-Verify Toleration Is Applied To Pod
-    [Documentation]    Verifies Pod spawns with toleration
-    [Tags]  Sanity
-    ...     ODS-1685
     Launch JupyterHub Spawner From Dashboard
     Spawn Notebook With Arguments    image=minimal-notebook
     Verify Server Pod Has The Expected Toleration    TestToleration
@@ -68,9 +63,8 @@ Suite Setup
 Suite Teardown
     [Documentation]    Removes Tolerations and cleans up
     Clean All Standalone Notebooks
+    Open ODS Dashboard With Admin User
     Menu.Navigate To Page    Settings    Cluster settings
-    Reload Page
-    Wait Until Page Contains Element    xpath://input[@id="tolerations-enabled-checkbox"]
-    Click Element    xpath://input[@id="tolerations-enabled-checkbox"]
+    Disable Pod Toleration Via UI
     Save Changes In Cluster Settings
     Close Browser

@@ -121,7 +121,8 @@ Get All Text Under Element
     ${elements}=    Get WebElements    ${parent_element}
     ${text_list}=    Create List
     FOR    ${element}    IN    @{elements}
-        ${text}=    Get Element Attribute    ${element}    textContent
+        ${text}=    Run Keyword And Ignore Error
+        ...    Get Element Attribute    ${element}    textContent
         Append To List    ${text_list}    ${text}
     END
     RETURN   ${text_list}

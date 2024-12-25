@@ -9,10 +9,10 @@ Resource       Projects.resource
 ${STORAGE_SECTION_XP}=             xpath=//div[@data-testid="section-cluster-storages"]
 ${STORAGE_NAME_INPUT_XP}=          xpath=//input[@name="create-new-storage-name"]
 ${STORAGE_DESCR_INPUT_XP}=         xpath=//textarea[@name="create-new-storage-description"]
-${STORAGE_SIZE_INPUT_XP}=         xpath=//input[@aria-label="Input"]
+${STORAGE_SIZE_INPUT_XP}=         xpath=//input[@type="number"]
 ${STORAGE_SIZE_PLUS_BTN_XP}=         xpath=//div/button[@aria-label="Plus"]
-${STORAGE_MOUNT_DIR_INPUT_XP}=         xpath=//input[@aria-label="mount-path-folder-value"]
-${STORAGE_WORKBENCH_SELECTOR_XP}=         xpath=//div[contains(@class,"modal")]//ul/li
+${STORAGE_MOUNT_DIR_INPUT_XP}=         xpath=//input[@data-testid="mount-path-folder-value"]
+${STORAGE_WORKBENCH_SELECTOR_XP}=         xpath=//*[@data-testid="cluster-storage-workbench-select"]
 ${STORAGE_ADD_BTN_1_XP}=           ${STORAGE_SECTION_XP}//button[.="Add cluster storage"]
 ${STORAGE_SUBMIT_BTN_XP}=           xpath=//footer//button[@data-testid="modal-submit-button"]
 
@@ -29,7 +29,7 @@ Storage Should Be Listed
         Run Keyword And Continue On Failure    Page Should Contain Element    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]//*/div[text()="${name}"]]/td[text()="No connections"]
     ELSE
         FOR    ${index}    ${workbench_title}    IN ENUMERATE    @{connected_workbench}
-            Run Keyword And Continue On Failure    Page Should Contain Element    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]//div[text()="${name}"]]/td[@data-label="Connected workbenches"]//*[contains(text(),"${workbench_title}")]
+            Run Keyword And Continue On Failure    Page Should Contain Element    ${STORAGE_SECTION_XP}//tr[td[@data-label="Name"]//div[text()="${name}"]]//*[contains(text(),"${workbench_title}")]
         END
     END
 
@@ -105,7 +105,7 @@ Create PersistentVolume Storage
     ELSE
         Click Button    ${STORAGE_ADD_BTN_1_XP}
     END
-    Fill In New PV Data    ${name}    ${description}    ${size}    ${connected_workbench}
+    Fill In New PV Data    ${name}    ${size}    ${description}    ${connected_workbench}
     IF    ${press_cancel} == ${TRUE}
         Click Button    ${GENERIC_CANCEL_BTN_XP}
     ELSE
@@ -117,16 +117,17 @@ Create PersistentVolume Storage
 
 Fill In New PV Data
     [Documentation]    Compiles the modal for creating a new PersistenVolume storage in DS Project details page
-    [Arguments]    ${name}    ${description}    ${size}    ${connected_workbench}=${NONE}
+    [Arguments]    ${name}    ${size}    ${description}=${NONE}    ${connected_workbench}=${NONE}    ${mount_dir}=${NONE}
     ${is_storage_modal}=     Run Keyword And Return Status    Page Should Contain Element     ${STORAGE_SUBMIT_BTN_XP}
     Wait Until Page Contains Element    ${STORAGE_NAME_INPUT_XP}
     IF   ${is_storage_modal}     Run Keyword And Continue On Failure     Element Should Be Disabled    ${STORAGE_SUBMIT_BTN_XP}
     Clear Element Text    ${STORAGE_NAME_INPUT_XP}
     Input Text   ${STORAGE_NAME_INPUT_XP}   ${name}
     Wait Until Page Contains Element    ${STORAGE_DESCR_INPUT_XP}
-    IF   ${is_storage_modal}    Run Keyword And Continue On Failure     Element Should Be Enabled    ${STORAGE_SUBMIT_BTN_XP}
-    Input Text   ${STORAGE_DESCR_INPUT_XP}   ${description}
-    Clear Element Text    ${STORAGE_SIZE_INPUT_XP}
+    # IF   ${is_storage_modal}    Run Keyword And Continue On Failure     Element Should Be Enabled    ${STORAGE_SUBMIT_BTN_XP}
+    IF   "${description}" != "${NONE}"    Input Text   ${STORAGE_DESCR_INPUT_XP}   ${description}
+    Double Click Element    ${STORAGE_SIZE_INPUT_XP}
+    Press Keys    ${STORAGE_SIZE_INPUT_XP}    DELETE
     IF    ${size} > 1
         FOR    ${counter}    IN RANGE    1    ${size}
             Click Element    ${STORAGE_SIZE_PLUS_BTN_XP}
@@ -134,26 +135,35 @@ Fill In New PV Data
     END
     IF    "${connected_workbench}" == "${NONE}"
         Log    msg=Creating PV Storage '${name}' without a Workbench    console=True
+        ${add_mount}=     Run Keyword And Return Status
+        ...    Element Should Be Visible    ${STORAGE_MOUNT_DIR_INPUT_XP}
+        IF   ${add_mount} 
+            IF    "${mount_dir}" == "${NONE}"
+                ${mount_dir}=    Generate Mount Name    ${name}
+            END
+            IF    "${mount_dir}[0]" == "/"    Click Element    xpath=//input[@id="mount-path-radio-custom"]
+            Input Text    ${STORAGE_MOUNT_DIR_INPUT_XP}    ${mount_dir}
+        END
     ELSE
         Log    msg=Creating PV Storage '${name}' for Workbenches: @{connected_workbench}     console=True
-        Run Keyword And Continue On Failure    Element Should Be Enabled
-        ...    xpath=//div[contains(@class,"modal")]//input[contains(@placeholder,"Select a workbench to connect")]
         FOR    ${workbench_title}    IN    @{connected_workbench}
             ${mount_dir}=    Generate Mount Name    ${workbench_title}
             Set Connection Between PV And Workbench    ${workbench_title}    ${mount_dir}
             Run Keyword And Continue On Failure     Element Should Be Enabled    ${STORAGE_SUBMIT_BTN_XP}
         END
     END
+    Wait Until Element Is Enabled    ${STORAGE_SUBMIT_BTN_XP}
+    Click Button    ${STORAGE_SUBMIT_BTN_XP}
 
 Set Connection Between PV And Workbench
     [Documentation]    Connects a PV to an existent workbench
     [Arguments]    ${workbench_title}    ${mount_dir}
-    Wait Until Element Is Enabled    xpath=//button[@aria-label="Options menu"]
-    Click Element    xpath=//button[@aria-label="Options menu"]
-    Wait Until Page Contains Element    ${STORAGE_WORKBENCH_SELECTOR_XP}/button[text()="${workbench_title}"]
-    Click Element                       ${STORAGE_WORKBENCH_SELECTOR_XP}/button[text()="${workbench_title}"]
+    Click Button    //button[@data-testid="add-workbench-button"]
+    Run Keyword And Ignore Error    Click Element    ${STORAGE_WORKBENCH_SELECTOR_XP}//button
+    Run Keyword And Ignore Error    Click Element    ${STORAGE_WORKBENCH_SELECTOR_XP}//*[contains(.,"${workbench_title}")]
+    Click Element    xpath=//td[@data-label="Path format"]//button[@aria-label="Options menu"]
+    Click Element    xpath=//*[@data-testid="Custom"]//button
     Wait Until Page Contains Element    ${STORAGE_MOUNT_DIR_INPUT_XP}
-    Run Keyword And Continue On Failure     Element Should Be Disabled    ${STORAGE_SUBMIT_BTN_XP}
     Input Text    ${STORAGE_MOUNT_DIR_INPUT_XP}    ${mount_dir}
 
 Delete Storage

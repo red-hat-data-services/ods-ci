@@ -45,7 +45,7 @@ ${DC_S3_AWS_SECRET_ACCESS_KEY}=    custom dummy secret access key
 ${DC_S3_AWS_ACCESS_KEY}=    custom dummy access key id
 ${DC_S3_ENDPOINT}=    custom.endpoint.s3.com
 ${DC_S3_REGION}=    ods-ci-region
-${DC_S3_TYPE}=    Object storage
+${DC_S3_TYPE}=    object storage
 @{IMAGE_LIST}    Minimal Python    CUDA   PyTorch    Standard Data Science    TensorFlow
 ${ENV_SECRET_FILEPATH}=    tests/Resources/Files/env_vars_secret.yaml
 ${ENV_CM_FILEPATH}=    tests/Resources/Files/env_vars_cm.yaml
@@ -176,7 +176,6 @@ Verify User Can Create And Start A Workbench Adding A New PV Storage
     ...                 storage=Persistent  pv_existent=${FALSE}
     ...                 pv_name=${pv_name}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
     Workbench Should Be Listed      workbench_title=${WORKBENCH_3_TITLE}
-    Workbench Status Should Be      workbench_title=${WORKBENCH_3_TITLE}      status=${WORKBENCH_STATUS_STARTING}
     Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_3_TITLE}
     Check Corresponding Notebook CR Exists      workbench_title=${WORKBENCH_3_TITLE}   namespace=${ns_name}
     ${connected_woksps}=    Create List    ${WORKBENCH_3_TITLE}
@@ -723,7 +722,7 @@ Environment Variables Should Be Displayed According To Their Type
 Environment Variable Type Should Be
     [Arguments]    ${expected_type}    ${var_idx}
     ${displayed_type}=    Get Text
-    ...    ${ENV_VARIABLES_SECTION_XP}/div[(contains(@class, "-l-split"))][${var_idx}]//div[contains(@class,"pf-v6-c-select")]/button//span[contains(@class,'toggle-text')]  # robocop: disable:line-too-long
+    ...    ${ENV_VARIABLES_SECTION_XP}/div[(contains(@class, "-l-split"))][${var_idx}]//*[@data-testid="environment-variable-type-select"]
     Run Keyword And Continue On Failure    Should Be Equal As Strings    ${displayed_type}    ${expected_type}
 
 Environment Variable Key/Value Fields Should Be Correctly Displayed

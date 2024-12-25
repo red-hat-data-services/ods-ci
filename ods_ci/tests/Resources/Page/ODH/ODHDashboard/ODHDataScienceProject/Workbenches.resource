@@ -24,7 +24,7 @@ ${WORKBENCH_ACCELERATOR_PLUS_BUTTON_XPATH}=    xpath=${WORKBENCH_ACCELERATOR_INP
 ${WORKBENCH_SIZE_ITEM_BTN_XP}=           xpath=//*[@data-testid="container-size-group"]//button
 ${WORKBENCH_GPU_MENU_BTN_XP}=           xpath=//section[@id="deployment-size"]//button[contains(@aria-labelledby,"gpu-numbers")]     # robocop: disable
 ${WORKBENCH_GPU_ITEM_BTN_XP}=           xpath=//ul[@data-id="gpu-select"]/li/button
-${WORKBENCH_ADD_VAR_BTN_XP}=           xpath=//button[text()="Add variable"]
+${WORKBENCH_ADD_VAR_BTN_XP}=           xpath=//button[@data-testid="add-variable-button"]
 ${WORKBENCH_USE_CONNECTION_CHK_XP}=           xpath=//input[@name="enable-data-connection-checkbox"]
 ${WORKBENCH_EXISTING_CONNECTION_RAD_XP}=      xpath=//input[@name="existing-data-connection-type-radio"]
 ${WORKBENCH_STATUS_STOPPED}=                  Stopped
@@ -87,8 +87,8 @@ Create Workbench
         ELSE IF   ${pv_existent} == ${FALSE}
             # Use the `Jump to section` links in the page to scroll the section into view
             Click Element    //a[@href="#cluster-storage"]
-            Click Element   xpath=//input[@name="persistent-new-storage-type-radio"]
-            Fill In New PV Data    name=${pv_name}    description=${pv_description}  size=${pv_size}
+            Click Element   //*[@data-testid="create-storage-button"]
+            Fill In New PV Data    name=${pv_name}    size=${pv_size}    description=${pv_description}
             Log    msg=Delete PVC '${pv_name}' before creating new one via the Workbench dialog
             Delete PVC In Project From CLI    pvc_title=${pv_name}    project_title=${prj_title}
         ELSE
@@ -172,13 +172,13 @@ Select Environment Variable Types
     Run Keyword And Continue On Failure    Wait Until Page Contains Element
     ...    ${ENV_VARIABLES_SECTION_XP}/div[contains(@class, "-l-split")][${variable_index}]//button[@aria-label="Options menu"]
     Click Element    ${ENV_VARIABLES_SECTION_XP}/div[contains(@class, "-l-split")][${variable_index}]//button[@aria-label="Options menu"]
-    Wait Until Page Contains Element    xpath=//ul[@role="listbox"]/li/button[text()="${k8s_type}"]
-    Click Element    xpath=//ul[@role="listbox"]/li/button[text()="${k8s_type}"]
+    Wait Until Page Contains Element    xpath=//ul[@role="listbox"]/li/button[contains(.,"${k8s_type}")]
+    Click Element    xpath=//ul[@role="listbox"]/li/button[contains(.,"${k8s_type}")]
     Run Keyword And Continue On Failure
-    ...    Wait Until Page Contains Element    ${ENV_VARIABLES_SECTION_XP}//button[div/span[text()="Select one"]]
-    Click Element    ${ENV_VARIABLES_SECTION_XP}/div[contains(@class, "-l-split")][${variable_index}]//button[div/span[text()="Select one"]]
-    Wait Until Page Contains Element    xpath=//ul[@role="listbox"]/li/button[text()="${input_type}"]
-    Click Element    xpath=//ul[@role="listbox"]/li/button[text()="${input_type}"]
+    ...    Wait Until Page Contains Element    ${ENV_VARIABLES_SECTION_XP}//button[contains(.,"Select one")]
+    Click Element    ${ENV_VARIABLES_SECTION_XP}/div[contains(@class, "-l-split")][${variable_index}]//button[contains(.,"Select one")]
+    Wait Until Page Contains Element    xpath=//ul[@role="listbox"]/li/button[contains(.,"${input_type}")]
+    Click Element    xpath=//ul[@role="listbox"]/li/button[contains(.,"${input_type}")]
 
 Remove All Environment Variables
     [Documentation]    Removes all the added environment variables from the workbench creation page

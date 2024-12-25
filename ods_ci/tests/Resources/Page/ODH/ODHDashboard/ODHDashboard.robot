@@ -870,7 +870,7 @@ Handle Deletion Confirmation Modal
 Click Action From Actions Menu
     [Documentation]    Clicks an action from Actions menu (3-dots menu on the right)
     [Arguments]    ${item_title}    ${action}    ${item_type}=${NONE}
-    ${item_row}=    Set Variable    //tr[td[@data-label="Name"]//*[text()="${item_title}"]]
+    ${item_row}=    Set Variable    //tr[td[contains(translate(@data-label, 'NAME', 'name'), 'name')]//*[text()="${item_title}"]]
     ${action_btn}=    Set Variable    //button[@role="menuitem" and starts-with(.,"${action}")]
     Click Element       xpath=${item_row}//button[@aria-label="Kebab toggle"]
     IF    "${item_type}" != "${NONE}"

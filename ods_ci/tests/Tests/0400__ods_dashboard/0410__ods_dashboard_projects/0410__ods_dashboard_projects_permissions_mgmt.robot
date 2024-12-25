@@ -42,6 +42,8 @@ Verify User Can Modify And Revoke Access To DS Projects From Other Users    # ro
     ...       ODS-2202
     Switch To User    ${USER_B}
     Move To Tab    Permissions
+    Assign Contributor Permissions To User ${USER_C}
+    Assign Admin Permissions To User ${USER_A}
     Change ${USER_C} Permissions To Admin
     Change ${USER_A} Permissions To Contributor
     Refresh Pages

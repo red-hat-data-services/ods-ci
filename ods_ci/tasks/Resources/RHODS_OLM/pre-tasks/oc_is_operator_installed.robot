@@ -11,7 +11,7 @@ Is RHODS Installed
           ...  Oc Get  kind=CatalogSource  namespace=openshift-marketplace
           ...          field_selector=metadata.name=redhat-operators
       ELSE
-          IF  "${INSTALL_TYPE}" == "CLi"
+          IF  "${INSTALL_TYPE}" == "Cli"
               ${result}=  Run Keyword And Return Status
               ...  Run Keywords
               ...  Check A RHODS Family Operator Is Installed  namespace=redhat-ods-operator

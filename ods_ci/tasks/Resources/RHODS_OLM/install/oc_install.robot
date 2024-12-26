@@ -24,7 +24,7 @@ Install RHODS
   Clone OLM Install Repo
   ${csv_display_name} =    Set Variable    ${RHODS_CSV_DISPLAY}
   IF  "${cluster_type}" == "selfmanaged"
-      IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "CLi"
+      IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "Cli"
             IF  "${UPDATE_CHANNEL}" != "odh-nightlies"
                  Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
             ELSE
@@ -42,7 +42,7 @@ Install RHODS
            FAIL    Provided test envrioment and install type is not supported
       END
   ELSE IF  "${cluster_type}" == "managed"
-      IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "CLi"
+      IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "Cli"
            IF  "${UPDATE_CHANNEL}" != "odh-nightlies"
                 Install RHODS In Managed Cluster Using CLI  ${cluster_type}     ${image_url}
            ELSE

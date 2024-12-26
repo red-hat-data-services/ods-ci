@@ -1,7 +1,7 @@
 *** Settings ***
 Resource    ../ODH/ODHDashboard/ODHDashboard.robot
-Library     JupyterLibrary
 Library     String
+Library     JupyterLibrary
 
 *** Keywords ***
 Navigate To Page

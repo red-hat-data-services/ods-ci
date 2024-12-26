@@ -33,8 +33,8 @@ Begin Web Test
     IF    ${jupyter_login}
         Launch Jupyter From RHODS Dashboard Link
         Login To Jupyterhub  ${username}  ${password}  ${auth_type}
-        ${authorization_required} =  Is Service Account Authorization Required
-        IF  ${authorization_required}  Authorize jupyterhub service account
+        ${authorization_required}=   Is Service Account Authorization Required
+        IF  ${authorization_required}  Authorize JupyterLab Service Account
         Fix Spawner Status
         Go To  ${ODH_DASHBOARD_URL}
     END
@@ -126,6 +126,15 @@ Get All Text Under Element
         Append To List    ${text_list}    ${text}
     END
     RETURN   ${text_list}
+
+Scroll And Input Text Into Element
+    [Documentation]    Scrolls element into view and inputs text into the element
+    [Arguments]    ${element}    ${text}
+    Scroll Element Into View    ${element}
+    ${text_entered}=    Run Keyword And Return Status    Input Text    ${element}    ${text}
+    IF    ${text_entered}    RETURN
+    Click Element    ${element}
+    Press Keys    NONE    ${text}
 
 Get All Strings That Contain
     [Documentation]    Returns new list of strings, for each item in ${list_of_strings} that contains ${substring_to_search}

@@ -152,15 +152,13 @@ Fill In New PV Data
             Run Keyword And Continue On Failure     Element Should Be Enabled    ${STORAGE_SUBMIT_BTN_XP}
         END
     END
-    Wait Until Element Is Enabled    ${STORAGE_SUBMIT_BTN_XP}
-    Click Button    ${STORAGE_SUBMIT_BTN_XP}
 
 Set Connection Between PV And Workbench
     [Documentation]    Connects a PV to an existent workbench
     [Arguments]    ${workbench_title}    ${mount_dir}
     Click Button    //button[@data-testid="add-workbench-button"]
     Run Keyword And Ignore Error    Click Element    ${STORAGE_WORKBENCH_SELECTOR_XP}//button
-    Run Keyword And Ignore Error    Click Element    ${STORAGE_WORKBENCH_SELECTOR_XP}//*[contains(.,"${workbench_title}")]
+    Run Keyword And Ignore Error    Click Element    //button[contains(.,"${workbench_title}")]
     Click Element    xpath=//td[@data-label="Path format"]//button[@aria-label="Options menu"]
     Click Element    xpath=//*[@data-testid="Custom"]//button
     Wait Until Page Contains Element    ${STORAGE_MOUNT_DIR_INPUT_XP}
@@ -197,9 +195,7 @@ Delete All PVC In Project From CLI
     [Documentation]    Deletes All PVCs in a project from CLI
     [Arguments]    ${project_title}
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${project_title}
-    ${result}=    Run Process
-    ...    oc delete pvc -n ${ns_name} --all    shell=yes
-    Should Be True    ${result.rc} == 0    msg=${result.stderr}
+    ${result}=    Run Process    oc delete pvc -n ${ns_name} --all --timeout\=30s    shell=yes
 
 Generate Mount Name
     [Documentation]    Generate a supported mount directory name (lower case and dashes only) from string '${str}'

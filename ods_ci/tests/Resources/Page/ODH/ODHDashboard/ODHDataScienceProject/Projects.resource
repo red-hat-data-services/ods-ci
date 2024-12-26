@@ -10,11 +10,13 @@ ${TITLE_INPUT_XP}=    xpath=//input[@id="manage-project-modal-name"]
 ${DESCR_INPUT_XP}=    xpath=//textarea[@id="manage-project-modal-description"]
 ${RESOURCE_EDIT_BTN_XP}=    xpath=//button[.="Edit resource name"]
 ${RESOURCE_INPUT_XP}=    css:[data-testid="manage-project-modal-resourceName"]
-${GENERIC_CREATE_BTN_XP}=     xpath=//*[@role="dialog"]//button[.="Create" or starts-with(., "Create")]
-${GENERIC_CANCEL_BTN_XP}=     xpath=//*[@role="dialog"]//button[.="Cancel" or starts-with(., "Cancel")]
-${GENERIC_DELETE_BTN_XP}=     xpath=//*[@role="dialog"]//button[.="Delete" or starts-with(., "Delete")]
-${GENERIC_STOP_BTN_XP}=     xpath=//*[@role="dialog"]//button[.="Stop" or starts-with(., "Stop")]
-${GENERIC_DISABLE_BTN_XP}=     xpath=//*[@role="dialog"]//button[.="Disable" or starts-with(., "Disable")]
+${GENERIC_CREATE_BTN_XP}=     xpath=//*[@role="dialog"]//button[@aria-label="Create" or .="Create" or starts-with(., "Create")]
+${GENERIC_CANCEL_BTN_XP}=     xpath=//*[@role="dialog"]//button[@aria-label="Cancel" or .="Cancel" or starts-with(., "Cancel")]
+${GENERIC_DELETE_BTN_XP}=     xpath=//*[@role="dialog"]//button[@aria-label="Delete" or .="Delete" or starts-with(., "Delete")]
+${GENERIC_STOP_BTN_XP}=       xpath=//*[@role="dialog"]//button[@aria-label="Stop" or .="Stop" or starts-with(., "Stop")]
+${GENERIC_CLOSE_BTN_XP}=      xpath=//*[@role="dialog"]//button[@aria-label="Close" or .="Close" or starts-with(., "Close")]
+${GENERIC_DISABLE_BTN_XP}=    xpath=//*[@role="dialog"]//button[@aria-label="Disable" or .="Disable" or starts-with(., "Disable")]
+${GENERIC_SUBMIT_BTN_XP}=     xpath=//button[contains(@data-testid,"submit-button")]
 # TODO: Update to latter option once the change is pulled from ODH into downstream!
 ${PROJECT_CREATE_BTN_XP}=     xpath=//button[@data-testid="create-data-science-project"]
 ${ACTIONS_BTN_XP}=    xpath=//div/button[@aria-label="Actions"]
@@ -273,37 +275,25 @@ Delete Project Via CLI By Display Name
         Should Be Equal As Integers    ${rc}    ${0}
     END
 
-#robocop: disable: line-too-long
 Workbench Status Should Be From Projects Home Page
     [Documentation]    Checks the workbench status is the expected one, from the DS Project home page
-    [Arguments]     ${workbench_title}      ${status}    ${project_title}
-    ${namespace}=        Get Openshift Namespace From Data Science Project    project_title=${project_title}
-    ${_}  ${workbench_cr_name}=       Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}
-    ...                                                                           namespace=${namespace}
-
-    ${xpath_exists}=    Run Keyword And Return Status
-    ...    Element Should Be Visible    xpath=//a[@data-testid="notebook-route-link" and text()="${workbench_title}"]
-
-    IF    not ${xpath_exists}
-        Click Element    xpath=//td[@data-testid="notebook-column-expand"]
-    ELSE
-        Log    XPath element found, no need to click alternative
+    [Arguments]    ${project_title}    ${workbench_title}      ${status}=${NONE}
+    ${wb_status_row}=    Set Variable    //tr[contains(., "${workbench_title}")]//td[@data-label="Status"]
+    ${project_expended}=    Run Keyword And Return Status    Element Should Be Visible    ${wb_status_row}
+    IF    not ${project_expended}
+        Click Element    xpath=//tr[contains(.,"${project_title}")]//td[@data-testid="notebook-column-expand"]
     END
-
-#    We need to wait it to render
-    ${status_xpath}=    Set Variable    //a[text()="${workbench_title}"]/ancestor::tr//td[@data-label="Status"]//*[text()="${status}"]
-    Run Keyword And Continue On Failure    Wait Until Element Is Visible    ${status_xpath}    timeout=10s
-    Run Keyword And Continue On Failure    Page Should Contain Element    ${status_xpath}
+    #  Wait for workbench status
+    Run Keyword If    "${status}"!="${NONE}"
+    ...    Wait Until Element Is Visible    ${wb_status_row}//*[text()="${status}"]    timeout=30s
 
 Start Workbench From Projects Home Page
     [Documentation]    Triggers the workbench "start" process from DS Projects home page.
     ...                It needs ${workbench_title} and ${project_title} at least. If ${namespace} and/or
     ...                ${workbench_cr_name} are given too, the kw spares one or two calls to openshift API server
     [Arguments]     ${workbench_title}    ${project_title}   ${namespace}=${EMPTY}    ${workbench_cr_name}=${EMPTY}
-    ${is_stopped}=      Run Keyword And Return Status
-    ...                    Workbench Status Should Be From Projects Home Page      workbench_title=${workbench_title}
-    ...                                                                            status=${WORKBENCH_STATUS_STOPPED}
-    ...                                                                            project_title=${project_title}
+    ${is_stopped}=      Run Keyword And Return Status    Workbench Status Should Be From Projects Home Page
+    ...    project_title=${project_title}    workbench_title=${workbench_title}    status=${WORKBENCH_STATUS_STOPPED}
     IF    ${is_stopped} == ${TRUE}
         IF    "${workbench_cr_name}" == "${EMPTY}"
             IF    "${namespace}" == "${EMPTY}"
@@ -313,11 +303,9 @@ Start Workbench From Projects Home Page
                 ...           Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}
                 ...                                                        namespace=${namespace}
         END
-        ${kebab_button}=    Set Variable    xpath=//a[@data-testid="notebook-route-link" and text()="${workbench_title}"]/ancestor::tr[@data-testid="project-notebooks-table-row"]//button[@aria-label="Kebab toggle"]
-        Wait Until Element Is Visible    ${kebab_button}    timeout=10s
-        Click Element    ${kebab_button}
-        ${start_button}=    Set Variable    xpath=//a[@data-testid="notebook-route-link" and text()="${workbench_title}"]/ancestor::tr[@data-testid="project-notebooks-table-row"]//button[@data-testid="notebook-start-action"]
-        Wait Until Element Is Visible    ${start_button}    timeout=10s
+        Workbench Status Should Be From Projects Home Page   project_title=${project_title}    workbench_title=${workbench_title}
+        ${start_button}=    Set Variable    xpath=//tr[contains(.,"${workbench_title}")]//button[@data-testid="notebook-start-action"]
+        Wait Until Element Is Visible    ${start_button}    timeout=30s
         Click Element    ${start_button}
     ELSE
         Fail     msg=Cannot start ${workbench_title} workbench because it is not stopped.
@@ -332,26 +320,22 @@ Stop Workbench From Projects Home Page
     ...                ${workbench_cr_name} are given too, the kw spares one or two calls to openshift API server
     [Arguments]     ${workbench_title}    ${project_title}   ${namespace}=${EMPTY}
     ...             ${workbench_cr_name}=${EMPTY}    ${press_cancel}=${FALSE}
-    ${is_started}=      Run Keyword And Return Status
-    ...                        Workbench Status Should Be From Projects Home Page      workbench_title=${workbench_title}
-    ...                                                                                status=${WORKBENCH_STATUS_RUNNING}
-    ...                                                                                project_title=${project_title}
-    ${is_starting}=      Run Keyword And Return Status
-    ...                        Workbench Status Should Be From Projects Home Page      workbench_title=${workbench_title}
-    ...                                                                                status=${WORKBENCH_STATUS_STARTING}
-    ...                                                                                project_title=${project_title}
+    ${is_started}=      Run Keyword And Return Status    Workbench Status Should Be From Projects Home Page
+    ...    project_title=${project_title}    workbench_title=${workbench_title}    status=${WORKBENCH_STATUS_RUNNING}
+    ${is_starting}=      Run Keyword And Return Status    Workbench Status Should Be From Projects Home Page
+    ...    project_title=${project_title}    workbench_title=${workbench_title}    status=${WORKBENCH_STATUS_STARTING}
     IF    ${is_started} == ${TRUE} or ${is_starting} == ${TRUE}
         IF    "${workbench_cr_name}" == "${EMPTY}"
             IF    "${namespace}" == "${EMPTY}"
-                ${namespace}=        Get Openshift Namespace From Data Science Project    project_title=${project_title}
+                ${namespace}=
+                ...    Get Openshift Namespace From Data Science Project    project_title=${project_title}
             END
-                ${_}    ${workbench_cr_name}=       Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}    namespace=${namespace}
+                ${_}    ${workbench_cr_name}=
+                ...    Get Openshift Notebook CR From Workbench    workbench_title=${workbench_title}    namespace=${namespace}
         END
-        ${kebab_button}=    Set Variable    xpath=//a[@data-testid="notebook-route-link" and text()="${workbench_title}"]/ancestor::tr[@data-testid="project-notebooks-table-row"]//button[@aria-label="Kebab toggle"]
-        Wait Until Element Is Visible    ${kebab_button}    timeout=10s
-        Click Element    ${kebab_button}
-        ${stop_button}=    Set Variable    xpath=//a[@data-testid="notebook-route-link" and text()="${workbench_title}"]/ancestor::tr[@data-testid="project-notebooks-table-row"]//button[@data-testid="notebook-stop-action"]
-        Wait Until Element Is Visible    ${stop_button}    timeout=10s
+        Workbench Status Should Be From Projects Home Page   project_title=${project_title}    workbench_title=${workbench_title}
+        ${stop_button}=    Set Variable    xpath=//tr[contains(.,"${workbench_title}")]//button[@data-testid="notebook-stop-action"]
+        Wait Until Element Is Visible    ${stop_button}    timeout=30s
         Click Element    ${stop_button}
         Handle Stop Workbench Confirmation Modal    workbench_title=${workbench_title}
         ...    press_cancel=${press_cancel}
@@ -365,13 +349,13 @@ Wait Until Workbench Is Started From Projects Home Page
     [Documentation]    Waits until the workbench status is "RUNNING", from the DS Project home page
     [Arguments]     ${workbench_title}   ${project_title}   ${timeout}=60s
     Wait Until Keyword Succeeds    ${timeout}    5s      Workbench Status Should Be From Projects Home Page
-    ...     workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}   project_title=${project_title}
+    ...        project_title=${project_title}    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}
 
 Wait Until Workbench Is Stopped From Projects Home Page
     [Documentation]    Waits until the workbench status is "STOPPED", from the DS Project home page
     [Arguments]     ${workbench_title}   ${project_title}   ${timeout}=30s
     Wait Until Keyword Succeeds    ${timeout}    5s      Workbench Status Should Be From Projects Home Page
-    ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STOPPED}   project_title=${project_title}
+    ...    project_title=${project_title}   workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STOPPED}
 
 Launch And Access Workbench From Projects Home Page
     [Documentation]    Launches a running workbench from DS Projects home page.
@@ -379,9 +363,9 @@ Launch And Access Workbench From Projects Home Page
     ...             ${password}=${TEST_USER_3.PASSWORD}    ${auth_type}=${TEST_USER_3.AUTH_TYPE}
     ...             ${expected_ide}=JupyterLab
     ${is_started}=      Run Keyword And Return Status   Workbench Status Should Be From Projects Home Page
-    ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}    project_title=${project_title}
+    ...    project_title=${project_title}   workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}
     IF    ${is_started} == ${TRUE}
-        Click Element       xpath=//a[@data-testid="notebook-route-link" and text()="${workbench_title}"]
+        Click Element       //a[@data-testid="notebook-route-link" and contains(.,"${workbench_title}")]
         Switch Window   NEW
         Access To Workbench    username=${username}    password=${password}
         ...    auth_type=${auth_type}    expected_ide=${expected_ide}
@@ -393,7 +377,7 @@ Workbench Launch Link Should Be Disabled
     [Documentation]    Checks the workbench launch link is disabled from DS Projects home page.
     [Arguments]     ${workbench_title}    ${project_title}
     ${link_status}=    Get Element Attribute
-    ...    xpath=//a[@data-testid="notebook-route-link" and text()="${workbench_title}"]    aria-disabled
+    ...    xpath=//a[@data-testid="notebook-route-link" and contains(.,"${workbench_title}")]    aria-disabled
     Should Be Equal As Strings    ${link_status}    true
     ...    msg=Workbench launch link should be disabled for workbench ${workbench_title} in project ${project_title}
 
@@ -517,6 +501,7 @@ Overview Tab Should Be Accessible
 Move To Tab
     [Documentation]    Open one of the tabs in a DS Project details page (e.g., Permissions)
     [Arguments]    ${tab_title}
+    Wait Until Element Is Visible    xpath://span[text()="${tab_title}"]    timeout=10s
     Click Element    xpath://span[text()="${tab_title}"]
     Sleep    1s    reason=The tab page needs to load content according to user permissions
     Maybe Wait For Dashboard Loading Spinner Page

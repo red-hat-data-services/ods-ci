@@ -232,7 +232,8 @@ Clean All Standalone Notebooks
 
 Delete Folder In User Notebook
   [Documentation]  Delete recursively the folder  /opt/app-root/src/${folder} in ${username}'s notebook PVC.
-  ...   Note: this command requires ${admin_username}  to be logged to the cluster (oc login ...) and to have the user's notebook pod running (e.g. jupyterhub-nb-ldap-2duser1)
+  ...   Note: this command requires ${admin_username} to be logged to the cluster (oc login ...)
+  ...   and to have the user's notebook pod running (e.g. jupyterhub-nb-ldap-2duser1)
   [Arguments]  ${admin_username}  ${username}  ${folder}
 
   # Verify that ${admin_username}  is connected to the cluster

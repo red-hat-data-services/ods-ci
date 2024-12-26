@@ -18,7 +18,7 @@ Is Service Account Authorization Required
    ${result} =  Run Keyword And Return Status  Should Start With  ${title}  Authorize service account
    RETURN  ${result}
 
-Authorize jupyterhub service account
+Authorize JupyterLab Service Account
   Wait Until Page Contains  Authorize Access
   Checkbox Should Be Selected  user:info
   Click Element  approve

@@ -36,7 +36,7 @@ Can Login To Jupyterhub
     ...      ODS-936
     Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =  Is Service Account Authorization Required
-    IF  ${authorization_required}  Authorize jupyterhub service account
+    IF  ${authorization_required}  Authorize JupyterLab Service Account
     Wait Until Page Contains  Start a notebook server
 
 Can Spawn Notebook
@@ -75,7 +75,7 @@ Can Spawn Notebook
     IF  ${oauth_prompt_visible}    Click Button     Log in with OpenShift
     Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =  Is Service Account Authorization Required
-    IF  ${authorization_required}  Authorize jupyterhub service account
+    IF  ${authorization_required}  Authorize JupyterLab Service Account
     Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
     Sleep  3
     Maybe Close Popup

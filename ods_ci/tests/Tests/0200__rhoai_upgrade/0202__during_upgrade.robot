@@ -90,7 +90,7 @@ Launch Notebook
     Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub    ${username}    ${password}    ${auth_type}
     ${authorization_required} =    Is Service Account Authorization Required
-    IF    ${authorization_required}    Authorize Jupyterhub Service Account
+    IF    ${authorization_required}    Authorize JupyterLab Service Account
     Fix Spawner Status
     # robocop: disable
     Spawn Notebook With Arguments

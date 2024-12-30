@@ -45,7 +45,7 @@ yq -i '.ODH_DASHBOARD_URL=env(RHODS_DASHBOARD)' "${TEST_VARIABLES_FILE}"
 yq -i '.BROWSER.NAME="firefox"' "${TEST_VARIABLES_FILE}"
 yq -i '.S3.AWS_ACCESS_KEY_ID=env(AWS_ACCESS_KEY_ID)' "${TEST_VARIABLES_FILE}"
 yq -i '.S3.AWS_SECRET_ACCESS_KEY=env(AWS_SECRET_ACCESS_KEY)' "${TEST_VARIABLES_FILE}"
-# TODO: Inject S3 endpoint URL to test-variables file?
+# TODO: Consume S3 endpoint URL from test-variables file?
 
 echo "Performing oc login with cluster admin"
 username=$(yq eval '.OCP_ADMIN_USER.USERNAME' "${TEST_VARIABLES_FILE}")

@@ -1,6 +1,7 @@
 *** Settings ***
-Library  JupyterLibrary
-Library  String
+Resource    ../ODH/ODHDashboard/ODHDashboard.robot
+Library     String
+Library     JupyterLibrary
 
 *** Keywords ***
 Navigate To Page
@@ -17,6 +18,7 @@ Navigate To Page
    IF    "${is_menu_expanded}" == "false"    Menu.Click Menu   ${menu}
    Wait Until Page Contains    ${submenu}
    Menu.Click Submenu    ${submenu}
+   Run Keyword And Ignore Error    Wait For Dashboard Page Title    ${submenu}
 
 Click Menu
    [Arguments]

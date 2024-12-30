@@ -255,7 +255,7 @@ Fill Up User PVC    # robocop: disable:too-many-calls-in-keyword
     Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =    Is Service Account Authorization Required
-    IF    ${authorization_required}    Authorize jupyterhub service account
+    IF    ${authorization_required}    Authorize JupyterLab Service Account
     Fix Spawner Status
     Spawn Notebook With Arguments    image=science-notebook
     Clone Git Repository And Run    ${notebook_repo}    ${notebook_path}

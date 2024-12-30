@@ -437,7 +437,7 @@ Launch Notebook And Stop It    # robocop: disable
     Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =    Is Service Account Authorization Required
-    IF    ${authorization_required}    Authorize Jupyterhub Service Account
+    IF    ${authorization_required}    Authorize JupyterLab Service Account
     Wait Until Page Contains    Start a notebook server
     Fix Spawner Status
     Spawn Notebook With Arguments    image=minimal-notebook

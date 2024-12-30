@@ -27,7 +27,7 @@ ${PRJ_USER_C_TITLE}=            ${PRJ_BASE_TITLE}-${TEST_USER_4.USERNAME}
 *** Test Cases ***
 Verify User Can Make Their Owned DS Project Accessible To Other Users    # robocop: disable
     [Documentation]    Verify user can give access permissions for their DS Projects to other users
-    [Tags]    Tier1    Smoke
+    [Tags]    Smoke
     ...       ODS-2194    ODS-2201
     Switch To User    ${USER_B}
     Move To Tab    Permissions
@@ -38,10 +38,12 @@ Verify User Can Make Their Owned DS Project Accessible To Other Users    # roboc
 
 Verify User Can Modify And Revoke Access To DS Projects From Other Users    # robocop: disable
     [Documentation]    Verify user can modify/remove access permissions for their DS Projects to other users
-    [Tags]    Tier1    Sanity
+    [Tags]    Sanity
     ...       ODS-2202
     Switch To User    ${USER_B}
     Move To Tab    Permissions
+    Assign Contributor Permissions To User ${USER_C}
+    Assign Admin Permissions To User ${USER_A}
     Change ${USER_C} Permissions To Admin
     Change ${USER_A} Permissions To Contributor
     Refresh Pages
@@ -53,7 +55,7 @@ Verify User Can Modify And Revoke Access To DS Projects From Other Users    # ro
     ${USER_C} Should Not Have Access To ${PRJ_USER_B_TITLE}
 
 Verify User Can Assign Access Permissions To User Groups
-    [Tags]    Tier1    Sanity
+    [Tags]    Sanity
     ...       ODS-2208
     [Setup]    Restore Permissions Of The Project
     Switch To User    ${USER_B}
@@ -79,7 +81,8 @@ Verify User Can Assign Access Permissions To User Groups
     ${USER_C} Should Not Have Access To ${PRJ_USER_B_TITLE}
 
 Verify Project Sharing Does Not Override Dashboard Permissions
-    [Tags]                  Tier1                   ODS-2223
+    [Tags]    Tier1
+    ...       ODS-2223
     [Setup]                 Set RHODS Users Group To rhods-users
     Launch Data Science Project Main Page    username=${OCP_ADMIN_USER.USERNAME}    password=${OCP_ADMIN_USER.PASSWORD}
     ...    ocp_user_auth_type=${OCP_ADMIN_USER.AUTH_TYPE}

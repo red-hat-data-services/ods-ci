@@ -11,6 +11,7 @@ ${PV_MOUNT_PATH}=    ods-ci-test-path
 ${WORKBENCH_SECTION_XP}=             xpath=//div[@data-testid="section-workbenches"]
 ${WORKBENCH_CREATE_BTN_XP}=           xpath=//button[@data-testid="create-workbench-button"]
 ${WORKBENCH_CREATE_BTN_2_XP}=         xpath=//button[@id="create-button"]
+${WORKBENCH_CANCEL_BTN_XP}=         xpath=//button[@id="cancel-button"]
 ${WORKBENCH_NAME_INPUT_XP}=               xpath=//input[@name="workbench-name"]
 ${WORKBENCH_DESCR_TXT_XP}=                xpath=//textarea[@name="workbench-description"]
 ${WORKBENCH_IMAGE_MENU_BTN_XP}=           xpath=//*[@data-testid="workbench-image-stream-selection"]    # robocop: disable
@@ -24,12 +25,13 @@ ${WORKBENCH_ACCELERATOR_PLUS_BUTTON_XPATH}=    xpath=${WORKBENCH_ACCELERATOR_INP
 ${WORKBENCH_SIZE_ITEM_BTN_XP}=           xpath=//*[@data-testid="container-size-group"]//button
 ${WORKBENCH_GPU_MENU_BTN_XP}=           xpath=//section[@id="deployment-size"]//button[contains(@aria-labelledby,"gpu-numbers")]     # robocop: disable
 ${WORKBENCH_GPU_ITEM_BTN_XP}=           xpath=//ul[@data-id="gpu-select"]/li/button
-${WORKBENCH_ADD_VAR_BTN_XP}=           xpath=//button[text()="Add variable"]
+${WORKBENCH_ADD_VAR_BTN_XP}=           xpath=//button[@data-testid="add-variable-button"]
 ${WORKBENCH_USE_CONNECTION_CHK_XP}=           xpath=//input[@name="enable-data-connection-checkbox"]
-${WORKBENCH_EXISTING_CONNECTION_RAD_XP}=      xpath=//input[@name="existing-data-connection-type-radio"]
+${WORKBENCH_EXISTING_CONNECTION_RAD_XP}=      xpath=//button[@data-testid="attach-existing-connection-button"]
 ${WORKBENCH_STATUS_STOPPED}=                  Stopped
 ${WORKBENCH_STATUS_RUNNING}=                  Running
 ${WORKBENCH_STATUS_STARTING}=                 Starting
+${WORKBENCH_STATUS_FAILED}=                   Failed
 ${WORKBENCH_IMAGE_VER_LABEL}=        //label[@for="workbench-image-version-selection"]
 ${WORKBENCH_IMAGE_VER_BUTTON}=       ${WORKBENCH_IMAGE_VER_LABEL}/../..//button
 ${WORKBENCH_IMAGE_VER_DROPDOWN}=     //*[@id="workbench-image-version-selection"]
@@ -43,6 +45,7 @@ ${KEYVALUE_TYPE}=        Key / value
 ${UPLOAD_TYPE}=        Upload
 ${ENV_VARIABLES_SECTION_XP}=        xpath=//section[@aria-label="Environment variables"]
 ${ENV_DATA_CONNECTION_SECTION_XP}=   xpath=//section[@aria-label="Connections"]
+${DC_WORKBENCH_SELECTOR}=       xpath=//*[@id="select-connection"]
 ${ERROR_ICON_XP}=        span[contains(@class,'pf-m-danger')]
 
 
@@ -85,12 +88,13 @@ Create Workbench
             Click Element    //*[@data-testid="existing-storage-button"]
             Select An Existent PV   ${pv_name}   ${PV_MOUNT_PATH}
         ELSE IF   ${pv_existent} == ${FALSE}
-            # Use the `Jump to section` links in the page to scroll the section into view
-            Click Element    //a[@href="#cluster-storage"]
-            Click Element   xpath=//input[@name="persistent-new-storage-type-radio"]
-            Fill In New PV Data    name=${pv_name}    description=${pv_description}  size=${pv_size}
             Log    msg=Delete PVC '${pv_name}' before creating new one via the Workbench dialog
             Delete PVC In Project From CLI    pvc_title=${pv_name}    project_title=${prj_title}
+            # Use the `Jump to section` links in the page to scroll the section into view
+            Click Element    //a[@href="#cluster-storage"]
+            Click Element   //*[@data-testid="create-storage-button"]
+            Fill In New PV Data    name=${pv_name}    size=${pv_size}    description=${pv_description}
+            Click Button    ${STORAGE_SUBMIT_BTN_XP}
         ELSE
             Log    msg="pv_existent" argument not set, using default PV settings   level=WARN
             Delete PVC In Project From CLI    pvc_title=${workbench_title}    project_title=${prj_title}
@@ -152,19 +156,12 @@ Add Existing Data Connection In Workbench
     [Documentation]    Adds the data connection through the workbench creation page
     [Arguments]    ${data_connection}
     # Use the `Jump to section` links in the page to scroll the section into view
-    Click Element    //a[@href="#data-connections"]
-    Click Element    ${WORKBENCH_USE_CONNECTION_CHK_XP}
-    # Use the `Jump to section` again to move the expanded form into view
-    Click Element    //a[@href="#data-connections"]
+    Click Element    ${ENV_DATA_CONNECTION_SECTION_XP}
     Click Element    ${WORKBENCH_EXISTING_CONNECTION_RAD_XP}
-    Select Existing Data Connection In Workbench    data_connection=${data_connection}
-
-Select Existing Data Connection In Workbench
-    [Documentation]    Selects the existing data connection in the workbench creation page from a dropdown list
-    [Arguments]    ${data_connection}
-    Click Element    ${ENV_DATA_CONNECTION_SECTION_XP}//input[contains(@placeholder,"Select a data connection")]
-    Wait Until Page Contains Element    xpath=//ul[@role="listbox"]/li/button[text()="${data_connection}"]
-    Click Element    xpath=//ul[@role="listbox"]/li/button[text()="${data_connection}"]
+    Run Keyword And Ignore Error    Click Element    //button[@aria-label="Connections"]
+    Click Element    xpath=//*[.="${data_connection}"]
+    Run Keyword And Ignore Error    Click Element    //button[@aria-label="Connections"]
+    Click Element    xpath=//button[@data-testid="attach-button"]
 
 Select Environment Variable Types
     [Documentation]    Selects the type of environment variable in the workbench creation page: Secret vs Config Map
@@ -172,13 +169,13 @@ Select Environment Variable Types
     Run Keyword And Continue On Failure    Wait Until Page Contains Element
     ...    ${ENV_VARIABLES_SECTION_XP}/div[contains(@class, "-l-split")][${variable_index}]//button[@aria-label="Options menu"]
     Click Element    ${ENV_VARIABLES_SECTION_XP}/div[contains(@class, "-l-split")][${variable_index}]//button[@aria-label="Options menu"]
-    Wait Until Page Contains Element    xpath=//ul[@role="listbox"]/li/button[text()="${k8s_type}"]
-    Click Element    xpath=//ul[@role="listbox"]/li/button[text()="${k8s_type}"]
+    Wait Until Page Contains Element    xpath=//ul[@role="listbox"]/li/button[contains(.,"${k8s_type}")]
+    Click Element    xpath=//ul[@role="listbox"]/li/button[contains(.,"${k8s_type}")]
     Run Keyword And Continue On Failure
-    ...    Wait Until Page Contains Element    ${ENV_VARIABLES_SECTION_XP}//button[div/span[text()="Select one"]]
-    Click Element    ${ENV_VARIABLES_SECTION_XP}/div[contains(@class, "-l-split")][${variable_index}]//button[div/span[text()="Select one"]]
-    Wait Until Page Contains Element    xpath=//ul[@role="listbox"]/li/button[text()="${input_type}"]
-    Click Element    xpath=//ul[@role="listbox"]/li/button[text()="${input_type}"]
+    ...    Wait Until Page Contains Element    ${ENV_VARIABLES_SECTION_XP}//button[contains(.,"Select one")]
+    Click Element    ${ENV_VARIABLES_SECTION_XP}/div[contains(@class, "-l-split")][${variable_index}]//button[contains(.,"Select one")]
+    Wait Until Page Contains Element    xpath=//ul[@role="listbox"]/li/button[contains(.,"${input_type}")]
+    Click Element    xpath=//ul[@role="listbox"]/li/button[contains(.,"${input_type}")]
 
 Remove All Environment Variables
     [Documentation]    Removes all the added environment variables from the workbench creation page
@@ -261,7 +258,7 @@ Select Workbench Container Size
     Click Element    ${WORKBENCH_SIZE_SIDE_MENU_BTN}
     Wait Until Page Contains Element    ${WORKBENCH_SIZE_MENU_BTN_XP}
     Click Element    ${WORKBENCH_SIZE_MENU_BTN_XP}
-    ${workbench_size_button_click}=    Set Variable    ${WORKBENCH_SIZE_ITEM_BTN_XP}//span[text()="${size_name}"]
+    ${workbench_size_button_click}=    Set Variable    xpath=//button[contains(.,"${size_name}")]
     Wait Until Page Contains Element    ${workbench_size_button_click}
     Click Element    ${workbench_size_button_click}
 
@@ -305,13 +302,12 @@ Status Error Icon Should Appear
 
 Wait Until Workbench Is Started
     [Documentation]    Waits until workbench status is "RUNNING" in the DS Project details page
-    [Arguments]     ${workbench_title}    ${timeout}=60s    ${status}=${WORKBENCH_STATUS_RUNNING}
-    Wait Until Page Contains Element
-    ...    ${WORKBENCH_SECTION_XP}//td[@data-label="Name"]//*[.="${workbench_title}"]/../../../td[@data-label="Status"]//span[text()="${status}"]
-    ...    timeout=${timeout}
+    [Arguments]     ${workbench_title}      ${timeout}=40s
+    Wait Until Keyword Succeeds    ${timeout}    5s      Workbench Status Should Be
+    ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_RUNNING}
 
 Wait Until Workbench Is Stopped
-    [Documentation]    Waits until workbench status is "RUNNING" in the DS Project details page
+    [Documentation]    Waits until workbench status is "STOPPED" in the DS Project details page
     [Arguments]     ${workbench_title}      ${timeout}=40s
     Wait Until Keyword Succeeds    ${timeout}    5s      Workbench Status Should Be
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STOPPED}
@@ -322,10 +318,15 @@ Wait Until Workbench Is Restarting
     Wait Until Keyword Succeeds    ${timeout}    5s      Workbench Status Should Be
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STARTING}
 
+Wait Until Workbench Is Failed
+    [Documentation]    Waits until workbench status is "FAIL" in the DS Project details page
+    [Arguments]     ${workbench_title}      ${timeout}=40s
+    Wait Until Keyword Succeeds    ${timeout}    5s      Workbench Status Should Be
+    ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_FAILED}
+
 Start Workbench
     [Documentation]    Starts a workbench from the DS Project details page
     [Arguments]     ${workbench_title}      ${timeout}=60s
-
     ${is_stopped}=      Run Keyword And Return Status   Workbench Status Should Be
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STOPPED}
     IF    ${is_stopped} == ${TRUE}
@@ -343,7 +344,7 @@ Access To Workbench
     IF  ${oauth_prompt_visible}    Click Button     Log in with OpenShift
     Run Keyword And Warn On Failure   Login To Openshift  ${username}  ${password}  ${auth_type}
     ${authorization_required}=  Is Service Account Authorization Required
-    IF  ${authorization_required}  Authorize Jupyterhub Service Account
+    IF  ${authorization_required}  Authorize JupyterLab Service Account
     IF  "${expected_ide}"=="VSCode"
         Wait Until Page Contains Element  xpath://div[@class="menubar-menu-button"]  timeout=60s
         Wait Until Page Contains Element  xpath://div[@class="monaco-dialog-box"]  timeout=60s
@@ -464,26 +465,14 @@ Get Openshift Notebook CR From Workbench
     ...    shell=yes
     RETURN    ${result.rc}    ${result.stdout}
 
-Start Workbench Should Fail
-    [Documentation]    Checks the workbench fails to start
-    [Arguments]    ${workbench_title}
-    ${failed}=    Run Keyword And Return Status
-    ...    Wait Until Workbench Is Started     workbench_title=${workbench_title}
-    IF    ${failed} != ${FALSE}    Fail    msg=Workbench is expected to fail starting...
-    Run Keyword And Continue On Failure    Wait Until Keyword Succeeds    30 times    2s
-    ...    Status Error Icon Should Appear    workbench_title=${workbench_title}
-    Workbench Should Be Listed    ${workbench_title}    timeout=30s
-    Wait Until Keyword Succeeds    20 times    2s
-    ...    Status Error Icon Should Appear    workbench_title=${workbench_title}
-
 Open Notebook Event Log
-    [Documentation]    Opens the event log of the given workbench
+    [Documentation]    Opens the event log of a "Starting" workbench and verify an event message in UI
     [Arguments]    ${workbench_title}    ${exp_preview_text}=${NONE}
-    Click Element
-    ...    ${WORKBENCH_SECTION_XP}//tr[td[@data-label="Name"]/*[div[text()="${workbench_title}"]]]/td[@data-label="Status"]//p[text()="${WORKBENCH_STATUS_STARTING}"]    # robocop: disable
-    Page Should Contain Event Log Preview    expected_text=${exp_preview_text}
-    Click Element    xpath=//div[contains(@class,"popover")]//footer/button[text()="Event log"]
-    Wait Until Generic Modal Appears
+    Click Element    //tr[contains(., "${workbench_title}")]//*[@data-testid="notebook-status-text"]
+    Wait Until Page Contains Element    xpath=//*[contains(.,"Workbench status")]
+    IF   "${exp_preview_text}" != "${NONE}"
+        Page Should Contain Element    xpath=//*[contains(.,"${exp_preview_text}")]
+    END
 
 Event Log Should Report The Failure
     [Documentation]    Checks that the Event log modal reports the
@@ -492,49 +481,43 @@ Event Log Should Report The Failure
     Page Should Contain Event Log    expected_progress_text=${exp_progress_text}
     ...    expected_result_text=${exp_result_text}
 
-Cancel Workbench Startup From Event Log
-    [Documentation]    Clicks the Cancel button in Workbench statup event log
-    Click Element    ${KFNBC_MODAL_CANCEL_XPATH}
+Stop Workbench Startup From Event Log
+    [Documentation]    Clicks the Stop button (twice) in Workbench startup event log
+    Click Element    ${GENERIC_STOP_BTN_XP}
+    ${stop_present}=    Run Keyword And Return Status
+    ...    Page Should Contain Element    ${GENERIC_STOP_BTN_XP}
+    IF    ${stop_present}    Click Element    ${GENERIC_STOP_BTN_XP}
     Wait Until Generic Modal Disappears
 
 Close Event Log
-    [Documentation]    Closes the event log which was previously opened by the robot
+    [Documentation]    Closes the event log (if it was not already closed)
     ${cancel_present}=    Run Keyword And Return Status
-    ...    Page Should Contain Element    ${KFNBC_MODAL_CANCEL_XPATH}
-    IF    ${cancel_present} == ${TRUE}
-        Click Element    ${KFNBC_MODAL_CANCEL_XPATH}
+    ...    Page Should Contain Element    ${GENERIC_CANCEL_BTN_XP}
+    IF    ${cancel_present}
+        Click Element    ${GENERIC_CANCEL_BTN_XP}
     ELSE
-        Click Element    ${KFNBC_MODAL_X_XPATH}
+        ${close_present}=    Run Keyword And Return Status
+        ...    Page Should Contain Element    ${GENERIC_CANCEL_BTN_XP}
+        IF    ${close_present}    Click Element    ${GENERIC_CLOSE_BTN_XP}
     END
     Wait Until Generic Modal Disappears
-
-Page Should Contain Event Log Preview
-    [Documentation]    Check if a preview of the event log is displayed when
-    ...                user clicks on "Starting..." status label
-    [Arguments]    ${expected_text}=${NONE}
-    Wait Until Page Contains Element    xpath=//div[contains(@class,"popover")]//h6[text()="Notebook status"]
-    IF   "${expected_text}" != "${NONE}"
-        Page Should Contain Element
-        ...    xpath=//div[contains(@class,"popover")]//div[contains(text(),"${expected_text}")]
-    END
-    Wait Until Page Contains Element
-    ...    xpath=//div[contains(@class,"popover")]//footer/button[text()="Event log"]
 
 Page Should Contain Event Log
     [Documentation]    Checks if the event log is displayed
     [Arguments]    ${expected_progress_text}=${NONE}    ${expected_result_text}=${NONE}
-    Is Generic Modal Displayed
-    Run Keyword And Continue On Failure    Page Should Contain    Starting server
+    Click Element    xpath=//button[contains(.,"Event log")]
+    Wait Until Generic Modal Appears
+    Run Keyword And Continue On Failure    Page Should Contain    Starting workbench
     Run Keyword And Continue On Failure    Page Should Contain    Event log
     Run Keyword And Continue On Failure    Page Should Contain Element    css:ul[data-id="event-logs"]
     ${text}=    Get Text    css:ul[data-id="event-logs"]
     IF   "${expected_progress_text}" != "${NONE}"
         Page Should Contain Element
-        ...    xpath=//div[@data-id="progress-bar"]//div[contains(text(),"${expected_progress_text}")]
+        ...    xpath=//*[@data-id="progress-bar"]//*[contains(text(),"${expected_progress_text}")]
     END
     IF   "${expected_result_text}" != "${NONE}"
         Page Should Contain Element
-        ...    xpath=//div[contains(@class,"alert")]//h4[contains(text(),"${expected_result_text}")]
+        ...    xpath=//*[contains(@class,"alert")]//*[contains(text(),"${expected_result_text}")]
     END
     Capture Page Screenshot
 
@@ -597,6 +580,12 @@ Delete Workbench From CLI
             Sleep    5s    reason=let's not overload the API
         END
     END
+
+Delete All Workbenches In Project From CLI
+    [Documentation]    Deletes All Workbenches (Notebooks) in a project from CLI
+    [Arguments]    ${project_title}
+    ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${project_title}
+    ${result}=    Run Process    oc delete notebook -n ${ns_name} --all --timeout\=30s    shell=yes
 
 Get Workbench Pod
     [Documentation]    Retrieves info of a workbench pod: namespace, CR resource name and pod definition

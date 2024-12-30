@@ -122,7 +122,7 @@ Switch To Pipeline Execution Page
     ${login-required} =  Is OpenShift Login Visible
     IF  ${login-required}  Login To Openshift  ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =    Is Service Account Authorization Required
-    IF    ${authorization_required}    Authorize jupyterhub service account
+    IF    ${authorization_required}    Authorize JupyterLab Service Account
     RETURN    ${handle}
 
 Set Runtime Image In All Nodes

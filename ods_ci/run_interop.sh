@@ -8,6 +8,7 @@ export ROBOT_EXTRA_ARGS="-i Smoke --dryrun"
 TEST_CASE_FILE="tests/Tests"
 TEST_VARIABLES_FILE="test-variables.yml"
 
+
 oc_wait_for_pods() {
     local ns="${1}"
     local pods

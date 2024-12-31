@@ -24,6 +24,21 @@ yq -i '.ODH_DASHBOARD_URL=env(RHODS_DASHBOARD)' "${TEST_VARIABLES_FILE}"
 yq -i '.BROWSER.NAME="firefox"' "${TEST_VARIABLES_FILE}"
 yq -i '.S3.AWS_ACCESS_KEY_ID=env(AWS_ACCESS_KEY_ID)' "${TEST_VARIABLES_FILE}"
 yq -i '.S3.AWS_SECRET_ACCESS_KEY=env(AWS_SECRET_ACCESS_KEY)' "${TEST_VARIABLES_FILE}"
+yq -i '.S3.BUCKET_1.NAME="ods-ci-s3"' "${TEST_VARIABLES_FILE}"
+yq -i '.S3.BUCKET_1.REGION="us-east-1"' "${TEST_VARIABLES_FILE}"
+yq -i '.S3.BUCKET_1.ENDPOINT="https://s3.amazonaws.com/"' "${TEST_VARIABLES_FILE}"
+yq -i '.S3.BUCKET_2.NAME="ods-ci-ds-pipelines"' "${TEST_VARIABLES_FILE}"
+yq -i '.S3.BUCKET_2.REGION="us-east-1"' "${TEST_VARIABLES_FILE}"
+yq -i '.S3.BUCKET_2.ENDPOINT="https://s3.amazonaws.com/"' "${TEST_VARIABLES_FILE}"
+yq -i '.S3.BUCKET_3.NAME="ods-ci-wisdom"' "${TEST_VARIABLES_FILE}"
+yq -i '.S3.BUCKET_3.REGION="us-east-1"' "${TEST_VARIABLES_FILE}"
+yq -i '.S3.BUCKET_3.ENDPOINT="https://s3.amazonaws.com/"' "${TEST_VARIABLES_FILE}"
+yq -i '.S3.BUCKET_4.NAME="ods-ci-pachyderm"' "${TEST_VARIABLES_FILE}"
+yq -i '.S3.BUCKET_4.REGION="us-east-1"' "${TEST_VARIABLES_FILE}"
+yq -i '.S3.BUCKET_4.ENDPOINT="https://s3.amazonaws.com/"' "${TEST_VARIABLES_FILE}"
+yq -i '.S3.BUCKET_5.NAME="rhoai-dw"' "${TEST_VARIABLES_FILE}"
+yq -i '.S3.BUCKET_5.REGION="us-east-1"' "${TEST_VARIABLES_FILE}"
+yq -i '.S3.BUCKET_5.ENDPOINT="https://s3.amazonaws.com/"' "${TEST_VARIABLES_FILE}"
 
 echo "Performing oc login with cluster admin"
 username=$(yq eval '.OCP_ADMIN_USER.USERNAME' "${TEST_VARIABLES_FILE}")
@@ -46,4 +61,4 @@ if [[ -z "${ARTIFACT_DIR}" ]]; then
   ARTIFACT_DIR="/tmp"
 fi
 
-poetry run robot --include ${TEST_SUITE} --exclude "AutomationBug" --exclude "ProductBug" --exclude "ExcludeOnRHOAI" -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE}
+poetry run robot --include ${TEST_SUITE} --exclude "Resources-*" --exclude "AutomationBug" --exclude "ProductBug" --exclude "ExcludeOnRHOAI" -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE}

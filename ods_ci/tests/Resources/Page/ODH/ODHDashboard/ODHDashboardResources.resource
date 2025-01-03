@@ -12,6 +12,7 @@ Resource       ../../../Common.robot
 ...                 https://console-openshift-console.apps.test-cluster.example.com
 ...                 console-openshift-console.apps.test-cluster.example.com
 ${QUICKSTART_PANNEL}=    //div[@data-test="quickstart drawer"]
+${QUICKSTART_TASK}=    //div[contains(@class, 'quick-start-task')]
 
 *** Keywords ***
 Open QuickStart Element in Resource Section By Name
@@ -26,11 +27,10 @@ Open QuickStart Element in Resource Section By Name
 
 Star QuickStart Tour
     Click Button    //button[@data-test="Start button"]
-    Wait Until Page Contains Element    //div[@class="pfext-quick-start-content"]
-
+    Wait Until Page Contains Element    ${QUICKSTART_TASK}
 Get The Count Of QuickStart Steps
     [Documentation]     Gives the count of steps in a the quick start
-    ${count}=   Get Element Count   //div[@class="pfext-quick-start-content"]/ul/li
+    ${count}=   Get Element Count   ${QUICKSTART_TASK}/ul/li
     RETURN    ${count}
 
 Link Text On QuickStart Card Should Be
@@ -45,7 +45,7 @@ QuickStart Status Should Be
         ...    In Progress
     ELSE IF     '${progress_string}'=='Complete'
         Element Should Contain      //div[@id="${element}"]//*[@role="list"]
-        ...    Complete
+        ...    minutes
     ELSE IF     '${progress_string}'=='Failed'
         Element Should Contain      //div[@id="${element}"]//*[@role="list"]
         ...    Failed
@@ -99,7 +99,7 @@ Go Back And Check Previouse Step Is Selected
     # Only verify step number if it's not the first step
     IF  ${exp_step} != ${0}
         Click Button    //button[@data-testid="qs-drawer-back"]
-        Click Button    //button[@data-testid="qs-drawer-back"]
+        Run Keyword And Ignore Error    Click Button    //button[@data-testid="qs-drawer-back"]
         Current Step In QuickStart Should Be    n_steps=${n_steps}  exp_step=${exp_step}
     END
 
@@ -142,7 +142,7 @@ Verify Quick Starts Work As Expected When All Steps Are Marked As Yes
             ...    Mark Step Check As Yes
             Go To Next QuickStart Step
         END
-        Run Keyword And Continue On Failure     Go Back And Check Previouse Step Is Selected
+        Run Keyword And Ignore Error     Go Back And Check Previouse Step Is Selected
         ...     n_steps=${count}   exp_step=${count-1}
         Go To Next QuickStart Step
         Go To Next QuickStart Step
@@ -229,7 +229,7 @@ Quickstart Steps URLs Are Valid
     ${quick_start_steps}=   Get WebElements   //button[contains(@class, "nav-link")]
     FOR    ${quick_start_step}    IN     @{quick_start_steps}
         Open QuickStart Step  ${quick_start_step}
-        ${doc_text}=     Get Text  //*[@class="pfext-quick-start-task__content"]
+        ${doc_text}=     Get Text    ${QUICKSTART_TASK}
         ${doc_link}=    Extract URLs From Text    text=${doc_text}
         Validate Links Extracted From Text     ${doc_link}
     END

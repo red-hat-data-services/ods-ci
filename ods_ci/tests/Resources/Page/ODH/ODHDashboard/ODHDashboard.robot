@@ -1,11 +1,12 @@
 *** Settings ***
 Resource      ../../../Page/Components/Components.resource
 Resource      ../../../Page/OCPDashboard/UserManagement/Groups.robot
-Resource       ../../../Common.robot
-Resource       ../JupyterHub/ODHJupyterhub.resource
+Resource      ../../../Common.robot
+Resource      ../JupyterHub/ODHJupyterhub.resource
 Resource      ../../../Page/ODH/ODHDashboard/ResourcesPage.resource
 Resource      ../../../Page/ODH/ODHDashboard/ODHDashboardSettings.resource
-Resource    ../../../OCP.resource
+Resource      ../../../Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
+Resource      ../../../OCP.resource
 Library       JupyterLibrary
 
 
@@ -13,30 +14,30 @@ Library       JupyterLibrary
 # This variable is overriden for ODH runs via 'test-variables-odh-overwrite.yml'
 ${ODH_DASHBOARD_PROJECT_NAME}=   Red Hat OpenShift AI
 ${ODH_DASHBOARD_SPINNER_XP}=     xpath://*[@data-id="loading-empty-state" or @aria-valuetext="Loading..."]
-${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}=         //*[@class="pf-v5-c-drawer__panel-main"]//button[.='Enable']
-${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}=   //*[@class="pf-v5-c-drawer__panel-main"]//*[.='Get started']
-${CARDS_XP}=  //*[(contains(@class, 'odh-card')) and (contains(@class, 'pf-v5-c-card'))]
+${ODH_DASHBOARD_SIDEBAR_HEADER_ENABLE_BUTTON}=         //*[@class="pf-v6-c-drawer__panel-main"]//button[.='Enable']
+${ODH_DASHBOARD_SIDEBAR_HEADER_GET_STARTED_ELEMENT}=   //*[@class="pf-v6-c-drawer__panel-main"]//*[.='Get started']
+${CARDS_XP}=  //*[(contains(@class, 'odh-card')) and (contains(@class, 'pf-v6-c-card'))]
 ${CARD_BUTTON_XP}=  //input[@name="odh-explore-selectable-card"]
 ${RES_CARDS_XP}=  //div[contains(@data-ouia-component-type, "Card")]
 ${JUPYTER_CARD_XP}=    //div[@data-testid="card jupyter"]
 ${EXPLORE_PANEL_XP}=    //div[@data-testid="explore-drawer-panel"]
-${HEADER_XP}=  div[@class='pf-v5-c-card__header']
-${TITLE_XP}=   div[@class='pf-v5-c-card__title']//span
-${TITLE_XP_OLD}=  div[@class='pf-v5-c-card__title']//div/div[1]
-${PROVIDER_XP}=  div[@class='pf-v5-c-card__title']//span[contains(@class, "provider")]
-${DESCR_XP}=  div[@class='pf-v5-c-card__body']
+${HEADER_XP}=  div[@class='pf-v6-c-card__header']
+${TITLE_XP}=   div[@class='pf-v6-c-card__title']//span
+${TITLE_XP_OLD}=  div[@class='pf-v6-c-card__title']//div/div[1]
+${PROVIDER_XP}=  div[@class='pf-v6-c-card__title']//span[contains(@class, "provider")]
+${DESCR_XP}=  div[@class='pf-v6-c-card__body']
 ${BADGES_XP}=  ${HEADER_XP}//div[contains(@class, 'badge') or contains(@class, 'coming-soon')]
 ${BADGES_XP_OLD}=  ${HEADER_XP}/div[contains(@class, 'badges')]/span[contains(@class, 'badge') or contains(@class, 'coming-soon')]
-${OFFICIAL_BADGE_XP}=  div[@class='pf-v5-c-card__title']//img
-${OFFICIAL_BADGE_XP_OLD}=  div[@class='pf-v5-c-card__title']//img[contains(@class, 'supported-image')]    # robocop: disable
+${OFFICIAL_BADGE_XP}=  div[@class='pf-v6-c-card__title']//img
+${OFFICIAL_BADGE_XP_OLD}=  div[@class='pf-v6-c-card__title']//img[contains(@class, 'supported-image')]    # robocop: disable
 ${FALLBK_IMAGE_XP}=  ${HEADER_XP}/svg[contains(@class, 'odh-card__header-fallback-img')]
 ${IMAGE_XP}=  ${HEADER_XP}//picture[contains(@class,'pf-m-picture')]/source
 ${IMAGE_XP_OLD}=  ${HEADER_XP}/img[contains(@class, 'odh-card__header-brand')]
 ${APPS_DICT_PATH_LATEST}=   tests/Resources/Files/AppsInfoDictionary_latest.json
 ${SIDEBAR_TEXT_CONTAINER_XP}=  //div[contains(@class,'odh-markdown-view')]
-${SUCCESS_MSG_XP}=  //div[@class='pf-v5-c-alert pf-m-success']
+${SUCCESS_MSG_XP}=  //div[@class='pf-v6-c-alert pf-m-success']
 ${PAGE_TITLE_XP}=  //*[@data-testid="app-page-title"]
-${CLUSTER_SETTINGS_XP}=  //*[@data-testid="app-page-title" and text()="Cluster settings"]
+${CLUSTER_SETTINGS_TITLE}=  Cluster settings
 ${PVC_SIZE_INPUT_XP}=           xpath=//*[@data-testid="pvc-size-input"]
 ${USAGE_DATA_COLLECTION_XP}=    //*[@id="usage-data-checkbox"]
 ${CUSTOM_IMAGE_SOFTWARE_TABLE}=  //caption[contains(., "the advertised software")]/../tbody
@@ -48,11 +49,11 @@ ${CUSTOM_IMAGE_LAST_ROW_NAME}=  tr[last()]/td[1]
 ${CUSTOM_IMAGE_LAST_ROW_VERSION}=  tr[last()]/td[2]
 ${CUSTOM_IMAGE_EDIT_BTN}=  button[@id="edit-package-software-button"]
 ${CUSTOM_IMAGE_REMOVE_BTN}=  button[@id="delete-package-software-button"]
-${NOTIFICATION_DRAWER_CLOSE_BTN}=  //div[@class="pf-v5-c-drawer__panel"]/div/div//button
-${NOTIFICATION_DRAWER_CLOSED}=  //div[@class="pf-v5-c-drawer__panel" and @hidden=""]
+${NOTIFICATION_DRAWER_CLOSE_BTN}=  //div[@class="pf-v6-c-drawer__panel"]/div/div//button
+${NOTIFICATION_DRAWER_CLOSED}=  //div[@class="pf-v6-c-drawer__panel" and @hidden=""]
 ${GROUPS_CONFIG_CM}=    groups-config
 ${RHODS_GROUPS_CONFIG_CM}=    rhods-groups-config
-${RHODS_LOGO_XPATH}=    //img[@alt="${ODH_DASHBOARD_PROJECT_NAME} Logo"]
+${RHODS_LOGO_XPATH}=    //img[@alt="${ODH_DASHBOARD_PROJECT_NAME}"]
 ${USER_MENU_TOGGLE}=    //button[@id="user-menu-toggle"]
 ${LOGOUT_BTN}=    //button[.="Log out"]
 @{ISV_TO_REMOVE_SELF_MANAGED}=      Create List     starburst   nvidia    rhoam
@@ -122,7 +123,7 @@ Wait For Dashboard Page Title
 Wait Until RHODS Dashboard ${dashboard_app} Is Visible
   # Ideally the timeout would be an arg but Robot does not allow "normal" and "embedded" arguments
   # Setting timeout to 30seconds since anything beyond that should be flagged as a UI bug
-  Wait Until Element Is Visible    xpath://div[contains(@class,'gallery')]/div//div[@class="pf-v5-c-card__title"]//*[text()="${dashboard_app}"]
+  Wait Until Element Is Visible    xpath://div[contains(@class,'gallery')]/div//div[@class="pf-v6-c-card__title"]//*[text()="${dashboard_app}"]
   ...    timeout=30s
 
 Launch ${dashboard_app} From RHODS Dashboard Link
@@ -134,9 +135,9 @@ Launch ${dashboard_app} From RHODS Dashboard Link
       Click Link   xpath:${CARDS_XP}//*[text()='${splits[0]} ']/../..//a
   ELSE
       IF    "${dashboard_app}" == "Jupyter"
-          Click Link    xpath://div[contains(@class,'pf-v5-l-gallery')]/div[contains(@class,'pf-v5-c-card')]/div[@class="pf-v5-c-card__title"]//span[text()="${dashboard_app}"]/../../..//div[contains(@class,"pf-v5-c-card__footer")]/a
+          Click Link    xpath://div[contains(@class,'pf-v6-l-gallery')]/div[contains(@class,'pf-v6-c-card')]/div[@class="pf-v6-c-card__title"]//span[text()="${dashboard_app}"]/../../..//div[contains(@class,"pf-v6-c-card__footer")]/a
       ELSE
-          Click Link    xpath://div[contains(@class,'pf-v5-l-gallery')]/div[contains(@class,'pf-v5-c-card')]/div[@class="pf-v5-c-card__title"]//span[text()="${dashboard_app}"]/../..//div[contains(@class,"pf-v5-c-card__footer")]/a
+          Click Link    xpath://div[contains(@class,'pf-v6-l-gallery')]/div[contains(@class,'pf-v6-c-card')]/div[@class="pf-v6-c-card__title"]//span[text()="${dashboard_app}"]/../..//div[contains(@class,"pf-v6-c-card__footer")]/a
       END
   END
   IF    "${dashboard_app}" != "Jupyter"
@@ -145,8 +146,8 @@ Launch ${dashboard_app} From RHODS Dashboard Link
 
 Launch ${dashboard_app} From RHODS Dashboard Dropdown
   Wait Until RHODS Dashboard ${dashboard_app} Is Visible
-  Click Button  xpath://div[@class="pf-v5-c-card__title" and .="${dashboard_app}"]/..//button[contains(@class,pf-v5-c-dropdown__toggle)]
-  Click Link  xpath://div[@class="pf-v5-c-card__title" and .="${dashboard_app}"]/..//a[.="Launch"]
+  Click Button  xpath://div[@class="pf-v6-c-card__title" and .="${dashboard_app}"]/..//button[contains(@class,pf-v6-c-dropdown__toggle)]
+  Click Link  xpath://div[@class="pf-v6-c-card__title" and .="${dashboard_app}"]/..//a[.="Launch"]
   Switch Window  NEW
 
 Verify Service Is Enabled
@@ -347,7 +348,7 @@ Open Get Started Sidebar And Return Status
     Mouse Down    ${card_locator}
     Mouse Up    ${card_locator}
     ${status}=    Run Keyword And Return Status    Wait Until Page Contains Element
-    ...    xpath://div[contains(@class,'pf-v5-c-drawer__panel-main')]
+    ...    xpath://div[contains(@class,'pf-v6-c-drawer__panel-main')]
     Sleep  1
     RETURN  ${status}
 
@@ -364,7 +365,7 @@ Check Get Started Sidebar Status
     END
 
 Get Sidebar Links
-    ${link_elements}=  Get WebElements    xpath://div[contains(@class,'pf-v5-c-drawer__panel-main')]//a
+    ${link_elements}=  Get WebElements    xpath://div[contains(@class,'pf-v6-c-drawer__panel-main')]//a
     RETURN  ${link_elements}
 
 Check Sidebar Links
@@ -409,7 +410,7 @@ Check Sidebar Header Text
     ...    message=Missing Sidebar Title for App Card ${app_id}
     ${header}=  Get Text    xpath:${SIDEBAR_TEXT_CONTAINER_XP}/h1
     Run Keyword And Continue On Failure  Should Be Equal  ${header}  ${sidebar_h1}
-    ${getstarted_title}=  Get Text  xpath://div[contains(@class,'pf-v5-c-drawer__head')]
+    ${getstarted_title}=  Get Text  xpath://div[contains(@class,'pf-v6-c-drawer__head')]
     ${titles}=    Split String    ${getstarted_title}   separator=\n    max_split=1
     Run Keyword And Continue On Failure  Should Be Equal   ${titles[0]}  ${expected_data}[${app_id}][title]
     Run Keyword And Continue On Failure  Should Be Equal   ${titles[1]}  ${expected_data}[${app_id}][provider]
@@ -494,8 +495,7 @@ Get Question Mark Links
     [Documentation]      It returns the link elements from the question mark
     Click Button  id:help-icon-toggle
     @{links_list}=  Create List
-    @{link_elements}=  Get WebElements
-    ...    //button[@id="help-icon-toggle"]/following-sibling::div//a
+    @{link_elements}=  Get WebElements    //ul[@role="menu"]//a
     FOR  ${link}  IN  @{link_elements}
          ${href}=    Get Element Attribute    ${link}    href
          Append To List    ${links_list}    ${href}
@@ -522,9 +522,8 @@ Check External Links Status
 Verify Cluster Settings Is Available
     [Documentation]    Verifies submenu Settings > Cluster settings is visible
     Page Should Contain    Settings
-    Menu.Navigate To Page    Settings    Cluster settings
-    Capture Page Screenshot
-    Wait Until Page Contains Element    ${CLUSTER_SETTINGS_XP}    timeout=30
+    Menu.Navigate To Page    Settings    ${CLUSTER_SETTINGS_TITLE}
+    Wait For Dashboard Page Title    ${CLUSTER_SETTINGS_TITLE}
     Wait Until Page Contains Element    ${PVC_SIZE_INPUT_XP}    timeout=30
 
 Verify Cluster Settings Is Not Available
@@ -538,9 +537,9 @@ Search Items In Resources Section
     Sleep   5
     ${version-check}=  Is RHODS Version Greater Or Equal Than    1.18.0
     IF    ${version-check} == True
-        Input Text  xpath://input[@class="pf-v5-c-text-input-group__text-input"]       ${element}
+        Input Text  xpath://input[@class="pf-v6-c-text-input-group__text-input"]       ${element}
     ELSE
-        Input Text  xpath://input[@class="pf-v5-c-search-input__text-input"]       ${element}
+        Input Text  xpath://input[@class="pf-v6-c-search-input__text-input"]       ${element}
     END
 
 Verify Username Displayed On RHODS Dashboard
@@ -851,9 +850,6 @@ Reload RHODS Dashboard Page
 Handle Deletion Confirmation Modal
     [Documentation]    Handles confirmation modal on item deletion
     [Arguments]     ${item_title}    ${item_type}   ${press_cancel}=${FALSE}    ${additional_msg}=${NONE}
-    # Once fixed https://issues.redhat.com/browse/RHODS-9730 change the button xpath to
-    # xpath=//button[text()="Delete ${item_type}"]
-    ${delete_btn_xp}=    Set Variable    xpath=//button[contains(text(), 'Delete')]
     Wait Until Generic Modal Appears
     Run Keyword And Warn On Failure    Page Should Contain    Delete ${item_type}?
     Run Keyword And Warn On Failure    Page Should Contain    This action cannot be undone.
@@ -861,25 +857,25 @@ Handle Deletion Confirmation Modal
         Run Keyword And Continue On Failure    Page Should Contain    ${additional_msg}
     END
     Run Keyword And Continue On Failure    Page Should Contain    Type ${item_title} to confirm deletion:
-    Run Keyword And Continue On Failure    Element Should Be Disabled    ${delete_btn_xp}
+    Run Keyword And Continue On Failure    Element Should Be Disabled    ${GENERIC_DELETE_BTN_XP}
     Input Text    xpath=//input[@id="delete-modal-input"]    ${item_title}
-    Wait Until Element Is Enabled    ${delete_btn_xp}
+    Wait Until Element Is Enabled    ${GENERIC_DELETE_BTN_XP}
     IF    ${press_cancel} == ${TRUE}
         Click Button    ${GENERIC_CANCEL_BTN_XP}
     ELSE
-        Click Button    ${delete_btn_xp}
+        Click Button    ${GENERIC_DELETE_BTN_XP}
     END
     Wait Until Generic Modal Disappears
 
 Click Action From Actions Menu
     [Documentation]    Clicks an action from Actions menu (3-dots menu on the right)
     [Arguments]    ${item_title}    ${action}    ${item_type}=${NONE}
-    ${item_row}=    Set Variable    //tr[td[@data-label="Name"]//*[text()="${item_title}"]]
+    ${item_row}=    Set Variable    //tr[td[contains(translate(@data-label, 'NAME', 'name'), 'name')]//*[text()="${item_title}"]]
+    ${action_btn}=    Set Variable    //button[@role="menuitem" and starts-with(.,"${action}")]
     Click Element       xpath=${item_row}//button[@aria-label="Kebab toggle"]
     IF    "${item_type}" != "${NONE}"
         ${action}=    Catenate    ${action}    ${item_type}
     END
-    Wait Until Page Contains Element
-    ...    xpath=${item_row}//button[@role="menuitem"]//*[.="${action}"]
+    Wait Until Page Contains Element    ${action_btn}
     Sleep    0.5    msg=Avoid element missclicking
-    Click Element    xpath=${item_row}//button[@role="menuitem"]//*[.="${action}"]
+    Click Element    ${action_btn}

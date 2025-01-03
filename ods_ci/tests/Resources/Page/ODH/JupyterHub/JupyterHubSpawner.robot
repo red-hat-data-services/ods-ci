@@ -19,7 +19,7 @@ ${JUPYTERHUB_DROPDOWN_XPATH} =    //button[@aria-label="Options menu"]
 ${KFNBC_CONTAINER_SIZE_TITLE} =    //div[.="Deployment size"]/..//span[.="Container Size"]
 ${KFNBC_CONTAINER_SIZE_DROPDOWN_XPATH} =  //label[@for="modal-notebook-container-size"]/../..//button[@aria-label="Options menu"]
 ${KFNBC_ACCELERATOR_HEADER_XPATH} =    //span[text()='Accelerator']
-${KFNBC_ACCELERATOR_DROPDOWN_XPATH} =    //label[@for='modal-notebook-accelerator']/ancestor::div[@class='pf-v5-c-form__group']/descendant::button
+${KFNBC_ACCELERATOR_DROPDOWN_XPATH} =    //label[@for='modal-notebook-accelerator']/ancestor::div[@class='pf-v6-c-form__group']/descendant::button
 ${KFNBC_ACCELERATOR_INPUT_XPATH} =    //input[@aria-label='Number of accelerators']
 ${KFNBC_ACCELERATOR_LESS_BUTTON_XPATH} =    ${KFNBC_ACCELERATOR_INPUT_XPATH}/parent::*/parent::*/preceding-sibling::*//button
 ${KFNBC_ACCELERATOR_PLUS_BUTTON_XPATH} =    ${KFNBC_ACCELERATOR_INPUT_XPATH}/parent::*/parent::*/following-sibling::*//button
@@ -29,7 +29,7 @@ ${KFNBC_MODAL_CANCEL_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Cancel"]
 ${KFNBC_MODAL_CLOSE_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Close"]
 ${KFNBC_MODAL_X_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[@aria-label="Close"]
 ${KFNBC_CONTROL_PANEL_HEADER_XPATH} =    //h1[.="Notebook server control panel"]
-${KFNBC_ENV_VAR_NAME_PRE} =    //span[.="Variable name"]/../../../div[@class="pf-v5-c-form__group-control"]
+${KFNBC_ENV_VAR_NAME_PRE} =    //span[.="Variable name"]/../../../div[@class="pf-v6-c-form__group-control"]
 ${DEFAULT_PYTHON_VER} =    3.11
 ${PREVIOUS_PYTHON_VER} =    3.9
 ${DEFAULT_NOTEBOOK_VER} =    2024.2
@@ -372,7 +372,7 @@ Spawn Notebook With Arguments  # robocop: disable
             IF  ${oauth_prompt_visible}    Click Button     Log in with OpenShift
             Run Keyword And Warn On Failure   Login To Openshift  ${username}  ${password}  ${auth_type}
             ${authorization_required} =  Is Service Account Authorization Required
-            IF  ${authorization_required}  Authorize jupyterhub service account
+            IF  ${authorization_required}  Authorize JupyterLab Service Account
 
             Wait Notebook To Be Loaded  ${image}    ${version}
             ${spawn_fail} =  Has Spawn Failed
@@ -410,7 +410,7 @@ Launch JupyterHub Spawner From Dashboard
     Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub  ${username}  ${password}  ${auth}
     ${authorization_required} =  Is Service Account Authorization Required
-    IF  ${authorization_required}  Authorize jupyterhub service account
+    IF  ${authorization_required}  Authorize JupyterLab Service Account
     Fix Spawner Status
     #Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']
     Wait Until Page Contains   Start server
@@ -601,7 +601,7 @@ Fetch Image Tooltip Info
     [Documentation]    Fetches libraries in image tooltip text
     [Arguments]    ${img}
     ${xpath_img_tooltip} =    Set Variable    //input[contains(@id, "${img}")]/../label//div[@class=""][.=""]
-    ${xpath_tooltip_items} =    Set Variable    //div[@class='pf-v5-c-popover__body']/p
+    ${xpath_tooltip_items} =    Set Variable    //div[@class='pf-v6-c-popover__body']/p
     @{tmp_list} =    Create List
     Click Element    ${xpath_img_tooltip}
     ${libs} =    Get Element Count    ${xpath_tooltip_items}
@@ -670,7 +670,7 @@ Get List Of All Available Container Size
     ${size}    Create List
     #Click Element  xpath://div[contains(concat(' ',normalize-space(@class),' '),' jsp-spawner__size_options__select ')]\[1]
     Click Element  xpath://button[@aria-label="Options menu"][1]
-    ${link_elements}   Get WebElements  xpath://*[@class="pf-v5-c-select__menu-item-main"]
+    ${link_elements}   Get WebElements  xpath://*[@class="pf-v6-c-select__menu-item-main"]
     FOR  ${idx}  ${ext_link}  IN ENUMERATE  @{link_elements}  start=1
           ${text}      Get Text    ${ext_link}
           Append To List    ${size}     ${text}
@@ -700,7 +700,7 @@ Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
         Login To Jupyterhub    ${username}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
         Page Should Not Contain    403 : Forbidden
         ${authorization_required} =    Is Service Account Authorization Required
-        IF    ${authorization_required}    Authorize jupyterhub service account
+        IF    ${authorization_required}    Authorize JupyterLab Service Account
         Fix Spawner Status
         Spawn Notebook With Arguments
     END
@@ -718,7 +718,7 @@ CleanUp JupyterHub For N Users
         Login To Jupyterhub    ${username}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
         Page Should Not Contain    403 : Forbidden
         ${authorization_required} =    Is Service Account Authorization Required
-        IF    ${authorization_required}    Authorize jupyterhub service account
+        IF    ${authorization_required}    Authorize JupyterLab Service Account
         #Fix Spawner Status stops the current notebook, handling the different possible states
         Fix Spawner Status
     END

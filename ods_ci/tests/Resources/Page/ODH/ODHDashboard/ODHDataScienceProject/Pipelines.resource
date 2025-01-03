@@ -184,7 +184,7 @@ Pipeline Yaml Should Be Readonly
     Click Link      ${pipeline_name}
     Click Element     //button[@aria-label="Pipeline YAML Tab"]
     Press Keys    //div[contains(@class, 'lines-content')]    cannot_enter_read_only
-    Wait Until Element Is Visible    //div[@class="pf-v5-c-code-editor pf-m-read-only odh-dashboard__code-editor"]    timeout=10
+    Wait Until Element Is Visible    //div[@class="pf-v6-c-code-editor pf-m-read-only odh-dashboard__code-editor"]    timeout=10
     Capture Page Screenshot
     SeleniumLibrary.Set Selenium Implicit Wait    ${orig wait}
 

@@ -4,10 +4,10 @@ Resource       ../../../Common.robot
 
 
 *** Variables ***
-${ADD_RUNTIME_BTN_XP}=    //button[text()="Add serving runtime"]
-${SUBMIT_RUNTIME_BTN_XP}=    //button[text()="Create"]
-${UPLOAD_RUNTIME_BTN_XP}=    //button[text()="Upload files"]
-${SCRATCH_RUNTIME_BTN_XP}=    //button[text()="Start from scratch"]
+${ADD_RUNTIME_BTN_XP}=    //button[@data-testid="add-serving-runtime-button"]
+${SUBMIT_RUNTIME_BTN_XP}=    //button[@data-testid="create-button"]
+${UPLOAD_RUNTIME_BTN_XP}=    //button[contains(., "Upload files")]
+${SCRATCH_RUNTIME_BTN_XP}=    //button[contains(., "Start from scratch")]
 ${EDITOR_RUNTIME_BTN_XP}=    //div[contains(@class, "odh-dashboard__code-editor")]
 &{PLATFORM_NAMES_MAPPING}=    single=Single-model serving platform    multi=Multi-model serving platform
 ...    both=Single-model and multi-model serving platforms
@@ -44,15 +44,11 @@ Upload Serving Runtime Template
 
 Serving Runtime Template Should Be Listed
     [Arguments]    ${displayed_name}    ${serving_platform}
+    ${platform_label_xp}=    Set Variable
+    ...    //tr[contains(., "${displayed_name}")]//ancestor::*[@data-testid="serving-runtime-platform-label"]
     Run Keyword And Continue On Failure
-    ...    Wait Until Page Contains Element
-    ...    //*[@data-testid="serving-runtime ${displayed_name}"]
-    ...    timeout=10s
-    Run Keyword And Continue On Failure
-    ...    Wait Until Page Contains Element
-    ...    //*[@data-testid="serving-runtime ${displayed_name}"]//ancestor::*[@data-testid="serving-runtime-platform-label"]    # robocop: disable
-    ${actual_platform_labels_str}=    Get Text
-    ...    //*[@data-testid="serving-runtime ${displayed_name}"]//ancestor::*[@data-testid="serving-runtime-platform-label"]    # robocop: disable
+    ...    Wait Until Page Contains Element    ${platform_label_xp}    timeout=10s
+    ${actual_platform_labels_str}=    Get Text    ${platform_label_xp}
     ${actual_platform_labels}=    Split To Lines    ${actual_platform_labels_str}
     IF    "${serving_platform}" == "both"
         Run Keyword And Continue On Failure    Length Should Be    ${actual_platform_labels}    ${2}

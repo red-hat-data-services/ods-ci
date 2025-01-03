@@ -1,79 +1,78 @@
 *** Settings ***
 Documentation       Test suite for OpenShift Pipeline using kfp python package
 
-Resource            ../../Resources/RHOSi.resource
-Resource            ../../Resources/ODS.robot
-Resource            ../../Resources/Common.robot
-Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
-Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipelines.resource
-Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Permissions.resource
-Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
-Resource            ../../Resources/CLI/DataSciencePipelines/DataSciencePipelinesBackend.resource
+Resource            ../../../Resources/RHOSi.resource
+Resource            ../../../Resources/ODS.robot
+Resource            ../../../Resources/Common.robot
+Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
+Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipelines.resource
+Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Permissions.resource
+Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
+Resource            ../../../Resources/CLI/DataSciencePipelines/DataSciencePipelinesBackend.resource
+Resource            ../../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 Library             DateTime
-Library             ../../../libs/DataSciencePipelinesAPI.py
-Library             ../../../libs/DataSciencePipelinesKfp.py
+Library             ../../../../libs/DataSciencePipelinesAPI.py
+Library             ../../../../libs/DataSciencePipelinesKfp.py
 Test Tags           DataSciencePipelines-Backend
 Suite Setup         Data Science Pipelines Suite Setup
 Suite Teardown      RHOSi Teardown
 
 
 *** Variables ***
-${PROJECT_NAME}=    pipelineskfp1
+${PROJECT_NAME}=    dw-pipelines
 ${KUEUE_RESOURCES_SETUP_FILEPATH}=    tests/Resources/Page/DistributedWorkloads/kueue_resources_setup.sh
 
 
 *** Test Cases ***
-Verify Users Can Create And Run A Pipeline That Uses Only Packages From Base Image Using The kfp Python Package
-    [Documentation]    Creates and runs flip_coin pipeline as regular user, verifiying the run results
-    ...   This is a simple pipeline, where the tasks doesn't have any packages_to_install and just needs
-    ...   the python packages included in the base_image
-    [Tags]      Smoke    ODS-2203
-    ${emtpy_dict}=    Create Dictionary
-    End To End Pipeline Workflow Using Kfp
-    ...    admin_username=${TEST_USER.USERNAME}
-    ...    admin_password=${TEST_USER.PASSWORD}
-    ...    username=${TEST_USER_3.USERNAME}
-    ...    password=${TEST_USER_3.PASSWORD}
-    ...    project=${PROJECT_NAME}
-    ...    python_file=cache-disabled/flip_coin.py
-    ...    method_name=flipcoin_pipeline
-    ...    status_check_timeout=180
-    ...    pipeline_params=${emtpy_dict}
-    [Teardown]    Projects.Delete Project Via CLI By Display Name    ${PROJECT_NAME}
-
-Verify Users Can Create And Run A Pipeline That Uses Custom Python Packages To Install Using The kfp Python Package
-    [Documentation]    Creates and runs iris_pipeline pipeline as regular user, verifiying the run results
-    ...   In this pipeline there are tasks defining with packages_to_install some custom python packages to
-    ...   be installed at execution time
-    [Tags]      Smoke
-    ${emtpy_dict}=    Create Dictionary
-    End To End Pipeline Workflow Using Kfp
-    ...    admin_username=${TEST_USER.USERNAME}
-    ...    admin_password=${TEST_USER.PASSWORD}
-    ...    username=${TEST_USER_3.USERNAME}
-    ...    password=${TEST_USER_3.PASSWORD}
-    ...    project=${PROJECT_NAME}
-    ...    python_file=cache-disabled/iris_pipeline.py
-    ...    method_name=my_pipeline
-    ...    status_check_timeout=300
-    ...    pipeline_params=${emtpy_dict}
-    [Teardown]    Projects.Delete Project Via CLI By Display Name    ${PROJECT_NAME}
-
-Verify Upload Download In Data Science Pipelines Using The kfp Python Package
+Verify Ods Users Can Create And Run A Data Science Pipeline With Ray Using The kfp Python Package
     [Documentation]    Creates, runs pipelines with regular user. Double check the pipeline result and clean
     ...    the pipeline resources.
-    [Tags]    Sanity    ODS-2683
-    ${upload_download_dict}=    Create Dictionary    mlpipeline_minio_artifact_secret=value    bucket_name=value
+    ...    AutomationBugOnDisconnected: RHOAIENG-12514
+    [Tags]      Tier1
+    ...         AutomationBugOnDisconnected
+    ...         DistributedWorkloads
+    ...         WorkloadsOrchestration
+    ...         DataSciencePipelines-DistributedWorkloads
+    ${params_dict}=    Create Dictionary
+    ...    AWS_DEFAULT_ENDPOINT=${AWS_DEFAULT_ENDPOINT}
+    ...    AWS_STORAGE_BUCKET=${AWS_STORAGE_BUCKET}
+    ...    AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+    ...    AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    ...    AWS_STORAGE_BUCKET_MNIST_DIR=${AWS_STORAGE_BUCKET_MNIST_DIR}
     End To End Pipeline Workflow Using Kfp
     ...    admin_username=${TEST_USER.USERNAME}
     ...    admin_password=${TEST_USER.PASSWORD}
     ...    username=${TEST_USER_3.USERNAME}
     ...    password=${TEST_USER_3.PASSWORD}
     ...    project=${PROJECT_NAME}
-    ...    python_file=cache-disabled/upload_download.py
-    ...    method_name=wire_up_pipeline
-    ...    status_check_timeout=180
-    ...    pipeline_params=${upload_download_dict}
+    ...    python_file=cache-disabled/ray_job_integration.py
+    ...    method_name=ray_job_integration
+    ...    status_check_timeout=600
+    ...    pipeline_params=${params_dict}
+    ...    ray=${TRUE}
+    [Teardown]    Projects.Delete Project Via CLI By Display Name    ${PROJECT_NAME}
+
+Verify Ods Users Can Create And Run A Data Science Pipeline With Ray Job Using The kfp Python Package
+    [Documentation]    Creates, runs pipelines with regular user. Double check the pipeline result and clean
+    ...    the pipeline resources.
+    ...    AutomationBugOnDisconnected: RHOAIENG-12514
+    [Tags]      Tier1
+    ...         AutomationBugOnDisconnected
+    ...         DistributedWorkloads
+    ...         WorkloadsOrchestration
+    ...         DataSciencePipelines-DistributedWorkloads
+    ${ray_dict}=    Create Dictionary
+    End To End Pipeline Workflow Using Kfp
+    ...    admin_username=${TEST_USER.USERNAME}
+    ...    admin_password=${TEST_USER.PASSWORD}
+    ...    username=${TEST_USER_3.USERNAME}
+    ...    password=${TEST_USER_3.PASSWORD}
+    ...    project=${PROJECT_NAME}
+    ...    python_file=cache-disabled/ray_integration.py
+    ...    method_name=ray_integration
+    ...    status_check_timeout=600
+    ...    pipeline_params=${ray_dict}
+    ...    ray=${TRUE}
     [Teardown]    Projects.Delete Project Via CLI By Display Name    ${PROJECT_NAME}
 
 

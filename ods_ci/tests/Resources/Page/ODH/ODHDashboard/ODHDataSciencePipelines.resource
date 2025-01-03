@@ -192,7 +192,7 @@ Get Pipeline Run Step Log
     # the logs are full loaded when "The log window displays partial content" the message appeared
     Wait Until Page Contains Element    xpath=//h2[text()='The log window displays partial content']
     Capture Page Screenshot
-    ${log_with_tags}=    Get Element Attribute    xpath://div[@class="pf-v5-c-log-viewer__list"]    innerHTML
+    ${log_with_tags}=    Get Element Attribute    xpath://div[@class="pf-v6-c-log-viewer__list"]    innerHTML
     Log    ${log_with_tags}
     # we close the modal otherwise any othe step in the test case will need to close it
     Click Element    xpath=//button[@aria-label="Close drawer panel"]
@@ -202,7 +202,7 @@ Verify Pipeline Run Is Completed
     [Documentation]    Open the Pipeline detail and wait for the Completed Status
     [Arguments]    ${pipeline_run_name}    ${timeout}=10m   ${experiment_name}=Default
     Open Pipeline Run    ${pipeline_run_name}    ${experiment_name}
-    Wait Until Page Contains Element    //span[@class='pf-v5-c-label__text' and text()='Succeeded']    timeout=${timeout}
+    Wait Until Page Contains Element    //span[@class='pf-v6-c-label__text' and text()='Succeeded']    timeout=${timeout}
     Capture Page Screenshot
 
 # robocop: disable:line-too-long

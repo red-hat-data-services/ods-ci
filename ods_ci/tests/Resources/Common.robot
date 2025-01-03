@@ -601,14 +601,14 @@ Skip If Operator Starting Version Is Not Supported
     Skip If    condition="${supported}"=="${FALSE}"    msg=This test is skipped because starting operator version < ${minimum_version}
 
 Skip If Cluster Type Is Self-Managed
-    [Documentation]    Skips test if cluster type  is Self-managed
-    ${cluster_type}=    Is Cluster Type Self-Managed
-    Skip If    condition=${cluster_type}==True    msg=This test is skipped for Self-managed cluster
+    [Documentation]    Skips test if cluster type is Self-managed
+    ${cluster_type}=    Is Cluster Type Managed
+    Skip If    condition=${cluster_type}==False    msg=This test is skipped for Self-managed cluster
 
 Skip If Cluster Type Is Managed
-    [Documentation]    Skips test if cluster type  is Managed
-    ${cluster_type}=    Is Cluster Type Self-Managed
-    Skip If    condition=${cluster_type}==False    msg=This test is skipped for Managed cluster
+    [Documentation]    Skips test if cluster type is Managed
+    ${cluster_type}=    Is Cluster Type Managed
+    Skip If    condition=${cluster_type}==True    msg=This test is skipped for Managed cluster
 
 Delete All ${resource_type} In Namespace By Name
     [Documentation]    Force delete all ${resource_type} named '${resource_type}' in namespace '${namespace}'

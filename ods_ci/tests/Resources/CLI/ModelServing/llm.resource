@@ -141,7 +141,7 @@ Compile Inference Service YAML
     [Arguments]    ${isvc_name}    ${model_storage_uri}    ${model_format}=caikit    ${serving_runtime}=caikit-tgis-runtime
     ...            ${kserve_mode}=${NONE}    ${sa_name}=${DEFAULT_BUCKET_SA_NAME}    ${canaryTrafficPercent}=${EMPTY}    ${min_replicas}=1
     ...            ${scaleTarget}=1    ${scaleMetric}=concurrency  ${auto_scale}=${NONE}
-    ...            ${requests_dict}=&{EMPTY}    ${limits_dict}=&{EMPTY}    ${overlays}=${EMPTY}
+    ...            ${requests_dict}=&{EMPTY}    ${limits_dict}=&{EMPTY}    ${overlays}=${EMPTY}     ${version}=${EMPTY}
     IF   '${auto_scale}' == '${NONE}'
         ${scaleTarget}=    Set Variable    ${EMPTY}
         ${scaleMetric}=    Set Variable    ${EMPTY}
@@ -154,6 +154,7 @@ Compile Inference Service YAML
     Set Test Variable    ${scaleMetric}
     Set Test Variable    ${canaryTrafficPercent}
     Set Test Variable    ${model_format}
+    Set Test Variable    ${version}
     Set Test Variable    ${serving_runtime}
     IF    len($overlays) > 0
         FOR    ${index}    ${overlay}    IN ENUMERATE    @{overlays}
@@ -414,6 +415,46 @@ Query Model Multiple Times
             END
         END
     END
+
+Setup Test Variables    # robocop: off=too-many-calls-in-keyword
+    [Documentation]    Sets up variables for the Suite
+    [Arguments]    ${model_name}    ${kserve_mode}=Serverless    ${use_pvc}=${FALSE}    ${use_gpu}=${FALSE}
+    ...    ${model_path}=${model_name}
+    Set Test Variable    ${model_name}
+    ${models_names}=    Create List    ${model_name}
+    Set Test Variable    ${models_names}
+    Set Test Variable    ${model_path}
+    Set Test Variable    ${test_namespace}     ${TEST_NS}-${model_name}
+    IF    ${use_pvc}
+        Set Test Variable    ${storage_uri}    pvc://${model_name}-claim/${model_path}
+    ELSE
+        Set Test Variable    ${storage_uri}    s3://${S3.BUCKET_1.NAME}/${model_path}
+    END
+    IF   ${use_gpu}
+        ${supported_gpu_type}=   Convert To Lowercase         ${GPU_TYPE}
+        Set Runtime Image    ${supported_gpu_type}
+        IF  "${supported_gpu_type}" == "nvidia"
+            ${limits}=    Create Dictionary    nvidia.com/gpu=1
+        ELSE IF    "${supported_gpu_type}" == "amd"
+            ${limits}=    Create Dictionary    amd.com/gpu=1
+        ELSE
+            FAIL   msg=Provided GPU type is not yet supported. Only nvidia and amd gpu type are supported
+        END
+        Set Test Variable    ${limits}
+    ELSE
+        Set Test Variable    ${limits}    &{EMPTY}
+    END
+    IF    "${KSERVE_MODE}" == "RawDeployment"    # robocop: off=inconsistent-variable-name
+        Set Test Variable    ${use_port_forwarding}    ${TRUE}
+    ELSE
+        Set Test Variable    ${use_port_forwarding}    ${FALSE}
+    END
+    Set Log Level    NONE
+    Set Test Variable    ${access_key_id}    ${S3.AWS_ACCESS_KEY_ID}
+    Set Test Variable    ${access_key}    ${S3.AWS_SECRET_ACCESS_KEY}
+    Set Test Variable    ${endpoint}    ${MODELS_BUCKET.ENDPOINT}
+    Set Test Variable    ${region}    ${MODELS_BUCKET.REGION}
+    Set Log Level    INFO
 
 Compile Deploy And Query LLM model
     [Documentation]    Group together the test steps for preparing, deploying
@@ -910,3 +951,20 @@ Remove Model Mount Path From Runtime
     ${rc}    ${out}=    Run And Return Rc And Output
     ...   oc patch servingruntime ${runtime} -n ${namespace} --type='json' -p='[{"op": "remove", "path": "/spec/containers/0/args/1"}]'
     Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
+
+
+Set Runtime Image
+    [Documentation]    Sets up runtime variables for the Suite
+    [Arguments]    ${gpu_type}
+    IF  "${RUNTIME_IMAGE}" == "${EMPTY}"
+         IF  "${gpu_type}" == "nvidia"
+            Set Test Variable    ${runtime_image}    quay.io/modh/vllm@sha256:c86ff1e89c86bc9821b75d7f2bbc170b3c13e3ccf538bf543b1110f23e056316
+         ELSE IF    "${gpu_type}" == "amd"
+            Set Test Variable    ${runtime_image}    quay.io/modh/vllm@sha256:10f09eeca822ebe77e127aad7eca2571f859a5536a6023a1baffc6764bcadc6e
+         ELSE
+             FAIL   msg=Provided GPU type is not yet supported. Only nvidia and amd gpu type are supported
+         END
+    ELSE
+        Log To Console    msg= Using the image provided from terminal
+    END
+

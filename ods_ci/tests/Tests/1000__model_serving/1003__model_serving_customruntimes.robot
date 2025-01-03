@@ -31,7 +31,7 @@ Verify RHODS Admins Can Import A Custom Serving Runtime Template By Uploading A 
 
 Verify RHODS Admins Can Delete A Custom Serving Runtime Template
     [Documentation]    Verifies an admin user can delete a custom serving runtime
-    [Tags]    Smoke    Interop     ODS-2279
+    [Tags]    Smoke    ODS-2279
     [Setup]    Create Test Serving Runtime Template If Not Exists
     Open Dashboard Settings    settings_page=Serving runtimes
     Delete Serving Runtime Template    displayed_name=${UPLOADED_OVMS_DISPLAYED_NAME}

@@ -1,11 +1,8 @@
 FROM quay.io/centos/centos:stream9
 
 # Use this build arg to set any default test script arguments
-ENV RUN_SCRIPT_ARGS=${RUN_SCRIPT_ARGS}
-ENV ROBOT_EXTRA_ARGS=''
 ENV SET_ENVIRONMENT=0
 ENV RETURN_PW=0
-ENV OC_HOST=${OC_HOST}
 ENV RUN_FROM_CONTAINER=1
 ENV SE_BROWSER_PATH=/usr/bin/chromium-browser
 ARG OC_VERSION=4.13

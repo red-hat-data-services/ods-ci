@@ -230,19 +230,19 @@ Verify Ray Cluster Exists And Monitor Workload Metrics By Submitting Ray Job Aft
     [Teardown]      Run Keywords        Cleanup Codeflare-SDK Setup     AND
     ...     Codeflare Upgrade Tests Teardown        ${PRJ_UPGRADE}      ${DW_PROJECT_CREATED}
 
-Run Training Operator ODH Run PyTorchJob Test Use Case
-    [Documentation]    Run Training Operator ODH Run PyTorchJob Test Use Case
+Run Training Operator FMS Run PyTorchJob Test Use Case
+    [Documentation]    Run Training Operator FMS Run PyTorchJob Test Use Case
     [Tags]      Upgrade
-    [Setup]     Prepare Training Operator E2E Upgrade Test Suite
-    Run Training Operator ODH Upgrade Test          TestRunPytorchjob
-    [Teardown]      Teardown Training Operator E2E Upgrade Test Suite
+    [Setup]     Prepare Training Operator FMS E2E Test Suite
+    Run Training Operator FMS Test          TestRunPytorchjob
+    [Teardown]      Teardown Training Operator FMS E2E Test Suite
 
-Run Training Operator ODH Run Sleep PyTorchJob Test Use Case
+Run Training Operator FMS Run Sleep PyTorchJob Test Use Case
     [Documentation]    Verify that running PyTorchJob Pod wasn't restarted
     [Tags]      Upgrade
-    [Setup]     Prepare Training Operator E2E Upgrade Test Suite
-    Run Training Operator ODH Upgrade Test      TestVerifySleepPytorchjob
-    [Teardown]      Teardown Training Operator E2E Upgrade Test Suite
+    [Setup]     Prepare Training Operator FMS E2E Test Suite
+    Run Training Operator FMS Test      TestVerifySleepPytorchjob
+    [Teardown]      Teardown Training Operator FMS E2E Test Suite
 
 Verify that the must-gather image provides RHODS logs and info
     [Documentation]    Tests the must-gather image for ODH/RHOAI after upgrading

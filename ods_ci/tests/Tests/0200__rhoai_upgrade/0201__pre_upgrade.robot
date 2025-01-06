@@ -220,19 +220,19 @@ Verify Distributed Workload Metrics Resources By Creating Ray Cluster Workload
     [Teardown]      Run Keywords        Cleanup Codeflare-SDK Setup     AND
     ...     Run Keyword If Test Failed      Codeflare Upgrade Tests Teardown        ${PRJ_UPGRADE}      ${DW_PROJECT_CREATED}       # robocop: disable:line-too-long
 
-Run Training Operator ODH Setup PyTorchJob Test Use Case
-    [Documentation]    Run Training Operator ODH Setup PyTorchJob Test Use Case
+Run Training Operator FMS Setup PyTorchJob Test Use Case
+    [Documentation]    Run Training Operator FMS Setup PyTorchJob Test Use Case
     [Tags]      Upgrade
-    [Setup]     Prepare Training Operator E2E Upgrade Test Suite
-    Run Training Operator ODH Upgrade Test      TestSetupPytorchjob
-    [Teardown]      Teardown Training Operator E2E Upgrade Test Suite
+    [Setup]     Prepare Training Operator FMS E2E Test Suite
+    Run Training Operator FMS Test    TestSetupPytorchjob
+    [Teardown]    Teardown Training Operator FMS E2E Test Suite
 
-Run Training Operator ODH Setup Sleep PyTorchJob Test Use Case
+Run Training Operator FMS Setup Sleep PyTorchJob Test Use Case
     [Documentation]    Setup PyTorchJob which is kept running for 24 hours
     [Tags]      Upgrade
-    [Setup]     Prepare Training Operator E2E Upgrade Test Suite
-    Run Training Operator ODH Upgrade Test          TestSetupSleepPytorchjob
-    [Teardown]      Teardown Training Operator E2E Upgrade Test Suite
+    [Setup]     Prepare Training Operator FMS E2E Test Suite
+    Run Training Operator FMS Test    TestSetupSleepPytorchjob
+    [Teardown]    Teardown Training Operator FMS E2E Test Suite
 
 Data Science Pipelines Pre Upgrade Configuration
     [Documentation]    Creates project dsp-test-upgrade and configures the pipeline resources testing upgrade

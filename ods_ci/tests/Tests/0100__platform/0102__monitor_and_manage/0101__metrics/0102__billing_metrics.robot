@@ -137,7 +137,7 @@ Test Setup For Matrics Web Test
     Wait Until OpenShift Console Is Loaded
     Click Button    Observe
     Click Link    Metrics
-    Wait Until Element Is Visible    xpath://textarea[@class="pf-v5-c-form-control query-browser__query-input"]
+    Wait Until Element Is Visible    xpath://textarea[@class="pf-v6-c-form-control query-browser__query-input"]
 
 Test Teardown For Matrics Web Test
     [Documentation]     Closes all browsers
@@ -146,10 +146,10 @@ Test Teardown For Matrics Web Test
 Run Query On Metrics And Return Value
     [Documentation]    Fires query in metrics through web browser and returns value
     [Arguments]    ${query}    ${count_of_columns}    # count of columns + 1 like name,values example: ${count_of_columns}=3
-    Input Text    xpath://textarea[@class="pf-v5-c-form-control query-browser__query-input"]    ${query}
+    Input Text    xpath://textarea[@class="pf-v6-c-form-control query-browser__query-input"]    ${query}
     Click Button    Run queries
-    Wait Until Element is Visible    xpath://table[@class="pf-v5-c-table pf-m-compact"]    timeout=15seconds
-    @{data} =    Get WebElements    //table[@class="pf-v5-c-table pf-m-compact"] //tbody/tr/td[${count_of_columns}]
+    Wait Until Element is Visible    xpath://table[@class="pf-v6-c-table pf-m-compact"]    timeout=15seconds
+    @{data} =    Get WebElements    //table[@class="pf-v6-c-table pf-m-compact"] //tbody/tr/td[${count_of_columns}]
     RETURN    ${data[0].text}
 
 Fire Query On RHODS Prometheus And Return Value
@@ -198,7 +198,7 @@ Iterative Image Test
     Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     Page Should Not Contain    403 : Forbidden
     ${authorization_required} =    Is Service Account Authorization Required
-    IF    ${authorization_required}    Authorize jupyterhub service account
+    IF    ${authorization_required}    Authorize JupyterLab Service Account
     Fix Spawner Status
     Spawn Notebook With Arguments    image=${image}
     Run Cell And Check Output    print("Hello World!")    Hello World!
@@ -220,7 +220,7 @@ CleanUp JupyterHub
     Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     Page Should Not Contain    403 : Forbidden
     ${authorization_required} =    Is Service Account Authorization Required
-    IF    ${authorization_required}    Authorize jupyterhub service account
+    IF    ${authorization_required}    Authorize JupyterLab Service Account
     # Additional check on running server
     ${control_panel_visible} =  Control Panel Is Visible
     IF  ${control_panel_visible}==True

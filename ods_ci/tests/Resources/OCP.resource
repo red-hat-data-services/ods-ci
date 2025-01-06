@@ -347,3 +347,16 @@ Is Cluster Type Self-Managed
     ELSE
         RETURN    ${FALSE}
     END
+
+Is Test Enviroment ROSA-HCP
+    [Documentation]    Find the test environment based on output of the infrastructure of the cluster
+    ...    Returns ${TRUE} if test environment is ROSA_HCP
+    ...    Returns ${FALSE} if test environment is not ROSA_HCP
+    ${rc}    ${output}=    Run And Return Rc And Output
+    ...    oc get infrastructure cluster -o jsonpath='{.metadata.labels.hypershift\\.openshift\\.io/managed}'
+    Should Be Equal As Integers    ${rc}    0
+    IF    "${output}" == "true"
+        RETURN    ${TRUE}
+    ELSE
+        RETURN    ${FALSE}
+    END

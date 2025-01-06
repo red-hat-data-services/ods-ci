@@ -10,7 +10,7 @@ ${ACCELERATOR_RESOURCES_DIRPATH}=    tests/Resources/Files/accelerator
 Create An Accelerator Profile Via CLI
     [Documentation]    Create an instance of Accelerator Profile using OC
     [Arguments]   ${name}  ${ns}=${APPLICATIONS_NAMESPACE}
-    ${status}=    Run Keyword And Return Status    Oc Create    kind=AcceleratorProfile
+    ${status}=    Run Keyword And Return Status    Oc Apply    kind=AcceleratorProfile
     ...    src=${ACCELERATOR_RESOURCES_DIRPATH}/${name}.yaml    namespace=${ns}
     ...    template_data={test_name: '${TEST_NAME}', test_ns: '${ns}'}
     Should Be Equal As Integers    ${status}     ${TRUE}

@@ -23,7 +23,7 @@ ${MS_TABLE_PROJECT}=    /../../td[@data-label="Project"]
 ${MS_TABLE_ENDPOINT_INPUT}=    /ancestor::tr//td[@data-label="Inference endpoint"]//input[contains(@id,"text-input-")]
 ${MS_TABLE_STATUS_SUCCESS}=     /ancestor::tr//td[@data-label="Status"]//span[contains(@class,"pf-m-success")]
 ${MS_TABLE_STATUS_FAILURE}=     /ancestor::tr//td[@data-label="Status"]//span[contains(@class,"pf-m-danger")]
-${KSERVE_MODAL_HEADER}=    //header[@class="pf-v5-c-modal-box__header"]/h1[.="Deploy model"]
+${KSERVE_MODAL_HEADER}=    //header[@class="pf-v6-c-modal-box__header"]/h1[.="Deploy model"]
 ${KSERVE_RUNTIME_DROPDOWN}=    //button[@data-testid="serving-runtime-template-selection"]
 ${LLM_RESOURCES_DIRPATH}=    tests/Resources/Files/llm
 ${DEPLOY_SINGLE_SV_MODEL_BTN}=    //button[@data-testid="single-serving-select-button"]
@@ -160,9 +160,9 @@ Select Existing Data Connection
     [Arguments]    ${data_connection_name}    ${retries}=1
 
     FOR  ${retry_idx}  IN RANGE  0  1+${retries}
-        Click Element    xpath://button[@class="pf-v5-c-menu-toggle__button"]
-        Click Element    xpath://button[@class="pf-v5-c-menu__item"]/span/span[contains(., "${data_connection_name}")]
-        ${selected}=    Get Element Attribute    //span[@class="pf-v5-c-text-input-group__text"]/input    value
+        Click Element    xpath://button[@class="pf-v6-c-menu-toggle__button"]
+        Click Element    xpath://button[@class="pf-v6-c-menu__item"]/span/span[contains(., "${data_connection_name}")]
+        ${selected}=    Get Element Attribute    //span[@class="pf-v6-c-text-input-group__text"]/input    value
         IF  "${selected}"=="${data_connection_name}"
             BREAK
         END

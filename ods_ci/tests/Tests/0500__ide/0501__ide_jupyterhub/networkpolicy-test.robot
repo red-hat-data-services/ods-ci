@@ -39,7 +39,7 @@ Open Browser And Start Notebook As First User
     Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =    Is Service Account Authorization Required
-    IF    ${authorization_required}    Authorize Jupyterhub Service Account
+    IF    ${authorization_required}    Authorize JupyterLab Service Account
     Wait Until Page Contains    Start a notebook server
     Fix Spawner Status
     Spawn Notebook With Arguments    image=minimal-notebook
@@ -61,7 +61,7 @@ Open Browser And Start Notebook As Second User With Env Vars
     Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub    ${TEST_USER_2.USERNAME}    ${TEST_USER_2.PASSWORD}    ${TEST_USER_2.AUTH_TYPE}
     ${authorization_required} =    Is Service Account Authorization Required
-    IF    ${authorization_required}    Authorize Jupyterhub Service Account
+    IF    ${authorization_required}    Authorize JupyterLab Service Account
     Wait Until Page Contains    Start a notebook server
     Fix Spawner Status
     &{first_pod_details} =  Create Dictionary  pod_ip=${pod_ip}  pod_login=${pod_login_name}

@@ -2,6 +2,7 @@
 Documentation     Smoke tests for Workloads Training
 Library           Process
 Resource          ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
+Resource          ../../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 Suite Setup       Prepare Codeflare E2E Test Suite
 Suite Teardown    Teardown Codeflare E2E Test Suite
 
@@ -28,11 +29,7 @@ Ray smoke test
         FAIL    Can not find kuberay-operator service in ${APPLICATIONS_NAMESPACE}
     END
     Log To Console    kuberay-operator service exists
-    Log To Console    Verifying kuberay-operator's container image is referred from registry.redhat.io
-    ${pod} =    Find First Pod By Name  namespace=${APPLICATIONS_NAMESPACE}   pod_regex=kuberay-operator-
-    Container Image Url Should Contain      ${APPLICATIONS_NAMESPACE}     ${pod}      kuberay-operator
-    ...     registry.redhat.io/rhoai/odh-kuberay-operator-controller
-    Log To Console    kuberay-operator's container image is verified
+    Verify container images    kuberay-operator    kuberay-operator    odh-kuberay-operator-controller
 
 Codeflare smoke test
     [Documentation]    Check that Codeflare deployment and its monitoring service are up and running
@@ -54,11 +51,7 @@ Codeflare smoke test
         FAIL    Can not find codeflare-operator-manager-metrics service in ${APPLICATIONS_NAMESPACE}
     END
     Log To Console    codeflare-operator-manager-metrics service exists
-    Log To Console    Verifying codeflare-operator-manager's container image is referred from registry.redhat.io
-    ${pod} =    Find First Pod By Name  namespace=${APPLICATIONS_NAMESPACE}   pod_regex=codeflare-operator-manager-
-    Container Image Url Should Contain      ${APPLICATIONS_NAMESPACE}     ${pod}      manager
-    ...     registry.redhat.io/rhoai/odh-codeflare-operator
-    Log To Console    codeflare-operator-manager's container image is verified
+    Verify container images    codeflare-operator-manager    manager    odh-codeflare-operator
 
 Training operator smoke test
     [Documentation]    Check that Training operator deployment is up and running
@@ -72,11 +65,7 @@ Training operator smoke test
     IF    ${result.rc} != 0
         FAIL    Timeout waiting for deployment/kubeflow-training-operator to be available in ${APPLICATIONS_NAMESPACE}
     END
-    Log To Console    Verifying kubeflow-training-operator's container image is referred from registry.redhat.io
-    ${pod} =    Find First Pod By Name  namespace=${APPLICATIONS_NAMESPACE}   pod_regex=kubeflow-training-operator-
-    Container Image Url Should Contain      ${APPLICATIONS_NAMESPACE}     ${pod}      training-operator
-    ...     registry.redhat.io/rhoai/odh-training-operator
-    Log To Console    kubeflow-training-operator's container image is verified
+    Verify container images    kubeflow-training-operator    training-operator    odh-training-operator
 
 
 *** Keywords ***

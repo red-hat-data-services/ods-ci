@@ -74,7 +74,7 @@ Spawn and Stop Server
     Spawn Notebook
     Run Keyword And Warn On Failure   Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =  Is Service Account Authorization Required
-    IF  ${authorization_required}  Authorize jupyterhub service account
+    IF  ${authorization_required}  Authorize JupyterLab Service Account
     # If this fails we waited for 60s. Avg. time will be thrown off, might be acceptable
     # given that we weren't able to spawn?
     Run Keyword And Continue On Failure  Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s

@@ -142,7 +142,7 @@ Iterative Image Test
     Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     Page Should Not Contain    403 : Forbidden
     ${authorization_required} =    Is Service Account Authorization Required
-    IF    ${authorization_required}    Authorize jupyterhub service account
+    IF    ${authorization_required}    Authorize JupyterLab Service Account
     Fix Spawner Status
     Spawn Notebook With Arguments    image=${image}
     Run Cell And Check Output    print("Hello World!")    Hello World!

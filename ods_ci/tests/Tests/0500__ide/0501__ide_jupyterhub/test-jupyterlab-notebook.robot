@@ -27,7 +27,7 @@ Can Login to Jupyterhub
   [Tags]  Sanity
   Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   ${authorization_required} =  Is Service Account Authorization Required
-  IF  ${authorization_required}  Authorize jupyterhub service account
+  IF  ${authorization_required}  Authorize JupyterLab Service Account
   #Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']
   Wait Until Page Contains  Start a notebook server
 
@@ -65,7 +65,7 @@ Verify A Default Image Is Provided And Starts Successfully
     Spawn Notebook
     Run Keyword And Warn On Failure   Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     ${authorization_required} =  Is Service Account Authorization Required
-    IF  ${authorization_required}  Authorize jupyterhub service account
+    IF  ${authorization_required}  Authorize JupyterLab Service Account
     Run Keyword And Continue On Failure  Wait Until Page Contains Element  xpath://div[@id="jp-top-panel"]  timeout=60s
     Open New Notebook In Jupyterlab Menu
     Verify Notebook Name And Image Tag  user_data=${user_data}

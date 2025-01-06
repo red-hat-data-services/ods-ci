@@ -151,7 +151,7 @@ Test Inference Post RHODS Upgrade
     ${INFERENCE_INPUT_OPENVINO}    Set Variable
     ...    @tests/Resources/Files/openvino-example-input.json
     ${EXPECTED_INFERENCE_OUTPUT_OPENVINO}    Set Variable
-    ...    {"model_name":"test-model__isvc-8655dc7979","model_version":"1","outputs":[{"name":"Func/StatefulPartitionedCall/output/_13:0","datatype":"FP32","shape":[1,1],"data":[0.99999994]}]}º       # robocop: disable:line-too-long
+    ...    {"model_name":"test-model__isvc-8655dc7979","model_version":"1","outputs":[{"name":"Func/StatefulPartitionedCall/output/_13:0","datatype":"FP32","shape":[1,1],"data":[0.99999994]}]}   # robocop: disable:line-too-long
     Fetch CA Certificate If RHODS Is Self-Managed
     Open Model Serving Home Page
     Verify Model Status     ${MODEL_NAME}           success

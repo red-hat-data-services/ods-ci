@@ -10,9 +10,9 @@ ${EDIT_ACCELERATOR_PROFILE_BTN}=    //table[@id='accelerator-profile-table']//sp
 ${DELETE_ACCELERATOR_PROFILE_BTN}=    //table[@id='accelerator-profile-table']//span[text()='Delete']/ancestor::button
 ${ACCELERATOR_PROFILE_GRID_COLUMN_NAME}=    //table[@id='accelerator-profile-table']//td[@data-label='Name']
 ${ACCELERATOR_PROFILE_SEARCH_INPUT}=    //input[@aria-label="Search input"]
-${ACCELERATOR_NAME}=    //input[@id="accelerator-name"]
-${ACCELERATOR_IDENTIFIER}=    //input[@id="accelerator-identifier"]
-${ACCELERATOR_DESCRIPTION}=    //textarea[@id="accelerator-description"]
+${ACCELERATOR_NAME}=    //input[@data-testid="accelerator-profile-name"]
+${ACCELERATOR_IDENTIFIER}=    //input[@data-testid="accelerator-identifier-input"]
+${ACCELERATOR_DESCRIPTION}=    //textarea[@data-testid="accelerator-profile-description"]
 ${ACCELERATOR_ENABLED_SWITCH}=    //input[@id="accelerator-enabled"]/following-sibling::span
 ${ACCELERATOR_ADD_TOLERATION_BTN}=    //button[@data-testid="add-toleration-button"]
 ${ACCELERATOR_ADD_TOLERATION_MODAL_FORM}=    //div[contains(@id, "pf-modal-part")]//span[text()="Add toleration"]
@@ -28,8 +28,6 @@ ${ACCELERATOR_TOLERATION_ADD_OR_UPDATE_BUTTON}=    //button[@data-testid="modal-
 ${ACCELERATOR_EDIT_NAV_MENU_TOLERATIONS}=    //nav[@aria-label="Jump to section"]//span[text()="Tolerations"]
 ${ACCELERATOR_EDIT_TOLERATION_KEBAB_BTN}=    //section[@aria-label="Tolerations"]//table//button[@aria-label="Kebab toggle"]
 ${ACCELERATOR_EDIT_TOLERATION_MODAL_FORM}=    //div[contains(@id, "pf-modal-part")]//span[text()="Edit toleration"]
-${ACCELERATOR_DISABLE_MODAL_DISABLE_BUTTON}=    //span[text()='Disable accelerator profile']/ancestor::header/following::footer/button[text()='Disable']
-${ACCELERATOR_DELETE_MODAL_DELETE_BUTTON}=    //span[text()='Delete accelerator profile?']/ancestor::header/following::footer/button[text()='Delete']
 ${ACCELERATOR_DELETE_MODAL_INPUT}=    //input[@id="delete-modal-input"]
 
 
@@ -67,8 +65,8 @@ Disable Accelerator Profile
     ...                view: Settings -> Accelerator profiles
     [Arguments]   ${name}
     Click On The Enable Switch From Accelerator Profile    ${name}
-    Wait Until Page Contains Element    ${ACCELERATOR_DISABLE_MODAL_DISABLE_BUTTON}
-    Click Button    ${ACCELERATOR_DISABLE_MODAL_DISABLE_BUTTON}
+    Wait Until Page Contains Element    ${GENERIC_DISABLE_BTN_XP}
+    Click Button    ${GENERIC_DISABLE_BTN_XP}
 
 Search For Accelerator Profile In Grid
     [Documentation]    Search for and specific Accelerator Profile in the grid
@@ -108,10 +106,10 @@ Create An Accelerator Profile Via UI
         Wait Until Element Is Visible    ${ACCELERATOR_ADD_TOLERATION_MODAL_FORM}
         # Select Operator
         Click Button    ${ACCELERATOR_TOLERATION_OPERATOR_DROPDOWN}
-        Click Element    //li[@data-testid="dropdown-item ${tol_operator}"]
+        Click Element    //li[@data-testid="${tol_operator}"]
         # Select Effect
         Click Button    ${ACCELERATOR_TOLERATION_EFFECT_DROPDOWN}
-        Click Element    //li[@data-testid="dropdown-item ${tol_effect}"]
+        Click Element    //li[@data-testid="${tol_effect}"]
         # Input Key and value
         Input Text    ${ACCELERATOR_TOLERATION_KEY}    ${tol_key}
         Input Text    ${ACCELERATOR_TOLERATION_VALUE}    ${tol_value}
@@ -150,17 +148,18 @@ Edit Accelerator Profile
     END
     IF    "${tolerations}" != "${EMPTY}"
         ${first_kebab}=    Catenate    SEPARATOR=    ${ACCELERATOR_EDIT_TOLERATION_KEBAB_BTN}    [1]
-        Click Button    ${first_kebab}
+        Click Element    ${ACCELERATOR_EDIT_NAV_MENU_TOLERATIONS}
+        Click Element    ${first_kebab}
         Wait Until Element Is Visible    ${first_kebab}/following::div//span[text()="Edit"]    timeout=10
         Click Element    ${first_kebab}/following::div//span[text()="Edit"]
         Wait Until Element Is Visible    ${ACCELERATOR_EDIT_TOLERATION_MODAL_FORM}    timeout=10
         IF    "${tol_operator}" != "${EMPTY}"
-            Click Button    ${ACCELERATOR_TOLERATION_OPERATOR_DROPDOWN}
-            Click Element    //li[@data-testid="dropdown-item ${tol_operator}"]
+            Click Element    ${ACCELERATOR_TOLERATION_OPERATOR_DROPDOWN}
+            Click Element    //li[@data-testid="${tol_operator}"]
         END
         IF    "${tol_effect}" != "${EMPTY}"
-            Click Button    ${ACCELERATOR_TOLERATION_EFFECT_DROPDOWN}
-            Click Element    //li[@data-testid="dropdown-item ${tol_effect}"]
+            Click Element    ${ACCELERATOR_TOLERATION_EFFECT_DROPDOWN}
+            Click Element    //li[@data-testid="${tol_effect}"]
         END
         IF    "${tol_key}" != "${EMPTY}"
             Clear Element And Input Text    ${ACCELERATOR_TOLERATION_KEY}    ${tol_key}

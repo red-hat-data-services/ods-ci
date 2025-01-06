@@ -24,7 +24,7 @@ Can Login to Jupyterhub
   [Tags]  Tier1
   Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   ${authorization_required} =  Is Service Account Authorization Required
-  IF  ${authorization_required}  Authorize jupyterhub service account
+  IF  ${authorization_required}  Authorize JupyterLab Service Account
   #Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']
   Wait Until Page Contains  Start a notebook server
 

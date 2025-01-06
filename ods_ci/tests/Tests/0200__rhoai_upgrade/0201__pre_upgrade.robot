@@ -224,6 +224,7 @@ Run Training Operator FMS Setup PyTorchJob Test Use Case
     [Documentation]    Run Training Operator FMS Setup PyTorchJob Test Use Case
     [Tags]      Upgrade
     [Setup]     Prepare Training Operator FMS E2E Test Suite
+    Skip If Operator Starting Version Is Not Supported      minimum_version=2.12.0
     Run Training Operator FMS Test    TestSetupPytorchjob
     [Teardown]    Teardown Training Operator FMS E2E Test Suite
 
@@ -231,6 +232,7 @@ Run Training Operator FMS Setup Sleep PyTorchJob Test Use Case
     [Documentation]    Setup PyTorchJob which is kept running for 24 hours
     [Tags]      Upgrade
     [Setup]     Prepare Training Operator FMS E2E Test Suite
+    Skip If Operator Starting Version Is Not Supported      minimum_version=2.12.0
     Run Training Operator FMS Test    TestSetupSleepPytorchjob
     [Teardown]    Teardown Training Operator FMS E2E Test Suite
 

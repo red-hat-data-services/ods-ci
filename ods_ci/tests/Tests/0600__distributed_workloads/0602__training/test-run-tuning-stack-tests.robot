@@ -1,7 +1,7 @@
 *** Settings ***
-Documentation     Training operator E2E tests - https://github.com/opendatahub-io/distributed-workloads/tree/main/tests/kfto
-Suite Setup       Prepare Training Operator E2E Core Test Suite
-Suite Teardown    Teardown Training Operator E2E Core Test Suite
+Documentation     Training Operator FMS E2E tests - https://github.com/opendatahub-io/distributed-workloads/tree/main/tests/fms
+Suite Setup       Prepare Training Operator FMS E2E Test Suite
+Suite Teardown    Teardown Training Operator FMS E2E Test Suite
 Library           OperatingSystem
 Library           Process
 Resource          ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
@@ -9,23 +9,23 @@ Resource          ../../../../tests/Resources/Page/DistributedWorkloads/Distribu
 
 
 *** Test Cases ***
-Run Training operator ODH test base finetuning use case
-    [Documentation]    Run Go ODH tests for Training operator base finetuning use case
+Run Training operator FMS test base finetuning use case
+    [Documentation]    Run Go FMS tests for Training operator base finetuning use case
     [Tags]  RHOAIENG-6965
     ...     Tier1
     ...     DistributedWorkloads
     ...     Training
     ...     TrainingOperator
-    Run Training Operator ODH Core Test    TestPytorchjobWithSFTtrainerFinetuning
+    Run Training Operator FMS Test    TestPytorchjobWithSFTtrainerFinetuning
 
-Run Training operator ODH test base LoRA use case
-    [Documentation]    Run Go ODH tests for Training operator base LoRA use case
+Run Training operator FMS test base LoRA use case
+    [Documentation]    Run Go FMS tests for Training operator base LoRA use case
     [Tags]  RHOAIENG-6965
     ...     Tier1
     ...     DistributedWorkloads
     ...     Training
     ...     TrainingOperator
-    Run Training Operator ODH Core Test    TestPytorchjobWithSFTtrainerLoRa
+    Run Training Operator FMS Test    TestPytorchjobWithSFTtrainerLoRa
 
 ## Note : This test is disabled because the required model supported for QLoRA test is not available
 # Run Training operator ODH test base QLoRA use case
@@ -38,11 +38,11 @@ Run Training operator ODH test base LoRA use case
 #     ...     TrainingOperator
 #     Run Training Operator ODH Core Test    TestPytorchjobWithSFTtrainerQLoRa
 
-Run Training operator ODH test with Kueue quota
-    [Documentation]    Run Go ODH tests for Training operator with Kueue quota
+Run Training operator FMS test with Kueue quota
+    [Documentation]    Run Go FMS tests for Training operator with Kueue quota
     [Tags]  RHOAIENG-6965
     ...     Tier1
     ...     DistributedWorkloads
     ...     Training
     ...     TrainingOperator
-    Run Training Operator ODH Core Test    TestPytorchjobUsingKueueQuota
+    Run Training Operator FMS Test    TestPytorchjobUsingKueueQuota

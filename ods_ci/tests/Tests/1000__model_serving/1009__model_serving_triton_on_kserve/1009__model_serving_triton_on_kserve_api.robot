@@ -20,7 +20,7 @@ Test Tags         Kserve
 *** Variables ***
 ${PYTHON_MODEL_NAME}=   python-predictor
 ${EXPECTED_INFERENCE_GRPC_OUTPUT_PYTHON}=       {"modelName":"python","modelVersion":"1","id":"1","outputs":[{"name":"OUTPUT0","datatype":"FP32","shape":["4"]},{"name":"OUTPUT1","datatype":"FP32","shape":["4"]}],"rawOutputContents":["AgAAAAAAAAAAAAAAAAAAAA==","AAQAAAAAAAAAAAAAAAAAAA=="]}
-${INFERENCE_GRPC_INPUT_PYTHON}=       tests/Resources/Files/triton/kserve-triton-python-grpc-input.json
+${INFERENCE_GRPC_INPUT_PYTHON}=       @tests/Resources/Files/triton/kserve-triton-python-grpc-input.json
 ${KSERVE_MODE}=    Serverless   # Serverless
 ${PROTOCOL_GRPC}=     grpc
 ${TEST_NS}=        tritonmodel

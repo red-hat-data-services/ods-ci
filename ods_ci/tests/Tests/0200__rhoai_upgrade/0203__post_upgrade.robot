@@ -234,6 +234,7 @@ Run Training Operator ODH Run PyTorchJob Test Use Case
     [Documentation]    Run Training Operator ODH Run PyTorchJob Test Use Case
     [Tags]      Upgrade
     [Setup]     Prepare Training Operator E2E Upgrade Test Suite
+    Skip If Operator Starting Version Is Not Supported      minimum_version=2.12.0
     Run Training Operator ODH Upgrade Test          TestRunPytorchjob
     [Teardown]      Teardown Training Operator E2E Upgrade Test Suite
 
@@ -241,6 +242,7 @@ Run Training Operator ODH Run Sleep PyTorchJob Test Use Case
     [Documentation]    Verify that running PyTorchJob Pod wasn't restarted
     [Tags]      Upgrade
     [Setup]     Prepare Training Operator E2E Upgrade Test Suite
+    Skip If Operator Starting Version Is Not Supported      minimum_version=2.12.0
     Run Training Operator ODH Upgrade Test      TestVerifySleepPytorchjob
     [Teardown]      Teardown Training Operator E2E Upgrade Test Suite
 

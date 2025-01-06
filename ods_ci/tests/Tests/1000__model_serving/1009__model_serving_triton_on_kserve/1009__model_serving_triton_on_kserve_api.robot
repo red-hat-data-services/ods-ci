@@ -20,7 +20,7 @@ Test Tags         Kserve
 *** Variables ***
 ${PYTHON_MODEL_NAME}=   python-predictor
 ${EXPECTED_INFERENCE_GRPC_OUTPUT_PYTHON}=       {"modelName":"python","modelVersion":"1","id":"1","outputs":[{"name":"OUTPUT0","datatype":"FP32","shape":["4"]},{"name":"OUTPUT1","datatype":"FP32","shape":["4"]}],"rawOutputContents":["AgAAAAAAAAAAAAAAAAAAAA==","AAQAAAAAAAAAAAAAAAAAAA=="]}
-${INFERENCE_GRPC_INPUT_PYTHON}=       @tests/Resources/Files/triton/kserve-triton-python-grpc-input.json
+${INFERENCE_GRPC_INPUT_PYTHON}=       tests/Resources/Files/triton/kserve-triton-python-grpc-input.json
 ${KSERVE_MODE}=    Serverless   # Serverless
 ${PROTOCOL_GRPC}=     grpc
 ${TEST_NS}=        tritonmodel
@@ -39,7 +39,7 @@ ${PROTOBUFF_FILE}=      tests/Resources/Files/triton/grpc_predict_v2.proto
 *** Test Cases ***
 Test Python Model Grpc Inference Via API (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of python model in Kserve using Triton
-    [Tags]    Tier2    RHOAIENG-16912       RunThisTest
+    [Tags]    Tier2    RHOAIENG-16912
 
     Setup Test Variables    model_name=${PYTHON_MODEL_NAME}    use_pvc=${FALSE}    use_gpu=${FALSE}
     ...    kserve_mode=${KSERVE_MODE}   model_path=triton/model_repository/

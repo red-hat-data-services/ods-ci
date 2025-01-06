@@ -18,7 +18,7 @@ Suite Teardown    Suite Teardown
 Test Tags         Kserve
 
 *** Variables ***
-${PYTHON_MODEL_NAME}=   python
+${PYTHON_MODEL_NAME}=   python-predictor
 ${EXPECTED_INFERENCE_GRPC_OUTPUT_PYTHON}=       {"modelName":"python","modelVersion":"1","id":"1","outputs":[{"name":"OUTPUT0","datatype":"FP32","shape":["4"]},{"name":"OUTPUT1","datatype":"FP32","shape":["4"]}],"rawOutputContents":["AgAAAAAAAAAAAAAAAAAAAA==","AAQAAAAAAAAAAAAAAAAAAA=="]}
 ${INFERENCE_GRPC_INPUT_PYTHON}=       tests/Resources/Files/triton/kserve-triton-python-grpc-input.json
 ${KSERVE_MODE}=    Serverless   # Serverless
@@ -57,16 +57,10 @@ Test Python Model Grpc Inference Via API (Triton on Kserve)    # robocop: off=to
     ...    namespace=${test_namespace}
     # File is not needed anymore after applying
     Remove File    ${INFERENCESERVICE_FILLED_FILEPATH}
-    #Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${PYTHON_MODEL_NAME}
-    #...    namespace=${test_namespace}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${PYTHON_MODEL_NAME}
+    ...    namespace=${test_namespace}
     ${pod_name}=  Get Pod Name    namespace=${test_namespace}
     ...    label_selector=serving.kserve.io/inferenceservice=${PYTHON_MODEL_NAME}
-    ${service_port}=    Extract Service Port    service_name=${PYTHON_MODEL_NAME}    protocol=${PROTOCOL_GRPC}
-    ...    namespace=${test_namespace}
-    IF   "${KSERVE_MODE}"=="RawDeployment"
-        Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}  local_port=${service_port}
-        ...    remote_port=${service_port}    process_alias=triton-process
-    END
     ${valued}  ${host}=    Run And Return Rc And Output    oc get ksvc ${PYTHON_MODEL_NAME}-predictor -o jsonpath='{.status.url}'
     Log    ${host}
     Log    ${valued}
@@ -213,6 +207,6 @@ Compile Inference Service YAML
         ELSE
             ${mode}=    Get KServe Default Deployment Mode From DSC
         END
-        Log    message=Using defaultDeploymentMode set in the DSC: ${mode}
+        Log    message=Using defaultDeploymentMode set in the DSC: ${mode}S
     END
 

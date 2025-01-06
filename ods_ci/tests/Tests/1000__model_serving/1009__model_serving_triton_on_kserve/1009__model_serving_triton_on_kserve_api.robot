@@ -18,9 +18,9 @@ Suite Teardown    Suite Teardown
 Test Tags         Kserve
 
 *** Variables ***
-${PYTHON_MODEL_NAME}=   python-predictor
+${PYTHON_MODEL_NAME}=   python
 ${EXPECTED_INFERENCE_GRPC_OUTPUT_PYTHON}=       {"modelName":"python","modelVersion":"1","id":"1","outputs":[{"name":"OUTPUT0","datatype":"FP32","shape":["4"]},{"name":"OUTPUT1","datatype":"FP32","shape":["4"]}],"rawOutputContents":["AgAAAAAAAAAAAAAAAAAAAA==","AAQAAAAAAAAAAAAAAAAAAA=="]}
-${INFERENCE_GRPC_INPUT_PYTHON}=       tests/Resources/Files/triton/kserve-triton-python-grpc-input.json
+${INFERENCE_GRPC_INPUT_PYTHONFILE}=       tests/Resources/Files/triton/kserve-triton-python-grpc-input.json
 ${KSERVE_MODE}=    Serverless   # Serverless
 ${PROTOCOL_GRPC}=     grpc
 ${TEST_NS}=        tritonmodel
@@ -39,7 +39,7 @@ ${PROTOBUFF_FILE}=      tests/Resources/Files/triton/grpc_predict_v2.proto
 *** Test Cases ***
 Test Python Model Grpc Inference Via API (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of python model in Kserve using Triton
-    [Tags]    Tier2    RHOAIENG-16912
+    [Tags]    Tier2    RHOAIENG-16912       RunThisTest
 
     Setup Test Variables    model_name=${PYTHON_MODEL_NAME}    use_pvc=${FALSE}    use_gpu=${FALSE}
     ...    kserve_mode=${KSERVE_MODE}   model_path=triton/model_repository/
@@ -68,9 +68,15 @@ Test Python Model Grpc Inference Via API (Triton on Kserve)    # robocop: off=to
     Log    ${host}
     ${inference_output}=    Query Model With GRPCURL   host=${host}    port=443
     ...    endpoint=inference.GRPCInferenceService/ModelInfer
-    ...    json_body=@      input_filepath=${INFERENCE_GRPC_INPUT_PYTHON}
+    ...    json_body=@      input_filepath=${INFERENCE_GRPC_INPUT_PYTHONFILE}
     ...    insecure=${True}    protobuf_file=${PROTOBUFF_FILE}      json_header=${NONE}
     Log    ${inference_output}
+    ${inference_output}=    Evaluate    json.dumps(${inference_output})
+    Log    ${inference_output}
+    Log    ${EXPECTED_INFERENCE_GRPC_OUTPUT_PYTHON}
+    ${result}    ${list}=    Inference Comparison    ${EXPECTED_INFERENCE_GRPC_OUTPUT_PYTHON}    ${inference_output}
+    Log    ${result}
+    Log    ${list}
     [Teardown]    Run Keywords
     ...    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}    kserve_mode=${KSERVE_MODE}

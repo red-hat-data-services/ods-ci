@@ -33,6 +33,7 @@ PagerDuty Dummy Secret Verification
      ...     Tier1
      ...     ODS-737
      ...     Deployment-Cli
+     ...       Monitoring
      Skip If RHODS Is Self-Managed
      ${service_key}   Get PagerDuty Key From Alertmanager ConfigMap
      ${secret_key}    Get PagerDuty Key From Secrets

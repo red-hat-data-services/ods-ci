@@ -32,7 +32,7 @@ Verify All Alerts Severity
     [Tags]    Smoke
     ...       Tier1
     ...       ODS-1227
-
+    ...       Monitoring
     Verify "DeadManSnitch" Alerts Severity And Continue On Failure
     Verify "Kubeflow Notebook Controller Pod Is Not Running" Alerts Severity And Continue On Failure
     Verify "ODH Notebook Controller Pod Is Not Running" Alerts Severity And Continue On Failure
@@ -46,7 +46,7 @@ Verify No Alerts Are Firing Except For DeadManSnitch    # robocop: disable:too-l
     [Tags]    Smoke
     ...       Tier1
     ...       ODS-540
-
+    ...       Monitoring
     Verify Alert Is Firing And Continue On Failure
     ...    DeadManSnitch    DeadManSnitch
 
@@ -67,7 +67,7 @@ Verify Alert RHODS-PVC-Usage-Above-90 Is Fired When User PVC Is Above 90 Percent
     ...    verifies that alert "User notebook pvc usage above 90%" is fired
     [Tags]    Tier2
     ...       ODS-516
-
+    ...       Monitoring
     Fill Up User PVC    ${NOTEBOOK_REPO_URL}    ${TEST_ALERT_PVC90_NOTEBOOK_PATH}
 
     Prometheus.Wait Until Alert Is Firing    ${RHODS_PROMETHEUS_URL}
@@ -83,7 +83,7 @@ Verify Alert RHODS-PVC-Usage-At-100 Is Fired When User PVC Is At 100 Percent
     ...    verifies that alert "User notebook pvc usage at 100%" is fired
     [Tags]    Tier2
     ...       ODS-517
-
+    ...       Monitoring
     Fill Up User PVC    ${NOTEBOOK_REPO_URL}    ${TEST_ALERT_PVC100_NOTEBOOK_PATH}
 
     Prometheus.Wait Until Alert Is Firing    ${RHODS_PROMETHEUS_URL}
@@ -99,7 +99,7 @@ Verify Alerts Are Fired When RHODS Dashboard Is Down    # robocop: disable:too-l
     ...    are fired when rhods-dashboard is not working
     [Tags]    Tier3
     ...       ODS-739
-
+    ...       Monitoring
     Skip If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
     ...    SLOs-haproxy_backend_http_responses_dashboard
@@ -145,7 +145,7 @@ Verify Alert "Kubeflow notebook controller pod is not running" Is Fired When Kub
     ...    when notebook-controller-deployment-xxx pod is not running
     [Tags]    Tier3
     ...       ODS-1700
-
+    ...       Monitoring
     Skip If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
     ...    RHODS Notebook controllers
@@ -177,7 +177,7 @@ Verify Alert "ODH notebook controller pod is not running" Is Fired When ODH Cont
     ...    when odh-notebook-controller-manager-xxx pod is not running
     [Tags]    Tier3
     ...       ODS-1701
-
+    ...       Monitoring
     Skip If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
     ...    RHODS Notebook controllers
@@ -209,7 +209,7 @@ Verify That MT-SRE Are Not Paged For Alerts In Clusters Used For Development Or 
     [Tags]              Sanity
     ...                 ODS-1058
     ...                 Tier1
-
+    ...       Monitoring
     ${res} =    Check Cluster Name Contain "Aisrhods" Or Not
     IF    ${res}
         ${receiver} =         Set Variable    alerts-sink

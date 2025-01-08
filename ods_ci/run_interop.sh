@@ -40,6 +40,20 @@ yq -i '.S3.BUCKET_5.NAME="rhoai-dw"' "${TEST_VARIABLES_FILE}"
 yq -i '.S3.BUCKET_5.REGION="us-east-1"' "${TEST_VARIABLES_FILE}"
 yq -i '.S3.BUCKET_5.ENDPOINT="https://s3.amazonaws.com/"' "${TEST_VARIABLES_FILE}"
 
+echo "Wait for the IDP users to sync"
+sleep 100
+
+echo "Performing oc login with IDP user"
+username=$(yq eval '.TEST_USER.USERNAME' "${TEST_VARIABLES_FILE}")
+password=$(yq eval '.TEST_USER.PASSWORD' "${TEST_VARIABLES_FILE}")
+oc login "$OC_HOST" --username "${username}" --password "${password}" --insecure-skip-tls-verify=true
+retVal=$?
+if [ $retVal -ne 0 ]; then
+    echo "The oc login command seems to have failed"
+    echo "Please review the content of $TEST_VARIABLES_FILE"
+    exit "$retVal"
+fi
+
 echo "Performing oc login with cluster admin"
 username=$(yq eval '.OCP_ADMIN_USER.USERNAME' "${TEST_VARIABLES_FILE}")
 password=$(yq eval '.OCP_ADMIN_USER.PASSWORD' "${TEST_VARIABLES_FILE}")

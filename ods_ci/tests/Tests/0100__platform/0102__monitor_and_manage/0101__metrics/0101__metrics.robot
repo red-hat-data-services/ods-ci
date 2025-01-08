@@ -28,6 +28,7 @@ Test Existence of Prometheus Alerting Rules
     [Tags]    Smoke
     ...       Tier1
     ...       ODS-509
+    ...       Monitoring
     Skip If RHODS Is Self-Managed
     Check Prometheus Alerting Rules
 
@@ -36,6 +37,7 @@ Test Existence of Prometheus Recording Rules
     [Tags]    Smoke
     ...       Tier1
     ...       ODS-510
+    ...       Monitoring
     Skip If RHODS Is Self-Managed
     Check Prometheus Recording Rules
 
@@ -44,6 +46,7 @@ Test Metric "Notebook CPU Usage" On ODS Prometheus
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-178
+    ...       Monitoring
     Skip If RHODS Is Self-Managed
     ${cpu_usage_before} =    Read Current CPU Usage
     Run Jupyter Notebook For 5 Minutes
@@ -56,6 +59,7 @@ Test Metric "Rhods_Total_Users" On ODS Prometheus
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-628
+    ...       Monitoring
     Skip If RHODS Is Self-Managed
     # Note: the expression ends with "step=1" to obtain the value for current second
     ${expression} =    Set Variable    rhods_total_users&step=1
@@ -81,6 +85,7 @@ Test Metric Existence For "Rhods_Aggregate_Availability" On ODS Prometheus
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-636
+    ...       Monitoring
     Skip If RHODS Is Self-Managed
     ${expression} =    Set Variable    rhods_aggregate_availability&step=1
     ${resp} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    ${expression}

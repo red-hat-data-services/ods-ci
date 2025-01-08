@@ -17,7 +17,7 @@ Verify That Administrators Can Access "Cluster Settings"
     [Documentation]    Verifies users in the admin_groups (group "dedicated-admins" since RHODS 1.8.0)
     ...    can access to "Cluster Settings"
     [Tags]    Smoke
-    ...       ODS-1216
+    ...       ODS-1216   Interop
     Open ODS Dashboard With Admin User
     Verify Cluster Settings Is Available
     [Teardown]    Dashboard Settings Test Teardown

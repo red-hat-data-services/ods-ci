@@ -41,7 +41,7 @@ if [ "${images[$xyVersion]}" ]; then
     echo "Using image SHA for $xyVersion: $imageUrl"
 else
     imageUrl="${images["4.17"]}"
-    echo "I don't know the sha for $xyVersion. Re-using default 4.17 $imageUrl. It might now work!"
+    echo "WARNING: I don't know the sha for $xyVersion. Re-using default 4.17 $imageUrl. It might not work!"
 fi
 sed -i'' -e "s/<imageUrl>/$imageUrl/g" $NFD_INSTANCE
 oc apply -f "$NFD_INSTANCE"

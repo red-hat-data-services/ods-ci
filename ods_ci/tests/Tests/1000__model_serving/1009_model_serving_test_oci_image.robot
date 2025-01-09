@@ -20,7 +20,7 @@ Verify User Can Serve And flan ovms Model using OCI image
     [Documentation]    Basic tests for preparing, deploying and querying model
     ...                using Kserve and OCI image
     [Tags]    OVMS
-    ...       Smoke
+    ...       Smoke    Interop
     ...       OpenDataHub
     ...       RHOAIENG-12306
     ...       RHOAIENG-13465

@@ -179,7 +179,7 @@ Open Pipeline Run
     Wait Until Page Contains Element    xpath=//*[@data-testid="active-runs-tab"]      timeout=30s
     Click Element    xpath=//*[@data-testid="active-runs-tab"]
     Wait Until Page Contains Element    xpath=//span[text()='${pipeline_run_name}']
-    Click Element    xpath=//span[text()='${pipeline_run_name}']
+    Click Element    xpath=//td[@data-label="Name"]//span[contains(text(), '${pipeline_run_name}')]
     Wait Until Page Contains Element    xpath=//div[@data-test-id='topology']
 
 # robocop: disable:line-too-long

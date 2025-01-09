@@ -1,24 +1,6 @@
 #!/bin/bash
 set -e
 
-function wait_while {
-  local seconds timeout interval
-  interval=2
-  seconds=0
-  timeout=$1
-  shift
-  while eval "$*"; do
-    seconds=$(( seconds + interval ))
-    sleep $interval
-    echo -n '.'
-    [[ $seconds -gt $timeout ]] && echo "Time out of ${timeout} exceeded" && return 1
-  done
-  if [[ "$seconds" != '0' ]]; then
-    echo ''
-  fi
-  return 0
-}
-
 NFD_INSTALL_DIR="$(dirname "$0")"
 NFD_INSTANCE=$NFD_INSTALL_DIR/nfd_deploy.yaml
 echo "Installing NFD operator"

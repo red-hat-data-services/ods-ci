@@ -910,3 +910,4 @@ Remove Model Mount Path From Runtime
     ${rc}    ${out}=    Run And Return Rc And Output
     ...   oc patch servingruntime ${runtime} -n ${namespace} --type='json' -p='[{"op": "remove", "path": "/spec/containers/0/args/1"}]'
     Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
+

@@ -35,7 +35,6 @@ ${PATTERN}=     https:\/\/([^\/:]+)
 ${PROTOBUFF_FILE}=      tests/Resources/Files/triton/grpc_predict_v2.proto
 
 
-
 *** Test Cases ***
 Test Python Model Grpc Inference Via API (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of python model in Kserve using Triton

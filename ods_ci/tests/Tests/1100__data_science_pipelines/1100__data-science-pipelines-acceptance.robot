@@ -16,12 +16,12 @@ ${PIPELINE_HELLOWORLD_FILEPATH}=    tests/Resources/Files/pipeline-samples/v2/ca
 *** Test Cases ***
 Verify Pipeline Server Creation With S3 Object Storage
     [Documentation]    Creates a pipeline server using S3 object storage and verifies that all components are running
-    [Tags]    Smoke
+    [Tags]    Smoke    Interop
     Pass Execution    Passing test, as suite setup creates pipeline server
 
 Verify Hello World Pipeline Runs Successfully    # robocop: disable:too-long-test-case
     [Documentation]    Runs a quick hello-world pipeline and verifies that it finishes successfully
-    [Tags]    Smoke
+    [Tags]    Smoke    Interop
 
     ${pipeline_run_params}=    Create Dictionary    message=Hello world!
 

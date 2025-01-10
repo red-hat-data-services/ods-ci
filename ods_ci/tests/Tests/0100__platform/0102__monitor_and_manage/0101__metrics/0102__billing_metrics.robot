@@ -27,6 +27,7 @@ Verify OpenShift Monitoring Results Are Correct When Running Undefined Queries
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-173
+    ...       Monitoring
     Run OpenShift Metrics Query    ${METRIC_RHODS_UNDEFINED}   username=${OCP_ADMIN_USER.USERNAME}   password=${OCP_ADMIN_USER.PASSWORD}
     ...    auth_type=${OCP_ADMIN_USER.AUTH_TYPE}   retry_attempts=1
     Metrics.Verify Query Results Dont Contain Data
@@ -37,6 +38,7 @@ Test Billing Metric (Notebook Cpu Usage) On OpenShift Monitoring
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-175
+    ...       Monitoring
     Run Jupyter Notebook For 5 Minutes
     Verify Previus CPU Usage Is Greater Than Zero
     [Teardown]    CleanUp JupyterHub And Close All Browsers
@@ -46,6 +48,7 @@ Test Metric "Rhods_Total_Users" On Cluster Monitoring Prometheus
     [Tags]    Sanity
     ...       ODS-634
     ...       Tier1
+    ...       Monitoring
     Skip If RHODS Is Self-Managed
     ${value} =    Run OpenShift Metrics Query    query=rhods_total_users   username=${OCP_ADMIN_USER.USERNAME}   password=${OCP_ADMIN_USER.PASSWORD}
     ...    auth_type=${OCP_ADMIN_USER.AUTH_TYPE}
@@ -59,7 +62,7 @@ Test Metric "Rhods_Aggregate_Availability" On Cluster Monitoring Prometheus
     [Tags]    Smoke
     ...       ODS-637
     ...       Tier1
-
+    ...       Monitoring
     Skip If RHODS Is Self-Managed
 
     ${value_openshift_observe} =    Run OpenShift Metrics Query
@@ -80,7 +83,7 @@ Test Metric "Active_Users" On OpenShift Monitoring On Cluster Monitoring Prometh
     [Tags]    Sanity
     ...       ODS-1053
     ...       Tier1
-
+    ...       Monitoring
     ${active_users_before} =    Run OpenShift Metrics Query
     ...    username=${OCP_ADMIN_USER.USERNAME}    password=${OCP_ADMIN_USER.PASSWORD}
     ...    auth_type=${OCP_ADMIN_USER.AUTH_TYPE}   query=cluster:usage:consumption:rhods:active_users
@@ -110,6 +113,7 @@ Test Metric "Active Notebook Pod Time" On OpenShift Monitoring - Cluster Monitor
     [Tags]    Sanity
     ...       ODS-1055
     ...       Tier1
+    ...       Monitoring
     @{list_of_usernames} =    Create List    ${TEST_USER_3.USERNAME}    ${TEST_USER_4.USERNAME}
     Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
     ...    list_of_usernames=${list_of_usernames}

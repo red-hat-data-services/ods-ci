@@ -63,7 +63,7 @@ ${IS_NOT_PRESENT}    1
 Validate Kueue Managed State
     [Documentation]    Validate that the DSC Kueue component Managed state creates the expected resources,
     ...    check that kueue deployment is created and pod is in Ready state
-    [Tags]    Operator    Tier1    RHOAIENG-5435    kueue-managed
+    [Tags]    Operator    Tier1    RHOAIENG-5435    kueue-managed    Integration
 
     Set DSC Component Managed State And Wait For Completion   kueue    ${KUEUE_DEPLOYMENT_NAME}    ${KUEUE_LABEL_SELECTOR}
 
@@ -71,7 +71,7 @@ Validate Kueue Managed State
 
 Validate Kueue Removed State
     [Documentation]    Validate that Kueue management state Removed does remove relevant resources.
-    [Tags]    Operator    Tier1    RHOAIENG-5435    kueue-removed
+    [Tags]    Operator    Tier1    RHOAIENG-5435    kueue-removed     Integration
 
     Set DSC Component Removed State And Wait For Completion   kueue    ${KUEUE_DEPLOYMENT_NAME}    ${KUEUE_LABEL_SELECTOR}
 
@@ -80,7 +80,7 @@ Validate Kueue Removed State
 Validate Codeflare Managed State
     [Documentation]    Validate that the DSC Codeflare component Managed state creates the expected resources,
     ...    check that Codeflare deployment is created and pod is in Ready state
-    [Tags]    Operator    Tier1    RHOAIENG-5435    codeflare-managed
+    [Tags]    Operator    Tier1    RHOAIENG-5435    codeflare-managed      Integration
 
     Set DSC Component Managed State And Wait For Completion   codeflare    ${CODEFLARE_DEPLOYMENT_NAME}    ${CODEFLARE_LABEL_SELECTOR}
 
@@ -88,7 +88,7 @@ Validate Codeflare Managed State
 
 Validate Codeflare Removed State
     [Documentation]    Validate that Codeflare management state Removed does remove relevant resources.
-    [Tags]    Operator    Tier1    RHOAIENG-5435    codeflare-removed
+    [Tags]    Operator    Tier1    RHOAIENG-5435    codeflare-removed      Integration
 
     Set DSC Component Removed State And Wait For Completion   codeflare    ${CODEFLARE_DEPLOYMENT_NAME}    ${CODEFLARE_LABEL_SELECTOR}
 
@@ -97,7 +97,7 @@ Validate Codeflare Removed State
 Validate Ray Managed State
     [Documentation]    Validate that the DSC Ray component Managed state creates the expected resources,
     ...    check that Ray deployment is created and pod is in Ready state
-    [Tags]    Operator    Tier1    RHOAIENG-5435    ray-managed
+    [Tags]    Operator    Tier1    RHOAIENG-5435    ray-managed     Integration
 
     Set DSC Component Managed State And Wait For Completion   ray    ${RAY_DEPLOYMENT_NAME}    ${RAY_LABEL_SELECTOR}
 
@@ -105,7 +105,7 @@ Validate Ray Managed State
 
 Validate Ray Removed State
     [Documentation]    Validate that Ray management state Removed does remove relevant resources.
-    [Tags]    Operator    Tier1    RHOAIENG-5435    ray-removed
+    [Tags]    Operator    Tier1    RHOAIENG-5435    ray-removed      Integration
 
     Set DSC Component Removed State And Wait For Completion   ray    ${RAY_DEPLOYMENT_NAME}    ${RAY_LABEL_SELECTOR}
 
@@ -114,7 +114,7 @@ Validate Ray Removed State
 Validate Training Operator Managed State
     [Documentation]    Validate that the DSC Training Operator component Managed state creates the expected resources,
     ...    check that Training deployment is created and pod is in Ready state
-    [Tags]    Operator    Tier1    RHOAIENG-6627    training-managed
+    [Tags]    Operator    Tier1    RHOAIENG-6627    training-managed      Integration
 
     Set DSC Component Managed State And Wait For Completion   trainingoperator    ${TRAINING_DEPLOYMENT_NAME}    ${TRAINING_LABEL_SELECTOR}
 
@@ -122,7 +122,7 @@ Validate Training Operator Managed State
 
 Validate Training Operator Removed State
     [Documentation]    Validate that Training Operator management state Removed does remove relevant resources.
-    [Tags]    Operator    Tier1    RHOAIENG-6627    training-removed
+    [Tags]    Operator    Tier1    RHOAIENG-6627    training-removed      Integration
 
     Set DSC Component Removed State And Wait For Completion   trainingoperator    ${TRAINING_DEPLOYMENT_NAME}    ${TRAINING_LABEL_SELECTOR}
 
@@ -131,7 +131,7 @@ Validate Training Operator Removed State
 Validate Dashboard Managed State
     [Documentation]    Validate that the DSC Dashboard component Managed state creates the expected resources,
     ...    check that Dashboard deployment is created and all pods are in Ready state
-    [Tags]    Operator    Tier1    RHOAIENG-7298    dashboard-managed
+    [Tags]    Operator    Tier1    RHOAIENG-7298    dashboard-managed      Integration
 
     Set DSC Component Managed State And Wait For Completion   dashboard    ${DASHBOARD_DEPLOYMENT_NAME}    ${DASHBOARD_LABEL_SELECTOR}
 
@@ -139,7 +139,7 @@ Validate Dashboard Managed State
 
 Validate Dashboard Removed State
     [Documentation]    Validate that Dashboard management state Removed does remove relevant resources.
-    [Tags]    Operator    Tier1    RHOAIENG-7298    dashboard-removed
+    [Tags]    Operator    Tier1    RHOAIENG-7298    dashboard-removed     Integration
 
     Set DSC Component Removed State And Wait For Completion   dashboard    ${DASHBOARD_DEPLOYMENT_NAME}    ${DASHBOARD_LABEL_SELECTOR}
 
@@ -148,7 +148,7 @@ Validate Dashboard Removed State
 Validate Datasciencepipelines Managed State
     [Documentation]    Validate that the DSC Datasciencepipelines component Managed state creates the expected resources,
     ...    check that Datasciencepipelines deployment is created and pod is in Ready state
-    [Tags]    Operator    Tier1    RHOAIENG-7298    operator-datasciencepipelines-managed
+    [Tags]    Operator    Tier1    RHOAIENG-7298    operator-datasciencepipelines-managed     Integration
 
     Set DSC Component Managed State And Wait For Completion   datasciencepipelines    ${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}    ${DATASCIENCEPIPELINES_LABEL_SELECTOR}
 
@@ -156,7 +156,7 @@ Validate Datasciencepipelines Managed State
 
 Validate Datasciencepipelines Removed State
     [Documentation]    Validate that Datasciencepipelines management state Removed does remove relevant resources.
-    [Tags]    Operator    Tier1    RHOAIENG-7298    operator-datasciencepipelines-removed
+    [Tags]    Operator    Tier1    RHOAIENG-7298    operator-datasciencepipelines-removed     Integration
 
     Set DSC Component Removed State And Wait For Completion   datasciencepipelines    ${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}    ${DATASCIENCEPIPELINES_LABEL_SELECTOR}
 
@@ -165,7 +165,7 @@ Validate Datasciencepipelines Removed State
 Validate TrustyAi Managed State
     [Documentation]    Validate that the DSC TrustyAi component Managed state creates the expected resources,
     ...    check that TrustyAi deployment is created and pod is in Ready state
-    [Tags]    Operator    Tier1    RHOAIENG-14018    trustyai-managed
+    [Tags]    Operator    Tier1    RHOAIENG-14018    trustyai-managed      Integration
 
     Set DSC Component Managed State And Wait For Completion   trustyai    ${TRUSTYAI_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${TRUSTYAI_CONTROLLER_MANAGER_LABEL_SELECTOR}
 
@@ -173,7 +173,7 @@ Validate TrustyAi Managed State
 
 Validate TrustyAi Removed State
     [Documentation]    Validate that TrustyAi management state Removed does remove relevant resources.
-    [Tags]    Operator    Tier1    RHOAIENG-14018    trustyai-removed
+    [Tags]    Operator    Tier1    RHOAIENG-14018    trustyai-removed     Integration
 
     Set DSC Component Removed State And Wait For Completion   trustyai    ${TRUSTYAI_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${TRUSTYAI_CONTROLLER_MANAGER_LABEL_SELECTOR}
 
@@ -182,7 +182,7 @@ Validate TrustyAi Removed State
 Validate Modelmeshserving Managed State
     [Documentation]    Validate that the DSC Modelmeshserving component Managed state creates the expected resources,
     ...    check that Modelmeshserving deployment is created and pods are in Ready state
-    [Tags]    Operator    Tier1    RHOAIENG-8546    modelmeshserving-managed
+    [Tags]    Operator    Tier1    RHOAIENG-8546    modelmeshserving-managed      Integration
 
     Set DSC Component Managed State And Wait For Completion   modelmeshserving    ${MODELMESH_CONTROLLER_DEPLOYMENT_NAME}    ${MODELMESH_CONTROLLER_LABEL_SELECTOR}
 
@@ -196,7 +196,7 @@ Validate Modelmeshserving Managed State
 
 Validate Modelmeshserving Removed State
     [Documentation]    Validate that Modelmeshserving management state Removed does remove relevant resources.
-    [Tags]    Operator    Tier1    RHOAIENG-8546    modelmeshserving-removed
+    [Tags]    Operator    Tier1    RHOAIENG-8546    modelmeshserving-removed     Integration
 
     Set DSC Component Removed State And Wait For Completion   modelmeshserving    ${MODELMESH_CONTROLLER_DEPLOYMENT_NAME}    ${MODELMESH_CONTROLLER_LABEL_SELECTOR}
 
@@ -214,7 +214,7 @@ Validate Modelmeshserving Removed State
 Validate ModelRegistry Managed State
     [Documentation]    Validate that the DSC ModelRegistry component Managed state creates the expected resources,
     ...    check that ModelRegistry deployment is created and pod is in Ready state
-    [Tags]    Operator    Tier1    RHOAIENG-10404    modelregistry-managed
+    [Tags]    Operator    Tier1    RHOAIENG-10404    modelregistry-managed      Integration
 
     Set DSC Component Managed State And Wait For Completion   modelregistry    ${MODELREGISTRY_CONTROLLER__DEPLOYMENT_NAME}    ${MODELREGISTRY_CONTROLLER__LABEL_SELECTOR}
 
@@ -224,7 +224,7 @@ Validate ModelRegistry Managed State
 
 Validate ModelRegistry Removed State
     [Documentation]    Validate that ModelRegistry management state Removed does remove relevant resources.
-    [Tags]    Operator    Tier1    RHOAIENG-10404    modelregistry-removed
+    [Tags]    Operator    Tier1    RHOAIENG-10404    modelregistry-removed      Integration
 
     # Properly validate Removed state by first setting to Manged, which will ensure that namspace
     # was created as needed for later validating that namespace persisted when component is Removed
@@ -240,7 +240,7 @@ Validate ModelRegistry Removed State
 Validate KServe Controller Manager Managed State
     [Documentation]    Validate that the DSC KServe Controller Manager component Managed state creates the expected resources,
     ...    check that KServe Controller Manager deployment is created and pod is in Ready state
-    [Tags]    Operator    Tier1    RHOAIENG-7217    kserve-controller-manager-managed
+    [Tags]    Operator    Tier1    RHOAIENG-7217    kserve-controller-manager-managed      Integration
 
     Set DSC Component Managed State And Wait For Completion   kserve    ${KSERVE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${KSERVE_CONTROLLER_MANAGER_LABEL_SELECTOR}
 
@@ -248,7 +248,7 @@ Validate KServe Controller Manager Managed State
 
 Validate KServe Controller Manager Removed State
     [Documentation]    Validate that KServe Controller Manager management state Removed does remove relevant resources.
-    [Tags]    Operator    Tier1   RHOAIENG-7217    kserve-controller-manager-removed
+    [Tags]    Operator    Tier1   RHOAIENG-7217    kserve-controller-manager-removed      Integration
 
     Set DSC Component Removed State And Wait For Completion   kserve    ${KSERVE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${KSERVE_CONTROLLER_MANAGER_LABEL_SELECTOR}
 
@@ -261,7 +261,7 @@ Validate KServe Controller Manager Removed State
 Validate Workbenches Managed State
     [Documentation]    Validate that the DSC Workbenches component Managed state creates the expected resources,
     ...    check that Workbenches deployment is created and pods are in Ready state
-    [Tags]    Operator    Tier1    workbenches-managed
+    [Tags]    Operator    Tier1    workbenches-managed     Integration
 
     Set DSC Component Managed State And Wait For Completion   workbenches    ${NOTEBOOK_DEPLOYMENT_NAME}    ${NOTEBOOK_CONTROLLER_MANAGER_LABEL_SELECTOR}
 
@@ -271,7 +271,7 @@ Validate Workbenches Managed State
 
 Validate Workbenches Removed State
     [Documentation]    Validate that Workbenches component management state Removed does remove relevant resources.
-    [Tags]    Operator    Tier1   workbenches-removed
+    [Tags]    Operator    Tier1   workbenches-removed      Integration
 
     Set DSC Component Removed State And Wait For Completion   workbenches    ${NOTEBOOK_DEPLOYMENT_NAME}    ${NOTEBOOK_CONTROLLER_MANAGER_LABEL_SELECTOR}
 
@@ -281,7 +281,7 @@ Validate Workbenches Removed State
 
 Validate Support For Configuration Of Controller Resources
     [Documentation]    Validate support for configuration of controller resources in component deployments
-    [Tags]    Operator    Tier1    ODS-2664
+    [Tags]    Operator    Tier1    ODS-2664      Integration
     FOR   ${controller}    IN    @{CONTROLLERS_LIST}
         ${rc}=    Run And Return Rc
         ...    oc patch Deployment ${controller} -n ${APPLICATIONS_NAMESPACE} --type=json -p="[{'op': 'replace', 'path': '/spec/template/spec/containers/0/resources/limits/cpu', 'value': '600m'}]"    # robocop: disable

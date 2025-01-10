@@ -579,7 +579,7 @@ Clone Git Repository
 Get Operator Starting Version
     [Documentation]    Returns the starting version of the operator in the upgrade chain
     ${rc}    ${out}=    Run And Return RC And Output
-    ...    oc get subscription rhods-operator -n ${OPERATOR_NAMESPACE} -o yaml | yq '.spec.startingCSV' | awk -F. '{print $2"."$3"."$4}'    # robocop: disable
+    ...    oc get subscription rhods-operator -n ${OPERATOR_NAMESPACE} -o yaml | yq -r '.spec.startingCSV' | awk -F. '{print $2"."$3"."$4}'    # robocop: disable
     Should Be Equal As Integers    ${rc}    0
     RETURN    ${out}
 
@@ -601,14 +601,14 @@ Skip If Operator Starting Version Is Not Supported
     Skip If    condition="${supported}"=="${FALSE}"    msg=This test is skipped because starting operator version < ${minimum_version}
 
 Skip If Cluster Type Is Self-Managed
-    [Documentation]    Skips test if cluster type  is Self-managed
-    ${cluster_type}=    Is Cluster Type Self-Managed
-    Skip If    condition=${cluster_type}==True    msg=This test is skipped for Self-managed cluster
+    [Documentation]    Skips test if cluster type is Self-managed
+    ${cluster_type}=    Is Cluster Type Managed
+    Skip If    condition=${cluster_type}==False    msg=This test is skipped for Self-managed cluster
 
 Skip If Cluster Type Is Managed
-    [Documentation]    Skips test if cluster type  is Managed
-    ${cluster_type}=    Is Cluster Type Self-Managed
-    Skip If    condition=${cluster_type}==False    msg=This test is skipped for Managed cluster
+    [Documentation]    Skips test if cluster type is Managed
+    ${cluster_type}=    Is Cluster Type Managed
+    Skip If    condition=${cluster_type}==True    msg=This test is skipped for Managed cluster
 
 Delete All ${resource_type} In Namespace By Name
     [Documentation]    Force delete all ${resource_type} named '${resource_type}' in namespace '${namespace}'

@@ -35,8 +35,8 @@ ${NOTEBOOK_IMAGE_3.11}                   quay.io/modh/odh-generic-data-science-n
 ${NOTEBOOK_IMAGE_3.9}                    quay.io/modh/odh-generic-data-science-notebook@sha256:b1066204611b4bcfa6172c3115650a8e8393089d5606458fa0d8c53633d2ce17
 ${NOTEBOOK_USER_NAME}                    ${TEST_USER_3.USERNAME}
 ${NOTEBOOK_USER_PASSWORD}                ${TEST_USER_3.PASSWORD}
-${KFTO_CORE_BINARY_NAME}                 kfto
-${KFTO_UPGRADE_BINARY_NAME}              kfto-upgrade
+${FMS_BINARY_NAME}                       fms
+${KFTO_BINARY_NAME}                      kfto
 ${ODH_BINARY_NAME}                       odh
 ${PIP_INDEX_URL}                         ${PIP_INDEX_URL}
 ${PIP_TRUSTED_HOST}                      ${PIP_TRUSTED_HOST}
@@ -105,13 +105,13 @@ Cleanup Codeflare-SDK Setup
     Log To Console     "Removing directory ${CODEFLARE-SDK_DIR}"
     Remove Directory        ${CODEFLARE-SDK_DIR}    recursive=True
 
-Prepare Training Operator E2E Core Test Suite
-    [Documentation]    Prepare Training Operator E2E Core Test Suite
-    Prepare Training Operator E2E Test Suite    ${KFTO_CORE_BINARY_NAME}
+Prepare Training Operator KFTO E2E Test Suite
+    [Documentation]    Prepare Training Operator KFTO E2E Test Suite
+    Prepare Training Operator E2E Test Suite    ${KFTO_BINARY_NAME}
 
-Prepare Training Operator E2E Upgrade Test Suite
-    [Documentation]    Prepare Training Operator E2E Upgrade Test Suite
-    Prepare Training Operator E2E Test Suite    ${KFTO_UPGRADE_BINARY_NAME}
+Prepare Training Operator FMS E2E Test Suite
+    [Documentation]    Prepare Training Operator FMS E2E Test Suite
+    Prepare Training Operator E2E Test Suite    ${FMS_BINARY_NAME}
 
 Prepare Training Operator E2E Test Suite
     [Documentation]    Prepare Training Operator E2E Test Suite
@@ -128,13 +128,13 @@ Prepare Training Operator E2E Test Suite
     Enable Component    trainingoperator
     Wait Component Ready    trainingoperator
 
-Teardown Training Operator E2E Core Test Suite
-    [Documentation]    Prepare Training Operator E2E Core Test Suite
-    Teardown Training Operator E2E Test Suite    ${KFTO_CORE_BINARY_NAME}
+Teardown Training Operator KFTO E2E Test Suite
+    [Documentation]    Teardown Training Operator KFTO E2E Test Suite
+    Teardown Training Operator E2E Test Suite    ${KFTO_BINARY_NAME}
 
-Teardown Training Operator E2E Upgrade Test Suite
-    [Documentation]    Prepare Training Operator E2E Upgrade Test Suite
-    Teardown Training Operator E2E Test Suite    ${KFTO_UPGRADE_BINARY_NAME}
+Teardown Training Operator FMS E2E Test Suite
+    [Documentation]    Teardown Training Operator FMS E2E Test Suite
+    Teardown Training Operator E2E Test Suite    ${FMS_BINARY_NAME}
 
 Teardown Training Operator E2E Test Suite
     [Documentation]    Teardown Training Operator E2E Test Suite
@@ -143,27 +143,17 @@ Teardown Training Operator E2E Test Suite
     Remove File        ${test_binary}
     Disable Component    trainingoperator
 
-Run Training Operator ODH Core Test
-    [Documentation]    Run Training Operator ODH Core Test
+Run Training Operator FMS Test
+    [Documentation]    Run Training Operator FMS Test
     [Arguments]    ${TEST_NAME}
-    Run Training Operator ODH Test   ${TEST_NAME}   ${KFTO_CORE_BINARY_NAME}
-
-Run Training Operator ODH Upgrade Test
-    [Documentation]    Run Training Operator ODH Upgrade Test
-    [Arguments]    ${TEST_NAME}
-    Run Training Operator ODH Test   ${TEST_NAME}   ${KFTO_UPGRADE_BINARY_NAME}
-
-Run Training Operator ODH Test
-    [Documentation]    Run Training Operator ODH Test
-    [Arguments]    ${TEST_NAME}    ${test_binary}
     Log To Console    "Running test: ${TEST_NAME}"
-    ${result} =    Run Process    ./${test_binary} -test.run ${TEST_NAME}
+    ${result} =    Run Process    ./${FMS_BINARY_NAME} -test.run ${TEST_NAME}
     ...    shell=true
     ...    stderr=STDOUT
     ...    env:CODEFLARE_TEST_TIMEOUT_SHORT=5m
     ...    env:CODEFLARE_TEST_TIMEOUT_MEDIUM=10m
     ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
-    ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-${test_binary}-logs
+    ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-${FMS_BINARY_NAME}-logs
     ...    env:FMS_HF_TUNING_IMAGE=${FMS_HF_TUNING_IMAGE}
     Log To Console    ${result.stdout}
     Check missing Go test    ${result.stdout}
@@ -175,13 +165,13 @@ Run Training Operator KFTO Test
     [Documentation]    Run Training Operator KFTO Test
     [Arguments]    ${TEST_NAME}    ${TRAINING_IMAGE}
     Log To Console    "Running test: ${TEST_NAME}"
-    ${result} =    Run Process    ./${KFTO_CORE_BINARY_NAME} -test.run ${TEST_NAME}
+    ${result} =    Run Process    ./${KFTO_BINARY_NAME} -test.run ${TEST_NAME}
     ...    shell=true
     ...    stderr=STDOUT
     ...    env:CODEFLARE_TEST_TIMEOUT_SHORT=5m
     ...    env:CODEFLARE_TEST_TIMEOUT_MEDIUM=10m
     ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
-    ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-${KFTO_CORE_BINARY_NAME}-logs
+    ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-${KFTO_BINARY_NAME}-logs
     ...    env:CODEFLARE_TEST_TRAINING_IMAGE=${TRAINING_IMAGE}
     Log To Console    ${result.stdout}
     Check missing Go test    ${result.stdout}

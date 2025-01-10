@@ -20,6 +20,7 @@ spec:
       volumeMounts: []
       modelFormat:
         name: ${model_format}
+        version: ${version}
       runtime: ${serving_runtime}
       storageUri: ${model_storage_uri}
     volumes: []

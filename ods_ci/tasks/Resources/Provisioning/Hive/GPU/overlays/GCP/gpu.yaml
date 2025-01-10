@@ -4,3 +4,6 @@
 - op: add
   path: /spec/template/spec/providerSpec/value/onHostMaintenance
   value: Terminate
+- op: replace
+  path: /spec/replicas
+  value: 1

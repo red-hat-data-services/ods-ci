@@ -12,10 +12,9 @@ CSVNAME="$(oc get packagemanifests/gpu-operator-certified -n openshift-marketpla
 sed -i'' -e "0,/v1.11/s//$CHANNEL/g" "$GPU_INSTALL_DIR/gpu_install.yaml"
 
 oc apply -f "$GPU_INSTALL_DIR/gpu_install.yaml"
-oc apply -f "$GPU_INSTALL_DIR/../nfd_operator.yaml"
-echo "Wait for Nvidia GPU Operator Subscription, InstallPlan and Deployment to complete"
+/bin/bash tasks/Resources/Provisioning/GPU/NFD/install_nfd.sh
 
-oc wait --timeout=3m --for jsonpath='{.status.state}'=AtLatestKnown -n openshift-nfd sub nfd
+echo "Wait for Nvidia GPU Operator Subscription, InstallPlan and Deployment to complete"
 
 oc wait --timeout=3m --for jsonpath='{.status.state}'=AtLatestKnown -n nvidia-gpu-operator sub gpu-operator-certified
 
@@ -80,7 +79,6 @@ function rerun_accelerator_migration() {
 }
 
 wait_until_pod_ready_status  "gpu-operator"
-oc apply -f "$GPU_INSTALL_DIR/../nfd_deploy.yaml"
 oc get csv -n nvidia-gpu-operator "$CSVNAME" -o jsonpath='{.metadata.annotations.alm-examples}' | jq .[0] > clusterpolicy.json
 oc apply -f clusterpolicy.json
 wait_until_pod_ready_status "nvidia-device-plugin-daemonset"

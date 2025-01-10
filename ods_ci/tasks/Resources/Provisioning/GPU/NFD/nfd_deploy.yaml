@@ -7,12 +7,8 @@ spec:
   instance: "" # instance is empty by default
   topologyupdater: false # False by default
   operand:
-<<<<<<< HEAD:ods_ci/tasks/Resources/Provisioning/GPU/nfd_deploy.yaml
-    image: registry.redhat.io/openshift4/ose-node-feature-discovery:v4.11
-=======
     # Image URL example: registry.redhat.io/openshift4/ose-node-feature-discovery:v4.11
     image: <imageUrl>
->>>>>>> a0052546 (Update AMD Operator and NFD install scripts (#2139)):ods_ci/tasks/Resources/Provisioning/GPU/NFD/nfd_deploy.yaml
     imagePullPolicy: Always
   workerConfig:
     configData: |

@@ -9,3 +9,6 @@
 - op: replace
   path: /spec/template/spec/providerSpec/value/machineType
   value: INSTANCE_TYPE
+- op: replace
+  path: /spec/replicas
+  value: 1

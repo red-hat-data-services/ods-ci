@@ -157,6 +157,32 @@ EOF
   fi 
 }
 
+function applyWorkaroundForOlderOCPVersions () {
+  # workaround for OCP versions less than 4.16
+  # AMD certified operator is published starting from OCP v4.16
+  ocpVersion=$(oc version --output json | jq '.openshiftVersion' | tr -d '"')
+  IFS='.' read -ra ocpVersionSplit <<< "$ocpVersion"
+  if [ "${ocpVersionSplit[1]}" -lt 16 ]; then
+    echo "OCP Version: $ocpVersion"
+    echo "AMD Operator is not available for versions < 4.16, hence creating custom catalog source as workaround"
+    oc apply -f - <<EOF
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: certified-operators-416-amd
+  namespace: openshift-marketplace
+spec:
+  displayName: Certfied operator
+  image: 'registry.redhat.io/redhat/certified-operator-index:v4.16'
+  publisher: RHOAI QE
+  sourceType: grpc
+EOF
+    oc wait --timeout="120s" --for=condition=ready=true pod -n openshift-marketplace -l olm.catalogSource=certified-operators-416-amd
+    sed -i'' -e "s/certified-operators/certified-operators-416-amd/g" "$GPU_INSTALL_DIR/amd_gpu_install.yaml"
+  fi
+}
+
+applyWorkaroundForOlderOCPVersions
 check_registry
 status=$?
 
@@ -170,10 +196,7 @@ fi
 sleep 120
 wait_while 1800 ! machineconfig_updates
 
-echo "Installing NFD operator"
-oc apply -f "$GPU_INSTALL_DIR/../nfd_operator.yaml"
-wait_while 360 ! has_csv_succeeded openshift-nfd nfd
-oc apply -f "$GPU_INSTALL_DIR/../nfd_deploy.yaml"
+/bin/bash tasks/Resources/Provisioning/GPU/NFD/install_nfd.sh
 echo "Installing KMM operator"
 oc apply -f "$GPU_INSTALL_DIR/kmm_operator_install.yaml"
 wait_while 360 ! has_csv_succeeded openshift-kmm kernel-module-management

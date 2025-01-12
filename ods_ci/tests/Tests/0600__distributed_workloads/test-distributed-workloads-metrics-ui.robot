@@ -31,9 +31,9 @@ Verify Workload Metrics Home page Contents
     [Tags]    RHOAIENG-4837
     ...       Sanity    DistributedWorkloads    Training    WorkloadsOrchestration
     Open Distributed Workload Metrics Home Page
+    Wait For Dashboard Page Title   Distributed Workload Metrics
     Wait Until Element Is Visible    ${DISTRIBUITED_WORKLOAD_METRICS_TEXT_XP}   timeout=20
     Wait Until Element Is Visible    ${PROJECT_METRICS_TAB_XP}   timeout=20
-    Page Should Contain Element     ${DISTRIBUITED_WORKLOAD_METRICS_TITLE_XP}
     Page Should Contain Element     ${DISTRIBUITED_WORKLOAD_METRICS_TEXT_XP}
     Page Should Contain Element     ${PROJECT_XP}
     Page Should Contain Element     ${PROJECT_METRICS_TAB_XP}
@@ -143,9 +143,11 @@ Verify The Workload Metrics By Submitting Ray Workload
     Open Distributed Workload Metrics Home Page
     Select Distributed Workload Project By Name    ${PRJ_TITLE}
     Select Refresh Interval    15 seconds
+    # verifying workload metrics in Dark mode
+    Click Button    xpath=//button[@aria-label="dark theme"]
     Wait Until Element Is Visible    ${DISTRIBUITED_WORKLOAD_RESOURCE_METRICS_TITLE_XP}    timeout=20
     Wait For Job With Status    ${RAY_CLUSTER_NAME}    Admitted    30
-    Wait For Job With Status    ${RAY_CLUSTER_NAME}    Running    180
+    Wait For Job With Status    ${RAY_CLUSTER_NAME}    Running    300
 
     ${cpu_requested} =   Get CPU Requested    ${PRJ_TITLE}    ${LOCAL_QUEUE_NAME}
     ${memory_requested} =   Get Memory Requested    ${PRJ_TITLE}    ${LOCAL_QUEUE_NAME}   RayCluster

@@ -121,9 +121,9 @@ Get All Text Under Element
     ${elements}=    Get WebElements    ${parent_element}
     ${text_list}=    Create List
     FOR    ${element}    IN    @{elements}
-        ${text}=    Run Keyword And Ignore Error
+        ${status}    ${text}=    Run Keyword And Ignore Error
         ...    Get Element Attribute    ${element}    textContent
-        Append To List    ${text_list}    ${text}
+        Run Keyword If    '${status}' == 'PASS'    Append To List    ${text_list}    ${text}
     END
     RETURN   ${text_list}
 

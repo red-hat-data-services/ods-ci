@@ -104,7 +104,6 @@ Test Python Model Grpc Inference Via API (Triton on Kserve)    # robocop: off=to
     ${pod_name}=  Get Pod Name    namespace=${test_namespace}
     ...    label_selector=serving.kserve.io/inferenceservice=${PYTHON_MODEL_NAME}
     ${valued}  ${host}=    Run And Return Rc And Output    oc get ksvc ${PYTHON_MODEL_NAME}-predictor -o jsonpath='{.status.url}'
-    Log    ${host}
     Log    ${valued}
     ${host}=    Evaluate    re.search(r"${PATTERN}", r"${host}").group(1)    re
     Log    ${host}
@@ -112,10 +111,8 @@ Test Python Model Grpc Inference Via API (Triton on Kserve)    # robocop: off=to
     ...    endpoint=inference.GRPCInferenceService/ModelInfer
     ...    json_body=@      input_filepath=${INFERENCE_GRPC_INPUT_PYTHONFILE}
     ...    insecure=${True}    protobuf_file=${PROTOBUFF_FILE}      json_header=${NONE}
-    Log    ${inference_output}
     ${inference_output}=    Evaluate    json.dumps(${inference_output})
     Log    ${inference_output}
-    Log    ${EXPECTED_INFERENCE_GRPC_OUTPUT_PYTHON}
     ${result}    ${list}=    Inference Comparison    ${EXPECTED_INFERENCE_GRPC_OUTPUT_PYTHON}    ${inference_output}
     Log    ${result}
     Log    ${list}

@@ -244,6 +244,22 @@ Wait Until Alert Is Not Firing    # robocop: disable:too-many-arguments
     Wait Until Keyword Succeeds    ${timeout}    30s
     ...    Alert Should Not Be Firing    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-duration}
 
+Get Target Pools
+    [Documentation]     Returns list of Targets scrape pools
+    [Arguments]        ${pm_url}    ${pm_token}    ${username}    ${password}
+    ${links}=    Run  curl --silent -X GET -H "Authorization:Bearer ${pm_token}" -u ${username}:${password} -k ${pm_url}/api/v1/targets | jq '.data.activeTargets[] | .scrapePool'       #robocop:disable
+    ${links}=    Replace String    ${links}    "    ${EMPTY}
+    @{links}=    Split String  ${links}  \n
+    RETURN    ${links}
+
+Get Target Pools Which Have State Up
+    [Documentation]     Returns list of Targets scrape pools which have state as "UP"
+    [Arguments]        ${pm_url}    ${pm_token}    ${username}    ${password}
+    ${links}=    Run  curl --silent -X GET -H "Authorization:Bearer ${pm_token}" -u ${username}:${password} -k ${pm_url}/api/v1/targets | jq '.data.activeTargets[] | select(.health == "up") | .scrapePool'       #robocop:disable
+    ${links}=    Replace String    ${links}    "    ${EMPTY}
+    @{links}=    Split String  ${links}  \n
+    RETURN    ${links}
+
 Get Target Endpoints
     [Documentation]     Returns list of Endpoint URLs
     [Arguments]         ${target_name}    ${pm_url}    ${pm_token}    ${username}    ${password}

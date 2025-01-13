@@ -30,7 +30,6 @@ ${SERVICEMESH_CR_NS}=    istio-system
 ...                      triton-kserve-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/triton_servingruntime_{{protocol}}.yaml     # robocop: disable
 ${DOWNLOAD_PVC_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_model_in_pvc.yaml
 ${DOWNLOAD_PVC_FILLED_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_model_in_pvc_filled.yaml
-
 ${DOWNLOAD_PROMPTS_PVC_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_prompts_in_pvc.yaml
 ${DOWNLOAD_PROMPTS_PVC_FILLED_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_prompts_in_pvc_filled.yaml
 ${MATCHING_RATIO}=    ${60}
@@ -141,7 +140,7 @@ Compile Inference Service YAML
     [Arguments]    ${isvc_name}    ${model_storage_uri}    ${model_format}=caikit    ${serving_runtime}=caikit-tgis-runtime
     ...            ${kserve_mode}=${NONE}    ${sa_name}=${DEFAULT_BUCKET_SA_NAME}    ${canaryTrafficPercent}=${EMPTY}    ${min_replicas}=1
     ...            ${scaleTarget}=1    ${scaleMetric}=concurrency  ${auto_scale}=${NONE}
-    ...            ${requests_dict}=&{EMPTY}    ${limits_dict}=&{EMPTY}    ${overlays}=${EMPTY}     ${version}=${EMPTY}
+    ...            ${requests_dict}=&{EMPTY}    ${limits_dict}=&{EMPTY}    ${overlays}=${EMPTY}   ${version}=${EMPTY}
     IF   '${auto_scale}' == '${NONE}'
         ${scaleTarget}=    Set Variable    ${EMPTY}
         ${scaleMetric}=    Set Variable    ${EMPTY}
@@ -198,7 +197,6 @@ Compile Inference Service YAML
         END
         Log    message=Using defaultDeploymentMode set in the DSC: ${mode}
     END
-
 
 Model Response Should Match The Expectation
     [Documentation]    Checks that the actual model response matches the expected answer.
@@ -951,7 +949,6 @@ Remove Model Mount Path From Runtime
     ${rc}    ${out}=    Run And Return Rc And Output
     ...   oc patch servingruntime ${runtime} -n ${namespace} --type='json' -p='[{"op": "remove", "path": "/spec/containers/0/args/1"}]'
     Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
-
 
 Set Runtime Image
     [Documentation]    Sets up runtime variables for the Suite

@@ -25,7 +25,7 @@ ${PRJ_TITLE}=    ms-triton-project
 ${PRJ_DESCRIPTION}=    project used for model serving triton runtime tests
 ${MODEL_CREATED}=    ${FALSE}
 ${PATTERN}=     https:\/\/([^\/:]+)
-${ONNX_MODEL_NAME}=    densenet_onnx
+${ONNX_MODEL_NAME}=    densenetonnx
 ${ONNX_MODEL_LABEL}=     densenetonnx
 ${ONNX_GRPC_RUNTIME_NAME}=    triton-kserve-grpc
 ${ONNX_RUNTIME_NAME}=    triton-kserve-rest
@@ -407,7 +407,7 @@ Test FIL Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-lo
     ...  Clean All Models Of Current User
     ...  AND
     ...  Delete Serving Runtime Template From CLI    displayed_name=triton-kserve-rest
-    
+
 Test FIL Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of an fil model in Kserve using Triton
     [Tags]    Sanity    RHOAIENG-15823

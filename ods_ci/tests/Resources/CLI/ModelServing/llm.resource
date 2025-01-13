@@ -195,7 +195,7 @@ Compile Inference Service YAML
         ELSE
             ${mode}=    Get KServe Default Deployment Mode From DSC
         END
-        Log    message=Using defaultDeploymentMode set in the DSC: ${mode}S
+        Log    message=Using defaultDeploymentMode set in the DSC: ${mode}
     END
 
 Model Response Should Match The Expectation

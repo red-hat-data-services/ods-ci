@@ -39,6 +39,8 @@ Install RHOAI For KserveRaw
             Copy File    source=${file_path}cs_template.yaml    destination=${file_path}cs_apply.yaml
             Run    sed -i'' -e 's/<OPERATOR_NAMESPACE>/openshift-marketplace/' ${file_path}cs_apply.yaml
             Run    sed -i'' -e 's/<IMAGE_URL>/${image_escaped}/' ${file_path}cs_apply.yaml
+            Run    sed -i'' -e 's/<STARTING_CSV>//' ${file_path}cs_apply.yaml
+            Run    sed -i'' -e 's/<INSTALL_PLAN_APPROVAL>/Automatic/' ${file_path}cs_apply.yaml
             ${rc}  ${out} =    Run And Return Rc And Output    oc apply -f ${file_path}cs_apply.yaml
             IF    ${rc}!=0    Fail
             Log    ${out}    console=yes

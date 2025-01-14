@@ -5,13 +5,15 @@ Resource   oc_install.robot
 
 
 *** Keywords ***
-Installing RHODS Operator ${image_url}
+Installing RHODS Operator
+  [Documentation]   Installing the RHOAI operator
+  [Arguments]       ${image_url}    ${install_plan_approval}    ${rhoai_version}=${EMPTY}
   ${is_operator_installed} =  Is RHODS Installed
   IF  not ${is_operator_installed}  Run Keywords
   ...  Log  Installing RHODS operator in ${cluster_type}  console=yes  AND
   ...  Set Suite Variable  ${image_url}  AND
   ...  Set Test Variable  ${RHODS_OSD_INSTALL_REPO}  AND
-  ...  Install RHODS   ${cluster_type}    ${image_url}
+  ...  Install RHODS   ${cluster_type}    ${image_url}    ${install_plan_approval}    ${rhoai_version}
 
 RHODS Operator Should Be installed
   Verify RHODS Installation

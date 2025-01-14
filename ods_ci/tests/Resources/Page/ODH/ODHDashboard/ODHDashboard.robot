@@ -569,8 +569,8 @@ Import New Custom Image
     Sleep  1
     Open Custom Image Import Popup
     Input Text    xpath://input[@id="byon-image-location-input"]    ${repo}
-    Input Text    xpath://input[@id="byon-image-name-input"]    ${name}
-    Input Text    xpath://input[@id="byon-image-description-input"]    ${description}
+    Input Text    xpath://input[@id="byon-image-name"]    ${name}
+    Input Text    xpath://*[@id="byon-image-description"]    ${description}
     # No button present anymore?
     #Add Softwares To Custom Image    ${software}
     #Add Packages To Custom Image    ${packages}
@@ -631,15 +631,15 @@ Delete Custom Image
     ${custom_image_kebab_btn}=    Set Variable    //td[.="${image_name}"]/../td[last()]//button
     Click Button  xpath:${custom_image_kebab_btn}
     ${image_name_id}=  Replace String  ${image_name}  ${SPACE}  -
-    Click Element  xpath:${custom_image_kebab_btn}/..//button[@id="custom-${image_name_id}-delete-button"]  # robocop: disable
+    Click Element  xpath://button[@id="${image_name_id}-delete-button"]
     Handle Deletion Confirmation Modal  ${image_name}  notebook image
     # Wait for the image to disappear from the list
     Wait Until Page Does Not Contain Element    xpath:${custom_image_kebab_btn}    timeout=10s
     # Assure that the actual ImageStream is also removed
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc wait --for=delete --timeout=10s imagestream -n ${APPLICATIONS_NAMESPACE} custom-${image_name_id}
+    ...    oc wait --for=delete --timeout=10s imagestream -n ${APPLICATIONS_NAMESPACE} ${image_name_id}
     IF    ${rc} != ${0}
-        Fail    msg=The ImageStream 'custom-${image_name_id}' wasn't deleted from cluster in timeout.
+        Fail    msg=The ImageStream '${image_name_id}' wasn't deleted from cluster in timeout.
     END
 
 
@@ -649,7 +649,7 @@ Open Edit Menu For Custom Image
     ${custom_image_kebab_btn}=    Set Variable    //td[.="${image_name}"]/../td[last()]//button
     Click Button  xpath:${custom_image_kebab_btn}
     ${image_name_id}=  Replace String  ${image_name}  ${SPACE}  -
-    Click Element  xpath:${custom_image_kebab_btn}/..//button[@id="custom-${image_name_id}-edit-button"]
+    Click Element  xpath:${custom_image_kebab_btn}/..//button[@id="${image_name_id}-edit-button"]
     Wait Until Page Contains  Delete Notebook Image
 
 Expand Custom Image Details

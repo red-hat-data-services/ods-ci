@@ -26,4 +26,6 @@ else
     echo "WARNING: I don't know the sha for $xyVersion. Re-using default 4.17 $imageUrl. It might not work!"
 fi
 sed -i'' -e "s/<imageUrl>/$imageUrl/g" $NFD_INSTANCE
+# temporary sleep until latest oc binary is available and --for=create is supported
+sleep 10s
 oc apply -f "$NFD_INSTANCE"

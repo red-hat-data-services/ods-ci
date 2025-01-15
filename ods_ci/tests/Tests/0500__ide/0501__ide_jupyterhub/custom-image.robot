@@ -73,7 +73,7 @@ Test Duplicate Image
     ...    packages=${IMG_PACKAGES}
     # Assure that the expected error message is shown in the modal window
     ${image_name_id}=  Replace String  ${IMG_NAME}  ${SPACE}  -
-    Wait Until Page Contains    Unable to add notebook image: imagestreams.image.openshift.io "custom-${image_name_id}" already exists
+    Wait Until Page Contains    Unable to add notebook image: imagestreams.image.openshift.io "${image_name_id}" already exists
     # Since the image cannot be created, we need to cancel the modal window now
     Click Button    ${GENERIC_CANCEL_BTN_XP}
     [Teardown]  Duplicate Image Teardown

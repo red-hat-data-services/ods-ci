@@ -87,6 +87,7 @@ Verify Tensorflow Model Via UI    # robocop: off=too-long-test-case,too-many-cal
     ${url}=    Get Model Route Via UI    ${MODEL_NAME}
     ${status_code}    ${response_text}=    Send Random Inference Request     endpoint=${url}    name=input:0
     ...    shape={"B": 1, "H": 299, "W": 299, "C": 3}    no_requests=1
+    ...    deployment_type=modelmesh
     Should Be Equal As Strings    ${status_code}    200
     [Teardown]   Run Keywords    Run Keyword If Test Failed    Get Modelmesh Events And Logs
     ...    server_name=${RUNTIME_NAME}    project_title=${namespace}
@@ -163,7 +164,7 @@ Verify Editing Existing Model Deployment    # robocop: off=too-long-test-case,to
     Recreate S3 Data Connection    project_title=${namespace}    dc_name=model-serving-connection
     ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
     ...            aws_bucket_name=ods-ci-s3
-    Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}    existing_server=${TRUE}
+    Create Model Server    token=${FALSE}    server_name=${RUNTIME_NAME}    existing_server=${FALSE}
     Serve Model    project_name=${namespace}    model_name=${MODEL_NAME}    framework=tensorflow
     ...    existing_data_connection=${TRUE}    data_connection_name=model-serving-connection
     ...    model_path=inception_resnet_v2.pb
@@ -174,8 +175,9 @@ Verify Editing Existing Model Deployment    # robocop: off=too-long-test-case,to
     Verify Model Status    ${MODEL_NAME}    success
     Set Suite Variable    ${MODEL_CREATED}    ${TRUE}
     ${url}=    Get Model Route Via UI    ${MODEL_NAME}
-    ${status_code}    ${response_text}=    Send Random Inference Request     endpoint=${url}    name=input
+    ${status_code}    ${response_text}=    Send Random Inference Request     endpoint=${url}    name=input:0
     ...    shape={"B": 1, "H": 299, "W": 299, "C": 3}    no_requests=1
+    ...    deployment_type=modelmesh
     Should Be Equal As Strings    ${status_code}    200
     Serve Model    project_name=${namespace}    model_name=${MODEL_NAME}    framework=openvino_ir
     ...    existing_data_connection=${TRUE}    data_connection_name=model-serving-connection

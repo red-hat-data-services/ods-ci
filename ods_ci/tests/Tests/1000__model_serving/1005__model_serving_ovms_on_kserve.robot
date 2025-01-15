@@ -52,6 +52,7 @@ Verify Tensorflow Model Via UI (OVMS on Kserve)    # robocop: off=too-long-test-
     [Documentation]    Test the deployment of a tensorflow (.pb) model in Kserve using OVMS
     [Tags]    Sanity
     ...       ODS-2627
+    Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}    existing_project=${TRUE}
     Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
@@ -66,6 +67,7 @@ Verify Tensorflow Model Via UI (OVMS on Kserve)    # robocop: off=too-long-test-
     ${url}=    Get Model Route Via UI    ${MODEL_NAME}
     ${status_code}    ${response_text}=    Send Random Inference Request     endpoint=${url}    name=input:0
     ...    shape={"B": 1, "H": 299, "W": 299, "C": 3}    no_requests=1
+    ...    deployment_type=kserve
     Should Be Equal As Strings    ${status_code}    200
     [Teardown]    Run Keywords    Delete Project Via CLI By Display Name    displayed_name=ALL    AND
     ...    Run Keyword If Test Failed    Get Kserve Events And Logs
@@ -108,6 +110,7 @@ Verify GPU Model Deployment Via UI (OVMS on Kserve)    # robocop: off=too-long-t
     ...       ODS-2630    ODS-2631    ProductBug    RHOAIENG-3355
     ${requests}=    Create Dictionary    nvidia.com/gpu=1
     ${limits}=    Create Dictionary    nvidia.com/gpu=1
+    Fetch Knative CA Certificate    filename=openshift_ca_istio_knative.crt
     Clean All Models Of Current User
     Open Data Science Projects Home Page
     Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
@@ -131,7 +134,7 @@ Verify GPU Model Deployment Via UI (OVMS on Kserve)    # robocop: off=too-long-t
     Verify Model Status    ${MODEL_NAME_GPU}    success
     Set Suite Variable    ${MODEL_CREATED}    True
     ${url}=    Get Model Route Via UI    ${MODEL_NAME_GPU}
-    Send Random Inference Request     endpoint=${url}    no_requests=100
+    Send Random Inference Request     endpoint=${url}    no_requests=100    deployment_type=kserve
     # Verify metric DCGM_FI_PROF_GR_ENGINE_ACTIVE goes over 0
     ${prometheus_route}=    Get OpenShift Prometheus Route
     ${sa_token}=    Get OpenShift Prometheus Service Account Token

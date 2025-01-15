@@ -19,12 +19,15 @@ Test Tags         Kserve
 
 *** Variables ***
 ${PYTHON_MODEL_NAME}=   python
+${ONNX_MODEL_NAME}=     densenetonnx
 ${EXPECTED_INFERENCE_GRPC_OUTPUT_PYTHON}=       {"modelName":"python","modelVersion":"1","id":"1","outputs":[{"name":"OUTPUT0","datatype":"FP32","shape":["4"]},{"name":"OUTPUT1","datatype":"FP32","shape":["4"]}],"rawOutputContents":["AgAAAAAAAAAAAAAAAAAAAA==","AAQAAAAAAAAAAAAAAAAAAA=="]}
 ${INFERENCE_GRPC_INPUT_PYTHONFILE}=       tests/Resources/Files/triton/kserve-triton-python-grpc-input.json
 ${KSERVE_MODE}=    Serverless   # Serverless
 ${PROTOCOL_GRPC}=     grpc
 ${EXPECTED_INFERENCE_REST_OUTPUT_PYTHON}=       {"model_name":"python","model_version":"1","outputs":[{"name":"OUTPUT0","datatype":"FP32","shape":[4],"data":[0.921442985534668,0.6223347187042236,0.8059385418891907,1.2578542232513428]},{"name":"OUTPUT1","datatype":"FP32","shape":[4],"data":[0.49091365933418274,-0.027157962322235107,-0.5641784071922302,0.6906309723854065]}]}
 ${INFERENCE_REST_INPUT_PYTHON}=       @tests/Resources/Files/triton/kserve-triton-python-rest-input.json
+${EXPECTED_INFERENCE_REST_OUTPUT_FILE_ONNX}=       tests/Resources/Files/triton/kserve-triton-onnx-rest-output.json
+${INFERENCE_REST_INPUT_ONNX}=       @tests/Resources/Files/triton/kserve-triton-onnx-rest-input.json
 ${KSERVE_MODE}=    Serverless   # Serverless
 ${PROTOCOL}=     http
 ${TEST_NS}=        tritonmodel
@@ -82,7 +85,6 @@ Test Python Model Rest Inference Via API (Triton on Kserve)    # robocop: off=to
 Test Python Model Grpc Inference Via API (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of python model in Kserve using Triton
     [Tags]    Tier2    RHOAIENG-16912
-
     Setup Test Variables    model_name=${PYTHON_MODEL_NAME}    use_pvc=${FALSE}    use_gpu=${FALSE}
     ...    kserve_mode=${KSERVE_MODE}   model_path=triton/model_repository/
     Set Project And Runtime    runtime=${KSERVE_RUNTIME_REST_NAME}     protocol=${PROTOCOL_GRPC}     namespace=${test_namespace}
@@ -122,6 +124,47 @@ Test Python Model Grpc Inference Via API (Triton on Kserve)    # robocop: off=to
     ...    AND
     ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    triton-process    kill=true
 
+Test Onnx Model Rest Inference Via API (Triton on Kserve)    # robocop: off=too-long-test-case
+    [Documentation]    Test the deployment of onnx model in Kserve using Triton
+    [Tags]    Tier2    RHOAIENG-16908
+    Setup Test Variables    model_name=${ONNX_MODEL_NAME}    use_pvc=${FALSE}    use_gpu=${FALSE}
+    ...    kserve_mode=${KSERVE_MODE}   model_path=triton/model_repository/
+    Log    ${ONNX_MODEL_NAME}
+    Set Project And Runtime    runtime=${KSERVE_RUNTIME_REST_NAME}     protocol=${PROTOCOL}     namespace=${test_namespace}
+    ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${ONNX_MODEL_NAME}
+    ...    storage_size=100Mi    memory_request=100Mi
+    ${requests}=    Create Dictionary    memory=1Gi
+    Compile Inference Service YAML    isvc_name=${ONNX_MODEL_NAME}
+    ...    sa_name=models-bucket-sa
+    ...    model_storage_uri=${storage_uri}
+    ...    model_format=onnx  serving_runtime=${KSERVE_RUNTIME_REST_NAME}
+    ...    version="1"
+    ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
+    Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
+    ...    namespace=${test_namespace}
+    # File is not needed anymore after applying
+    Remove File    ${INFERENCESERVICE_FILLED_FILEPATH}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${ONNX_MODEL_NAME}
+    ...    namespace=${test_namespace}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${ONNX_MODEL_NAME}
+    ${service_port}=    Extract Service Port    service_name=${ONNX_MODEL_NAME}-predictor    protocol=TCP
+    ...    namespace=${test_namespace}
+    IF   "${KSERVE_MODE}"=="RawDeployment"
+        Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}  local_port=${service_port}
+        ...    remote_port=${service_port}    process_alias=triton-process
+    END
+    ${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}=     Load Json File
+    ...    file_path=${EXPECTED_INFERENCE_REST_OUTPUT_FILE_ONNX}    as_string=${TRUE}
+    Verify Model Inference With Retries   model_name=${ONNX_MODEL_NAME}    inference_input=${INFERENCE_REST_INPUT_ONNX}
+    ...    expected_inference_output=${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}   project_title=${test_namespace}
+    ...    deployment_mode=Cli  kserve_mode=${KSERVE_MODE}    service_port=${service_port}
+    ...    end_point=/v2/models/${model_name}/infer   retries=3
+    [Teardown]    Run Keywords
+    ...    Clean Up Test Project    test_ns=${test_namespace}
+    ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}    kserve_mode=${KSERVE_MODE}
+    ...    AND
+    ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    triton-process    kill=true
 
 *** Keywords ***
 Suite Setup

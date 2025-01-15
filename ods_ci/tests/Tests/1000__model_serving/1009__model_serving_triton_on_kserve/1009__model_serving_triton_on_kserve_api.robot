@@ -28,6 +28,8 @@ ${EXPECTED_INFERENCE_REST_OUTPUT_PYTHON}=       {"model_name":"python","model_ve
 ${INFERENCE_REST_INPUT_PYTHON}=       @tests/Resources/Files/triton/kserve-triton-python-rest-input.json
 ${EXPECTED_INFERENCE_REST_OUTPUT_FILE_ONNX}=       tests/Resources/Files/triton/kserve-triton-onnx-rest-output.json
 ${INFERENCE_REST_INPUT_ONNX}=       @tests/Resources/Files/triton/kserve-triton-onnx-rest-input.json
+${INFERENCE_GRPC_INPUT_ONNXFILE}=       tests/Resources/Files/triton/kserve-triton-onnx-grpc-input.json
+${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE_ONNX}=    tests/Resources/Files/triton/kserve-triton-onnx-grpc-output.json
 ${KSERVE_MODE}=    Serverless   # Serverless
 ${PROTOCOL}=     http
 ${TEST_NS}=        tritonmodel
@@ -160,6 +162,50 @@ Test Onnx Model Rest Inference Via API (Triton on Kserve)    # robocop: off=too-
     ...    expected_inference_output=${EXPECTED_INFERENCE_REST_OUTPUT_ONNX}   project_title=${test_namespace}
     ...    deployment_mode=Cli  kserve_mode=${KSERVE_MODE}    service_port=${service_port}
     ...    end_point=/v2/models/${model_name}/infer   retries=3
+    [Teardown]    Run Keywords
+    ...    Clean Up Test Project    test_ns=${test_namespace}
+    ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}    kserve_mode=${KSERVE_MODE}
+    ...    AND
+    ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    triton-process    kill=true
+
+Test Onnx Model Grpc Inference Via API (Triton on Kserve)    # robocop: off=too-long-test-case
+    [Documentation]    Test the deployment of onnx model in Kserve using Triton
+    [Tags]    Tier2    RHOAIENG-16908       RunThisTest
+    Setup Test Variables    model_name=${ONNX_MODEL_NAME}    use_pvc=${FALSE}    use_gpu=${FALSE}
+    ...    kserve_mode=${KSERVE_MODE}   model_path=triton/model_repository/
+    Set Project And Runtime    runtime=${KSERVE_RUNTIME_REST_NAME}     protocol=${PROTOCOL_GRPC}     namespace=${test_namespace}
+    ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${ONNX_MODEL_NAME}
+    ...    storage_size=100Mi    memory_request=100Mi
+    ${requests}=    Create Dictionary    memory=1Gi
+    Compile Inference Service YAML    isvc_name=${ONNX_MODEL_NAME}
+    ...    sa_name=models-bucket-sa
+    ...    model_storage_uri=${storage_uri}
+    ...    model_format=onnx  serving_runtime=${KSERVE_RUNTIME_REST_NAME}
+    ...    version="1"
+    ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
+    Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
+    ...    namespace=${test_namespace}
+    # File is not needed anymore after applying
+    Remove File    ${INFERENCESERVICE_FILLED_FILEPATH}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${ONNX_MODEL_NAME}
+    ...    namespace=${test_namespace}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${ONNX_MODEL_NAME}
+    ${valued}  ${host}=    Run And Return Rc And Output    oc get ksvc ${ONNX_MODEL_NAME}-predictor -o jsonpath='{.status.url}'
+    Log    ${valued}
+    ${host}=    Evaluate    re.search(r"${PATTERN}", r"${host}").group(1)    re
+    Log    ${host}
+    ${EXPECTED_INFERENCE_GRPC_OUTPUT_ONNX}=     Load Json File
+    ...    file_path=${EXPECTED_INFERENCE_GRPC_OUTPUT_FILE_ONNX}    as_string=${TRUE}
+    ${inference_output}=    Query Model With GRPCURL   host=${host}    port=443
+    ...    endpoint=inference.GRPCInferenceService/ModelInfer
+    ...    json_body=@      input_filepath=${INFERENCE_GRPC_INPUT_ONNXFILE}
+    ...    insecure=${True}    protobuf_file=${PROTOBUFF_FILE}      json_header=${NONE}
+    ${inference_output}=    Evaluate    json.dumps(${inference_output})
+    Log    ${inference_output}
+    ${result}    ${list}=    Inference Comparison    ${EXPECTED_INFERENCE_GRPC_OUTPUT_ONNX}    ${inference_output}
+    Log    ${result}
+    Log    ${list}
     [Teardown]    Run Keywords
     ...    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}    kserve_mode=${KSERVE_MODE}

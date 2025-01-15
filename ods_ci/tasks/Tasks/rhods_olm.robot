@@ -17,6 +17,7 @@ ${INSTALL_TYPE}                 OperatorHub
 ${UPDATE_CHANNEL}               odh-nightlies
 ${OLM_DIR}                      rhodsolm
 ${RHODS_VERSION}                None
+${CATALOG_SOURCE}               redhat-operators
 
 *** Tasks ***
 Can Install RHODS Operator

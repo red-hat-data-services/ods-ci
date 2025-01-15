@@ -7,7 +7,6 @@ Resource         ../../Common.robot
 
 *** Variables ***
 ${PROJECT_XP}=    xpath=//div[text()='Project']
-${DISTRIBUITED_WORKLOAD_METRICS_TITLE_XP}=    xpath=//h1[text()="Distributed Workload Metrics"]
 ${DISTRIBUITED_WORKLOAD_METRICS_TEXT_XP}=    xpath=//div[text()='Monitor the metrics of your active resources.']
 ${PROJECT_METRICS_TAB_XP}=    xpath=//button[@aria-label="Project metrics tab"]
 ${WORKLOAD_STATUS_TAB_XP}=    xpath=//button[@aria-label="Distributed workload status tab"]

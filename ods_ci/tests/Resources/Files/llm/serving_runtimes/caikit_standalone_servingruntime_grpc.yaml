@@ -10,7 +10,7 @@ spec:
       name: caikit
   containers:
     - name: kserve-container
-      image: quay.io/modh/caikit-nlp@sha256:3c33185fda84d7bac6715c8743c446a6713cdbc0cb0ed831acc0df89bd8bab6b
+      image: quay.io/modh/caikit-nlp@sha256:d4b045f880cebc2b22de6c1203915be4a07909ca818f3be3df32c28e6abff526
       command: ["python", "-m", "caikit.runtime"]
       env:
         - name: RUNTIME_LOCAL_MODELS_DIR

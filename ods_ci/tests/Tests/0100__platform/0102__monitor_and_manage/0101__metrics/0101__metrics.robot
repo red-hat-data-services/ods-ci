@@ -93,7 +93,6 @@ Test Metric Existence For "Rhods_Aggregate_Availability" On ODS Prometheus
     @{list_values} =    Create List    1    0
     Should Contain    ${list_values}    ${resp.json()["data"]["result"][0]["value"][-1]}
 
-
 Test Targets Are Available And Up In RHOAI Prometheus
     [Documentation]   Verifies the expected targets in Prometheus are available and up running
     [Tags]    Sanity
@@ -122,6 +121,48 @@ Test Targets Are Available And Up In RHOAI Prometheus
     List Should Contain Value    ${targets}    user_facing_endpoints_status_dsp
     List Should Contain Value    ${targets}    user_facing_endpoints_status_rhods_dashboard
     List Should Contain Value    ${targets}    user_facing_endpoints_status_workbenches
+
+Test RHOAI Dashboard Metrics By Code Are Defined
+    [Documentation]   Verifies the RHOAI Dashboard Metrics By Code Are Defined and show accurate values
+    ...               (2xx and 5xx codes)
+    [Tags]    Sanity
+    ...       Tier1
+    ...       ODS-195
+    ...       RHOAIENG-13261
+    ...       Monitoring
+    Skip If RHODS Is Self-Managed
+    ${response_by_code} =    Prometheus.Run Query
+    ...    pm_url=${RHODS_PROMETHEUS_URL}
+    ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
+    ...    pm_query=sum(haproxy_backend_http_responses_total {route='rhods-dashboard'}) by(code)
+    ${response_5xx} =    Prometheus.Run Query
+    ...    pm_url=${RHODS_PROMETHEUS_URL}
+    ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
+    ...    pm_query=sum(haproxy_backend_http_responses_total{route='rhods-dashboard', code='5xx'})
+    ${response_2xx} =    Prometheus.Run Query
+    ...    pm_url=${RHODS_PROMETHEUS_URL}
+    ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
+    ...    pm_query=sum(haproxy_backend_http_responses_total{route='rhods-dashboard', code='2xx'})
+    ${response_total} =    Prometheus.Run Query
+    ...    pm_url=${RHODS_PROMETHEUS_URL}
+    ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
+    ...    pm_query=sum(haproxy_backend_http_responses_total{route='rhods-dashboard'})
+
+    @{metrics_by_code} =    Set Variable    ${response_by_code.json()["data"]["result"]}
+    ${metrics_by_code_5xx} =    Set Variable    ${metrics_by_code[4]["value"][-1]}
+    ${metrics_by_code_5xx} =    Convert To Number    ${metrics_by_code_5xx}    2
+    ${metrics_by_code_2xx} =    Set Variable    ${metrics_by_code[1]["value"][-1]}
+    ${metrics_by_code_2xx} =    Convert To Number    ${metrics_by_code_2xx}    2
+    ${metrics_5xx} =    Set Variable    ${response_5xx.json()["data"]["result"][0]["value"][-1]}
+    ${metrics_5xx} =    Convert To Number    ${metrics_5xx}    2
+    ${metrics_2xx} =    Set Variable    ${response_2xx.json()["data"]["result"][0]["value"][-1]}
+    ${metrics_2xx} =    Convert To Number    ${metrics_2xx}    2
+    ${metrics_total} =    Set Variable    ${response_total.json()["data"]["result"][0]["value"][-1]}
+    ${metrics_total} =    Convert To Number    ${metrics_total}    2
+
+    Should Be True      ${metrics_by_code_5xx} == ${metrics_5xx}
+    Should Be True      ${metrics_by_code_2xx} == ${metrics_2xx}
+    Should Be True      ${metrics_total} == ${metrics_by_code_5xx}+${metrics_by_code_2xx}
 
 
 *** Keywords ***

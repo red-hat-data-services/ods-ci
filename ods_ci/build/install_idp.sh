@@ -258,13 +258,13 @@ function create_groups_and_assign_users(){
     echo $groups
     groups=($groups)
     for group in "${groups[@]}"; do
-      if [[ $group == *"dedicated-admins"* ]]; then
-          if [ "${USE_OCM_IDP}" -eq 1 ]
-              then
-                  add_users_to_ocm_dedicated_admins $prefix
-                  continue
-          fi
-      fi
+#      if [[ $group == *"dedicated-admins"* ]]; then
+#          if [ "${USE_OCM_IDP}" -eq 1 ]
+#              then
+#                  add_users_to_ocm_dedicated_admins $prefix
+#                  continue
+#          fi
+#      fi
       add_users_to_groups $group $prefix
     done
   done

@@ -75,5 +75,4 @@ if [[ -z "${ARTIFACT_DIR}" ]]; then
   ARTIFACT_DIR="/tmp"
 fi
 
-sleep 3000
 poetry run robot --include ${TEST_SUITE} -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE}

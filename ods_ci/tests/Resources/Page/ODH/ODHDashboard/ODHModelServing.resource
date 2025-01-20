@@ -339,7 +339,12 @@ Get Model Inference
             ${rc}    ${url}=    Run And Return Rc And Output
             ...    oc get ksvc ${model_name}-predictor -n ${project_title} -o jsonpath='{.status.url}'
             Should Be Equal As Integers    ${rc}    0
-            ${curl_cmd}=    Set Variable    curl -s ${url}${end_point} -d ${inference_input} --cacert openshift_ca_istio_knative.crt
+            IF    ${set_json_content_type}
+                    ${json-header}=     Set Variable    -H 'Content-Type: application/json'
+                    ${curl_cmd}=      Set Variable    curl -s  ${json-header} ${url}${end_point} -d ${inference_input} --cacert openshift_ca_istio_knative.crt
+            ELSE
+                    ${curl_cmd}=    Set Variable    curl -s  ${url}${end_point} -d ${inference_input} --cacert openshift_ca_istio_knative.crt
+            END
         ELSE IF    '${kserve_mode}' == 'RawDeployment'
             ${url}=   Set Variable    http://localhost:${service_port}${end_point}
             ${curl_cmd}=    Set Variable    curl -s ${url} -d ${inference_input} --cacert openshift_ca_istio_knative.crt

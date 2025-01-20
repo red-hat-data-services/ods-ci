@@ -44,7 +44,7 @@ ${PYTORCH_MODEL_NAME}=    resnet50
 ${INFERENCE_REST_INPUT_PYTORCH}=    @tests/Resources/Files/triton/kserve-triton-resnet-rest-input.json
 ${EXPECTED_INFERENCE_REST_OUTPUT_FILE__PYTORCH}=        tests/Resources/Files/triton/kserve-triton-resnet-rest-output.json
 ${TENSORFLOW_MODEL_NAME}=    inceptiongraphdef
-${INFERENCE_REST_INPUT_TENSORFLOW}=     @tests/Resources/Files/triton/kserve-triton-tensorflow-rest-input.json
+${INFERENCE_REST_INPUT_TENSORFLOW}=       @tests/Resources/Files/triton/kserve-triton-tensorflow-rest-input.json
 ${EXPECTED_INFERENCE_REST_OUTPUT_FILE_TENSORFLOW}=      tests/Resources/Files/triton/kserve-triton-tensorflow-rest-output.json
 ${PATTERN}=     https:\/\/([^\/:]+)
 ${PROTOBUFF_FILE}=      tests/Resources/Files/triton/grpc_predict_v2.proto
@@ -295,7 +295,7 @@ Test Tensorflow Model Rest Inference Via API (Triton on Kserve)    # robocop: of
     Verify Model Inference With Retries   model_name=${TENSORFLOW_MODEL_NAME}    inference_input=${INFERENCE_REST_INPUT_TENSORFLOW}
     ...    expected_inference_output=${EXPECTED_INFERENCE_REST_OUTPUT_TENSORFLOW}   project_title=${test_namespace}
     ...    deployment_mode=Cli  kserve_mode=${KSERVE_MODE}    service_port=${service_port}
-    ...    end_point=/v2/models/${model_name}/infer   retries=3
+    ...    end_point=/v2/models/${model_name}/infer   retries=3      set_json_content_type=${TRUE}
     [Teardown]    Run Keywords
     ...    Clean Up Test Project    test_ns=${test_namespace}
     ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}    kserve_mode=${KSERVE_MODE}

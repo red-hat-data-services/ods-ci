@@ -5,7 +5,7 @@ common_base_image = (
 )
 
 # image and the sdk has a fixed value because the version matters
-@dsl.component(packages_to_install=["codeflare-sdk==v0.24.0"], base_image=common_base_image)
+@dsl.component(packages_to_install=["codeflare-sdk==v0.25.0"], base_image=common_base_image)
 def ray_fn(
     AWS_DEFAULT_ENDPOINT: str,
     AWS_STORAGE_BUCKET: str,

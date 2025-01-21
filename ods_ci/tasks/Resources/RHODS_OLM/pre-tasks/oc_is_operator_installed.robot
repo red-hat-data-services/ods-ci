@@ -5,8 +5,7 @@ Is RHODS Installed
       IF  "${INSTALL_TYPE}" == "Cli"
           ${result}=  Run Keyword And Return Status
           ...  Run Keywords
-          ...  Check A RHODS Family Operator Is Installed  namespace=${OPERATOR_NAMESPACE}
-          ...                                              subscription=rhoai-operator-dev  AND
+          ...  Check A RHODS Family Operator Is Installed  AND
           ...  Oc Get  kind=Namespace  field_selector=metadata.name=${MONITORING_NAMESPACE}  AND
           ...  Oc Get  kind=Namespace  field_selector=metadata.name=${APPLICATIONS_NAMESPACE}  AND
           ...  Oc Get  kind=Namespace  field_selector=metadata.name=${OPERATOR_NAMESPACE}  AND
@@ -15,8 +14,7 @@ Is RHODS Installed
       ELSE IF  "${INSTALL_TYPE}" == "OperatorHub"
           ${result}=  Run Keyword And Return Status
           ...  Run Keywords
-          ...  Check A RHODS Family Operator Is Installed  namespace=${OPERATOR_NAMESPACE}
-          ...                                              subscription=${OPERATOR_NAME}  AND
+          ...  Check A RHODS Family Operator Is Installed  AND
           ...  Oc Get  kind=Namespace  field_selector=metadata.name=${MONITORING_NAMESPACE}  AND
           ...  Oc Get  kind=Namespace  field_selector=metadata.name=${APPLICATIONS_NAMESPACE}  AND
           ...  Oc Get  kind=Namespace  field_selector=metadata.name=${OPERATOR_NAMESPACE}
@@ -34,8 +32,7 @@ Is RHODS Installed
       END
       ${result}=  Run Keyword And Return Status
       ...  Run Keywords
-      ...  Check A RHODS Family Operator Is Installed  namespace=${OPERATOR_NAMESPACE}
-      ...                                              subscription=${SUB_NAME}  AND
+      ...  Check A RHODS Family Operator Is Installed  AND
       ...  Oc Get  kind=Namespace  field_selector=metadata.name=${MONITORING_NAMESPACE}  AND
       ...  Oc Get  kind=Namespace  field_selector=metadata.name=${APPLICATIONS_NAMESPACE}  AND
       ...  Oc Get  kind=Namespace  field_selector=metadata.name=${OPERATOR_NAMESPACE}  AND
@@ -49,17 +46,40 @@ Is RHODS Installed
   RETURN  ${result}
 
 Check A RHODS Family Operator Is Installed
-  [Documentation]   Returns if an operator with given subscription name has a CSV in the given namespace
-  [Arguments]    ${namespace}  ${subscription}
-  Log   Getting CSV from subscription ${subscription} namespace ${namespace}      console=yes
-  ${rc}    ${current_csv_name} =    Run And Return Rc And Output
-  ...    oc get subscription ${subscription} -n ${namespace} -ojson | jq '.status.currentCSV' | tr -d '"'
-  Log   Got CSV ${current_csv_name} from subscription ${subscription}, result: ${rc}      console=yes
-  IF  "${rc}" == "0" and "${current_csv_name}" != "${EMPTY}"
-      ${result} =  Run Keyword And Return Status
-      ...  Oc Get  kind=ClusterServiceVersion  namespace=${namespace}  name=${current_csv_name}
-  ELSE
-      ${result} =  Set Variable    False
+  [Documentation]   Returns if RHODS operator has a CSV
+
+  ${result} =  Set Variable    False
+  Log   Check if the RHODS operator installed.    console=yes
+  ${subscription}=    Get RHODS Subscription Name
+  ${namespace}=    Get RHODS Namespace
+  IF  "${subscription}" != "${EMPTY}"
+      Log   Getting CSV from subscription ${subscription} namespace ${namespace}      console=yes
+      ${rc}    ${current_csv_name} =    Run And Return Rc And Output
+      ...    oc get subscription ${subscription} -n ${namespace} -ojson | jq '.status.currentCSV' | tr -d '"'
+      Log   Got CSV '${current_csv_name}' from subscription '${subscription}', result: ${rc}      console=yes
+      IF  "${rc}" == "0" and "${current_csv_name}" != "${EMPTY}"
+          ${rc}=    Run Keyword And Return Status    oc get csv ${current_csv_name} -n ${namespace}
+          ${result}=    Evaluate    ${rc} == 0
+          Log   The csv exists: ${result}      console=yes
+      END
   END
-  Log   Operator with sub ${subscription} is installed result: ${result}      console=yes
+  Log   Operator with sub '${subscription}' is installed result: ${result}      console=yes
   IF  not ${result}     FAIL    The operator with sub ${subscription} is not installed.
+
+Get RHODS Subscription Name
+    [Documentation]    Returns the subscription name of RHOAI/ODH operator
+    Log   Get the RHODS subscription name by package name: '${RHODS_PACKAGE_NAME}'    console=yes
+    ${rc}    ${out}=    Run And Return RC And Output
+    ...    oc get sub -A -o json | jq --arg pkgName "${RHODS_PACKAGE_NAME}" -r '.items[] | select(.spec.name==$pkgName) | .metadata.name'
+    Should Be Equal As Integers    ${rc}    0
+    Log   The RHODS Subscription Name is: '${out}'    console=yes
+    RETURN    ${out}
+
+Get RHODS Namespace
+    [Documentation]    Returns the namespace of RHOAI/ODH operator
+    Log   Get the RHODS namespace by package name: '${RHODS_PACKAGE_NAME}'    console=yes
+    ${rc}    ${out}=    Run And Return RC And Output
+    ...    oc get sub -A -o json | jq --arg pkgName "${RHODS_PACKAGE_NAME}" -r '.items[] | select(.spec.name==$pkgName) | .metadata.namespace'
+    Should Be Equal As Integers    ${rc}    0
+    Log   The RHODS Namespace is: '${out}'    console=yes
+    RETURN    ${out}

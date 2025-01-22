@@ -201,8 +201,7 @@ Iterative Image Test
     Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     Page Should Not Contain    403 : Forbidden
-    ${authorization_required} =    Is Service Account Authorization Required
-    IF    ${authorization_required}    Authorize JupyterLab Service Account
+    Verify Service Account Authorization Not Required
     Fix Spawner Status
     Spawn Notebook With Arguments    image=${image}
     Run Cell And Check Output    print("Hello World!")    Hello World!
@@ -223,8 +222,7 @@ CleanUp JupyterHub
     Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     Page Should Not Contain    403 : Forbidden
-    ${authorization_required} =    Is Service Account Authorization Required
-    IF    ${authorization_required}    Authorize JupyterLab Service Account
+    Verify Service Account Authorization Not Required
     # Additional check on running server
     ${control_panel_visible} =  Control Panel Is Visible
     IF  ${control_panel_visible}==True

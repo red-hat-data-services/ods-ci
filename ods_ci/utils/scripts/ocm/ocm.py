@@ -1669,6 +1669,23 @@ if __name__ == "__main__":
     )
     hibernate_cluster_parser.set_defaults(func=ocm_obj.hibernate_cluster)
 
+    # Argument parsers for fail_if_cluster_exists
+    cluster_exists_parser = subparsers.add_parser(
+        "check_cluster_existence",
+        help="Check if the given managed OpenShift Dedicated v4 clusters exists via OCM.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    cluster_exists_parser.add_argument(
+        "--cluster-name",
+        help="osd cluster name",
+        action="store",
+        dest="cluster_name",
+        metavar="",
+        default="",
+        required=True
+    )
+    cluster_exists_parser.set_defaults(func=ocm_obj.is_osd_cluster_exists)
+
     # Argument parsers for resume_cluster
     resume_cluster_parser = subparsers.add_parser(
         "resume_cluster",

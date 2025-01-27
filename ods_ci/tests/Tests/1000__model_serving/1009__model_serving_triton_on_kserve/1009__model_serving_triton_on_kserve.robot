@@ -484,6 +484,7 @@ Test Tensorflow Model Rest Inference Via UI (Triton on Kserve)    # robocop: off
     ...  Delete Serving Runtime Template From CLI    displayed_name=triton-kserve-rest
 
 
+
 *** Keywords ***
 Triton On Kserve Suite Setup
     [Documentation]    Suite setup steps for testing Triton. It creates some test variables

@@ -131,7 +131,7 @@ class OpenshiftClusterManager:
 
     def fail_if_cluster_does_not_exist(self):
         """Exit if cluster does not exist"""
-        # get_osd_cluster_id exit with code 1 if the cluster does not exist
+        # get_osd_cluster_id exits with code 1 if the cluster does not exist
         cluster_id = self.get_osd_cluster_id()
         if "Error" in cluster_id:
             log.info(f"ocm command failed. Cannot tell if {self.cluster_name} cluster exists or not!")

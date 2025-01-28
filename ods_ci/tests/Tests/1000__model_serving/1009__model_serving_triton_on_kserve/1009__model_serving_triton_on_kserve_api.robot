@@ -47,7 +47,7 @@ ${INFERENCE_REST_INPUT_KERAS}=    @tests/Resources/Files/triton/kserve-triton-ke
 ${EXPECTED_INFERENCE_REST_OUTPUT_FILE_KERAS}=        tests/Resources/Files/triton/kserve-triton-keras-rest-output.json
 ${PATTERN}=     https:\/\/([^\/:]+)
 ${PROTOBUFF_FILE}=      tests/Resources/Files/triton/grpc_predict_v2.proto
-${DALI_MODEL_NAME}=   dali
+${DALI_MODEL_NAME}=   daligpu
 ${INFERENCE_REST_INPUT_DALI}=    @tests/Resources/Files/triton/kserve-triton-dali-rest-input.json
 ${EXPECTED_INFERENCE_REST_OUTPUT_FILE_DALI}=        tests/Resources/Files/triton/kserve-triton-dali-rest-output.json
 
@@ -305,7 +305,7 @@ Test Keras Model Rest Inference Via API (Triton on Kserve)    # robocop: off=too
 
 Test Dali Model Rest Inference Via API (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of Dali model in Kserve using Triton
-    [Tags]    Tier2    RHOAIENG-16914   Resources-GPU    NVIDIA-GPUs    RunThisTest
+    [Tags]    Tier2    RHOAIENG-16914   Resources-GPU    NVIDIA-GPUs
     Setup Test Variables    model_name=${DALI_MODEL_NAME}    use_pvc=${FALSE}    use_gpu=${FALSE}
     ...    kserve_mode=${KSERVE_MODE}   model_path=triton_gpu/model_repository/
     Set Project And Runtime    runtime=${KSERVE_RUNTIME_REST_NAME}     protocol=${PROTOCOL}     namespace=${test_namespace}
@@ -322,7 +322,7 @@ Test Dali Model Rest Inference Via API (Triton on Kserve)    # robocop: off=too-
     ...    namespace=${test_namespace}
     # File is not needed anymore after applying
     Remove File    ${INFERENCESERVICE_FILLED_FILEPATH}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${PYTHON_MODEL_NAME}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${DALI_MODEL_NAME}
     ...    namespace=${test_namespace}
     ${pod_name}=  Get Pod Name    namespace=${test_namespace}
     ...    label_selector=serving.kserve.io/inferenceservice=${DALI_MODEL_NAME}
@@ -332,8 +332,10 @@ Test Dali Model Rest Inference Via API (Triton on Kserve)    # robocop: off=too-
         Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}  local_port=${service_port}
         ...    remote_port=${service_port}    process_alias=triton-process
     END
+    ${EXPECTED_INFERENCE_REST_OUTPUT_DALI}=     Load Json File
+    ...    file_path=${EXPECTED_INFERENCE_REST_OUTPUT_FILE_DALI}    as_string=${TRUE}
     Verify Model Inference With Retries   model_name=${DALI_MODEL_NAME}    inference_input=${INFERENCE_REST_INPUT_DALI}
-    ...    expected_inference_output=${EXPECTED_INFERENCE_REST_OUTPUT_FILE_DALI}   project_title=${test_namespace}
+    ...    expected_inference_output=${EXPECTED_INFERENCE_REST_OUTPUT_DALI}   project_title=${test_namespace}
     ...    deployment_mode=Cli  kserve_mode=${KSERVE_MODE}    service_port=${service_port}
     ...    end_point=/v2/models/${model_name}/infer   retries=3
     [Teardown]    Run Keywords

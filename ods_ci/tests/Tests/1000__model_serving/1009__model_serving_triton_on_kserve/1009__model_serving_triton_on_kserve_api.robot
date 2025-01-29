@@ -351,7 +351,7 @@ Test Dali Model Grpc Inference Via API (Triton on Kserve)    # robocop: off=too-
 Suite Setup
     [Documentation]    Suite setup keyword
     Set Library Search Order  SeleniumLibrary
-    #Skip If Component Is Not Enabled    kserve
+    Skip If Component Is Not Enabled    kserve
     RHOSi Setup
     Load Expected Responses
     Set Default Storage Class In GCP    default=ssd-csi

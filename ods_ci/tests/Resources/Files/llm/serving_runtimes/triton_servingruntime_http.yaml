@@ -14,7 +14,7 @@ spec:
         - --http-port=8080
         - --allow-grpc=true
         - --allow-http=true
-      image: nvcr.io/nvidia/tritonserver:23.05-py3
+      image: nvcr.io/nvidia/tritonserver:24.10-py3
       name: kserve-container
       resources:
         limits:

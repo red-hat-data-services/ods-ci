@@ -307,7 +307,7 @@ Test Keras Model Rest Inference Via API (Triton on Kserve)    # robocop: off=too
 
 Test Tensort Model Rest Inference Via API (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of tensort model in Kserve using Triton
-    [Tags]    Tier2    RHOAIENG-16913    RunThisTest
+    [Tags]    Tier2    RHOAIENG-16913
     Setup Test Variables    model_name=${TENSORT_MODEL_NAME}    use_pvc=${FALSE}    use_gpu=${FALSE}
     ...    kserve_mode=${KSERVE_MODE}   model_path=triton_tensort/model_repository/
     Set Project And Runtime    runtime=${KSERVE_RUNTIME_REST_NAME}     protocol=${PROTOCOL}     namespace=${test_namespace}
@@ -391,7 +391,7 @@ Test Dali Model Rest Inference Via API (Triton on Kserve)    # robocop: off=too-
 Suite Setup
     [Documentation]    Suite setup keyword
     Set Library Search Order  SeleniumLibrary
-    Skip If Component Is Not Enabled    kserve
+    # Skip If Component Is Not Enabled    kserve
     RHOSi Setup
     Load Expected Responses
     Set Default Storage Class In GCP    default=ssd-csi

@@ -47,6 +47,9 @@ Run Training operator KFTO error handling test with AMD ROCm image
     ...     TrainingOperator
     Run Training Operator KFTO Test    TestPyTorchJobFailureWithROCm    ${ROCM_TRAINING_IMAGE}
 
+## Note : For the disconnected environment, the KFTO Pytorch multi-node tests added below needs additional temporary workaround as a pre-requisite mentioned here
+## Pre-requisite for disconnected : Update Kubeflow training operator deployment yaml to add additional arg in spec.containers.args : `--pytorch-init-container-image=quay.io/quay/busybox@sha256:92f3298bf80a1ba949140d77987f5de081f010337880cd771f7e7fc928f8c74d`
+
 Run Training operator KFTO_MNIST multi-node single-CPU test with NVIDIA CUDA image
     [Documentation]    Run Go KFTO_MNIST multi-node single-CPU test for Training operator using PyTorch job with NVIDIA CUDA image - It requires 2 cluster-nodes with at least 1 CPUs each
     [Tags]  RHOAIENG-16556

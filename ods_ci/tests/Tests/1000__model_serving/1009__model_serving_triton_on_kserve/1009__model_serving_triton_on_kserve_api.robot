@@ -20,6 +20,9 @@ Test Tags         Kserve
 *** Variables ***
 ${PYTHON_MODEL_NAME}=   python
 ${ONNX_MODEL_NAME}=     densenetonnx
+${USE_GPU}=    ${TRUE}
+${GPU_TYPE}=     NVIDIA
+${RUNTIME_IMAGE}=    ${EMPTY}
 ${EXPECTED_INFERENCE_GRPC_OUTPUT_PYTHON}=       {"modelName":"python","modelVersion":"1","id":"1","outputs":[{"name":"OUTPUT0","datatype":"FP32","shape":["4"]},{"name":"OUTPUT1","datatype":"FP32","shape":["4"]}],"rawOutputContents":["AgAAAAAAAAAAAAAAAAAAAA==","AAQAAAAAAAAAAAAAAAAAAA=="]}
 ${INFERENCE_GRPC_INPUT_PYTHONFILE}=       tests/Resources/Files/triton/kserve-triton-python-grpc-input.json
 ${KSERVE_MODE}=    Serverless   # Serverless
@@ -305,7 +308,7 @@ Test Keras Model Rest Inference Via API (Triton on Kserve)    # robocop: off=too
 Test Dali Model Grpc Inference Via API (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of dali model in Kserve using Triton
     [Tags]    Tier2    RHOAIENG-16914       Resources-GPU    NVIDIA-GPUs     RunThisTest
-    Setup Test Variables    model_name=${DALI_MODEL_NAME}    use_pvc=${FALSE}    use_gpu=${FALSE}
+    Setup Test Variables    model_name=${DALI_MODEL_NAME}    use_pvc=${FALSE}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}   model_path=triton_gpu/model_repository/
     Set Project And Runtime    runtime=${KSERVE_RUNTIME_REST_NAME}     protocol=${PROTOCOL_GRPC}     namespace=${test_namespace}
     ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${DALI_MODEL_NAME}

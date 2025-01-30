@@ -263,7 +263,7 @@ Query Model With GRPCURL
     ...            ${cert}=${False}
     ...            ${connect_timeout}=10
     ...            &{args}
-    ${cmd}=    Set Variable    grpcurl -v -connect-timeout ${connect_timeout}  -d ${json_body}
+    ${cmd}=    Set Variable    grpcurl -connect-timeout ${connect_timeout} -d ${json_body}
     IF    $json_header != None
         ${cmd}=    Catenate    ${cmd}    -H ${json_header}
     END

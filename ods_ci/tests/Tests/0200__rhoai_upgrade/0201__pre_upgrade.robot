@@ -181,7 +181,7 @@ Verify Distributed Workload Metrics Resources By Creating Ray Cluster Workload
     ...    upgrade
     ...    raycluster_sdk_upgrade_test.py::TestMNISTRayClusterUp
     ...    3.11
-    ...    ${RAY_CUDA_IMAGE_3.11}
+    ...    ${RAY_IMAGE_3.11}
     ...    ${CODEFLARE-SDK-RELEASE-TAG}
     Set Library Search Order        SeleniumLibrary
     RHOSi Setup

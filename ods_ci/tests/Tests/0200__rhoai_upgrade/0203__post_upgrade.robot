@@ -203,7 +203,7 @@ Verify Ray Cluster Exists And Monitor Workload Metrics By Submitting Ray Job Aft
     ...    upgrade
     ...    raycluster_sdk_upgrade_test.py::TestMnistJobSubmit
     ...    3.11
-    ...    ${RAY_CUDA_IMAGE_3.11}
+    ...    ${RAY_IMAGE_3.11}
     ...    ${CODEFLARE-SDK-RELEASE-TAG}
     Set Global Variable     ${DW_PROJECT_CREATED}       True        # robocop: disable:replace-set-variable-with-var
     Set Library Search Order        SeleniumLibrary

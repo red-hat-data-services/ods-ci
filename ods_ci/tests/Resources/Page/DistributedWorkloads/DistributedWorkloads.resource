@@ -23,8 +23,8 @@ ${RAY_TORCH_ROCM_IMAGE_3.11}             quay.io/rhoai/ray@sha256:b0e129cd2f4cde
 ${RAY_CUDA_IMAGE_3.9}                    quay.io/modh/ray@sha256:0d715f92570a2997381b7cafc0e224cfa25323f18b9545acfd23bc2b71576d06
 # Corresponds to quay.io/rhoai/ray:2.35.0-py39-cu121-torch24-fa26
 ${RAY_TORCH_CUDA_IMAGE_3.9}              quay.io/rhoai/ray@sha256:158b481b8e9110008d60ac9fb8d156eadd71cb057ac30382e62e3a231ceb39c0
-# Corresponds to quay.io/modh/fms-hf-tuning:v2.1.2
-${FMS_HF_TUNING_IMAGE}                   quay.io/modh/fms-hf-tuning@sha256:6f98907f9095db72932caa54094438eae742145f4b66c28d15887d5303ff1186
+# Corresponds to quay.io/modh/fms-hf-tuning:v2.5.0
+${FMS_HF_TUNING_IMAGE}                   quay.io/modh/fms-hf-tuning@sha256:e54a58825bfcd9047e0db973a4fa02fb44b63446bbbea08d40d80b337b9cd122
 # Corresponds to quay.io/modh/training:py311-cuda121-torch241
 ${CUDA_TRAINING_IMAGE}                   quay.io/modh/training@sha256:b98e373a972ff6f896a9dc054d56920e915675339c02ea7fa123e0f4bbef4d74
 # Corresponds to quay.io/modh/training:py311-rocm61-torch241
@@ -173,6 +173,13 @@ Run Training Operator KFTO Test
     ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
     ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-${KFTO_BINARY_NAME}-logs
     ...    env:CODEFLARE_TEST_TRAINING_IMAGE=${TRAINING_IMAGE}
+    ...    env:AWS_DEFAULT_ENDPOINT=${AWS_DEFAULT_ENDPOINT}
+    ...    env:AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+    ...    env:AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    ...    env:AWS_STORAGE_BUCKET=${AWS_STORAGE_BUCKET}
+    ...    env:AWS_STORAGE_BUCKET_MNIST_DIR=${AWS_STORAGE_BUCKET_MNIST_DIR}
+    ...    env:PIP_INDEX_URL=${PIP_INDEX_URL}
+    ...    env:PIP_TRUSTED_HOST=${PIP_TRUSTED_HOST}
     Log To Console    ${result.stdout}
     Check missing Go test    ${result.stdout}
     IF    ${result.rc} != 0

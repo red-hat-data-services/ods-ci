@@ -317,7 +317,7 @@ Test Dali Model Grpc Inference Via API (Triton on Kserve)    # robocop: off=too-
     Compile Inference Service YAML    isvc_name=${DALI_MODEL_NAME}
     ...    sa_name=models-bucket-sa
     ...    model_storage_uri=${storage_uri}
-    ...    model_format=onnx  serving_runtime=${KSERVE_RUNTIME_REST_NAME}
+    ...    model_format=python  serving_runtime=${KSERVE_RUNTIME_REST_NAME}
     ...    version="1"
     ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}

@@ -263,7 +263,7 @@ Query Model With GRPCURL
     ...            ${cert}=${False}
     ...            ${connect_timeout}=10
     ...            &{args}
-    ${cmd}=    Set Variable    grpcurl -connect-timeout ${connect_timeout} -d ${json_body}
+    ${cmd}=    Set Variable    grpcurl -connect-timeout ${connect_timeout} -d '${json_body}'
     IF    $json_header != None
         ${cmd}=    Catenate    ${cmd}    -H ${json_header}
     END
@@ -293,7 +293,7 @@ Query Model With GRPCURL
     IF   '${background}' == '${NONE}'
           # ${rc}    ${response}=    Run And Return Rc And Output    ${cmd}
           Log    ${cmd}    console=yes
-          ${query_process}=    Run Process    command=${cmd}    stderr=STDOUT  shell=yes
+          ${query_process}=    Run Process    command=${cmd}    stderr=STDOUT  shell=yes    timeout=30s    # Add timeout to prevent hanging
           # Run Keyword And Continue On Failure    Should Be Equal As Integers    ${query_process.rc}    ${0}
           ${rc}=    Set Variable    ${query_process.rc}
           Run Keyword And Continue On Failure    Should Be Equal As Integers    ${rc}    ${0}

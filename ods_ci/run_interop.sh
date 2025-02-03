@@ -83,7 +83,7 @@ elif [[ ${TEST_SUITE} == 'Post-Upgrade' ]]; then
   TEST_CASE_FILE="tests/Tests/0200__rhoai_upgrade/0203__post_upgrade.robot"
 fi
 
-if [[ ${TEST_SUITE =~ "Upgrade" ]]; then
+if [[ ${TEST_SUITE} =~ "Upgrade" ]]; then
   poetry run robot -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE}
 elif
   poetry run robot --include ${TEST_SUITE} --exclude "ExcludeOnRHOAI" -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE}

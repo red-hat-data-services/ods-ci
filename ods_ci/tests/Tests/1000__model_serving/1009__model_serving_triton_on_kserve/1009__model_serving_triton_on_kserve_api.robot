@@ -61,7 +61,7 @@ ${EXPECTED_INFERENCE_REST_OUTPUT_FILE_DALI}=        tests/Resources/Files/triton
 *** Test Cases ***
 Test Python Model Rest Inference Via API (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of python model in Kserve using Triton
-    [Tags]    Tier2    RHOAIENG-16912
+    [Tags]    Tier2    RHOAIENG-16912    RunThisTest
     Setup Test Variables    model_name=${PYTHON_MODEL_NAME}    use_pvc=${FALSE}    use_gpu=${FALSE}
     ...    kserve_mode=${KSERVE_MODE}   model_path=triton/model_repository/
     Set Project And Runtime    runtime=${KSERVE_RUNTIME_REST_NAME}     protocol=${PROTOCOL}     namespace=${test_namespace}
@@ -228,7 +228,7 @@ Test Onnx Model Grpc Inference Via API (Triton on Kserve)    # robocop: off=too-
 
 Test Pytorch Model Rest Inference Via API (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of pytorch model in Kserve using Triton
-    [Tags]    Tier2    RHOAIENG-16909
+    [Tags]    Tier2    RHOAIENG-16909    RunThisTest
     Setup Test Variables    model_name=${PYTORCH_MODEL_NAME}    use_pvc=${FALSE}    use_gpu=${FALSE}
     ...    kserve_mode=${KSERVE_MODE}   model_path=triton/model_repository/
     Set Project And Runtime    runtime=${KSERVE_RUNTIME_REST_NAME}     protocol=${PROTOCOL}     namespace=${test_namespace}
@@ -269,7 +269,7 @@ Test Pytorch Model Rest Inference Via API (Triton on Kserve)    # robocop: off=t
 
 Test Keras Model Rest Inference Via API (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of keras model in Kserve using Triton
-    [Tags]    Tier2    RHOAIENG-16911
+    [Tags]    Tier2    RHOAIENG-16911    RunThisTest
     Setup Test Variables    model_name=${PYTORCH_MODEL_NAME}    use_pvc=${FALSE}    use_gpu=${FALSE}
     ...    kserve_mode=${KSERVE_MODE}   model_path=tritonkeras/model_repository/
     Set Project And Runtime    runtime=${KSERVE_RUNTIME_REST_NAME}     protocol=${PROTOCOL}     namespace=${test_namespace}

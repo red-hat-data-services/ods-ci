@@ -164,6 +164,31 @@ Test RHOAI Dashboard Metrics By Code Are Defined
     Should Be True      ${metrics_by_code_2xx} == ${metrics_2xx}
     Should Be True      ${metrics_total} == ${metrics_by_code_5xx}+${metrics_by_code_2xx}
 
+Test RHOAI Dashboard Metrics Are Defined
+    [Documentation]   Verifies the RHOAI Dashboard Metrics Are Defined and show meaningful values
+    [Tags]    Sanity
+    ...       Tier1
+    ...       ODS-194
+    ...       RHOAIENG-13260
+    ...       Monitoring
+    Skip If RHODS Is Self-Managed
+    ${response} =    Prometheus.Run Query
+    ...    pm_url=${RHODS_PROMETHEUS_URL}
+    ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
+    ...    pm_query={job="user_facing_endpoints_status_rhods_dashboard"}
+
+    ${metrics_names} =   Run  echo '${response.text}' | jq .data.result[].metric.__name__
+    @{expected_metric_names} =    Create List  probe_dns_lookup_time_seconds  probe_duration_seconds  probe_failed_due_to_regex
+    ...                                     probe_http_content_length  probe_http_duration_seconds  probe_http_last_modified_timestamp_seconds
+    ...                                     probe_http_redirects  probe_http_ssl  probe_http_status_code  probe_http_uncompressed_body_length
+    ...                                     probe_http_version  probe_ip_addr_hash  probe_ip_protocol  probe_ssl_earliest_cert_expiry
+    ...                                     probe_ssl_last_chain_expiry_timestamp_seconds  probe_ssl_last_chain_info  probe_success
+    ...                                     probe_tls_version_info  scrape_duration_seconds  scrape_samples_post_metric_relabeling
+    ...                                     scrape_samples_scraped  scrape_series_added
+
+    FOR    ${metric}    IN    @{expected_metric_names}
+        Should Contain    ${metrics_names}    ${metric}
+    END
 
 *** Keywords ***
 Begin Metrics Web Test

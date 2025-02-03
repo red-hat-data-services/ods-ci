@@ -206,7 +206,7 @@ DataScienceCluster Should Fail Because Service Mesh Operator Is Not Installed
     ${return_code}    ${output}=    Run And Return Rc And Output
     ...    oc get DataScienceCluster ${DSC_NAME} -n ${OPERATOR_NS} -o json | jq -r '.status.conditions | map(.message) | join(",")'    #robocop:disable
     Should Be Equal As Integers  ${return_code}   0   msg=Error retrieved DSC conditions
-    Should Contain    ${output}    operator servicemeshoperator not found. Please install the operator before enabling kserve component    #robocop:disable
+    Should Contain    ${output}    ServiceMesh operator must be installed for this component's configuration    #robocop:disable
 
     ${rc}    ${logs}=    Run And Return Rc And Output
     ...    oc logs -l ${OPERATOR_LABEL_SELECTOR} -c ${OPERATOR_POD_CONTAINER_NAME} -n ${OPERATOR_NS} --ignore-errors
@@ -219,4 +219,4 @@ DataScienceCluster Should Fail Because Serverless Operator Is Not Installed
     ${return_code}    ${output}=    Run And Return Rc And Output
     ...    oc get DataScienceCluster ${DSC_NAME} -n ${OPERATOR_NS} -o json | jq -r '.status.conditions | map(.message) | join(",")'    #robocop:disable
     Should Be Equal As Integers  ${return_code}   0   msg=Error retrieved DSC conditions
-    Should Contain    ${output}    operator serverless-operator not found. Please install the operator before enabling kserve component    #robocop:disable
+    Should Contain    ${output}    Serverless operator must be installed for this component's configuration    #robocop:disable

@@ -8,6 +8,26 @@ export ROBOT_EXTRA_ARGS="-i Smoke --dryrun"
 TEST_CASE_FILE="tests/Tests"
 TEST_VARIABLES_FILE="test-variables.yml"
 
+if [[ -z "${TEST_SUITE}" ]]; then
+  echo "Error: TEST_SUITE not set. Please define it. Exiting.."
+  exit 1
+fi
+
+if [[ -z "${ARTIFACT_DIR}" ]]; then
+  echo "ARTIFACT_DIR is empty. Using  default value /tmp."
+  ARTIFACT_DIR="/tmp"
+fi
+
+if [[ ${TEST_SUITE} == "Post-Upgrade" ]]; then
+  echo "Retrive test config file..."
+  cp ${SHARED_DIR}/test-variables.yml test-variables.yml
+
+  echo "Running post-upgrade testing"
+  TEST_CASE_FILE="tests/Tests/0200__rhoai_upgrade/0203__post_upgrade.robot"
+  poetry run robot -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE}
+  exit $?
+fi
+
 echo "Install IDP users and map them to test config file"
 ./build/install_idp.sh
 
@@ -65,14 +85,13 @@ if [ $retVal -ne 0 ]; then
     exit "$retVal"
 fi
 
-if [[ -z "${TEST_SUITE}" ]]; then
-  echo "Define TEST_SUITE"
-  exit 1
-fi
+if [[ ${TEST_SUITE} == "Pre-Upgrade" ]]; then
+  echo "Save test config file..."
+  cp test-variables.yml ${SHARED_DIR}/test-variables.yml
 
-if [[ -z "${ARTIFACT_DIR}" ]]; then
-  echo "Define ARTIFACT_DIR"
-  ARTIFACT_DIR="/tmp"
+  echo "Running pre-upgrade testing"
+  TEST_CASE_FILE="tests/Tests/0200__rhoai_upgrade/0201__pre_upgrade.robot"
+  poetry run robot -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE} || true
+else
+  poetry run robot --include ${TEST_SUITE} --exclude "ExcludeOnRHOAI" --exclude "AutomationBug" -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE}
 fi
-
-poetry run robot --include ${TEST_SUITE} --exclude "ExcludeOnRHOAI" -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE}

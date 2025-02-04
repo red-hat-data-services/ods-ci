@@ -48,6 +48,9 @@ ${EXPECTED_INFERENCE_REST_OUTPUT_FILE_KERAS}=        tests/Resources/Files/trito
 ${TENSORT_MODEL_NAME}=    densenetplan
 ${INFERENCE_REST_INPUT_TENSORT}=    @tests/Resources/Files/triton/kserve-triton-tensort-rest-input.json
 ${EXPECTED_INFERENCE_REST_OUTPUT_FILE_TENSORT}=        tests/Resources/Files/triton/kserve-triton-tensort-rest-output.json
+${FIL_MODEL_NAME}=    fil
+${INFERENCE_REST_INPUT_FIL}=    @tests/Resources/Files/triton/kserve-triton-fil-rest-input.json
+${EXPECTED_INFERENCE_REST_OUTPUT_FILE_FIL}=        tests/Resources/Files/triton/kserve-triton-fil-rest-output.json
 ${PATTERN}=     https:\/\/([^\/:]+)
 ${PROTOBUFF_FILE}=      tests/Resources/Files/triton/grpc_predict_v2.proto
 ${DALI_MODEL_NAME}=   daligpu
@@ -338,6 +341,47 @@ Test Tensort Model Rest Inference Via API (Triton on Kserve)    # robocop: off=t
     ...    file_path=${EXPECTED_INFERENCE_REST_OUTPUT_FILE_TENSORT}    as_string=${TRUE}
     Verify Model Inference With Retries   model_name=${TENSORT_MODEL_NAME}    inference_input=${INFERENCE_REST_INPUT_TENSORT}
     ...    expected_inference_output=${EXPECTED_INFERENCE_REST_OUTPUT_TENSORT}   project_title=${test_namespace}
+    ...    deployment_mode=Cli  kserve_mode=${KSERVE_MODE}    service_port=${service_port}
+    ...    end_point=/v2/models/${model_name}/infer   retries=3
+    [Teardown]    Run Keywords
+    ...    Clean Up Test Project    test_ns=${test_namespace}
+    ...    isvc_names=${models_names}    wait_prj_deletion=${FALSE}    kserve_mode=${KSERVE_MODE}
+    ...    AND
+    ...    Run Keyword If    "${KSERVE_MODE}"=="RawDeployment"    Terminate Process    triton-process    kill=true
+
+Test fil Model Rest Inference Via API (Triton on Kserve)    # robocop: off=too-long-test-case
+    [Documentation]    Test the deployment of fil model in Kserve using Triton
+    [Tags]    Tier2    RHOAIENG-16915
+    Setup Test Variables    model_name=${FIL_MODEL_NAME}    use_pvc=${FALSE}    use_gpu=${FALSE}
+    ...    kserve_mode=${KSERVE_MODE}   model_path=triton/model_repository/
+    Set Project And Runtime    runtime=${KSERVE_RUNTIME_REST_NAME}     protocol=${PROTOCOL}     namespace=${test_namespace}
+    ...    download_in_pvc=${DOWNLOAD_IN_PVC}    model_name=${FIL_MODEL_NAME}
+    ...    storage_size=100Mi    memory_request=100Mi
+    ${requests}=    Create Dictionary    memory=1Gi
+    Compile Inference Service YAML    isvc_name=${FIL_MODEL_NAME}
+    ...    sa_name=models-bucket-sa
+    ...    model_storage_uri=${storage_uri}
+    ...    model_format=xgboost  serving_runtime=${KSERVE_RUNTIME_REST_NAME}
+    ...    version="1"
+    ...    limits_dict=${limits}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
+    Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
+    ...    namespace=${test_namespace}
+    # File is not needed anymore after applying
+    Remove File    ${INFERENCESERVICE_FILLED_FILEPATH}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${FIL_MODEL_NAME}
+    ...    namespace=${test_namespace}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${FIL_MODEL_NAME}
+    ${service_port}=    Extract Service Port    service_name=${FIL_MODEL_NAME}-predictor    protocol=TCP
+    ...    namespace=${test_namespace}
+    IF   "${KSERVE_MODE}"=="RawDeployment"
+        Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}  local_port=${service_port}
+        ...    remote_port=${service_port}    process_alias=triton-process
+    END
+    ${EXPECTED_INFERENCE_REST_OUTPUT_FIL}=     Load Json File
+    ...    file_path=${EXPECTED_INFERENCE_REST_OUTPUT_FILE_FIL}    as_string=${TRUE}
+    Verify Model Inference With Retries   model_name=${FIL_MODEL_NAME}    inference_input=${INFERENCE_REST_INPUT_FIL}
+    ...    expected_inference_output=${EXPECTED_INFERENCE_REST_OUTPUT_FIL}   project_title=${test_namespace}
     ...    deployment_mode=Cli  kserve_mode=${KSERVE_MODE}    service_port=${service_port}
     ...    end_point=/v2/models/${model_name}/infer   retries=3
     [Teardown]    Run Keywords

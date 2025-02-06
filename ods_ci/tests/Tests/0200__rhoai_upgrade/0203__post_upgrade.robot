@@ -263,7 +263,7 @@ Run Training Operator FMS Run Sleep PyTorchJob Test Use Case
 
 Verify that the must-gather image provides RHODS logs and info
     [Documentation]    Tests the must-gather image for ODH/RHOAI after upgrading
-    [Tags]      Upgrade
+    [Tags]      Upgrade    ODS-505    ExcludeOnDisconnected
     Get Must-Gather Logs
     Verify Logs For ${APPLICATIONS_NAMESPACE}
     IF    "${PRODUCT}" == "RHODS"

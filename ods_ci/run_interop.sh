@@ -8,6 +8,14 @@ export ROBOT_EXTRA_ARGS="-i Smoke --dryrun"
 TEST_CASE_FILE="tests/Tests"
 TEST_VARIABLES_FILE="test-variables.yml"
 
+if [[ ${TEST_SUITE} == "Post-Upgrade" ]]; then
+  echo "Running post-upgrade testing"
+  TEST_CASE_FILE="tests/Tests/0200__rhoai_upgrade/0203__post_upgrade.robot"
+  poetry run robot -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE}
+  exit $?
+fi
+
+
 echo "Install IDP users and map them to test config file"
 ./build/install_idp.sh
 
@@ -75,16 +83,11 @@ if [[ -z "${ARTIFACT_DIR}" ]]; then
   ARTIFACT_DIR="/tmp"
 fi
 
-if [[ ${TEST_SUITE} == 'Pre-Upgrade' ]]; then
+if [[ ${TEST_SUITE} == "Pre-Upgrade" ]]; then
   echo "Running pre-upgrade testing"
   TEST_CASE_FILE="tests/Tests/0200__rhoai_upgrade/0201__pre_upgrade.robot"
-elif [[ ${TEST_SUITE} == 'Post-Upgrade' ]]; then
-  echo "Running post-upgrade testing"
-  TEST_CASE_FILE="tests/Tests/0200__rhoai_upgrade/0203__post_upgrade.robot"
-fi
-
-if [[ ${TEST_SUITE} =~ "Upgrade" ]]; then
   poetry run robot -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE} || true
 else
   poetry run robot --include ${TEST_SUITE} --exclude "ExcludeOnRHOAI" -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE}
 fi
+

@@ -9,6 +9,9 @@ TEST_CASE_FILE="tests/Tests"
 TEST_VARIABLES_FILE="test-variables.yml"
 
 if [[ ${TEST_SUITE} == "Post-Upgrade" ]]; then
+  echo "Retrive test config file..."
+  cp ${SHARED_DIR}/test-variables.yml test-variables.yml
+
   echo "Running post-upgrade testing"
   TEST_CASE_FILE="tests/Tests/0200__rhoai_upgrade/0203__post_upgrade.robot"
   poetry run robot -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE}
@@ -84,6 +87,9 @@ if [[ -z "${ARTIFACT_DIR}" ]]; then
 fi
 
 if [[ ${TEST_SUITE} == "Pre-Upgrade" ]]; then
+  echo "Save test config file..."
+  cp test-variables.yml ${SHARED_DIR}/test-variables.yml
+
   echo "Running pre-upgrade testing"
   TEST_CASE_FILE="tests/Tests/0200__rhoai_upgrade/0201__pre_upgrade.robot"
   poetry run robot -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE} || true

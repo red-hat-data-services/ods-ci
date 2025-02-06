@@ -38,12 +38,21 @@ Install RHODS
   [Arguments]  ${cluster_type}     ${image_url}
   Install Kserve Dependencies
   Clone OLM Install Repo
-  IF  "${PRODUCT}" == "ODH"
-      ${csv_display_name} =    Set Variable    ${ODH_CSV_DISPLAY}
-  ELSE
-      ${csv_display_name} =    Set Variable    ${RHODS_CSV_DISPLAY}
+  IF   "${OPERATOR_NAMESPACE}" != "redhat-ods-operator" and "${OPERATOR_NAMESPACE}" != "opendatahub-operators"
+      # If the operator namespace is not the default one, we need to check if exists
+      # and create if not prior to installing ODH/RHOAI. Adding a custom label for automation purposes.
+      Configure Custom Operator Namespace    ${OPERATOR_NAMESPACE}
   END
-  IF  "${cluster_type}" == "selfmanaged"
+  IF   "${APPLICATIONS_NAMESPACE}" != "redhat-ods-applications" and "${APPLICATIONS_NAMESPACE}" != "opendatahub"
+      # If the applications namespace is not the default one, we need to apply some steps prior to installing ODH/RHOAI
+      Configure Custom Applications Namespace    ${APPLICATIONS_NAMESPACE}
+  END
+  IF   "${PRODUCT}" == "ODH"
+       ${csv_display_name} =    Set Variable    ${ODH_CSV_DISPLAY}
+  ELSE
+       ${csv_display_name} =    Set Variable    ${RHODS_CSV_DISPLAY}
+  END
+  IF   "${cluster_type}" == "selfmanaged"
       IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "Cli"
              Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
       ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "OperatorHub"
@@ -62,7 +71,7 @@ Install RHODS
       ELSE
            FAIL    Provided test environment and install type is not supported
       END
-  ELSE IF  "${cluster_type}" == "managed"
+  ELSE IF   "${cluster_type}" == "managed"
       IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "Cli" and "${UPDATE_CHANNEL}" == "odh-nightlies"
           # odh-nightly is not build for Managed, it is only possible for Self-Managed
           Set Global Variable    ${OPERATOR_NAMESPACE}    openshift-marketplace
@@ -85,18 +94,31 @@ Verify RHODS Installation
   Wait For Pods Status  namespace=${OPERATOR_NAMESPACE}  timeout=1200
   Log  Verified ${OPERATOR_NAMESPACE}  console=yes
 
-  IF  "${UPDATE_CHANNEL}" == "odh-nightlies" or "${cluster_type}" != "managed"
-    IF  "${PRODUCT}" == "ODH"
-        Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
-        IF    "${TEST_ENV.lower()}" == "crc"
-            ${timeout_in_seconds} =   Set Variable   180
-        ELSE
-            ${timeout_in_seconds} =   Set Variable   60
+  IF   "${APPLICATIONS_NAMESPACE}" != "redhat-ods-applications" and "${APPLICATIONS_NAMESPACE}" != "opendatahub"
+      # If the applications namespace is not the default one, we need to add a new workflow where we need to wait the
+      # DSCI to be deleted and recreate it using the proper applications namespace.
+      # This is needed because by default, the DSCI is automatically created pointing to the default apps namespace.
+      Wait Until Keyword Succeeds    2 min    0 sec
+      ...        Run And Return Rc      oc get DSCInitialization default-dsci
+      ${delete_dsci_rc} =    Run And Return Rc    oc delete DSCInitialization --all --ignore-not-found
+      IF   ${delete_dsci_rc} == 0
+           Log To Console    DSCInitialization CRs successfully deleted
+      ELSE
+           FAIL     Cannot delete DSCInitialization CRs
+      END
+      Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
+      Wait For DSCInitialization CustomResource To Be Ready    timeout=180
+  ELSE
+      #    If the applications namespace is the default one, we keep the same workflow as it was
+      IF   "${UPDATE_CHANNEL}" == "odh-nightlies" or "${cluster_type}" != "managed"
+        IF   "${PRODUCT}" == "ODH"
+            Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
+            Wait For DSCInitialization CustomResource To Be Ready    timeout=180
         END
-        Wait For DSCInitialization CustomResource To Be Ready    timeout=${timeout_in_seconds}
-    END
-    Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
+      END
   END
+
+  Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
 
   ${dashboard} =    Is Component Enabled    dashboard    ${DSC_NAME}
   IF    "${dashboard}" == "true"
@@ -515,6 +537,48 @@ Install Kserve Dependencies
          Install Serverless Operator Via Cli
     ELSE
          Log To Console    message=Serverless Operator is already installed
+    END
+
+Configure Custom Operator Namespace
+    [Documentation]    Configures a custom namespace to be able to be used as the ODH/RHOAI operator namespace.
+    ...                If this namespace does not exist, its created.
+    [Arguments]    ${namespace}
+    ${rc}=    Run And Return Rc    oc get namespace ${namespace}
+    IF  ${rc} != ${0}
+         ${create_ns_rc} =    Run And Return Rc    oc create namespace ${namespace}
+         IF   ${create_ns_rc} == 0
+                Log To Console    Namespace ${namespace} created successfully
+         ELSE
+                FAIL     Can not create namespace ${namespace}
+         END
+    END
+    ${add_label_rc} =    Run And Return Rc     oc label namespace ${namespace} opendatahub.io/custom-namespace=true
+    IF   ${add_label_rc} == 0
+            Log To Console    Label added to namespace ${namespace} successfully
+    ELSE
+            FAIL     Can not add label to namespace ${namespace}
+    END
+
+Configure Custom Applications Namespace
+    [Documentation]    Configures a custom namespace to be able to be used as the ODH/RHOAI applications namespace.
+    ...                If this namespace does not exist, its created.
+    [Arguments]    ${namespace}
+    ${rc}=    Run And Return Rc    oc get namespace ${namespace}
+    IF  ${rc} != ${0}
+        ${create_ns_rc} =    Run And Return Rc    oc create namespace ${namespace}
+        IF   ${create_ns_rc} == 0
+            Log To Console    Namespace ${namespace} created successfully
+        ELSE
+            FAIL     Can not create namespace ${namespace}
+        END
+    END
+
+    # Next step, add the label opendatahub.io/application-namespace: true to the namespace
+    ${add_label_rc} =    Run And Return Rc     oc label namespace ${namespace} opendatahub.io/application-namespace=true
+    IF   ${add_label_rc} == 0
+            Log To Console    Label added to namespace ${namespace} successfully
+    ELSE
+            FAIL     Can not add label to namespace ${namespace}
     END
 
 Set Component State

@@ -23,7 +23,6 @@ ${CATALOG_SOURCE}               redhat-operators
 Can Install RHODS Operator
   [Tags]  install
   IF  "${PRODUCT}" == "ODH"
-      Set Global Variable  ${OPERATOR_NAMESPACE}  opendatahub-operators
       Set Global Variable  ${OPERATOR_NAME_LABEL}  opendatahub-operator
       Set Global Variable  ${MODEL_REGISTRY_NAMESPACE}    odh-model-registries
       IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
@@ -44,7 +43,6 @@ Can Install RHODS Operator
 Can Uninstall RHODS Operator
   [Tags]  uninstall
   IF  "${PRODUCT}" == "ODH"
-      Set Global Variable  ${OPERATOR_NAMESPACE}  opendatahub-operators
       IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
           Set Global Variable  ${OPERATOR_NAME}  rhods-operator
       ELSE

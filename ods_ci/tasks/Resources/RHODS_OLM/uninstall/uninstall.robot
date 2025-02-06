@@ -15,8 +15,7 @@ ${ISTIO_SYSTEM_NS}=       istio-system
 
 *** Keywords ***
 Uninstalling RHODS Operator
-  ${is_operator_installed} =  Is RHODS Installed
-  IF  ${is_operator_installed}  Run Keywords
+  Run Keywords
   ...  Log  Uninstalling RHODS operator in ${cluster_type}  console=yes  AND
   ...  Uninstall RHODS
 

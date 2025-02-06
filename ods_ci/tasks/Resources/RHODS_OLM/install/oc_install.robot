@@ -31,19 +31,25 @@ ${AUTHORINO_SUB_NAME}=    authorino-operator
 ${AUTHORINO_CHANNEL_NAME}=  tech-preview-v1
 ${RHODS_CSV_DISPLAY}=    Red Hat OpenShift AI
 ${ODH_CSV_DISPLAY}=    Open Data Hub Operator
+${DEFAULT_OPERATOR_NAMESPACE_RHOAI}=    redhat-ods-operator
+${DEFAULT_OPERATOR_NAMESPACE_ODH}=    opendatahub-operators
+${DEFAULT_APPLICATIONS_NAMESPACE_RHOAI}=    redhat-ods-applications
+${DEFAULT_APPLICATIONS_NAMESPACE_ODH}=    opendatahub
 ${CUSTOM_MANIFESTS}=    ${EMPTY}
+${IS_NOT_PRESENT}=      1
 
 *** Keywords ***
 Install RHODS
   [Arguments]  ${cluster_type}     ${image_url}
   Install Kserve Dependencies
   Clone OLM Install Repo
-  IF  "${PRODUCT}" == "ODH"
-      ${csv_display_name} =    Set Variable    ${ODH_CSV_DISPLAY}
+  Configure Custom Namespaces
+  IF   "${PRODUCT}" == "ODH"
+       ${csv_display_name} =    Set Variable    ${ODH_CSV_DISPLAY}
   ELSE
-      ${csv_display_name} =    Set Variable    ${RHODS_CSV_DISPLAY}
+       ${csv_display_name} =    Set Variable    ${RHODS_CSV_DISPLAY}
   END
-  IF  "${cluster_type}" == "selfmanaged"
+  IF   "${cluster_type}" == "selfmanaged"
       IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "Cli"
              Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
       ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "OperatorHub"
@@ -62,7 +68,7 @@ Install RHODS
       ELSE
            FAIL    Provided test environment and install type is not supported
       END
-  ELSE IF  "${cluster_type}" == "managed"
+  ELSE IF   "${cluster_type}" == "managed"
       IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "Cli" and "${UPDATE_CHANNEL}" == "odh-nightlies"
           # odh-nightly is not build for Managed, it is only possible for Self-Managed
           Set Global Variable    ${OPERATOR_NAMESPACE}    openshift-marketplace
@@ -85,17 +91,17 @@ Verify RHODS Installation
   Wait For Pods Status  namespace=${OPERATOR_NAMESPACE}  timeout=1200
   Log  Verified ${OPERATOR_NAMESPACE}  console=yes
 
-  IF  "${UPDATE_CHANNEL}" == "odh-nightlies" or "${cluster_type}" != "managed"
-    IF  "${PRODUCT}" == "ODH"
-        Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
-        IF    "${TEST_ENV.lower()}" == "crc"
-            ${timeout_in_seconds} =   Set Variable   180
-        ELSE
-            ${timeout_in_seconds} =   Set Variable   60
-        END
-        Wait For DSCInitialization CustomResource To Be Ready    timeout=${timeout_in_seconds}
-    END
-    Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
+  IF   "${cluster_type}" == "managed"
+       IF   "${PRODUCT}" == "ODH"
+            Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
+            Wait For DSCInitialization CustomResource To Be Ready    timeout=180
+            Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
+       END
+  ELSE
+      IF  "${APPLICATIONS_NAMESPACE}" != "${DEFAULT_APPLICATIONS_NAMESPACE_RHOAI}" and "${APPLICATIONS_NAMESPACE}" != "${DEFAULT_APPLICATIONS_NAMESPACE_ODH}"
+          Create DSCI With Custom Namespaces
+      END
+      Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
   END
 
   ${dashboard} =    Is Component Enabled    dashboard    ${DSC_NAME}
@@ -191,7 +197,7 @@ Verify RHODS Installation
      Log  Verified Monitoring NS: ${MONITORING_NAMESPACE}  console=yes
   END
 
-Verify Builds In redhat-ods-applications
+Verify Builds In Application Namespace
   Log  Verifying Builds  console=yes
   Wait Until Keyword Succeeds  45 min  15 s  Verify Builds Number  7
   Wait Until Keyword Succeeds  45 min  15 s  Verify Builds Status  Complete
@@ -287,7 +293,7 @@ Apply DataScienceCluster CustomResource
         Log To Console    ${output}
         Should Be Equal As Integers  ${return_code}  0  msg=Error detected while applying DSC CR
         #Remove File    ${file_path}dsc_apply.yml
-        Wait For DSC Conditions Reconciled    ${OPERATOR_NS}     ${DSC_NAME}
+        Wait For DSC Conditions Reconciled    ${OPERATOR_NAMESPACE}     ${DSC_NAME}
     ELSE
         Log to Console    Requested Configuration:
         FOR    ${cmp}    IN    @{COMPONENT_LIST}
@@ -516,6 +522,68 @@ Install Kserve Dependencies
     ELSE
          Log To Console    message=Serverless Operator is already installed
     END
+
+Create Namespace With Label
+    [Documentation]    Creates a namespace and adds a specific label to it
+    [Arguments]    ${namespace}   ${label}
+    ${rc}=    Run And Return Rc    oc get namespace ${namespace}
+    IF  ${rc} != ${0}
+         ${create_ns_rc} =    Run And Return Rc    oc create namespace ${namespace}
+         IF   ${create_ns_rc} == 0
+                Log To Console    Namespace ${namespace} created successfully
+         ELSE
+                FAIL     Can not create namespace ${namespace}
+         END
+    END
+    ${add_label_rc} =    Run And Return Rc     oc label namespace ${namespace} ${label}
+    IF   ${add_label_rc} == 0
+            Log To Console    Label ${label} added to namespace ${namespace} successfully
+    ELSE
+            FAIL     Can not add label ${label} to namespace ${namespace}
+    END
+
+Configure Custom Operator Namespace
+    [Documentation]    Configures a custom namespace to be able to be used as the ODH/RHOAI operator namespace.
+    ...                If this namespace does not exist, its created.
+    [Arguments]    ${namespace}
+    Create Namespace With Label    ${namespace}    opendatahub.io/custom-namespace=true
+
+Configure Custom Applications Namespace
+    [Documentation]    Configures a custom namespace to be able to be used as the ODH/RHOAI applications namespace.
+    ...                If this namespace does not exist, its created.
+    [Arguments]    ${namespace}
+    Create Namespace With Label    ${namespace}    opendatahub.io/application-namespace=true
+
+Configure Custom Namespaces
+    [Documentation]    Configures both operator and application namespaces when they are setted as custom ones
+    IF   "${OPERATOR_NAMESPACE}" != "${DEFAULT_OPERATOR_NAMESPACE_RHOAI}" and "${OPERATOR_NAMESPACE}" != "${DEFAULT_OPERATOR_NAMESPACE_ODH}"
+       # If the operator namespace is not the default one, we need to check if exists
+       # and create if not prior to installing ODH/RHOAI. Adding a custom label for automation purposes.
+       Configure Custom Operator Namespace    ${OPERATOR_NAMESPACE}
+    END
+    IF   "${APPLICATIONS_NAMESPACE}" != "${DEFAULT_APPLICATIONS_NAMESPACE_RHOAI}" and "${APPLICATIONS_NAMESPACE}" != "${DEFAULT_APPLICATIONS_NAMESPACE_ODH}"
+       # If the applications namespace is not the default one, we need to apply some steps prior to installing ODH/RHOAI
+       Configure Custom Applications Namespace    ${APPLICATIONS_NAMESPACE}
+    END
+
+Create DSCI With Custom Namespaces
+    [Documentation]    Recreates a DSCI pointing to a custom applications namespace
+    # If the applications namespace is not the default one, we need to add a new workflow where we need to wait the
+    # DSCI to be deleted and recreate it using the proper applications namespace.
+    # This is needed because by default, the DSCI is automatically created pointing to the default apps namespace.
+    Wait Until Keyword Succeeds    2 min    0 sec
+    ...        Run And Return Rc      oc get DSCInitialization default-dsci
+    ${delete_dsci_rc} =    Run And Return Rc    oc delete DSCInitialization --all --ignore-not-found
+    IF   ${delete_dsci_rc} == 0
+         Log To Console    DSCInitialization CRs successfully deleted
+    ELSE
+         FAIL     Cannot delete DSCInitialization CRs
+    END
+    Wait Until Keyword Succeeds    1 min    0 sec
+    ...    Is Resource Present    DSCInitialization    ${DSCI_NAME}
+    ...    ${OPERATOR_NAMESPACE}      ${IS_NOT_PRESENT}
+    Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
+    Wait For DSCInitialization CustomResource To Be Ready    timeout=180
 
 Set Component State
     [Documentation]    Set component state in Data Science Cluster (state should be Managed or Removed)

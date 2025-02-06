@@ -8,6 +8,16 @@ export ROBOT_EXTRA_ARGS="-i Smoke --dryrun"
 TEST_CASE_FILE="tests/Tests"
 TEST_VARIABLES_FILE="test-variables.yml"
 
+if [[ -z "${TEST_SUITE}" ]]; then
+  echo "Define TEST_SUITE"
+  exit 1
+fi
+
+if [[ -z "${ARTIFACT_DIR}" ]]; then
+  echo "Define ARTIFACT_DIR"
+  ARTIFACT_DIR="/tmp"
+fi
+
 if [[ ${TEST_SUITE} == "Post-Upgrade" ]]; then
   echo "Retrive test config file..."
   cp ${SHARED_DIR}/test-variables.yml test-variables.yml
@@ -17,7 +27,6 @@ if [[ ${TEST_SUITE} == "Post-Upgrade" ]]; then
   poetry run robot -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE}
   exit $?
 fi
-
 
 echo "Install IDP users and map them to test config file"
 ./build/install_idp.sh
@@ -74,16 +83,6 @@ if [ $retVal -ne 0 ]; then
     echo "The oc login command seems to have failed"
     echo "Please review the content of $TEST_VARIABLES_FILE"
     exit "$retVal"
-fi
-
-if [[ -z "${TEST_SUITE}" ]]; then
-  echo "Define TEST_SUITE"
-  exit 1
-fi
-
-if [[ -z "${ARTIFACT_DIR}" ]]; then
-  echo "Define ARTIFACT_DIR"
-  ARTIFACT_DIR="/tmp"
 fi
 
 if [[ ${TEST_SUITE} == "Pre-Upgrade" ]]; then

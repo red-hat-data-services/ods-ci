@@ -58,6 +58,8 @@ Prepare Kuberay E2E Test Suite
     END
     Create Directory    %{WORKSPACE}/kuberay-logs
     RHOSi Setup
+    # This is a temporary workaround to avoid ValidatingAdmissionPolicy check
+    Disable Component    kueue
 
 Teardown Kuberay E2E Test Suite
     Log To Console    "Removing test binaries"
@@ -69,6 +71,8 @@ Teardown Kuberay E2E Test Suite
         FAIL    Unable to remove compiled binaries
     END
     RHOSi Teardown
+    Enable Component    kueue
+    Wait Component Ready    kueue
 
 Run Kuberay E2E Test
     [Documentation]    Run Kuberay E2E Test

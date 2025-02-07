@@ -17,7 +17,7 @@ Run TestRayClusterSDKOauth test with Python 3.9
     ...     DistributedWorkloads
     ...     WorkloadsOrchestration
     ...     Codeflare-sdk
-    Run Codeflare-SDK Test    e2e    mnist_raycluster_sdk_oauth_test.py    3.9    ${RAY_IMAGE_3.9}    ${CODEFLARE-SDK-RELEASE-TAG-3.9}
+    Run Codeflare-SDK Test    e2e    mnist_raycluster_sdk_oauth_test.py    3.9    ${RAY_CUDA_IMAGE_3.9}    ${CODEFLARE-SDK-RELEASE-TAG-3.9}
 
 Run TestRayClusterSDKOauth test with Python 3.11
     [Documentation]    Run Python E2E test: TestRayClusterSDKOauth
@@ -26,7 +26,7 @@ Run TestRayClusterSDKOauth test with Python 3.11
     ...     DistributedWorkloads
     ...     WorkloadsOrchestration
     ...     Codeflare-sdk
-    Run Codeflare-SDK Test    e2e    mnist_raycluster_sdk_oauth_test.py    3.11    ${RAY_IMAGE_3.11}    ${CODEFLARE-SDK-RELEASE-TAG}
+    Run Codeflare-SDK Test    e2e    mnist_raycluster_sdk_oauth_test.py    3.11    ${RAY_CUDA_IMAGE_3.11}    ${CODEFLARE-SDK-RELEASE-TAG}
 
 Run TestRayLocalInteractiveOauth test with Python 3.9
     [Documentation]    Run Python E2E test: TestRayLocalInteractiveOauth
@@ -35,7 +35,7 @@ Run TestRayLocalInteractiveOauth test with Python 3.9
     ...     DistributedWorkloads
     ...     WorkloadsOrchestration
     ...     Codeflare-sdk
-    Run Codeflare-SDK Test    e2e    local_interactive_sdk_oauth_test.py    3.9    ${RAY_IMAGE_3.9}    ${CODEFLARE-SDK-RELEASE-TAG-3.9}
+    Run Codeflare-SDK Test    e2e    local_interactive_sdk_oauth_test.py    3.9    ${RAY_CUDA_IMAGE_3.9}    ${CODEFLARE-SDK-RELEASE-TAG-3.9}
 
 Run TestRayLocalInteractiveOauth test with Python 3.11
     [Documentation]    Run Python E2E test: TestRayLocalInteractiveOauth
@@ -44,7 +44,7 @@ Run TestRayLocalInteractiveOauth test with Python 3.11
     ...     DistributedWorkloads
     ...     WorkloadsOrchestration
     ...     Codeflare-sdk
-    Run Codeflare-SDK Test    e2e    local_interactive_sdk_oauth_test.py    3.11    ${RAY_IMAGE_3.11}    ${CODEFLARE-SDK-RELEASE-TAG}
+    Run Codeflare-SDK Test    e2e    local_interactive_sdk_oauth_test.py    3.11    ${RAY_CUDA_IMAGE_3.11}    ${CODEFLARE-SDK-RELEASE-TAG}
 
 Run TestHeterogenousClustersOauth
     [Documentation]    Run Python E2E test: TestHeterogenousClustersOauth (workaround for 2.15)
@@ -54,7 +54,7 @@ Run TestHeterogenousClustersOauth
     ...     WorkloadsOrchestration
     ...     HeterogeneousCluster
     ...     Codeflare-sdk
-    Run Codeflare-SDK Test    e2e    heterogeneous_clusters_oauth_test.py    3.11    ${RAY_IMAGE_3.11}    ${CODEFLARE-SDK-RELEASE-TAG}
+    Run Codeflare-SDK Test    e2e    heterogeneous_clusters_oauth_test.py    3.11    ${RAY_CUDA_IMAGE_3.11}    ${CODEFLARE-SDK-RELEASE-TAG}
 
 *** Keywords ***
 Prepare Codeflare-sdk E2E Test Suite

@@ -129,6 +129,14 @@ class OpenshiftClusterManager:
         log.info(f"ocm cluster with name {self.cluster_name} exists!")
         return True
 
+    def fail_if_cluster_does_not_exist(self):
+        """Exit if cluster does not exist"""
+        # get_osd_cluster_id exits with code 1 if the cluster does not exist
+        cluster_id = self.get_osd_cluster_id()
+        if "error" in cluster_id.lower():
+            log.info(f"ocm command failed. Cannot tell if {self.cluster_name} cluster exists or not!")
+            sys.exit(2)
+
     def osd_cluster_create(self):
         """Creates OSD cluster"""
 
@@ -1668,6 +1676,23 @@ if __name__ == "__main__":
         default="qeaisrhods-xyz",
     )
     hibernate_cluster_parser.set_defaults(func=ocm_obj.hibernate_cluster)
+
+    # Argument parsers for fail_if_cluster_exists
+    cluster_exists_parser = subparsers.add_parser(
+        "check_cluster_existence",
+        help="Check if the given managed OpenShift Dedicated v4 clusters exists via OCM.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    cluster_exists_parser.add_argument(
+        "--cluster-name",
+        help="osd cluster name",
+        action="store",
+        dest="cluster_name",
+        metavar="",
+        default="",
+        required=True
+    )
+    cluster_exists_parser.set_defaults(func=ocm_obj.fail_if_cluster_does_not_exist)
 
     # Argument parsers for resume_cluster
     resume_cluster_parser = subparsers.add_parser(

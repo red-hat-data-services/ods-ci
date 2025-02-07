@@ -92,3 +92,10 @@ Run TestKueueCustomRayRocmGpu ODH test with Python 3.11
     ...     Training
     ...     WorkloadsOrchestration
     Run DistributedWorkloads ODH Test    TestMnistCustomRayRocmGpu    ${RAY_TORCH_ROCM_IMAGE_3.11}    ${NOTEBOOK_IMAGE_3.11}
+
+Run TestValidatingAdmissionPolicy ODH test
+    [Documentation]    Run Go ODH test: TestValidatingAdmissionPolicy
+    [Tags]  Tier2
+    ...     DistributedWorkloads
+    ...     WorkloadsOrchestration
+    Run DistributedWorkloads ODH Test    TestValidatingAdmissionPolicy    ${RAY_CUDA_IMAGE_3.11}    ${NOTEBOOK_IMAGE_3.11}

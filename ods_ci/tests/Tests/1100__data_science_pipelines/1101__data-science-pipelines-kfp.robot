@@ -86,7 +86,7 @@ End To End Pipeline Workflow Using Kfp
     ...    ${method_name}    ${pipeline_params}    ${status_check_timeout}=160    ${ray}=${FALSE}
 
     Projects.Delete Project Via CLI By Display Name    ${project}
-    Projects.Create Data Science Project From CLI    name=${project}
+    Projects.Create Data Science Project From CLI    name=${project}    as_user=${admin_username}
 
     DataSciencePipelinesBackend.Create PipelineServer Using Custom DSPA    ${project}
 

@@ -4,7 +4,7 @@ Resource       ./Projects.resource
 
 
 *** Variables ***
-${SAVE_BUTTON}=    xpath://button[@data-id="save-rolebinding-button"]
+${SAVE_PERMISSION_BUTTON}=    xpath://button[@data-id="save-rolebinding-button"]
 ${PERMISSIONS_DROPDOWN}=    xpath://td[@data-label="Permission"]//button[@aria-label="Options menu"]
 ${IS_CLUSTER_ADMIN}=    ${FALSE}
 ${USERS_TABLE}=    //table[@data-testid="role-binding-table User"]
@@ -19,7 +19,7 @@ Assign ${permission_type} Permissions To User ${username}
     ...    to the currently open DS Project in UI
     Log     ${username} - ${permission_type}
     Click Element    //button[@data-testid="add-button user"]
-    Element Should Be Disabled    ${SAVE_BUTTON}
+    Element Should Be Disabled    ${SAVE_PERMISSION_BUTTON}
     Input Text    xpath:${INPUT_USER}    ${username}
     Select Permission Type    permission_type=${permission_type}
     Save Permission
@@ -51,16 +51,16 @@ Select Permission Type
     Click Element    xpath://button[@role="option"]//*[.="${permission_type}"]
 
 Save Permission
-    Element Should Be Enabled    ${SAVE_BUTTON}
-    Click Element    ${SAVE_BUTTON}
-    Wait Until Page Does Not Contain Element    ${SAVE_BUTTON}    timeout=30s
+    Element Should Be Enabled    ${SAVE_PERMISSION_BUTTON}
+    Click Element    ${SAVE_PERMISSION_BUTTON}
+    Wait Until Page Does Not Contain Element    ${SAVE_PERMISSION_BUTTON}    timeout=30s
 
 Assign ${permission_type} Permissions To Group ${group_name}
     [Documentation]    Assign the user ${group_name} and level of permission ${permission_type}
     ...    to the currently open DS Project in UI
     Log     ${group_name} - ${permission_type}
     Click Element    //button[@data-testid="add-button group"]
-    Element Should Be Disabled    ${SAVE_BUTTON}
+    Element Should Be Disabled    ${SAVE_PERMISSION_BUTTON}
     IF    ${IS_CLUSTER_ADMIN} == ${FALSE}
         Input Text    xpath:${INPUT_GROUP}    ${group_name}
     ELSE

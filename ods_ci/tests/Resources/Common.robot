@@ -33,8 +33,7 @@ Begin Web Test
     IF    ${jupyter_login}
         Launch Jupyter From RHODS Dashboard Link
         Login To Jupyterhub  ${username}  ${password}  ${auth_type}
-        ${authorization_required}=   Is Service Account Authorization Required
-        IF  ${authorization_required}  Authorize JupyterLab Service Account
+        Verify Service Account Authorization Not Required
         Fix Spawner Status
         Go To  ${ODH_DASHBOARD_URL}
     END

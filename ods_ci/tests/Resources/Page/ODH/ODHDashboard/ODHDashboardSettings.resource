@@ -50,8 +50,7 @@ Launch Dashboard And Check User Management Option Is Available For The User
     [Arguments]    ${username}  ${password}  ${auth_type}  ${settings_should_be}=${TRUE}
     Launch Dashboard    ocp_user_name=${username}  ocp_user_pw=${password}  ocp_user_auth_type=${auth_type}
     ...    dashboard_url=${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  browser_options=${BROWSER.OPTIONS}
-    ${authorization_required}=  Is Service Account Authorization Required
-    IF    ${authorization_required}    Authorize JupyterLab Service Account
+    Verify Service Account Authorization Not Required
     IF    ${settings_should_be}
         # Wait up to 2 minutes as a workaround for bug RHOAIENG-11116
         Menu.Navigate To Page    Settings    User management    timeout=2m

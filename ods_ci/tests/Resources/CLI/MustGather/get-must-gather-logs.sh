@@ -1,6 +1,9 @@
 #!/bin/sh
 # Redirecting stdout/stderr of must-gather to a file, as it fills up the
 # process buffer and prevents the script from running further.
+export OPERATOR_NS=${OPERATOR_NAMESPACE}
+export APPLICATIONS_NS=${APPLICATIONS_NAMESPACE}
+
 oc adm must-gather --image=quay.io/modh/must-gather@sha256:9d5988f45c3b00ec7fbbe7a8a86cc149a2768c9c47e207694fdb6e87ef44adf3 &> must-gather-results.txt
 
 if [ $? -eq 0 ]

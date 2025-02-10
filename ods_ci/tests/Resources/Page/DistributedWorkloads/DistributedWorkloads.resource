@@ -128,6 +128,14 @@ Prepare Training Operator E2E Test Suite
     Enable Component    trainingoperator
     Wait Component Ready    trainingoperator
 
+Prepare Training Operator SDK Test Suite
+    [Documentation]    Prepare Training Operator SDK Test Suite
+    Prepare Training Operator E2E Test Suite    ${KFTO_BINARY_NAME}
+    ${common_user_token} =    Generate User Token    ${NOTEBOOK_USER_NAME}    ${NOTEBOOK_USER_PASSWORD}
+    Set Suite Variable    ${NOTEBOOK_USER_TOKEN}   ${common_user_token}
+    Log To Console    "Log back as cluster admin"
+    Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
+
 Teardown Training Operator KFTO E2E Test Suite
     [Documentation]    Teardown Training Operator KFTO E2E Test Suite
     Teardown Training Operator E2E Test Suite    ${KFTO_BINARY_NAME}
@@ -142,6 +150,10 @@ Teardown Training Operator E2E Test Suite
     Log To Console     "Removing test binaries"
     Remove File        ${test_binary}
     Disable Component    trainingoperator
+
+Teardown Training Operator SDK Test Suite
+    [Documentation]    Teardown Training Operator SDK Test Suite
+    Teardown Training Operator E2E Test Suite    ${KFTO_BINARY_NAME}
 
 Run Training Operator FMS Test
     [Documentation]    Run Training Operator FMS Test
@@ -180,6 +192,34 @@ Run Training Operator KFTO Test
     ...    env:AWS_STORAGE_BUCKET_MNIST_DIR=${AWS_STORAGE_BUCKET_MNIST_DIR}
     ...    env:PIP_INDEX_URL=${PIP_INDEX_URL}
     ...    env:PIP_TRUSTED_HOST=${PIP_TRUSTED_HOST}
+    Log To Console    ${result.stdout}
+    Check missing Go test    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    ${TEST_NAME} failed
+    END
+
+Run Training Operator KFTO SDK Test
+    [Documentation]    Run Training Operator KFTO SDK Test
+    [Arguments]    ${TEST_NAME}
+    Log To Console    "Running test: ${TEST_NAME}"
+    ${result} =    Run Process    ./${KFTO_BINARY_NAME} -test.run ${TEST_NAME}
+    ...    shell=true
+    ...    stderr=STDOUT
+    ...    env:CODEFLARE_TEST_TIMEOUT_SHORT=5m
+    ...    env:CODEFLARE_TEST_TIMEOUT_MEDIUM=10m
+    ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
+    ...    env:ODH_NAMESPACE=${APPLICATIONS_NAMESPACE}
+    ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-${KFTO_BINARY_NAME}-logs
+    ...    env:AWS_DEFAULT_ENDPOINT=${AWS_DEFAULT_ENDPOINT}
+    ...    env:AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+    ...    env:AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    ...    env:AWS_STORAGE_BUCKET=${AWS_STORAGE_BUCKET}
+    ...    env:AWS_STORAGE_BUCKET_MNIST_DIR=${AWS_STORAGE_BUCKET_MNIST_DIR}
+    ...    env:PIP_INDEX_URL=${PIP_INDEX_URL}
+    ...    env:PIP_TRUSTED_HOST=${PIP_TRUSTED_HOST}
+    ...    env:NOTEBOOK_USER_NAME=${NOTEBOOK_USER_NAME}
+    ...    env:NOTEBOOK_USER_TOKEN=${NOTEBOOK_USER_TOKEN}
+    ...    env:NOTEBOOK_IMAGE=${NOTEBOOK_IMAGE_3.11}
     Log To Console    ${result.stdout}
     Check missing Go test    ${result.stdout}
     IF    ${result.rc} != 0

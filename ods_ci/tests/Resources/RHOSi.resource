@@ -117,8 +117,10 @@ Assign Vars According To Product
         Set Suite Variable    ${APPLICATIONS_NAMESPACE}    redhat-ods-applications
         IF  "${CLUSTER_TYPE}" == "managed"
             Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     addon-managed-odh
+            Set Suite Variable    ${ADMIN_GROUPS}       dedicated-admins
         ELSE
             Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     rhoai-operator-dev
+            Set Suite Variable    ${ADMIN_GROUPS}       rhods-admins
         END
         Set Suite Variable  ${MODEL_REGISTRY_NAMESPACE}    rhoai-model-registries
     ELSE IF    "${PRODUCT}" == "ODH"
@@ -133,6 +135,7 @@ Assign Vars According To Product
         Set Suite Variable    ${APPLICATIONS_NAMESPACE}    opendatahub
         Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     rhoai-operator-dev
         Set Suite Variable   ${MODEL_REGISTRY_NAMESPACE}    odh-model-registries
+        Set Suite Variable    ${ADMIN_GROUPS}       odh-admins
     END
 
 Gather Release Attributes From DSC And DSCI

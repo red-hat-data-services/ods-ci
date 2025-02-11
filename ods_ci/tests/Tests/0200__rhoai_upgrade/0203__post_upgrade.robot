@@ -36,6 +36,7 @@ ${S_SIZE}                   25
 ${DW_PROJECT_CREATED}       False
 ${UPGRADE_NS}    upgrade
 ${UPGRADE_CONFIG_MAP}    upgrade-config-map
+${ALLOWED_GROUPS}       system:authenticated
 
 
 *** Test Cases ***
@@ -55,11 +56,12 @@ Verify Pod Toleration
 
 Verify RHODS User Groups
     [Documentation]    Verify User Configuration after the upgrade
-    [Tags]      Upgrade
-    ${admin}        Set Variable        ${payload[0]['spec']['groupsConfig']['adminGroups']}
-    ${user}     Set Variable        ${payload[0]['spec']['groupsConfig']['allowedGroups']}
-    Should Be Equal As Strings      '${admin}'      'rhods-admins,rhods-users'
-    Should Be Equal As Strings      '${user}'       'system:authenticated'
+    [Tags]      Upgrade     Operator
+    Get Auth Cr Config Data
+    ${admin}                Set Variable            ${AUTH_PAYLOAD[0]['spec']['adminGroups']}
+    ${user}                 Set Variable            ${AUTH_PAYLOAD[0]['spec']['allowedGroups']}
+    Should Be Equal As Strings      '${admin}'      '['${ADMIN_GROUPS}']'
+    Should Be Equal As Strings      '${user}'       '['${ALLOWED_GROUPS}']'
     [Teardown]      Set Default Users
 
 Verify Culler is Enabled
@@ -322,6 +324,12 @@ Get Dashboard Config Data
     ${payload}    Oc Get    kind=OdhDashboardConfig    namespace=${APPLICATIONS_NAMESPACE}
     ...    field_selector=metadata.name==odh-dashboard-config
     Set Suite Variable    ${payload}    # robocop:disable
+
+Get Auth Cr Config Data
+    [Documentation]    Get payload from Auth CR
+    ${AUTH_PAYLOAD}    Oc Get    kind=Auth    namespace=${APPLICATIONS_NAMESPACE}
+    ...    field_selector=metadata.name==auth
+    Set Suite Variable    ${AUTH_PAYLOAD}
 
 Set Default Users
     [Documentation]    Set Default user settings

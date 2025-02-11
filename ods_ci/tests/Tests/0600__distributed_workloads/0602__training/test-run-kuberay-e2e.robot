@@ -60,6 +60,8 @@ Prepare Kuberay E2E Test Suite
     RHOSi Setup
     # This is a temporary workaround to avoid ValidatingAdmissionPolicy check
     Disable Component    kueue
+    # ValidatingAdmissionPolicy is supported just on newer OCP, using Sleep as a workaround to make sure that ValidatingAdmissionPolicy is removed if it exists
+    Sleep  3s
 
 Teardown Kuberay E2E Test Suite
     Log To Console    "Removing test binaries"

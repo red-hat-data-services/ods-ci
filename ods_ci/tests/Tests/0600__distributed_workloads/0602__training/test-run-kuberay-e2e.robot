@@ -60,6 +60,12 @@ Prepare Kuberay E2E Test Suite
     RHOSi Setup
     # This is a temporary workaround to avoid ValidatingAdmissionPolicy check
     Disable Component    kueue
+    ${vap_removed} =    Run Process    oc wait --for\=delete ValidatingAdmissionPolicy/kueue-validating-admission-policy --timeout\=60s
+    ...    shell=true
+    ...    stderr=STDOUT
+    IF    ${vap_removed.rc} != ${0}
+        FAIL    ValidatingAdmissionPolicy kueue-validating-admission-policy not removed
+    END
 
 Teardown Kuberay E2E Test Suite
     Log To Console    "Removing test binaries"

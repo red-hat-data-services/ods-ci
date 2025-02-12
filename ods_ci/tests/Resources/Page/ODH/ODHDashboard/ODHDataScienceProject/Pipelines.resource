@@ -72,7 +72,8 @@ Import Pipeline
     END
     Wait Until Generic Modal Disappears
     Maybe Wait For Dashboard Loading Spinner Page     timeout=45s
-    Wait For Dashboard Page Title    ${name}    timeout=30s
+    Wait Until Keyword Succeeds    3 times    20s
+    ...    Wait For Dashboard Page Title    ${name}    timeout=30s
 
 Create Pipeline Run
     [Documentation]    Create a pipeline run from DS Project details page.
@@ -131,22 +132,23 @@ Click Action From Pipeline Actions Menu
     # robocop: off=line-too-long
     ${pipeline_row_xp}=    Set Variable    //*[@data-testid="table-row-title"]//span[text()="${pipeline_name}"]/ancestor::tr
     ${kebab_xp}=           Set Variable    ${pipeline_row_xp}/td/button[@aria-label="Kebab toggle"]
-    ${kebap_action_xp}=    Set Variable    ${pipeline_row_xp}/td/div/div/ul/li/button[.//*[contains(text(), '${action}')]]
-    Wait Until Page Contains Element    ${kebab_xp}
+    ${kebap_action_xp}=    Set Variable    //button/span/span[text()='${action}']
+    SeleniumLibrary.Wait Until Page Contains    ${pipeline_name}    timeout=60
+    Wait Until Element Is Enabled       ${kebab_xp}           timeout=60
     Click Element                       ${kebab_xp}
-    Wait Until Page Contains Element    ${kebap_action_xp}
+    Wait Until Element Is Enabled       ${kebap_action_xp}    timeout=60
     Click Element                       ${kebap_action_xp}
 
 Click Action From Pipeline Version Actions Menu
     [Documentation]    Click an action from Pipeline Version Actions menu (3-dots menu on the right)
     [Arguments]    ${pipeline_version_name_contains}    ${action}
     # robocop: off=line-too-long
-    ${version_row_xp}=    Set Variable     //*[@data-testid="table-row-title"]/span/a[contains(text(),"${pipeline_version_name_contains}")]/ancestor::tr
+    ${version_row_xp}=     Set Variable    //*[@data-testid="table-row-title"]/span/a[contains(text(),"${pipeline_version_name_contains}")]/ancestor::tr
     ${kebab_xp}=           Set Variable    ${version_row_xp}/td/button[@aria-label="Kebab toggle"]
-    ${kebap_action_xp}=    Set Variable    ${version_row_xp}/td/div/div/ul/li/button[.//*[contains(text(), '${action}')]]
-    Wait Until Page Contains Element    ${kebab_xp}
+    ${kebap_action_xp}=    Set Variable    //button/span/span[text()='${action}']
+    Wait Until Element Is Enabled       ${kebab_xp}           timeout=60
     Click Element                       ${kebab_xp}
-    Wait Until Page Contains Element    ${kebap_action_xp}
+    Wait Until Element Is Enabled       ${kebap_action_xp}    timeout=60
     Click Element                       ${kebap_action_xp}
 
 Click Action From Pipeline Run Actions Menu
@@ -155,10 +157,10 @@ Click Action From Pipeline Run Actions Menu
 
     ${pipeline_run_row_xp}=    Set Variable    //span[contains(text(),"${pipeline_run_name}")]/../../../..
     ${kebab_xp}=               Set Variable    ${pipeline_run_row_xp}/td/button[@aria-label="Kebab toggle"]
-    ${kebap_action_xp}=        Set Variable    ${pipeline_run_row_xp}/td/div/div/ul/li/button[.//*[contains(text(), '${action}')]]
-    Wait Until Page Contains Element    ${kebab_xp}
+    ${kebap_action_xp}=        Set Variable    //button/span/span[text()='${action}']
+    Wait Until Element Is Enabled       ${kebab_xp}           timeout=60
     Click Element                       ${kebab_xp}
-    Wait Until Page Contains Element    ${kebap_action_xp}
+    Wait Until Element Is Enabled       ${kebap_action_xp}    timeout=60
     Click Element                       ${kebap_action_xp}
 
 Pipeline Context Menu Should Be Working

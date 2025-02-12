@@ -7,6 +7,7 @@ Resource            ../../Resources/ODS.robot
 Resource            ../../Resources/OCP.resource
 Resource            ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
+Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboardSettings.resource
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboardResources.resource
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
@@ -56,10 +57,8 @@ Verify Pod Toleration
 Verify RHODS User Groups
     [Documentation]    Verify User Configuration after the upgrade
     [Tags]      Upgrade
-    ${admin}        Set Variable        ${payload[0]['spec']['groupsConfig']['adminGroups']}
-    ${user}     Set Variable        ${payload[0]['spec']['groupsConfig']['allowedGroups']}
-    Should Be Equal As Strings      '${admin}'      'rhods-admins,rhods-users'
-    Should Be Equal As Strings      '${user}'       'system:authenticated'
+    AdminGroups In OdhDashboardConfig CRD Should Be     rhods-admins
+    AllowedGroups In OdhDashboardConfig CRD Should Be   system:authenticated
     [Teardown]      Set Default Users
 
 Verify Culler is Enabled

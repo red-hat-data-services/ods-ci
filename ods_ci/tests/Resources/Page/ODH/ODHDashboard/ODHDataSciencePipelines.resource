@@ -112,14 +112,14 @@ Delete Pipeline
     ...    available and deletes the pipeline using the pipelines actions menu.
     ...    TODO: improve keyword to delete multiple pipeline versions
     [Arguments]    ${pipeline_name}
-    Navigate To Page    Data Science Pipelines
+    Navigate To Page    Data Science Pipelines    Pipelines
     ODHDashboard.Maybe Wait For Dashboard Loading Spinner Page
 
     Pipelines.Expand Pipeline Details    ${pipeline_name}
     Pipelines.Click Action From Pipeline Version Actions Menu    ${pipeline_name}    Delete pipeline version
     Handle Deletion Confirmation Modal    ${pipeline_name}    pipeline
-
-    Pipelines.Click Action From Pipeline Actions Menu    ${pipeline_name}    Delete
+    SeleniumLibrary.Reload Page
+    Pipelines.Click Action From Pipeline Actions Menu    ${pipeline_name}    Delete pipeline
     Handle Deletion Confirmation Modal    ${pipeline_name}    pipeline
     Wait Until Pipeline Is Not Listed    ${pipeline_name}
 

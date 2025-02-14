@@ -127,6 +127,13 @@ Prepare Training Operator E2E Test Suite
     Create Directory    %{WORKSPACE}/codeflare-${test_binary}-logs
     Enable Component    trainingoperator
     Wait Component Ready    trainingoperator
+    Log To Console    "Additional waiting due to RHOAIENG-20295"
+    ${result} =    Run Process    oc wait --for\=condition\=Available --timeout\=300s -n ${APPLICATIONS_NAMESPACE} deployment/kubeflow-training-operator
+    ...    shell=true    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Timeout waiting for deployment/kubeflow-training-operator to be available in ${APPLICATIONS_NAMESPACE}
+    END
 
 Prepare Training Operator SDK Test Suite
     [Documentation]    Prepare Training Operator SDK Test Suite

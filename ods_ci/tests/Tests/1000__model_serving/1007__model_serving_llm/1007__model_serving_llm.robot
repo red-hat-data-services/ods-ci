@@ -51,13 +51,13 @@ ${CAIKIT_TGIS_RUNTIME_NAME}=    caikit-tgis-runtime
 Verify External Dependency Operators Can Be Deployed
     [Documentation]    Checks the pre-required Operators can be installed
     ...                and configured
-    [Tags]    ODS-2326
+    [Tags]    ODS-2326   Kserve-caikit
     Pass Execution    message=Installation done as part of Suite Setup.
 
 Verify User Can Serve And Query A Model    # robocop: off=too-long-test-case
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    Sanity    ODS-2341
+    [Tags]    Sanity    ODS-2341   Kserve-caikit
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}-cli
     ${test_namespace}=    Set Variable     ${TEST_NS}-cli
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -339,7 +339,7 @@ Verify User Can Set Requests And Limits For A Model    # robocop: off=too-long-t
 Verify Model Can Be Served And Query On A GPU Node    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
     ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    Sanity    ODS-2381    Resources-GPU    NVIDIA-GPUs
+    [Tags]    Sanity    ODS-2381    Resources-GPU    NVIDIA-GPUs   Kserve-caikit
     [Setup]    Set Project And Runtime    namespace=singlemodel-gpu
     ${test_namespace}=    Set Variable    singlemodel-gpu
     ${model_name}=    Set Variable    flan-t5-small-caikit
@@ -398,7 +398,7 @@ Verify Non Admin Can Serve And Query A Model    # robocop: off=too-long-test-cas
 
 Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector    # robocop: off=too-long-test-case
     [Documentation]    Deploys and queries flan-t5-large-grammar-synthesis model
-    [Tags]    Tier2    ODS-2441
+    [Tags]    Tier2    ODS-2441   Kserve-caikit
     [Setup]    Set Project And Runtime    namespace=grammar-model
     ${test_namespace}=    Set Variable     grammar-model
     ${flan_model_name}=    Set Variable    flan-t5-large-grammar-synthesis-caikit
@@ -421,7 +421,7 @@ Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector    # robocop: o
 
 Verify User Can Serve And Query Flan-t5 Large    # robocop: off=too-long-test-case
     [Documentation]    Deploys and queries flan-t5-large model
-    [Tags]    Tier2    ODS-2434
+    [Tags]    Tier2    ODS-2434   Kserve-caikit
     [Setup]    Set Project And Runtime    namespace=flan-t5-large3
     ${test_namespace}=    Set Variable     flan-t5-large3
     ${flan_model_name}=    Set Variable    flan-t5-large
@@ -524,7 +524,7 @@ Verify User Can Access Model Metrics From UWM    # robocop: off=too-long-test-ca
 Verify User Can Query A Model Using HTTP Calls    # robocop: off=too-long-test-case
     [Documentation]    From RHOAI 2.5 HTTP is allowed and default querying protocol.
     ...                This tests deploys the runtime enabling HTTP port and send queries to the model
-    [Tags]    ODS-2501    Sanity
+    [Tags]    ODS-2501    Sanity    Kserve-caikit
     [Setup]    Set Project And Runtime    namespace=kserve-http    protocol=http
     ${test_namespace}=    Set Variable     kserve-http
     ${model_name}=    Set Variable    flan-t5-small-caikit

@@ -70,7 +70,7 @@ Validate DSC and DSCI Created With Errors When Serverless Operator Is Not Instal
 Validate DSC and DSCI Created With Errors When Service Mesh And Serverless Operators Are Not Installed   #robocop:disable
     [Documentation]    The purpose of this Test Case is to validate that DSC and DSCI are created
     ...                without dependant operators ((servicemesh, serverless) installed, but with errors
-    [Tags]    Operator    Tier3    ODS-2527     RHOAIENG-2518
+    [Tags]    Operator    Tier3    ODS-2527     RHOAIENG-2518       ProductBug
 
     Remove DSC And DSCI Resources
     Uninstall Service Mesh Operator CLI

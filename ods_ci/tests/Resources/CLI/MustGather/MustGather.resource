@@ -9,7 +9,10 @@ Resource         ../../Common.robot
 *** Keywords ***
 Get Must-Gather Logs
     [Documentation]    Runs the must-gather image and obtains the ODH/RHOAI logs
-    ${output}=    Run process    tests/Resources/CLI/MustGather/get-must-gather-logs.sh     shell=yes
+    ${output}=    Run process    tests/Resources/CLI/MustGather/get-must-gather-logs.sh
+    ...                          shell=yes
+    ...                          env:OPERATOR_NAMESPACE=${OPERATOR_NAMESPACE}
+    ...                          env:APPLICATIONS_NAMESPACE=${APPLICATIONS_NAMESPACE}
     Should Be Equal As Integers	  ${output.rc}	 0
     Should Not Contain    ${output.stdout}    FAIL
     ${must_gather_dir}=  Run     ls -d must-gather.local.*

@@ -1323,6 +1323,8 @@ Setup Test Variables    # robocop: off=too-many-calls-in-keyword
             ${limits}=    Create Dictionary    nvidia.com/gpu=1
         ELSE IF    "${supported_gpu_type}" == "amd"
             ${limits}=    Create Dictionary    amd.com/gpu=1
+        ELSE IF    "${supported_gpu_type}" == "gaudi"
+            ${limits}=    Create Dictionary   habana.ai/gaudi=1
         ELSE
             FAIL   msg=Provided GPU type is not yet supported. Only nvidia and amd gpu type are supported
         END
@@ -1347,9 +1349,11 @@ Set Runtime Image
     [Arguments]    ${gpu_type}
     IF  "${RUNTIME_IMAGE}" == "${EMPTY}"
          IF  "${gpu_type}" == "nvidia"
-            Set Test Variable    ${runtime_image}    quay.io/modh/vllm@sha256:9689bffacabc38777555de87e0fce0dd95165de3716c68c1aa744358a592ee1f
+            Set Test Variable    ${runtime_image}    quay.io/modh/vllm@sha256:4f1f6b5738b311332b2bc786ea71259872e570081807592d97b4bd4cb65c4be1
          ELSE IF    "${gpu_type}" == "amd"
-            Set Test Variable    ${runtime_image}    quay.io/modh/vllm@sha256:3719efefa24e6634b0cb4ccef25df521a26f363b724c23c37f56629df6111883
+            Set Test Variable    ${runtime_image}    quay.io/modh/vllm@sha256:05abd450806958f384fad2ca142b120f6a6edc2662b3627455f5dd2eb808a5b8
+         ELSE IF    "${gpu_type}" == "gaudi"
+            Set Test Variable    ${runtime_image}    quay.io/modh/vllm@sha256:db2aa1ea8d0fe550e1c3e333c37861ed894205263746bf373ab8d7453299a8c4
          ELSE
              FAIL   msg=Provided GPU type is not yet supported. Only nvidia and amd gpu type are supported
          END

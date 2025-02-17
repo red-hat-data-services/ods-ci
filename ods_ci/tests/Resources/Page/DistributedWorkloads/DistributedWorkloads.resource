@@ -15,8 +15,8 @@ ${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}  https://github.com/opendatahub-io/distr
 ${RAY_CUDA_IMAGE_3.11}                   quay.io/modh/ray@sha256:db667df1bc437a7b0965e8031e905d3ab04b86390d764d120e05ea5a5c18d1b4
 # Corresponds to quay.io/rhoai/ray:2.35.0-py311-cu121-torch24-fa26
 ${RAY_TORCH_CUDA_IMAGE_3.11}             quay.io/rhoai/ray@sha256:5077f9bb230dfa88f34089fecdfcdaa8abc6964716a8a8325c7f9dcdf11bbbb3
-# Corresponds to quay.io/modh/ray:2.35.0-py311-rocm61
-${RAY_ROCM_IMAGE_3.11}                   quay.io/modh/ray@sha256:f8b4f2b1c954187753c1f5254f7bb6a4286cec5a4f1b43def7ef4e009f2d28cb
+# Corresponds to quay.io/modh/ray:2.35.0-py311-rocm62
+${RAY_ROCM_IMAGE_3.11}                   quay.io/modh/ray@sha256:baeb1428a008ff109ae1afb372f804c574b4179cfa84c752f7afc609e0d44b3a
 # Corresponds to quay.io/rhoai/ray:2.35.0-py311-rocm61-torch24-fa26
 ${RAY_TORCH_ROCM_IMAGE_3.11}             quay.io/rhoai/ray@sha256:b0e129cd2f4cdea7ad7a7859031357ffd9915410551f94fbcb942af2198cdf78
 # Corresponds to quay.io/modh/ray:2.35.0-py39-cu121
@@ -27,8 +27,8 @@ ${RAY_TORCH_CUDA_IMAGE_3.9}              quay.io/rhoai/ray@sha256:158b481b8e9110
 ${FMS_HF_TUNING_IMAGE}                   quay.io/modh/fms-hf-tuning@sha256:e54a58825bfcd9047e0db973a4fa02fb44b63446bbbea08d40d80b337b9cd122
 # Corresponds to quay.io/modh/training:py311-cuda121-torch241
 ${CUDA_TRAINING_IMAGE}                   quay.io/modh/training@sha256:b98e373a972ff6f896a9dc054d56920e915675339c02ea7fa123e0f4bbef4d74
-# Corresponds to quay.io/modh/training:py311-rocm61-torch241
-${ROCM_TRAINING_IMAGE}                   quay.io/modh/training@sha256:2efb6efba4ec08e63847d701e3062a5f6ddf51c91af5fbcef6378b9e6520a3bb
+# Corresponds to quay.io/modh/training:py311-rocm62-torch241
+${ROCM_TRAINING_IMAGE}                   quay.io/modh/training@sha256:02094ab6f98a9b8a8bea8ff72bde5b4ba6789d036ce19e15cfdea0146d288061
 # Corresponds to quay.io/modh/odh-generic-data-science-notebook:v3-2024b-20250115
 ${NOTEBOOK_IMAGE_3.11}                   quay.io/modh/odh-generic-data-science-notebook@sha256:0efbb3ad6f8f342360cf1f002d40716a39d4c58f69163e053d5bd19b4fe732d4
 # Corresponds to quay.io/modh/odh-generic-data-science-notebook:v2-2024a-20250115

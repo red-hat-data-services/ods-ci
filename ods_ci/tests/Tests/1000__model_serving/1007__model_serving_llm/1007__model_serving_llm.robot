@@ -398,7 +398,7 @@ Verify Non Admin Can Serve And Query A Model    # robocop: off=too-long-test-cas
 
 Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector    # robocop: off=too-long-test-case
     [Documentation]    Deploys and queries flan-t5-large-grammar-synthesis model
-    [Tags]    Tier2    ODS-2441   Kserve-caikit
+    [Tags]    Tier2    ODS-2441
     [Setup]    Set Project And Runtime    namespace=grammar-model
     ${test_namespace}=    Set Variable     grammar-model
     ${flan_model_name}=    Set Variable    flan-t5-large-grammar-synthesis-caikit
@@ -421,7 +421,7 @@ Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector    # robocop: o
 
 Verify User Can Serve And Query Flan-t5 Large    # robocop: off=too-long-test-case
     [Documentation]    Deploys and queries flan-t5-large model
-    [Tags]    Tier2    ODS-2434   Kserve-caikit
+    [Tags]    Tier2    ODS-2434
     [Setup]    Set Project And Runtime    namespace=flan-t5-large3
     ${test_namespace}=    Set Variable     flan-t5-large3
     ${flan_model_name}=    Set Variable    flan-t5-large
@@ -524,7 +524,7 @@ Verify User Can Access Model Metrics From UWM    # robocop: off=too-long-test-ca
 Verify User Can Query A Model Using HTTP Calls    # robocop: off=too-long-test-case
     [Documentation]    From RHOAI 2.5 HTTP is allowed and default querying protocol.
     ...                This tests deploys the runtime enabling HTTP port and send queries to the model
-    [Tags]    ODS-2501    Sanity    Kserve-caikit
+    [Tags]    ODS-2501    Sanity
     [Setup]    Set Project And Runtime    namespace=kserve-http    protocol=http
     ${test_namespace}=    Set Variable     kserve-http
     ${model_name}=    Set Variable    flan-t5-small-caikit

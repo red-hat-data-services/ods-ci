@@ -48,6 +48,7 @@ Verify Project Metrics Default Page contents
     [Documentation]    Verifiy Project Metrics default Page contents
     Open Distributed Workload Metrics Home Page
     Select Distributed Workload Project By Name    ${PRJ_TITLE}
+    Wait Until Element Is Visible  ${WORKLOADS_STATUS_XP}    timeout=20
     Check Project Metrics Default Page Contents    ${PRJ_TITLE}
 
 Verify Distributed Workload status Default Page contents
@@ -56,7 +57,6 @@ Verify Distributed Workload status Default Page contents
     [Documentation]    Verifiy distributed workload status page default contents
     Open Distributed Workload Metrics Home Page
     Select Distributed Workload Project By Name    ${PRJ_TITLE}
-    Wait Until Element Is Visible    xpath=//div[text()="Distributed workload resource metrics"]   timeout=20
     Check Distributed Workload Status Page Contents
 
 Verify That Not Admin Users Can Access Distributed workload metrics default page contents
@@ -76,8 +76,8 @@ Verify That Not Admin Users Can Access Distributed workload metrics default page
     Setup Kueue Resources    ${PRJ_TITLE_NONADMIN}    cluster-queue-user    resource-flavor-user    local-queue-user
     Click Link    Distributed Workload Metrics
     Select Distributed Workload Project By Name    ${PRJ_TITLE_NONADMIN}
-    Check Project Metrics Default Page Contents    ${PRJ_TITLE_NONADMIN}
     Check Distributed Workload Status Page Contents
+    Check Project Metrics Default Page Contents    ${PRJ_TITLE_NONADMIN}
     [Teardown]    Run Keywords
     ...    Cleanup Kueue Resources    ${PRJ_TITLE_NONADMIN}    cluster-queue-user    resource-flavor-user    local-queue-user
     ...    AND
@@ -96,6 +96,7 @@ Verify The Workload Metrics By Submitting Kueue Batch Workload
     Submit Kueue Workload    ${LOCAL_QUEUE_NAME}    ${PRJ_TITLE}    ${CPU_REQUESTED}    ${MEMORY_REQUESTED}    ${JOB_NAME_QUEUE}
     Select Distributed Workload Project By Name    ${PRJ_TITLE}
     Select Refresh Interval    15 seconds
+    Click Button    ${PROJECT_METRICS_TAB_XP}
     Wait Until Element Is Visible    ${DISTRIBUITED_WORKLOAD_RESOURCE_METRICS_TITLE_XP}    timeout=20
     Wait For Job With Status    ${JOB_NAME_QUEUE}    Running    60
 
@@ -132,6 +133,7 @@ Verify The Workload Metrics By Submitting Kueue Batch Workload
     Wait Until Element Is Visible    xpath=//*[@data-testid="dw-workload-resource-metrics"]//*[text()="No distributed workloads in the selected project are currently consuming resources."]    timeout=60
     Page Should Not Contain    ${JOB_NAME_QUEUE}
     Page Should Not Contain    Succeeded
+    Click Button    ${WORKLOAD_STATUS_TAB_XP}
     Check Distributed Workload Status Page Contents
     [Teardown]    Run Process     oc delete Job ${JOB_NAME_QUEUE} -n ${PRJ_TITLE}    shell=true
 
@@ -145,6 +147,7 @@ Verify The Workload Metrics By Submitting Ray Workload
     Select Refresh Interval    15 seconds
     # verifying workload metrics in Dark mode
     Click Button    xpath=//button[@aria-label="dark theme"]
+    Click Button    ${PROJECT_METRICS_TAB_XP}
     Wait Until Element Is Visible    ${DISTRIBUITED_WORKLOAD_RESOURCE_METRICS_TITLE_XP}    timeout=20
     Wait For Job With Status    ${RAY_CLUSTER_NAME}    Admitted    30
     Wait For Job With Status    ${RAY_CLUSTER_NAME}    Running    300
@@ -176,6 +179,7 @@ Verify Requested resources When Multiple Local Queue Exists
     Open Distributed Workload Metrics Home Page
     Select Distributed Workload Project By Name    ${PRJ_TITLE}
     Select Refresh Interval    15 seconds
+    Click Button    ${PROJECT_METRICS_TAB_XP}
     Wait Until Element Is Visible    ${DISTRIBUITED_WORKLOAD_RESOURCE_METRICS_TITLE_XP}    timeout=20
     Wait For Job With Status    ${JOB_NAME_QUEUE}    Running    60
     Wait For Job With Status   ${MULTIPLE_JOB_NAME}    Running    60
@@ -217,6 +221,8 @@ Verify CPU And Memory Resource Usage Exceeds Warning Threshold
     Submit Kueue Workload    ${LOCAL_QUEUE_NAME}    ${PRJ_TITLE}    ${CPU_SHARED_QUOTA}    ${MEMORY_REQUESTING}    ${JOB_NAME_QUEUE}    ${ADD_ANNOTATION}    ${PARALLELISM}
     Open Distributed Workload Metrics Home Page
     Select Distributed Workload Project By Name    ${PRJ_TITLE}
+    Wait Until Element Is Visible  ${WORKLOADS_STATUS_XP}    timeout=20
+    Click Button    ${PROJECT_METRICS_TAB_XP}
     Select Refresh Interval    15 seconds
     Wait For Job With Status    ${JOB_NAME_QUEUE}    Admitted    180
     Wait Until Element Is Visible    xpath=${CPU_WARNING_XP}   timeout=120

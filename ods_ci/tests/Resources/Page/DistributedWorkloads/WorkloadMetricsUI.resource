@@ -208,6 +208,7 @@ Cleanup Ray Cluster Workload
 Check Project Metrics Default Page Contents
     [Documentation]    checks Project Metrics Default Page contents exists
     [Arguments]    ${project_name}
+    Click Button    ${PROJECT_METRICS_TAB_XP}
     Wait Until Element Is Visible    ${DISTRIBUITED_WORKLOAD_RESOURCE_METRICS_TITLE_XP}    timeout=20
     Page Should Contain Element    ${PROJECT_METRICS_TAB_XP}
     Page Should Contain Element    ${REFRESH_INTERVAL_XP}
@@ -220,7 +221,6 @@ Check Project Metrics Default Page Contents
 
 Check Distributed Workload Status Page Contents
     [Documentation]    checks Distributed Workload status Default Page contents exists
-    Click Button    ${WORKLOAD_STATUS_TAB_XP}
     Wait Until Element Is Visible  ${WORKLOADS_STATUS_XP}    timeout=20
     Page Should Contain Element    ${REFRESH_INTERVAL_XP}
     Page Should Contain Element    ${STATUS_OVERVIEW_XP}

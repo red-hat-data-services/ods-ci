@@ -308,3 +308,45 @@ Verify container images
     Container Image Url Should Contain      ${APPLICATIONS_NAMESPACE}     ${pod}      ${container}
     ...     ${registry_name}/rhoai/${expected_image}
     Log To Console    ${pod_name}'s container image is verified
+
+Enable appwrapper in Codeflare operator
+    [Documentation]    Enable appwrapper in Codeflare operator
+    ${result} =    Run Process    config_yaml\=\$(oc -n ${APPLICATIONS_NAMESPACE} get configmap codeflare-operator-config -o json | jq -r '.data."config.yaml"' | yq ".appwrapper.enabled\=true" | sed 's/"/\\\\"/g') && oc -n ${APPLICATIONS_NAMESPACE} get configmap codeflare-operator-config -o json | jq ".data.\\"config.yaml\\"\=\\"\$config_yaml\\"" | oc apply -n ${APPLICATIONS_NAMESPACE} -f -
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Unable to edit codeflare-operator-config configmap
+    END
+    ${result} =    Run Process    oc -n ${APPLICATIONS_NAMESPACE} delete pod -l app.kubernetes.io/name\=codeflare-operator
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Unable to reset codeflare-operator pod
+    END
+    ${result} =    Run Process    oc -n ${APPLICATIONS_NAMESPACE} wait --for\=condition\=Available deployment/codeflare-operator-manager
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+
+Disable appwrapper in Codeflare operator
+    [Documentation]    Enable appwrapper in Codeflare operator
+    ${result} =    Run Process    config_yaml\=\$(oc -n ${APPLICATIONS_NAMESPACE} get configmap codeflare-operator-config -o json | jq -r '.data."config.yaml"' | yq ".appwrapper.enabled\=false" | sed 's/"/\\\\"/g') && oc -n ${APPLICATIONS_NAMESPACE} get configmap codeflare-operator-config -o json | jq ".data.\\"config.yaml\\"\=\\"\$config_yaml\\"" | oc apply -n ${APPLICATIONS_NAMESPACE} -f -
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Unable to edit codeflare-operator-config configmap
+    END
+    ${result} =    Run Process    oc -n ${APPLICATIONS_NAMESPACE} delete pod -l app.kubernetes.io/name\=codeflare-operator
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Unable to reset codeflare-operator pod
+    END
+    ${result} =    Run Process    oc -n ${APPLICATIONS_NAMESPACE} wait --for\=condition\=Available deployment/codeflare-operator-manager
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}

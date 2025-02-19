@@ -1,6 +1,6 @@
 # How To Create An ods-ci Release
 
-As an example, for RHODS release 1.21.0-21 we would create a branch releases/1.21.0-21 and add a 1.21.0 tag (without -21).
+As an example, for RHODS release 1.21-21 we would create a branch release-1.21-21 and add a 1.21 tag (without -21).
 
 ## Steps:
     Use the main repo instead of a fork
@@ -16,20 +16,20 @@ As an example, for RHODS release 1.21.0-21 we would create a branch releases/1.2
 
     Create a branch and tag for this release.
     Note that the tag format should be x.y.z (without -16). This is required in order to make the automatic release notes work properly
-    4. git checkout -b releases/1.21.0-21
-    5. git tag 1.21.0
+    4. git checkout -b release-1.21-21
+    5. git tag 1.21
 
     Add also the “stable” tag (ISV team needs it) 
     6. git tag stable
 
     Finally, push branch and tags
-    7. git push --set-upstream origin releases/1.21.0-21
+    7. git push --set-upstream origin release-1.21-21
     8. git push --tags
 
     Go to GitHub and publish the release
     9. Go to https://github.com/red-hat-data-services/ods-ci/tags
-    10. In tag 1.21.0, click on the three dots and then Create release
-    11. Release title: 1.21.0
+    10. In tag 1.21, click on the three dots and then Create release
+    11. Release title: 1.21
     12. Auto-generate release notes
     13. Publish release
 

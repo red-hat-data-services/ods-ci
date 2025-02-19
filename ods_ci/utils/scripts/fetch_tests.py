@@ -3,16 +3,16 @@
 """
 Examples
 Input:
-poetry run ods_ci/utils/scripts/fetch_tests.py --test-repo git@github.com:red-hat-data-services/ods-ci.git --ref1 releases/2.8.0 --ref2-auto true --selector-attribute creatordate -A new-arg-file.txt
+poetry run ods_ci/utils/scripts/fetch_tests.py --test-repo git@github.com:red-hat-data-services/ods-ci.git --ref1 release-2.8 --ref2-auto true --selector-attribute creatordate -A new-arg-file.txt
 Output:
 ---| Computing differences |----
-Done. Found 30 new tests in releases/2.8.0 which were not present in origin/releases/2.7.0
+Done. Found 30 new tests in release-2.8 which were not present in origin/release-2.7
 
 Input:
 poetry run ods_ci/utils/scripts/fetch_tests.py --test-repo git@github.com:red-hat-data-services/ods-ci.git --ref1 master  --ref2-auto true --selector-attribute creatordate -A new-arg-file.txt
 Output:
 ---| Computing differences |----
-Done. Found 14 new tests in master which were not present in origin/releases/2.9.0
+Done. Found 14 new tests in master which were not present in origin/release-2.9
 
 """
 
@@ -66,7 +66,7 @@ def get_branch(ref_to_exclude, selector_attribute):
     List the remote branches and sort by selector_attribute date (ASC order), exclude $ref_to_exclude and get latest
     """
     ref_to_exclude_esc = ref_to_exclude.replace("/", r"\/")
-    cmd = f"git branch -r --sort={selector_attribute} | grep releases/"
+    cmd = f"git branch -r --sort={selector_attribute} | grep release-"
     if "master" not in ref_to_exclude and "main" not in ref_to_exclude:
         cmd += rf" | sed  's/.*{ref_to_exclude_esc}$/current/g' |  grep -zPo '[\S\s]+(?=current)'"
     ret = execute_command(cmd)
@@ -181,7 +181,7 @@ if __name__ == "__main__":
         help="second branch or commit to use for comparison (e.g., newer one)",
         action="store",
         dest="ref_2",
-        default="releases/2.8.0",
+        default="release-2.8",
     )
     parser.add_argument(
         "--ref2-auto",

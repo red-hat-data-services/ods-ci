@@ -196,6 +196,7 @@ Verify Distributed Workload Metrics Resources By Creating Ray Cluster Workload
     Select Distributed Workload Project By Name     ${PRJ_UPGRADE}
     Set Global Variable     ${DW_PROJECT_CREATED}       True        # robocop: disable:replace-set-variable-with-var
     Select Refresh Interval     15 seconds
+    Click Button    ${PROJECT_METRICS_TAB_XP}
     Wait Until Element Is Visible
     ...    ${DISTRIBUITED_WORKLOAD_RESOURCE_METRICS_TITLE_XP}
     ...    timeout=20
@@ -212,6 +213,7 @@ Verify Distributed Workload Metrics Resources By Creating Ray Cluster Workload
     ...    ${memory_requested}
     ...    RayCluster
 
+    Click Button    ${WORKLOAD_STATUS_TAB_XP}
     Check Distributed Workload Resource Metrics Status      ${JOB_NAME}     Running
     Check Distributed Worklaod Status Overview      ${JOB_NAME}     Running
     ...     All pods were ready or succeeded since the workload admission

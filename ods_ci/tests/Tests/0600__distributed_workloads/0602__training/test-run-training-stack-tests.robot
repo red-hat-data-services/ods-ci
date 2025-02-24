@@ -11,7 +11,7 @@ Resource          ../../../../tests/Resources/Page/DistributedWorkloads/Distribu
 
 *** Test Cases ***
 
-##Note: The testcases added below tagged with 'Kfto-MultiGpu' are meant for manual execution and must be skipped during QG tests
+##Note: The testcases added below tagged with 'Kfto-CUDA' and 'Kfto-ROCm' are meant for manual execution and must be skipped during QG tests
 
 Run Training operator KFTO Huggingface Trainer test with NVIDIA CUDA image using Single Node Single Gpu
     [Documentation]    Run Go KFTO test for Training operator using PyTorch job with NVIDIA CUDA image using Single Node Single Gpu configuration
@@ -24,7 +24,7 @@ Run Training operator KFTO Huggingface Trainer test with NVIDIA CUDA image using
 
 Run Training operator KFTO Huggingface Trainer test with NVIDIA CUDA image using Single Node Multi Gpu
     [Documentation]    Run Go KFTO test for Training operator using PyTorch job with NVIDIA CUDA image using Single Node Multi Gpu configuration
-    [Tags]  Kfto-MultiGpu
+    [Tags]  Kfto-CUDA
     ...     DistributedWorkloads
     ...     Training
     ...     TrainingOperator
@@ -32,7 +32,7 @@ Run Training operator KFTO Huggingface Trainer test with NVIDIA CUDA image using
 
 Run Training operator KFTO Huggingface Trainer test with NVIDIA CUDA image using Multi Node Single Gpu
     [Documentation]    Run Go KFTO test for Training operator using PyTorch job with NVIDIA CUDA image using Multi Node Single Gpu configuration
-    [Tags]  Resources-GPU    NVIDIA-GPUs
+    [Tags]  Kfto-CUDA
     ...     Tier1
     ...     DistributedWorkloads
     ...     Training
@@ -42,7 +42,7 @@ Run Training operator KFTO Huggingface Trainer test with NVIDIA CUDA image using
 
 Run Training operator KFTO Huggingface Trainer test with NVIDIA CUDA image using Multi Node Multi Gpu
     [Documentation]    Run Go KFTO test for Training operator using PyTorch job with NVIDIA CUDA image using Multi Node Multi Gpu configuration
-    [Tags]  Kfto-MultiGpu
+    [Tags]  Kfto-CUDA
     ...     DistributedWorkloads
     ...     Training
     ...     TrainingOperator
@@ -59,7 +59,7 @@ Run Training operator KFTO Huggingface Trainer test with AMD ROCm image using Si
 
 Run Training operator KFTO Huggingface Trainer test with AMD ROCm image using Single Node Multi Gpu
     [Documentation]    Run Go KFTO test for Training operator using PyTorch job with AMD ROCm image using Single Node Multi Gpu configuration
-    [Tags]  Kfto-MultiGpu
+    [Tags]  Kfto-ROCm
     ...     DistributedWorkloads
     ...     Training
     ...     TrainingOperator
@@ -67,7 +67,7 @@ Run Training operator KFTO Huggingface Trainer test with AMD ROCm image using Si
 
 Run Training operator KFTO Huggingface Trainer test with AMD ROCm image using Multi Node Single Gpu
     [Documentation]    Run Go KFTO test for Training operator using PyTorch job with AMD ROCm image using Multi Node Single Gpu configuration
-    [Tags]  Resources-GPU    AMD-GPUs    ROCm
+    [Tags]  Kfto-ROCm
     ...     Tier1
     ...     DistributedWorkloads
     ...     Training
@@ -77,7 +77,7 @@ Run Training operator KFTO Huggingface Trainer test with AMD ROCm image using Mu
 
 Run Training operator KFTO Huggingface Trainer test with AMD ROCm image using Multi Node Multi Gpu
     [Documentation]    Run Go KFTO test for Training operator using PyTorch job with AMD ROCm image using Multi Node Multi Gpu configuration
-    [Tags]  Kfto-MultiGpu
+    [Tags]  Kfto-ROCm
     ...     DistributedWorkloads
     ...     Training
     ...     TrainingOperator
@@ -124,7 +124,7 @@ Run Training operator KFTO_MNIST multi-node multi-CPU test with NVIDIA CUDA imag
 
 Run Training operator KFTO_MNIST multi-node single-GPU test with NVIDIA CUDA image
     [Documentation]    Run Go KFTO_MNIST multi-node single-GPU test for Training operator using PyTorch job with NVIDIA CUDA image - It requires 2 cluster-nodes with 1 GPU each
-    [Tags]  Resources-GPU    NVIDIA-GPUs
+    [Tags]  Kfto-CUDA
     ...     RHOAIENG-16556
     ...     Tier1
     ...     DistributedWorkloads
@@ -144,7 +144,7 @@ Run Training operator KFTO_MNIST multi-node single-GPU test with AMD ROCm image
 
 Run Training operator KFTO_MNIST multi-node multi-gpu test with NVIDIA CUDA image
     [Documentation]    Run Go KFTO_MNIST multi-node multi-gpu test for Training operator using PyTorch job with NVIDIA CUDA image - It requires 2 cluster-nodes with 2 GPUs each
-    [Tags]  Kfto-MultiGpu
+    [Tags]  Kfto-CUDA
     ...     DistributedWorkloads
     ...     Training
     ...     TrainingOperator
@@ -152,7 +152,7 @@ Run Training operator KFTO_MNIST multi-node multi-gpu test with NVIDIA CUDA imag
 
 Run Training operator KFTO_MNIST multi-node multi-gpu test with AMD ROCm image
     [Documentation]    Run Go KFTO_MNIST multi-node multi-gpu test for Training operator using PyTorch job with AMD ROCm image  - It requires 2 cluster-nodes with 2 GPUs each
-    [Tags]  Kfto-MultiGpu
+    [Tags]  Kfto-ROCm
     ...     DistributedWorkloads
     ...     Training
     ...     TrainingOperator

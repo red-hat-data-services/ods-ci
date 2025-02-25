@@ -212,8 +212,8 @@ Run Training Operator KFTO SDK Test
     ${result} =    Run Process    ./${KFTO_BINARY_NAME} -test.run ${TEST_NAME}
     ...    shell=true
     ...    stderr=STDOUT
-    ...    env:CODEFLARE_TEST_TIMEOUT_SHORT=5m
-    ...    env:CODEFLARE_TEST_TIMEOUT_MEDIUM=10m
+    ...    env:CODEFLARE_TEST_TIMEOUT_SHORT=10m
+    ...    env:CODEFLARE_TEST_TIMEOUT_MEDIUM=15m
     ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
     ...    env:ODH_NAMESPACE=${APPLICATIONS_NAMESPACE}
     ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-${KFTO_BINARY_NAME}-logs

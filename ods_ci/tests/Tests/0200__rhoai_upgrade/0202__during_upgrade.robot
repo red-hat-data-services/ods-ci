@@ -17,7 +17,7 @@ Test Tags           DuringUpgrade
 *** Test Cases ***
 Upgrade RHODS
     [Documentation]    Approve the install plan for the upgrade and make sure that upgrade has completed
-    [Tags]      ODS-1766        Upgrade
+    [Tags]      ODS-1766        Upgrade    Platform
     ${initial_version} =    Get RHODS Version
     ${initial_creation_date} =      Get Operator Pod Creation Date
     # robocop:disable
@@ -36,7 +36,7 @@ Upgrade RHODS
 
 TensorFlow Image Test
     [Documentation]    Run basic tensorflow notebook during upgrade
-    [Tags]      Upgrade
+    [Tags]      Upgrade    IDE
     Launch Notebook
     ...    tensorflow
     ...    ${TEST_USER.USERNAME}
@@ -46,7 +46,7 @@ TensorFlow Image Test
 
 PyTorch Image Workload Test
     [Documentation]    Run basic pytorch notebook during upgrade
-    [Tags]      Upgrade
+    [Tags]      Upgrade    IDE
     Launch Notebook
     ...    pytorch
     ...    ${TEST_USER.USERNAME}

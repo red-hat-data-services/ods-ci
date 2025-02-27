@@ -6,7 +6,7 @@ common_base_image = (
 
 
 # image and the sdk has a fixed value because the version matters
-@dsl.component(packages_to_install=["codeflare-sdk==v0.25.0"], base_image=common_base_image)
+@dsl.component(packages_to_install=["codeflare-sdk==v0.26.0"], base_image=common_base_image)
 def ray_fn() -> int:
     import ray  # noqa: PLC0415
     from codeflare_sdk import generate_cert  # noqa: PLC0415

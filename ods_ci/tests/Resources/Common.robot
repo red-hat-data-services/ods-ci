@@ -595,7 +595,7 @@ Skip If Operator Starting Version Is Not Supported
     [Documentation]    Skips test if ODH/RHOAI operator starting version is < ${minimum_version}
     ...    Usage example: add    Skip If Operator Starting Version Is Not Supported    minimum_version=2.14.0
     ...    in your post-upgrade tests if the resources needed by them were added in the pre-upgrade suite
-    ...    in ods-ci releases/2.14.0
+    ...    in ods-ci release-2.14
     [Arguments]    ${minimum_version}
     ${supported}=    Is Starting Version Supported    minimum_version=${minimum_version}
     Skip If    condition="${supported}"=="${FALSE}"    msg=This test is skipped because starting operator version < ${minimum_version}

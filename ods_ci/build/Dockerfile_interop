@@ -12,6 +12,7 @@ ARG PYTHON_VERSION=3.11
 
 ENV ODS_VENV="/ods_venv" \
     HOME="/ods_venv" \
+    WORKSPACE="/ods_venv/ods_ci" \
     PATH="ods_venv/bin:${PATH}" \
     AM_I_IN_CONTAINER="Yes" \
     PYTHONUNBUFFERED="True"

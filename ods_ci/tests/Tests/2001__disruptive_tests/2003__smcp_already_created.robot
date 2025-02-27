@@ -11,7 +11,6 @@ Suite Teardown      Suite Teardown
 
 
 *** Variables ***
-${OPERATOR_NS}                              ${OPERATOR_NAMESPACE}
 ${DSCI_NAME}                                default-dsci
 ${DSC_NAME}                                 default-dsc
 ${SERVICE_MESH_OPERATOR_NS}                 openshift-operators
@@ -34,8 +33,10 @@ Validate Service Mesh Control Plane Already Created
     Check Whether DSC Exists And Save Component Statuses
     IF    "${CLUSTER_TYPE}" == "selfmanaged"
         Uninstall RHODS In Self Managed Cluster
+        Configure Custom Namespaces
         Create Smcp From Template
         Install RHODS In Self Managed Cluster Using CLI     ${CLUSTER_TYPE}     ${IMAGE_URL}
+        Verify RHODS Installation
     ELSE IF    "${CLUSTER_TYPE}" == "managed"
         Uninstall RHODS In OSD
         Create Smcp From Template
@@ -53,6 +54,19 @@ Suite Setup
     Wait Until Operator Ready    ${SERVICE_MESH_OPERATOR_DEPLOYMENT_NAME}    ${SERVICE_MESH_OPERATOR_NS}
     Wait Until Operator Ready    ${OPERATOR_DEPLOYMENT_NAME}    ${OPERATOR_NAMESPACE}
     Wait For DSCI Ready State    ${DSCI_NAME}    ${OPERATOR_NAMESPACE}
+    IF  "${PRODUCT}" == "ODH"
+      Set Global Variable  ${OPERATOR_NAME_LABEL}  opendatahub-operator
+      Set Global Variable  ${MODEL_REGISTRY_NAMESPACE}    odh-model-registries
+      IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
+          Set Global Variable  ${OPERATOR_NAME}  rhods-operator
+      ELSE
+          Set Global Variable  ${OPERATOR_NAME}  opendatahub-operator
+      END
+    ELSE
+      Set Global Variable  ${OPERATOR_NAME}  rhods-operator
+      Set Global Variable  ${OPERATOR_NAME_LABEL}  rhods-operator
+      Set Global Variable  ${MODEL_REGISTRY_NAMESPACE}    rhoai-model-registries
+    END
 
 Suite Teardown
     [Documentation]    Suite Teardown
@@ -100,7 +114,7 @@ Fetch Image Url And Update Channel
     Should Be Equal As Integers    ${rc}    0
     Set Global Variable    ${IMAGE_URL}    ${out}
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc get subscription ${OPERATOR_SUBSCRIPTION_NAME} --namespace ${OPERATOR_NS} -o jsonpath='{.spec.channel}'
+    ...    oc get subscription ${OPERATOR_SUBSCRIPTION_NAME} --namespace ${OPERATOR_NAMESPACE} -o jsonpath='{.spec.channel}'
     Should Be Equal As Integers    ${rc}    0
     Set Global Variable    ${UPDATE_CHANNEL}    ${out}
 

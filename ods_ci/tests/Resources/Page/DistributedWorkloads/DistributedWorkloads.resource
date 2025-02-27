@@ -6,7 +6,7 @@ Resource          ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 
 
 *** Variables ***
-${CODEFLARE-SDK-RELEASE-TAG}             v0.25.0
+${CODEFLARE-SDK-RELEASE-TAG}             v0.26.0
 ${CODEFLARE-SDK-RELEASE-TAG-3.9}         adjustments-release-0.21.1
 ${CODEFLARE-SDK_DIR}                     codeflare-sdk
 ${CODEFLARE-SDK_REPO_URL}                %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
@@ -29,10 +29,10 @@ ${FMS_HF_TUNING_IMAGE}                   quay.io/modh/fms-hf-tuning@sha256:e54a5
 ${CUDA_TRAINING_IMAGE}                   quay.io/modh/training@sha256:b98e373a972ff6f896a9dc054d56920e915675339c02ea7fa123e0f4bbef4d74
 # Corresponds to quay.io/modh/training:py311-rocm62-torch241
 ${ROCM_TRAINING_IMAGE}                   quay.io/modh/training@sha256:02094ab6f98a9b8a8bea8ff72bde5b4ba6789d036ce19e15cfdea0146d288061
-# Corresponds to quay.io/modh/odh-generic-data-science-notebook:v3-2024b-20250115
-${NOTEBOOK_IMAGE_3.11}                   quay.io/modh/odh-generic-data-science-notebook@sha256:0efbb3ad6f8f342360cf1f002d40716a39d4c58f69163e053d5bd19b4fe732d4
-# Corresponds to quay.io/modh/odh-generic-data-science-notebook:v2-2024a-20250115
-${NOTEBOOK_IMAGE_3.9}                    quay.io/modh/odh-generic-data-science-notebook@sha256:78f4456c6f006711bbf29d850b0561773965c71a65f94ee94b286560b46ae80d
+# Corresponds to quay.io/modh/odh-generic-data-science-notebook:v3-2024b-20250212
+${NOTEBOOK_IMAGE_3.11}                   quay.io/modh/odh-generic-data-science-notebook@sha256:d0ba5fc23e2b3846763f60e8ade8a0f561cdcd2bf6717df6e732f6f8b68b89c4
+# Corresponds to quay.io/modh/odh-generic-data-science-notebook:v2-2024a-20250116
+${NOTEBOOK_IMAGE_3.9}                    quay.io/modh/odh-generic-data-science-notebook@sha256:3e51c462fc03b5ccb080f006ced86d36480da036fa04b8685a3e4d6d51a817ba
 ${NOTEBOOK_USER_NAME}                    ${TEST_USER_3.USERNAME}
 ${NOTEBOOK_USER_PASSWORD}                ${TEST_USER_3.PASSWORD}
 ${FMS_BINARY_NAME}                       fms
@@ -127,6 +127,13 @@ Prepare Training Operator E2E Test Suite
     Create Directory    %{WORKSPACE}/codeflare-${test_binary}-logs
     Enable Component    trainingoperator
     Wait Component Ready    trainingoperator
+    Log To Console    "Additional waiting due to RHOAIENG-20295"
+    ${result} =    Run Process    oc wait --for\=condition\=Available --timeout\=300s -n ${APPLICATIONS_NAMESPACE} deployment/kubeflow-training-operator
+    ...    shell=true    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Timeout waiting for deployment/kubeflow-training-operator to be available in ${APPLICATIONS_NAMESPACE}
+    END
 
 Prepare Training Operator SDK Test Suite
     [Documentation]    Prepare Training Operator SDK Test Suite
@@ -205,8 +212,8 @@ Run Training Operator KFTO SDK Test
     ${result} =    Run Process    ./${KFTO_BINARY_NAME} -test.run ${TEST_NAME}
     ...    shell=true
     ...    stderr=STDOUT
-    ...    env:CODEFLARE_TEST_TIMEOUT_SHORT=5m
-    ...    env:CODEFLARE_TEST_TIMEOUT_MEDIUM=10m
+    ...    env:CODEFLARE_TEST_TIMEOUT_SHORT=10m
+    ...    env:CODEFLARE_TEST_TIMEOUT_MEDIUM=15m
     ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
     ...    env:ODH_NAMESPACE=${APPLICATIONS_NAMESPACE}
     ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-${KFTO_BINARY_NAME}-logs
@@ -308,3 +315,45 @@ Verify container images
     Container Image Url Should Contain      ${APPLICATIONS_NAMESPACE}     ${pod}      ${container}
     ...     ${registry_name}/rhoai/${expected_image}
     Log To Console    ${pod_name}'s container image is verified
+
+Enable appwrapper in Codeflare operator
+    [Documentation]    Enable appwrapper in Codeflare operator
+    ${result} =    Run Process    config_yaml\=\$(oc -n ${APPLICATIONS_NAMESPACE} get configmap codeflare-operator-config -o json | jq -r '.data."config.yaml"' | yq ".appwrapper.enabled\=true" | sed 's/"/\\\\"/g') && oc -n ${APPLICATIONS_NAMESPACE} get configmap codeflare-operator-config -o json | jq ".data.\\"config.yaml\\"\=\\"\$config_yaml\\"" | oc apply -n ${APPLICATIONS_NAMESPACE} -f -
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Unable to edit codeflare-operator-config configmap
+    END
+    ${result} =    Run Process    oc -n ${APPLICATIONS_NAMESPACE} delete pod -l app.kubernetes.io/name\=codeflare-operator
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Unable to reset codeflare-operator pod
+    END
+    ${result} =    Run Process    oc -n ${APPLICATIONS_NAMESPACE} wait --for\=condition\=Available deployment/codeflare-operator-manager
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+
+Disable appwrapper in Codeflare operator
+    [Documentation]    Enable appwrapper in Codeflare operator
+    ${result} =    Run Process    config_yaml\=\$(oc -n ${APPLICATIONS_NAMESPACE} get configmap codeflare-operator-config -o json | jq -r '.data."config.yaml"' | yq ".appwrapper.enabled\=false" | sed 's/"/\\\\"/g') && oc -n ${APPLICATIONS_NAMESPACE} get configmap codeflare-operator-config -o json | jq ".data.\\"config.yaml\\"\=\\"\$config_yaml\\"" | oc apply -n ${APPLICATIONS_NAMESPACE} -f -
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Unable to edit codeflare-operator-config configmap
+    END
+    ${result} =    Run Process    oc -n ${APPLICATIONS_NAMESPACE} delete pod -l app.kubernetes.io/name\=codeflare-operator
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Unable to reset codeflare-operator pod
+    END
+    ${result} =    Run Process    oc -n ${APPLICATIONS_NAMESPACE} wait --for\=condition\=Available deployment/codeflare-operator-manager
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}

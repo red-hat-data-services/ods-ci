@@ -220,6 +220,7 @@ Verify Ray Cluster Exists And Monitor Workload Metrics By Submitting Ray Job Aft
     Open Distributed Workload Metrics Home Page
     Select Distributed Workload Project By Name     ${PRJ_UPGRADE}
     Select Refresh Interval     15 seconds
+    Click Button    ${PROJECT_METRICS_TAB_XP}
     Wait Until Element Is Visible
     ...    ${DISTRIBUITED_WORKLOAD_RESOURCE_METRICS_TITLE_XP}
     ...    timeout=20
@@ -236,11 +237,12 @@ Verify Ray Cluster Exists And Monitor Workload Metrics By Submitting Ray Job Aft
     ...    ${memory_requested}
     ...    RayCluster
 
+    Click Button    ${WORKLOAD_STATUS_TAB_XP}
     Check Distributed Workload Resource Metrics Status      ${JOB_NAME}     Running
     Check Distributed Worklaod Status Overview      ${JOB_NAME}     Running
     ...     All pods were ready or succeeded since the workload admission
 
-    Click Button            ${PROJECT_METRICS_TAB_XP}
+    Click Button    ${PROJECT_METRICS_TAB_XP}
     Check Distributed Workload Resource Metrics Chart       ${PRJ_UPGRADE}      ${cpu_requested}
     ...     ${memory_requested}     RayCluster      ${JOB_NAME}
 

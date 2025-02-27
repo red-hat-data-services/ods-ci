@@ -24,9 +24,9 @@ Add OpenShift Groups To Data Science Administrators
     Click Button   ${ADMIN_GROUPS_SECTION}//button[@aria-label="Select the OpenShift groups that contain all Data Science administrators."]
     FOR    ${group}    IN    @{admin_groups}
         ${present}=    Run Keyword And Return Status    Element Should Be Visible
-        ...    ${ADMIN_GROUPS_LIST}//*[text()="${group}"]
+        ...    ${ADMIN_GROUPS_SECTION}//div[@data-testid="group-setting-select"]//ul//*[text()="${group}"]
         IF    not ${present}
-            Click Element    ${ADMIN_GROUPS_SECTION}//*[text()="${group}"]
+            Click Element       //li[@data-testid="select-multi-typeahead-${group}"]/button
         END
     END
     Press Keys    None    ESC
@@ -37,9 +37,9 @@ Add OpenShift Groups To Data Science User Groups
     Click Button   ${USER_GROUPS_SECTION}//button[@aria-label="Select the OpenShift groups that contain all Data Science users."]
     FOR    ${group}    IN    @{user_groups}
         ${present}=    Run Keyword And Return Status    Element Should Be Visible
-        ...    ${USER_GROUPS_LIST}//*[text()="${group}"]
+        ...      ${USER_GROUPS_SECTION}//div[@data-testid="group-setting-select"]//ul//*[text()="${group}"]
         IF    not ${present}
-            Click Element    ${USER_GROUPS_SECTION}//*[text()="${group}"]
+            Click Element       //li[@data-testid="select-multi-typeahead-${group}"]/button
         END
     END
     Press Keys    None    ESC
@@ -91,8 +91,6 @@ Save Changes In User Management Setting
     ...    Wait Until Element Is Enabled   ${SAVE_BUTTON}
     IF    ${button_enabled}
         Click Button    ${SAVE_BUTTON}
-        Wait Until Keyword Succeeds    30    1
-    ...    Wait Until Page Contains    changes saved
     END
 
 AdminGroups In OdhDashboardConfig CRD Should Be

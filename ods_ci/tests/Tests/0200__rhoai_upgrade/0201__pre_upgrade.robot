@@ -42,21 +42,21 @@ ${UPGRADE_CONFIG_MAP}    upgrade-config-map
 *** Test Cases ***
 Set PVC Size Via UI
     [Documentation]    Sets a Pod toleration via the admin UI
-    [Tags]      Upgrade
+    [Tags]      Upgrade    Dashboard
     [Setup]     Begin Web Test
     Set PVC Value In RHODS Dashboard        ${S_SIZE}
     [Teardown]      Dashboard Test Teardown
 
 Set Culler Timeout
     [Documentation]     Sets a culler timeout via the admin UI
-    [Tags]      Upgrade
+    [Tags]      Upgrade    Dashboard
     [Setup]     Begin Web Test
     Modify Notebook Culler Timeout      ${CUSTOM_CULLER_TIMEOUT}
     [Teardown]      Dashboard Test Teardown
 
 Setting Pod Toleration Via UI
     [Documentation]    Sets a Pod toleration via the admin UI
-    [Tags]      Upgrade
+    [Tags]      Upgrade    Dashboard
     [Setup]     Begin Web Test
     Menu.Navigate To Page       Settings        Cluster settings
     Wait Until Page Contains        Notebook pod tolerations
@@ -67,7 +67,7 @@ Setting Pod Toleration Via UI
 Verify RHODS Accept Multiple Admin Groups And CRD Gets Updates
     [Documentation]    Verify that users can set multiple admin groups and
     ...    check OdhDashboardConfig CRD gets updated according to Admin UI
-    [Tags]      Upgrade     RHOAIENG-14306
+    [Tags]      Upgrade     RHOAIENG-14306    Platform
     [Setup]     Begin Web Test
     # robocop: disable
     Launch Dashboard And Check User Management Option Is Available For The User
@@ -82,19 +82,19 @@ Verify RHODS Accept Multiple Admin Groups And CRD Gets Updates
 
 Verify Custom Image Can Be Added
     [Documentation]    Create Custome notebook using Cli
-    [Tags]      Upgrade
+    [Tags]      Upgrade    IDE
     Oc Apply        kind=ImageStream        src=tests/Tests/0200__rhoai_upgrade/custome_image.yaml
 
 Verify User Can Disable The Runtime
     [Documentation]    Disable the Serving runtime using Cli
-    [Tags]      Upgrade
+    [Tags]      Upgrade    ModelServing
     Disable Model Serving Runtime Using CLI     namespace=redhat-ods-applications
 
 Verify Model Can Be Deployed Via UI For Upgrade
     # robocop: off=too-long-test-case
     # robocop: off=too-many-calls-in-test-case
     [Documentation]    Verify Model Can Be Deployed Via UI For Upgrade
-    [Tags]                  Upgrade
+    [Tags]                  Upgrade    ModelServing
     [Setup]                 Begin Web Test
     ${PRJ_TITLE}=           Set Variable            model-serving-upgrade
     ${PRJ_DESCRIPTION}=     Set Variable            project used for model serving tests
@@ -160,7 +160,7 @@ Verify Model Can Be Deployed Via UI For Upgrade
 
 Verify User Can Deploy Custom Runtime For Upgrade
     [Documentation]     Verify User Can Deploy Custom Runtime For Upgrade
-    [Tags]      Upgrade
+    [Tags]      Upgrade    ModelServing
     Create Custom Serving Runtime Using Template By CLI
     ...    tests/Resources/Files/caikit_runtime_template.yaml
     Begin Web Test
@@ -173,7 +173,7 @@ Verify Distributed Workload Metrics Resources By Creating Ray Cluster Workload
     # robocop: off=too-long-test-case
     # robocop: off=too-many-calls-in-test-case
     [Documentation]    Creates the Ray Cluster and verify resource usage
-    [Tags]      Upgrade
+    [Tags]      Upgrade    WorkloadOrchestration
     [Setup]     Prepare Codeflare-SDK Test Setup
     ${PRJ_UPGRADE}=     Set Variable        test-ns-rayupgrade
     ${JOB_NAME}=        Set Variable        mnist
@@ -227,7 +227,7 @@ Verify Distributed Workload Metrics Resources By Creating Ray Cluster Workload
 
 Run Training Operator FMS Setup PyTorchJob Test Use Case
     [Documentation]    Run Training Operator FMS Setup PyTorchJob Test Use Case
-    [Tags]      Upgrade
+    [Tags]      Upgrade    Training
     [Setup]     Prepare Training Operator FMS E2E Test Suite
     Skip If Operator Starting Version Is Not Supported      minimum_version=2.12.0
     Run Training Operator FMS Test    TestSetupPytorchjob
@@ -235,7 +235,7 @@ Run Training Operator FMS Setup PyTorchJob Test Use Case
 
 Run Training Operator FMS Setup Sleep PyTorchJob Test Use Case
     [Documentation]    Setup PyTorchJob which is kept running for 24 hours
-    [Tags]      Upgrade
+    [Tags]      Upgrade    Training
     [Setup]     Prepare Training Operator FMS E2E Test Suite
     Skip If Operator Starting Version Is Not Supported      minimum_version=2.12.0
     Run Training Operator FMS Test    TestSetupSleepPytorchjob
@@ -253,7 +253,7 @@ Model Registry Pre Upgrade Set Up
 
 Long Running Jupyter Notebook
     [Documentation]    Launch a long running notebook before the upgrade
-    [Tags]      Upgrade
+    [Tags]      Upgrade    IDE
     Launch Notebook
     Add And Run JupyterLab Code Cell In Active Notebook     ${CODE}
 

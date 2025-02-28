@@ -42,21 +42,21 @@ ${ALLOWED_GROUPS}       system:authenticated
 *** Test Cases ***
 Verify PVC Size
     [Documentation]    Verify PVC Size after the upgrade
-    [Tags]      Upgrade
+    [Tags]      Upgrade    Dashboard
     Get Dashboard Config Data
     ${size}     Set Variable        ${payload[0]['spec']['notebookController']['pvcSize']}[:-2]
     Should Be Equal As Strings      '${size}'       '${S_SIZE}'
 
 Verify Pod Toleration
     [Documentation]    Verify Pod toleration after the upgrade
-    [Tags]      Upgrade
+    [Tags]      Upgrade    Dashboard
     ${enable}    Set Variable
     ...    ${payload[0]['spec']['notebookController']['notebookTolerationSettings']['enabled']}
     Should Be Equal As Strings      '${enable}'     'True'
 
 Verify RHODS User Groups
     [Documentation]    Verify User Configuration after the upgrade
-    [Tags]      Upgrade     Operator
+    [Tags]      Upgrade     Operator    Platform
     Get Auth Cr Config Data
     ${admin}                Set Variable            ${AUTH_PAYLOAD[0]['spec']['adminGroups']}
     ${user}                 Set Variable            ${AUTH_PAYLOAD[0]['spec']['allowedGroups']}
@@ -66,7 +66,7 @@ Verify RHODS User Groups
 
 Verify Culler is Enabled
     [Documentation]    Verify Culler Configuration after the upgrade
-    [Tags]      Upgrade
+    [Tags]      Upgrade    Dashboard
     ${status}    Check If ConfigMap Exists
     ...    ${APPLICATIONS_NAMESPACE}
     ...    notebook-controller-culler-config
@@ -76,7 +76,7 @@ Verify Culler is Enabled
 
 Verify Notebook Has Not Restarted
     [Documentation]    Verify Notebook pod has not restarted after the upgrade
-    [Tags]      Upgrade
+    [Tags]      Upgrade    IDE
     ${notebook_name}=    Get User CR Notebook Name    ${TEST_USER2.USERNAME}
     ${notebook_pod_name}=    Get User Notebook Pod Name    ${TEST_USER2.USERNAME}
 
@@ -98,7 +98,7 @@ Verify Notebook Has Not Restarted
 
 Verify Custom Image Is Present
     [Documentation]    Verify Custom Noteboook is not deleted after the upgrade
-    [Tags]      Upgrade
+    [Tags]      Upgrade    IDE
     ${status}       Run Keyword And Return Status
     ...    Oc Get
     ...    kind=ImageStream
@@ -109,28 +109,28 @@ Verify Custom Image Is Present
 
 Verify Disable Runtime Is Present
     [Documentation]    Disable the Serving runtime using Cli
-    [Tags]      Upgrade
+    [Tags]      Upgrade    ModelServing
     ${rn}       Set Variable        ${payload[0]['spec']['templateDisablement']}
     List Should Contain Value       ${rn}       ovms-gpu
     [Teardown]      Enable Model Serving Runtime Using CLI      namespace=redhat-ods-applications
 
 Reset PVC Size Via UI
     [Documentation]    Sets a Pod toleration via the admin UI
-    [Tags]      Upgrade
+    [Tags]      Upgrade    Dashboard
     [Setup]     Begin Web Test
     Set PVC Value In RHODS Dashboard        20
     [Teardown]      Dashboard Test Teardown
 
 Reset Culler Timeout
     [Documentation]    Sets a culler timeout via the admin UI
-    [Tags]      Upgrade
+    [Tags]      Upgrade    Dashboard
     [Setup]     Begin Web Test
     Disable Notebook Culler
     [Teardown]      Dashboard Test Teardown
 
 Resetting Pod Toleration Via UI
     [Documentation]    Sets a Pod toleration via the admin UI
-    [Tags]                  Upgrade
+    [Tags]                  Upgrade    Dashboard
     [Setup]                 Begin Web Test
     Menu.Navigate To Page       Settings        Cluster settings
     Wait Until Page Contains        Notebook pod tolerations
@@ -143,7 +143,7 @@ Resetting Pod Toleration Via UI
 
 Verify POD Status
     [Documentation]    Verify all the pods are up and running
-    [Tags]                  Upgrade
+    [Tags]                  Upgrade    Platform
     Wait For Pods Status    namespace=${APPLICATIONS_NAMESPACE}     timeout=60
     Log     Verified ${APPLICATIONS_NAMESPACE}      console=yes
     Wait For Pods Status    namespace=${OPERATOR_NAMESPACE}     timeout=60
@@ -157,7 +157,7 @@ Test Inference Post RHODS Upgrade
     # robocop: off=too-many-calls-in-test-case
     # robocop: off=too-long-test-case
     [Documentation]    Test the inference result after having deployed a model that requires Token Authentication
-    [Tags]                  Upgrade
+    [Tags]                  Upgrade    ModelServing
     [Setup]                 Begin Web Test
     ${PRJ_TITLE}            Set Variable        model-serving-upgrade
     ${PRJ_DESCRIPTION}      Set Variable        project used for model serving tests        # robocop: off=unused-variable      # robocop: disable:line-too-long
@@ -183,7 +183,7 @@ Test Inference Post RHODS Upgrade
 
 Verify Custom Runtime Exists After Upgrade
     [Documentation]    Test the inference result after having deployed a model that requires Token Authentication
-    [Tags]      Upgrade
+    [Tags]      Upgrade    ModelServing
     [Setup]     Begin Web Test
     Menu.Navigate To Page       Settings        Serving runtimes
     Wait Until Page Contains        Add serving runtime     timeout=15s
@@ -196,7 +196,7 @@ Verify Ray Cluster Exists And Monitor Workload Metrics By Submitting Ray Job Aft
     # robocop: off=too-long-test-case
     # robocop: off=too-many-calls-in-test-case
     [Documentation]    check the Ray Cluster exists , submit ray job and    verify resource usage after upgrade
-    [Tags]      Upgrade
+    [Tags]      Upgrade    WorkloadOrchestration
     [Setup]     Prepare Codeflare-SDK Test Setup
     ${PRJ_UPGRADE}      Set Variable        test-ns-rayupgrade
     ${LOCAL_QUEUE}      Set Variable        local-queue-mnist
@@ -251,7 +251,7 @@ Verify Ray Cluster Exists And Monitor Workload Metrics By Submitting Ray Job Aft
 
 Run Training Operator FMS Run PyTorchJob Test Use Case
     [Documentation]    Run Training Operator FMS Run PyTorchJob Test Use Case
-    [Tags]      Upgrade
+    [Tags]      Upgrade    Training
     [Setup]     Prepare Training Operator FMS E2E Test Suite
     Skip If Operator Starting Version Is Not Supported      minimum_version=2.12.0
     Run Training Operator FMS Test          TestRunPytorchjob
@@ -259,7 +259,7 @@ Run Training Operator FMS Run PyTorchJob Test Use Case
 
 Run Training Operator FMS Run Sleep PyTorchJob Test Use Case
     [Documentation]    Verify that running PyTorchJob Pod wasn't restarted
-    [Tags]      Upgrade
+    [Tags]      Upgrade    Training
     [Setup]     Prepare Training Operator FMS E2E Test Suite
     Skip If Operator Starting Version Is Not Supported      minimum_version=2.12.0
     Run Training Operator FMS Test      TestVerifySleepPytorchjob
@@ -267,7 +267,7 @@ Run Training Operator FMS Run Sleep PyTorchJob Test Use Case
 
 Verify that the must-gather image provides RHODS logs and info
     [Documentation]    Tests the must-gather image for ODH/RHOAI after upgrading
-    [Tags]      Upgrade    ODS-505    ExcludeOnDisconnected
+    [Tags]      Upgrade    ODS-505    ExcludeOnDisconnected    Platform
     Get Must-Gather Logs
     Verify Logs For ${APPLICATIONS_NAMESPACE}
     IF    "${PRODUCT}" == "RHODS"
@@ -281,13 +281,13 @@ Verify That DSC And DSCI Release.Name Attribute matches ${expected_release_name}
     ...    ODH: Open Data Hub
     ...    RHOAI managed: OpenShift AI Cloud Service
     ...    RHOAI selfmanaged: OpenShift AI Self-Managed
-    [Tags]      Upgrade
+    [Tags]      Upgrade    Platform
     Should Be Equal As Strings      ${DSC_RELEASE_NAME}     ${expected_release_name}
     Should Be Equal As Strings      ${DSCI_RELEASE_NAME}    ${expected_release_name}
 
 Verify That DSC And DSCI Release.Version Attribute matches the value in the subscription        # robocop: disable:not-allowed-char-in-name
     [Documentation]    Tests the release.version attribute from the DSC and DSCI matches the value in the subscription.
-    [Tags]      Upgrade
+    [Tags]      Upgrade    Platform
     ${rc}    ${csv_name}    Run And Return Rc And Output
     ...    oc get subscription -n ${OPERATOR_NAMESPACE} -l ${OPERATOR_SUBSCRIPTION_LABEL} -ojson | jq '.items[0].status.currentCSV' | tr -d '"'     # robocop: disable:line-too-long
     Should Be Equal As Integers     ${rc}       ${0}        ${rc}

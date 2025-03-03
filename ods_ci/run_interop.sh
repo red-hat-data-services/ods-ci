@@ -18,13 +18,16 @@ if [[ -z "${ARTIFACT_DIR}" ]]; then
   ARTIFACT_DIR="/tmp"
 fi
 
-if [[ ${TEST_SUITE} == "Post-Upgrade" ]]; then
+if [[ ${TEST_SUITE} == "PostUpgrade" ]]; then
   echo "Retrive test config file..."
-  cp ${SHARED_DIR}/test-variables.yml test-variables.yml
+  cp ${SHARED_DIR}/${TEST_VARIABLES_FILE} ${TEST_VARIABLES_FILE}
 
   echo "Running post-upgrade testing"
-  TEST_CASE_FILE="tests/Tests/0200__rhoai_upgrade/0203__post_upgrade.robot"
-  poetry run robot -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE}
+  poetry run robot --include ${TEST_SUITE} --exclude "ExcludeOnRHOAI" --exclude "AutomationBug" --exclude "ProductBug" -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE} || true
+
+  echo "Running Smoke testing after upgrade"
+  TEST_SUITE="Smoke"
+  poetry run robot --include ${TEST_SUITE} --exclude "ExcludeOnRHOAI" --exclude "AutomationBug" --exclude "ProductBug" -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE}
   exit $?
 fi
 
@@ -85,13 +88,13 @@ if [ $retVal -ne 0 ]; then
     exit "$retVal"
 fi
 
-if [[ ${TEST_SUITE} == "Pre-Upgrade" ]]; then
+if [[ ${TEST_SUITE} == "PreUpgrade" ]]; then
   echo "Save test config file..."
-  cp test-variables.yml ${SHARED_DIR}/test-variables.yml
+  cp ${TEST_VARIABLES_FILE} ${SHARED_DIR}/${TEST_VARIABLES_FILE}
 
   echo "Running pre-upgrade testing"
-  TEST_CASE_FILE="tests/Tests/0200__rhoai_upgrade/0201__pre_upgrade.robot"
-  poetry run robot -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE} || true
+  poetry run robot --include ${TEST_SUITE} --exclude "ExcludeOnRHOAI" --exclude "AutomationBug" --exclude "ProductBug" -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE} || true
+  exit 0
 else
-  poetry run robot --include ${TEST_SUITE} --exclude "ExcludeOnRHOAI" --exclude "AutomationBug" -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE}
+  poetry run robot --include ${TEST_SUITE} --exclude "ExcludeOnRHOAI" --exclude "AutomationBug" --exclude "ProductBug" -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE}
 fi

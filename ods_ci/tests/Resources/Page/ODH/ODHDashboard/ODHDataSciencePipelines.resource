@@ -11,7 +11,7 @@ Resource            ODHDataScienceProject/Pipelines.resource
 
 
 *** Variables ***
-${PIPELINES_IMPORT_BTN_FORM_XP}=                 xpath://*[@data-testid="import-button"]
+${PIPELINES_IMPORT_BTN_FORM_XP}=                 xpath://*[@data-testid="modal-submit-button"]
 ${PIPELINE_NAME_INPUT_XP}=                       xpath://*[@data-testid="pipeline-name"]
 ${PIPELINE_DESC_INPUT_XP}=                       xpath://*[@data-testid="pipeline-description"]
 ${PIPELINE_RUN_NAME_INPUT_XP}=                   id:run-name
@@ -174,7 +174,7 @@ Open Pipeline Run
     [Arguments]    ${pipeline_run_name}    ${experiment_name}=Default
     Navigate To Page    Experiments    Experiments and runs
     ODHDashboard.Maybe Wait For Dashboard Loading Spinner Page    timeout=30s
-    Click Element    ${PIPELINE_EXPERIMENT_TABLE_XP}//*[contains(text(), "${experiment_name}")]
+    Click Element    ${PIPELINE_EXPERIMENT_TABLE_XP}//*[@data-testid="table-row-title"]//*[text()="${experiment_name}"]
     ODHDashboard.Maybe Wait For Dashboard Loading Spinner Page     timeout=30s
     Wait Until Page Contains Element    xpath=//*[@data-testid="active-runs-tab"]      timeout=30s
     Click Element    xpath=//*[@data-testid="active-runs-tab"]

@@ -28,6 +28,7 @@ ${SERVICEMESH_CR_NS}=    istio-system
 ...                      ovms-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/ovms_servingruntime_{{protocol}}.yaml
 ...                      caikit-standalone-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/caikit_standalone_servingruntime_{{protocol}}.yaml     # robocop: disable
 ...                      triton-kserve-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/triton_servingruntime_{{protocol}}.yaml     # robocop: disable
+...                      triton-modelmesh-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/triton_modelmesh_servingruntime_{{protocol}}.yaml     # robocop: disable
 ${DOWNLOAD_PVC_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_model_in_pvc.yaml
 ${DOWNLOAD_PVC_FILLED_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_model_in_pvc_filled.yaml
 ${DOWNLOAD_PROMPTS_PVC_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/download_prompts_in_pvc.yaml
@@ -84,6 +85,7 @@ Set Project And Runtime
         ...    access_key_id=${access_key_id}    access_key=${access_key}
         ...    verify_ssl=${verify_ssl}
     END
+    Log    ${runtime}
     Deploy Serving Runtime    namespace=${namespace}    runtime=${runtime}    protocol=${protocol}
     IF   ${enable_metrics} == ${TRUE}
         Enable User Workload Monitoring

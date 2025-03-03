@@ -1,0 +1,75 @@
+apiVersion: serving.kserve.io/v1alpha1
+kind: ServingRuntime
+metadata:
+  annotations:
+    enable-route: "true"
+  name: triton-modelmesh-runtime
+spec:
+  annotations:
+    opendatahub.io/modelServingSupport: '["multi"x`x`]'
+    prometheus.kserve.io/path: /metrics
+    prometheus.kserve.io/port: "8002"
+  builtInAdapter:
+    env:
+      - name: CONTAINER_MEM_REQ_BYTES
+        value: "268435456"
+      - name: USE_EMBEDDED_PULLER
+        value: "true"
+    memBufferBytes: 134217728
+    modelLoadingTimeoutMillis: 90000
+    runtimeManagementPort: 8001
+    serverType: triton
+  containers:
+    - args:
+        - -c
+        - 'mkdir -p /models/_triton_models;  chmod 777
+          /models/_triton_models;  exec
+          tritonserver  "--model-repository=/models/_triton_models"  "--model-control-mode=explicit"  "--strict-model-config=false"  "--strict-readiness=false"  "--allow-http=true"  "--allow-grpc=true"  '
+      command:
+        - /bin/sh
+      image: nvcr.io/nvidia/tritonserver:23.05-py3
+      name: triton
+      resources:
+        limits:
+          cpu: "1"
+          memory: 2Gi
+        requests:
+          cpu: "1"
+          memory: 2Gi
+  grpcDataEndpoint: port:8001
+  grpcEndpoint: port:8085
+  multiModel: true
+  protocolVersions:
+    - grpc-v2
+    - v2
+  supportedModelFormats:
+    - autoSelect: true
+      name: keras
+      version: "2"
+    - autoSelect: true
+      name: onnx
+      version: "1"
+    - autoSelect: true
+      name: pytorch
+      version: "1"
+    - autoSelect: true
+      name: tensorflow
+      version: "1"
+    - autoSelect: true
+      name: tensorflow
+      version: "2"
+    - autoSelect: true
+      name: tensorrt
+      version: "7"
+    - autoSelect: false
+      name: sklearn
+      version: "0"
+    - autoSelect: false
+      name: xgboost
+      version: "1"
+    - autoSelect: false
+      name: lightgbm
+      version: "3"
+    - autoSelect: true
+      name: python
+      version: "1"

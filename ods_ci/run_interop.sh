@@ -18,6 +18,15 @@ if [[ -z "${ARTIFACT_DIR}" ]]; then
   ARTIFACT_DIR="/tmp"
 fi
 
+if [[ ${TEST_SUITE} == "PostUpgrade" ]]; then
+  echo "Retrive test config file..."
+  cp ${SHARED_DIR}/${TEST_VARIABLES_FILE} ${TEST_VARIABLES_FILE}
+
+  echo "Running post-upgrade testing"
+  poetry run robot --include ${TEST_SUITE} --exclude "ExcludeOnRHOAI" --exclude "AutomationBug" --exclude "ProductBug" -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE}
+  exit 0
+fi
+
 echo "Install IDP users and map them to test config file"
 ./build/install_idp.sh
 
@@ -81,13 +90,6 @@ if [[ ${TEST_SUITE} == "PreUpgrade" ]]; then
 
   echo "Running pre-upgrade testing"
   poetry run robot --include ${TEST_SUITE} --exclude "ExcludeOnRHOAI" --exclude "AutomationBug" --exclude "ProductBug" -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE} || true
-elif [[ ${TEST_SUITE} == "PostUpgrade" ]]; then
-  echo "Retrive test config file..."
-  cp ${SHARED_DIR}/${TEST_VARIABLES_FILE} ${TEST_VARIABLES_FILE}
-
-  echo "Running post-upgrade testing"
-  poetry run robot --include ${TEST_SUITE} --exclude "ExcludeOnRHOAI" --exclude "AutomationBug" --exclude "ProductBug" -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE}
-  exit 0
 else
   poetry run robot --include ${TEST_SUITE} --exclude "ExcludeOnRHOAI" --exclude "AutomationBug" --exclude "ProductBug" -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE}
 fi

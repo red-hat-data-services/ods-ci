@@ -16,6 +16,7 @@ Run Training operator FMS test base finetuning use case
     ...     DistributedWorkloads
     ...     Training
     ...     TrainingOperator
+    ...     Resources-GPU    NVIDIA-GPUs
     Run Training Operator FMS Test    TestPytorchjobWithSFTtrainerFinetuning
 
 Run Training operator FMS test base LoRA use case
@@ -25,6 +26,7 @@ Run Training operator FMS test base LoRA use case
     ...     DistributedWorkloads
     ...     Training
     ...     TrainingOperator
+    ...     Resources-GPU    NVIDIA-GPUs
     Run Training Operator FMS Test    TestPytorchjobWithSFTtrainerLoRa
 
 ## Note : This test is disabled because the required model supported for QLoRA test is not available
@@ -45,4 +47,5 @@ Run Training operator FMS test with Kueue quota
     ...     DistributedWorkloads
     ...     Training
     ...     TrainingOperator
+    ...     Resources-GPU    NVIDIA-GPUs
     Run Training Operator FMS Test    TestPytorchjobUsingKueueQuota

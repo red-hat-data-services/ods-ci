@@ -174,6 +174,11 @@ Run Training Operator FMS Test
     ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
     ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-${FMS_BINARY_NAME}-logs
     ...    env:FMS_HF_TUNING_IMAGE=${FMS_HF_TUNING_IMAGE}
+    ...    env:AWS_DEFAULT_ENDPOINT=${AWS_DEFAULT_ENDPOINT}
+    ...    env:AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+    ...    env:AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    ...    env:AWS_STORAGE_BUCKET_DOWNLOAD=${AWS_STORAGE_BUCKET}
+    ...    env:AWS_STORAGE_BUCKET_DOWNLOAD_MODEL_PATH=models/granite-3b-code-base-2k
     Log To Console    ${result.stdout}
     Check missing Go test    ${result.stdout}
     IF    ${result.rc} != 0

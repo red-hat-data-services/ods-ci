@@ -22,7 +22,6 @@ Run Data Science Pipelines Operator Integration Tests
     [Documentation]    Run Data Science Pipelines Operator Integration Tests
     [Tags]
     ...     DataSciencePipelines-Backend
-    ...     Tier1
     ...     ODS-2632
     ${openshift_api}    Get Openshift Server
     Log    ${openshift_api}

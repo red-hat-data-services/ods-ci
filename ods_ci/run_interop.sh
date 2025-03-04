@@ -86,7 +86,7 @@ elif [[ ${TEST_SUITE} == "PostUpgrade" ]]; then
   cp ${SHARED_DIR}/${TEST_VARIABLES_FILE} ${TEST_VARIABLES_FILE}
 
   echo "Running post-upgrade testing"
-  poetry run robot --include ${TEST_SUITE} --exclude "ExcludeOnRHOAI" --exclude "AutomationBug" --exclude "ProductBug" -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE} || true
+  poetry run robot --include ${TEST_SUITE} --exclude "ExcludeOnRHOAI" --exclude "AutomationBug" --exclude "ProductBug" -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE}
   exit 0
 else
   poetry run robot --include ${TEST_SUITE} --exclude "ExcludeOnRHOAI" --exclude "AutomationBug" --exclude "ProductBug" -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE}

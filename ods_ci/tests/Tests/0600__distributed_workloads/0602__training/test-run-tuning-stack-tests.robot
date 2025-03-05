@@ -12,21 +12,19 @@ Resource          ../../../../tests/Resources/Page/DistributedWorkloads/Distribu
 Run Training operator FMS test base finetuning use case
     [Documentation]    Run Go FMS tests for Training operator base finetuning use case
     [Tags]  RHOAIENG-6965
-    ...     Tier1
     ...     DistributedWorkloads
     ...     Training
     ...     TrainingOperator
-    ...     Resources-GPU    NVIDIA-GPUs
+    ...     FMS
     Run Training Operator FMS Test    TestPytorchjobWithSFTtrainerFinetuning
 
 Run Training operator FMS test base LoRA use case
     [Documentation]    Run Go FMS tests for Training operator base LoRA use case
     [Tags]  RHOAIENG-6965
-    ...     Tier1
     ...     DistributedWorkloads
     ...     Training
     ...     TrainingOperator
-    ...     Resources-GPU    NVIDIA-GPUs
+    ...     FMS
     Run Training Operator FMS Test    TestPytorchjobWithSFTtrainerLoRa
 
 ## Note : This test is disabled because the required model supported for QLoRA test is not available
@@ -43,9 +41,8 @@ Run Training operator FMS test base LoRA use case
 Run Training operator FMS test with Kueue quota
     [Documentation]    Run Go FMS tests for Training operator with Kueue quota
     [Tags]  RHOAIENG-6965
-    ...     Tier1
     ...     DistributedWorkloads
     ...     Training
     ...     TrainingOperator
-    ...     Resources-GPU    NVIDIA-GPUs
+    ...     FMS
     Run Training Operator FMS Test    TestPytorchjobUsingKueueQuota

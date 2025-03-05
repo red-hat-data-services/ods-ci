@@ -225,21 +225,21 @@ Verify Distributed Workload Metrics Resources By Creating Ray Cluster Workload
     [Teardown]      Run Keywords        Cleanup Codeflare-SDK Setup     AND
     ...     Run Keyword If Test Failed      Codeflare Upgrade Tests Teardown        ${PRJ_UPGRADE}      ${DW_PROJECT_CREATED}       # robocop: disable:line-too-long
 
-Run Training Operator FMS Setup PyTorchJob Test Use Case
-    [Documentation]    Run Training Operator FMS Setup PyTorchJob Test Use Case
+Run Training Operator KFTO Setup PyTorchJob Test Use Case
+    [Documentation]    Run Training Operator KFTO Setup PyTorchJob Test Use Case
     [Tags]      Upgrade    Training
-    [Setup]     Prepare Training Operator FMS E2E Test Suite
+    [Setup]     Prepare Training Operator KFTO E2E Test Suite
     Skip If Operator Starting Version Is Not Supported      minimum_version=2.12.0
-    Run Training Operator FMS Test    TestSetupPytorchjob
-    [Teardown]    Teardown Training Operator FMS E2E Test Suite
+    Run Training Operator KFTO Test    TestSetupPytorchjob    ${CUDA_TRAINING_IMAGE}
+    [Teardown]    Teardown Training Operator KFTO E2E Test Suite
 
-Run Training Operator FMS Setup Sleep PyTorchJob Test Use Case
+Run Training Operator KFTO Setup Sleep PyTorchJob Test Use Case
     [Documentation]    Setup PyTorchJob which is kept running for 24 hours
     [Tags]      Upgrade    Training
-    [Setup]     Prepare Training Operator FMS E2E Test Suite
+    [Setup]     Prepare Training Operator KFTO E2E Test Suite
     Skip If Operator Starting Version Is Not Supported      minimum_version=2.12.0
-    Run Training Operator FMS Test    TestSetupSleepPytorchjob
-    [Teardown]    Teardown Training Operator FMS E2E Test Suite
+    Run Training Operator KFTO Test    TestSetupSleepPytorchjob    ${CUDA_TRAINING_IMAGE}
+    [Teardown]    Teardown Training Operator KFTO E2E Test Suite
 
 Data Science Pipelines Pre Upgrade Configuration
     [Documentation]    Creates project dsp-test-upgrade and configures the pipeline resources testing upgrade

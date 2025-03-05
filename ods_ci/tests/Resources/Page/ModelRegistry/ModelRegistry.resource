@@ -265,6 +265,7 @@ Download Python Client Dependencies
     # version compatible with the specific python version. If specified it will need to be updated to point to the
     # correct cpython version (e.g. cp311 for python 3.11, cp312 for python 3.12 etc.)
     Open New Notebook
+    Sleep  1s
     ${python_version}=    Get XY Python Version From Jupyterlab
     ${result}=    Run Process    command=pip download --platform=manylinux2014_x86_64 --python-version=${python_version} --only-binary=:all: --dest=${destination} ${package_version}    # robocop: disable:line-too-long
     ...    shell=yes

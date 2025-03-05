@@ -40,11 +40,7 @@ Deploy Model Registry
     Component Should Be Enabled    modelregistry
     Sleep    60s    reason=Wait for webhook endpoint
     Apply Db Config Samples    namespace=${NAMESPACE_MODEL_REGISTRY}    samples=${MODEL_REGISTRY_DB_SAMPLES}
-    # After the MR instance is seen as Available, the rest container might take a little bit of additional time to
-    # properly connect to the MLMD server (I'm assuming it's based on how often it retries and when the DB actually
-    # becomes available). I've tested this multiple times locally and the longest time I've seen this keyword retry for
-    # is 20 seconds. Setting it to 60 to give it ample time to do its thing.
-    Wait Until Keyword Succeeds    60 s    2 s    Verify Model Registry Can Accept Requests
+    Wait Until Keyword Succeeds    10 s    2 s    Verify Model Registry Can Accept Requests
 
 Registering A Model In The Registry
     [Documentation]    Registers a model in the model registry

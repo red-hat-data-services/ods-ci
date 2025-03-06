@@ -5,6 +5,7 @@ Library  JupyterLibrary
 *** Variables ***
 # This variable is overriden for ODH runs via 'test-variables-odh-overwrite.yml'
 ${ODH_DASHBOARD_PROJECT_NAME}=   Red Hat OpenShift AI
+${APP_LAUNCHER_XPATH}=    xpath://button[@aria-label="Application launcher"]
 
 
 *** Keywords ***
@@ -29,7 +30,8 @@ Launch Jupyterhub via Routes
 Launch RHOAI Via OCP Application Launcher
    [Documentation]    Uses the Application Launcher in the OCP Web UI to open the
    ...    RHOAI Dashboard page.
-   Click Element    xpath://button[@aria-label="Application launcher"]
+   Wait Until Element Is Visible    ${APP_LAUNCHER_XPATH}
+   Click Element    ${APP_LAUNCHER_XPATH}
    Wait Until Page Contains Element    xpath://span[.="${ODH_DASHBOARD_PROJECT_NAME}"]
    Click Element    xpath://span[.="${ODH_DASHBOARD_PROJECT_NAME}"]/..
    Switch Window    NEW

@@ -153,7 +153,11 @@ Apply Db Config Samples
     [Documentation]    Applying the db config samples from https://github.com/opendatahub-io/model-registry-operator
     [Arguments]    ${namespace}    ${samples}
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc apply -k ${samples} -n ${namespace}
+    ...    oc apply -k ${samples} -n ${namespace} -l app.kubernetes.io/name=model-registry-db
+    Should Be Equal As Integers	  ${rc}	 0   msg=${out}
+    Wait For Model Registry DB To Be Ready
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc apply -k ${samples} -n ${namespace} -l app.kubernetes.io/instance=modelregistry-sample
     Should Be Equal As Integers	  ${rc}	 0   msg=${out}
     Wait For Model Registry Containers To Be Ready
 
@@ -170,13 +174,17 @@ Jupyter Notebook Can Query Model Registry
     JupyterLab Code Cell Error Output Should Not Be Visible
     SeleniumLibrary.Capture Page Screenshot
 
-Wait For Model Registry Containers To Be Ready
-    [Documentation]    Wait for model-registry-deployment to be ready
+Wait For Model Registry DB To Be Ready
+    [Documentation]    Wait for model-registry-db to be ready
     ${NAMESPACE_MODEL_REGISTRY}=    Get Model Registry Namespace From DSC
     ${result}=    Run Process
     ...        oc wait --for\=condition\=Available --timeout\=5m -n ${NAMESPACE_MODEL_REGISTRY} deployment/model-registry-db      # robocop: disable:line-too-long
     ...        shell=true    stderr=STDOUT
     Log To Console    ${result.stdout}
+
+Wait For Model Registry Containers To Be Ready
+    [Documentation]    Wait for model-registry-sample instance to be ready
+    ${NAMESPACE_MODEL_REGISTRY}=    Get Model Registry Namespace From DSC
     ${result}=    Run Process
     ...        oc wait --for\=condition\=Available --timeout\=5m -n ${NAMESPACE_MODEL_REGISTRY} deployment/modelregistry-sample     # robocop: disable:line-too-long
     ...        shell=true    stderr=STDOUT

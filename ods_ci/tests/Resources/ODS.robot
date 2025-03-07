@@ -106,8 +106,8 @@ Set Access Groups Settings
 
 Set Default Access Groups Settings
     [Documentation]    Restores the default rhods-groups config map
-    Apply Access Groups Settings     admins_group=${STANDARD_ADMINS_GROUP}
-    ...     users_group=${STANDARD_SYSTEM_GROUP}
+    Apply Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
+    ...    users_group=${STANDARD_SYSTEM_GROUP}
 
 Uninstall RHODS From OSD Cluster
     [Documentation]    Selects the cluster type and triggers the RHODS uninstallation

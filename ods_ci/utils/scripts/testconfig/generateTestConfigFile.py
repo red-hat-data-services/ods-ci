@@ -262,6 +262,8 @@ def generate_test_config_file(
     data["NOTEBOOKS_NAMESPACE"] = config_data["NOTEBOOKS_NAMESPACE"]
     data["OPENSHIFT_PIPELINES_CHANNEL"] = config_data["OPENSHIFT_PIPELINES_CHANNEL"]
     data["RHODS_OSD_INSTALL_REPO"] = config_data["RHODS_OSD_INSTALL_REPO"]
+    if config_data.get("NGC_API_KEY"):
+        data["NGC_API_KEY"] = config_data["NGC_API_KEY"]
     if config_data.get("PIP_INDEX_URL"):
         data["PIP_INDEX_URL"] = config_data["PIP_INDEX_URL"]
     if config_data.get("PIP_TRUSTED_HOST"):

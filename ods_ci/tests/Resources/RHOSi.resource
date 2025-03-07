@@ -121,7 +121,7 @@ Assign Vars According To Product
             Set Suite Variable    ${ADMIN_GROUPS}       dedicated-admins
         ELSE
             Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     rhoai-operator-dev
-            Set Suite Variable    ${ADMIN_GROUPS}       rhods-admins
+            Set Suite Variable    ${ADMIN_GROUPS}       'rhods-admins,rhods-users'
         END
         Set Suite Variable  ${MODEL_REGISTRY_NAMESPACE}    rhoai-model-registries
     ELSE IF    "${PRODUCT}" == "ODH"

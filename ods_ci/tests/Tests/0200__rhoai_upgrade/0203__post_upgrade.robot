@@ -56,7 +56,7 @@ Verify Pod Toleration
 
 Verify RHODS User Groups
     [Documentation]    Verify User Configuration after the upgrade
-    [Tags]      Upgrade     Operator    Platform
+    [Tags]      Upgrade     Platform        RHOAIENG-19806
     Get Auth Cr Config Data
     ${admin}                Set Variable            ${AUTH_PAYLOAD[0]['spec']['adminGroups']}
     ${user}                 Set Variable            ${AUTH_PAYLOAD[0]['spec']['allowedGroups']}

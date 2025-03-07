@@ -5,7 +5,7 @@ Library  String
 Library  OpenShiftLibrary
 
 *** Variables ***
-${APP_LAUNCHER_ELEMENT}                 xpath=//*[@aria-label='Application launcher']/button
+${APP_LAUNCHER_ELEMENT}                 xpath://button[@aria-label="Application launcher"]
 ${PERSPECTIVE_SWITCHER_BUTTON_ELEMENT}  xpath=//*[@data-test-id="perspective-switcher-toggle"]
 ${PERSPECTIVE_SWITCHER_TEXT_ELEMENT}  xpath=//*[@data-test-id="perspective-switcher-toggle"]/span/h2
 ${PERSPECTIVE_ADMINISTRATOR_BUTTON}  xpath=//*[@data-test-id="perspective-switcher-menu-option"][starts-with(., "Administrator")]

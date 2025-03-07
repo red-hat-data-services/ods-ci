@@ -19,6 +19,8 @@ ${RAY_TORCH_CUDA_IMAGE_3.11}             quay.io/rhoai/ray@sha256:5077f9bb230dfa
 ${RAY_ROCM_IMAGE_3.11}                   quay.io/modh/ray@sha256:baeb1428a008ff109ae1afb372f804c574b4179cfa84c752f7afc609e0d44b3a
 # Corresponds to quay.io/rhoai/ray:2.35.0-py311-rocm61-torch24-fa26
 ${RAY_TORCH_ROCM_IMAGE_3.11}             quay.io/rhoai/ray@sha256:b0e129cd2f4cdea7ad7a7859031357ffd9915410551f94fbcb942af2198cdf78
+# Corresponds to quay.io/modh/ray:2.35.0-py39-rocm62
+${RAY_ROCM_IMAGE_3.9}                    quay.io/modh/ray@sha256-98642508c09b2b33e11cc321765c1f57a9935d97dfc63affc0d8a2e2d2a6c125
 # Corresponds to quay.io/modh/ray:2.35.0-py39-cu121
 ${RAY_CUDA_IMAGE_3.9}                    quay.io/modh/ray@sha256:0d715f92570a2997381b7cafc0e224cfa25323f18b9545acfd23bc2b71576d06
 # Corresponds to quay.io/rhoai/ray:2.35.0-py39-cu121-torch24-fa26

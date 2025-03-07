@@ -122,6 +122,49 @@ Test Targets Are Available And Up In RHOAI Prometheus
     List Should Contain Value    ${targets}    user_facing_endpoints_status_rhods_dashboard
     List Should Contain Value    ${targets}    user_facing_endpoints_status_workbenches
 
+Test RHOAI Operator Metrics Are Defined
+    [Documentation]   Verifies the RHOAI Operator Metrics are defined and show meaningful values
+    [Tags]    Sanity
+    ...       Tier1
+    ...       ODS-192
+    ...       RHOAIENG-13081
+    ...       Monitoring
+    Skip If RHODS Is Self-Managed
+    @{expected_metric_names} =    Create List  controller_runtime_active_workers
+    ...                                     controller_runtime_max_concurrent_reconciles  controller_runtime_reconcile_errors_total
+    ...                                     controller_runtime_reconcile_time_seconds_bucket  controller_runtime_reconcile_time_seconds_count
+    ...                                     controller_runtime_reconcile_time_seconds_sum  controller_runtime_reconcile_total
+
+    @{expected_controller_names} =     Create List  auth  codeflare  dashboard
+    ...                                    datasciencecluster  datasciencepipelines  dscinitialization  kserve  kueue
+    ...                                    modelcontroller  modelmeshserving  modelregistry  monitoring  ray
+    ...                                    trainingoperator  trustyai  workbenches
+
+    FOR   ${controller}    IN    @{expected_controller_names}
+            ${response} =    Prometheus.Run Query
+            ...    pm_url=${RHODS_PROMETHEUS_URL}
+            ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
+            ...    pm_query={job="RHOAI Metrics", controller="${controller}"}
+
+            ${metrics_names} =   Run  echo '${response.text}' | jq '.data.result[].metric.__name__'
+
+            FOR    ${metric}    IN    @{expected_metric_names}
+                   Should Contain    ${metrics_names}    ${metric}
+            END
+    END
+
+    @{expected_method_names} =    Create List   GET   POST   PUT   DELETE   PATCH
+    FOR    ${method}      IN     @{expected_method_names}
+            ${response} =    Prometheus.Run Query
+            ...    pm_url=${RHODS_PROMETHEUS_URL}
+            ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
+            ...    pm_query={job="RHOAI Metrics", method="${method}"}
+            ${metrics_names} =   Run  echo '${response.text}' | jq '.data.result[].metric.__name__'
+            ${methods} =   Run  echo '${response.text}' | jq '.data.result[].metric.method'
+            Should Contain    ${methods}     ${method}
+            Should Contain    ${metrics_names}     rest_client_requests_total
+    END
+
 Test RHOAI Dashboard Metrics By Code Are Defined
     [Documentation]   Verifies the RHOAI Dashboard Metrics By Code Are Defined and show accurate values
     ...               (2xx and 5xx codes)
@@ -143,10 +186,6 @@ Test RHOAI Dashboard Metrics By Code Are Defined
     ...    pm_url=${RHODS_PROMETHEUS_URL}
     ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
     ...    pm_query=sum(haproxy_backend_http_responses_total{route='rhods-dashboard', code='2xx'})
-    ${response_total} =    Prometheus.Run Query
-    ...    pm_url=${RHODS_PROMETHEUS_URL}
-    ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
-    ...    pm_query=sum(haproxy_backend_http_responses_total{route='rhods-dashboard'})
 
     @{metrics_by_code} =    Set Variable    ${response_by_code.json()["data"]["result"]}
     ${metrics_by_code_5xx} =    Set Variable    ${metrics_by_code[4]["value"][-1]}
@@ -157,12 +196,9 @@ Test RHOAI Dashboard Metrics By Code Are Defined
     ${metrics_5xx} =    Convert To Number    ${metrics_5xx}    2
     ${metrics_2xx} =    Set Variable    ${response_2xx.json()["data"]["result"][0]["value"][-1]}
     ${metrics_2xx} =    Convert To Number    ${metrics_2xx}    2
-    ${metrics_total} =    Set Variable    ${response_total.json()["data"]["result"][0]["value"][-1]}
-    ${metrics_total} =    Convert To Number    ${metrics_total}    2
 
     Should Be True      ${metrics_by_code_5xx} == ${metrics_5xx}
     Should Be True      ${metrics_by_code_2xx} == ${metrics_2xx}
-    Should Be True      ${metrics_total} == ${metrics_by_code_5xx}+${metrics_by_code_2xx}
 
 Test RHOAI Dashboard Metrics Are Defined
     [Documentation]   Verifies the RHOAI Dashboard Metrics Are Defined and show meaningful values

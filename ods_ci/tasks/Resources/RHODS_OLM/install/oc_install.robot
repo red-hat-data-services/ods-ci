@@ -20,6 +20,7 @@ ${DSCI_NAME} =    default-dsci
 ...    trustyai
 ...    workbenches
 ...    modelregistry
+...    feastoperator
 ${SERVERLESS_OP_NAME}=     serverless-operator
 ${SERVERLESS_SUB_NAME}=    serverless-operator
 ${SERVERLESS_NS}=    openshift-serverless
@@ -200,6 +201,12 @@ Verify RHODS Installation
   IF    "${trainingoperator}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app.kubernetes.io/part-of=trainingoperator   timeout=400s
+  END
+
+  ${feastoperator} =    Is Component Enabled    feastoperator    ${DSC_NAME}
+  IF    "${feastoperator}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/part-of=feastoperator   timeout=400s
   END
 
   IF    "${dashboard}" == "true" or "${workbenches}" == "true" or "${modelmeshserving}" == "true" or "${datasciencepipelines}" == "true" or "${kserve}" == "true" or "${kueue}" == "true" or "${codeflare}" == "true" or "${ray}" == "true" or "${trustyai}" == "true" or "${modelregistry}" == "true" or "${trainingoperator}" == "true"    # robocop: disable
@@ -496,50 +503,65 @@ Catalog Is Ready
 
 Install Authorino Operator Via Cli
     [Documentation]    Install Authorino Operator Via CLI
-    Install ISV Operator From OperatorHub Via CLI    operator_name=${AUTHORINO_OP_NAME}
-        ...    subscription_name=${AUTHORINO_SUB_NAME}
-        ...    channel=${AUTHORINO_CHANNEL_NAME}
-        ...    catalog_source_name=redhat-operators
-    Wait Until Operator Subscription Last Condition Is
-          ...    type=CatalogSourcesUnhealthy    status=False
-          ...    reason=AllCatalogSourcesHealthy    subcription_name=${AUTHORINO_SUB_NAME}
-          ...    retry=150
-    Wait For Pods To Be Ready    label_selector=control-plane=authorino-operator
-          ...    namespace=${OPENSHIFT_OPERATORS_NS}
+    ${is_installed} =   Check If Operator Is Installed Via CLI   ${AUTHORINO_OP_NAME}
+    IF    not ${is_installed}
+          Install ISV Operator From OperatorHub Via CLI    operator_name=${AUTHORINO_OP_NAME}
+             ...    subscription_name=${AUTHORINO_SUB_NAME}
+             ...    channel=${AUTHORINO_CHANNEL_NAME}
+             ...    catalog_source_name=redhat-operators
+          Wait Until Operator Subscription Last Condition Is
+             ...    type=CatalogSourcesUnhealthy    status=False
+             ...    reason=AllCatalogSourcesHealthy    subcription_name=${AUTHORINO_SUB_NAME}
+             ...    retry=150
+          Wait For Pods To Be Ready    label_selector=control-plane=authorino-operator
+             ...    namespace=${OPENSHIFT_OPERATORS_NS}
+    ELSE
+          Log To Console    message=Authorino Operator is already installed
+    END
 
 Install Service Mesh Operator Via Cli
     [Documentation]    Install Service Mesh Operator Via CLI
-    Install ISV Operator From OperatorHub Via CLI    operator_name=${SERVICEMESH_OP_NAME}
-          ...    subscription_name=${SERVICEMESH_SUB_NAME}
-          ...    catalog_source_name=redhat-operators
-    Wait Until Operator Subscription Last Condition Is
-          ...    type=CatalogSourcesUnhealthy    status=False
-          ...    reason=AllCatalogSourcesHealthy    subcription_name=${SERVICEMESH_SUB_NAME}
-          ...    retry=150
-    Wait For Pods To Be Ready    label_selector=name=istio-operator
-          ...    namespace=${OPENSHIFT_OPERATORS_NS}
+    ${is_installed} =   Check If Operator Is Installed Via CLI   ${SERVICEMESH_OP_NAME}
+    IF    not ${is_installed}
+          Install ISV Operator From OperatorHub Via CLI    operator_name=${SERVICEMESH_OP_NAME}
+             ...    subscription_name=${SERVICEMESH_SUB_NAME}
+             ...    catalog_source_name=redhat-operators
+          Wait Until Operator Subscription Last Condition Is
+             ...    type=CatalogSourcesUnhealthy    status=False
+             ...    reason=AllCatalogSourcesHealthy    subcription_name=${SERVICEMESH_SUB_NAME}
+             ...    retry=150
+          Wait For Pods To Be Ready    label_selector=name=istio-operator
+             ...    namespace=${OPENSHIFT_OPERATORS_NS}
+    ELSE
+          Log To Console    message=Service Mesh Operator is already installed
+    END
 
 Install Serverless Operator Via Cli
     [Documentation]    Install Serverless Operator Via CLI
-    ${rc}    ${out} =    Run And Return Rc And Output    oc create namespace ${SERVERLESS_NS}
-    Install ISV Operator From OperatorHub Via CLI    operator_name=${SERVERLESS_OP_NAME}
-          ...    namespace=${SERVERLESS_NS}
-          ...    subscription_name=${SERVERLESS_SUB_NAME}
-          ...    catalog_source_name=redhat-operators
-          ...    operator_group_name=serverless-operators
-          ...    operator_group_ns=${SERVERLESS_NS}
-          ...    operator_group_target_ns=${NONE}
-    Wait Until Operator Subscription Last Condition Is
-          ...    type=CatalogSourcesUnhealthy    status=False
-          ...    reason=AllCatalogSourcesHealthy    subcription_name=${SERVERLESS_SUB_NAME}
-          ...    namespace=${SERVERLESS_NS}
-          ...    retry=150
-    Wait For Pods To Be Ready    label_selector=name=knative-openshift
-          ...    namespace=${SERVERLESS_NS}
-    Wait For Pods To Be Ready    label_selector=name=knative-openshift-ingress
-          ...    namespace=${SERVERLESS_NS}
-    Wait For Pods To Be Ready    label_selector=name=knative-operator
-          ...    namespace=${SERVERLESS_NS}
+    ${is_installed} =   Check If Operator Is Installed Via CLI   ${SERVERLESS_OP_NAME}
+    IF    not ${is_installed}
+        ${rc}    ${out} =    Run And Return Rc And Output    oc create namespace ${SERVERLESS_NS}
+        Install ISV Operator From OperatorHub Via CLI    operator_name=${SERVERLESS_OP_NAME}
+             ...    namespace=${SERVERLESS_NS}
+             ...    subscription_name=${SERVERLESS_SUB_NAME}
+             ...    catalog_source_name=redhat-operators
+             ...    operator_group_name=serverless-operators
+             ...    operator_group_ns=${SERVERLESS_NS}
+             ...    operator_group_target_ns=${NONE}
+        Wait Until Operator Subscription Last Condition Is
+             ...    type=CatalogSourcesUnhealthy    status=False
+             ...    reason=AllCatalogSourcesHealthy    subcription_name=${SERVERLESS_SUB_NAME}
+             ...    namespace=${SERVERLESS_NS}
+             ...    retry=150
+        Wait For Pods To Be Ready    label_selector=name=knative-openshift
+             ...    namespace=${SERVERLESS_NS}
+        Wait For Pods To Be Ready    label_selector=name=knative-openshift-ingress
+             ...    namespace=${SERVERLESS_NS}
+        Wait For Pods To Be Ready    label_selector=name=knative-operator
+             ...    namespace=${SERVERLESS_NS}
+    ELSE
+        Log To Console    message=Serverless Operator is already installed
+    END
 
 Install Kserve Dependencies
     [Documentation]    Install Dependent Operators For Kserve
@@ -547,24 +569,9 @@ Install Kserve Dependencies
     Set Suite Variable   ${FILES_RESOURCES_DIRPATH}    tests/Resources/Files
     Set Suite Variable   ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
     Set Suite Variable   ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
-    ${is_installed} =   Check If Operator Is Installed Via CLI   ${AUTHORINO_OP_NAME}
-    IF    not ${is_installed} and "authorino" in ${dependencies}
-          Install Authorino Operator Via Cli
-    ELSE
-          Log To Console    message=Authorino Operator is already installed
-    END
-    ${is_installed} =   Check If Operator Is Installed Via CLI   ${SERVICEMESH_OP_NAME}
-    IF    not ${is_installed} and "servicemesh" in ${dependencies}
-        Install Service Mesh Operator Via Cli
-    ELSE
-        Log To Console    message=ServiceMesh Operator is already installed
-    END
-    ${is_installed} =   Check If Operator Is Installed Via CLI   ${SERVERLESS_OP_NAME}
-    IF    not ${is_installed} and "serverless" in ${dependencies}
-        Install Serverless Operator Via Cli
-    ELSE
-        Log To Console    message=Serverless Operator is already installed
-    END
+    Install Authorino Operator Via Cli
+    Install Service Mesh Operator Via Cli
+    Install Serverless Operator Via Cli
 
 Create Namespace With Label
     [Documentation]    Creates a namespace and adds a specific label to it

@@ -46,4 +46,7 @@ spec:
       devFlags: <modelregistry_devflags>
       managementState: <modelregistry_value>
       registriesNamespace: <modelregistry_namespace>
+    feastoperator:
+      devFlags: <feastoperator_devflags>
+      managementState: <feastoperator_value>
 

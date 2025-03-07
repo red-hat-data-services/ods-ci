@@ -250,20 +250,27 @@ Remove Model Registry
     # We don't want to stop the teardown if any of these resources are not found
     Run Keyword And Continue On Failure
     ...    Run And Verify Command
-    ...    oc delete -n ${NAMESPACE_MODEL_REGISTRY} -k ${MODELREGISTRY_BASE_FOLDER}/samples/secure-db/mysql-tls
+    ...    oc delete -n ${NAMESPACE_MODEL_REGISTRY} -k ${MODELREGISTRY_BASE_FOLDER}/samples/secure-db/mysql-tls --ignore-not-found=true  # robocop: disable
     Run Keyword And Continue On Failure
-    ...    Run And Verify Command    oc delete secret modelregistry-sample-grpc-credential -n ${NAMESPACE_ISTIO}
+    ...    Run And Verify Command
+    ...    oc delete secret modelregistry-sample-grpc-credential -n ${NAMESPACE_ISTIO} --ignore-not-found=true
     Run Keyword And Continue On Failure
-    ...    Run And Verify Command    oc delete secret modelregistry-sample-rest-credential -n ${NAMESPACE_ISTIO}
+    ...    Run And Verify Command
+    ...    oc delete secret modelregistry-sample-rest-credential -n ${NAMESPACE_ISTIO} --ignore-not-found=true
     # I don't think this NS should be removed, it's managed by the DSC
     # Run And Verify Command    oc delete namespace ${NAMESPACE_MODEL_REGISTRY} --force
 
 Remove Deployment Files
     [Documentation]    Remove all files from the given directory
     [Arguments]  ${directory}
-    ${files}=    List Files In Directory    ${directory}
-    FOR    ${file}    IN    @{files}
-        Remove Files  ${directory}/${file}
+    ${dir_exists}=    Run Keyword And Return Status    Directory Should Exist    ${directory}
+    IF    ${dir_exists}
+        ${files}=    List Files In Directory    ${directory}
+        FOR    ${file}    IN    @{files}
+            Remove File  ${directory}/${file}
+        END
+    ELSE
+        Log    ${directory} does not exist    level= WARN
     END
 
 Download Python Client Dependencies

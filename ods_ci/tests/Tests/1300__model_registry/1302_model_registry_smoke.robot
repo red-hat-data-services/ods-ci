@@ -80,7 +80,8 @@ Remove Model Registry Non UI
     [Documentation]    Run multiple oc delete commands to remove model registry components
     # We don't want to stop the teardown if any of these resources are not found
     Run Keyword And Continue On Failure
-    ...    Run  oc delete -k ${MODELREGISTRY_BASE_FOLDER}/samples/istio/mysql -n ${NAMESPACE_MODEL_REGISTRY}
+    ...    Run And Verify Command
+    ...    oc delete -k ${MODELREGISTRY_BASE_FOLDER}/samples/istio/mysql -n ${NAMESPACE_MODEL_REGISTRY} --ignore-not-found=true  # robocop: disable
 
 Run Curl Command And Verify Response
     [Documentation]    Runs a curl command to verify response from server

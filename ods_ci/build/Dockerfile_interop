@@ -11,13 +11,13 @@ ARG OC_CHANNEL=stable
 ARG PYTHON_VERSION=3.11
 
 ENV ODS_VENV="/ods_venv" \
-    HOME="/ods_venv" \
-    WORKSPACE="/ods_venv/ods_ci" \
-    PATH="ods_venv/bin:${PATH}" \
+    HOME=${ODS_VENV} \
+    WORKSPACE="${ODS_VENV}/ods_ci" \
+    PATH="${ODS_VENV}/bin:${PATH}" \
     AM_I_IN_CONTAINER="Yes" \
     PYTHONUNBUFFERED="True"
 
-WORKDIR /ods_venv
+WORKDIR ${ODS_VENV}
 
 COPY . ${ODS_VENV}
 COPY ods_ci/test-variables.yml.example ${ODS_VENV}/ods_ci/test-variables.yml

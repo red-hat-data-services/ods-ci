@@ -10,22 +10,22 @@
             "suffixes": {
                 "ldap-op-": {
                     "type": "incremental_with_rand_base",
-                    "rand_length": 20,
+                    "rand_length": 2,
                     "n_users": 5
                 },
                 "ldap-usr-": {
                     "type": "incremental_with_rand_base",
-                    "rand_length": 20,
+                    "rand_length": 2,
                     "n_users": 5
                 },
                 "ldap-noaccess-": {
                     "type": "incremental_with_rand_base",
-                    "rand_length": 20,
+                    "rand_length": 2,
                     "n_users": 5
                 },
                 "ldap-special": {
                     "type": "custom",
-                    "rand_length": 20,
+                    "rand_length": 2,
                     "list": [".","^","$","*","?","(",")","[","]","{","}","|","@",";"]
                 }
             },
@@ -36,7 +36,7 @@
             "TEST_USER_4":  "ldap-usr-<RAND_BASE>4",
             "groups_map":{
                 "ldap-op-": [
-                    "rhods-admins", 
+                    "rhods-admins",
                     "dedicated-admins"
                 ],
                 "ldap-usr-": [
@@ -58,12 +58,12 @@
             "suffixes": {
                 "htp-user-": {
                     "type": "incremental_with_rand_base",
-                    "rand_length": 20,
+                    "rand_length": 2,
                     "n_users": 1
                 },
                 "htp-basic-user-": {
                     "type": "incremental_with_rand_base",
-                    "rand_length": 20,
+                    "rand_length": 2,
                     "n_users": 2
                 }
             },

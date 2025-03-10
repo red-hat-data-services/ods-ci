@@ -33,6 +33,15 @@ Run TestKueueRayGpu ODH test with Python 3.9
     ...     WorkloadsOrchestration
     Run DistributedWorkloads ODH Test    TestMnistRayGpu    ${RAY_CUDA_IMAGE_3.9}    ${NOTEBOOK_IMAGE_3.9}
 
+Run TestKueueRayROCmGpu ODH test with Python 3.9
+    [Documentation]    Run Go ODH test: TestKueueRayROCmGpu
+    [Tags]  Resources-GPU    AMD-GPUs    ROCm
+    ...     Tier1
+    ...     DistributedWorkloads
+    ...     Training
+    ...     WorkloadsOrchestration
+    Run DistributedWorkloads ODH Test    TestMnistRayROCmGpu    ${RAY_ROCM_IMAGE_3.9}    ${NOTEBOOK_IMAGE_3.9}
+
 Run TestRayTuneHPOCpu ODH test with Python 3.9
     [Documentation]    Run Go ODH test: TestMnistRayTuneHpoCpu
     [Tags]  RHOAIENG-10004

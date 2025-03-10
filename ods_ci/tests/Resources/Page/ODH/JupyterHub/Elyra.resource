@@ -121,8 +121,7 @@ Switch To Pipeline Execution Page
     IF  ${oauth_prompt_visible}  Click Button  Log in with OpenShift
     ${login-required} =  Is OpenShift Login Visible
     IF  ${login-required}  Login To Openshift  ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
-    ${authorization_required} =    Is Service Account Authorization Required
-    IF    ${authorization_required}    Authorize JupyterLab Service Account
+    Verify Service Account Authorization Not Required
     RETURN    ${handle}
 
 Set Runtime Image In All Nodes

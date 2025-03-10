@@ -3,6 +3,7 @@ Documentation    Perform and verify RHODS OLM tasks
 Metadata         RHODS OLM Version    1.0.0
 Resource         ../Resources/RHODS_OLM/RHODS_OLM.resource
 Resource         ../../tests/Resources/Common.robot
+Resource         ../../tests/Resources/RHOSi.resource
 Library          OpenShiftLibrary
 Library          OperatingSystem
 Library          String
@@ -22,6 +23,7 @@ ${CATALOG_SOURCE}               redhat-operators
 *** Tasks ***
 Can Install RHODS Operator
   [Tags]  install
+  RHOSi Setup
   IF  "${PRODUCT}" == "ODH"
       Set Global Variable  ${OPERATOR_NAME_LABEL}  opendatahub-operator
       Set Global Variable  ${MODEL_REGISTRY_NAMESPACE}    odh-model-registries
@@ -42,6 +44,7 @@ Can Install RHODS Operator
 
 Can Uninstall RHODS Operator
   [Tags]  uninstall
+  RHOSi Setup
   IF  "${PRODUCT}" == "ODH"
       IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
           Set Global Variable  ${OPERATOR_NAME}  rhods-operator

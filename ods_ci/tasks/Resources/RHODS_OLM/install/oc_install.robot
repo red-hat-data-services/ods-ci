@@ -37,10 +37,24 @@ ${DEFAULT_APPLICATIONS_NAMESPACE_RHOAI}=    redhat-ods-applications
 ${DEFAULT_APPLICATIONS_NAMESPACE_ODH}=    opendatahub
 ${CUSTOM_MANIFESTS}=    ${EMPTY}
 ${IS_NOT_PRESENT}=      1
+${DSC_TEMPLATE}=    dsc_template.yml
+${DSC_TEMPLATE_RAW}=    dsc_template_raw.yml
+${DSCI_TEMPLATE}=    dsci_template.yml
+${DSCI_TEMPLATE_RAW}=    dsci_template_raw.yml
+@{KSERVE_DEPENDENCIES}=    authorino
+...    servicemesh
+...    serverless
+${CONFIG_ENV}=    ${EMPTY}
 
 *** Keywords ***
 Install RHODS
   [Arguments]  ${cluster_type}     ${image_url}
+  IF    "${KSERVE_RAW_DEPLOYMENT}" == "true"
+      Set Suite Variable    @{KSERVE_DEPENDENCIES}    authorino        # robocop: disable
+      Set Suite Variable    ${CONFIG_ENV}    -e DISABLE_DSC_CONFIG    # robocop: disable
+      Set Suite Variable    ${DSC_TEMPLATE}    ${DSC_TEMPLATE_RAW}    # robocop: disable
+      Set Suite Variable    ${DSCI_TEMPLATE}    ${DSCI_TEMPLATE_RAW}    # robocop: disable
+  END
   Install Kserve Dependencies
   Clone OLM Install Repo
   Configure Custom Namespaces
@@ -101,7 +115,9 @@ Verify RHODS Installation
       IF  "${APPLICATIONS_NAMESPACE}" != "${DEFAULT_APPLICATIONS_NAMESPACE_RHOAI}" and "${APPLICATIONS_NAMESPACE}" != "${DEFAULT_APPLICATIONS_NAMESPACE_ODH}"
           Create DSCI With Custom Namespaces
       END
-      Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
+      Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}    dsci_template=${DSCI_TEMPLATE}
+      Wait For DSCInitialization CustomResource To Be Ready    timeout=180
+      Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}    dsc_template=${DSC_TEMPLATE}
   END
 
   ${dashboard} =    Is Component Enabled    dashboard    ${DSC_NAME}
@@ -211,8 +227,10 @@ Clone OLM Install Repo
 
 Install RHODS In Self Managed Cluster Using CLI
   [Documentation]   Install rhods on self managed cluster using cli
-  [Arguments]     ${cluster_type}     ${image_url}
-  ${return_code}    Run and Watch Command    cd ${EXECDIR}/${OLM_DIR} && ./setup.sh -t operator -u ${UPDATE_CHANNEL} -i ${image_url} -n ${OPERATOR_NAME} -p ${OPERATOR_NAMESPACE}   timeout=20 min
+  [Arguments]     ${cluster_type}     ${image_url}    ${config_env}=${CONFIG_ENV}
+  ${return_code} =    Run And Watch Command
+  ...    cd ${EXECDIR}/${OLM_DIR} && ./setup.sh -t operator -u ${UPDATE_CHANNEL} -i ${image_url} -n ${OPERATOR_NAME} -p ${OPERATOR_NAMESPACE} ${CONFIG_ENV}    # robocop: disable
+  ...    timeout=20 min
   Should Be Equal As Integers   ${return_code}   0   msg=Error detected while installing RHODS
 
 Install RHODS In Managed Cluster Using CLI
@@ -241,7 +259,7 @@ Wait For Pods Numbers
 
 Apply DSCInitialization CustomResource
     [Documentation]
-    [Arguments]        ${dsci_name}=${DSCI_NAME}
+    [Arguments]        ${dsci_name}=${DSCI_NAME}    ${dsci_template}=${DSCI_TEMPLATE}
     ${return_code}    ${output} =    Run And Return Rc And Output    oc get DSCInitialization --output json | jq -j '.items | length'
     Log To Console    output : ${output}, return_code : ${return_code}
     IF  ${output} != 0
@@ -251,6 +269,8 @@ Apply DSCInitialization CustomResource
     ${file_path} =    Set Variable    tasks/Resources/Files/
     Log to Console    Requested Configuration:
     Create DSCInitialization CustomResource Using Test Variables
+    ...    dsci_name=${dsci_name}
+    ...    dsci_template=${dsci_template}
     ${yml} =    Get File    ${file_path}dsci_apply.yml
     Log To Console    Applying DSCI yaml
     Log To Console    ${yml}
@@ -261,9 +281,9 @@ Apply DSCInitialization CustomResource
 
 Create DSCInitialization CustomResource Using Test Variables
     [Documentation]
-    [Arguments]    ${dsci_name}=${DSCI_NAME}
+    [Arguments]    ${dsci_name}=${DSCI_NAME}    ${dsci_template}=${DSCI_TEMPLATE}
     ${file_path} =    Set Variable    tasks/Resources/Files/
-    Copy File    source=${file_path}dsci_template.yml    destination=${file_path}dsci_apply.yml
+    Copy File    source=${file_path}${dsci_template}    destination=${file_path}dsci_apply.yml
     Run    sed -i'' -e 's/<dsci_name>/${dsci_name}/' ${file_path}dsci_apply.yml
     Run    sed -i'' -e 's/<application_namespace>/${APPLICATIONS_NAMESPACE}/' ${file_path}dsci_apply.yml
     Run    sed -i'' -e 's/<monitoring_namespace>/${MONITORING_NAMESPACE}/' ${file_path}dsci_apply.yml
@@ -276,16 +296,22 @@ Wait For DSCInitialization CustomResource To Be Ready
     ${result} =    Run Process    oc wait DSCInitialization --timeout\=${timeout}s --for jsonpath\='{.status.phase}'\=Ready --all
     ...    shell=true    stderr=STDOUT
     IF    ${result.rc} != 0
-        Run Keyword And Continue On Failure    FAIL    ${result.stdout}
+        FAIL    ${result.stdout}
     END
+    ${_}  ${dsci} =    Run And Return Rc And Output    oc get DSCInitialization -o yaml
+    Log To Console    DSCInitialization CustomResource Is Ready
+    Log To COnsole    ${dsci}
 
 Apply DataScienceCluster CustomResource
     [Documentation]
     [Arguments]        ${dsc_name}=${DSC_NAME}      ${custom}=False       ${custom_cmp}=''
+    ...    ${dsc_template}=${DSC_TEMPLATE}
     ${file_path} =    Set Variable    tasks/Resources/Files/
     IF      ${custom} == True
         Log to Console    message=Creating DataScience Cluster using custom configuration
         Generate CustomManifest In DSC YAML
+        ...    dsc_name=${dsc_name}
+        ...    dsc_template=${dsc_template}
         Rename DevFlags in DataScienceCluster CustomResource
         ${yml} =    Get File    ${file_path}dsc_apply.yml
         Log To Console    Applying DSC yaml
@@ -327,9 +353,9 @@ Apply DataScienceCluster CustomResource
 
 Create DataScienceCluster CustomResource Using Test Variables
     [Documentation]
-    [Arguments]    ${dsc_name}=${DSC_NAME}
+    [Arguments]    ${dsc_name}=${DSC_NAME}    ${dsc_template}=${DSC_TEMPLATE}
     ${file_path} =    Set Variable    tasks/Resources/Files/
-    Copy File    source=${file_path}dsc_template.yml    destination=${file_path}dsc_apply.yml
+    Copy File    source=${file_path}${dsc_template}    destination=${file_path}dsc_apply.yml
     Run    sed -i'' -e 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
     Run    sed -i'' -e 's/<operator_yaml_label>/${OPERATOR_YAML_LABEL}/' ${file_path}dsc_apply.yml
     FOR    ${cmp}    IN    @{COMPONENT_LIST}
@@ -347,10 +373,10 @@ Create DataScienceCluster CustomResource Using Test Variables
     END
 
 Generate CustomManifest In DSC YAML
-    [Arguments]    ${dsc_name}=${DSC_NAME}
+    [Arguments]    ${dsc_name}=${DSC_NAME}    ${dsc_template}=${DSC_TEMPLATE}
     Log To Console      ${custom_cmp}.items
     ${file_path} =    Set Variable    tasks/Resources/Files/
-    Copy File    source=${file_path}dsc_template.yml    destination=${file_path}dsc_apply.yml
+    Copy File    source=${file_path}${dsc_template}    destination=${file_path}dsc_apply.yml
     Run    sed -i'' -e 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
     FOR    ${cmp}    IN    @{COMPONENT_LIST}
             ${value}=       Get From Dictionary 	${custom_cmp} 	${cmp}
@@ -509,26 +535,27 @@ Install Serverless Operator Via Cli
 
 Install Kserve Dependencies
     [Documentation]    Install Dependent Operators For Kserve
+    [Arguments]    ${dependencies}=${KSERVE_DEPENDENCIES}
     Set Suite Variable   ${FILES_RESOURCES_DIRPATH}    tests/Resources/Files
     Set Suite Variable   ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
     Set Suite Variable   ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
     ${is_installed} =   Check If Operator Is Installed Via CLI   ${AUTHORINO_OP_NAME}
-    IF    not ${is_installed}
+    IF    not ${is_installed} and "authorino" in ${dependencies}
           Install Authorino Operator Via Cli
     ELSE
           Log To Console    message=Authorino Operator is already installed
     END
     ${is_installed} =   Check If Operator Is Installed Via CLI   ${SERVICEMESH_OP_NAME}
-    IF    not ${is_installed}
-          Install Service Mesh Operator Via Cli
+    IF    not ${is_installed} and "servicemesh" in ${dependencies}
+        Install Service Mesh Operator Via Cli
     ELSE
-          Log To Console    message=ServiceMesh Operator is already installed
+        Log To Console    message=ServiceMesh Operator is already installed
     END
     ${is_installed} =   Check If Operator Is Installed Via CLI   ${SERVERLESS_OP_NAME}
-    IF    not ${is_installed}
-         Install Serverless Operator Via Cli
+    IF    not ${is_installed} and "serverless" in ${dependencies}
+        Install Serverless Operator Via Cli
     ELSE
-         Log To Console    message=Serverless Operator is already installed
+        Log To Console    message=Serverless Operator is already installed
     END
 
 Create Namespace With Label

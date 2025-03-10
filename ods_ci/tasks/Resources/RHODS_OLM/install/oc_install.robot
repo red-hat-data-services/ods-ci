@@ -41,7 +41,7 @@ ${IS_NOT_PRESENT}=      1
 *** Keywords ***
 Install RHODS
   [Arguments]  ${cluster_type}     ${image_url}
-  Install Kserve Dependencies
+  IF    "${INSTALL_TYPE}" != "Cli - raw"    Install Kserve Dependencies
   Clone OLM Install Repo
   Configure Custom Namespaces
   IF   "${PRODUCT}" == "ODH"
@@ -52,6 +52,8 @@ Install RHODS
   IF   "${cluster_type}" == "selfmanaged"
       IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "Cli"
              Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
+      ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "Cli - raw"
+             Install RHODS In Self Managed Cluster Using CLI Raw  ${cluster_type}     ${image_url}
       ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "OperatorHub"
           ${file_path} =    Set Variable    tasks/Resources/RHODS_OLM/install/
           Copy File    source=${file_path}cs_template.yaml    destination=${file_path}cs_apply.yaml
@@ -98,10 +100,18 @@ Verify RHODS Installation
             Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
        END
   ELSE
-      IF  "${APPLICATIONS_NAMESPACE}" != "${DEFAULT_APPLICATIONS_NAMESPACE_RHOAI}" and "${APPLICATIONS_NAMESPACE}" != "${DEFAULT_APPLICATIONS_NAMESPACE_ODH}"
-          Create DSCI With Custom Namespaces
+      IF    "${INSTALL_TYPE}" == "Cli - raw"
+          Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
+          ...    dsci_template="dsci_template_raw.yml"
+          Wait For DSCInitialization CustomResource To Be Ready    timeout=180
+          Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
+          ...    dsc_template="dsc_template_raw.yml"
+      ELSE
+          IF  "${APPLICATIONS_NAMESPACE}" != "${DEFAULT_APPLICATIONS_NAMESPACE_RHOAI}" and "${APPLICATIONS_NAMESPACE}" != "${DEFAULT_APPLICATIONS_NAMESPACE_ODH}"
+              Create DSCI With Custom Namespaces
+          END
+          Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
       END
-      Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
   END
 
   ${dashboard} =    Is Component Enabled    dashboard    ${DSC_NAME}
@@ -215,6 +225,12 @@ Install RHODS In Self Managed Cluster Using CLI
   ${return_code}    Run and Watch Command    cd ${EXECDIR}/${OLM_DIR} && ./setup.sh -t operator -u ${UPDATE_CHANNEL} -i ${image_url} -n ${OPERATOR_NAME} -p ${OPERATOR_NAMESPACE}   timeout=20 min
   Should Be Equal As Integers   ${return_code}   0   msg=Error detected while installing RHODS
 
+Install RHODS In Self Managed Cluster Using CLI Raw
+  [Documentation]   Install raw rhods on self managed cluster using cli
+  [Arguments]     ${cluster_type}     ${image_url}
+  ${return_code}    Run and Watch Command    cd ${EXECDIR}/${OLM_DIR} && ./setup.sh -t operator -u ${UPDATE_CHANNEL} -i ${image_url} -n ${OPERATOR_NAME} -p ${OPERATOR_NAMESPACE} -e DISABLE_DSC_CONFIG   timeout=20 min
+  Should Be Equal As Integers   ${return_code}   0   msg=Error detected while installing RHODS
+
 Install RHODS In Managed Cluster Using CLI
   [Documentation]   Install rhods on managed managed cluster using cli
   [Arguments]     ${cluster_type}     ${image_url}
@@ -241,7 +257,7 @@ Wait For Pods Numbers
 
 Apply DSCInitialization CustomResource
     [Documentation]
-    [Arguments]        ${dsci_name}=${DSCI_NAME}
+    [Arguments]        ${dsci_name}=${DSCI_NAME}    ${dsci_template}="dsci_template.yml"
     ${return_code}    ${output} =    Run And Return Rc And Output    oc get DSCInitialization --output json | jq -j '.items | length'
     Log To Console    output : ${output}, return_code : ${return_code}
     IF  ${output} != 0
@@ -250,7 +266,7 @@ Apply DSCInitialization CustomResource
     END
     ${file_path} =    Set Variable    tasks/Resources/Files/
     Log to Console    Requested Configuration:
-    Create DSCInitialization CustomResource Using Test Variables
+    Create DSCInitialization CustomResource Using Test Variables    ${dsci_template}
     ${yml} =    Get File    ${file_path}dsci_apply.yml
     Log To Console    Applying DSCI yaml
     Log To Console    ${yml}
@@ -261,9 +277,9 @@ Apply DSCInitialization CustomResource
 
 Create DSCInitialization CustomResource Using Test Variables
     [Documentation]
-    [Arguments]    ${dsci_name}=${DSCI_NAME}
+    [Arguments]    ${dsci_name}=${DSCI_NAME}    ${dsci_template}="dsci_template.yml"
     ${file_path} =    Set Variable    tasks/Resources/Files/
-    Copy File    source=${file_path}dsci_template.yml    destination=${file_path}dsci_apply.yml
+    Copy File    source=${file_path}${dsci_template}    destination=${file_path}dsci_apply.yml
     Run    sed -i'' -e 's/<dsci_name>/${dsci_name}/' ${file_path}dsci_apply.yml
     Run    sed -i'' -e 's/<application_namespace>/${APPLICATIONS_NAMESPACE}/' ${file_path}dsci_apply.yml
     Run    sed -i'' -e 's/<monitoring_namespace>/${MONITORING_NAMESPACE}/' ${file_path}dsci_apply.yml
@@ -281,10 +297,11 @@ Wait For DSCInitialization CustomResource To Be Ready
 Apply DataScienceCluster CustomResource
     [Documentation]
     [Arguments]        ${dsc_name}=${DSC_NAME}      ${custom}=False       ${custom_cmp}=''
+    ...    ${dsc_template}="dsc_template.yml"
     ${file_path} =    Set Variable    tasks/Resources/Files/
     IF      ${custom} == True
         Log to Console    message=Creating DataScience Cluster using custom configuration
-        Generate CustomManifest In DSC YAML
+        Generate CustomManifest In DSC YAML    ${dsc_template}
         Rename DevFlags in DataScienceCluster CustomResource
         ${yml} =    Get File    ${file_path}dsc_apply.yml
         Log To Console    Applying DSC yaml
@@ -304,7 +321,7 @@ Apply DataScienceCluster CustomResource
             END
         END
         Log to Console    message=Creating DataScience Cluster using yml template
-        Create DataScienceCluster CustomResource Using Test Variables
+        Create DataScienceCluster CustomResource Using Test Variables    ${dsc_template}
         Apply Custom Manifest in DataScienceCluster CustomResource Using Test Variables
         ${yml} =    Get File    ${file_path}dsc_apply.yml
         Log To Console    Applying DSC yaml
@@ -326,9 +343,9 @@ Apply DataScienceCluster CustomResource
 
 Create DataScienceCluster CustomResource Using Test Variables
     [Documentation]
-    [Arguments]    ${dsc_name}=${DSC_NAME}
+    [Arguments]    ${dsc_name}=${DSC_NAME}    ${dsc_template}="dsc_template.yml"
     ${file_path} =    Set Variable    tasks/Resources/Files/
-    Copy File    source=${file_path}dsc_template.yml    destination=${file_path}dsc_apply.yml
+    Copy File    source=${file_path}${dsc_template}    destination=${file_path}dsc_apply.yml
     Run    sed -i'' -e 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
     FOR    ${cmp}    IN    @{COMPONENT_LIST}
             IF    $cmp not in $COMPONENTS
@@ -345,10 +362,10 @@ Create DataScienceCluster CustomResource Using Test Variables
     END
 
 Generate CustomManifest In DSC YAML
-    [Arguments]    ${dsc_name}=${DSC_NAME}
+    [Arguments]    ${dsc_name}=${DSC_NAME}    ${dsc_template}="dsc_template.yml"
     Log To Console      ${custom_cmp}.items
     ${file_path} =    Set Variable    tasks/Resources/Files/
-    Copy File    source=${file_path}dsc_template.yml    destination=${file_path}dsc_apply.yml
+    Copy File    source=${file_path}${dsc_template}    destination=${file_path}dsc_apply.yml
     Run    sed -i'' -e 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
     FOR    ${cmp}    IN    @{COMPONENT_LIST}
             ${value}=       Get From Dictionary 	${custom_cmp} 	${cmp}

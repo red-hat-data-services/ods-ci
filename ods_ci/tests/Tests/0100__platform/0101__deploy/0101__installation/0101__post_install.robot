@@ -300,6 +300,21 @@ Verify All The Pods Are Using Image Digest Instead Of Tags
     Append To List    ${projects_list}     ${OPERATOR_NAMESPACE}
     Container Image Url Should Use Image Digest Instead Of Tags Based On Project Name  @{projects_list}
 
+Verify No Application Pods Run With Anyuid SCC Or As Root
+    [Documentation]    Verifies that no pods in application namespace run with anyuid SCC or as a root
+    [Tags]    Smoke
+    ...       RHOAIENG-15892
+    ...       Operator
+    ${return_code}    ${output} =    Run And Return Rc And Output    oc get pod -n ${APPLICATIONS_NAMESPACE} -o custom-columns="NAMESPACE:metadata.namespace,NAME:metadata.name,SCC:.metadata.annotations.openshift\\.io/scc,CONTAINER_NAME:.spec.containers[*].name,RUNASUSER_CONTAINERS:.spec.containers[*].securityContext.runAsUser,RUNASUSER:.spec.securityContext.runAsUser"  # robocop: disable
+    Should Be Equal As Integers	 ${return_code}	 0  msg=Error getting SCC of pods
+    Log    Pods and their SCC are: ${output}
+    ${status} =    Run Keyword And Return Status    Should Not Contain Any    ${output}    anyuid
+    IF    not ${status}    Fail      msg=Some pods are running with anyuid SCC
+
+    ${return_code}    ${output} =    Run And Return Rc And Output    oc get pod -n ${APPLICATIONS_NAMESPACE} -o json | jq '.items[] | select(any(.spec.containers[].securityContext.runAsUser; . == 0 ) or .spec.securityContext.runAsUser == 0) | .metadata.namespace + "/" + .metadata.name'
+    Should Be Equal As Integers	 ${return_code}	 0  msg=Error getting runAsUser of pods
+    ${status} =    Run Keyword And Return Status    Should Be Empty    ${output}
+    IF    not ${status}    Fail      msg=Some pods are running as root (UID=0)
 
 *** Keywords ***
 Delete Dashboard Pods And Wait Them To Be Back

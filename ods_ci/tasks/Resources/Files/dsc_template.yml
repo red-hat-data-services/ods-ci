@@ -2,6 +2,12 @@ apiVersion: datasciencecluster.opendatahub.io/v1
 kind: DataScienceCluster
 metadata:
   name: <dsc_name>
+  labels:
+      app.kubernetes.io/created-by: <operator_yaml_label>
+      app.kubernetes.io/instance: <dsc_name>
+      app.kubernetes.io/managed-by: kustomize
+      app.kubernetes.io/name: datasciencecluster
+      app.kubernetes.io/part-of: <operator_yaml_label>
 spec:
   components:
     codeflare:

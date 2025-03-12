@@ -70,7 +70,7 @@ Validate DSC and DSCI Created With Errors When Serverless Operator Is Not Instal
 Validate DSC and DSCI Created With Errors When Service Mesh And Serverless Operators Are Not Installed   #robocop:disable
     [Documentation]    The purpose of this Test Case is to validate that DSC and DSCI are created
     ...                without dependant operators ((servicemesh, serverless) installed, but with errors
-    [Tags]    Operator    Tier3    ODS-2527     RHOAIENG-2518       ProductBug
+    [Tags]    Operator    Tier3    ODS-2527     RHOAIENG-2518
 
     Remove DSC And DSCI Resources
     Uninstall Service Mesh Operator CLI
@@ -92,11 +92,14 @@ Validate DSC and DSCI Created With Errors When Service Mesh And Serverless Opera
 
     [Teardown]    Reinstall Service Mesh And Serverless Operators And Recreate DSC And DSCI
 
-Validate DSC and DSCI Created With No Errors When Kserve Serving Is Unmanaged And Service Mesh And Serverless Operators Are Not Installed    #robocop:disable
+Validate DSC and DSCI Created With No Errors When Kserve Serving Is Unmanaged And ModelRegistry Is Removed And Service Mesh And Serverless Operators Are Not Installed    #robocop:disable
     [Documentation]    The purpose of this Test Case is to validate that DSC and DSCI are created
     ...                without dependant operators ((servicemesh, serverless) installed and with no errors
-    ...                because the Kserve component serving is unmanaged
+    ...                because the Kserve component serving is unmanaged and modelregistry component is removed
     [Tags]    Operator    Tier3     RHOAIENG-3472
+
+    ${modelregistry} =    Is Component Enabled    modelregistry    ${DSC_NAME}
+    Skip If     "${modelregistry}" == "true"     msg=This test is skipped if Model Registry component is Managed
 
     Remove DSC And DSCI Resources
     Uninstall Service Mesh Operator CLI
@@ -117,12 +120,46 @@ Validate DSC and DSCI Created With No Errors When Kserve Serving Is Unmanaged An
 
     [Teardown]    Reinstall Service Mesh And Serverless Operators And Recreate DSC And DSCI
 
+Validate DSC and DSCI Created With Errors When Kserve Serving Is Unmanaged And ModelRegistry Is Managed And Service Mesh And Serverless Operators Are Not Installed    #robocop:disable
+    [Documentation]    The purpose of this Test Case is to validate that DSC and DSCI are created
+    ...                without dependant operators ((servicemesh, serverless) installed and with errors
+    ...                because the Kserve component serving is unmanaged and modelregistry component is managed
+    [Tags]    Operator    Tier3     RHOAIENG-3472
+
+    ${modelregistry} =    Is Component Enabled    modelregistry    ${DSC_NAME}
+    Skip If     "${modelregistry}" == "false"     msg=This test is skipped if Model Registry component is Removed
+
+    Remove DSC And DSCI Resources
+    Uninstall Service Mesh Operator CLI
+    Uninstall Serverless Operator CLI
+
+    Log To Console    message=Creating DSCInitialization CR via CLI
+    Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
+    Set Service Mesh Management State    Unmanaged    ${OPERATOR_NS}
+
+    Wait For DSCInitialization CustomResource To Be Ready    timeout=600
+
+    Log To Console    message=Creating DataScienceCluster CR via CLI
+    Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
+
+    Set DataScienceCluster Kserve Serving Management State        ${DSC_NAME}      Unmanaged
+
+    Wait Until Keyword Succeeds    10 min    0 sec
+    ...    DataScienceCluster Should Fail Because Service Mesh Is Not Present And Model Registry Is Managed
+
+    [Teardown]    Reinstall Service Mesh And Serverless Operators And Recreate DSC And DSCI
+
 
 *** Keywords ***
 Suite Setup
     [Documentation]    Suite Setup
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
+    IF  "${PRODUCT}" == "ODH"
+      Set Global Variable  ${OPERATOR_YAML_LABEL}  opendatahub-operator
+    ELSE
+      Set Global Variable  ${OPERATOR_YAML_LABEL}  rhods-operator
+    END
 
 Suite Teardown
     [Documentation]    Suite Teardown
@@ -163,8 +200,8 @@ Reinstall Serverless Operator And Recreate DSC And DSCI
 Reinstall Service Mesh And Serverless Operators And Recreate DSC And DSCI
     [Documentation]    Reinstalls Dependant (service mesh, serverless) operators and waits for the Service Mesh Control plane to be created
     Remove DSC And DSCI Resources
-    Install Serverless Operator Via Cli
     Install Service Mesh Operator Via Cli
+    Install Serverless Operator Via Cli
     Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
     Wait For DSCInitialization CustomResource To Be Ready    timeout=600
     Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
@@ -220,3 +257,15 @@ DataScienceCluster Should Fail Because Serverless Operator Is Not Installed
     ...    oc get DataScienceCluster ${DSC_NAME} -n ${OPERATOR_NS} -o json | jq -r '.status.conditions | map(.message) | join(",")'    #robocop:disable
     Should Be Equal As Integers  ${return_code}   0   msg=Error retrieved DSC conditions
     Should Contain    ${output}    Serverless operator must be installed for this component's configuration    #robocop:disable
+
+DataScienceCluster Should Fail Because Service Mesh Is Not Present And Model Registry Is Managed
+    [Documentation]   Keyword to check the DSC conditions when Service Mesh instance is not present.
+    ...           One condition should appear saying this instance is needed to make ModelRegistry work.
+    ${modelregistry} =    Is Component Enabled    modelregistry    ${DSC_NAME}
+    IF    "${modelregistry}" == "true"
+        ${return_code}    ${output}=    Run And Return Rc And Output
+        ...    oc get DataScienceCluster ${DSC_NAME} -n ${OPERATOR_NS} -o json | jq -r '.status.conditions | map(.message) | join(",")'    #robocop:disable
+        Should Be Equal As Integers  ${return_code}   0   msg=Error retrieved DSC conditions
+        Should Contain    ${output}    ServiceMesh needs to be set to 'Managed' in DSCI CR    #robocop:disable
+    END
+

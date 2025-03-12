@@ -267,6 +267,7 @@ Create DSCInitialization CustomResource Using Test Variables
     Run    sed -i'' -e 's/<dsci_name>/${dsci_name}/' ${file_path}dsci_apply.yml
     Run    sed -i'' -e 's/<application_namespace>/${APPLICATIONS_NAMESPACE}/' ${file_path}dsci_apply.yml
     Run    sed -i'' -e 's/<monitoring_namespace>/${MONITORING_NAMESPACE}/' ${file_path}dsci_apply.yml
+    Run    sed -i'' -e 's/<operator_yaml_label>/${OPERATOR_YAML_LABEL}/' ${file_path}dsci_apply.yml
 
 Wait For DSCInitialization CustomResource To Be Ready
     [Documentation]   Wait ${timeout} seconds for DSCInitialization CustomResource To Be Ready
@@ -293,7 +294,7 @@ Apply DataScienceCluster CustomResource
         Log To Console    ${output}
         Should Be Equal As Integers  ${return_code}  0  msg=Error detected while applying DSC CR
         #Remove File    ${file_path}dsc_apply.yml
-        Wait For DSC Conditions Reconciled    ${OPERATOR_NAMESPACE}     ${DSC_NAME}
+        Wait For DSC Ready State    ${OPERATOR_NAMESPACE}     ${DSC_NAME}
     ELSE
         Log to Console    Requested Configuration:
         FOR    ${cmp}    IN    @{COMPONENT_LIST}
@@ -330,6 +331,7 @@ Create DataScienceCluster CustomResource Using Test Variables
     ${file_path} =    Set Variable    tasks/Resources/Files/
     Copy File    source=${file_path}dsc_template.yml    destination=${file_path}dsc_apply.yml
     Run    sed -i'' -e 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
+    Run    sed -i'' -e 's/<operator_yaml_label>/${OPERATOR_YAML_LABEL}/' ${file_path}dsc_apply.yml
     FOR    ${cmp}    IN    @{COMPONENT_LIST}
             IF    $cmp not in $COMPONENTS
                 Run    sed -i'' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml

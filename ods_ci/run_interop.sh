@@ -5,9 +5,6 @@ export USE_OCM_IDP=0
 export RUN_SCRIPT_ARGS="skip-oclogin true --set-urls-variables true"
 export ROBOT_EXTRA_ARGS="-i Smoke --dryrun"
 
-TEST_CASE_FILE="tests/Tests"
-TEST_VARIABLES_FILE="test-variables.yml"
-
 if [[ -z "${TEST_SUITE}" ]]; then
   echo "Error: TEST_SUITE not set. Please define it. Exiting.."
   exit 1
@@ -18,14 +15,24 @@ if [[ -z "${ARTIFACT_DIR}" ]]; then
   ARTIFACT_DIR="/tmp"
 fi
 
-if [[ ${TEST_SUITE} == "Post-Upgrade" ]]; then
-  echo "Retrive test config file..."
-  cp ${SHARED_DIR}/test-variables.yml test-variables.yml
+run_tests() {
+  echo "Running $1 testing"
 
-  echo "Running post-upgrade testing"
-  TEST_CASE_FILE="tests/Tests/0200__rhoai_upgrade/0203__post_upgrade.robot"
-  poetry run robot -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE}
-  exit $?
+  TEST_CASE_FILE="tests/Tests"
+  TEST_VARIABLES_FILE="test-variables.yml"
+  TEST_SUITE=$1
+
+  poetry run robot --include ${TEST_SUITE} --exclude "ExcludeOnRHOAI" --exclude "AutomationBug" --exclude "ProductBug" -d ${ARTIFACT_DIR}/${TEST_SUITE} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE} || true
+}
+
+if [[ ${TEST_SUITE} == "PostUpgrade" ]]; then
+  echo "Retrieve test config file..."
+  cp ${SHARED_DIR}/${TEST_VARIABLES_FILE} ${TEST_VARIABLES_FILE}
+  run_tests ${TEST_SUITE}
+
+  echo "Running Smoke testing after upgrade"
+  run_tests "Smoke"
+  exit 0
 fi
 
 echo "Install IDP users and map them to test config file"
@@ -85,13 +92,11 @@ if [ $retVal -ne 0 ]; then
     exit "$retVal"
 fi
 
-if [[ ${TEST_SUITE} == "Pre-Upgrade" ]]; then
+if [[ ${TEST_SUITE} == "PreUpgrade" ]]; then
   echo "Save test config file..."
-  cp test-variables.yml ${SHARED_DIR}/test-variables.yml
-
-  echo "Running pre-upgrade testing"
-  TEST_CASE_FILE="tests/Tests/0200__rhoai_upgrade/0201__pre_upgrade.robot"
-  poetry run robot -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE} || true
+  cp ${TEST_VARIABLES_FILE} ${SHARED_DIR}/${TEST_VARIABLES_FILE}
+  run_tests ${TEST_SUITE}
+  exit 0
 else
-  poetry run robot --include ${TEST_SUITE} --exclude "ExcludeOnRHOAI" --exclude "AutomationBug" -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE}
+  run_tests ${TEST_SUITE}
 fi

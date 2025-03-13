@@ -453,16 +453,12 @@ Catalog Is Ready
 Install Authorino Operator Via Cli
     [Documentation]    Install Authorino Operator Via CLI
     IF   "${PRODUCT}" == "ODH"
-        Install ISV Operator From OperatorHub Via CLI    operator_name=${AUTHORINO_OP_NAME}
-            ...    subscription_name=${AUTHORINO_SUB_NAME}
-            ...    channel=stable
-            ...    catalog_source_name=redhat-operators
-    ELSE
-        Install ISV Operator From OperatorHub Via CLI    operator_name=${AUTHORINO_OP_NAME}
-            ...    subscription_name=${AUTHORINO_SUB_NAME}
-            ...    channel=${AUTHORINO_CHANNEL_NAME}
-            ...    catalog_source_name=redhat-operators
+        Set Global Variable    $AUTHORINO_CHANNEL_NAME    stable
     END
+    Install ISV Operator From OperatorHub Via CLI    operator_name=${AUTHORINO_OP_NAME}
+        ...    subscription_name=${AUTHORINO_SUB_NAME}
+        ...    channel=${AUTHORINO_CHANNEL_NAME}
+        ...    catalog_source_name=redhat-operators
     Wait Until Operator Subscription Last Condition Is
           ...    type=CatalogSourcesUnhealthy    status=False
           ...    reason=AllCatalogSourcesHealthy    subcription_name=${AUTHORINO_SUB_NAME}

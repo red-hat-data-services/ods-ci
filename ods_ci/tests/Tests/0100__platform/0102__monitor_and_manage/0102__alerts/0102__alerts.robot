@@ -32,6 +32,7 @@ Verify All Alerts Severity
     [Tags]    Smoke
     ...       Tier1
     ...       ODS-1227
+    ...       Operator
     ...       Monitoring
     Verify "DeadManSnitch" Alerts Severity And Continue On Failure
     Verify "Kubeflow Notebook Controller Pod Is Not Running" Alerts Severity And Continue On Failure
@@ -297,70 +298,70 @@ Verify "RHODS Dashboard Route Error Burn Rate" Alerts Are Not Firing And Continu
     [Documentation]    Verifies that alert "RHODS Dashboard Route Error Burn Rate" is not firing
     ...    for all alert durations
     Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-haproxy_backend_http_responses_dashboard    RHODS Dashboard Route Error Burn Rate    alert-duration=120
+    ...    SLOs-haproxy_backend_http_responses_dashboard    RHODS Dashboard Probe Success 5m and 1h Burn Rate high    alert-duration=120
     Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-haproxy_backend_http_responses_dashboard    RHODS Dashboard Route Error Burn Rate    alert-duration=900
+    ...    SLOs-haproxy_backend_http_responses_dashboard    RHODS Dashboard Probe Success 30m and 6h Burn Rate high    alert-duration=900
     Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-haproxy_backend_http_responses_dashboard    RHODS Dashboard Route Error Burn Rate    alert-duration=3600
+    ...    SLOs-haproxy_backend_http_responses_dashboard    RHODS Dashboard Probe Success 2h and 1d Burn Rate high    alert-duration=3600
     Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-haproxy_backend_http_responses_dashboard    RHODS Dashboard Route Error Burn Rate    alert-duration=10800
+    ...    SLOs-haproxy_backend_http_responses_dashboard    RHODS Dashboard Probe Success 6h and 3d Burn Rate high    alert-duration=10800
 
 Verify "RHODS Dashboard Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
     [Documentation]    Verifies that alert "RHODS Dashboard Probe Success Burn Rate" is not firing
     ...    for all alert durations
     Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-probe_success_dashboard    RHODS Dashboard Probe Success Burn Rate    alert-duration=120
+    ...    SLOs-probe_success_dashboard    RHODS Dashboard Probe Success 5m and 1h Burn Rate high    alert-duration=120
     Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-probe_success_dashboard    RHODS Dashboard Probe Success Burn Rate    alert-duration=900
+    ...    SLOs-probe_success_dashboard    RHODS Dashboard Probe Success 30m and 6h Burn Rate high    alert-duration=900
     Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-probe_success_dashboard    RHODS Dashboard Probe Success Burn Rate    alert-duration=3600
+    ...    SLOs-probe_success_dashboard    RHODS Dashboard Probe Success 2h and 1d Burn Rate high    alert-duration=3600
     Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-probe_success_dashboard    RHODS Dashboard Probe Success Burn Rate    alert-duration=10800
+    ...    SLOs-probe_success_dashboard    RHODS Dashboard Probe Success 6h and 3d Burn Rate high    alert-duration=10800
 
 Verify "RHODS Jupyter Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
     [Documentation]    Verifies that alert "RHODS JupyterHub Probe Success Burn Rate" is not firing
     ...     for all alert durations
     Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-probe_success_workbench    RHODS Jupyter Probe Success Burn Rate    alert-duration=120
+    ...    SLOs-probe_success_workbench    RHODS Jupyter Probe Success 5m and 1h Burn Rate high    alert-duration=120
     Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-probe_success_workbench    RHODS Jupyter Probe Success Burn Rate    alert-duration=900
+    ...    SLOs-probe_success_workbench    RHODS Jupyter Probe Success 30m and 6h Burn Rate high    alert-duration=900
     Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-probe_success_workbench    RHODS Jupyter Probe Success Burn Rate    alert-duration=3600
+    ...    SLOs-probe_success_workbench    RHODS Jupyter Probe Success 2h and 1d Burn Rate high    alert-duration=3600
     Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-probe_success_workbench    RHODS Jupyter Probe Success Burn Rate    alert-duration=10800
+    ...    SLOs-probe_success_workbench    RHODS Jupyter Probe Success 6h and 3d Burn Rate high    alert-duration=10800
 
 Verify "RHODS Dashboard Probe Success Burn Rate" Alerts Severity And Continue On Failure
     [Documentation]    Verifies that alert "RHODS Probe Success Burn Rate" severity
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success_dashboard    RHODS Dashboard Probe Success Burn Rate    critical    alert-duration=120
+    ...    SLOs-probe_success_dashboard    RHODS Dashboard Probe Success 5m and 1h Burn Rate high    critical    alert-duration=120
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success_dashboard    RHODS Dashboard Probe Success Burn Rate    critical    alert-duration=900
+    ...    SLOs-probe_success_dashboard    RHODS Dashboard Probe Success 30m and 6h Burn Rate high    critical    alert-duration=900
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success_dashboard    RHODS Dashboard Probe Success Burn Rate    warning    alert-duration=3600
+    ...    SLOs-probe_success_dashboard    RHODS Dashboard Probe Success 2h and 1d Burn Rate high    warning    alert-duration=3600
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success_dashboard    RHODS Dashboard Probe Success Burn Rate    warning    alert-duration=10800
+    ...    SLOs-probe_success_dashboard    RHODS Dashboard Probe Success 6h and 3d Burn Rate high    warning    alert-duration=10800
 
 Verify "RHODS Jupyter Probe Success Burn Rate" Alerts Severity And Continue On Failure
     [Documentation]    Verifies that alert "RHODS Probe Success Burn Rate" severity
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success_workbench    RHODS Jupyter Probe Success Burn Rate    critical    alert-duration=120
+    ...    SLOs-probe_success_workbench    RHODS Jupyter Probe Success 5m and 1h Burn Rate high    critical    alert-duration=120
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success_workbench    RHODS Jupyter Probe Success Burn Rate    critical    alert-duration=900
+    ...    SLOs-probe_success_workbench    RHODS Jupyter Probe Success 30m and 6h Burn Rate high    critical    alert-duration=900
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success_workbench    RHODS Jupyter Probe Success Burn Rate    warning    alert-duration=3600
+    ...    SLOs-probe_success_workbench    RHODS Jupyter Probe Success 2h and 1d Burn Rate high    warning    alert-duration=3600
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success_workbench    RHODS Jupyter Probe Success Burn Rate    warning    alert-duration=10800
+    ...    SLOs-probe_success_workbench    RHODS Jupyter Probe Success 6h and 3d Burn Rate high    warning    alert-duration=10800
 
 Verify "RHODS Dashboard Route Error Burn Rate" Alerts Severity And Continue On Failure
     [Documentation]    Verifies that alert "RHODS Dashboard Route Error Burn Rate" severity
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-haproxy_backend_http_responses_dashboard    RHODS Dashboard Route Error Burn Rate    critical    alert-duration=120
+    ...    SLOs-haproxy_backend_http_responses_dashboard    RHODS Dashboard Route Error 5m and 1h Burn Rate high    critical    alert-duration=120
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-haproxy_backend_http_responses_dashboard    RHODS Dashboard Route Error Burn Rate   critical    alert-duration=900
+    ...    SLOs-haproxy_backend_http_responses_dashboard    RHODS Dashboard Route Error 30m and 6h Burn Rate high   critical    alert-duration=900
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-haproxy_backend_http_responses_dashboard    RHODS Dashboard Route Error Burn Rate   warning    alert-duration=3600
+    ...    SLOs-haproxy_backend_http_responses_dashboard    RHODS Dashboard Route Error 2h and 1d Burn Rate high   warning    alert-duration=3600
     Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-haproxy_backend_http_responses_dashboard    RHODS Dashboard Route Error Burn Rate    warning    alert-duration=10800
+    ...    SLOs-haproxy_backend_http_responses_dashboard    RHODS Dashboard Route Error 6h and 3d Burn Rate high    warning    alert-duration=10800
 
 Verify "Kubeflow Notebook Controller Pod Is Not Running" Alerts Severity And Continue On Failure
     [Documentation]    Verifies alert severity for different alert durations

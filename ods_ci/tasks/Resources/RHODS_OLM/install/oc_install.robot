@@ -20,6 +20,7 @@ ${DSCI_NAME} =    default-dsci
 ...    trustyai
 ...    workbenches
 ...    modelregistry
+...    feastoperator
 ${SERVERLESS_OP_NAME}=     serverless-operator
 ${SERVERLESS_SUB_NAME}=    serverless-operator
 ${SERVERLESS_NS}=    openshift-serverless
@@ -182,6 +183,12 @@ Verify RHODS Installation
   IF    "${trainingoperator}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app.kubernetes.io/part-of=trainingoperator   timeout=400s
+  END
+
+  ${feastoperator} =    Is Component Enabled    feastoperator    ${DSC_NAME}
+  IF    "${feastoperator}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/part-of=feastoperator   timeout=400s
   END
 
   IF    "${dashboard}" == "true" or "${workbenches}" == "true" or "${modelmeshserving}" == "true" or "${datasciencepipelines}" == "true" or "${kserve}" == "true" or "${kueue}" == "true" or "${codeflare}" == "true" or "${ray}" == "true" or "${trustyai}" == "true" or "${modelregistry}" == "true" or "${trainingoperator}" == "true"    # robocop: disable

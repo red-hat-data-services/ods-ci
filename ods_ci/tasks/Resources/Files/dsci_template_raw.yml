@@ -1,0 +1,14 @@
+apiVersion: dscinitialization.opendatahub.io/v1
+kind: DSCInitialization 
+metadata:
+  name: <dsci_name>
+spec:
+  applicationsNamespace: <application_namespace>
+  monitoring:
+    managementState: Managed
+    namespace: <monitoring_namespace>
+  serviceMesh:
+    managementState: Removed
+  trustedCABundle:
+    managementState: Managed
+    customCABundle: ""

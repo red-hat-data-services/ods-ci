@@ -404,10 +404,10 @@ Wait For DSCI Ready State
     ...    oc wait --timeout=${wait_time} --for jsonpath='{.status.conditions[].reason}'=ReconcileCompleted -n ${namespace} dsci ${dsci}
     Should Be Equal    "${rc}"    "0"     msg=${output}
 
-Wait For DSC Conditions Reconciled
+Wait For DSC Ready State
     [Documentation]    Checks all DSC conditions to be successfully reconciled
     [Arguments]    ${namespace}    ${dsc_name}    ${wait_time}=20m
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc wait --timeout=${wait_time} --for jsonpath='{.status.conditions[].reason}'=ReconcileCompleted -n ${namespace} dsc ${dsc_name}    # robocop: disable
+    ...    oc wait --timeout=${wait_time} --for jsonpath='{.status.conditions[].type}'=Ready -n ${namespace} dsc ${dsc_name}    # robocop: disable
     Should Be Equal As Integers    ${rc}     ${0}
     Log    ${out}    console=${out}

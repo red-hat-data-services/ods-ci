@@ -2,12 +2,21 @@ apiVersion: dscinitialization.opendatahub.io/v1
 kind: DSCInitialization
 metadata:
   name: <dsci_name>
+  labels:
+      app.kubernetes.io/created-by: <operator_yaml_label>
+      app.kubernetes.io/instance: <dsci_name>
+      app.kubernetes.io/managed-by: kustomize
+      app.kubernetes.io/name: dscinitialization
+      app.kubernetes.io/part-of: <operator_yaml_label>
 spec:
     applicationsNamespace: <application_namespace>
     monitoring:
         managementState: Managed
         namespace: <monitoring_namespace>
     serviceMesh:
+        auth:
+            audiences:
+                - 'https://kubernetes.default.svc'
         controlPlane:
             metricsCollection: Istio
             name: data-science-smcp

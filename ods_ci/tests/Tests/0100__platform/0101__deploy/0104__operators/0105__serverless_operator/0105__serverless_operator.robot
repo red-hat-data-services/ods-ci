@@ -30,7 +30,7 @@ Validate DSC creates all Serverless CRs
             Set Component State    kserve/serving    Managed
     END
 
-    Wait For DSC Conditions Reconciled    ${OPERATOR_NAMESPACE}    default-dsc
+    Wait For DSC Ready State    ${OPERATOR_NAMESPACE}    default-dsc
 
     # Resource Should Exist     KnativeServing    knative-serving     ${KNATIVESERVING_NS}
     Wait Until Keyword Succeeds    5 min    0 sec
@@ -76,7 +76,7 @@ Validate DSC Kserve Serving Removed State
     Wait Until Keyword Succeeds    5 min    0 sec
     ...    Is Resource Present     KnativeServing    knative-serving    ${KNATIVESERVING_NS}   ${IS_NOT_PRESENT}
 
-    Wait For DSC Conditions Reconciled    ${OPERATOR_NAMESPACE}    default-dsc
+    Wait For DSC Ready State    ${OPERATOR_NAMESPACE}    default-dsc
 
     Wait Until Keyword Succeeds    5 min    0 sec
     ...    Is Resource Present     Gateway    knative-ingress-gateway     ${KNATIVESERVING_NS}   ${IS_NOT_PRESENT}
@@ -121,7 +121,7 @@ Check value for serverless cert on CSV
 Suite Setup
     [Documentation]    Suite Setup
     RHOSi Setup
-    Wait For DSC Conditions Reconciled    ${OPERATOR_NAMESPACE}    default-dsc
+    Wait For DSC Ready State    ${OPERATOR_NAMESPACE}    default-dsc
     ${KSERVE_SERVING_STATE}=    Get DSC Component State    ${DSC_NAME}    kserve.serving    ${OPERATOR_NAMESPACE}
     Set Suite Variable    ${KSERVE_SERVING_STATE}
     Log To Console    "Suite Setup: KServe.serving state: ${KSERVE_SERVING_STATE}"
@@ -151,7 +151,7 @@ Restore Kserve Serving State
         ...    Is Resource Present     KnativeServing    knative-serving    ${KNATIVESERVING_NS}   ${IS_NOT_PRESENT}
     END
 
-    Wait For DSC Conditions Reconciled    ${KNATIVESERVING_NS}    default-dsc
+    Wait For DSC Ready State    ${KNATIVESERVING_NS}    default-dsc
 
 Wait Knative Serving CR To Be In Ready State
     [Documentation]    Wait for Knative Serving CR to be in Ready state.

@@ -4,6 +4,7 @@ export SET_ENVIRONMENT=1
 export USE_OCM_IDP=0
 export RUN_SCRIPT_ARGS="skip-oclogin true --set-urls-variables true"
 export ROBOT_EXTRA_ARGS="-i Smoke --dryrun"
+export TEST_VARIABLES_FILE="test-variables.yml"
 
 if [[ -z "${TEST_SUITE}" ]]; then
   echo "Error: TEST_SUITE not set. Please define it. Exiting.."
@@ -19,7 +20,6 @@ run_tests() {
   echo "Running $1 testing"
 
   TEST_CASE_FILE="tests/Tests"
-  TEST_VARIABLES_FILE="test-variables.yml"
   TEST_SUITE=$1
 
   poetry run robot --include ${TEST_SUITE} --exclude "ExcludeOnRHOAI" --exclude "AutomationBug" --exclude "ProductBug" -d ${ARTIFACT_DIR}/${TEST_SUITE} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE} || true

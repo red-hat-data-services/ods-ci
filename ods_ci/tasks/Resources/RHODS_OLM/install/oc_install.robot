@@ -467,8 +467,11 @@ Install Authorino Operator Via Cli
           ...    retry=150
     Wait For Pods To Be Ready    label_selector=control-plane=authorino-operator
           ...    namespace=${OPENSHIFT_OPERATORS_NS}
-    Wait For Pods To Be Ready    label_selector=authorino-component=authorino-webhooks
-          ...    namespace=${OPENSHIFT_OPERATORS_NS}
+    IF   "${AUTHORINO_CHANNEL_NAME}" == "tech-preview-v1"
+    # This pod does not exist in the Stable channel version
+        Wait For Pods To Be Ready    label_selector=authorino-component=authorino-webhooks
+            ...    namespace=${OPENSHIFT_OPERATORS_NS}
+    END
 
 Install Service Mesh Operator Via Cli
     [Documentation]    Install Service Mesh Operator Via CLI

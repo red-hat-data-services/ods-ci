@@ -25,7 +25,7 @@ ${MODEL_S3_DIR}=   e5-mistral-7b-instruct
 Verify Non Admin Can Serve And Query A Model Using The UI    # robocop: off=too-long-test-case
     [Documentation]    Basic tests leveraging on a non-admin user for preparing, deploying and querying a LLM model
     ...                using Single-model platform and TGIS Standalone runtime.
-    [Tags]    Sanity    ODS-2611
+    [Tags]    Sanity    ODS-2611    deprecatedTest
     [Setup]    Run Keywords
     ...    Run    git clone https://github.com/IBM/text-generation-inference/
     ...    AND

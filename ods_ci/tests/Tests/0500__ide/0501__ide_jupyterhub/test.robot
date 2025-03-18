@@ -19,7 +19,7 @@ Logged Into OpenShift
     [Tags]   Smoke
     ...      ODS-127
     Open Page    ${OCP_CONSOLE_URL}
-    Wait Until Page Contains    Log in with
+    Wait Until Page Contains    Log in with    timeout=15s
     Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     Wait Until OpenShift Console Is Loaded
 

@@ -32,6 +32,7 @@ Verify User Can Serve And Query ovms Model    # robocop: off=too-long-test-case,
     ...       Smoke
     ...       OpenDataHub
     ...       RHOAIENG-9045
+    ...       deprecatedTest
     Setup Test Variables    model_name=test-dir    use_pvc=${USE_PVC}    use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}
     Set Project And Runtime    runtime=${RUNTIME_NAME}     protocol=${PROTOCOL}     namespace=${test_namespace}

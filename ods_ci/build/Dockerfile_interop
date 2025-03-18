@@ -41,6 +41,7 @@ RUN dnf install epel-release -y &&\
     chmod +x /usr/bin/grpcurl
 
 RUN alternatives --install /usr/local/bin/python3 python3 /usr/bin/python${PYTHON_VERSION} 1
+RUN python3 --version
 ENV POETRY_HOME=$HOME/.local \
     PATH="${POETRY_HOME}/bin:${PATH}"
 

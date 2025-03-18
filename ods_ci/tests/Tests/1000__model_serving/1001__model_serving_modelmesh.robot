@@ -36,6 +36,7 @@ Verify Model Serving Installation
     [Tags]    Smoke
     ...       OpenDataHub
     ...       ODS-1919
+    ...       deprecatedTest
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec
     ...    Verify odh-model-controller Deployment    # robocop: disable
     Run Keyword And Continue On Failure  Wait Until Keyword Succeeds  5 min  10 sec  Verify ModelMesh Deployment
@@ -45,6 +46,7 @@ Verify Openvino_IR Model Via UI
     [Documentation]    Test the deployment of an openvino_ir model
     [Tags]    Smoke
     ...       ODS-2054
+    ...       deprecatedTest
     Create Openvino Models    server_name=${RUNTIME_NAME}    model_name=${MODEL_NAME}    project_name=${PRJ_TITLE}
     ...    num_projects=1
     [Teardown]   Run Keyword If Test Failed    Get Modelmesh Events And Logs
@@ -55,6 +57,7 @@ Test Inference Without Token Authentication
     ...                Intermittently failing: RHOAIENG-3115
     [Tags]    Smoke    FlakyTest
     ...       ODS-2053
+    ...       deprecatedTest
     Depends On Test  Verify Openvino_IR Model Via UI
     # This inference request often fails because of timing, currently it is sent ~10 seconds after the model is shown as
     # ready, let's add 30 second on top.
@@ -68,6 +71,7 @@ Verify Tensorflow Model Via UI    # robocop: off=too-long-test-case,too-many-cal
     [Documentation]    Test the deployment of a tensorflow (.pb) model
     [Tags]    Sanity
     ...       ODS-2268
+    ...       deprecatedTest
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}-2268    description=${PRJ_DESCRIPTION}
     Recreate S3 Data Connection    project_title=${PRJ_TITLE}-2268    dc_name=model-serving-connection
@@ -121,6 +125,7 @@ Test Inference With Token Authentication    # robocop: off=too-long-test-case
     [Documentation]    Test the inference result after having deployed a model that requires Token Authentication
     [Tags]    Sanity
     ...       ODS-1920
+    ...       deprecatedTest
     Open Data Science Projects Home Page
     Create Data Science Project    title=${SECOND_PROJECT}    description=${PRJ_DESCRIPTION}
     ...    existing_project=${FALSE}

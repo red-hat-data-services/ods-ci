@@ -31,7 +31,8 @@ Verify Workload Metrics Home page Contents
     [Tags]    RHOAIENG-4837
     ...       Sanity    DistributedWorkloads    Training    WorkloadsOrchestration
     Open Distributed Workload Metrics Home Page
-    Wait For Dashboard Page Title   Distributed Workload Metrics
+    Wait For Dashboard Page Title   Distributed workloads
+    Select Distributed Workload Project By Name    ${PRJ_TITLE}
     Wait Until Element Is Visible    ${DISTRIBUITED_WORKLOAD_METRICS_TEXT_XP}   timeout=20
     Wait Until Element Is Visible    ${PROJECT_METRICS_TAB_XP}   timeout=20
     Page Should Contain Element     ${DISTRIBUITED_WORKLOAD_METRICS_TEXT_XP}
@@ -66,15 +67,14 @@ Verify That Not Admin Users Can Access Distributed workload metrics default page
     Launch Dashboard    ocp_user_name=${TEST_USER_3.USERNAME}    ocp_user_pw=${TEST_USER_3.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER_3.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}
     ...    browser=${BROWSER.NAME}    browser_options=${BROWSER.OPTIONS}
-    Open Data Science Projects Home Page
-    Create Data Science Project    title=${PRJ_TITLE_NONADMIN}   description=${PRJ_DESCRIPTION}
+    Create Data Science Project From CLI    ${PRJ_TITLE_NONADMIN}    as_user=${TEST_USER_3.USERNAME}
     Open Distributed Workload Metrics Home Page
     Select Distributed Workload Project By Name    ${PRJ_TITLE_NONADMIN}
     Wait Until Element Is Visible    xpath=//h4[text()="Configure the project queue"]   timeout=20
     Page Should Contain Element     xpath=//div[text()="Configure the queue for this project, or select a different project."]
     # setup Kueue resource for the created project
     Setup Kueue Resources    ${PRJ_TITLE_NONADMIN}    cluster-queue-user    resource-flavor-user    local-queue-user
-    Click Link    Distributed Workload Metrics
+    Click Link    Distributed workloads
     Select Distributed Workload Project By Name    ${PRJ_TITLE_NONADMIN}
     Check Distributed Workload Status Page Contents
     Check Project Metrics Default Page Contents    ${PRJ_TITLE_NONADMIN}
@@ -92,6 +92,7 @@ Verify The Workload Metrics By Submitting Kueue Batch Workload
     [Tags]    RHOAIENG-5216
     ...       Tier1    DistributedWorkloads    Training    WorkloadsOrchestration
     Open Distributed Workload Metrics Home Page
+    Select Distributed Workload Project By Name    ${PRJ_TITLE}
     # Submitting kueue batch workload
     Submit Kueue Workload    ${LOCAL_QUEUE_NAME}    ${PRJ_TITLE}    ${CPU_REQUESTED}    ${MEMORY_REQUESTED}    ${JOB_NAME_QUEUE}
     Select Distributed Workload Project By Name    ${PRJ_TITLE}
@@ -239,8 +240,7 @@ Project Suite Setup
     RHOSi Setup
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
-    Open Data Science Projects Home Page
-    Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
+    Create Data Science Project From CLI    ${PRJ_TITLE}    as_user=${TEST_USER.USERNAME}
     Set Global Variable    ${project_created}    True
     # setup Kueue resource for the created project
     Setup Kueue Resources    ${PRJ_TITLE}    ${CLUSTER_QUEUE_NAME}    ${RESOURCE_FLAVOR_NAME}    ${LOCAL_QUEUE_NAME}

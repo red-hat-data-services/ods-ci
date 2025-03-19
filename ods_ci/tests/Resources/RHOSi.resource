@@ -111,6 +111,7 @@ Assign Vars According To Product
     # Product specific vars
     IF    "${PRODUCT}" == "RHODS"
         Set Suite Variable    ${OPERATOR_APPNAME}     "Red Hat OpenShift AI"
+        Set Suite Variable    ${OPERATOR_YAML_LABEL}  rhods-operator
         Set Suite Variable    ${OPERATOR_DEPLOYMENT_NAME}    rhods-operator
         Set Suite Variable    ${OPERATOR_POD_CONTAINER_NAME}  rhods-operator
         Set Suite Variable    ${OPERATOR_LABEL_SELECTOR}    name=rhods-operator
@@ -126,6 +127,7 @@ Assign Vars According To Product
         Set Suite Variable  ${MODEL_REGISTRY_NAMESPACE}    rhoai-model-registries
     ELSE IF    "${PRODUCT}" == "ODH"
         Set Suite Variable    ${OPERATOR_APPNAME}  "Open Data Hub Operator"
+        Set Suite Variable    ${OPERATOR_YAML_LABEL}  opendatahub-operator
         Set Suite Variable    ${OPERATOR_DEPLOYMENT_NAME}    opendatahub-operator-controller-manager
         Set Suite Variable    ${OPERATOR_POD_CONTAINER_NAME}  manager
         Set Suite Variable    ${OPERATOR_LABEL_SELECTOR}    control-plane=controller-manager

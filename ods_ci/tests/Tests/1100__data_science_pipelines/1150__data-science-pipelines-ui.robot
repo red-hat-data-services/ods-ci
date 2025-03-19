@@ -6,6 +6,7 @@ Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/D
 Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Pipelines.resource
 Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipelines.resource
 Resource           ../../Resources/CLI/DataSciencePipelines/DataSciencePipelinesBackend.resource
+Library            String
 Test Tags          DataSciencePipelines-Dashboard
 Suite Setup        Pipelines Suite Setup
 Suite Teardown     Pipelines Suite Teardown
@@ -14,8 +15,8 @@ Suite Teardown     Pipelines Suite Teardown
 *** Variables ***
 # lower case because it will be the OpenShift project
 ${PRJ_BASE_TITLE}=   dsp
-${PRJ_DESCRIPTION}=   ${PRJ_BASE_TITLE} is a test project for validating DS Pipelines feature
 ${PRJ_TITLE}=    ${PRJ_BASE_TITLE}-${TEST_USER_3.USERNAME}
+${PRJ_DESCRIPTION}=   ${PRJ_TITLE} is a test project for validating DS Pipelines feature
 ${PIPELINE_TEST_NAME}=    ${PIPELINE_TEST_BASENAME}-${TEST_USER_3.USERNAME}
 ${DC_NAME}=    ds-pipeline-conn
 ${PIPELINE_TEST_BASENAME}=    iris
@@ -80,6 +81,11 @@ Pipelines Suite Setup
     [Documentation]    Sets global test variables, create a DS project and a data connection
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
+
+    # Prevent project titles longer than 30 chars, as they will be shorteded by Dashboard
+    ${prj_title_short}=    Get Substring    ${PRJ_TITLE}    0    29
+    Set Suite Variable    ${PRJ_TITLE}    ${prj_title_short}
+
     ${to_delete}=    Create List    ${PRJ_TITLE}
     Set Suite Variable    ${PROJECTS_TO_DELETE}    ${to_delete}
     Launch Data Science Project Main Page    username=${TEST_USER_3.USERNAME}

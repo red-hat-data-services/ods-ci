@@ -267,6 +267,7 @@ Create DSCInitialization CustomResource Using Test Variables
     Run    sed -i'' -e 's/<dsci_name>/${dsci_name}/' ${file_path}dsci_apply.yml
     Run    sed -i'' -e 's/<application_namespace>/${APPLICATIONS_NAMESPACE}/' ${file_path}dsci_apply.yml
     Run    sed -i'' -e 's/<monitoring_namespace>/${MONITORING_NAMESPACE}/' ${file_path}dsci_apply.yml
+    Run    sed -i'' -e 's/<operator_yaml_label>/${OPERATOR_YAML_LABEL}/' ${file_path}dsci_apply.yml
 
 Wait For DSCInitialization CustomResource To Be Ready
     [Documentation]   Wait ${timeout} seconds for DSCInitialization CustomResource To Be Ready
@@ -293,7 +294,7 @@ Apply DataScienceCluster CustomResource
         Log To Console    ${output}
         Should Be Equal As Integers  ${return_code}  0  msg=Error detected while applying DSC CR
         #Remove File    ${file_path}dsc_apply.yml
-        Wait For DSC Conditions Reconciled    ${OPERATOR_NAMESPACE}     ${DSC_NAME}
+        Wait For DSC Ready State    ${OPERATOR_NAMESPACE}     ${DSC_NAME}
     ELSE
         Log to Console    Requested Configuration:
         FOR    ${cmp}    IN    @{COMPONENT_LIST}
@@ -330,6 +331,7 @@ Create DataScienceCluster CustomResource Using Test Variables
     ${file_path} =    Set Variable    tasks/Resources/Files/
     Copy File    source=${file_path}dsc_template.yml    destination=${file_path}dsc_apply.yml
     Run    sed -i'' -e 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
+    Run    sed -i'' -e 's/<operator_yaml_label>/${OPERATOR_YAML_LABEL}/' ${file_path}dsc_apply.yml
     FOR    ${cmp}    IN    @{COMPONENT_LIST}
             IF    $cmp not in $COMPONENTS
                 Run    sed -i'' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
@@ -452,18 +454,24 @@ Catalog Is Ready
 
 Install Authorino Operator Via Cli
     [Documentation]    Install Authorino Operator Via CLI
+    IF   "${PRODUCT}" == "ODH"
+        Set Global Variable    $AUTHORINO_CHANNEL_NAME    stable
+    END
     Install ISV Operator From OperatorHub Via CLI    operator_name=${AUTHORINO_OP_NAME}
-          ...    subscription_name=${AUTHORINO_SUB_NAME}
-          ...    channel=${AUTHORINO_CHANNEL_NAME}
-          ...    catalog_source_name=redhat-operators
+        ...    subscription_name=${AUTHORINO_SUB_NAME}
+        ...    channel=${AUTHORINO_CHANNEL_NAME}
+        ...    catalog_source_name=redhat-operators
     Wait Until Operator Subscription Last Condition Is
           ...    type=CatalogSourcesUnhealthy    status=False
           ...    reason=AllCatalogSourcesHealthy    subcription_name=${AUTHORINO_SUB_NAME}
           ...    retry=150
     Wait For Pods To Be Ready    label_selector=control-plane=authorino-operator
           ...    namespace=${OPENSHIFT_OPERATORS_NS}
-    Wait For Pods To Be Ready    label_selector=authorino-component=authorino-webhooks
-          ...    namespace=${OPENSHIFT_OPERATORS_NS}
+    IF   "${AUTHORINO_CHANNEL_NAME}" == "tech-preview-v1"
+    # This pod does not exist in the Stable channel version
+        Wait For Pods To Be Ready    label_selector=authorino-component=authorino-webhooks
+            ...    namespace=${OPENSHIFT_OPERATORS_NS}
+    END
 
 Install Service Mesh Operator Via Cli
     [Documentation]    Install Service Mesh Operator Via CLI

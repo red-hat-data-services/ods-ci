@@ -270,7 +270,7 @@ Remove Deployment Files
             Remove File  ${directory}/${file}
         END
     ELSE
-        Log    ${directory} does not exist    level= WARN
+        Log    ${directory} does not exist    level=WARN
     END
 
 Download Python Client Dependencies
@@ -443,7 +443,7 @@ Get Model Registry Operator Pod
     RETURN    ${name}
 
 Get Model Registry Operator ${type} Image
-    [Documentation]    Returns the GRPC image defined in the operator, type should be either GRPC or REST (case 
+    [Documentation]    Returns the GRPC image defined in the operator, type should be either GRPC or REST (case
     ...    sensitive)
     IF    "${type}"!="GRPC" and "${type}"!="REST"
         Log To Console    "Failing, `type` should be either REST or GRPC"

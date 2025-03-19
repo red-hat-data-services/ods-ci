@@ -33,9 +33,9 @@ ${MEMORY_WARNING_XP}=    //*[@id="requested-resources-chart-Memory-ChartLegend-C
 *** Keywords ***
 Open Distributed Workload Metrics Home Page
     [Documentation]    This will launch to the distributed Workloads Home page
-    Wait Until Page Contains    Distributed Workload Metrics    timeout=30
-    Click Link    Distributed Workload Metrics
-    Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=Distributed Workload Metrics
+    Wait Until Page Contains    Distributed workloads    timeout=30
+    Click Link    Distributed workloads
+    Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=Distributed workloads
 
 Select Distributed Workload Project By Name
     [Documentation]    Select the project in distributed workload metrics page by project name

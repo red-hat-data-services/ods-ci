@@ -32,6 +32,7 @@ Check DW Components Are Enabled By Default
     Component Should Be Enabled    codeflare
     Component Should Be Enabled    ray
     Component Should Be Enabled    kueue
+    Component Should Be Enabled    trainingoperator
 
 Verify User Can Access RHODS Documentation From OCM Console
   [Documentation]   Checks user can access RHODS documentation from addon on OCM Console

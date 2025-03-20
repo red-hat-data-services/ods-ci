@@ -229,7 +229,7 @@ Run Training Operator KFTO Setup PyTorchJob Test Use Case
     [Documentation]    Run Training Operator KFTO Setup PyTorchJob Test Use Case
     [Tags]      Upgrade    Training
     [Setup]     Prepare Training Operator KFTO E2E Test Suite
-    Skip If Operator Starting Version Is Not Supported      minimum_version=2.12.0
+    Skip If Operator Starting Version Is Not Supported      minimum_version=2.19.0
     Run Training Operator KFTO Test    TestSetupPytorchjob    ${CUDA_TRAINING_IMAGE}
     [Teardown]    Teardown Training Operator KFTO E2E Test Suite
 
@@ -237,7 +237,7 @@ Run Training Operator KFTO Setup Sleep PyTorchJob Test Use Case
     [Documentation]    Setup PyTorchJob which is kept running for 24 hours
     [Tags]      Upgrade    Training
     [Setup]     Prepare Training Operator KFTO E2E Test Suite
-    Skip If Operator Starting Version Is Not Supported      minimum_version=2.12.0
+    Skip If Operator Starting Version Is Not Supported      minimum_version=2.19.0
     Run Training Operator KFTO Test    TestSetupSleepPytorchjob    ${CUDA_TRAINING_IMAGE}
     [Teardown]    Teardown Training Operator KFTO E2E Test Suite
 

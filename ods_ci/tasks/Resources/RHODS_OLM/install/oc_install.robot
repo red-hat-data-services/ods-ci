@@ -587,8 +587,17 @@ Create DSCI With Custom Namespaces
     ELSE
          FAIL     Cannot delete DSCInitialization CRs
     END
-    Wait Until Keyword Succeeds    1 min    0 sec
+    ${delete_auth_rc} =    Run And Return Rc    oc delete Auth --all --ignore-not-found
+    IF   ${delete_auth_rc} == 0
+         Log To Console    Auth CRs successfully deleted
+    ELSE
+         FAIL     Cannot delete Auth CRs
+    END
+    Wait Until Keyword Succeeds    3 min    0 sec
     ...    Is Resource Present    DSCInitialization    ${DSCI_NAME}
+    ...    ${OPERATOR_NAMESPACE}      ${IS_NOT_PRESENT}
+    Wait Until Keyword Succeeds    3 min    0 sec
+    ...    Is Resource Present    Auth    auth
     ...    ${OPERATOR_NAMESPACE}      ${IS_NOT_PRESENT}
     Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
     Wait For DSCInitialization CustomResource To Be Ready    timeout=180

@@ -3,8 +3,8 @@ Documentation     Smoke tests for Workloads Training
 Library           Process
 Resource          ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 Resource          ../../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
-Suite Setup       Prepare Codeflare E2E Test Suite
-Suite Teardown    Teardown Codeflare E2E Test Suite
+Suite Setup       RHOSi Setup
+Suite Teardown    RHOSi Teardown
 
 
 *** Test Cases ***
@@ -66,14 +66,3 @@ Training operator smoke test
         FAIL    Timeout waiting for deployment/kubeflow-training-operator to be available in ${APPLICATIONS_NAMESPACE}
     END
     Verify container images    kubeflow-training-operator    training-operator    odh-training-operator
-
-
-*** Keywords ***
-Prepare Codeflare E2E Test Suite
-    Enable Component    trainingoperator
-    Wait Component Ready    trainingoperator
-    RHOSi Setup
-
-Teardown Codeflare E2E Test Suite
-    Disable Component    trainingoperator
-    RHOSi Teardown

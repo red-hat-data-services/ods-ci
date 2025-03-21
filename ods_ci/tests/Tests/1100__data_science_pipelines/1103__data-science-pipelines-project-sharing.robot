@@ -4,11 +4,7 @@ Documentation       Test suite for OpenShift Pipeline API
 Resource            ../../Resources/RHOSi.resource
 Resource            ../../Resources/ODS.robot
 Resource            ../../Resources/Common.robot
-Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
-Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipelines.resource
-Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
-Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Pipelines.resource
 Resource            ../../Resources/CLI/DataSciencePipelines/DataSciencePipelinesBackend.resource
 Library             DateTime
 Library             ../../../libs/DataSciencePipelinesAPI.py

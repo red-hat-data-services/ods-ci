@@ -49,7 +49,8 @@ ${CONFIG_ENV}=    ${EMPTY}
 *** Keywords ***
 Install RHODS
   [Arguments]  ${cluster_type}     ${image_url}
-  IF    "${KSERVE_RAW_DEPLOYMENT}" == "true"
+  ${kserve_raw_deployment} =    Get Variable Value    ${KSERVE_RAW_DEPLOYMENT}    false
+  IF    "${kserve_raw_deployment}" == "true"
       Set Suite Variable    @{KSERVE_DEPENDENCIES}    authorino        # robocop: disable
       Set Suite Variable    ${CONFIG_ENV}    -e DISABLE_DSC_CONFIG    # robocop: disable
       Set Suite Variable    ${DSC_TEMPLATE}    ${DSC_TEMPLATE_RAW}    # robocop: disable

@@ -55,6 +55,7 @@ Suite Setup
     Wait Until Operator Ready    ${OPERATOR_DEPLOYMENT_NAME}    ${OPERATOR_NAMESPACE}
     Wait For DSCI Ready State    ${DSCI_NAME}    ${OPERATOR_NAMESPACE}
     IF  "${PRODUCT}" == "ODH"
+      Set Global Variable  ${OPERATOR_YAML_LABEL}  opendatahub-operator
       Set Global Variable  ${OPERATOR_NAME_LABEL}  opendatahub-operator
       Set Global Variable  ${MODEL_REGISTRY_NAMESPACE}    odh-model-registries
       IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
@@ -63,6 +64,7 @@ Suite Setup
           Set Global Variable  ${OPERATOR_NAME}  opendatahub-operator
       END
     ELSE
+      Set Global Variable  ${OPERATOR_YAML_LABEL}  rhods-operator
       Set Global Variable  ${OPERATOR_NAME}  rhods-operator
       Set Global Variable  ${OPERATOR_NAME_LABEL}  rhods-operator
       Set Global Variable  ${MODEL_REGISTRY_NAMESPACE}    rhoai-model-registries

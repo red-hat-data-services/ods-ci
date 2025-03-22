@@ -51,7 +51,7 @@ Verify User Can Serve And Query A Model Using The UI
 
 Verify User Can Deploy Multiple Models In The Same Namespace Using The UI    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Checks if user can deploy and query multiple models in the same namespace
-    [Tags]    Sanity    ODS-2548
+    [Tags]    Sanity    ODS-2548    deprecatedTest
     [Setup]    Set Up Project    namespace=${TEST_NS}-multisame
     ${test_namespace}=    Set Variable     ${TEST_NS}-multisame
     ${model_one_name}=    Set Variable    bloom-560m-caikit
@@ -176,7 +176,7 @@ Verify Model Can Be Served And Query On A GPU Node Using The UI    # robocop: of
 Verify Non Admin Can Serve And Query A Model Using The UI    # robocop: off=too-long-test-case
     [Documentation]    Basic tests leveraging on a non-admin user for preparing, deploying and querying a LLM model
     ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    Smoke    ODS-2552
+    [Tags]    Smoke    ODS-2552    deprecatedTest
     [Setup]    Run Keywords    Setup Kserve UI Test    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}  AND
     ...        Set Up Project    namespace=non-admin-test    single_prj=${FALSE}
     ${test_namespace}=    Set Variable     non-admin-test
@@ -363,7 +363,7 @@ Verify User Can Access Model Metrics From UWM Using The UI    # robocop: off=too
     ...                and model pod cpu usage. Waiting for a complete list of expected metrics and
     ...                derived metrics.
     ...                ProductBug: RHOAIENG-3236
-    [Tags]    Smoke    ODS-2555    ProductBug
+    [Tags]    Smoke    ODS-2555    ProductBug    deprecatedTest
     [Setup]    Set Up Project   namespace=singlemodel-metrics    enable_metrics=${TRUE}
     ${test_namespace}=    Set Variable     singlemodel-metrics
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit

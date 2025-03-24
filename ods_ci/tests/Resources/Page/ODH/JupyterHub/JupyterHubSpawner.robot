@@ -23,7 +23,7 @@ ${KFNBC_ACCELERATOR_DROPDOWN_XPATH} =    //label[@for='modal-notebook-accelerato
 ${KFNBC_ACCELERATOR_INPUT_XPATH} =    //input[@aria-label='Number of accelerators']
 ${KFNBC_ACCELERATOR_LESS_BUTTON_XPATH} =    ${KFNBC_ACCELERATOR_INPUT_XPATH}/parent::*/parent::*/preceding-sibling::*//button
 ${KFNBC_ACCELERATOR_PLUS_BUTTON_XPATH} =    ${KFNBC_ACCELERATOR_INPUT_XPATH}/parent::*/parent::*/following-sibling::*//button
-${KFNBC_MAX_ACCELERATOR_WARNING_XPATH} =    //div[contains(@class, 'pf-m-warning')]//h4[contains(text(), 'accelerator detected')]
+${KFNBC_MAX_ACCELERATOR_WARNING_XPATH} =    //div[contains(@class, 'pf-m-warning')]//h4[contains(text(), 'accelerator detected') or contains(text(),'accelerators detected')]
 ${KFNBC_MODAL_HEADER_XPATH} =    //div[@aria-label="Starting server modal"]
 ${KFNBC_MODAL_CANCEL_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Cancel"]
 ${KFNBC_MODAL_CLOSE_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Close"]

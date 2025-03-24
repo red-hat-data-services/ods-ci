@@ -2,8 +2,9 @@ from kfp import compiler, dsl, kubernetes
 from kfp.dsl import PipelineTask
 
 #  Runtime: Pytorch with CUDA and Python 3.9 (UBI 9)
+#  Images for each release can be found here (in the branch for the release)
 common_base_image = (
-    "quay.io/modh/runtime-images@sha256:7d1b065f100666fe46f64a2e8aae888cb41a38b5482bb9b9343b14db05c2a14a"
+    "quay.io/modh/runtime-images@sha256:e1f7ad986f694236a818796af290a99b4e7f73d44cd39ca45860087644d136dd"
 )
 
 
@@ -14,11 +15,9 @@ def add_gpu_toleration(task: PipelineTask, accelerator_type: str, accelerator_li
     kubernetes.add_toleration(task, key=accelerator_type, operator="Exists", effect="NoSchedule")
 
 
-@dsl.component(
-    base_image=common_base_image
-)
+@dsl.component(base_image=common_base_image)
 def verify_gpu_availability(gpu_toleration: bool):
-    import torch
+    import torch  # noqa: PLC0415
 
     cuda_available = torch.cuda.is_available()
     device_count = torch.cuda.device_count()
@@ -30,7 +29,7 @@ def verify_gpu_availability(gpu_toleration: bool):
     if gpu_toleration:
         assert torch.cuda.is_available()
         assert torch.cuda.device_count() > 0
-        t = torch.tensor([5, 5, 5], dtype=torch.int64, device='cuda')
+        t = torch.tensor([5, 5, 5], dtype=torch.int64, device="cuda")
     else:
         assert not torch.cuda.is_available()
         assert torch.cuda.device_count() == 0

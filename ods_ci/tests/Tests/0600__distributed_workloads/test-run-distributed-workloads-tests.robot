@@ -9,13 +9,6 @@ Resource          ../../Resources/Page/DistributedWorkloads/DistributedWorkloads
 Test Tags         DistributedWorkloads3.11
 
 
-*** Variables ***
-${RAY_CUDA_IMAGE_3.11}               quay.io/modh/ray@sha256:db667df1bc437a7b0965e8031e905d3ab04b86390d764d120e05ea5a5c18d1b4
-${RAY_TORCH_CUDA_IMAGE_3.11}         quay.io/rhoai/ray@sha256:5077f9bb230dfa88f34089fecdfcdaa8abc6964716a8a8325c7f9dcdf11bbbb3
-${RAY_ROCM_IMAGE_3.11}               quay.io/modh/ray@sha256:f8b4f2b1c954187753c1f5254f7bb6a4286cec5a4f1b43def7ef4e009f2d28cb
-${NOTEBOOK_IMAGE_3.11}               quay.io/modh/odh-generic-data-science-notebook@sha256:7c1a4ca213b71d342a2d1366171304e469da06d5f15710fab5dd3ce013aa1b73
-
-
 *** Test Cases ***
 Run TestKueueRayCpu ODH test with Python 3.11
     [Documentation]    Run Go ODH test: TestKueueRayCpu

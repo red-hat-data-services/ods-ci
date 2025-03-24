@@ -78,6 +78,7 @@ Protect Sensitive Variables In Keywords
 Initialize Global Variables
     [Documentation]   Sets global variables
     [Arguments]    ${force_fetch}=False
+    Fetch Cluster Type By Domain
     Assign Vars According To Product
     ${RHODS_VERSION}=    Get RHODS Version    ${force_fetch}
     Set Global Variable   ${RHODS_VERSION}
@@ -92,6 +93,16 @@ Required Global Variables Should Exist
     Variable Should Exist    ${OPERATOR_NAMESPACE}
     Variable Should Exist    ${NOTEBOOKS_NAMESPACE}
 
+Fetch Cluster Type By Domain
+    [Documentation]    This Keyword outputs the kind of cluster depending on the console URL domain
+    ${matches}=    Get Regexp Matches    ${OCP_CONSOLE_URL}    rh-ods
+    ${matches_len}=     Get Length      ${matches}
+    IF  '${matches_len}' == '0'
+        Set Global Variable    ${CLUSTER_TYPE}    managed
+    ELSE
+        Set Global Variable    ${CLUSTER_TYPE}    selfmanaged
+    END
+
 Assign Vars According To Product
     [Documentation]    Assign vars related to product
     IF    "${PRODUCT}" == "RHODS"
@@ -104,7 +115,11 @@ Assign Vars According To Product
         Set Suite Variable    ${DASHBOARD_DEPLOYMENT_NAME}    rhods-dashboard
         Set Suite Variable    ${DASHBOARD_LABEL_SELECTOR}     app.kubernetes.io/part-of=rhods-dashboard
         Set Suite Variable    ${APPLICATIONS_NAMESPACE}    redhat-ods-applications
-        Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     rhoai-operator-dev
+        IF  "${CLUSTER_TYPE}" == "managed"
+            Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     addon-managed-odh
+        ELSE
+            Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     rhoai-operator-dev
+        END
         Set Suite Variable  ${MODEL_REGISTRY_NAMESPACE}    rhoai-model-registries
     ELSE IF    "${PRODUCT}" == "ODH"
         Set Suite Variable    ${OPERATOR_APPNAME}  "Open Data Hub Operator"

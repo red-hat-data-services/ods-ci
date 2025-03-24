@@ -38,7 +38,7 @@ Verify Regular Users Can Create And Run a Data Science Pipeline Using The Api
 Verify Ods Users Can Do Http Request That Must Be Redirected to Https
     [Documentation]    Verify Ods Users Can Do Http Request That Must Be Redirected to Https
     [Tags]        Tier1    ODS-2234
-    Projects.Create Data Science Project From CLI    name=project-redirect-http
+    Projects.Create Data Science Project From CLI    name=project-redirect-http    as_user=${OCP_ADMIN_USER.USERNAME}
     DataSciencePipelinesBackend.Create PipelineServer Using Custom DSPA    project-redirect-http
     ${status} =    Login And Wait Dsp Route    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
     ...         project-redirect-http
@@ -52,7 +52,7 @@ Verify DSPO Operator Reconciliation Retry
     [Tags]      Sanity    ODS-2477
 
     ${local_project_name} =    Set Variable    dsp-reconciliation-test
-    Projects.Create Data Science Project From CLI    name=${local_project_name}
+    Projects.Create Data Science Project From CLI    name=${local_project_name}    as_user=${OCP_ADMIN_USER.USERNAME}
 
     # Atempt to create a pipeline server with a custom DSPA. It should fail because there is a missing
     # secret with storage credentials (that's why, after, we don't use "Wait Until Pipeline Server Is Deployed"
@@ -80,7 +80,7 @@ End To End Pipeline Workflow Via Api
     ...    In the end, clean the pipeline resources.
     [Arguments]     ${username}    ${password}    ${project}
     Projects.Delete Project Via CLI By Display Name    ${project}
-    Projects.Create Data Science Project From CLI    name=${project}
+    Projects.Create Data Science Project From CLI    name=${project}    as_user=${username}
     Create PipelineServer Using Custom DSPA    ${project}
     ${status} =    Login And Wait Dsp Route    ${username}    ${password}    ${project}
     Should Be True    ${status} == 200    Could not login to the Data Science Pipelines Rest API OR DSP routing is not working    # robocop: disable:line-too-long

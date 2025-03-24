@@ -2,7 +2,7 @@
 Is RHODS Installed
   Log   Checking if RHODS is installed with "${clusterType}" "${UPDATE_CHANNEL}" "${INSTALL_TYPE}"      console=yes
   IF  "${cluster_type}" == "selfmanaged"
-      IF  "${INSTALL_TYPE}" == "CLi"
+      IF  "${INSTALL_TYPE}" == "Cli"
           ${result}=  Run Keyword And Return Status
           ...  Run Keywords
           ...  Check A RHODS Family Operator Is Installed  namespace=${OPERATOR_NAMESPACE}

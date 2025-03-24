@@ -18,7 +18,7 @@ ${SERVICE_MESH_OPERATOR_NS}                 openshift-operators
 ${SERVICE_MESH_OPERATOR_DEPLOYMENT_NAME}    istio-operator
 ${SERVICE_MESH_CR_NS}                       istio-system
 ${SERVICE_MESH_CR_NAME}                     data-science-smcp
-${INSTALL_TYPE}                             CLi
+${INSTALL_TYPE}                             Cli
 ${TEST_ENV}                                 PSI
 ${IS_PRESENT}                               0
 ${IS_NOT_PRESENT}                           1

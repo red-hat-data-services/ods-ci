@@ -45,7 +45,7 @@ Create Project And Configure Pipeline Server
     ...    configures a pipeline server using the default configuration and waits until the server is running
     [Arguments]    ${namespace}
     Projects.Delete Project Via CLI By Display Name    ${namespace}
-    Projects.Create Data Science Project From CLI    ${namespace}
+    Projects.Create Data Science Project From CLI    ${namespace}    as_user=${TEST_USER.USERNAME}
     DataSciencePipelinesBackend.Create Pipeline Server    namespace=${namespace}
     ...    object_storage_access_key=${S3.AWS_ACCESS_KEY_ID}
     ...    object_storage_secret_key=${S3.AWS_SECRET_ACCESS_KEY}

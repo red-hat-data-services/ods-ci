@@ -12,9 +12,6 @@ Test Tags         DistributedWorkloads3.9
 *** Variables ***
 # This is the last and latest distributed workloads release assest which contains test binaries compatible with python 3.9
 ${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS_3.9}   https://github.com/opendatahub-io/distributed-workloads/releases/download/v2.14.0-09-24-2024_adjustments_1
-${RAY_CUDA_IMAGE_3.9}                         quay.io/modh/ray@sha256:0d715f92570a2997381b7cafc0e224cfa25323f18b9545acfd23bc2b71576d06
-${RAY_TORCH_CUDA_IMAGE_3.9}                   quay.io/rhoai/ray@sha256:158b481b8e9110008d60ac9fb8d156eadd71cb057ac30382e62e3a231ceb39c0
-${NOTEBOOK_IMAGE_3.9}                         quay.io/modh/odh-generic-data-science-notebook@sha256:b1066204611b4bcfa6172c3115650a8e8393089d5606458fa0d8c53633d2ce17
 
 
 *** Test Cases ***

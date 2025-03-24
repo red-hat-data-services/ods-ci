@@ -10,7 +10,7 @@ spec:
       version: 3.2.0
     storage:
       files:
-        - path: "/etc/modprobe.d/amdgpu-blacklist.conf"
+        - path: "/etc/modprobe.d/blacklist-amdgpu.conf"
           mode: 420
           overwrite: true
           contents:

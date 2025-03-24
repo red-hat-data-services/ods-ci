@@ -1,0 +1,1 @@
+{"id":"1","model_name":"python","model_version":"1","inputs":[{"name":"INPUT0","shape":[4],"datatype":"FP32"},{"name":"INPUT1","shape":[4],"datatype":"FP32"}],"outputs":[{"name":"OUTPUT0"},{"name":"OUTPUT1"}],"raw_input_contents":["AQIAAAAAAAAAAAAAAAAAAA==","/wEAgAAAAAAAAAAAAAAAAA=="]}

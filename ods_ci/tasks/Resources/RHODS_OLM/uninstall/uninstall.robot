@@ -37,7 +37,7 @@ Uninstall RHODS In OSD
 
 Uninstall RHODS In Self Managed Cluster
   [Documentation]  Uninstall rhods from self-managed cluster
-  IF  "${INSTALL_TYPE}" == "CLi"
+  IF  "${INSTALL_TYPE}" == "Cli"
       Uninstall RHODS In Self Managed Cluster Using CLI
   ELSE IF  "${INSTALL_TYPE}" == "OperatorHub"
       Uninstall RHODS In Self Managed Cluster For Operatorhub

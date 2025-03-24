@@ -7,7 +7,7 @@ Resource         ../../Common.robot
 
 
 *** Keywords ***
-Get must-gather Logs
+Get Must-Gather Logs
     [Documentation]    Runs the must-gather image and obtains the ODH/RHOAI logs
     ${output}=    Run process    tests/Resources/CLI/MustGather/get-must-gather-logs.sh     shell=yes
     Should Be Equal As Integers	  ${output.rc}	 0
@@ -27,6 +27,6 @@ Verify Logs For ${namespace}
     ${log_files}=     Run   find ${namespaces_log_dir}/${namespace}/pods -type f -name "*.log"
     Should Not Be Equal    ${log_files}  ${EMPTY}
 
-Cleanup must-gather Logs
+Cleanup Must-Gather Logs
     [Documentation]    Deletes the folder with the must-gather logs
     Run Keyword If      "${must_gather_dir}" != "${EMPTY}"      Remove Directory   ${must_gather_dir}    recursive=True

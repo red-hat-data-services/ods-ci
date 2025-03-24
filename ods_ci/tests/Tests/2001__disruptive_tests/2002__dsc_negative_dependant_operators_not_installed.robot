@@ -225,6 +225,15 @@ Remove DSC And DSCI Resources
     ...    oc delete DSCInitialization --all --ignore-not-found
     Should Be Equal As Integers  ${return_code}   0   msg=Error deleting DSCInitialization CR
 
+    Log To Console    message=Deleting Auth CR From Cluster
+    ${return_code}    ${output}=    Run And Return Rc And Output
+    ...    oc delete Auth --all --ignore-not-found
+    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting Auth CR
+
+    Wait Until Keyword Succeeds    3 min    0 sec
+    ...    Is Resource Present    Auth    auth
+    ...    ${OPERATOR_NS}      ${IS_NOT_PRESENT}
+
     Wait Until Keyword Succeeds    3 min    0 sec
     ...    Is Resource Present    DSCInitialization    ${DSCI_NAME}
     ...    ${OPERATOR_NS}      ${IS_NOT_PRESENT}

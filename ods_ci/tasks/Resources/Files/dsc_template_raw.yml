@@ -1,0 +1,50 @@
+apiVersion: datasciencecluster.opendatahub.io/v1
+kind: DataScienceCluster
+metadata:
+  name: <dsc_name>
+  labels:
+      app.kubernetes.io/created-by: <operator_yaml_label>
+      app.kubernetes.io/instance: <dsc_name>
+      app.kubernetes.io/managed-by: kustomize
+      app.kubernetes.io/name: datasciencecluster
+      app.kubernetes.io/part-of: <operator_yaml_label>
+spec:
+  components:
+    codeflare:
+      devFlags: <codeflare_devflags>
+      managementState: <codeflare_value>
+    dashboard:
+      devFlags: <dashboard_devflags>
+      managementState: <dashboard_value>
+    datasciencepipelines:
+      devFlags: <datasciencepipelines_devflags>
+      managementState: <datasciencepipelines_value>
+    kserve:
+      devFlags: <kserve_devflags>
+      defaultDeploymentMode: RawDeployment
+      serving:
+        name: knative-serving
+        managementState: Removed
+      managementState: <kserve_value>
+    kueue:
+      devFlags: <kueue_devflags>
+      managementState: <kueue_value>
+    modelmeshserving:
+      devFlags: <modelmeshserving_devflags>
+      managementState: <modelmeshserving_value>
+    ray:
+      devFlags: <ray_devflags>
+      managementState: <ray_value>
+    trainingoperator:
+      devFlags: <trainingoperator_devflags>
+      managementState: <trainingoperator_value>
+    trustyai:
+      devFlags: <trustyai_devflags>
+      managementState: <trustyai_value>
+    workbenches:
+      devFlags: <workbenches_devflags>
+      managementState: <workbenches_value>
+    modelregistry:
+      devFlags: <modelregistry_devflags>
+      managementState: <modelregistry_value>
+      registriesNamespace: <modelregistry_namespace>

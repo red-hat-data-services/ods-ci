@@ -24,7 +24,7 @@ Run TestRayClusterSDKOauth test with Python 3.11
     [Tags]
     ...     Tier1
     ...     DistributedWorkloads
-    ...     WorkloadsOrchestration
+    ...     TrainingRay
     ...     Codeflare-sdk
     Run Codeflare-SDK Test    e2e    mnist_raycluster_sdk_oauth_test.py    3.11    ${RAY_CUDA_IMAGE_3.11}    ${CODEFLARE-SDK-RELEASE-TAG}
 
@@ -33,7 +33,7 @@ Run TestRayLocalInteractiveOauth test with Python 3.9
     [Tags]
     ...     Tier1
     ...     DistributedWorkloads
-    ...     WorkloadsOrchestration
+    ...     TrainingRay
     ...     Codeflare-sdk
     Run Codeflare-SDK Test    e2e    local_interactive_sdk_oauth_test.py    3.9    ${RAY_CUDA_IMAGE_3.9}    ${CODEFLARE-SDK-RELEASE-TAG-3.9}
 
@@ -42,7 +42,7 @@ Run TestRayLocalInteractiveOauth test with Python 3.11
     [Tags]
     ...     Tier1
     ...     DistributedWorkloads
-    ...     WorkloadsOrchestration
+    ...     TrainingRay
     ...     Codeflare-sdk
     Run Codeflare-SDK Test    e2e    local_interactive_sdk_oauth_test.py    3.11    ${RAY_CUDA_IMAGE_3.11}    ${CODEFLARE-SDK-RELEASE-TAG}
 
@@ -51,7 +51,7 @@ Run TestHeterogenousClustersOauth
     [Tags]
     ...     Tier1
     ...     DistributedWorkloads
-    ...     WorkloadsOrchestration
+    ...     TrainingRay
     ...     HeterogeneousCluster
     ...     Codeflare-sdk
     Run Codeflare-SDK Test    e2e    heterogeneous_clusters_oauth_test.py    3.11    ${RAY_CUDA_IMAGE_3.11}    ${CODEFLARE-SDK-RELEASE-TAG}

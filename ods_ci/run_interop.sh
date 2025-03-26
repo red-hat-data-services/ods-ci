@@ -4,6 +4,7 @@ export SET_ENVIRONMENT=1
 export USE_OCM_IDP=0
 export RUN_SCRIPT_ARGS="skip-oclogin true --set-urls-variables true"
 export ROBOT_EXTRA_ARGS="-i Smoke --dryrun"
+TEST_VARIABLES_FILE="test-variables.yml"
 
 if [[ -z "${TEST_SUITE}" ]]; then
   echo "Error: TEST_SUITE not set. Please define it. Exiting.."
@@ -17,9 +18,8 @@ fi
 
 run_tests() {
   echo "Running $1 testing"
-  
+
   TEST_CASE_FILE="tests/Tests"
-  TEST_VARIABLES_FILE="test-variables.yml"
   TEST_SUITE=$1
 
   poetry run robot --include ${TEST_SUITE} --exclude "ExcludeOnRHOAI" --exclude "AutomationBug" --exclude "ProductBug" -d ${ARTIFACT_DIR}/${TEST_SUITE} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE} || true
@@ -28,8 +28,8 @@ run_tests() {
 if [[ ${TEST_SUITE} == "PostUpgrade" ]]; then
   echo "Retrieve test config file..."
   cp ${SHARED_DIR}/${TEST_VARIABLES_FILE} ${TEST_VARIABLES_FILE}
-  run_tests ${TEST_SUITE} 
-  
+  run_tests ${TEST_SUITE}
+
   echo "Running Smoke testing after upgrade"
   run_tests "Smoke"
   exit 0

@@ -5,9 +5,6 @@ export USE_OCM_IDP=0
 export RUN_SCRIPT_ARGS="skip-oclogin true --set-urls-variables true"
 export ROBOT_EXTRA_ARGS="-i Smoke --dryrun"
 
-TEST_CASE_FILE="tests/Tests"
-TEST_VARIABLES_FILE="test-variables.yml"
-
 if [[ -z "${TEST_SUITE}" ]]; then
   echo "Error: TEST_SUITE not set. Please define it. Exiting.."
   exit 1
@@ -18,17 +15,24 @@ if [[ -z "${ARTIFACT_DIR}" ]]; then
   ARTIFACT_DIR="/tmp"
 fi
 
+run_tests() {
+  echo "Running $1 testing"
+  
+  TEST_CASE_FILE="tests/Tests"
+  TEST_VARIABLES_FILE="test-variables.yml"
+  TEST_SUITE=$1
+
+  poetry run robot --include ${TEST_SUITE} --exclude "ExcludeOnRHOAI" --exclude "AutomationBug" --exclude "ProductBug" -d ${ARTIFACT_DIR}/${TEST_SUITE} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE} || true
+}
+
 if [[ ${TEST_SUITE} == "PostUpgrade" ]]; then
-  echo "Retrive test config file..."
+  echo "Retrieve test config file..."
   cp ${SHARED_DIR}/${TEST_VARIABLES_FILE} ${TEST_VARIABLES_FILE}
-
-  echo "Running post-upgrade testing"
-  poetry run robot --include ${TEST_SUITE} --exclude "ExcludeOnRHOAI" --exclude "AutomationBug" --exclude "ProductBug" -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE} || true
-
+  run_tests ${TEST_SUITE} 
+  
   echo "Running Smoke testing after upgrade"
-  TEST_SUITE="Smoke"
-  poetry run robot --include ${TEST_SUITE} --exclude "ExcludeOnRHOAI" --exclude "AutomationBug" --exclude "ProductBug" -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE}
-  exit $?
+  run_tests "Smoke"
+  exit 0
 fi
 
 echo "Install IDP users and map them to test config file"
@@ -91,10 +95,10 @@ fi
 if [[ ${TEST_SUITE} == "PreUpgrade" ]]; then
   echo "Save test config file..."
   cp ${TEST_VARIABLES_FILE} ${SHARED_DIR}/${TEST_VARIABLES_FILE}
-
-  echo "Running pre-upgrade testing"
-  poetry run robot --include ${TEST_SUITE} --exclude "ExcludeOnRHOAI" --exclude "AutomationBug" --exclude "ProductBug" -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE} || true
+  run_tests ${TEST_SUITE}
   exit 0
+elif [[ ${TEST_SUITE} == "Smoke" ]]; then
+  run_tests ${TEST_SUITE}
 else
-  poetry run robot --include ${TEST_SUITE} --exclude "ExcludeOnRHOAI" --exclude "AutomationBug" --exclude "ProductBug" -d ${ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html --variablefile ${TEST_VARIABLES_FILE} ${TEST_CASE_FILE}
+  echo "Other tests are running..."
 fi

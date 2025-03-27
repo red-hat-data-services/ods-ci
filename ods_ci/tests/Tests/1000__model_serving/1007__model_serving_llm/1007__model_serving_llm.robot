@@ -57,7 +57,7 @@ Verify External Dependency Operators Can Be Deployed
 Verify User Can Serve And Query A Model    # robocop: off=too-long-test-case
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    Sanity    ODS-2341
+    [Tags]    Sanity    ODS-2341   Kserve-caikit
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}-cli
     ${test_namespace}=    Set Variable     ${TEST_NS}-cli
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -80,7 +80,7 @@ Verify User Can Serve And Query A Model    # robocop: off=too-long-test-case
 
 Verify User Can Deploy Multiple Models In The Same Namespace    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Checks if user can deploy and query multiple models in the same namespace
-    [Tags]    Sanity    ODS-2371
+    [Tags]    Sanity    ODS-2371    deprecatedTest
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}-multisame
     ${test_namespace}=    Set Variable     ${TEST_NS}-multisame
     ${model_one_name}=    Set Variable    bloom-560m-caikit
@@ -147,7 +147,7 @@ Verify User Can Deploy Multiple Models In Different Namespaces    # robocop: off
 
 Verify Model Upgrade Using Canaray Rollout    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Checks if user can apply Canary Rollout as deployment strategy
-    [Tags]    Sanity    ODS-2372
+    [Tags]    Sanity    ODS-2372    deprecatedTest
     [Setup]    Set Project And Runtime    namespace=canary-model-upgrade
     ${test_namespace}=    Set Variable    canary-model-upgrade
     ${isvc_name}=    Set Variable    canary-caikit
@@ -188,7 +188,7 @@ Verify Model Upgrade Using Canaray Rollout    # robocop: off=too-long-test-case,
 Verify Model Pods Are Deleted When No Inference Service Is Present
     [Documentation]    Checks if model pods gets successfully deleted after
     ...                deleting the KServe InferenceService object
-    [Tags]    Tier2    ODS-2373
+    [Tags]    Tier2    ODS-2373    deprecatedTest
     [Setup]    Set Project And Runtime    namespace=no-infer-kserve
     ${flan_isvc_name}=    Set Variable    flan-t5-small-caikit
     ${model_name}=    Set Variable    flan-t5-small-caikit
@@ -209,7 +209,7 @@ Verify User Can Change The Minimum Number Of Replicas For A Model    # robocop: 
     [Documentation]    Checks if user can change the minimum number of replicas
     ...                of a deployed model.
     ...                Affected by:  https://issues.redhat.com/browse/SRVKS-1175
-    [Tags]    Sanity    ODS-2376
+    [Tags]    Sanity    ODS-2376    deprecatedTest
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}-reps
     ${test_namespace}=    Set Variable     ${TEST_NS}-reps
     ${model_name}=    Set Variable    flan-t5-small-caikit
@@ -245,7 +245,7 @@ Verify User Can Change The Minimum Number Of Replicas For A Model    # robocop: 
 
 Verify User Can Autoscale Using Concurrency    # robocop: off=too-long-test-case
     [Documentation]    Checks if model successfully scale up based on concurrency metrics (KPA)
-    [Tags]    Sanity    ODS-2377
+    [Tags]    Sanity    ODS-2377    deprecatedTest
     [Setup]    Set Project And Runtime    namespace=autoscale-con
     ${test_namespace}=    Set Variable    autoscale-con
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -270,7 +270,7 @@ Verify User Can Autoscale Using Concurrency    # robocop: off=too-long-test-case
 
 Verify User Can Validate Scale To Zero    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Checks if model successfully scale down to 0 if there's no traffic
-    [Tags]    Sanity    ODS-2379
+    [Tags]    Sanity    ODS-2379    deprecatedTest
     [Setup]    Set Project And Runtime    namespace=autoscale-zero
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${flan_model_name}
@@ -369,7 +369,7 @@ Verify Model Can Be Served And Query On A GPU Node    # robocop: off=too-long-te
 Verify Non Admin Can Serve And Query A Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Basic tests leveraging on a non-admin user for preparing, deploying and querying a LLM model
     ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    Sanity    ODS-2326
+    [Tags]    Sanity    ODS-2326    deprecatedTest
     [Setup]    Run Keywords   Login To OCP Using API    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}  AND
     ...        Set Project And Runtime    namespace=non-admin-test
     ${test_namespace}=    Set Variable     non-admin-test

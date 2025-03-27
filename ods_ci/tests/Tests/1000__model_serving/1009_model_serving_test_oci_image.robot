@@ -24,6 +24,7 @@ Verify User Can Serve And flan ovms Model using OCI image
     ...       OpenDataHub
     ...       RHOAIENG-12306
     ...       RHOAIENG-13465
+    ...       deprecatedTest
 
     Setup Test Variables    model_name=${MODEL_NAME}  use_gpu=${USE_GPU}
     ...    kserve_mode=${KSERVE_MODE}

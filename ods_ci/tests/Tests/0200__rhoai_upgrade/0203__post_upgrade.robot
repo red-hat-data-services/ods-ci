@@ -157,7 +157,7 @@ Test Inference Post RHODS Upgrade
     # robocop: off=too-many-calls-in-test-case
     # robocop: off=too-long-test-case
     [Documentation]    Test the inference result after having deployed a model
-    [Tags]                  Upgrade    ModelServing    ModelServer    xxx2
+    [Tags]                  Upgrade    ModelServing    ModelServer
     Set Suite Variable    ${TEST_NS}    ovmsmodel-upgrade
     Set Suite Variable    ${KSERVE_MODE}    RawDeployment    # RawDeployment   # Serverless
     Set Suite Variable    ${INFERENCE_INPUT}    @tests/Resources/Files/modelmesh-mnist-input.json

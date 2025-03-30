@@ -94,9 +94,12 @@ Verify Model Can Be Deployed For Upgrade
     # robocop: off=too-long-test-case
     # robocop: off=too-many-calls-in-test-case
     [Documentation]    Verify Model Can Be Deployed Via UI For Upgrade
-    [Tags]                  Upgrade    ModelServing    xxx
+    [Tags]                  Upgrade    ModelServing    ModelServer
     Set Suite Variable    ${TEST_NS}    ovmsmodel-upgrade
     Set Suite Variable    ${KSERVE_MODE}    RawDeployment    # RawDeployment   # Serverless
+    Set Suite Variable    ${MODELS_BUCKET}    ${S3.BUCKET_1}
+    Set Suite Variable    ${INFERENCE_INPUT}    @tests/Resources/Files/modelmesh-mnist-input.json
+    Set Suite Variable    ${EXPECTED_INFERENCE_OUTPUT}    {"model_name": "test-dir","model_version": "1","outputs": [{"name": "Plus214_Output_0","shape": [1, 10],"datatype": "FP32","data": [-8.233053207397461, -7.749703407287598, -3.4236814975738527, 12.363029479980469, -12.079103469848633, 17.2665958404541, -10.570976257324219, 0.7130761742591858, 3.3217151165008547, 1.3621227741241456]}]}  #robocop: disable
     Setup Test Variables    model_name=test-dir    use_pvc=${TRUE}    use_gpu=${FALSE}
     ...    kserve_mode=${KSERVE_MODE}
     Set Project And Runtime    runtime=ovms-runtime     protocol=http     namespace=${TEST_NS}
@@ -109,21 +112,21 @@ Verify Model Can Be Deployed For Upgrade
     ...    model_format=onnx    serving_runtime=ovms-runtime
     ...    limits_dict=&{EMPTY}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
     Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
-    ...    namespace=${test_namespace}
+    ...    namespace=${TEST_NS}
     # File is not needed anymore after applying
     Remove File    ${INFERENCESERVICE_FILLED_FILEPATH}
     Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${test_namespace}
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    namespace=${TEST_NS}
+    ${pod_name}=  Get Pod Name    namespace=${TEST_NS}
     ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ${service_port}=    Extract Service Port    service_name=${model_name}-predictor    protocol=TCP
-    ...    namespace=${test_namespace}
+    ...    namespace=${TEST_NS}
     IF   "${KSERVE_MODE}"=="RawDeployment"
-        Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}  local_port=${service_port}
+        Start Port-forwarding    namespace=${TEST_NS}    pod_name=${pod_name}  local_port=${service_port}
         ...    remote_port=${service_port}    process_alias=ovms-process
     END
     Verify Model Inference With Retries   model_name=${model_name}    inference_input=${INFERENCE_INPUT}
-    ...    expected_inference_output=${EXPECTED_INFERENCE_OUTPUT}   project_title=${test_namespace}
+    ...    expected_inference_output=${EXPECTED_INFERENCE_OUTPUT}   project_title=${TEST_NS}
     ...    deployment_mode=Cli  kserve_mode=${KSERVE_MODE}    service_port=${service_port}
     ...    end_point=/v2/models/${model_name}/infer  retries=10
 

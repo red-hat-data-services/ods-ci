@@ -6,7 +6,7 @@ Resource          ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 
 
 *** Variables ***
-${CODEFLARE-SDK-RELEASE-TAG}             v0.26.0
+${CODEFLARE-SDK-RELEASE-TAG}             v0.27.0
 ${CODEFLARE-SDK-RELEASE-TAG-3.9}         adjustments-release-0.21.1
 ${CODEFLARE-SDK_DIR}                     codeflare-sdk
 ${CODEFLARE-SDK_REPO_URL}                %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
@@ -16,19 +16,19 @@ ${RAY_CUDA_IMAGE_3.11}                   quay.io/modh/ray@sha256:db667df1bc437a7
 # Corresponds to quay.io/rhoai/ray:2.35.0-py311-cu121-torch24-fa26
 ${RAY_TORCH_CUDA_IMAGE_3.11}             quay.io/rhoai/ray@sha256:5077f9bb230dfa88f34089fecdfcdaa8abc6964716a8a8325c7f9dcdf11bbbb3
 # Corresponds to quay.io/modh/ray:2.35.0-py311-rocm62
-${RAY_ROCM_IMAGE_3.11}                   quay.io/modh/ray@sha256:baeb1428a008ff109ae1afb372f804c574b4179cfa84c752f7afc609e0d44b3a
+${RAY_ROCM_IMAGE_3.11}                   quay.io/modh/ray@sha256:bc46827094a29062a3631f533ea373a26cc73ed5854c7352f890c6376d5840df
 # Corresponds to quay.io/rhoai/ray:2.35.0-py311-rocm61-torch24-fa26
 ${RAY_TORCH_ROCM_IMAGE_3.11}             quay.io/rhoai/ray@sha256:b0e129cd2f4cdea7ad7a7859031357ffd9915410551f94fbcb942af2198cdf78
 # Corresponds to quay.io/modh/ray:2.35.0-py39-cu121
 ${RAY_CUDA_IMAGE_3.9}                    quay.io/modh/ray@sha256:0d715f92570a2997381b7cafc0e224cfa25323f18b9545acfd23bc2b71576d06
 # Corresponds to quay.io/rhoai/ray:2.35.0-py39-cu121-torch24-fa26
 ${RAY_TORCH_CUDA_IMAGE_3.9}              quay.io/rhoai/ray@sha256:158b481b8e9110008d60ac9fb8d156eadd71cb057ac30382e62e3a231ceb39c0
-# Corresponds to quay.io/modh/fms-hf-tuning:v2.6.0
-${FMS_HF_TUNING_IMAGE}                   quay.io/modh/fms-hf-tuning@sha256:0c69cf850fd2e5850cdec1d81c303af5c3900359b97016958c9af6637ad8ee2e
+# Corresponds to quay.io/modh/fms-hf-tuning:v2.7.1
+${FMS_HF_TUNING_IMAGE}                   quay.io/modh/fms-hf-tuning@sha256:18a871cbb1fb16766266b2fb7e1e498259543a88ffb4422ebf7ba142e5e739b4
 # Corresponds to quay.io/modh/training:py311-cuda121-torch241
-${CUDA_TRAINING_IMAGE}                   quay.io/modh/training@sha256:b98e373a972ff6f896a9dc054d56920e915675339c02ea7fa123e0f4bbef4d74
+${CUDA_TRAINING_IMAGE}                   quay.io/modh/training@sha256:30adee3ea1485ec348c0fd63268260c1d6ae5b256f93b5366ccc7728b4fe428b
 # Corresponds to quay.io/modh/training:py311-rocm62-torch241
-${ROCM_TRAINING_IMAGE}                   quay.io/modh/training@sha256:02094ab6f98a9b8a8bea8ff72bde5b4ba6789d036ce19e15cfdea0146d288061
+${ROCM_TRAINING_IMAGE}                   quay.io/modh/training@sha256:0b1f2e3e7eebc5404cebbd2c4f960dc3bc40d453bcd8d33a53618baafedd6091
 # Corresponds to quay.io/modh/odh-generic-data-science-notebook:v3-2024b-20250212
 ${NOTEBOOK_IMAGE_3.11}                   quay.io/modh/odh-generic-data-science-notebook@sha256:d0ba5fc23e2b3846763f60e8ade8a0f561cdcd2bf6717df6e732f6f8b68b89c4
 # Corresponds to quay.io/modh/odh-generic-data-science-notebook:v2-2024a-20250116

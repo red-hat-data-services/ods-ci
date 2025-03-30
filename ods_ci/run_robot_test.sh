@@ -363,7 +363,7 @@ if [[ ${SKIP_INSTALL} -eq 0 ]]; then
     fi
   fi
 
-  poetry install --no-interaction --sync || {
+  poetry sync --no-interaction || {
       echo "[ERROR] poetry environment setup failed, aborting the execution!"
       exit 1
   }

@@ -253,7 +253,7 @@ Run Training Operator KFTO Run PyTorchJob Test Use Case
     [Documentation]    Run Training Operator KFTO Run PyTorchJob Test Use Case
     [Tags]      Upgrade    Training
     [Setup]     Prepare Training Operator KFTO E2E Test Suite
-    Skip If Operator Starting Version Is Not Supported      minimum_version=2.12.0
+    Skip If Operator Starting Version Is Not Supported      minimum_version=2.19.0
     Run Training Operator KFTO Test          TestRunPytorchjob    ${CUDA_TRAINING_IMAGE}
     [Teardown]      Teardown Training Operator KFTO E2E Test Suite
 
@@ -261,7 +261,7 @@ Run Training Operator KFTO Run Sleep PyTorchJob Test Use Case
     [Documentation]    Verify that running PyTorchJob Pod wasn't restarted
     [Tags]      Upgrade    Training
     [Setup]     Prepare Training Operator KFTO E2E Test Suite
-    Skip If Operator Starting Version Is Not Supported      minimum_version=2.12.0
+    Skip If Operator Starting Version Is Not Supported      minimum_version=2.19.0
     Run Training Operator KFTO Test      TestVerifySleepPytorchjob    ${CUDA_TRAINING_IMAGE}
     [Teardown]      Teardown Training Operator KFTO E2E Test Suite
 
@@ -299,7 +299,6 @@ Verify That DSC And DSCI Release.Version Attribute matches the value in the subs
 Data Science Pipelines Post Upgrade Verifications
     [Documentation]    Verifies the status of the resources created in project dsp-test-upgrade after the upgradea
     [Tags]      Upgrade     DataSciencePipelines-Backend
-    Skip If Operator Starting Version Is Not Supported      minimum_version=2.14.0
     DataSciencePipelinesUpgradeTesting.Verify Resources After Upgrade
 
 Model Registry Post Upgrade Verification

@@ -194,6 +194,8 @@ Verify Users Can Update Notification Email After Installing RHODS With The AddOn
     [Tags]    Tier2
     ...       ODS-673
     ...       Deployment-AddOnFlow
+    ...       Monitoring
+    Skip If RHODS Is Self-Managed
     ${email_to_change} =    Set Variable    dummyemail1@redhat.com
     ${cluster_name} =    Common.Get Cluster Name From Console URL
     ${current_email} =    Get Notification Email From Addon-Managed-Odh-Parameters Secret
@@ -226,7 +228,9 @@ Verify Monitoring Stack Is Reconciled Without Restarting The ODS Operator
     [Documentation]    Verify Monitoring Stack Is Reconciled Without Restarting The RHODS Operator
     [Tags]    Tier2
     ...       ODS-699
+    ...       Monitoring
     ...       Execution-Time-Over-15m
+    Skip If RHODS Is Self-Managed
     Replace "Prometheus" With "Grafana" In Rhods-Monitor-Federation
     Wait Until Operator Reverts "Grafana" To "Prometheus" In Rhods-Monitor-Federation
 

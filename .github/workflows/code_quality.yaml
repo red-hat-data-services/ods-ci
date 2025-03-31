@@ -25,11 +25,12 @@ jobs:
       -   name: Checkout repository
           uses: actions/checkout@v4
       -   name: Install dependencies
-          run: pipx install robotframework-robocop
+          #  robocop 6.X includes a new cli format and its not compatible with --reports
+          run: pipx install robotframework-robocop~=5.0.0
       -   name: Run robocop
           run: robocop --verbose --reports sarif . || true
       -   name: Upload SARIF file
-          uses: github/codeql-action/upload-sarif@v2
+          uses: github/codeql-action/upload-sarif@v3
           with:
             sarif_file: .sarif.json
             category: robocop

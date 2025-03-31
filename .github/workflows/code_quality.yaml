@@ -50,11 +50,12 @@ jobs:
       -   name: Install dependencies
           run: |
                 python -m pip install --upgrade pip
-                pip install robotframework-robocop
+                pip install robotframework-robocop~=5.0.0
+          #  robocop 6.X includes a new cli format and its not compatible with --reports
       -   name: Run robocop
           run: python -m robocop --verbose --reports sarif . || true
       -   name: Upload SARIF file
-          uses: github/codeql-action/upload-sarif@v2
+          uses: github/codeql-action/upload-sarif@v3
           with:
             sarif_file: .sarif.json
             category: robocop

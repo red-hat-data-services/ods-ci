@@ -109,7 +109,7 @@ Verify RHODS Installation
   IF   "${cluster_type}" == "managed"
        IF   "${PRODUCT}" == "ODH"
             Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
-            Wait For DSCInitialization CustomResource To Be Ready    timeout=180
+            Wait For DSCInitialization CustomResource To Be Ready
             Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
        END
   ELSE
@@ -117,7 +117,7 @@ Verify RHODS Installation
           Create DSCI With Custom Namespaces
       END
       Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}    dsci_template=${DSCI_TEMPLATE}
-      Wait For DSCInitialization CustomResource To Be Ready    timeout=180
+      Wait For DSCInitialization CustomResource To Be Ready
       Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}    dsc_template=${DSC_TEMPLATE}
   END
 
@@ -292,7 +292,7 @@ Create DSCInitialization CustomResource Using Test Variables
 
 Wait For DSCInitialization CustomResource To Be Ready
     [Documentation]   Wait ${timeout} seconds for DSCInitialization CustomResource To Be Ready
-    [Arguments]     ${timeout}
+    [Arguments]     ${timeout}=600
     Log To Console    Waiting ${timeout} seconds for DSCInitialization CustomResource To Be Ready
     ${result} =    Run Process    oc wait DSCInitialization --timeout\=${timeout}s --for jsonpath\='{.status.phase}'\=Ready --all
     ...    shell=true    stderr=STDOUT
@@ -628,7 +628,7 @@ Create DSCI With Custom Namespaces
     ...    Is Resource Present    Auth    auth
     ...    ${OPERATOR_NAMESPACE}      ${IS_NOT_PRESENT}
     Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
-    Wait For DSCInitialization CustomResource To Be Ready    timeout=180
+    Wait For DSCInitialization CustomResource To Be Ready
 
 Set Component State
     [Documentation]    Set component state in Data Science Cluster (state should be Managed or Removed)

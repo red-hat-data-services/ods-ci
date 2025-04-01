@@ -1,3 +1,4 @@
+# robocop: off=wrong-case-in-keyword-name,too-many-arguments,too-long-keyword
 *** Settings ***
 Documentation    Collection of keywords to interact with Model Serving
 Resource       ../../../Page/Components/Components.resource
@@ -363,17 +364,19 @@ Verify Model Inference With Retries
     ...            ${service_port}=${NONE}   ${end_point}=${NONE}
     ${status}=    Run Keyword And Return Status    Verify Model Inference    ${model_name}    ${inference_input}
     ...    ${expected_inference_output}    ${token_auth}    ${project_title}    ${deployment_mode}
+    ...    kserve_mode=${kserve_mode}    service_port=${service_port}   end_point=${end_point}
+    ...    set_json_content_type=${set_json_content_type}
     IF    not ${status}
         ${retry}=    Set Variable    ${0}
         WHILE    ${retry} < ${retries}
             IF    ${retry} > 0
-                Log    message=Modelmesh inference call failed ${retry}/${retries}.
+                Log    message=${kserve_mode} inference call failed ${retry}/${retries}.
                 ...    level=WARN
             END
             ${status}=    Run Keyword And Return Status    Verify Model Inference
             ...    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}
             ...    project_title=${project_title}     deployment_mode=${deployment_mode}  kserve_mode=${kserve_mode}
-            ...    service_port=${service_port}   end_point=${end_point}
+            ...    service_port=${service_port}   end_point=${end_point}    set_json_content_type=${set_json_content_type}
             IF    ${status}
                 BREAK
             END

@@ -90,73 +90,46 @@ Verify User Can Disable The Runtime
     [Tags]      Upgrade    ModelServing
     Disable Model Serving Runtime Using CLI     namespace=redhat-ods-applications
 
-Verify Model Can Be Deployed Via UI For Upgrade
+Verify Model Can Be Deployed For Upgrade
     # robocop: off=too-long-test-case
     # robocop: off=too-many-calls-in-test-case
     [Documentation]    Verify Model Can Be Deployed Via UI For Upgrade
-    [Tags]                  Upgrade    ModelServing
-    [Setup]                 Begin Web Test
-    ${PRJ_TITLE}=           Set Variable            model-serving-upgrade
-    ${PRJ_DESCRIPTION}=     Set Variable            project used for model serving tests
-    ${MODEL_NAME}=          Set Variable            test-model
-    ${MODEL_CREATED}=       Set Variable            ${FALSE}
-    ${RUNTIME_NAME}=        Set Variable            Model Serving Test
-    ${INFERENCE_INPUT_OPENVINO}=    Set Variable
-    ...    @tests/Resources/Files/openvino-example-input.json
-    ${EXPECTED_INFERENCE_OUTPUT_OPENVINO}=    Set Variable
-    ...    {"model_name":"test-model__isvc-8655dc7979","model_version":"1","outputs":[{"name":"Func/StatefulPartitionedCall/output/_13:0","datatype":"FP32","shape":[1,1],"data":[0.99999994]}]}   # robocop: disable:line-too-long
-    ${runtime_pod_name}=    Replace String Using Regexp
-    ...    string=${RUNTIME_NAME}
-    ...    pattern=\\s
-    ...    replace_with=-
-    ${runtime_pod_name}=    Convert To Lower Case                           ${runtime_pod_name}
-    Fetch CA Certificate If RHODS Is Self-Managed
-    Clean All Models Of Current User
-    Open Data Science Projects Home Page
-    Wait For RHODS Dashboard To Load
-    ...    wait_for_cards=${FALSE}
-    ...    expected_page=Data Science Projects
-    Create Data Science Project     title=${PRJ_TITLE}      description=${PRJ_DESCRIPTION}
-    Create S3 Data Connection
-    ...    project_title=${PRJ_TITLE}
-    ...    dc_name=model-serving-connection
-    ...    aws_access_key=${S3.AWS_ACCESS_KEY_ID}
-    ...    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
-    ...    aws_bucket_name=ods-ci-s3
-    Create Model Server     token=${FALSE}      server_name=${RUNTIME_NAME}
-    Serve Model
-    ...    project_name=${PRJ_TITLE}
-    ...    model_name=${MODEL_NAME}
-    ...    framework=openvino_ir
-    ...    existing_data_connection=${TRUE}
-    ...    data_connection_name=model-serving-connection
-    ...    model_path=openvino-example-model
-    Run Keyword And Continue On Failure
-    ...    Wait Until Keyword Succeeds
-    ...    5 min
-    ...    10 sec
-    ...    Verify Openvino Deployment
-    ...    runtime_name=${runtime_pod_name}
-    ...    project_name=${PRJ_TITLE}
-    Run Keyword And Continue On Failure
-    ...    Wait Until Keyword Succeeds
-    ...    5 min
-    ...    10 sec
-    ...    Verify Serving Service
-    ...    project_name=${PRJ_TITLE}
-    Verify Model Status     ${MODEL_NAME}           success
-    Set Suite Variable      ${MODEL_CREATED}        ${TRUE}     # robocop: disable:replace-set-variable-with-var
-    Run Keyword And Continue On Failure
-    ...    Verify Model Inference
-    ...    ${MODEL_NAME}
-    ...    ${INFERENCE_INPUT_OPENVINO}
-    ...    ${EXPECTED_INFERENCE_OUTPUT_OPENVINO}
-    ...    token_auth=${FALSE}
-    Remove File     openshift_ca.crt
-    [Teardown]      Run Keywords        Dashboard Test Teardown
-    ...     AND
-    ...     Run Keyword If Test Failed      Get Events And Pod Logs     namespace=${PRJ_TITLE}
-    ...     label_selector=name=modelmesh-serving-${runtime_pod_name}
+    [Tags]                  Upgrade    ModelServing    ModelServer
+    Set Suite Variable    ${TEST_NS}    ovmsmodel-upgrade
+    Set Suite Variable    ${KSERVE_MODE}    RawDeployment    # RawDeployment   # Serverless
+    Set Suite Variable    ${MODELS_BUCKET}    ${S3.BUCKET_1}
+    Set Suite Variable    ${INFERENCE_INPUT}    @tests/Resources/Files/modelmesh-mnist-input.json
+    Set Suite Variable    ${EXPECTED_INFERENCE_OUTPUT}    {"model_name": "test-dir","model_version": "1","outputs": [{"name": "Plus214_Output_0","shape": [1, 10],"datatype": "FP32","data": [-8.233053207397461, -7.749703407287598, -3.4236814975738527, 12.363029479980469, -12.079103469848633, 17.2665958404541, -10.570976257324219, 0.7130761742591858, 3.3217151165008547, 1.3621227741241456]}]}  #robocop: disable
+    Setup Test Variables    model_name=test-dir    use_pvc=${TRUE}    use_gpu=${FALSE}
+    ...    kserve_mode=${KSERVE_MODE}
+    Set Project And Runtime    runtime=ovms-runtime     protocol=http     namespace=${TEST_NS}
+    ...    download_in_pvc=${TRUE}    model_name=${model_name}
+    ...    storage_size=100Mi    memory_request=100Mi
+    ${requests}=    Create Dictionary    memory=1Gi
+    Compile Inference Service YAML    isvc_name=${model_name}
+    ...    sa_name=${EMPTY}
+    ...    model_storage_uri=pvc://${model_name}-claim/${model_name}
+    ...    model_format=onnx    serving_runtime=ovms-runtime
+    ...    limits_dict=&{EMPTY}    requests_dict=${requests}    kserve_mode=${KSERVE_MODE}
+    Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
+    ...    namespace=${TEST_NS}
+    # File is not needed anymore after applying
+    Remove File    ${INFERENCESERVICE_FILLED_FILEPATH}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${TEST_NS}
+    ${pod_name}=  Get Pod Name    namespace=${TEST_NS}
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ${service_port}=    Extract Service Port    service_name=${model_name}-predictor    protocol=TCP
+    ...    namespace=${TEST_NS}
+    IF   "${KSERVE_MODE}"=="RawDeployment"
+        Start Port-forwarding    namespace=${TEST_NS}    pod_name=${pod_name}  local_port=${service_port}
+        ...    remote_port=${service_port}    process_alias=ovms-process
+    END
+    Verify Model Inference With Retries   model_name=${model_name}    inference_input=${INFERENCE_INPUT}
+    ...    expected_inference_output=${EXPECTED_INFERENCE_OUTPUT}   project_title=${TEST_NS}
+    ...    deployment_mode=Cli  kserve_mode=${KSERVE_MODE}    service_port=${service_port}
+    ...    end_point=/v2/models/${model_name}/infer  retries=10
+
 
 Verify User Can Deploy Custom Runtime For Upgrade
     [Documentation]     Verify User Can Deploy Custom Runtime For Upgrade

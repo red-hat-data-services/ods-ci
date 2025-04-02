@@ -146,7 +146,7 @@ Test Inference Post RHODS Upgrade
     [Documentation]    Test the inference result after having deployed a model
     [Tags]                  Upgrade    ModelServing    ModelServer
     Set Suite Variable    ${TEST_NS}    ovmsmodel-upgrade
-    Set Suite Variable    ${KSERVE_MODE}    RawDeployment    # RawDeployment   # Serverless
+    Set Suite Variable    ${KSERVE_MODE}    Serverless
     Set Suite Variable    ${INFERENCE_INPUT}    @tests/Resources/Files/modelmesh-mnist-input.json
     Set Suite Variable    ${EXPECTED_INFERENCE_OUTPUT}    {"model_name": "test-dir","model_version": "1","outputs": [{"name": "Plus214_Output_0","shape": [1, 10],"datatype": "FP32","data": [-8.233053207397461, -7.749703407287598, -3.4236814975738527, 12.363029479980469, -12.079103469848633, 17.2665958404541, -10.570976257324219, 0.7130761742591858, 3.3217151165008547, 1.3621227741241456]}]}  #robocop: disable
     Setup Test Variables    model_name=test-dir    use_pvc=${TRUE}    use_gpu=${FALSE}

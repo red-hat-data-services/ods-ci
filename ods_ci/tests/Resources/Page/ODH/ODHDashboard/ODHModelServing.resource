@@ -265,7 +265,7 @@ Get Model Inference
     ...    set to ${TRUE}.
     [Arguments]    ${model_name}    ${inference_input}    ${token_auth}=${FALSE}   ${project_title}=${NONE}
     ...    ${kserve_mode}=Serverless   ${deployment_mode}=UI   ${service_port}=8888   ${end_point}=${NONE}
-    ...    ${service_account_name}=default-name   ${token}=${NONE}      ${set_json_content_type}=${FALSE}
+    ...    ${service_account_name}=default-name   ${token}=${NONE}    ${set_json_content_type}=${FALSE}
     ${curl_cmd}=     Set Variable    ${NONE}
     ${self_managed}=    Is RHODS Self-Managed
     IF    $deployment_mode == 'UI'
@@ -331,7 +331,7 @@ Verify Model Inference
     [Documentation]    Verifies that the inference result of a model is equal to an expected output
     [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}=${FALSE}
     ...    ${project_title}=${NONE}    ${deployment_mode}=UI    ${kserve_mode}=Serverless
-    ...    ${service_port}=${NONE}   ${end_point}=${NONE}    ${token}=${NONE}
+    ...    ${service_port}=${NONE}   ${end_point}=${NONE}    ${token}=${NONE}    ${set_json_content_type}=${FALSE}
     IF   $deployment_mode == 'UI'
          Open Model Serving Home Page
          Switch Model Serving Project    ${project_title}
@@ -339,7 +339,7 @@ Verify Model Inference
     ${inference_output}=    Get Model Inference    model_name=${model_name}   inference_input=${inference_input}
     ...    token_auth=${token_auth}    kserve_mode=${kserve_mode}    project_title=${project_title}
     ...    deployment_mode=${deployment_mode}    service_port=${service_port}    end_point=${end_point}
-    ...    token=${token}
+    ...    token=${token}    set_json_content_type=${set_json_content_type}
     Log    ${inference_output}
     ${result}    ${list}=    Inference Comparison    ${expected_inference_output}    ${inference_output}
     Log    ${result}
@@ -361,7 +361,7 @@ Verify Model Inference With Retries
     ...                This is a temporary mitigation meanwhile we find a better way to check the model
     [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}=${FALSE}
     ...            ${project_title}=${NONE}    ${retries}=${5}     ${deployment_mode}=UI    ${kserve_mode}=Serverless
-    ...            ${service_port}=${NONE}   ${end_point}=${NONE}
+    ...            ${service_port}=${NONE}   ${end_point}=${NONE}    ${set_json_content_type}=${FALSE}
     ${status}=    Run Keyword And Return Status    Verify Model Inference    ${model_name}    ${inference_input}
     ...    ${expected_inference_output}    ${token_auth}    ${project_title}    ${deployment_mode}
     ...    kserve_mode=${kserve_mode}    service_port=${service_port}   end_point=${end_point}

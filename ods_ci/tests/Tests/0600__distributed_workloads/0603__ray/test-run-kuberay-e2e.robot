@@ -15,7 +15,7 @@ Run TestRayJob test
     [Documentation]    Run Go E2E test: TestRayJob
     [Tags]  Tier1
     ...     DistributedWorkloads
-    ...     Training
+    ...     TrainingRay
     ...     Kuberay
     Run Kuberay E2E Test    "^TestRayJob$"
 
@@ -23,7 +23,7 @@ Run TestRayJobWithClusterSelector test
     [Documentation]    Run Go E2E test: TestRayJobWithClusterSelector
     [Tags]  Sanity
     ...     DistributedWorkloads
-    ...     Training
+    ...     TrainingRay
     ...     Kuberay
     Run Kuberay E2E Test    TestRayJobWithClusterSelector
 
@@ -31,7 +31,7 @@ Run TestRayJobSuspend test
     [Documentation]    Run Go E2E test: TestRayJobSuspend
     [Tags]  Tier1
     ...     DistributedWorkloads
-    ...     Training
+    ...     TrainingRay
     ...     Kuberay
     Run Kuberay E2E Test    TestRayJobSuspend
 
@@ -39,7 +39,7 @@ Run TestRayJobLightWeightMode test
     [Documentation]    Run Go E2E test: TestRayJobLightWeightMode
     [Tags]  Tier1
     ...     DistributedWorkloads
-    ...     Training
+    ...     TrainingRay
     ...     Kuberay
     ...     ProductBug:RHOAIENG-6614
     Run Kuberay E2E Test    TestRayJobLightWeightMode

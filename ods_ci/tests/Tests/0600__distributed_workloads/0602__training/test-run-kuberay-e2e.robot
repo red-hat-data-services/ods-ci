@@ -75,6 +75,13 @@ Teardown Kuberay E2E Test Suite
     RHOSi Teardown
     Enable Component    kueue
     Wait Component Ready    kueue
+    Log To Console    "Additional waiting due to RHOAIENG-20295"
+    ${result} =    Run Process    oc wait --for\=condition\=Available --timeout\=300s -n ${APPLICATIONS_NAMESPACE} deployment/kueue-controller-manager
+    ...    shell=true    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Timeout waiting for deployment/kueue-controller-manager to be available in ${APPLICATIONS_NAMESPACE}
+    END
 
 Run Kuberay E2E Test
     [Documentation]    Run Kuberay E2E Test

@@ -73,7 +73,6 @@ Set Project And Runtime
         Create PVC And Download Model From S3    model_name=${model_name}    namespace=${namespace}
         ...    bucket_name=${MODELS_BUCKET.NAME}    use_https=${USE_BUCKET_HTTPS}
         ...    download_timeout=${download_timeout}    storage_size=${storage_size}    model_path=${model_path}
-        ...    memory_request=${memory_request}
     ELSE
         Create Secret For S3-Like Buckets    endpoint=${endpoint}
         ...    region=${MODELS_BUCKET.REGION}    namespace=${namespace}

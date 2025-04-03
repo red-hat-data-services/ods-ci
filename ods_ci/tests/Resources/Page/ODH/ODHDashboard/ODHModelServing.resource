@@ -1,3 +1,4 @@
+# robocop: off=wrong-case-in-keyword-name,too-many-arguments,too-long-keyword
 *** Settings ***
 Documentation    Collection of keywords to interact with Model Serving
 Resource       ../../../Page/Components/Components.resource
@@ -272,6 +273,10 @@ Get Model Inference
         ${kserve}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain
         ...    Single-model serving enabled
         ${curl_cmd}=     Set Variable    curl -s ${url} -d ${inference_input}
+        IF    ${set_json_content_type}
+            ${curl_cmd}=     Catenate    ${curl_cmd}    -H 'Content-Type: application/json'
+        END
+        Log     ${curl_cmd}
         IF    ${token_auth}
             IF    "${project_title}" == "${NONE}"
                 ${project_title}=    Get Model Project    ${model_name}
@@ -307,7 +312,7 @@ Get Model Inference
             ${rc}    ${url}=    Run And Return Rc And Output
             ...    oc get ksvc ${model_name}-predictor -n ${project_title} -o jsonpath='{.status.url}'
             Should Be Equal As Integers    ${rc}    0
-            ${curl_cmd}=    Set Variable    curl -s ${url}${end_point} -d ${inference_input}
+            ${curl_cmd}=    Set Variable    curl -s ${url}${end_point} -d ${inference_input} --cacert openshift_ca_istio_knative.crt
         ELSE IF    '${kserve_mode}' == 'RawDeployment'
             ${url}=   Set Variable    http://localhost:${service_port}${end_point}
             ${curl_cmd}=    Set Variable    curl -s ${url} -d ${inference_input} --cacert openshift_ca_istio_knative.crt
@@ -330,7 +335,7 @@ Verify Model Inference
     [Documentation]    Verifies that the inference result of a model is equal to an expected output
     [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}=${FALSE}
     ...    ${project_title}=${NONE}    ${deployment_mode}=UI    ${kserve_mode}=Serverless
-    ...    ${service_port}=${NONE}   ${end_point}=${NONE}    ${token}=${NONE}
+    ...    ${service_port}=${NONE}   ${end_point}=${NONE}    ${token}=${NONE}      ${set_json_content_type}=${FALSE}
     IF   $deployment_mode == 'UI'
          Open Model Serving Home Page
          Switch Model Serving Project    ${project_title}
@@ -338,7 +343,7 @@ Verify Model Inference
     ${inference_output}=    Get Model Inference    model_name=${model_name}   inference_input=${inference_input}
     ...    token_auth=${token_auth}    kserve_mode=${kserve_mode}    project_title=${project_title}
     ...    deployment_mode=${deployment_mode}    service_port=${service_port}    end_point=${end_point}
-    ...    token=${token}
+    ...    token=${token}      set_json_content_type=${set_json_content_type}           # robocop: disable
     Log    ${inference_output}
     ${result}    ${list}=    Inference Comparison    ${expected_inference_output}    ${inference_output}
     Log    ${result}
@@ -360,20 +365,22 @@ Verify Model Inference With Retries
     ...                This is a temporary mitigation meanwhile we find a better way to check the model
     [Arguments]    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}=${FALSE}
     ...            ${project_title}=${NONE}    ${retries}=${5}     ${deployment_mode}=UI    ${kserve_mode}=Serverless
-    ...            ${service_port}=${NONE}   ${end_point}=${NONE}
+    ...            ${service_port}=${NONE}   ${end_point}=${NONE}   ${set_json_content_type}=${FALSE}
     ${status}=    Run Keyword And Return Status    Verify Model Inference    ${model_name}    ${inference_input}
     ...    ${expected_inference_output}    ${token_auth}    ${project_title}    ${deployment_mode}
+    ...    kserve_mode=${kserve_mode}    service_port=${service_port}   end_point=${end_point}
+    ...    set_json_content_type=${set_json_content_type}
     IF    not ${status}
         ${retry}=    Set Variable    ${0}
         WHILE    ${retry} < ${retries}
             IF    ${retry} > 0
-                Log    message=Modelmesh inference call failed ${retry}/${retries}.
+                Log    message=${kserve_mode} inference call failed ${retry}/${retries}.
                 ...    level=WARN
             END
             ${status}=    Run Keyword And Return Status    Verify Model Inference
             ...    ${model_name}    ${inference_input}    ${expected_inference_output}    ${token_auth}
             ...    project_title=${project_title}     deployment_mode=${deployment_mode}  kserve_mode=${kserve_mode}
-            ...    service_port=${service_port}   end_point=${end_point}
+            ...    service_port=${service_port}   end_point=${end_point}    set_json_content_type=${set_json_content_type}
             IF    ${status}
                 BREAK
             END

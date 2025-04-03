@@ -907,3 +907,44 @@ Remove Model Mount Path From Runtime
     ${rc}    ${out}=    Run And Return Rc And Output
     ...   oc patch servingruntime ${runtime} -n ${namespace} --type='json' -p='[{"op": "remove", "path": "/spec/containers/0/args/1"}]'
     Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
+
+
+Setup Test Variables    # robocop: off=too-many-calls-in-keyword
+    [Documentation]    Sets up variables for the Suite
+    [Arguments]    ${model_name}    ${kserve_mode}=Serverless    ${use_pvc}=${FALSE}    ${use_gpu}=${FALSE}
+    ...    ${model_path}=${model_name}
+    Set Test Variable    ${model_name}
+    ${models_names}=    Create List    ${model_name}
+    Set Test Variable    ${models_names}
+    Set Test Variable    ${model_path}
+    Set Test Variable    ${test_namespace}     ${TEST_NS}-${model_name}
+    IF    ${use_pvc}
+        Set Test Variable    ${storage_uri}    pvc://${model_name}-claim/${model_path}
+    ELSE
+        Set Test Variable    ${storage_uri}    s3://${S3.BUCKET_1.NAME}/${model_path}
+    END
+    IF   ${use_gpu}
+        ${supported_gpu_type}=   Convert To Lowercase         ${GPU_TYPE}
+        Set Runtime Image    ${supported_gpu_type}
+        IF  "${supported_gpu_type}" == "nvidia"
+            ${limits}=    Create Dictionary    nvidia.com/gpu=1
+        ELSE IF    "${supported_gpu_type}" == "amd"
+            ${limits}=    Create Dictionary    amd.com/gpu=1
+        ELSE
+            FAIL   msg=Provided GPU type is not yet supported. Only nvidia and amd gpu type are supported
+        END
+        Set Test Variable    ${limits}
+    ELSE
+        Set Test Variable    ${limits}    &{EMPTY}
+    END
+    IF    "${KSERVE_MODE}" == "RawDeployment"    # robocop: off=inconsistent-variable-name
+        Set Test Variable    ${use_port_forwarding}    ${TRUE}
+    ELSE
+        Set Test Variable    ${use_port_forwarding}    ${FALSE}
+    END
+    Set Log Level    NONE
+    Set Test Variable    ${access_key_id}    ${S3.AWS_ACCESS_KEY_ID}
+    Set Test Variable    ${access_key}    ${S3.AWS_SECRET_ACCESS_KEY}
+    Set Test Variable    ${endpoint}    ${MODELS_BUCKET.ENDPOINT}
+    Set Test Variable    ${region}    ${MODELS_BUCKET.REGION}
+    Set Log Level    INFO

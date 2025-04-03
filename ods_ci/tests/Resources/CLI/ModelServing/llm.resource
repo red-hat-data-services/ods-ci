@@ -762,23 +762,6 @@ Start Port-forwarding
     Process Should Be Running    ${process}
     sleep  7s
 
-Create Role Binding For Authorino
-    [Arguments]    ${name}    ${namespace}
-    Set Test Variable    ${name}
-    Set Test Variable    ${namespace}
-    Set Test Variable    ${nameview}    ${name}-view
-    Set Test Variable    ${namesa}    ${name}-sa
-    Create File From Template    ${ROLE_BINDING_FILEPATH}   ${LLM_RESOURCES_DIRPATH}/rb.filled.yaml
-    ${rc}    ${out}=    Run And Return Rc And Output
-    ...     oc apply -f ${LLM_RESOURCES_DIRPATH}/rb.filled.yaml
-    Should Be Equal As Integers    ${rc}    ${0}
-
-Create Inference Access Token
-    [Arguments]  ${test_namespace}  ${bucket_sa_name}
-    ${rc}    ${out}=    Run And Return Rc And Output    oc create token -n ${test_namespace} ${bucket_sa_name}
-    Should Be Equal As Strings    ${rc}    0
-    [Return]    ${out}
-
 Wait For Model KServe Deployment To Be Ready
     [Documentation]    Waits for the Pod to be Ready (i.e., Running status) and checks that
     ...                the deployment has the expected pods and containers
@@ -835,22 +818,6 @@ ISVC Should Be Loaded
     ...    oc get isvc ${isvc_name} -n ${namespace} -o=jsonpath='{.status.modelStatus.states.activeModelState}'
     Should Be Equal As Integers    ${rc}    ${0}
     Should Be Equal As Strings    ${isvc_status}    Loaded
-
-Update ISVC Filled Config
-    [Documentation]    Update default inference service with runtime argument based on requirement
-    [Arguments]    ${overlay}
-    ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc kustomize ${LLM_RESOURCES_DIRPATH}/serving_runtimes/overlay/${overlay} > ${INFERENCESERVICE_FILEPATH_NEW}/isvc_custom_filled.yaml
-    Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
-
-Remove Model Mount Path From Runtime
-    [Documentation]    This keyword is to remove model mount(mnt/model) path from runtime
-    ...   This is required for speculative decoding using draft model
-    [Arguments]     ${namespace}   ${runtime}=vllm-runtime
-    ${rc}    ${out}=    Run And Return Rc And Output
-    ...   oc patch servingruntime ${runtime} -n ${namespace} --type='json' -p='[{"op": "remove", "path": "/spec/containers/0/args/1"}]'
-    Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
-
 
 Setup Test Variables    # robocop: off=too-many-calls-in-keyword
     [Documentation]    Sets up variables for the Suite

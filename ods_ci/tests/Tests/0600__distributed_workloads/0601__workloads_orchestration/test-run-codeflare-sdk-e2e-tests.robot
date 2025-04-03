@@ -10,15 +10,6 @@ Resource          ../../../../tests/Resources/Page/DistributedWorkloads/Distribu
 
 
 *** Test Cases ***
-Run TestRayClusterSDKOauth test with Python 3.9
-    [Documentation]    Run Python E2E test: TestRayClusterSDKOauth
-    [Tags]
-    ...     Tier1
-    ...     DistributedWorkloads
-    ...     WorkloadsOrchestration
-    ...     Codeflare-sdk
-    Run Codeflare-SDK Test    e2e    mnist_raycluster_sdk_oauth_test.py    3.9    ${RAY_CUDA_IMAGE_3.9}    ${CODEFLARE-SDK-RELEASE-TAG-3.9}
-
 Run TestRayClusterSDKOauth test with Python 3.11
     [Documentation]    Run Python E2E test: TestRayClusterSDKOauth
     [Tags]
@@ -27,15 +18,6 @@ Run TestRayClusterSDKOauth test with Python 3.11
     ...     WorkloadsOrchestration
     ...     Codeflare-sdk
     Run Codeflare-SDK Test    e2e    mnist_raycluster_sdk_oauth_test.py    3.11    ${RAY_CUDA_IMAGE_3.11}    ${CODEFLARE-SDK-RELEASE-TAG}
-
-Run TestRayLocalInteractiveOauth test with Python 3.9
-    [Documentation]    Run Python E2E test: TestRayLocalInteractiveOauth
-    [Tags]
-    ...     Tier1
-    ...     DistributedWorkloads
-    ...     WorkloadsOrchestration
-    ...     Codeflare-sdk
-    Run Codeflare-SDK Test    e2e    local_interactive_sdk_oauth_test.py    3.9    ${RAY_CUDA_IMAGE_3.9}    ${CODEFLARE-SDK-RELEASE-TAG-3.9}
 
 Run TestRayLocalInteractiveOauth test with Python 3.11
     [Documentation]    Run Python E2E test: TestRayLocalInteractiveOauth

@@ -5,7 +5,7 @@ Resource       ./Workbenches.resource
 
 
 *** Variables ***
-${DS_PROJECT_TITLE}=    Data Science Projects
+${DS_PROJECT_TITLE}=    Data science projects
 ${TITLE_INPUT_XP}=    xpath=//input[@id="manage-project-modal-name"]
 ${DESCR_INPUT_XP}=    xpath=//textarea[@id="manage-project-modal-description"]
 ${RESOURCE_EDIT_BTN_XP}=    xpath=//button[.="Edit resource name"]
@@ -30,9 +30,9 @@ ${PROJECT_SEARCH_INPUT}=    ${PROJECT_SEARCH_BAR} [data-testid="filter-toolbar-t
 *** Keywords ***
 Open Data Science Projects Home Page
     [Documentation]    Open "Data Science Projects" page from the sidebar
-    Wait Until Page Contains    Data Science Projects
-    Click Link      Data Science Projects
-    Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
+    Wait Until Page Contains    ${DS_PROJECT_TITLE}
+    Click Link      ${DS_PROJECT_TITLE}
+    Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=${DS_PROJECT_TITLE}
     Maybe Wait For Dashboard Loading Spinner Page
 
 Is Data Science Projects Page Open
@@ -56,9 +56,9 @@ Open Data Science Project Details Page
     END
     IF  "${tab_id}" != "${NONE}"
         Log    ${tab_id}
-        Wait Until Element Is Visible    //button[@role="tab" and @aria-controls="${tab_id}"]
-        Click Button    //button[@role="tab" and @aria-controls="${tab_id}"]
-        Element Should Be Visible   //button[@role="tab" and @aria-controls="${tab_id}" and @aria-selected="true"]
+        Wait Until Element Is Visible    //button[@data-testid="${tab_id}-tab"]
+        Click Button    //button[@data-testid="${tab_id}-tab"]
+        Wait Until Element Is Visible   //button[@data-testid="${tab_id}-tab" and @aria-selected="true"]
         Sleep    1s    reason=The tab page needs to load content according to user permissions
     END
 

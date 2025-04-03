@@ -97,7 +97,7 @@ Verify Model Can Be Deployed For Upgrade
     ...    kserve_mode=${KSERVE_MODE}
     Set Project And Runtime    runtime=ovms-runtime     protocol=http     namespace=${TEST_NS}
     ...    download_in_pvc=${TRUE}    model_name=${model_name}
-    ...    storage_size=100Mi    memory_request=100Mi
+    ...    storage_size=100Mi
     ${requests}=    Create Dictionary    memory=1Gi
     Compile Inference Service YAML    isvc_name=${model_name}
     ...    sa_name=${EMPTY}

@@ -17,6 +17,7 @@ ${ISTIO_NS}     istio-system
 ${KNATIVE_SERVING_CONTROLLER_LABEL_SELECTOR}    app.kubernetes.io/component=controller
 ${KSERVE_SERVING_STATE}    ${EMPTY}
 ${IS_NOT_PRESENT}    1
+${INITIAL_KSERVE_MODE}    ${EMPTY}
 
 
 *** Test Cases ***
@@ -64,9 +65,29 @@ Validate DSC creates all Serverless CRs
     #${podname}=    Get Pod Name   ${OPERATOR_NAMESPACE}    ${OPERATOR_LABEL_SELECTOR}
     #Verify Pod Logs Do Not Contain    ${podname}    ${OPERATOR_NAMESPACE}    ${regex_pattern}    rhods-operator
 
-Validate DSC Kserve Serving Removed State
-    [Documentation]    Validate that KServe Serving state Removed does remove relevant resources.
-    [Tags]  Operator    RHOAIENG-7217    Tier2    kserve-serving-removed
+Validate DSC Kserve Serving Removed When Mode Is Serverless
+    [Documentation]    Validate that KServe Serving state Removed does trigger an error in the DSC conditions,
+    ...                showing this mode is not supported if kserve/serving mode is Serverless.
+    [Tags]  Operator    RHOAIENG-7217    Tier2    kserve-serving-removed-serverless
+
+    Set Resource Attribute       ${OPERATOR_NAMESPACE}       DataScienceCluster      ${DSC_NAME}
+    ...                          /spec/components/kserve/defaultDeploymentMode       Serverless
+
+    ${management_state}=    Get DSC Component State    ${DSC_NAME}    kserve/serving    ${OPERATOR_NAMESPACE}
+    IF    "${management_state}" != "Removed"
+            Set Component State    kserve/serving    Removed
+    END
+
+    Wait Until Keyword Succeeds    5 min    0 sec
+    ...    DataScienceCluster Should Fail Because Kserve Serving Is Removed And Mode Is Serverless
+
+Validate DSC Kserve Serving Removed State When Mode Is RawDeployment
+    [Documentation]    Validate that KServe Serving state Removed does remove relevant resources if kserve/serving
+    ...                mode is RawDeployment
+    [Tags]  Operator    RHOAIENG-7217    Tier2    kserve-serving-removed-rawdeployment
+
+    Set Resource Attribute       ${OPERATOR_NAMESPACE}       DataScienceCluster      ${DSC_NAME}
+    ...                          /spec/components/kserve/defaultDeploymentMode       RawDeployment
 
     ${management_state}=    Get DSC Component State    ${DSC_NAME}    kserve/serving    ${OPERATOR_NAMESPACE}
     IF    "${management_state}" != "Removed"
@@ -85,7 +106,7 @@ Validate DSC Kserve Serving Removed State
     ...    Is Resource Present     Gateway    knative-ingress-gateway     ${KNATIVESERVING_NS}   ${IS_NOT_PRESENT}
 
     Wait Until Keyword Succeeds    5 min    0 sec
-    ...    Is Resource Present      Gateway    kserve-local-gateway     ${ISTIO_NS}    ${IS_NOT_PRESENT}
+    ...    Is Resource Present     Gateway    kserve-local-gateway     ${ISTIO_NS}    ${IS_NOT_PRESENT}
 
     Wait Until Keyword Succeeds    5 min    0 sec
     ...    Is Resource Present     Service    kserve-local-gateway     ${ISTIO_NS}    ${IS_NOT_PRESENT}
@@ -123,21 +144,39 @@ Suite Setup
     RHOSi Setup
     Wait For DSC Ready State    ${OPERATOR_NAMESPACE}    default-dsc
     ${KSERVE_SERVING_STATE}=    Get DSC Component State    ${DSC_NAME}    kserve.serving    ${OPERATOR_NAMESPACE}
+    ${INITIAL_KSERVE_MODE}=    Get Resource Attribute      ${OPERATOR_NAMESPACE}
+    ...                 DataScienceCluster      ${DSC_NAME}        .spec.components.kserve.defaultDeploymentMode
     Set Suite Variable    ${KSERVE_SERVING_STATE}
+    Set Suite Variable    ${INITIAL_KSERVE_MODE}
     Log To Console    "Suite Setup: KServe.serving state: ${KSERVE_SERVING_STATE}"
+    Log To Console    "Suite Setup: KServe.defaultDeploymentMode: ${INITIAL_KSERVE_MODE}"
     ${STATE_LENGTH}=    Get Length    "${KSERVE_SERVING_STATE}"
+    Should Be True     ${STATE_LENGTH} > 0
+    ${STATE_LENGTH}=    Get Length    "${INITIAL_KSERVE_MODE}"
     Should Be True     ${STATE_LENGTH} > 0
 
 Suite Teardown
     [Documentation]    Suite Teardown
-    Restore Kserve Serving State
+    Restore Kserve Mode And Serving State
     RHOSi Teardown
 
-Restore Kserve Serving State
-    [Documentation]    Restore Kserve Serving state to original value (Managed or Removed)
+DataScienceCluster Should Fail Because Kserve Serving Is Removed And Mode Is Serverless
+    [Documentation]   Keyword to check the DSC conditions when serverless operator is not installed.
+    ...           One condition should appear saying this operator is needed to enable kserve component.
+    ${return_code}    ${output}=    Run And Return Rc And Output
+    ...    oc get DataScienceCluster ${DSC_NAME} -n ${OPERATOR_NAMESPACE} -o json | jq -r '.status.conditions | map(.message) | join(",")'    #robocop:disable
+    Should Be Equal As Integers  ${return_code}   0   msg=Error retrieved DSC conditions
+    Should Contain    ${output}    setting defaultdeployment mode as Serverless is incompatible with having Serving 'Removed'    #robocop:disable
+
+Restore Kserve Mode And Serving State
+    [Documentation]    Restore Kserve mode to original value (Serverless or RawDeployment) and
+    ...                Serving state to original value (Managed or Removed)
 
     Set Component State    kserve/serving     ${KSERVE_SERVING_STATE}
     Log To Console    "Restored Saved State: ${KSERVE_SERVING_STATE}"
+    Set Resource Attribute       ${OPERATOR_NAMESPACE}       DataScienceCluster      ${DSC_NAME}
+    ...                          /spec/components/kserve/defaultDeploymentMode       ${INITIAL_KSERVE_MODE}
+    Log To Console    "Restored Save Mode: ${INITIAL_KSERVE_MODE}
 
     IF    "${KSERVE_SERVING_STATE}" == "Managed"
         Wait Knative Serving CR To Be In Ready State

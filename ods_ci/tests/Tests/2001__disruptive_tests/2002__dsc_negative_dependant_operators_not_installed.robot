@@ -114,7 +114,7 @@ Validate DSC and DSCI Created With No Errors When Kserve Serving Is Unmanaged An
     Log To Console    message=Creating DataScienceCluster CR via CLI
     Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
 
-    Set DataScienceCluster Kserve Serving Management State        ${DSC_NAME}      Unmanaged
+    Set Component State    kserve/serving    Unmanaged
 
     Wait For DataScienceCluster CustomResource To Be Ready    timeout=600
 
@@ -142,7 +142,7 @@ Validate DSC and DSCI Created With Errors When Kserve Serving Is Unmanaged And M
     Log To Console    message=Creating DataScienceCluster CR via CLI
     Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
 
-    Set DataScienceCluster Kserve Serving Management State        ${DSC_NAME}      Unmanaged
+    Set Component State    kserve/serving    Unmanaged
 
     Wait Until Keyword Succeeds    10 min    0 sec
     ...    DataScienceCluster Should Fail Because Service Mesh Is Not Present And Model Registry Is Managed
@@ -165,15 +165,6 @@ Suite Teardown
     [Documentation]    Suite Teardown
     Selenium Library.Close All Browsers
     RHOSi Teardown
-
-Set DataScienceCluster Kserve Serving Management State
-    [Documentation]    Sets DSC Kserve Serving mgmt state to a specific value
-    [Arguments]      ${dsc_name}       ${status}
-    ${result} =    Run Process    oc patch DataScienceCluster ${dsc_name} --type 'json' -p '[{"op" : "replace" ,"path" : "/spec/components/kserve/serving/managementState" ,"value" : "${status}"}]'      #robocop:disable
-    ...    shell=true    stderr=STDOUT
-    IF    $result.rc != 0
-        FAIL    Can not patch serving.managementState field: ${result.stdout}
-    END
 
 Reinstall Service Mesh Operator And Recreate DSC And DSCI
     [Documentation]    Reinstalls Service Mesh operator and waits for the Service Mesh Control plane to be created

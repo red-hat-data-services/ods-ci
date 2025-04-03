@@ -761,3 +761,133 @@ Start Port-forwarding
     ...    alias=${process_alias}    stderr=STDOUT    shell=yes
     Process Should Be Running    ${process}
     sleep  7s
+
+Create Role Binding For Authorino
+    [Arguments]    ${name}    ${namespace}
+    Set Test Variable    ${name}
+    Set Test Variable    ${namespace}
+    Set Test Variable    ${nameview}    ${name}-view
+    Set Test Variable    ${namesa}    ${name}-sa
+    Create File From Template    ${ROLE_BINDING_FILEPATH}   ${LLM_RESOURCES_DIRPATH}/rb.filled.yaml
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...     oc apply -f ${LLM_RESOURCES_DIRPATH}/rb.filled.yaml
+    Should Be Equal As Integers    ${rc}    ${0}
+
+Create Inference Access Token
+    [Arguments]  ${test_namespace}  ${bucket_sa_name}
+    ${rc}    ${out}=    Run And Return Rc And Output    oc create token -n ${test_namespace} ${bucket_sa_name}
+    Should Be Equal As Strings    ${rc}    0
+    [Return]    ${out}
+
+Wait For Model KServe Deployment To Be Ready
+    [Documentation]    Waits for the Pod to be Ready (i.e., Running status) and checks that
+    ...                the deployment has the expected pods and containers
+    [Arguments]    ${label_selector}    ${namespace}    ${runtime}
+    ...    ${timeout}=300s    ${exp_replicas}=${1}
+    Wait For Pods To Be Ready    label_selector=${label_selector}    namespace=${namespace}   timeout=${timeout}
+    # Get the model name from the label_selector variable
+    ${splitted_str}    Split String    ${label_selector}    =
+    ${model_name}    Set Variable    ${splitted_str}[1]
+    Wait For ISVC To Be Loaded     ${model_name}     ${namespace}
+    Verify Model KServe Deployment    ${label_selector}    ${namespace}    ${runtime}    ${exp_replicas}
+
+Verify Model KServe Deployment
+    [Documentation]    Checks the given deployment has the expected pods and containers
+    [Arguments]    ${label_selector}    ${namespace}    ${runtime}    ${exp_replicas}
+    ${test_mode_var_exist}=    Run Keyword And Return Status    Variable Should Exist    ${KSERVE_MODE}
+    ${dsc_raw_var_exist}=    Run Keyword And Return Status    Variable Should Exist    ${IS_KSERVE_RAW}
+    IF    ${test_mode_var_exist}
+        IF    "${KSERVE_MODE}" == "RawDeployment"
+            Set Test Variable    ${is_raw}    ${TRUE}
+        ELSE
+            Set Test Variable    ${is_raw}    ${FALSE}
+        END
+    ELSE IF  ${dsc_raw_var_exist}
+        IF    ${IS_KSERVE_RAW}
+            Set Test Variable    ${is_raw}    ${TRUE}
+        ELSE
+            Set Test Variable    ${is_raw}    ${FALSE}
+        END
+    ELSE
+        Fail    msg=either ${KSERVE_MODE} or ${IS_KSERVE_RAW} suite/global variables are expected to be set
+    END
+    Load Runtime Query Formats
+    @{model_pods}=  Oc Get    kind=Pod    namespace=${namespace}    label_selector=${label_selector}
+    ${containers}=  Set Variable    ${RUNTIME_FORMATS}[${runtime}][containers]
+    IF    not ${is_raw}
+        ${serverless_container}=    Create List    queue-proxy    istio-proxy
+        Append To List    ${containers}    @{serverless_container}
+    END
+    ${n_containers}=    Get Length    ${containers}
+    Run Keyword And Continue On Failure    Verify Deployment    ${model_pods}  ${exp_replicas}
+    ...    ${n_containers}  ${containers}
+
+Wait For ISVC To Be Loaded
+    [Documentation]    Waits for the ISVC to be Loaded
+    [Arguments]    ${isvc_name}    ${namespace}    ${retries}=60
+    Wait Until Keyword Succeeds    ${retries} times    5s    ISVC Should Be Loaded    ${isvc_name}    ${namespace}
+    Sleep    30s    msg=There is a 20 seconds polling
+
+ISVC Should Be Loaded
+    [Documentation]    Check if the ISVC is Loaded (i.e., Success status in the grid)
+    [Arguments]    ${isvc_name}    ${namespace}
+    ${rc}    ${isvc_status}=    Run And Return Rc And Output
+    ...    oc get isvc ${isvc_name} -n ${namespace} -o=jsonpath='{.status.modelStatus.states.activeModelState}'
+    Should Be Equal As Integers    ${rc}    ${0}
+    Should Be Equal As Strings    ${isvc_status}    Loaded
+
+Update ISVC Filled Config
+    [Documentation]    Update default inference service with runtime argument based on requirement
+    [Arguments]    ${overlay}
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc kustomize ${LLM_RESOURCES_DIRPATH}/serving_runtimes/overlay/${overlay} > ${INFERENCESERVICE_FILEPATH_NEW}/isvc_custom_filled.yaml
+    Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
+
+Remove Model Mount Path From Runtime
+    [Documentation]    This keyword is to remove model mount(mnt/model) path from runtime
+    ...   This is required for speculative decoding using draft model
+    [Arguments]     ${namespace}   ${runtime}=vllm-runtime
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...   oc patch servingruntime ${runtime} -n ${namespace} --type='json' -p='[{"op": "remove", "path": "/spec/containers/0/args/1"}]'
+    Should Be Equal As Integers    ${rc}    ${0}    msg=${out}
+
+
+Setup Test Variables    # robocop: off=too-many-calls-in-keyword
+    [Documentation]    Sets up variables for the Suite
+    [Arguments]    ${model_name}    ${kserve_mode}=Serverless    ${use_pvc}=${FALSE}    ${use_gpu}=${FALSE}
+    ...    ${model_path}=${model_name}
+    Set Test Variable    ${model_name}
+    ${models_names}=    Create List    ${model_name}
+    Set Test Variable    ${models_names}
+    Set Test Variable    ${model_path}
+    Set Test Variable    ${test_namespace}     ${TEST_NS}-${model_name}
+    IF    ${use_pvc}
+        Set Test Variable    ${storage_uri}    pvc://${model_name}-claim/${model_path}
+    ELSE
+        Set Test Variable    ${storage_uri}    s3://${S3.BUCKET_1.NAME}/${model_path}
+    END
+    IF   ${use_gpu}
+        ${supported_gpu_type}=   Convert To Lowercase         ${GPU_TYPE}
+        Set Runtime Image    ${supported_gpu_type}
+        IF  "${supported_gpu_type}" == "nvidia"
+            ${limits}=    Create Dictionary    nvidia.com/gpu=1
+        ELSE IF    "${supported_gpu_type}" == "amd"
+            ${limits}=    Create Dictionary    amd.com/gpu=1
+        ELSE
+            FAIL   msg=Provided GPU type is not yet supported. Only nvidia and amd gpu type are supported
+        END
+        Set Test Variable    ${limits}
+    ELSE
+        Set Test Variable    ${limits}    &{EMPTY}
+    END
+    IF    "${KSERVE_MODE}" == "RawDeployment"    # robocop: off=inconsistent-variable-name
+        Set Test Variable    ${use_port_forwarding}    ${TRUE}
+    ELSE
+        Set Test Variable    ${use_port_forwarding}    ${FALSE}
+    END
+    Set Log Level    NONE
+    Set Test Variable    ${access_key_id}    ${S3.AWS_ACCESS_KEY_ID}
+    Set Test Variable    ${access_key}    ${S3.AWS_SECRET_ACCESS_KEY}
+    Set Test Variable    ${endpoint}    ${MODELS_BUCKET.ENDPOINT}
+    Set Test Variable    ${region}    ${MODELS_BUCKET.REGION}
+    Set Log Level    INFO

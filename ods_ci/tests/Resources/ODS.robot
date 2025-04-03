@@ -142,7 +142,7 @@ Wait Until RHODS Uninstallation Is Completed
 
 RHODS Namespaces Should Not Exist
     [Documentation]     Checks if the RHODS namespace do not exist on openshift
-    Verify Project Does Not Exists  rhods-notebook
+    Verify Project Does Not Exists  ${NOTEBOOKS_NAMESPACE}
     Verify Project Does Not Exists  ${MONITORING_NAMESPACE}
     Verify Project Does Not Exists  ${APPLICATIONS_NAMESPACE}
     Verify Project Does Not Exists  ${OPERATOR_NAMESPACE}

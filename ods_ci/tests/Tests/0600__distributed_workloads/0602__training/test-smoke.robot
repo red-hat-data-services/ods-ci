@@ -12,7 +12,7 @@ Ray smoke test
     [Documentation]    Check that Kuberay deployment and service are up and running
     [Tags]    Smoke
     ...       DistributedWorkloads
-    ...       Training
+    ...       TrainingRay
     ...       ODS-2648
     Log To Console    Waiting for kuberay-operator to be available
     ${result} =    Run Process    oc wait --for\=condition\=Available --timeout\=60s -n ${APPLICATIONS_NAMESPACE} deployment/kuberay-operator
@@ -35,7 +35,7 @@ Codeflare smoke test
     [Documentation]    Check that Codeflare deployment and its monitoring service are up and running
     [Tags]    Smoke
     ...       DistributedWorkloads
-    ...       Training
+    ...       TrainingRay
     ...       ODS-2675
     Log To Console    Waiting for codeflare-operator-manager to be available
     ${result} =    Run Process    oc wait --for\=condition\=Available --timeout\=60s -n ${APPLICATIONS_NAMESPACE} deployment/codeflare-operator-manager
@@ -57,7 +57,7 @@ Training operator smoke test
     [Documentation]    Check that Training operator deployment is up and running
     [Tags]    Smoke
     ...       DistributedWorkloads
-    ...       Training
+    ...       TrainingKubeflow
     Skip If Operator Starting Version Is Not Supported      minimum_version=2.19.0
     Log To Console    Waiting for kubeflow-training-operator to be available
     ${result} =    Run Process    oc wait --for\=condition\=Available --timeout\=300s -n ${APPLICATIONS_NAMESPACE} deployment/kubeflow-training-operator

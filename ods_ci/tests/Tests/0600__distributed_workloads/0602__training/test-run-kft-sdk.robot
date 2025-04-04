@@ -10,5 +10,5 @@ Run TestMnistSDK KFTO SDK test
     [Tags]  Tier1
     ...     KFTOSDK
     ...     DistributedWorkloads
-    ...     WorkloadsOrchestration
+    ...     TrainingKubeflow
     Run Training Operator KFTO SDK Test    TestMnistSDK

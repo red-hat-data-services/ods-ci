@@ -250,7 +250,7 @@ Verify Ray Cluster Exists And Monitor Workload Metrics By Submitting Ray Job Aft
 
 Run Training Operator KFTO Run PyTorchJob Test Use Case
     [Documentation]    Run Training Operator KFTO Run PyTorchJob Test Use Case
-    [Tags]      Upgrade    Training
+    [Tags]      Upgrade    TrainingKubeflow
     [Setup]     Prepare Training Operator KFTO E2E Test Suite
     Skip If Operator Starting Version Is Not Supported      minimum_version=2.19.0
     Run Training Operator KFTO Test          TestRunPytorchjob    ${CUDA_TRAINING_IMAGE}
@@ -258,7 +258,7 @@ Run Training Operator KFTO Run PyTorchJob Test Use Case
 
 Run Training Operator KFTO Run Sleep PyTorchJob Test Use Case
     [Documentation]    Verify that running PyTorchJob Pod wasn't restarted
-    [Tags]      Upgrade    Training
+    [Tags]      Upgrade    TrainingKubeflow
     [Setup]     Prepare Training Operator KFTO E2E Test Suite
     Skip If Operator Starting Version Is Not Supported      minimum_version=2.19.0
     Run Training Operator KFTO Test      TestVerifySleepPytorchjob    ${CUDA_TRAINING_IMAGE}

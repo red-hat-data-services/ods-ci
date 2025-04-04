@@ -13,7 +13,7 @@ Run Training operator FMS test base finetuning use case
     [Documentation]    Run Go FMS tests for Training operator base finetuning use case
     [Tags]  RHOAIENG-6965
     ...     DistributedWorkloads
-    ...     Training
+    ...     TrainingKubeflow
     ...     TrainingOperator
     ...     FMS
     Run Training Operator FMS Test    TestPytorchjobWithSFTtrainerFinetuning
@@ -22,7 +22,7 @@ Run Training operator FMS test base LoRA use case
     [Documentation]    Run Go FMS tests for Training operator base LoRA use case
     [Tags]  RHOAIENG-6965
     ...     DistributedWorkloads
-    ...     Training
+    ...     TrainingKubeflow
     ...     TrainingOperator
     ...     FMS
     Run Training Operator FMS Test    TestPytorchjobWithSFTtrainerLoRa
@@ -34,7 +34,7 @@ Run Training operator FMS test base LoRA use case
 #     ...     Resources-GPU    NVIDIA-GPUs
 #     ...     Tier1
 #     ...     DistributedWorkloads
-#     ...     Training
+#     ...     TrainingKubeflow
 #     ...     TrainingOperator
 #     Run Training Operator ODH Core Test    TestPytorchjobWithSFTtrainerQLoRa
 
@@ -42,7 +42,7 @@ Run Training operator FMS test with Kueue quota
     [Documentation]    Run Go FMS tests for Training operator with Kueue quota
     [Tags]  RHOAIENG-6965
     ...     DistributedWorkloads
-    ...     Training
+    ...     TrainingKubeflow
     ...     TrainingOperator
     ...     FMS
     Run Training Operator FMS Test    TestPytorchjobUsingKueueQuota

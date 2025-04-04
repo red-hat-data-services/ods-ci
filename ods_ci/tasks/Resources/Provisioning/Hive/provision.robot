@@ -6,7 +6,8 @@ Library    Process
 *** Keywords ***
 Claim Cluster
     Log    Claiming cluster ${cluster_name}    console=True
-    Oc Apply    kind=ClusterClaim    src=tasks/Resources/Provisioning/Hive/claim.yaml
+    Wait Until Keyword Succeeds    2 min    10 s
+    ...    Oc Apply    kind=ClusterClaim    src=tasks/Resources/Provisioning/Hive/claim.yaml
     ...    template_data=${infrastructure_configurations}
 
 Does ClusterName Exists
@@ -255,7 +256,7 @@ Login To Cluster
 Get Cluster Pool Namespace
     [Arguments]    ${hive_pool_name}
     Log    Cluster pool name is: ${hive_pool_name}     console=True
-    ${namespace} =    Wait Until Keyword Succeeds    2 min    2 s
+    ${namespace} =    Wait Until Keyword Succeeds    2 min    10 s
     ...    Oc Get    kind=Namespace    label_selector=hive.openshift.io/cluster-pool-name=${hive_pool_name}
     ${pool_namespace} =    Set Variable   ${namespace[0]['metadata']['name']}
     RETURN    ${pool_namespace}

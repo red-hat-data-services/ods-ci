@@ -15,7 +15,7 @@ Run TestKueueRayCpu ODH test with Python 3.11
     [Tags]  ODS-2514
     ...     Tier1
     ...     DistributedWorkloads
-    ...     Training
+    ...     TrainingRay
     ...     WorkloadsOrchestration
     Run DistributedWorkloads ODH Test    TestMnistRayCpu    ${RAY_CUDA_IMAGE_3.11}    ${NOTEBOOK_IMAGE_3.11}
 
@@ -24,7 +24,7 @@ Run TestKueueRayCudaGpu ODH test with Python 3.11
     [Tags]  Resources-GPU    NVIDIA-GPUs
     ...     Tier1
     ...     DistributedWorkloads
-    ...     Training
+    ...     TrainingRay
     ...     WorkloadsOrchestration
     Run DistributedWorkloads ODH Test    TestMnistRayCudaGpu    ${RAY_CUDA_IMAGE_3.11}    ${NOTEBOOK_IMAGE_3.11}
 
@@ -33,7 +33,7 @@ Run TestKueueRayROCmGpu ODH test with Python 3.11
     [Tags]  Resources-GPU    AMD-GPUs    ROCm
     ...     Tier1
     ...     DistributedWorkloads
-    ...     Training
+    ...     TrainingRay
     ...     WorkloadsOrchestration
     Run DistributedWorkloads ODH Test    TestMnistRayROCmGpu    ${RAY_ROCM_IMAGE_3.11}    ${NOTEBOOK_IMAGE_3.11}
 
@@ -42,7 +42,7 @@ Run TestRayTuneHPOCpu ODH test with Python 3.11
     [Tags]  RHOAIENG-10004
     ...     Tier1
     ...     DistributedWorkloads
-    ...     Training
+    ...     TrainingRay
     ...     WorkloadsOrchestration
     Run DistributedWorkloads ODH Test    TestMnistRayTuneHpoCpu    ${RAY_CUDA_IMAGE_3.11}    ${NOTEBOOK_IMAGE_3.11}
 
@@ -51,7 +51,7 @@ Run TestRayTuneHPOGpu ODH test with Python 3.11
     [Tags]  Resources-GPU    NVIDIA-GPUs
     ...     Tier1
     ...     DistributedWorkloads
-    ...     Training
+    ...     TrainingRay
     ...     WorkloadsOrchestration
     Run DistributedWorkloads ODH Test    TestMnistRayTuneHpoGpu    ${RAY_CUDA_IMAGE_3.11}    ${NOTEBOOK_IMAGE_3.11}
 
@@ -60,7 +60,7 @@ Run TestKueueCustomRayCudaCpu ODH test with Python 3.11
     [Tags]  RHOAIENG-10013
     ...     Tier1
     ...     DistributedWorkloads
-    ...     Training
+    ...     TrainingRay
     ...     WorkloadsOrchestration
     Run DistributedWorkloads ODH Test    TestMnistCustomRayCudaCpu    ${RAY_TORCH_CUDA_IMAGE_3.11}    ${NOTEBOOK_IMAGE_3.11}
 
@@ -70,7 +70,7 @@ Run TestKueueCustomRayCudaGpu ODH test with Python 3.11
     ...     Resources-GPU    NVIDIA-GPUs
     ...     Tier1
     ...     DistributedWorkloads
-    ...     Training
+    ...     TrainingRay
     ...     WorkloadsOrchestration
     Run DistributedWorkloads ODH Test    TestMnistCustomRayCudaGpu    ${RAY_TORCH_CUDA_IMAGE_3.11}    ${NOTEBOOK_IMAGE_3.11}
 
@@ -79,7 +79,7 @@ Run TestKueueCustomRayRocmCpu ODH test with Python 3.11
     [Tags]  RHOAIENG-12484
     ...     Tier1
     ...     DistributedWorkloads
-    ...     Training
+    ...     TrainingRay
     ...     WorkloadsOrchestration
     Run DistributedWorkloads ODH Test    TestMnistCustomRayRocmCpu    ${RAY_TORCH_ROCM_IMAGE_3.11}    ${NOTEBOOK_IMAGE_3.11}
 
@@ -89,7 +89,7 @@ Run TestKueueCustomRayRocmGpu ODH test with Python 3.11
     ...     Resources-GPU    AMD-GPUs    ROCm
     ...     Tier1
     ...     DistributedWorkloads
-    ...     Training
+    ...     TrainingRay
     ...     WorkloadsOrchestration
     Run DistributedWorkloads ODH Test    TestMnistCustomRayRocmGpu    ${RAY_TORCH_ROCM_IMAGE_3.11}    ${NOTEBOOK_IMAGE_3.11}
 

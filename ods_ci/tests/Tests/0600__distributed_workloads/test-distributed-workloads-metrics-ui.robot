@@ -29,7 +29,7 @@ Verify Workload Metrics Home page Contents
     [Documentation]    Verifies "Workload Metrics" page is accessible from
     ...                the navigation menu on the left and page contents
     [Tags]    RHOAIENG-4837
-    ...       Sanity    DistributedWorkloads    Training    WorkloadsOrchestration
+    ...       Sanity    DistributedWorkloads    TrainingRay    WorkloadsOrchestration
     Open Distributed Workload Metrics Home Page
     Wait For Dashboard Page Title   Distributed workloads
     Select Distributed Workload Project By Name    ${PRJ_TITLE}
@@ -45,7 +45,7 @@ Verify Workload Metrics Home page Contents
 
 Verify Project Metrics Default Page contents
     [Tags]    RHOAIENG-4837
-    ...       Sanity    DistributedWorkloads    Training    WorkloadsOrchestration
+    ...       Sanity    DistributedWorkloads    TrainingRay    WorkloadsOrchestration
     [Documentation]    Verifiy Project Metrics default Page contents
     Open Distributed Workload Metrics Home Page
     Select Distributed Workload Project By Name    ${PRJ_TITLE}
@@ -54,7 +54,7 @@ Verify Project Metrics Default Page contents
 
 Verify Distributed Workload status Default Page contents
     [Tags]    RHOAIENG-4837
-    ...       Sanity    DistributedWorkloads    Training    WorkloadsOrchestration
+    ...       Sanity    DistributedWorkloads    TrainingRay    WorkloadsOrchestration
     [Documentation]    Verifiy distributed workload status page default contents
     Open Distributed Workload Metrics Home Page
     Select Distributed Workload Project By Name    ${PRJ_TITLE}
@@ -63,7 +63,7 @@ Verify Distributed Workload status Default Page contents
 Verify That Not Admin Users Can Access Distributed workload metrics default page contents
     [Documentation]    Verify That Not Admin Users Can Access Distributed workload metrics default page contents
     [Tags]    RHOAIENG-4837
-    ...       Tier1    DistributedWorkloads    Training    WorkloadsOrchestration
+    ...       Tier1    DistributedWorkloads    TrainingRay    WorkloadsOrchestration
     Launch Dashboard    ocp_user_name=${TEST_USER_3.USERNAME}    ocp_user_pw=${TEST_USER_3.PASSWORD}
     ...    ocp_user_auth_type=${TEST_USER_3.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}
     ...    browser=${BROWSER.NAME}    browser_options=${BROWSER.OPTIONS}
@@ -90,7 +90,7 @@ Verify That Not Admin Users Can Access Distributed workload metrics default page
 Verify The Workload Metrics By Submitting Kueue Batch Workload
     [Documentation]    Monitor the workload metrics status and chart details by submitting kueue batch workload
     [Tags]    RHOAIENG-5216
-    ...       Tier1    DistributedWorkloads    Training    WorkloadsOrchestration
+    ...       Tier1    DistributedWorkloads    TrainingRay    WorkloadsOrchestration
     Open Distributed Workload Metrics Home Page
     Select Distributed Workload Project By Name    ${PRJ_TITLE}
     # Submitting kueue batch workload
@@ -141,7 +141,7 @@ Verify The Workload Metrics By Submitting Kueue Batch Workload
 Verify The Workload Metrics By Submitting Ray Workload
     [Documentation]    Monitor the workload metrics status and chart details by submitting Ray workload
     [Tags]    RHOAIENG-5216
-    ...       Tier1    DistributedWorkloads    Training    WorkloadsOrchestration
+    ...       Tier1    DistributedWorkloads    TrainingRay    WorkloadsOrchestration
     Create Ray Cluster Workload   ${PRJ_TITLE}    ${LOCAL_QUEUE_NAME}    ${RAY_CLUSTER_NAME}
     Open Distributed Workload Metrics Home Page
     Select Distributed Workload Project By Name    ${PRJ_TITLE}
@@ -169,7 +169,7 @@ Verify The Workload Metrics By Submitting Ray Workload
 Verify Requested resources When Multiple Local Queue Exists
     [Documentation]    Verify That Not Admin Users Can Access Distributed workload metrics default page contents
     [Tags]    RHOAIENG-8559
-    ...       Tier1    DistributedWorkloads    Training    WorkloadsOrchestration
+    ...       Tier1    DistributedWorkloads    TrainingRay    WorkloadsOrchestration
     Submit Kueue Workload    ${LOCAL_QUEUE_NAME}    ${PRJ_TITLE}    ${CPU_REQUESTED}    ${MEMORY_REQUESTED}    ${JOB_NAME_QUEUE}
     ${MULTIPLE_LOCAL_QUEUE}    Set Variable    test-multiple-local-queue
     ${MULTIPLE_JOB_NAME}    Set Variable    multiple-lq-job

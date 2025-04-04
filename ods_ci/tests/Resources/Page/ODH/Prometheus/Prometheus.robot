@@ -212,10 +212,12 @@ Alerts Should Be Equal
 Alert Should Not Be Firing
     [Documentation]    Fails if a Prometheus alert is firing
     [Arguments]    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-duration}=${EMPTY}
-    ${is_alert_firing}=    Run Keyword And Return Status
+    ${is_alert_firing}  ${error}=    Run Keyword And Ignore Error
     ...    Alert Should Be Firing
     ...    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-duration}
-    Should Be True    not ${is_alert_firing}    msg=Alert ${alert} should not be firing
+    Should Be Equal As Strings    ${is_alert_firing}    FAIL
+    # To make sure the alert was found by 'Alert Should Be Firing' keyword
+    Should Contain    ${error}    was found in Prometheus but state != firing
 
 Alert Should Not Be Firing In The Next Period    # robocop: disable:too-many-arguments
     [Documentation]    Fails if a Prometheus alert is firing in the next ${period}

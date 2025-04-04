@@ -13,13 +13,16 @@ Test Tags           ExcludeOnODH
 
 *** Variables ***
 @{RECORD_GROUPS}    SLOs - Data Science Pipelines Operator    SLOs - Data Science Pipelines Application
-...    SLOs - Modelmesh Controller
-...    SLOs - ODH Model Controller
-...    SLOs - RHODS Operator v2
+...    SLOs - Modelmesh Controller    SLOs - CodeFlare Operator    SLOs - MCAD Controller    Usage Metrics
+...    SLOs - ODH Model Controller    SLOs - Kserve Controller Manager    SLOs - ODH Dashboard    Availability Metrics
+...    SLOs - RHODS Operator v2    SLOs - TrustyAI Controller Manager    SLOs - Notebook Controller
 
 @{ALERT_GROUPS}    SLOs-haproxy_backend_http_responses_dsp    RHODS Data Science Pipelines    SLOs-probe_success_dsp
 ...    SLOs-probe_success_modelmesh     SLOs-probe_success_dashboard    SLOs-probe_success_workbench
-...    DeadManSnitch
+...    DeadManSnitch     SLOs-probe_success_codeflare     Distributed Workloads CodeFlare     KubeFlow Training Operator
+...    SLOs-haproxy_backend_http_responses_dashboard     SLOs-probe_success_model_controller     SLOs-probe_success_kserve
+...    Distributed Workloads Kuberay     Distributed Workloads Kueue     RHODS-PVC-Usage     RHODS Notebook controllers
+...    SLOs-probe_success_trustyai
 
 
 *** Test Cases ***

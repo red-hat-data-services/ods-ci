@@ -33,7 +33,7 @@ Create S3 Data Connection
     ELSE
         Click Element    ${DC_ADD_BTN_1}
     END
-    Select Connection Type From Add Connection Modal    S3 compatible object storage - v1
+    Select Connection Type From Create Connection Modal    S3 compatible object storage - v1
     Fill Data Connection Form    ${project_title}    ${dc_name}    ${aws_access_key}    ${aws_secret_access}
     ...            aws_s3_endpoint=${aws_s3_endpoint}    aws_region=${aws_region}
     ...            connected_workbench=${connected_workbench}    press_cancel=${press_cancel}
@@ -154,10 +154,10 @@ Recreate S3 Data Connection
         ...    connected_workbench=${connected_workbench}
     END
 
-Select Connection Type From Add Connection Modal
-    [Documentation]    Select connection type from Add Connection modal
+Select Connection Type From Create Connection Modal
+    [Documentation]    Select connection type from Create Connection modal
     [Arguments]    ${connection_type}
-    Wait Until Page Contains Element    xpath=//header/h1/span[text()="Add connection"]
+    Wait Until Page Contains Element    xpath=//header/h1/span[text()="Create connection"]
     Wait Until Page Contains Element    ${CONNECTION_TYPE_DROPDOWN}
     Click Element    ${CONNECTION_TYPE_DROPDOWN}
     Sleep    1    reason=Sometimes it takes a little bit longer to finish rendering all the dropdown content

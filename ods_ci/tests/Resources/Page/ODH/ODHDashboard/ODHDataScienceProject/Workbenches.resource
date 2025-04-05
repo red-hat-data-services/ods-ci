@@ -369,14 +369,7 @@ Launch And Access Workbench
 Open Workbench
     [Documentation]    Clicks on "open" link for a given workbench and returns the handle of the current tab
     [Arguments]    ${workbench_title}
-    ${desc}=    Does Workbench Have A Description    ${workbench_title}
-    ${open_workbench_link}=    Set Variable
-    ...    ${WORKBENCH_SECTION_XP}//td[@data-label="Name"]//*[.="${workbench_title}"]
-    IF    ${desc}
-        ${open_workbench_link}=    Catenate    ${open_workbench_link}    /../../../td//a[.="Open"]
-    ELSE
-        ${open_workbench_link}=    Catenate    ${open_workbench_link}    /../../td//a[.="Open"]
-    END
+    ${open_workbench_link}=    Set Variable    //*[@data-testid="notebook-route-link" and .//*[text()="${workbench_title}"]]
     SeleniumLibrary.Wait Until Page Contains Element    ${open_workbench_link}    timeout=30s
     SeleniumLibrary.Click Link    ${open_workbench_link}
     ${previous_handle}=    SeleniumLibrary.Switch Window    NEW

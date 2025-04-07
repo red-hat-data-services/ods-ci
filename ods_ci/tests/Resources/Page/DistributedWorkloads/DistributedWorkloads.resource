@@ -198,7 +198,7 @@ Run Training Operator KFTO Test
 
 Run Training Operator KFTO SDK Test
     [Documentation]    Run Training Operator KFTO SDK Test
-    [Arguments]    ${TEST_NAME}
+    [Arguments]    ${TEST_NAME}    ${TRAINING_IMAGE}
     Log To Console    "Running test: ${TEST_NAME}"
     ${result} =    Run Process    ./${KFTO_BINARY_NAME} -test.run ${TEST_NAME}
     ...    shell=true
@@ -208,6 +208,7 @@ Run Training Operator KFTO SDK Test
     ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
     ...    env:ODH_NAMESPACE=${APPLICATIONS_NAMESPACE}
     ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-${KFTO_BINARY_NAME}-logs
+    ...    env:CODEFLARE_TEST_TRAINING_IMAGE=${TRAINING_IMAGE}
     ...    env:AWS_DEFAULT_ENDPOINT=${AWS_DEFAULT_ENDPOINT}
     ...    env:AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
     ...    env:AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}

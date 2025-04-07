@@ -305,6 +305,16 @@ Apply OpenShift Configuration
     Should Be Equal As Strings    ${result.rc}    0    The oc apply command failed
     Log    ${result.stdout}
 
+Set Resource Attribute
+    [Documentation]    Sets the value of an attribute of a specific resource
+    [Arguments]    ${namespace}    ${resource_type}    ${resource_name}    ${attribute_path}    ${value}
+    ${result} =    Run Process    oc patch ${resource_type} ${resource_name} -n ${namespace} --type 'json' -p '[{"op" : "replace" ,"path" : "${attribute_path}" ,"value" : "${value}"}]'
+    ...    shell=true    stderr=STDOUT
+    IF    $result.rc != 0
+        FAIL    Can not set value ${value} to ${resource_type} ${resource_name} attribute ${attribute_path} in the namespace ${namespace}
+    END
+    Log To Console    ${resource_type} ${resource_name} in the namespace ${namespace} attribute ${attribute_path} value is ${value}
+
 Get Resource Attribute
     [Documentation]    Gets the value of an attribute of a specific resource
     [Arguments]    ${namespace}    ${resource_type}    ${resource_name}    ${attribute_path}
@@ -313,7 +323,7 @@ Get Resource Attribute
     Should Be Equal    "${rc}"    "0"    msg=${value}
     IF    "${value}" != "${EMPTY}"
         Log To Console    ${resource_type} ${resource_name} in the namespace ${namespace} attribute ${attribute_path} value is ${value}
-    ELSE 
+    ELSE
         Log To Console    ${resource_type} ${resource_name} in the namespace ${namespace} attribute ${attribute_path} value is EMPTY
     END
     RETURN    ${value}

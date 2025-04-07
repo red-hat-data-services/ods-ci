@@ -15,10 +15,6 @@ Verify Auth Crd
     [Tags]      Smoke
     ...         Operator
     ...         RHOAIENG-18846
-<<<<<<< HEAD
-=======
-    ...         ExcludeOnODH
->>>>>>> 5ad82dcc (Add Auth CRD Test Case)
     ${rc}       ${odhdashboardconfig_groups}=    Run And Return Rc And Output
     ...    oc get odhdashboardconfig odh-dashboard-config -n redhat-ods-applications -o jsonpath='{.spec.groupsConfig}'
     Should Be Equal As Integers     ${rc}       0

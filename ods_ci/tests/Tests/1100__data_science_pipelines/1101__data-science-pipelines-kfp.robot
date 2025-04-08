@@ -4,9 +4,6 @@ Documentation       Test suite for OpenShift Pipeline using kfp python package
 Resource            ../../Resources/RHOSi.resource
 Resource            ../../Resources/ODS.robot
 Resource            ../../Resources/Common.robot
-Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
-Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipelines.resource
-Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Permissions.resource
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource            ../../Resources/CLI/DataSciencePipelines/DataSciencePipelinesBackend.resource
 Library             DateTime
@@ -78,13 +75,12 @@ Verify Upload Download In Data Science Pipelines Using The kfp Python Package
 
 
 *** Keywords ***
-# robocop: disable:line-too-long
 End To End Pipeline Workflow Using Kfp
     [Documentation]    Create, run and double check the pipeline result using Kfp python package. In the end,
     ...    clean the pipeline resources.
     [Arguments]    ${username}    ${password}    ${admin_username}    ${admin_password}    ${project}    ${python_file}
-    ...    ${method_name}    ${pipeline_params}    ${status_check_timeout}=160    ${ray}=${FALSE}
-
+    ...    ${method_name}    ${pipeline_params}    ${status_check_timeout}=160
+    # robocop: off=line-too-long
     Projects.Delete Project Via CLI By Display Name    ${project}
     Projects.Create Data Science Project From CLI    name=${project}    as_user=${admin_username}
 
@@ -92,14 +88,9 @@ End To End Pipeline Workflow Using Kfp
 
     ${status}    Login And Wait Dsp Route    ${admin_username}    ${admin_password}    ${project}
     Should Be True    ${status} == 200    Could not login to the Data Science Pipelines Rest API OR DSP routing is not working
-    # we remove and add a new project for sanity. LocalQueue is  per namespace
-    IF    ${ray} == ${TRUE}
-        Setup Kueue Resources    ${project}    cluster-queue-user    resource-flavor-user    local-queue-user
-    END
     # The run_robot_test.sh is sending the --variablefile ${TEST_VARIABLES_FILE} which may contain the `PIP_INDEX_URL`
     # and `PIP_TRUSTED_HOST` variables, e.g. for disconnected testing.
-    Launch Data Science Project Main Page    username=${admin_username}    password=${admin_password}
-    Assign Contributor Permissions To User ${username} in Project ${project}
+    ODS.Assign Contributor Permissions To User ${username} In Project ${project} Using CLI
     ${pip_index_url} =    Get Variable Value    ${PIP_INDEX_URL}    ${NONE}
     ${pip_trusted_host} =    Get Variable Value    ${PIP_TRUSTED_HOST}    ${NONE}
     Log    pip_index_url = ${pip_index_url} / pip_trusted_host = ${pip_trusted_host}
@@ -113,16 +104,3 @@ Data Science Pipelines Suite Setup
     [Documentation]    Data Science Pipelines Suite Setup
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
-
-Setup Kueue Resources
-    [Documentation]    Setup the kueue resources for the project
-    [Arguments]    ${project_name}    ${cluster_queue_name}    ${resource_flavor_name}    ${local_queue_name}
-    # Easy for debug
-    Log    sh ${KUEUE_RESOURCES_SETUP_FILEPATH} ${cluster_queue_name} ${resource_flavor_name} ${local_queue_name} ${project_name} "2" "8"
-    ${result} =    Run Process    sh ${KUEUE_RESOURCES_SETUP_FILEPATH} ${cluster_queue_name} ${resource_flavor_name} ${local_queue_name} ${project_name} "2" "8"
-    ...    shell=true
-    ...    stderr=STDOUT
-    Log    ${result.stdout}
-    IF    ${result.rc} != 0
-        FAIL    Failed to setup kueue resources
-    END

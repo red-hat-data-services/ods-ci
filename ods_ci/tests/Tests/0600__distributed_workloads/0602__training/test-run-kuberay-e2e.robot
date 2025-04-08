@@ -15,7 +15,7 @@ Run TestRayJob test
     [Documentation]    Run Go E2E test: TestRayJob
     [Tags]  Tier1
     ...     DistributedWorkloads
-    ...     Training
+    ...     TrainingRay
     ...     Kuberay
     Run Kuberay E2E Test    "^TestRayJob$"
 
@@ -23,7 +23,7 @@ Run TestRayJobWithClusterSelector test
     [Documentation]    Run Go E2E test: TestRayJobWithClusterSelector
     [Tags]  Sanity
     ...     DistributedWorkloads
-    ...     Training
+    ...     TrainingRay
     ...     Kuberay
     Run Kuberay E2E Test    TestRayJobWithClusterSelector
 
@@ -31,7 +31,7 @@ Run TestRayJobSuspend test
     [Documentation]    Run Go E2E test: TestRayJobSuspend
     [Tags]  Tier1
     ...     DistributedWorkloads
-    ...     Training
+    ...     TrainingRay
     ...     Kuberay
     Run Kuberay E2E Test    TestRayJobSuspend
 
@@ -39,7 +39,7 @@ Run TestRayJobLightWeightMode test
     [Documentation]    Run Go E2E test: TestRayJobLightWeightMode
     [Tags]  Tier1
     ...     DistributedWorkloads
-    ...     Training
+    ...     TrainingRay
     ...     Kuberay
     ...     ProductBug:RHOAIENG-6614
     Run Kuberay E2E Test    TestRayJobLightWeightMode
@@ -75,6 +75,13 @@ Teardown Kuberay E2E Test Suite
     RHOSi Teardown
     Enable Component    kueue
     Wait Component Ready    kueue
+    Log To Console    "Additional waiting due to RHOAIENG-20295"
+    ${result} =    Run Process    oc wait --for\=condition\=Available --timeout\=300s -n ${APPLICATIONS_NAMESPACE} deployment/kueue-controller-manager
+    ...    shell=true    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Timeout waiting for deployment/kueue-controller-manager to be available in ${APPLICATIONS_NAMESPACE}
+    END
 
 Run Kuberay E2E Test
     [Documentation]    Run Kuberay E2E Test

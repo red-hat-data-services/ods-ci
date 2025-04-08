@@ -9,6 +9,7 @@ Resource            ../../../../Resources/OCP.resource
 Resource            ../../../../Resources/Page/OCPDashboard/OCPDashboard.resource
 Resource            ../../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Resource            ../../../../Resources/Page/ODH/Prometheus/Prometheus.robot
+Resource            ../../../../Resources/Page/ODH/Prometheus/Alerts.resource
 Resource            ../../../../Resources/ODS.robot
 Resource            ../../../../Resources/Page/ODH/Grafana/Grafana.resource
 Resource            ../../../../Resources/Page/HybridCloudConsole/HCCLogin.robot
@@ -194,6 +195,8 @@ Verify Users Can Update Notification Email After Installing RHODS With The AddOn
     [Tags]    Tier2
     ...       ODS-673
     ...       Deployment-AddOnFlow
+    ...       Monitoring
+    Skip If RHODS Is Self-Managed
     ${email_to_change} =    Set Variable    dummyemail1@redhat.com
     ${cluster_name} =    Common.Get Cluster Name From Console URL
     ${current_email} =    Get Notification Email From Addon-Managed-Odh-Parameters Secret
@@ -226,7 +229,9 @@ Verify Monitoring Stack Is Reconciled Without Restarting The ODS Operator
     [Documentation]    Verify Monitoring Stack Is Reconciled Without Restarting The RHODS Operator
     [Tags]    Tier2
     ...       ODS-699
+    ...       Monitoring
     ...       Execution-Time-Over-15m
+    Skip If RHODS Is Self-Managed
     Replace "Prometheus" With "Grafana" In Rhods-Monitor-Federation
     Wait Until Operator Reverts "Grafana" To "Prometheus" In Rhods-Monitor-Federation
 
@@ -299,6 +304,77 @@ Verify All The Pods Are Using Image Digest Instead Of Tags
     ${projects_list} =    Split String    ${output}
     Append To List    ${projects_list}     ${OPERATOR_NAMESPACE}
     Container Image Url Should Use Image Digest Instead Of Tags Based On Project Name  @{projects_list}
+
+Verify No Application Pods Run With Anyuid SCC Or As Root
+    [Documentation]    Verifies that no pods in application namespace run with anyuid SCC or as a root
+    [Tags]    Smoke
+    ...       RHOAIENG-15892
+    ...       Operator
+    ${return_code}    ${output} =    Run And Return Rc And Output    oc get pod -n ${APPLICATIONS_NAMESPACE} -o custom-columns="NAMESPACE:metadata.namespace,NAME:metadata.name,SCC:.metadata.annotations.openshift\\.io/scc,CONTAINER_NAME:.spec.containers[*].name,RUNASUSER_CONTAINERS:.spec.containers[*].securityContext.runAsUser,RUNASUSER:.spec.securityContext.runAsUser"  # robocop: disable
+    Should Be Equal As Integers	 ${return_code}	 0  msg=Error getting SCC of pods
+    Log    Pods and their SCC are: ${output}
+    ${status} =    Run Keyword And Return Status    Should Not Contain Any    ${output}    anyuid
+    IF    not ${status}    Fail      msg=Some pods are running with anyuid SCC
+
+    ${return_code}    ${output} =    Run And Return Rc And Output    oc get pod -n ${APPLICATIONS_NAMESPACE} -o json | jq '.items[] | select(any(.spec.containers[].securityContext.runAsUser; . == 0 ) or .spec.securityContext.runAsUser == 0) | .metadata.namespace + "/" + .metadata.name'
+    Should Be Equal As Integers	 ${return_code}	 0  msg=Error getting runAsUser of pods
+    ${status} =    Run Keyword And Return Status    Should Be Empty    ${output}
+    IF    not ${status}    Fail      msg=Some pods are running as root (UID=0)
+
+Verify No Alerts Are Firing After Installation Except For DeadManSnitch    # robocop: disable:too-long-test-case
+    [Documentation]    Verifies that, after installation, only the DeadManSnitch alert is firing
+    [Tags]    Smoke
+    ...       Tier1
+    ...       ODS-540
+    ...       RHOAIENG-13079
+    ...       Monitoring
+    ...       Operator
+    Skip If RHODS Is Self-Managed
+    # If these numbers change, add also alert-specific tests
+    # Need to wait to stabilize alerts after installation
+    Run Keyword And Continue On Failure
+    ...    Wait Until Keyword Succeeds    5 min    0 sec    Verify Number Of Alerting Rules  47  inactive
+    Run Keyword And Continue On Failure
+    ...    Verify Number Of Alerting Rules  1  firing
+    # Order of keys in prometheus-configs.yaml
+    # deadmanssnitch-alerting.rules
+    Verify Alert Is Firing And Continue On Failure
+    ...    DeadManSnitch    DeadManSnitch
+    # codeflare-alerting.rules
+    Verify "CodeFlare Operator Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
+    Verify "Distributed Workloads CodeFlare" Alerts Are Not Firing And Continue On Failure
+    # trainingoperator-alerting.rules
+    Verify "KubeFlow Training Operator" Alerts Are Not Firing And Continue On Failure
+    # rhods-dashboard-alerting.rules
+    Verify "RHODS Dashboard Route Error Burn Rate" Alerts Are Not Firing And Continue On Failure
+    Verify "RHODS Dashboard Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
+    # data-science-pipelines-operator-alerting.rules
+    Verify "Data Science Pipelines Application Route Error Burn Rate" Alerts Are Not Firing And Continue On Failure
+    Verify "Data Science Pipelines Operator Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
+    Verify "RHODS Data Science Pipelines" Alerts Are Not Firing And Continue On Failure
+    # model-mesh-alerting.rules
+    Verify "Modelmesh Controller Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
+    # odh-model-controller-alerting.rules
+    Verify "ODH Model Controller Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
+    # kserve-alerting.rules
+    Verify "Kserve Controller Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
+    # ray-alerting.rules
+    Verify "Distributed Workloads Kuberay" Alerts Are Not Firing And Continue On Failure
+    # kueue-alerting.rules
+    Verify "Distributed Workloads Kueue" Alerts Are Not Firing And Continue On Failure
+    # workbenches-alerting.rules
+    Verify Alert Is Not Firing And Continue On Failure
+    ...    RHODS-PVC-Usage    User notebook pvc usage above 90%    alert-duration=120
+    Verify Alert Is Not Firing And Continue On Failure
+    ...    RHODS-PVC-Usage    User notebook pvc usage at 100%    alert-duration=120
+    Verify "Kubeflow Notebook Controller Pod Is Not Running" Alerts Are Not Firing And Continue On Failure
+    Verify "ODH Notebook Controller Pod Is Not Running" Alerts Are Not Firing And Continue On Failure
+    Verify "RHODS Jupyter Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
+    # trustyai-alerting.rules
+    Verify "TrustyAI Controller Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
+    # model-registry-operator-alerting.rules
+    # Model Registry not GA yet (Removed state), so its metrics are not enabled by default
+    # Verify "Model Registry Operator Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
 
 
 *** Keywords ***

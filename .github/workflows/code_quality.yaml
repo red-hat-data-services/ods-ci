@@ -25,11 +25,12 @@ jobs:
       -   name: Checkout repository
           uses: actions/checkout@v4
       -   name: Install dependencies
-          run: pipx install robotframework-robocop
+          #  robocop 6.X includes a new cli format and its not compatible with --reports
+          run: pipx install robotframework-robocop~=5.0.0
       -   name: Run robocop
           run: robocop --verbose --reports sarif . || true
       -   name: Upload SARIF file
-          uses: github/codeql-action/upload-sarif@v2
+          uses: github/codeql-action/upload-sarif@v3
           with:
             sarif_file: .sarif.json
             category: robocop
@@ -38,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       python_version: '3.11'
-      poetry_version: '1.8.3'
+      poetry_version: '2.1.1'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -60,7 +61,7 @@ jobs:
 
       - run: poetry check --lock
 
-      - run: poetry install --sync
+      - run: poetry sync --no-interaction
 
       # run all liners in turn and don't fail fast
 
@@ -78,7 +79,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       python_version: '3.11'
-      poetry_version: '1.8.3'
+      poetry_version: '2.1.1'
     steps:
       - uses: actions/checkout@v4
 
@@ -96,6 +97,6 @@ jobs:
         run: poetry env use "${{ steps.setup-python.outputs.python-path }}"
 
       - name: Install deps
-        run: poetry install --sync
+        run: poetry sync --no-interaction
 
       - run: poetry run pytest

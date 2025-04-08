@@ -28,8 +28,7 @@ ${MSG_REGEX}                                denied the request: only one service
 *** Test Cases ***
 Validate Service Mesh Control Plane Already Created
     [Documentation]    This Test Case validates that only one ServiceMeshControlPlane is allowed to be installed per project/namespace
-    [Tags]      RHOAIENG-2517       Operator    Tier3       ProductBug
-    Fetch Image Url And Update Channel
+    [Tags]      RHOAIENG-2517      Operator    Tier3        AutomationBug
     Check Whether DSC Exists And Save Component Statuses
     IF    "${CLUSTER_TYPE}" == "selfmanaged"
         Uninstall RHODS In Self Managed Cluster
@@ -41,6 +40,7 @@ Validate Service Mesh Control Plane Already Created
         Uninstall RHODS In OSD
         Create Smcp From Template
         Install RHODS In Managed Cluster Using CLI      ${CLUSTER_TYPE}     ${IMAGE_URL}
+        Verify RHODS Installation
     END
     Operator Deployment Should Be Ready
     # Go check the Operator logs for the error message: denied the request: only one service mesh may be installed per project/namespace
@@ -51,12 +51,14 @@ Validate Service Mesh Control Plane Already Created
 Suite Setup
     [Documentation]    Suite Setup
     RHOSi Setup
+    Fetch Image Url And Update Channel
     Wait Until Operator Ready    ${SERVICE_MESH_OPERATOR_DEPLOYMENT_NAME}    ${SERVICE_MESH_OPERATOR_NS}
     Wait Until Operator Ready    ${OPERATOR_DEPLOYMENT_NAME}    ${OPERATOR_NAMESPACE}
     Wait For DSCI Ready State    ${DSCI_NAME}    ${OPERATOR_NAMESPACE}
     IF  "${PRODUCT}" == "ODH"
       Set Global Variable  ${OPERATOR_NAME_LABEL}  opendatahub-operator
       Set Global Variable  ${MODEL_REGISTRY_NAMESPACE}    odh-model-registries
+      Set Global Variable  ${OPERATOR_YAML_LABEL}  opendatahub-operator
       IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
           Set Global Variable  ${OPERATOR_NAME}  rhods-operator
       ELSE
@@ -66,6 +68,7 @@ Suite Setup
       Set Global Variable  ${OPERATOR_NAME}  rhods-operator
       Set Global Variable  ${OPERATOR_NAME_LABEL}  rhods-operator
       Set Global Variable  ${MODEL_REGISTRY_NAMESPACE}    rhoai-model-registries
+      Set Global Variable  ${OPERATOR_YAML_LABEL}  rhods-operator
     END
 
 Suite Teardown

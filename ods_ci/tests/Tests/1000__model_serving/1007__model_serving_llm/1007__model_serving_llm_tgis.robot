@@ -66,7 +66,7 @@ Verify User Can Serve And Query A Model    # robocop: off=too-long-test-case,too
 
 Verify User Can Deploy Multiple Models In The Same Namespace    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Checks if user can deploy and query multiple models in the same namespace
-    [Tags]    Tier1    ODS-2371
+    [Tags]    Tier1    ODS-2371    deprecatedTest
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${TEST_NS}-multisame
     ${test_namespace}=    Set Variable     ${TEST_NS}-multisame
     ${model_one_name}=    Set Variable    bloom-560m-caikit

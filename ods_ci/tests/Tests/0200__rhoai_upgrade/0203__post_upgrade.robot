@@ -156,30 +156,29 @@ Verify POD Status
 Test Inference Post RHODS Upgrade
     # robocop: off=too-many-calls-in-test-case
     # robocop: off=too-long-test-case
-    [Documentation]    Test the inference result after having deployed a model that requires Token Authentication
-    [Tags]                  Upgrade    ModelServing
-    [Setup]                 Begin Web Test
-    ${PRJ_TITLE}            Set Variable        model-serving-upgrade
-    ${PRJ_DESCRIPTION}      Set Variable        project used for model serving tests        # robocop: off=unused-variable      # robocop: disable:line-too-long
-    ${MODEL_NAME}           Set Variable        test-model
-    ${MODEL_CREATED}        Set Variable        ${FALSE}        # robocop: off=unused-variable
-    ${RUNTIME_NAME}         Set Variable        Model Serving Test      # robocop: off=unused-variable
-    ${INFERENCE_INPUT}      Set Variable        @tests/Resources/Files/modelmesh-mnist-input.json       # robocop: off=unused-variable      # robocop: disable:line-too-long
-    ${INFERENCE_INPUT_OPENVINO}    Set Variable
-    ...    @tests/Resources/Files/openvino-example-input.json
-    ${EXPECTED_INFERENCE_OUTPUT_OPENVINO}    Set Variable
-    ...    {"model_name":"test-model__isvc-8655dc7979","model_version":"1","outputs":[{"name":"Func/StatefulPartitionedCall/output/_13:0","datatype":"FP32","shape":[1,1],"data":[0.99999994]}]}   # robocop: disable:line-too-long
-    Fetch CA Certificate If RHODS Is Self-Managed
-    Open Model Serving Home Page
-    Verify Model Status     ${MODEL_NAME}           success
-    Run Keyword And Continue On Failure
-    ...    Verify Model Inference
-    ...    ${MODEL_NAME}
-    ...    ${INFERENCE_INPUT_OPENVINO}
-    ...    ${EXPECTED_INFERENCE_OUTPUT_OPENVINO}
-    ...    token_auth=${FALSE}
-    Remove File     openshift_ca.crt
-    [Teardown]      Run     oc delete project ${PRJ_TITLE}
+    [Documentation]    Test the inference result after having deployed a model
+    [Tags]                  Upgrade    ModelServing    ModelServer
+    Set Suite Variable    ${TEST_NS}    ovmsmodel-upgrade
+    Set Suite Variable    ${KSERVE_MODE}    RawDeployment    # RawDeployment   # Serverless
+    Set Suite Variable    ${INFERENCE_INPUT}    @tests/Resources/Files/modelmesh-mnist-input.json
+    Set Suite Variable    ${EXPECTED_INFERENCE_OUTPUT}    {"model_name": "test-dir","model_version": "1","outputs": [{"name": "Plus214_Output_0","shape": [1, 10],"datatype": "FP32","data": [-8.233053207397461, -7.749703407287598, -3.4236814975738527, 12.363029479980469, -12.079103469848633, 17.2665958404541, -10.570976257324219, 0.7130761742591858, 3.3217151165008547, 1.3621227741241456]}]}  #robocop: disable
+    Setup Test Variables    model_name=test-dir    use_pvc=${TRUE}    use_gpu=${FALSE}
+    ...    kserve_mode=${KSERVE_MODE}
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${TEST_NS}
+    ${pod_name}=  Get Pod Name    namespace=${TEST_NS}
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ${service_port}=    Extract Service Port    service_name=${model_name}-predictor    protocol=TCP
+    ...    namespace=${TEST_NS}
+    IF   "${KSERVE_MODE}"=="RawDeployment"
+        Start Port-forwarding    namespace=${TEST_NS}    pod_name=${pod_name}  local_port=${service_port}
+        ...    remote_port=${service_port}    process_alias=ovms-process
+    END
+    Verify Model Inference With Retries   model_name=${model_name}    inference_input=${INFERENCE_INPUT}
+    ...    expected_inference_output=${EXPECTED_INFERENCE_OUTPUT}   project_title=${TEST_NS}
+    ...    deployment_mode=Cli  kserve_mode=${KSERVE_MODE}    service_port=${service_port}
+    ...    end_point=/v2/models/${model_name}/infer  retries=10
+    [Teardown]      Run     oc delete project ${TEST_NS}
 
 Verify Custom Runtime Exists After Upgrade
     [Documentation]    Test the inference result after having deployed a model that requires Token Authentication
@@ -251,17 +250,17 @@ Verify Ray Cluster Exists And Monitor Workload Metrics By Submitting Ray Job Aft
 
 Run Training Operator KFTO Run PyTorchJob Test Use Case
     [Documentation]    Run Training Operator KFTO Run PyTorchJob Test Use Case
-    [Tags]      Upgrade    Training
+    [Tags]      Upgrade    TrainingKubeflow
     [Setup]     Prepare Training Operator KFTO E2E Test Suite
-    Skip If Operator Starting Version Is Not Supported      minimum_version=2.12.0
+    Skip If Operator Starting Version Is Not Supported      minimum_version=2.19.0
     Run Training Operator KFTO Test          TestRunPytorchjob    ${CUDA_TRAINING_IMAGE}
     [Teardown]      Teardown Training Operator KFTO E2E Test Suite
 
 Run Training Operator KFTO Run Sleep PyTorchJob Test Use Case
     [Documentation]    Verify that running PyTorchJob Pod wasn't restarted
-    [Tags]      Upgrade    Training
+    [Tags]      Upgrade    TrainingKubeflow
     [Setup]     Prepare Training Operator KFTO E2E Test Suite
-    Skip If Operator Starting Version Is Not Supported      minimum_version=2.12.0
+    Skip If Operator Starting Version Is Not Supported      minimum_version=2.19.0
     Run Training Operator KFTO Test      TestVerifySleepPytorchjob    ${CUDA_TRAINING_IMAGE}
     [Teardown]      Teardown Training Operator KFTO E2E Test Suite
 
@@ -299,7 +298,6 @@ Verify That DSC And DSCI Release.Version Attribute matches the value in the subs
 Data Science Pipelines Post Upgrade Verifications
     [Documentation]    Verifies the status of the resources created in project dsp-test-upgrade after the upgradea
     [Tags]      Upgrade     DataSciencePipelines-Backend
-    Skip If Operator Starting Version Is Not Supported      minimum_version=2.14.0
     DataSciencePipelinesUpgradeTesting.Verify Resources After Upgrade
 
 Model Registry Post Upgrade Verification

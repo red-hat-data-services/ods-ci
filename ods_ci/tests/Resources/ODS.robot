@@ -404,10 +404,26 @@ Wait For DSCI Ready State
     ...    oc wait --timeout=${wait_time} --for jsonpath='{.status.conditions[].reason}'=ReconcileCompleted -n ${namespace} dsci ${dsci}
     Should Be Equal    "${rc}"    "0"     msg=${output}
 
-Wait For DSC Conditions Reconciled
+Wait For DSC Ready State
     [Documentation]    Checks all DSC conditions to be successfully reconciled
     [Arguments]    ${namespace}    ${dsc_name}    ${wait_time}=20m
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc wait --timeout=${wait_time} --for jsonpath='{.status.conditions[].reason}'=ReconcileCompleted -n ${namespace} dsc ${dsc_name}    # robocop: disable
+    ...    oc wait --timeout=${wait_time} --for jsonpath='{.status.conditions[].type}'=Ready -n ${namespace} dsc ${dsc_name}    # robocop: disable
     Should Be Equal As Integers    ${rc}     ${0}
     Log    ${out}    console=${out}
+
+Assign ${permission_type} Permissions To User ${username} In Project ${project_title} Using CLI
+    [Documentation]     Adds permissions to Data Science Projects using the CLI same as the ones added with the UI
+    # robocop: off=line-too-long,unnecessary-string-conversion
+    IF  "${permission_type}" == "Admin"
+        ${cluster_role}=   Set Variable    "admin"
+    ELSE IF   "${permission_type}" == "Contributor"
+        ${cluster_role}=   Set Variable    "edit"
+    ELSE
+        Fail    Usupported permission type ${permission_type}
+    END
+    ${rolebinding_suffix}=    Generate Random String    6   [LOWER]
+    ${rolebinding_name}=    Catenate    SEPARATOR=-    dashboard-permission    ${rolebinding_suffix}
+    Run And Verify Command    oc create rolebinding ${rolebinding_name} --clusterrole=${cluster_role} --user=${username} -n ${project_title}
+    Run And Verify Command    oc label rolebinding ${rolebinding_name} opendatahub.io/dashboard=true -n ${project_title}
+    Run And Verify Command    oc label rolebinding ${rolebinding_name} opendatahub.io/project-sharing=true -n ${project_title}

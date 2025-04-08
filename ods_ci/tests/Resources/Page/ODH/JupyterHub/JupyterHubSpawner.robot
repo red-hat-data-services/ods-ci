@@ -31,9 +31,9 @@ ${KFNBC_MODAL_X_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[@aria-label="Clo
 ${KFNBC_CONTROL_PANEL_HEADER_XPATH} =    //h1[.="Notebook server control panel"]
 ${KFNBC_ENV_VAR_NAME_PRE} =    //span[.="Variable name"]/../../../div[@class="pf-v6-c-form__group-control"]
 ${DEFAULT_PYTHON_VER} =    3.11
-${PREVIOUS_PYTHON_VER} =    3.9
-${DEFAULT_NOTEBOOK_VER} =    2024.2
-${PREVIOUS_NOTEBOOK_VER} =    2024.1
+${PREVIOUS_PYTHON_VER} =    3.11
+${DEFAULT_NOTEBOOK_VER} =    2025.1
+${PREVIOUS_NOTEBOOK_VER} =    2024.2
 
 
 *** Keywords ***
@@ -78,25 +78,10 @@ Select Notebook Image
         END
     END
 
-    IF  "${version}"=="previous"
-        # Let's reset the JupyterLibrary settings so that global variables for Jupyter 3 (default) are in place.
-        Update Globals For JupyterLab 3 Custom
-    ELSE
-        # For Jupyter 4, we need to update global default variable values (images 2024b and newer)
-        # This calls method from JupyterLibrary Version.resource module
-        # https://github.com/robots-from-jupyter/robotframework-jupyterlibrary/blob/9e25fcb89a5f1a723c59e9b96706e4c638e0d9be/src/JupyterLibrary/clients/jupyterlab/Version.resource
-        Update Globals For JupyterLab 4
-    END
-
-Update Globals For JupyterLab 3 Custom
-    [Documentation]    Replace current selectors with JupyterLab 3-specific ones.
-    ...    This is the custom implementation since the original one doesn't really
-    ...    reverts defaults if they had been set to Jupyter 4 in the past already.
-    Set Global Variable    ${CM VERSION}    ${5}
-    Set Global Variable    ${CM CSS EDITOR}    .CodeMirror
-    Set Global Variable    ${CM JS INSTANCE}    .CodeMirror
-    Set Global Variable    ${JLAB CSS ACTIVE INPUT}    ${JLAB CSS ACTIVE CELL} ${CM CSS EDITOR}
-    Log    JupyterLab 3 is now the current version.
+    # For Jupyter 4, we need to update global default variable values (images 2024b and newer)
+    # This calls method from JupyterLibrary Version.resource module
+    # https://github.com/robots-from-jupyter/robotframework-jupyterlibrary/blob/9e25fcb89a5f1a723c59e9b96706e4c638e0d9be/src/JupyterLibrary/clients/jupyterlab/Version.resource
+    Update Globals For JupyterLab 4
 
 Verify Version Dropdown Is Present
     [Documentation]    Validates the version dropdown for a given Notebook image
@@ -222,14 +207,14 @@ Spawn Notebook
     Click Button  Start server
     # Waiting for 60 seconds, since a long wait seems to redirect the user to the control panel
     # if the spawn was successful
-    ${modal} =    Run Keyword And Return Status    Wait Until Page Contains
-    ...    Starting server    60s
+    ${modal} =    Run Keyword And Return Status    Wait Until Page Contains Element
+    ...    //*[@data-testid="notebook-status-modal"]
     IF  ${modal}==False
         Log    message=Starting server modal didn't appear after 60s    level=ERROR
         ${control_panel_visible} =  Control Panel Is Visible
         IF  ${control_panel_visible}==True
-         # If the user has been redirected to the control panel, move to the server and continue execution
-            Click Button    Return to server
+            # If the user has been redirected to the control panel, move to the server and continue execution
+            Click Element    xpath://*[@data-id="return-nb-button"]
             # If route annotation is empty redirect won't work, fail here
             Wait Until Page Does Not Contain Element    xpath:${KFNBC_CONTROL_PANEL_HEADER_XPATH}
             ...    timeout=15s    error=Redirect hasn't happened, check route annotation (opendatahub.io/link) in Notebook CR
@@ -259,7 +244,7 @@ Spawn Notebook
             ELSE IF  ${control_panel_visible}==True
                 # If the user has been redirected to the control panel,
                 # move to the server and continue execution
-                Click Button    Return to server
+                Click Element    xpath://*[@data-id="return-nb-button"]
                 RETURN
             ELSE IF  ${JL_Visible}==True
                 # We are in JL, return and let `Spawn Notebook With Arguments`
@@ -272,11 +257,13 @@ Spawn Notebook
             END
         END
     END
-    Wait Until Element Is Visible  xpath://div[@role="progressbar"]
+    Wait Until Element Is Visible  xpath://*[@data-testid="notebook-status-text"]
     IF    ${expect_autoscaling}
         Wait Until Page Contains    TriggeredScaleUp    timeout=120s
     END
-    Wait Until Page Contains    The notebook server is up and running.    ${spawner_timeout}
+    Wait Until Page Contains Element
+    ...    //*[@data-testid="notebook-status-text"]//*[text() = "Running"]
+    ...    ${spawner_timeout}
     IF  ${same_tab}
         Click Button    Open in current tab
     ELSE

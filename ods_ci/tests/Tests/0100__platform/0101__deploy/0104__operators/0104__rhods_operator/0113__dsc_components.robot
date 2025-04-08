@@ -310,7 +310,7 @@ Suite Setup
     RHOSi Setup
     ${DSC_SPEC}=    Get DataScienceCluster Spec    ${DSC_NAME}
     Log To Console    DSC Spec: ${DSC_SPEC}
-    Wait For DSC Conditions Reconciled    ${OPERATOR_NS}     ${DSC_NAME}
+    Wait For DSC Ready State    ${OPERATOR_NS}     ${DSC_NAME}
     ${SAVED_MANAGEMENT_STATES.RAY}=     Get DSC Component State    ${DSC_NAME}    ray    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.KUEUE}=     Get DSC Component State    ${DSC_NAME}    kueue    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.CODEFLARE}=     Get DSC Component State    ${DSC_NAME}    codeflare    ${OPERATOR_NS}

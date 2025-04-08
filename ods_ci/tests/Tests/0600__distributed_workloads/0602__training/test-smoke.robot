@@ -3,8 +3,8 @@ Documentation     Smoke tests for Workloads Training
 Library           Process
 Resource          ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 Resource          ../../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
-Suite Setup       Prepare Codeflare E2E Test Suite
-Suite Teardown    Teardown Codeflare E2E Test Suite
+Suite Setup       RHOSi Setup
+Suite Teardown    RHOSi Teardown
 
 
 *** Test Cases ***
@@ -12,7 +12,7 @@ Ray smoke test
     [Documentation]    Check that Kuberay deployment and service are up and running
     [Tags]    Smoke
     ...       DistributedWorkloads
-    ...       Training
+    ...       TrainingRay
     ...       ODS-2648
     Log To Console    Waiting for kuberay-operator to be available
     ${result} =    Run Process    oc wait --for\=condition\=Available --timeout\=60s -n ${APPLICATIONS_NAMESPACE} deployment/kuberay-operator
@@ -35,7 +35,7 @@ Codeflare smoke test
     [Documentation]    Check that Codeflare deployment and its monitoring service are up and running
     [Tags]    Smoke
     ...       DistributedWorkloads
-    ...       Training
+    ...       TrainingRay
     ...       ODS-2675
     Log To Console    Waiting for codeflare-operator-manager to be available
     ${result} =    Run Process    oc wait --for\=condition\=Available --timeout\=60s -n ${APPLICATIONS_NAMESPACE} deployment/codeflare-operator-manager
@@ -57,7 +57,8 @@ Training operator smoke test
     [Documentation]    Check that Training operator deployment is up and running
     [Tags]    Smoke
     ...       DistributedWorkloads
-    ...       Training
+    ...       TrainingKubeflow
+    Skip If Operator Starting Version Is Not Supported      minimum_version=2.19.0
     Log To Console    Waiting for kubeflow-training-operator to be available
     ${result} =    Run Process    oc wait --for\=condition\=Available --timeout\=300s -n ${APPLICATIONS_NAMESPACE} deployment/kubeflow-training-operator
     ...    shell=true    stderr=STDOUT
@@ -66,14 +67,3 @@ Training operator smoke test
         FAIL    Timeout waiting for deployment/kubeflow-training-operator to be available in ${APPLICATIONS_NAMESPACE}
     END
     Verify container images    kubeflow-training-operator    training-operator    odh-training-operator
-
-
-*** Keywords ***
-Prepare Codeflare E2E Test Suite
-    Enable Component    trainingoperator
-    Wait Component Ready    trainingoperator
-    RHOSi Setup
-
-Teardown Codeflare E2E Test Suite
-    Disable Component    trainingoperator
-    RHOSi Teardown

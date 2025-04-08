@@ -37,6 +37,7 @@ Verify Openvino_IR Model Via UI (OVMS on Kserve)
     [Documentation]    Test the deployment of an openvino_ir model in Kserve using OVMS
     [Tags]    Smoke
     ...       ODS-2626
+    ...       deprecatedTest
     Create Openvino Models For Kserve    server_name=${RUNTIME_NAME}    model_name=${MODEL_NAME}
     ...    project_name=${PRJ_TITLE}   num_projects=1
     # This inference request often fails because of timing, currently it is sent ~10 seconds after the model is shown as

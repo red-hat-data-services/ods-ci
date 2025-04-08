@@ -21,7 +21,7 @@ spec:
       #     cpu: 8
       #     memory: 16Gi
     - name: transformer-container
-      image: quay.io/modh/caikit-tgis-serving@sha256:3cbd01ca3c79de84eec111fa451fef6e2071d11c74550692d04862e45bc95e0a
+      image: quay.io/modh/caikit-tgis-serving@sha256:2c7eef73708b5d73de33153459ac7238fdcf517cdc3544c775981f5814b4b6ed
       env:
         - name: TRANSFORMERS_CACHE
           value: /tmp/transformers_cache

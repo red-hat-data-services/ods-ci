@@ -37,7 +37,13 @@ Validate Trusted CA Bundles State Managed
     ...    Check ConfigMap Contains CA Bundle Key    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    ca-bundle.crt    ${TEST_NS}
 
     Set Custom CA Bundle Value In DSCI    ${DSCI_NAME}   ${CUSTOM_CA_BUNDLE}    ${OPERATOR_NS}
-    Wait Until Keyword Succeeds    10 min    0 sec
+    ${rc}   ${output}=    Run And Return Rc And Output
+    ...    oc get project test-trustedcabundle -o yaml
+    Log To Console          ${output}
+    ${rc}   ${output}=    Run And Return Rc And Output
+    ...    oc get configmap ${TRUSTED_CA_BUNDLE_CONFIGMAP} -n ${TEST_NS} -o yaml | grep ${CUSTOM_CA_BUNDLE}
+    Log To Console          ${output}
+    Wait Until Keyword Succeeds    5 min    0 sec
     ...    Is CA Bundle Value Present    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    ${CUSTOM_CA_BUNDLE}    ${TEST_NS}    ${IS_PRESENT}
 
     [Teardown]     Restore DSCI Trusted CA Bundle Settings    ${SAVED_CUSTOM_CA_BUNDLE}

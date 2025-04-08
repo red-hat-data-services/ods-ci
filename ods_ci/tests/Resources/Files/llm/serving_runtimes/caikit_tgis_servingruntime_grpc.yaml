@@ -23,7 +23,7 @@ spec:
       ## Note: cannot add readiness/liveness probes to this container because knative will refuse them.
       # multi-container probing will be available after https://github.com/knative/serving/pull/14853 is merged
     - name: transformer-container
-      image: quay.io/modh/caikit-tgis-serving@sha256:3cbd01ca3c79de84eec111fa451fef6e2071d11c74550692d04862e45bc95e0a
+      image: quay.io/modh/caikit-tgis-serving@sha256:2c7eef73708b5d73de33153459ac7238fdcf517cdc3544c775981f5814b4b6ed
       env:
         - name: RUNTIME_LOCAL_MODELS_DIR
           value: /mnt/models

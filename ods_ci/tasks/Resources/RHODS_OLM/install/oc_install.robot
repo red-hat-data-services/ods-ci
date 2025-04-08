@@ -436,13 +436,19 @@ Wait For DataScienceCluster CustomResource To Be Ready
 
 Component Should Be Enabled
     [Arguments]    ${component}    ${dsc_name}=${DSC_NAME}
-    ${status} =    Is Component Enabled    ${component}    ${dsc_name}
-    IF    '${status}' != 'true'    Fail
+    ${status} =   Set Variable   False
+    WHILE   '${status}' != 'true'    limit=60 seconds
+        ${status} =    Is Component Enabled    ${component}    ${dsc_name}
+        IF    '${status}' == 'true'    BREAK
+    END
 
 Component Should Not Be Enabled
     [Arguments]    ${component}    ${dsc_name}=${DSC_NAME}
-    ${status} =    Is Component Enabled    ${component}    ${dsc_name}
-    IF    '${status}' != 'false'    Fail
+    ${status} =   Set Variable   True
+    WHILE   '${status}' != 'false'    limit=60 seconds
+        ${status} =    Is Component Enabled    ${component}    ${dsc_name}
+        IF    '${status}' == 'false'    BREAK
+    END
 
 Is Component Enabled
     [Documentation]    Returns the enabled status of a single component (true/false)

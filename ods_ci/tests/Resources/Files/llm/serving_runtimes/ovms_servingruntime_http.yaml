@@ -17,7 +17,7 @@ spec:
         - --rest_bind_address=0.0.0.0
         - --target_device=AUTO
         - --metrics_enable
-      image: quay.io/modh/openvino_model_server@sha256:f1140e9d987580d1aab1ccc62519b48b1d2673308b2db496e9e505e3be788d9f
+      image: quay.io/modh/openvino_model_server@sha256:53b7fcf95de9b81e4c8652d0bf4e84e22d5b696827a5d951d863420c68b9cfe8
       name: kserve-container
       ports:
         - containerPort: 8888

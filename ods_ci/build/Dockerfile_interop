@@ -53,3 +53,4 @@ RUN chgrp -R 0 ${ODS_VENV} && \
 
 USER 1001
 WORKDIR ${ODS_VENV}/ods_ci
+ENV HOME=${ODS_VENV}

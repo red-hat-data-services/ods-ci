@@ -99,7 +99,7 @@ Archive Pipeline Run
     ...                The "Delete Pipeline Run" will search for a line in the grid that match the pipeline name and
     ...                the run name. Based on that, hit the ... Menu in the row and hit Delete drop down menu.
     [Arguments]    ${run_name}    ${pipeline_name}
-    Navigate To Page    Data Science Pipelines    Runs
+    Navigate To Page    Data science pipelines    Runs
 
     Wait Until Page Contains Element    xpath=//*[@data-testid="active-runs-tab"]      timeout=30s
     Click Element    xpath=//*[@data-testid="active-runs-tab"]
@@ -112,7 +112,7 @@ Delete Pipeline
     ...    available and deletes the pipeline using the pipelines actions menu.
     ...    TODO: improve keyword to delete multiple pipeline versions
     [Arguments]    ${pipeline_name}
-    Navigate To Page    Data Science Pipelines    Pipelines
+    Navigate To Page    Data science pipelines    Pipelines
     ODHDashboard.Maybe Wait For Dashboard Loading Spinner Page
 
     Pipelines.Expand Pipeline Details    ${pipeline_name}
@@ -126,7 +126,7 @@ Delete Pipeline
 Delete Pipeline Server
     [Documentation]    Navigates to "Data Science Pipelines" -> Pipelines and deletes the pipeline server
     [Arguments]    ${data_science_project_name}
-    Navigate To Page    Data Science Pipelines
+    Navigate To Page    Data science pipelines
     ODHDashboard.Maybe Wait For Dashboard Loading Spinner Page
     Wait Until Page Contains Element    xpath://button[contains(span/text(), 'Pipeline server actions')]
     Wait Until Element Is Enabled       xpath://button[contains(span/text(), 'Pipeline server actions')]

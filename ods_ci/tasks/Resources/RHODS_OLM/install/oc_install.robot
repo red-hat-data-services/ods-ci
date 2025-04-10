@@ -35,6 +35,7 @@ ${DEFAULT_OPERATOR_NAMESPACE_RHOAI}=    redhat-ods-operator
 ${DEFAULT_OPERATOR_NAMESPACE_ODH}=    opendatahub-operators
 ${DEFAULT_APPLICATIONS_NAMESPACE_RHOAI}=    redhat-ods-applications
 ${DEFAULT_APPLICATIONS_NAMESPACE_ODH}=    opendatahub
+${DEFAULT_WORKBENCHES_NAMESPACE}=    rhods-notebooks
 ${CUSTOM_MANIFESTS}=    ${EMPTY}
 ${IS_NOT_PRESENT}=      1
 ${DSC_TEMPLATE}=    dsc_template.yml
@@ -369,7 +370,11 @@ Create DataScienceCluster CustomResource Using Test Variables
             END
             # The model registry component needs to set the namespace used, so adding this special statement just for it
             IF    '${cmp}' == 'modelregistry'
-                Run    sed -i'' -e 's/<${cmp}_namespace>/${MODEL_REGISTRY_NAMESPACE}/' ${file_path}dsc_apply.yml
+                Run    sed -i'' -e 's/<modelregistry_namespace>/${MODEL_REGISTRY_NAMESPACE}/' ${file_path}dsc_apply.yml
+            END
+            # The workbenches component needs to set the namespace used, so adding this special statement just for it
+            IF    '${cmp}' == 'workbenches'
+                Run    sed -i'' -e 's/<workbenches_namespace>/${NOTEBOOKS_NAMESPACE}/' ${file_path}dsc_apply.yml
             END
     END
 
@@ -390,7 +395,11 @@ Generate CustomManifest In DSC YAML
             END
             # The model registry component needs to set the namespace used, so adding this special statement just for it
             IF    '${cmp}' == 'modelregistry'
-                Run    sed -i'' -e 's/<${cmp}_namespace>/${MODEL_REGISTRY_NAMESPACE}/' ${file_path}dsc_apply.yml
+                Run    sed -i'' -e 's/<modelregistry_namespace>/${MODEL_REGISTRY_NAMESPACE}/' ${file_path}dsc_apply.yml
+            END
+            # The workbenches component needs to set the namespace used, so adding this special statement just for it
+            IF    '${cmp}' == 'workbenches'
+                Run    sed -i'' -e 's/<workbenches_namespace>/${NOTEBOOKS_NAMESPACE}/' ${file_path}dsc_apply.yml
             END
     END
 
@@ -588,8 +597,14 @@ Configure Custom Applications Namespace
     [Arguments]    ${namespace}
     Create Namespace With Label    ${namespace}    opendatahub.io/application-namespace=true
 
+Configure Custom Workbenches Namespace
+    [Documentation]    Configures a custom namespace to be able to be used as the ODH/RHOAI workbenches namespace.
+    ...                If this namespace does not exist, its created.
+    [Arguments]    ${namespace}
+    Create Namespace With Label    ${namespace}    opendatahub.io/workbenches-namespace=true
+
 Configure Custom Namespaces
-    [Documentation]    Configures both operator and application namespaces when they are setted as custom ones
+    [Documentation]    Configures both operator, application and workbenches namespaces when they are setted as custom ones
     IF   "${OPERATOR_NAMESPACE}" != "${DEFAULT_OPERATOR_NAMESPACE_RHOAI}" and "${OPERATOR_NAMESPACE}" != "${DEFAULT_OPERATOR_NAMESPACE_ODH}"
        # If the operator namespace is not the default one, we need to check if exists
        # and create if not prior to installing ODH/RHOAI. Adding a custom label for automation purposes.
@@ -598,6 +613,10 @@ Configure Custom Namespaces
     IF   "${APPLICATIONS_NAMESPACE}" != "${DEFAULT_APPLICATIONS_NAMESPACE_RHOAI}" and "${APPLICATIONS_NAMESPACE}" != "${DEFAULT_APPLICATIONS_NAMESPACE_ODH}"
        # If the applications namespace is not the default one, we need to apply some steps prior to installing ODH/RHOAI
        Configure Custom Applications Namespace    ${APPLICATIONS_NAMESPACE}
+    END
+    IF  "${NOTEBOOKS_NAMESPACE}" != "${DEFAULT_WORKBENCHES_NAMESPACE}"
+       # If the workbenches namespace is not the default one, we need to create prior to installing ODH/RHOAI
+       Configure Custom Workbenches Namespace    ${NOTEBOOKS_NAMESPACE}
     END
 
 Create DSCI With Custom Namespaces

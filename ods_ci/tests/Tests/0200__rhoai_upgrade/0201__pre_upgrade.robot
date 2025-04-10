@@ -39,6 +39,7 @@ ${UPGRADE_NS}    upgrade
 ${UPGRADE_CONFIG_MAP}    upgrade-config-map
 
 
+
 *** Test Cases ***
 Set PVC Size Via UI
     [Documentation]    Sets a Pod toleration via the admin UI
@@ -67,7 +68,7 @@ Setting Pod Toleration Via UI
 Verify RHODS Accept Multiple Admin Groups And CRD Gets Updates
     [Documentation]    Verify that users can set multiple admin groups and
     ...    check OdhDashboardConfig CRD gets updated according to Admin UI
-    [Tags]      Upgrade     RHOAIENG-14306    Platform
+    [Tags]      Upgrade     RHOAIENG-14306    Platform      RHOAIENG-19806
     [Setup]     Begin Web Test
     # robocop: disable
     Launch Dashboard And Check User Management Option Is Available For The User
@@ -75,8 +76,10 @@ Verify RHODS Accept Multiple Admin Groups And CRD Gets Updates
     ...    ${TEST_USER.PASSWORD}
     ...    ${TEST_USER.AUTH_TYPE}
     Clear User Management Settings
-    Add OpenShift Groups To Data Science Administrators     rhods-admins        rhods-users
-    Add OpenShift Groups To Data Science User Groups        system:authenticated
+    Set Global Variable         @{adm_groups}     rhods-admins        rhods-users
+    Set Global Variable         @{allwd_groups}     system:authenticated
+    Add OpenShift Groups To Data Science Administrators     @{adm_groups}
+    Add OpenShift Groups To Data Science User Groups        @{allwd_groups}
     Save Changes In User Management Setting
     [Teardown]      Dashboard Test Teardown
 

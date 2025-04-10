@@ -58,10 +58,14 @@ Verify RHODS User Groups
     [Documentation]    Verify User Configuration after the upgrade
     [Tags]      Upgrade     Platform        RHOAIENG-19806
     Get Auth Cr Config Data
-    ${admin}                Set Variable            ${AUTH_PAYLOAD[0]['spec']['adminGroups']}
-    ${user}                 Set Variable            ${AUTH_PAYLOAD[0]['spec']['allowedGroups']}
-    Should Be Equal As Strings      '${admin}'      '['${ADMIN_GROUPS}']'
-    Should Be Equal As Strings      '${user}'       '['${ALLOWED_GROUPS}']'
+    @{admins}                Set Variable            ${AUTH_PAYLOAD[0]['spec']['adminGroups']}
+    @{allowed}                 Set Variable            ${AUTH_PAYLOAD[0]['spec']['allowedGroups']}
+    FOR    ${group}    IN    @{adm_groups}
+        Should Contain Match        ${admins}        ${group}
+    END
+    FOR    ${group}    IN    @{allwd_groups}
+        Should Contain Match        ${allowed}        ${group}
+    END
     [Teardown]      Set Default Users
 
 Verify Culler is Enabled

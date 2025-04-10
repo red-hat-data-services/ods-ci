@@ -24,7 +24,7 @@ Verify Dashbord has no message with NO Component Found
     [Documentation]   Verify "NO Component Found" message dosen't display
     ...     on Rhods Dashbord page with bad subscription present in openshift
     [Setup]   Test Setup For Rhods Dashboard
-    Oc Apply  kind=Subscription  src=tests/Tests/0100__platform/0101__deploy/100__installation/bad_subscription.yaml
+    Oc Apply  kind=Subscription  src=tests/Tests/0100__platform/0101__deploy/0101__installation/bad_subscription.yaml
     Delete Dashboard Pods And Wait Them To Be Back
     Reload Page
     Menu.Navigate To Page    Applications    Explore
@@ -381,7 +381,10 @@ Verify No Alerts Are Firing After Installation Except For DeadManSnitch    # rob
 Delete Dashboard Pods And Wait Them To Be Back
     [Documentation]    Delete Dashboard Pods And Wait Them To Be Back
     Oc Delete    kind=Pod     namespace=${APPLICATIONS_NAMESPACE}    label_selector=app=${DASHBOARD_APP_NAME}
-    OpenShiftLibrary.Wait For Pods Status    namespace=${APPLICATIONS_NAMESPACE}  label_selector=app=${DASHBOARD_APP_NAME}  timeout=120
+    # This should not be necessary but the `oc wait` command was failing otherwise
+    Sleep    10s    msg=Wait for pods to be deleted.
+    Wait For Pods To Be Ready    label_selector=app=${DASHBOARD_APP_NAME}
+    ...    namespace=${APPLICATIONS_NAMESPACE}  timeout=180s
 
 Test Setup For Rhods Dashboard
     [Documentation]    Test Setup for Rhods Dashboard

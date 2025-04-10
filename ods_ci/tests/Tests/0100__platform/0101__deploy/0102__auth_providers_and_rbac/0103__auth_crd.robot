@@ -16,7 +16,7 @@ Verify Auth Crd
     ...         Operator
     ...         RHOAIENG-18846
     ${rc}       ${odhdashboardconfig_groups}=    Run And Return Rc And Output
-    ...    oc get odhdashboardconfig odh-dashboard-config -n redhat-ods-applications -o jsonpath='{.spec.groupsConfig}'
+    ...    oc get odhdashboardconfig odh-dashboard-config -n ${APPLICATIONS_NAMESPACE} -o jsonpath='{.spec.groupsConfig}'
     Should Be Equal As Integers     ${rc}       0
     ${rc}       ${auth_cr_groups}=      Run And Return Rc And Output
     ...                     oc get auth auth -o jsonpath='{.spec}'
@@ -51,6 +51,6 @@ Get User Groups From Auth Cr And Check Rolebinding Exists
     FOR    ${user}    IN    @{groups_list}
         Log To Console    ${user}
         ${rc}=    Run And Return Rc
-        ...    oc get ${role_type} ${rolebinding_name} -n redhat-ods-applications -o jsonpath='{.subjects[?(@.name==${user})]}'   #robocop: disable:line-too-long
+        ...    oc get ${role_type} ${rolebinding_name} -n ${APPLICATIONS_NAMESPACE} -o jsonpath='{.subjects[?(@.name==${user})]}'   #robocop: disable:line-too-long
         Should Be Equal As Integers    ${rc}    0
     END

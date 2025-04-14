@@ -44,8 +44,8 @@ Select Data Connection
     ...                in the modal for Pipeline Server creation
     [Arguments]    ${dc_name}
     # robocop: off=line-too-long
-    Wait Until Page Contains Element    xpath://button[@data-testid="select-data-connection"]
-    Click Button                        xpath://button[@data-testid="select-data-connection"]
+    Wait Until Page Contains Element    xpath://button[@data-testid="select-connection"]
+    Click Button                        xpath://button[@data-testid="select-connection"]
     Wait Until Page Contains Element    xpath://button//*[text()="${dc_name}"]
     Click Element    xpath://button//*[text()="${dc_name}"]
 

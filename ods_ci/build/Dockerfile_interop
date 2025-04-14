@@ -1,6 +1,5 @@
 FROM quay.io/centos/centos:stream9
 
-# Use this build arg to set any default test script arguments
 ENV ROBOT_EXTRA_ARGS=''
 ENV SET_ENVIRONMENT=0
 ENV RETURN_PW=0
@@ -42,7 +41,7 @@ RUN dnf install epel-release -y &&\
 
 RUN alternatives --install /usr/local/bin/python3 python3 /usr/bin/python${PYTHON_VERSION} 1
 RUN python3 --version
-ENV POETRY_HOME=$HOME/.local
+ENV POETRY_HOME=/ods_venv/.local
 ENV PATH="${POETRY_HOME}/bin:${PATH}"
 
 RUN curl -sSL https://install.python-poetry.org | python3 -

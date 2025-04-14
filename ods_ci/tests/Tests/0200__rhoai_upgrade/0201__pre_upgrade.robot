@@ -94,7 +94,7 @@ Verify Model Can Be Deployed For Upgrade
     # robocop: off=too-long-test-case
     # robocop: off=too-many-calls-in-test-case
     [Documentation]    Verify Model Can Be Deployed Via UI For Upgrade
-    [Tags]                  Upgrade    ModelServing    ModelServer
+    [Tags]                  Upgrade    ModelServing    ModelServer    AP-007
     Set Suite Variable    ${TEST_NS}    ovmsmodel-upgrade
     Set Suite Variable    ${KSERVE_MODE}    RawDeployment    # RawDeployment   # Serverless
     Set Suite Variable    ${MODELS_BUCKET}    ${S3.BUCKET_1}

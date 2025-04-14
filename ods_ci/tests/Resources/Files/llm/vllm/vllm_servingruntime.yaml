@@ -19,7 +19,7 @@ spec:
   containers:
     - name: kserve-container
       #image: kserve/vllmserver:latest
-      image: quay.io/modh/vllm@sha256:c86ff1e89c86bc9821b75d7f2bbc170b3c13e3ccf538bf543b1110f23e056316
+      image: quay.io/modh/vllm@sha256:4f550996130e7d16cacb24ca9a2865e7cf51eddaab014ceaf31a1ea6ef86d4ec
       startupProbe:
         httpGet:
           port: 8080

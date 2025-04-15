@@ -79,6 +79,7 @@ COMPONENTS:
   trustyai: Managed
   kueue: Managed
   trainingoperator: Removed
+  feastoperator: Removed
 PRODUCT: RHODS
 OPERATOR_NAME: rhods-operator
 APPLICATIONS_NAMESPACE: redhat-ods-applications

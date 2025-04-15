@@ -37,6 +37,8 @@ ${KSERVE_CONTROLLER_MANAGER_LABEL_SELECTOR}    control-plane=kserve-controller-m
 ${KSERVE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}   kserve-controller-manager
 ${TRUSTYAI_CONTROLLER_MANAGER_LABEL_SELECTOR}    app.kubernetes.io/part-of=trustyai
 ${TRUSTYAI_CONTROLLER_MANAGER_DEPLOYMENT_NAME}   trustyai-service-operator-controller-manager
+${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}    app.kubernetes.io/part-of=feastoperator
+${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}   feast-operator-controller-manager
 ${NOTEBOOK_CONTROLLER_DEPLOYMENT_LABEL_SELECTOR}    component.opendatahub.io/name=kf-notebook-controller
 ${NOTEBOOK_CONTROLLER_MANAGER_LABEL_SELECTOR}       component.opendatahub.io/name=odh-notebook-controller
 ${NOTEBOOK_DEPLOYMENT_NAME}                         notebook-controller-deployment
@@ -54,6 +56,7 @@ ${IS_NOT_PRESENT}    1
 ...  KSERVE=${EMPTY}
 ...  TRUSTYAI=${EMPTY}
 ...  WORKBENCHES=${EMPTY}
+...  FEASTOPERATOR=${EMPTY}
 
 @{CONTROLLERS_LIST}    kserve-controller-manager    odh-model-controller    modelmesh-controller
 @{REDHATIO_PATH_CHECK_EXCLUSTION_LIST}    kserve-controller-manager
@@ -279,6 +282,23 @@ Validate Workbenches Removed State
 
     [Teardown]     Restore DSC Component State    workbenches    ${NOTEBOOK_DEPLOYMENT_NAME}    ${NOTEBOOK_CONTROLLER_MANAGER_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.WORKBENCHES}
 
+Validate Feastoperator Managed State
+    [Documentation]    Validate that the DSC Feastoperator component Managed state creates the expected resources,
+    ...    check that FeastOperator deployment is created and pod is in Ready state
+    [Tags]    Operator    Tier1    feastoperator-managed      Integration      ExcludeOnODH
+
+    Set DSC Component Managed State And Wait For Completion   feastoperator    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
+
+    [Teardown]     Restore DSC Component State    feastoperator    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.TRUSTYAI}
+
+Validate Feastoperator Removed State
+    [Documentation]    Validate that FeastOperator management state Removed does remove relevant resources.
+    [Tags]    Operator    Tier1     feastoperator-removed     Integration      ExcludeOnODH
+
+    Set DSC Component Removed State And Wait For Completion   feastoperator    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
+
+    [Teardown]     Restore DSC Component State    feastoperator    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.FEASTOPERATOR}
+
 Validate Support For Configuration Of Controller Resources
     [Documentation]    Validate support for configuration of controller resources in component deployments
     [Tags]    Operator    Tier1    ODS-2664      Integration
@@ -322,6 +342,7 @@ Suite Setup
     ${SAVED_MANAGEMENT_STATES.KSERVE}=     Get DSC Component State    ${DSC_NAME}    kserve    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.TRUSTYAI}=     Get DSC Component State    ${DSC_NAME}    trustyai    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.WORKBENCHES}=    Get DSC Component State    ${DSC_NAME}    workbenches    ${OPERATOR_NS}
+    ${SAVED_MANAGEMENT_STATES.FEASTOPERATOR}=    Get DSC Component State    ${DSC_NAME}    feastoperator    ${OPERATOR_NS}
     Set Suite Variable    ${SAVED_MANAGEMENT_STATES}
 
 Suite Teardown

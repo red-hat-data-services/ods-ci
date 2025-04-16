@@ -17,6 +17,11 @@ Resource            ../../../../Resources/Common.robot
 Suite Setup         RHOSi Setup
 Suite Teardown      RHOSi Teardown
 
+*** Variables ***
+${RHODS_OPERATOR_GIT_REPO}       %{RHODS_OPERATOR_GIT_REPO=https://github.com/red-hat-data-services/rhods-operator}
+${RHODS_OPERATOR_GIT_DIR}        ${OUTPUT DIR}/rhods-operator
+
+
 *** Test Cases ***
 Verify Dashbord has no message with NO Component Found
     [Tags]  Tier3
@@ -375,6 +380,39 @@ Verify No Alerts Are Firing After Installation Except For DeadManSnitch    # rob
     # model-registry-operator-alerting.rules
     # Model Registry not GA yet (Removed state), so its metrics are not enabled by default
     # Verify "Model Registry Operator Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
+
+Verify DSC Contains Correct Component Versions  # robocop: disable:too-long-test-case
+    [Tags]    Smoke
+    ...       Operator
+    ...       RHOAIENG-12693
+    ...       ExcludeOnODH
+    [Documentation]   Verify that component versions are present in DSC status and match the release repo
+    Gather Release Attributes From DSC And DSCI
+    ${rhods_operator_branch} =  Remove String Using Regexp  ${DSC_RELEASE_VERSION}  \\.[0-9]+\$
+    Common.Clone Git Repository  ${RHODS_OPERATOR_GIT_REPO}  rhoai-${rhods_operator_branch}  ${RHODS_OPERATOR_GIT_DIR}
+    ${component_versions} =  Run
+    ...    oc get dsc default-dsc -o json | jq '.status.components'
+    ${component_versions_json} =    Evaluate     json.loads("""${component_versions}""")    json
+    ${components} =  List Directories In Directory    ${RHODS_OPERATOR_GIT_DIR}/prefetched-manifests
+    FOR  ${c}  IN  @{components}
+        ${component_metadata_file} =  Set Variable
+        ...     ${RHODS_OPERATOR_GIT_DIR}/prefetched-manifests/${c}/component_metadata.yaml
+        ${file_exists} =  Run Keyword And Return Status    File Should Exist  ${component_metadata_file}
+        IF  ${file_exists}
+            IF  $component_versions_json[$c]["managementState"] != "Managed"
+                Log  ${c} is not managed, skipping version check
+                CONTINUE
+            END
+            ${component_metadata_content} =  Get File  ${component_metadata_file}
+            ${component_metadata} =    Evaluate     yaml.safe_load("""${component_metadata_content}""")    yaml
+            Dictionaries Should Be Equal    ${component_versions_json}[${c}]   ${component_metadata}
+            ...    ignore_keys=['managementState', 'defaultDeploymentMode', 'serverlessMode']
+            ...    msg=Component versions in DSC don't match component metadata in repo
+        ELSE
+            Log  ${c} does not provide component_metadata.yaml
+        END
+    END
+    [Teardown]    Remove Directory  ${RHODS_OPERATOR_GIT_DIR}  recursive=True
 
 
 *** Keywords ***

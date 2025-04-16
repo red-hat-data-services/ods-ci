@@ -177,15 +177,15 @@ EOF
 }
 
 function applyWorkaroundForUncertifiedOCPVersions () {
-  # workaround for OCP versions less than 4.16 and greater than 4.17
+  # workaround for OCP versions less than 4.16 and greater than 4.18
   # AMD certified operator is published starting from OCP v4.16
   # certification can be checked here
-  # https://github.com/redhat-openshift-ecosystem/certified-operators/blob/main/operators/amd-gpu-operator/v1.1.1/metadata/annotations.yaml#L18
+  # https://github.com/redhat-openshift-ecosystem/certified-operators/blob/main/operators/amd-gpu-operator/v1.2.1/metadata/annotations.yaml
   ocpVersion=$(oc version --output json | jq '.openshiftVersion' | tr -d '"')
   IFS='.' read -ra ocpVersionSplit <<< "$ocpVersion"
-  if [[ "${ocpVersionSplit[1]}" -lt 16 ||  "${ocpVersionSplit[1]}" -gt 17 ]]; then
+  if [[ "${ocpVersionSplit[1]}" -lt 16 ||  "${ocpVersionSplit[1]}" -gt 18 ]]; then
     echo "OCP Version: $ocpVersion"
-    echo "AMD Operator is not available for versions < 4.16 or > 4.17, hence creating custom catalog source as workaround"
+    echo "AMD Operator is not available for versions < 4.16 or > 4.18, hence creating custom catalog source as workaround"
     oc apply -f - <<EOF
 apiVersion: operators.coreos.com/v1alpha1
 kind: CatalogSource

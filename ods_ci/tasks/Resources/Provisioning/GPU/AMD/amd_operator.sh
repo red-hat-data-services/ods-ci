@@ -205,7 +205,6 @@ EOF
 }
 
 applyWorkaroundForUncertifiedOCPVersions
-exit 0
 check_registry
 status=$?
 

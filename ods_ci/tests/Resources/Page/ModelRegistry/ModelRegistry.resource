@@ -18,6 +18,7 @@ ${PRJ_DESCRIPTION}=                  model resgistry test project
 ${WORKBENCH_TITLE}=                  registry-wb
 ${MODELREGISTRY_BASE_FOLDER}=        tests/Resources/CLI/ModelRegistry
 ${SERVICE_MESH_MEMBER}=              ${MODELREGISTRY_BASE_FOLDER}/serviceMeshMember_template.yaml
+${ROLEBINDING}=                      ${MODELREGISTRY_BASE_FOLDER}/rolebinding_template.yaml
 ${ENABLE_REST_API}=                  ${MODELREGISTRY_BASE_FOLDER}/enable_rest_api_route.yaml
 ${IPYNB_UPDATE_SCRIPT}=              ${MODELREGISTRY_BASE_FOLDER}/updateIPYNB.py
 ${CERTS_DIRECTORY}=                  certs
@@ -32,6 +33,7 @@ ${DISABLE_COMPONENT}=                ${False}
 ${SAMPLE_ONNX_MODEL}=                ${MODELREGISTRY_BASE_FOLDER}/mnist.onnx
 ${MR_PYTHON_CLIENT_FILES}=           ${MODELREGISTRY_BASE_FOLDER}/Python_Dependencies
 ${MR_PYTHON_CLIENT_WHL_VERSION}=     model_registry==0.2.8a1
+${MR_NAME}=                          modelregistry-sample
 ${JUPYTER_NOTEBOOK}=                 MRMS_UPDATED.ipynb
 ${JUPYTER_NOTEBOOK_FILEPATH}=        ${MODELREGISTRY_BASE_FOLDER}/${JUPYTER_NOTEBOOK}
 ${MR_REGISTERED_MODEL_NAME}=         test minst
@@ -62,6 +64,7 @@ Prepare Model Registry Test Setup
     Create Model Registry Secrets
     Apply Db Config Samples    namespace=${NAMESPACE_MODEL_REGISTRY}    samples=${MODEL_REGISTRY_DB_SAMPLES}
     Fetch CA Certificate If RHODS Is Self-Managed
+    Apply RoleBinding    mr_name=${MR_NAME}    dsp_name=${PRJ_TITLE}
 
 Teardown Model Registry Test Setup
     [Documentation]  Teardown Model Registry Suite
@@ -299,16 +302,19 @@ Upload Python Client Files In The Workbench
 Open Model Registry Dashboard Page
     [Documentation]    Opens the Model Registry page from the dashboard nav bar
     [Arguments]    ${allowed_user}=${TRUE}
-    ${mr_present}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain    Model Registry
+    ${mr_present}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain Element
+    ...    xpath=//a[@href="/modelRegistry"]
     WHILE    ${mr_present}!=${TRUE}    limit=120s
         SeleniumLibrary.Reload Page
         SeleniumLibrary.Wait Until Page Contains    Home
         Maybe Wait For Dashboard Loading Spinner Page
         ${mr_present}=    Run Keyword And Return Status
-        ...    SeleniumLibrary.Page Should Contain    Model Registry
+        ...    SeleniumLibrary.Page Should Contain Element    xpath=//a[@href="/modelRegistry"]
     END
-    SeleniumLibrary.Click Link      Model Registry
-    Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=Model Registry
+    SeleniumLibrary.Click Button    models
+    SeleniumLibrary.Wait Until Page Contains Element    xpath=//li/a[.="Model registry"]
+    SeleniumLibrary.Click Link      Model registry
+    Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=Model registry
     SeleniumLibrary.Wait Until Page Contains    Select a model registry to view and manage your registered models.
     Maybe Wait For Dashboard Loading Spinner Page
     # This works assuming there's a single MR instance and the user is either allowed or not allowed to see it
@@ -318,7 +324,7 @@ Open Model Registry Dashboard Page
         ...    SeleniumLibrary.Page Should Not Contain    Request access to model registries
         WHILE    ${loaded}!=${TRUE}    limit=12    # Retries for 2 minutes - wait for user group to reconcile
             SeleniumLibrary.Reload Page
-            SeleniumLibrary.Wait Until Page Contains    Model Registry
+            SeleniumLibrary.Wait Until Page Contains    Model registry
             SeleniumLibrary.Wait Until Page Contains
             ...    Select a model registry to view and manage your registered models.
             ${loaded}=    Run Keyword And Return Status
@@ -478,3 +484,14 @@ Add User To Model Registry Default Group
     ${rc}    ${out}=    Run And Return Rc And Output    oc adm groups add-users ${model_registry_name}-users ${user}
     Should Be Equal As Integers    ${rc}    0
     Should Be Equal As Strings    ${out}    group.user.openshift.io/${model_registry_name}-users added: "${user}"
+
+Apply RoleBinding
+    [Documentation]    Apply a RoleBinding using oc.
+    [Arguments]    ${mr_name}    ${dsp_name}
+    Copy File    source=${ROLEBINDING}    destination=${MODELREGISTRY_BASE_FOLDER}/rolebinding.yaml
+    ${uid} =    Run    oc get mr ${mr_name} -n rhoai-model-registries -o yaml | yq '.metadata.uid'
+    Run    sed -i '' -e 's/<MR_NAME>/${mr_name}/' ${MODELREGISTRY_BASE_FOLDER}/rolebinding.yaml
+    Run    sed -i '' -e 's/<DSP_NAME>/${dsp_name}/' ${MODELREGISTRY_BASE_FOLDER}/rolebinding.yaml
+    Run    sed -i '' -e 's/<MR_UID>/${uid}/' ${MODELREGISTRY_BASE_FOLDER}/rolebinding.yaml
+    Apply OpenShift Configuration    ${MODELREGISTRY_BASE_FOLDER}/rolebinding.yaml
+    Remove File    ${MODELREGISTRY_BASE_FOLDER}/rolebinding.yaml

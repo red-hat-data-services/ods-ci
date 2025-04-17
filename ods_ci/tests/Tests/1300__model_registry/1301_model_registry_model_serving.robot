@@ -64,13 +64,7 @@ Verify Model Registry Integration With Secured-DB
     SeleniumLibrary.Switch Window    ${handle}
     Add User To Model Registry Default Group    ${TEST_USER.USERNAME}
     Open Model Registry Dashboard Page
-    SeleniumLibrary.Page Should Contain Element    xpath:${MR_TABLE_XPATH}/tbody/tr/td[@data-label="Model name"]//a[.="${MR_REGISTERED_MODEL_NAME}"]
-    SeleniumLibrary.Page Should Contain Element    xpath:${MR_TABLE_XPATH}/tbody/tr/td[@data-label="Owner"]//p[.="${MR_REGISTERED_MODEL_AUTHOR}"]
-    SeleniumLibrary.Page Should Contain Element    xpath:${MR_TABLE_XPATH}/tbody/tr/td[@data-label="Labels" and .="-"]
-    SeleniumLibrary.Click Element    xpath:${MR_TABLE_XPATH}/tbody/tr/td[@data-label="Model name"]//a[.="${MR_REGISTERED_MODEL_NAME}"]
-    Maybe Wait For Dashboard Loading Spinner Page
-    SeleniumLibrary.Page Should Contain Element    xpath:${MR_VERSION_TABLE_XPATH}/tbody/tr/td[@data-label="Version name"]//a[.="${MR_REGISTERED_MODEL_VERSION}"]
-    SeleniumLibrary.Page Should Contain Element    xpath:${MR_VERSION_TABLE_XPATH}/tbody/tr/td[@data-label="Author" and .="${MR_REGISTERED_MODEL_AUTHOR}"]
+    Verify Model Is Present In Registry
     SeleniumLibrary.Close All Browsers
 
 Verify Unallowed User Cannot See Model Registry From The Dashboard
@@ -82,3 +76,28 @@ Verify Unallowed User Cannot See Model Registry From The Dashboard
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
     Open Model Registry Dashboard Page    allowed_user=${FALSE}
     SeleniumLibrary.Page Should Contain    Request access to model registries
+
+*** Keywords ***
+Verify Model Is Present In Registry
+    [Documentation]  Checks that the registered model is shown in the Registry UI
+    ${model_present}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain Element
+    ...    xpath:${MR_TABLE_XPATH}/tbody/tr/td[@data-label="Model name"]//a[.="${MR_REGISTERED_MODEL_NAME}"]
+    WHILE    ${model_present}!=${TRUE}    limit=30s
+        SeleniumLibrary.Reload Page
+        SeleniumLibrary.Wait Until Page Contains    Home
+        Maybe Wait For Dashboard Loading Spinner Page
+        ${model_present}=    Run Keyword And Return Status    SeleniumLibrary.Page Should Contain Element
+        ...    xpath:${MR_TABLE_XPATH}/tbody/tr/td[@data-label="Model name"]//a[.="${MR_REGISTERED_MODEL_NAME}"]
+    END
+    SeleniumLibrary.Page Should Contain Element
+    ...    xpath:${MR_TABLE_XPATH}/tbody/tr/td[@data-label="Model name"]//a[.="${MR_REGISTERED_MODEL_NAME}"]
+    SeleniumLibrary.Page Should Contain Element
+    ...    xpath:${MR_TABLE_XPATH}/tbody/tr/td[@data-label="Owner"]//p[.="${MR_REGISTERED_MODEL_AUTHOR}"]
+    SeleniumLibrary.Page Should Contain Element    xpath:${MR_TABLE_XPATH}/tbody/tr/td[@data-label="Labels" and .="-"]
+    SeleniumLibrary.Click Element
+    ...    xpath:${MR_TABLE_XPATH}/tbody/tr/td[@data-label="Model name"]//a[.="${MR_REGISTERED_MODEL_NAME}"]
+    Maybe Wait For Dashboard Loading Spinner Page
+    SeleniumLibrary.Page Should Contain Element
+    ...    xpath:${MR_VERSION_TABLE_XPATH}/tbody/tr/td[@data-label="Version name"]//a[.="${MR_REGISTERED_MODEL_VERSION}"]
+    SeleniumLibrary.Page Should Contain Element
+    ...    xpath:${MR_VERSION_TABLE_XPATH}/tbody/tr/td[@data-label="Author" and .="${MR_REGISTERED_MODEL_AUTHOR}"]

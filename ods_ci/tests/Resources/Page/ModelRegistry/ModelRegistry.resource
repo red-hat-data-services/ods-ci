@@ -489,7 +489,7 @@ Apply RoleBinding
     [Documentation]    Apply a RoleBinding using oc.
     [Arguments]    ${mr_name}    ${dsp_name}
     Copy File    source=${ROLEBINDING}    destination=${MODELREGISTRY_BASE_FOLDER}/rolebinding.yaml
-    ${uid} =    Run    oc get mr ${mr_name} -n rhoai-model-registries -o yaml | yq '.metadata.uid'
+    ${uid}=    Run    oc get mr ${mr_name} -n rhoai-model-registries -o yaml | yq '.metadata.uid'
     Run    sed -i '' -e 's/<MR_NAME>/${mr_name}/' ${MODELREGISTRY_BASE_FOLDER}/rolebinding.yaml
     Run    sed -i '' -e 's/<DSP_NAME>/${dsp_name}/' ${MODELREGISTRY_BASE_FOLDER}/rolebinding.yaml
     Run    sed -i '' -e 's/<MR_UID>/${uid}/' ${MODELREGISTRY_BASE_FOLDER}/rolebinding.yaml

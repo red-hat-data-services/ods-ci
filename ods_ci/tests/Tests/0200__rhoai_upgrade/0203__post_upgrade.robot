@@ -146,13 +146,12 @@ Test Inference Post RHODS Upgrade
     [Documentation]    Test the inference result after having deployed a model
     [Tags]                  Upgrade    ModelServing    ModelServer
     Set Suite Variable    ${TEST_NS}    ovmsmodel-upgrade
-    Set Suite Variable    ${KSERVE_MODE}    Serverless
+    Set Suite Variable    ${KSERVE_MODE}    Serverless    # RawDeployment   # Serverless
     Set Suite Variable    ${INFERENCE_INPUT}    @tests/Resources/Files/modelmesh-mnist-input.json
-    Set Suite Variable    ${EXPECTED_INFERENCE_OUTPUT}    {"model_name": "test-dir","model_version": "1","outputs": [{"name": "Plus214_Output_0","shape": [1, 10],"datatype": "FP32","data": [-8.233053207397461, -7.749703407287598, -3.4236814975738527, 12.363029479980469, -12.079103469848633, 17.2665958404541, -10.570976257324219, 0.7130761742591858, 3.3217151165008547, 1.3621227741241456]}]}  #robocop: disable
-    Setup Test Variables    model_name=test-dir    use_pvc=${TRUE}    use_gpu=${FALSE}
+    Set Suite Variable    ${EXPECTED_INFERENCE_OUTPUT}    {"model_name":"ovms-model","model_version":"1","outputs":[{"name":"Plus214_Output_0","datatype":"FP32","shape":[1,10],"data":[-8.233053,-7.7497034,-3.4236815,12.3630295,-12.079103,17.266596,-10.570976,0.7130762,3.321715,1.3621228]}]}    # robocop: off=line-too-long
+    Setup Test Variables    model_name=ovms-model    use_gpu=${FALSE}
     ...    kserve_mode=${KSERVE_MODE}
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${TEST_NS}
+
     ${pod_name}=  Get Pod Name    namespace=${TEST_NS}
     ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
     ${service_port}=    Extract Service Port    service_name=${model_name}-predictor    protocol=TCP
@@ -164,7 +163,7 @@ Test Inference Post RHODS Upgrade
     Verify Model Inference With Retries   model_name=${model_name}    inference_input=${INFERENCE_INPUT}
     ...    expected_inference_output=${EXPECTED_INFERENCE_OUTPUT}   project_title=${TEST_NS}
     ...    deployment_mode=Cli  kserve_mode=${KSERVE_MODE}    service_port=${service_port}
-    ...    end_point=/v2/models/${model_name}/infer  retries=10
+    ...    end_point=/v2/models/${model_name}/infer  retries=2
     [Teardown]      Run     oc delete project ${TEST_NS}
 
 Verify Custom Runtime Exists After Upgrade

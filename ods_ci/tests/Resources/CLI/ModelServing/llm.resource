@@ -923,20 +923,6 @@ Setup Test Variables    # robocop: off=too-many-calls-in-keyword
     ELSE
         Set Test Variable    ${storage_uri}    s3://${S3.BUCKET_1.NAME}/${model_path}
     END
-    IF   ${use_gpu}
-        ${supported_gpu_type}=   Convert To Lowercase         ${GPU_TYPE}
-        Set Runtime Image    ${supported_gpu_type}
-        IF  "${supported_gpu_type}" == "nvidia"
-            ${limits}=    Create Dictionary    nvidia.com/gpu=1
-        ELSE IF    "${supported_gpu_type}" == "amd"
-            ${limits}=    Create Dictionary    amd.com/gpu=1
-        ELSE
-            FAIL   msg=Provided GPU type is not yet supported. Only nvidia and amd gpu type are supported
-        END
-        Set Test Variable    ${limits}
-    ELSE
-        Set Test Variable    ${limits}    &{EMPTY}
-    END
     IF    "${KSERVE_MODE}" == "RawDeployment"    # robocop: off=inconsistent-variable-name
         Set Test Variable    ${use_port_forwarding}    ${TRUE}
     ELSE

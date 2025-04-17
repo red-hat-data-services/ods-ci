@@ -358,8 +358,7 @@ Spawn Notebook With Arguments  # robocop: disable
             ${oauth_prompt_visible} =    Is OpenShift OAuth Login Prompt Visible
             IF  ${oauth_prompt_visible}    Click Button     Log in with OpenShift
             Run Keyword And Warn On Failure   Login To Openshift  ${username}  ${password}  ${auth_type}
-            ${authorization_required} =  Is Service Account Authorization Required
-            IF  ${authorization_required}  Authorize JupyterLab Service Account
+            Verify Service Account Authorization Not Required
 
             Wait Notebook To Be Loaded  ${image}    ${version}
             ${spawn_fail} =  Has Spawn Failed
@@ -396,8 +395,7 @@ Launch JupyterHub Spawner From Dashboard
     Menu.Navigate To Page    Applications    Enabled
     Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub  ${username}  ${password}  ${auth}
-    ${authorization_required} =  Is Service Account Authorization Required
-    IF  ${authorization_required}  Authorize JupyterLab Service Account
+    Verify Service Account Authorization Not Required
     Fix Spawner Status
     #Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']
     Wait Until Page Contains   Start server
@@ -686,8 +684,7 @@ Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
         Launch Jupyter From RHODS Dashboard Link
         Login To Jupyterhub    ${username}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
         Page Should Not Contain    403 : Forbidden
-        ${authorization_required} =    Is Service Account Authorization Required
-        IF    ${authorization_required}    Authorize JupyterLab Service Account
+        Verify Service Account Authorization Not Required
         Fix Spawner Status
         Spawn Notebook With Arguments
     END
@@ -704,8 +701,7 @@ CleanUp JupyterHub For N Users
         Launch Jupyter From RHODS Dashboard Link
         Login To Jupyterhub    ${username}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
         Page Should Not Contain    403 : Forbidden
-        ${authorization_required} =    Is Service Account Authorization Required
-        IF    ${authorization_required}    Authorize JupyterLab Service Account
+        Verify Service Account Authorization Not Required
         #Fix Spawner Status stops the current notebook, handling the different possible states
         Fix Spawner Status
     END

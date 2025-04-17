@@ -29,8 +29,7 @@ Test User Notebook Plugin in JupyterLab
     Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
     Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     Launch JupyterHub Spawner From Dashboard
-    ${authorization_required} =  Is Service Account Authorization Required
-    IF  ${authorization_required}  Authorize JupyterLab Service Account
+    Verify Service Account Authorization Not Required
     Remove All Spawner Environment Variables
     Get the List of Plugins from RHODS notebook images
     Verify the Plugins for each JL images

@@ -338,8 +338,7 @@ Access To Workbench
     ${oauth_prompt_visible} =    Is OpenShift OAuth Login Prompt Visible
     IF  ${oauth_prompt_visible}    Click Button     Log in with OpenShift
     Run Keyword And Warn On Failure   Login To Openshift  ${username}  ${password}  ${auth_type}
-    ${authorization_required}=  Is Service Account Authorization Required
-    IF  ${authorization_required}  Authorize JupyterLab Service Account
+    Verify Service Account Authorization Not Required
     IF  "${expected_ide}"=="VSCode"
         Wait Until Page Contains Element  xpath://div[@class="menubar-menu-button"]  timeout=60s
         Wait Until Page Contains Element  xpath://div[@class="monaco-dialog-box"]  timeout=60s

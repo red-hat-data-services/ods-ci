@@ -302,8 +302,8 @@ Apply OpenShift Configuration
     [Arguments]    ${config}
     ${command}=    Set Variable    oc apply -f ${config}
     ${result}=    Run Process    ${command}    stdin=${config}    shell=True    stdout=PIPE    stderr=PIPE
-    Should Be Equal As Strings    ${result.rc}    0    The oc apply command failed
     Log    ${result.stdout}
+    Should Be Equal As Strings    ${result.rc}    0    The oc apply command failed
 
 Set Resource Attribute
     [Documentation]    Sets the value of an attribute of a specific resource

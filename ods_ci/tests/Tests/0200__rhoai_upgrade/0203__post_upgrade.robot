@@ -25,6 +25,7 @@ Resource            ../../Resources/Page/DistributedWorkloads/WorkloadMetricsUI.
 Resource            ../../Resources/CLI/MustGather/MustGather.resource
 Resource            ../../Resources/CLI/DataSciencePipelines/DataSciencePipelinesUpgradeTesting.resource
 Resource            ../../Resources/Page/ModelRegistry/ModelRegistry.resource
+Resource            ../../Resources/Page/FeatureStore/FeatureStore.resource
 
 Suite Setup         Upgrade Suite Setup
 
@@ -322,6 +323,12 @@ Model Registry Post Upgrade Verification
     Model Registry Post Upgrade Scenario
     [Teardown]      Post Upgrade Scenario Teardown
 
+Run Feast operator TestRemoteRegistryFeastCR Test Use Case
+    [Documentation]    Run TestRemoteRegistryFeastCR Test Use Case
+    [Tags]  Upgrade    FeatureStoreUpgrade
+    [Setup]    Prepare Feature Store Upgrade Test
+    Run Feast Operator E2E Test    TestRemoteRegistryFeastCR
+    [Teardown]    Teardown Feast E2E Test Suite
 
 *** Keywords ***
 Dashboard Suite Setup

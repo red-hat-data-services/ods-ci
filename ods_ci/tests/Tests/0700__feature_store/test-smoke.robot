@@ -3,6 +3,7 @@ Documentation     Smoke tests for Feature Store
 Library           Process
 Resource          ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 Resource          ../../Resources/Page/FeatureStore/FeatureStore.resource
+Resource          ../../../tests/Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 Suite Setup       Prepare Feature Store Test Suite
 Suite Teardown    Cleanup Feature Store Setup
 
@@ -34,8 +35,4 @@ Feature Store Smoke Test
     Log To Console    feast-operator-controller-manager-metrics-service exists
 
     #  Verify feature store operator container image referrence
-    Log To Console    Verifying feast-operator-controller-manager container image is referred from registry.redhat.io
-    ${pod} =    Find First Pod By Name  namespace=${APPLICATIONS_NAMESPACE}   pod_regex=feast-operator-controller-manager
-    Container Image Url Should Contain      ${APPLICATIONS_NAMESPACE}     ${pod}      manager
-    ...     registry.redhat.io/rhoai/odh-feast-operator
-    Log To Console    feast-operator-controller-manager's container image is verified
+    Verify container images    feast-operator-controller-manager    manager    odh-feast-operator

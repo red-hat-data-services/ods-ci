@@ -236,6 +236,7 @@ Test RHOAI DSP Operator Recording Rules On Prometheus
     ...       ODS-2168
     ...       RHOAIENG-13263
     ...       Monitoring
+    Skip If RHODS Is Self-Managed
     ${user_facing_endpoints_status_dsp_response} =    Prometheus.Run Query
     ...    pm_url=${RHODS_PROMETHEUS_URL}
     ...    pm_token=${RHODS_PROMETHEUS_TOKEN}

@@ -242,7 +242,7 @@ Fill Up User PVC    # robocop: disable:too-many-calls-in-keyword
     Sleep    5s
 
 Verify "RHODS Dashboard Probe Success Burn Rate" Alerts Severity And Continue On Failure
-    [Documentation]    Verifies that alert "RHODS Probe Success Burn Rate" severity
+    [Documentation]    Verifies that alert "RHODS Dashboard Probe Success Burn Rate" severity
     Verify Alert Has A Given Severity And Continue On Failure
     ...    SLOs-probe_success_dashboard    RHODS Dashboard Probe Success 5m and 1h Burn Rate high    critical    alert-duration=120
     Verify Alert Has A Given Severity And Continue On Failure
@@ -253,7 +253,7 @@ Verify "RHODS Dashboard Probe Success Burn Rate" Alerts Severity And Continue On
     ...    SLOs-probe_success_dashboard    RHODS Dashboard Probe Success 6h and 3d Burn Rate high    warning    alert-duration=10800
 
 Verify "RHODS Jupyter Probe Success Burn Rate" Alerts Severity And Continue On Failure
-    [Documentation]    Verifies that alert "RHODS Probe Success Burn Rate" severity
+    [Documentation]    Verifies that alert "RHODS Jupyter Probe Success Burn Rate" severity
     Verify Alert Has A Given Severity And Continue On Failure
     ...    SLOs-probe_success_workbench    RHODS Jupyter Probe Success 5m and 1h Burn Rate high    critical    alert-duration=120
     Verify Alert Has A Given Severity And Continue On Failure
@@ -262,6 +262,60 @@ Verify "RHODS Jupyter Probe Success Burn Rate" Alerts Severity And Continue On F
     ...    SLOs-probe_success_workbench    RHODS Jupyter Probe Success 2h and 1d Burn Rate high    warning    alert-duration=3600
     Verify Alert Has A Given Severity And Continue On Failure
     ...    SLOs-probe_success_workbench    RHODS Jupyter Probe Success 6h and 3d Burn Rate high    warning    alert-duration=10800
+
+Verify "TrustyAI Controller Probe Success Burn Rate" Alerts Severity And Continue On Failure
+    [Documentation]    Verifies that alert "TrustyAI Controller Probe Success Burn Rate" severity
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    SLOs-probe_success_workbench    TrustyAI Controller Probe Success 5m and 1h Burn Rate high    critical    alert-duration=120
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    SLOs-probe_success_workbench    TrustyAI Controller Probe Success 30m and 6h Burn Rate high    critical    alert-duration=900
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    SLOs-probe_success_workbench    TrustyAI Controller Probe Success 2h and 1d Burn Rate high    warning    alert-duration=3600
+
+Verify "ODH Model Controller Probe Success Burn Rate" Alerts Severity And Continue On Failure
+    [Documentation]    Verifies that alert "ODH Model Controller Probe Success Burn Rate" severity
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    SLOs-probe_success_workbench    ODH Model Controller Probe Success 5m and 1h Burn Rate high    critical    alert-duration=120
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    SLOs-probe_success_workbench    ODH Model Controller Probe Success 30m and 6h Burn Rate high    critical    alert-duration=900
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    SLOs-probe_success_workbench    ODH Model Controller Probe Success 2h and 1d Burn Rate high    warning    alert-duration=3600
+
+Verify "Modelmesh Controller Probe Success Burn Rate" Alerts Severity And Continue On Failure
+    [Documentation]    Verifies that alert "Modelmesh Controller Probe Success Burn Rate" severity
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    SLOs-probe_success_workbench    Modelmesh Controller Probe Success 5m and 1h Burn Rate high    critical    alert-duration=120
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    SLOs-probe_success_workbench    Modelmesh Controller Probe Success 30m and 6h Burn Rate high    critical    alert-duration=900
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    SLOs-probe_success_workbench    Modelmesh Controller Probe Success 2h and 1d Burn Rate high    warning    alert-duration=3600
+
+Verify "KServe Controller Probe Success Burn Rate" Alerts Severity And Continue On Failure
+    [Documentation]    Verifies that alert "KServe Controller Probe Success Burn Rate" severity
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    SLOs-probe_success_workbench    KServe Controller Probe Success 5m and 1h Burn Rate high    critical    alert-duration=120
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    SLOs-probe_success_workbench    KServe Controller Probe Success 30m and 6h Burn Rate high    critical    alert-duration=900
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    SLOs-probe_success_workbench    KServe Controller Probe Success 2h and 1d Burn Rate high    warning    alert-duration=3600
+
+Verify "Data Science Pipelines Operator Probe Success Burn Rate" Alerts Severity And Continue On Failure
+    [Documentation]    Verifies that alert "Data Science Pipelines Operator Probe Success Burn Rate" severity
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    SLOs-probe_success_workbench    Data Science Pipelines Operator Probe Success 5m and 1h Burn Rate high    info    alert-duration=120
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    SLOs-probe_success_workbench    Data Science Pipelines Operator Probe Success 30m and 6h Burn Rate high    info    alert-duration=900
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    SLOs-probe_success_workbench    Data Science Pipelines Operator Probe Success 2h and 1d Burn Rate high    info    alert-duration=3600
+
+Verify "CodeFlare Operator Probe Success Burn Rate" Alerts Severity And Continue On Failure
+    [Documentation]    Verifies that alert "CodeFlare Operator Probe Success Burn Rate" severity
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    SLOs-probe_success_workbench    CodeFlare Operator Probe Success 5m and 1h Burn Rate high    critical    alert-duration=120
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    SLOs-probe_success_workbench    CodeFlare Operator Probe Success 30m and 6h Burn Rate high    critical    alert-duration=900
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    SLOs-probe_success_workbench    CodeFlare Operator Probe Success 2h and 1d Burn Rate high    warning    alert-duration=3600
 
 Verify "RHODS Dashboard Route Error Burn Rate" Alerts Severity And Continue On Failure
     [Documentation]    Verifies that alert "RHODS Dashboard Route Error Burn Rate" severity
@@ -273,6 +327,17 @@ Verify "RHODS Dashboard Route Error Burn Rate" Alerts Severity And Continue On F
     ...    SLOs-haproxy_backend_http_responses_dashboard    RHODS Dashboard Route Error 2h and 1d Burn Rate high   warning    alert-duration=3600
     Verify Alert Has A Given Severity And Continue On Failure
     ...    SLOs-haproxy_backend_http_responses_dashboard    RHODS Dashboard Route Error 6h and 3d Burn Rate high    warning    alert-duration=10800
+
+Verify "Data Science Pipelines Application Route Error Burn Rate" Alerts Severity And Continue On Failure
+    [Documentation]    Verifies that alert "Data Science Pipelines Application Route Error Burn Rate" severity
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    SLOs-haproxy_backend_http_responses_dashboard    Data Science Pipelines Application Route Error 5m and 1h Burn Rate high    info    alert-duration=120
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    SLOs-haproxy_backend_http_responses_dashboard    Data Science Pipelines Application Route Error 30m and 6h Burn Rate high   info    alert-duration=900
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    SLOs-haproxy_backend_http_responses_dashboard    Data Science Pipelines Application Route Error 2h and 1d Burn Rate high   info    alert-duration=3600
+    Verify Alert Has A Given Severity And Continue On Failure
+    ...    SLOs-haproxy_backend_http_responses_dashboard    Data Science Pipelines Application Route Error 6h and 3d Burn Rate high    info    alert-duration=10800
 
 Verify "Kubeflow Notebook Controller Pod Is Not Running" Alerts Severity And Continue On Failure
     [Documentation]    Verifies alert severity for different alert durations

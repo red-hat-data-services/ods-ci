@@ -42,6 +42,14 @@ RUN dnf install epel-release -y &&\
     mv grpcurl /usr/bin/grpcurl && \
     chmod +x /usr/bin/grpcurl
 
+RUN echo '[google-chrome]' > /etc/yum.repos.d/google-chrome.repo && \
+    echo 'name=google-chrome' >> /etc/yum.repos.d/google-chrome.repo && \
+    echo 'baseurl=https://dl.google.com/linux/chrome/rpm/stable/x86_64' >> /etc/yum.repos.d/google-chrome.repo && \
+    echo 'enabled=1' >> /etc/yum.repos.d/google-chrome.repo && \
+    echo 'gpgcheck=1' >> /etc/yum.repos.d/google-chrome.repo && \
+    echo 'gpgkey=https://dl.google.com/linux/linux_signing_key.pub' >> /etc/yum.repos.d/google-chrome.repo
+RUN dnf install -y google-chrome-stable
+
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash && \
     . "$NVM_DIR/nvm.sh" && \
     nvm install 20.18.0 && \

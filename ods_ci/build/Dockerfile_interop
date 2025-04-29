@@ -47,9 +47,6 @@ RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | b
     nvm use 20.18.0 && \
     nvm alias default 20.18.0
 RUN git clone https://github.com/opendatahub-io/odh-dashboard.git ${WORKSPACE}/odh-dashboard
-RUN . "$NVM_DIR/nvm.sh" && \
-    cd ${WORKSPACE}/odh-dashboard/frontend && \
-    npm install
 
 RUN alternatives --install /usr/local/bin/python3 python3 /usr/bin/python${PYTHON_VERSION} 1
 RUN python3 --version

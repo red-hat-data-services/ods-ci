@@ -80,6 +80,7 @@ Verify Alerts Are Fired When RHODS Dashboard Is Down    # robocop: disable:too-l
     [Tags]    Tier3
     ...       ODS-739
     ...       Monitoring
+    ...       AutomationBug
     Skip If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}
     ...    ${RHODS_PROMETHEUS_TOKEN}
     ...    SLOs-haproxy_backend_http_responses_dashboard

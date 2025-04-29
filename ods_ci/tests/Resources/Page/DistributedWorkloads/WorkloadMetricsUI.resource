@@ -18,7 +18,7 @@ ${REFRESH_INTERNAL_MENU_XP}=    xpath=//button[@aria-label="Options menu"]
 @{REFRESH_INTERNAL_LIST}=    15 seconds    30 seconds    1 minute    5 minutes    15 minutes    30 minutes    1 hour    2 hours    1 day
 ${DISTRIBUITED_WORKLOAD_RESOURCE_METRICS_TITLE_XP}=    xpath=//div[text()="Distributed workload resource metrics"]
 ${REQUESTED_RESOURCES_TITLE_XP}=    xpath=//div[text()="Requested resources"]
-${RESOURCES_CONSUMING_TITLE_XP}=    xpath=//div[text()="Top resource-consuming distributed workloads"]
+${RESOURCES_CONSUMING_TITLE_XP}=    xpath=//div[text()="Top 5 resource-consuming distributed workloads"]
 ${MAX_RETRIES}=    3
 ${RAY_WORKLOAD_CREATED}=    False
 ${KUEUE_RESOURCES_SETUP_FILEPATH}=    tests/Resources/Page/DistributedWorkloads/kueue_resources_setup.sh

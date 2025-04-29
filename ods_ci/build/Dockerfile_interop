@@ -26,7 +26,8 @@ COPY ods_ci/test-variables.yml.example ${ODS_VENV}/ods_ci/test-variables.yml
 RUN dnf install epel-release -y &&\
     dnf -y update &&\
     dnf install -y jq git unzip chromium chromedriver httpd-tools gcc wget \
-                   python3 python3-devel python3-distro python-pip python${PYTHON_VERSION} python${PYTHON_VERSION}-devel &&\
+                   python3 python3-devel python3-distro python-pip python${PYTHON_VERSION} python${PYTHON_VERSION}-devel \
+                   xorg-x11-server-Xvfb &&\
     dnf clean all && rm -rf /var/cache/yum &&\
     curl --proto "=https" -L https://github.com/mikefarah/yq/releases/download/v4.34.1/yq_linux_amd64 -o /usr/bin/yq &&\
     chmod +x /usr/bin/yq &&\
@@ -46,7 +47,7 @@ RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | b
     nvm install 20.18.0 && \
     nvm use 20.18.0 && \
     nvm alias default 20.18.0
-RUN git clone https://github.com/opendatahub-io/odh-dashboard.git ${WORKSPACE}/odh-dashboard
+RUN git clone https://github.com/red-hat-data-services/odh-dashboard.git ${WORKSPACE}/odh-dashboard
 
 RUN alternatives --install /usr/local/bin/python3 python3 /usr/bin/python${PYTHON_VERSION} 1
 RUN python3 --version

@@ -106,10 +106,11 @@ Fetch Cluster Type By Domain
 Assign Vars According To Product
     [Documentation]    Assign vars related to product
     # Common vars
-    Set Suite Variable    ${OPERATOR_SUBSCRIPTION_LABEL}     operators.coreos.com/rhods-operator.${OPERATOR_NAMESPACE}
+    
     Set Suite Variable    ${AUTHORINO_CR_NS}    ${APPLICATIONS_NAMESPACE}-auth-provider
     # Product specific vars
     IF    "${PRODUCT}" == "RHODS"
+        Set Suite Variable    ${OPERATOR_SUBSCRIPTION_LABEL}     operators.coreos.com/rhods-operator.${OPERATOR_NAMESPACE}
         Set Suite Variable    ${OPERATOR_APPNAME}     "Red Hat OpenShift AI"
         Set Suite Variable    ${OPERATOR_YAML_LABEL}  rhods-operator
         Set Suite Variable    ${OPERATOR_DEPLOYMENT_NAME}    rhods-operator
@@ -126,6 +127,7 @@ Assign Vars According To Product
         END
         Set Suite Variable  ${MODEL_REGISTRY_NAMESPACE}    rhoai-model-registries
     ELSE IF    "${PRODUCT}" == "ODH"
+        Set Suite Variable    ${OPERATOR_SUBSCRIPTION_LABEL}     operators.coreos.com/opendatahub-operator.${OPERATOR_NAMESPACE}
         Set Suite Variable    ${OPERATOR_APPNAME}  "Open Data Hub Operator"
         Set Suite Variable    ${OPERATOR_YAML_LABEL}  opendatahub-operator
         Set Suite Variable    ${OPERATOR_DEPLOYMENT_NAME}    opendatahub-operator-controller-manager

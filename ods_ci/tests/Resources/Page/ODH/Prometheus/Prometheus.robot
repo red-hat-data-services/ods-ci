@@ -90,44 +90,17 @@ Verify Rules
 Alert Should Be Firing    # robocop: disable:too-many-calls-in-keyword
     [Documentation]    Fails if a Prometheus alert is not firing
     [Arguments]    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-duration}=${EMPTY}
-    ${all_rules}=    Get Rules    ${pm_url}    ${pm_token}    alert
-    ${all_rules}=    Get From Dictionary    ${all_rules['data']}    groups
-    ${alert_found}=    Set Variable    False
+    Alert Should Be In States    ${pm_url}    ${pm_token}    ['firing']    ${rule_group}    ${alert}    ${alert-duration}
 
-    FOR    ${rule}    IN    @{all_rules}
-        ${rule_name}=    Get From Dictionary    ${rule}    name
-        ${rules_list}=    Get From Dictionary    ${rule}    rules
+Alert Should Be Pending    # robocop: disable:too-many-calls-in-keyword
+    [Documentation]    Fails if a Prometheus alert is not pending
+    [Arguments]    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-duration}=${EMPTY}
+    Alert Should Be In States    ${pm_url}    ${pm_token}    ['pending']    ${rule_group}    ${alert}    ${alert-duration}
 
-        IF    '${rule_name}' == '${rule_group}'
-            FOR    ${sub_rule}    IN    @{rules_list}
-                ${state}=    Get From Dictionary    ${sub_rule}    state
-                ${name}=    Get From Dictionary    ${sub_rule}    name
-                ${duration}=    Get From Dictionary    ${sub_rule}    duration
-
-                ${alert_found}=    Run Keyword And Return Status
-                ...    Alerts Should Be Equal    ${alert}    ${alert-duration}    ${name}    ${duration}
-
-                IF    ${alert_found}
-                    IF    '${state}' == 'firing'
-                        RETURN    ${TRUE}
-                    ELSE
-                        Exit For Loop
-                    END
-                END
-            END
-            IF    ${alert_found}
-                Exit For Loop
-            END
-        END
-    END
-
-    IF    ${alert_found} == True
-        # Log To Console    msg=Alert "${alert} ${alert-duration}" was found in Prometheus but state != firing
-        Fail    msg=Alert "${alert} ${alert-duration}" was found in Prometheus but state != firing
-    ELSE
-        Log    message=ERROR: Alert "${alert} ${alert-duration}" was not found in Prometheus    level=WARN
-        Fail    msg=Alert "${alert} ${alert-duration}" was not found in Prometheus
-    END
+Alert Should Be Inactive    # robocop: disable:too-many-calls-in-keyword
+    [Documentation]    Fails if a Prometheus alert is not inactive
+    [Arguments]    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-duration}=${EMPTY}
+    Alert Should Be In States    ${pm_url}    ${pm_token}    ['inactive']    ${rule_group}    ${alert}    ${alert-duration}
 
 Alerts Should Not Be Firing    #robocop: disable:too-many-calls-in-keyword
     [Documentation]    Fails if any Prometheus alert is in pending or firing state,
@@ -156,6 +129,48 @@ Alerts Should Not Be Firing    #robocop: disable:too-many-calls-in-keyword
     ${alerts_firing_count}=    Get Length     ${alerts_firing}
     IF    ${alerts_firing_count} > 0
         Fail    msg=${message_prefix} Alerts should not be firing: ${alerts_firing}
+    END
+
+Alert Should Be In States
+    [Documentation]    Fails if a Prometheus alert is not in any of the specified states
+    [Arguments]    ${pm_url}    ${pm_token}    ${expected_states}    ${rule_group}    ${alert}    ${alert-duration}=${EMPTY}
+    ${all_rules}=    Get Rules    ${pm_url}    ${pm_token}    alert
+    ${all_rules}=    Get From Dictionary    ${all_rules['data']}    groups
+    ${alert_found}=    Set Variable    False
+
+    FOR    ${rule}    IN    @{all_rules}
+        ${rule_name}=    Get From Dictionary    ${rule}    name
+        ${rules_list}=    Get From Dictionary    ${rule}    rules
+
+        IF    '${rule_name}' == '${rule_group}'
+            FOR    ${sub_rule}    IN    @{rules_list}
+                ${state}=    Get From Dictionary    ${sub_rule}    state
+                ${name}=    Get From Dictionary    ${sub_rule}    name
+                ${duration}=    Get From Dictionary    ${sub_rule}    duration
+
+                ${alert_found}=    Run Keyword And Return Status
+                ...    Alerts Should Be Equal    ${alert}    ${alert-duration}    ${name}    ${duration}
+
+                IF    ${alert_found}
+                    IF    '${state}' in ${expected_states}
+                        RETURN    ${TRUE}
+                    ELSE
+                        Exit For Loop
+                    END
+                END
+            END
+            IF    ${alert_found}
+                Exit For Loop
+            END
+        END
+    END
+
+    IF    ${alert_found} == True
+        # Log To Console    msg=Alert "${alert} ${alert-duration}" was found in Prometheus but state != firing
+        Fail    msg=Alert "${alert} ${alert-duration}" was found in Prometheus but state != ${expected_states}, the state was '${state}'
+    ELSE
+        Log    message=ERROR: Alert "${alert} ${alert-duration}" was not found in Prometheus    level=WARN
+        Fail    msg=Alert "${alert} ${alert-duration}" was not found in Prometheus
     END
 
 Alert Severity Should Be    # robocop: disable:too-many-calls-in-keyword
@@ -217,7 +232,7 @@ Alert Should Not Be Firing
     ...    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-duration}
     Should Be Equal As Strings    ${is_alert_firing}    FAIL
     # To make sure the alert was found by 'Alert Should Be Firing' keyword
-    Should Contain    ${error}    was found in Prometheus but state != firing
+    Should Contain    ${error}    was found in Prometheus but state != ['firing']
 
 Alert Should Not Be Firing In The Next Period    # robocop: disable:too-many-arguments
     [Documentation]    Fails if a Prometheus alert is firing in the next ${period}
@@ -245,6 +260,20 @@ Wait Until Alert Is Not Firing    # robocop: disable:too-many-arguments
     ...    ${alert}    ${alert-duration}=${EMPTY}    ${timeout}=5 min
     Wait Until Keyword Succeeds    ${timeout}    30s
     ...    Alert Should Not Be Firing    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-duration}
+
+Wait Until Alert Is Pending    # robocop: disable:too-many-arguments
+    [Documentation]    Waits until alert is pending or timeout is reached (failing in that case),
+    ...    checking the alert state every 30 seconds
+    [Arguments]    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-duration}=${EMPTY}    ${timeout}=10 min
+    Wait Until Keyword Succeeds    ${timeout}    30s
+    ...    Alert Should Be Pending    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-duration}
+
+Wait Until Alert Is Inactive    # robocop: disable:too-many-arguments
+    [Documentation]    Waits until alert is inactive or timeout is reached (failing in that case),
+    ...    checking the alert state every 30 seconds
+    [Arguments]    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-duration}=${EMPTY}    ${timeout}=10 min
+    Wait Until Keyword Succeeds    ${timeout}    30s
+    ...    Alert Should Be Inactive    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-duration}
 
 Get Target Pools
     [Documentation]     Returns list of Targets scrape pools

@@ -6,6 +6,7 @@ Resource            ../../../../Resources/ODS.robot
 Resource            ../../../../Resources/Common.robot
 Resource            ../../../../Resources/Page/OCPDashboard/Builds/Builds.robot
 Resource            ../../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
+Resource            ../../../../Resources/CLI/DataSciencePipelines/DataSciencePipelinesBackend.resource
 Library             OperatingSystem
 Library             SeleniumLibrary
 Library             JupyterLibrary
@@ -199,6 +200,139 @@ Verify That MT-SRE Are Not Paged For Alerts In Clusters Used For Development Or 
     END
     Verify Alertmanager Receiver For Critical Alerts    receiver=${receiver}
 
+Verify Data Science Pipelines Application Alerts
+    [Documentation]    Verifies that Data Science Pipelines Application alerts are fired when various parts are not running
+    [Tags]    Tier3
+    ...       ODS-2170
+    ...       RHOAIENG-12886
+    ...       Monitoring
+
+    Set Test Variable  ${PROJECT}  test-dspa-alerts
+
+    Log To Console    "Creating Data Science Pipelines Application"
+    Projects.Create Data Science Project From CLI    ${PROJECT}    as_user=${TEST_USER.USERNAME}
+    DataSciencePipelinesBackend.Create Pipeline Server    namespace=${PROJECT}
+    ...    object_storage_access_key=${S3.AWS_ACCESS_KEY_ID}
+    ...    object_storage_secret_key=${S3.AWS_SECRET_ACCESS_KEY}
+    ...    object_storage_endpoint=${S3.BUCKET_2.ENDPOINT}
+    ...    object_storage_region=${S3.BUCKET_2.REGION}
+    ...    object_storage_bucket_name=${S3.BUCKET_2.NAME}
+    ...    dsp_version=v2
+    DataSciencePipelinesBackend.Wait Until Pipeline Server Is Deployed    namespace=${PROJECT}
+
+    Log To Console    "Verifying metrics"
+    @{metrics_to_check} =    Create List    data_science_pipelines_application_ready
+    ...                                     data_science_pipelines_application_apiserver_ready
+    ...                                     data_science_pipelines_application_persistenceagent_ready
+    ...                                     data_science_pipelines_application_scheduledworkflow_ready
+
+    FOR    ${metric}    IN    @{metrics_to_check}
+            Wait Until Keyword Succeeds    1m    5s
+            ...     Metric Should Be Equal To Value
+                    ...    pm_url=${RHODS_PROMETHEUS_URL}
+                    ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
+                    ...    pm_query=${metric}{dspa_namespace="${PROJECT}"}
+                    ...    expected_value=1
+    END
+
+    Make Dummy GET Request To ds-pipeline-dspa Route    expected_status=404
+
+    Wait Until Keyword Succeeds    2m    5s
+    ...     Metric Should Be Equal To Value
+            ...    pm_url=${RHODS_PROMETHEUS_URL}
+            ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
+            ...    pm_query=haproxy_backend_http_responses_total:burnrate5m{component="dsp", exported_namespace="${PROJECT}"}
+            ...    expected_value=0
+
+    Log To Console    "Scaling down"
+    ODS.Scale Deployment    ${PROJECT}        ds-pipeline-dspa                                     replicas=0
+    ODS.Scale Deployment    ${PROJECT}        ds-pipeline-persistenceagent-dspa                    replicas=0
+    ODS.Scale Deployment    ${PROJECT}        ds-pipeline-scheduledworkflow-dspa                   replicas=0
+
+    Log To Console    "Verifying metrics"
+    FOR    ${metric}    IN    @{metrics_to_check}
+            Wait Until Keyword Succeeds    1m    5s
+            ...     Metric Should Be Equal To Value
+                    ...    pm_url=${RHODS_PROMETHEUS_URL}
+                    ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
+                    ...    pm_query=${metric}{dspa_namespace="${PROJECT}"}
+                    ...    expected_value=0
+    END
+
+    Make Dummy GET Request To ds-pipeline-dspa Route    expected_status=503
+
+    Wait Until Keyword Succeeds    1m    5s
+    ...     Metric Should Be Greater Than Value
+            ...    pm_url=${RHODS_PROMETHEUS_URL}
+            ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
+            ...    pm_query=haproxy_backend_http_responses_total:burnrate5m{component="dsp", exported_namespace="${PROJECT}"}
+            ...    greater_than_value=0
+
+    Log To Console    "Verifying alerts are pending or firing"
+    @{alerts_to_check} =    Create List    Data Science Pipeline Application Unavailable
+    ...                                    Data Science Pipeline APIServer Unavailable
+    ...                                    Data Science Pipeline PersistenceAgent Unavailable
+    ...                                    Data Science Pipeline ScheduledWorkflows Unavailable
+
+    FOR    ${alert}    IN    @{alerts_to_check}
+            Prometheus.Wait Until Alert Is Pending    ${RHODS_PROMETHEUS_URL}
+            ...    ${RHODS_PROMETHEUS_TOKEN}
+            ...    RHODS Data Science Pipelines
+            ...    ${alert}
+            ...    alert-duration=120
+            ...    timeout=5 min
+    END
+
+    # This one starts firing shortly after, so let's check that it actually fires
+    Prometheus.Wait Until Alert Is Firing    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    SLOs-haproxy_backend_http_responses_dsp
+    ...    Data Science Pipelines Application Route Error 5m and 1h Burn Rate high
+    ...    alert-duration=120
+    ...    timeout=3 min
+
+    Log To Console    "Scaling up"
+    ODS.Scale Deployment    ${PROJECT}        ds-pipeline-dspa                                     replicas=1
+    ODS.Scale Deployment    ${PROJECT}        ds-pipeline-persistenceagent-dspa                    replicas=1
+    ODS.Scale Deployment    ${PROJECT}        ds-pipeline-scheduledworkflow-dspa                   replicas=1
+
+    Log To Console    "Verifying metrics"
+    FOR    ${metric}    IN    @{metrics_to_check}
+            Wait Until Keyword Succeeds    1m    5s
+            ...     Metric Should Be Equal To Value
+                    ...    pm_url=${RHODS_PROMETHEUS_URL}
+                    ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
+                    ...    pm_query=${metric}{dspa_namespace="${PROJECT}"}
+                    ...    expected_value=1
+    END
+
+    Make Dummy GET Request To ds-pipeline-dspa Route    expected_status=404
+
+    Wait Until Keyword Succeeds    2m    5s
+    ...     Metric Should Be Equal To Value
+            ...    pm_url=${RHODS_PROMETHEUS_URL}
+            ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
+            ...    pm_query=haproxy_backend_http_responses_total:burnrate5m{component="dsp", exported_namespace="${PROJECT}"}
+            ...    expected_value=0
+
+    Log To Console    "Verifying alerts are inactive"
+    FOR    ${alert}    IN    @{alerts_to_check}
+            Prometheus.Wait Until Alert Is Inactive    ${RHODS_PROMETHEUS_URL}
+            ...    ${RHODS_PROMETHEUS_TOKEN}
+            ...    RHODS Data Science Pipelines
+            ...    ${alert}
+            ...    alert-duration=120
+            ...    timeout=1 min
+    END
+
+    Prometheus.Wait Until Alert Is Inactive    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    SLOs-haproxy_backend_http_responses_dsp
+    ...    Data Science Pipelines Application Route Error 5m and 1h Burn Rate high
+    ...    alert-duration=120
+    ...    timeout=2 min
+
+    [Teardown]    Delete Project Via CLI    ${PROJECT}
 
 *** Keywords ***
 Alerts Suite Setup
@@ -410,3 +544,32 @@ Verify Alertmanager Receiver For Critical Alerts
     [Arguments]         ${receiver}
     ${result} =    Run    oc get configmap alertmanager -n ${MONITORING_NAMESPACE} -o jsonpath='{.data.alertmanager\\.yml}' | yq '.route.routes[] | select(.match.severity == "critical") | .receiver'
     Should Be Equal    ${receiver}    ${result}    msg=Alertmanager has an unexpected receiver for critical alerts
+
+Metric Should Be Equal To Value
+    [Documentation]    Verifies that metric is equal to the expected value
+    [Arguments]    ${pm_url}    ${pm_token}    ${pm_query}    ${expected_value}
+    ${response} =    Prometheus.Run Query
+    ...    pm_url=${pm_url}
+    ...    pm_token=${pm_token}
+    ...    pm_query=${pm_query}
+    Log    The response was: ${response.json()}
+    Should Be Equal    ${response.json()["data"]["result"][0]["value"][-1]}    ${expected_value}
+
+Metric Should Be Greater Than Value
+    [Documentation]    Verifies that metric is greater than the specified value
+    [Arguments]    ${pm_url}    ${pm_token}    ${pm_query}    ${greater_than_value}
+    ${response} =    Prometheus.Run Query
+    ...    pm_url=${pm_url}
+    ...    pm_token=${pm_token}
+    ...    pm_query=${pm_query}
+    Log    The response was: ${response.json()}
+    Should Be True    ${response.json()["data"]["result"][0]["value"][-1]} > ${greater_than_value}
+
+Make Dummy GET Request To ds-pipeline-dspa Route
+    [Documentation]    Makes a dummy GET request to the DSPA route so the burnrate metric is not returning NaN
+    [Arguments]    ${expected_status}
+    ${token} =    Get Access Token
+    ${return_code}    ${url} =   Run And Return Rc And Output   oc get route ds-pipeline-dspa -n ${PROJECT} --template={{.spec.host}}
+    Should Be Equal As Integers    ${return_code}	 0
+    ${headers} =    Create Dictionary    Authorization=Bearer ${token}
+    RequestsLibrary.GET    url=https://${url}    headers=${headers}    verify=${False}  expected_status=${expected_status}

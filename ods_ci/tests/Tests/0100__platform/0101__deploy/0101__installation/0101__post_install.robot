@@ -197,10 +197,13 @@ Verify RHODS Release Version Number
 
 Verify Users Can Update Notification Email After Installing RHODS With The AddOn Flow
     [Documentation]    Verifies the Alert Notification email is updated in Addon-Managed-Odh-Parameters Secret and Alertmanager ConfigMap
+    ...                The test requires a real addon installation (not faked with the `-t addon` cli install), because updating
+    ...                the email is done through ocm.
     [Tags]    Tier2
     ...       ODS-673
     ...       Deployment-AddOnFlow
     ...       Monitoring
+    ...       AutomationBug  # currently broken on fake addon installs
     Skip If RHODS Is Self-Managed
     ${email_to_change} =    Set Variable    dummyemail1@redhat.com
     ${cluster_name} =    Common.Get Cluster Name From Console URL

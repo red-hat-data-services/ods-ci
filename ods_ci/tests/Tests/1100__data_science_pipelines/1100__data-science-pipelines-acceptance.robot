@@ -23,6 +23,7 @@ Verify Hello World Pipeline Runs Successfully    # robocop: disable:too-long-tes
     [Documentation]    Runs a quick hello-world pipeline and verifies that it finishes successfully
     [Tags]    Smoke
 
+    Skip If Test Enviroment Is ROSA-HCP    msg=Skipped due to automation bug on ROSA-HCP (tracked at RHOAIENG-16414)
     ${pipeline_run_params}=    Create Dictionary    message=Hello world!
 
     ${pipeline_id}    ${pipeline_version_id}    ${pipeline_run_id}    ${experiment_id}=

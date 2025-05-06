@@ -25,6 +25,7 @@ Verify Users Can Create And Run A Pipeline That Uses Only Packages From Base Ima
     ...   This is a simple pipeline, where the tasks doesn't have any packages_to_install and just needs
     ...   the python packages included in the base_image
     [Tags]      Smoke    ODS-2203
+    Skip If Test Enviroment Is ROSA-HCP    msg=Skipped due to automation bug on ROSA-HCP (tracked at RHOAIENG-16414)
     ${emtpy_dict}=    Create Dictionary
     End To End Pipeline Workflow Using Kfp
     ...    admin_username=${TEST_USER.USERNAME}
@@ -43,6 +44,7 @@ Verify Users Can Create And Run A Pipeline That Uses Custom Python Packages To I
     ...   In this pipeline there are tasks defining with packages_to_install some custom python packages to
     ...   be installed at execution time
     [Tags]      Smoke
+    Skip If Test Enviroment Is ROSA-HCP    msg=Skipped due to automation bug on ROSA-HCP (tracked at RHOAIENG-16414)
     ${emtpy_dict}=    Create Dictionary
     End To End Pipeline Workflow Using Kfp
     ...    admin_username=${TEST_USER.USERNAME}
@@ -60,6 +62,7 @@ Verify Upload Download In Data Science Pipelines Using The kfp Python Package
     [Documentation]    Creates, runs pipelines with regular user. Double check the pipeline result and clean
     ...    the pipeline resources.
     [Tags]    Sanity    ODS-2683
+    Skip If Test Enviroment Is ROSA-HCP    msg=Skipped due to automation bug on ROSA-HCP (tracked at RHOAIENG-16414)
     ${upload_download_dict}=    Create Dictionary    mlpipeline_minio_artifact_secret=value    bucket_name=value
     End To End Pipeline Workflow Using Kfp
     ...    admin_username=${TEST_USER.USERNAME}

@@ -368,3 +368,9 @@ Is Test Enviroment ROSA-HCP
     ELSE
         RETURN    ${FALSE}
     END
+
+Get Access Token
+    [Documentation]    Fetch the current users's token
+    ${rc}    ${out}=    Run And Return Rc And Output    oc whoami -t
+    Should Be Equal As Integers    ${rc}    ${0}    Command 'oc whoami -t' returned non-zero exit code: ${rc}
+    RETURN    ${out}

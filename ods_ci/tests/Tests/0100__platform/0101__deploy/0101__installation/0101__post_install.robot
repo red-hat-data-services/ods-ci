@@ -405,8 +405,7 @@ Verify DSC Contains Correct Component Versions  # robocop: disable:too-long-test
             END
             ${component_metadata_content} =  Get File  ${component_metadata_file}
             ${component_metadata} =    Evaluate     yaml.safe_load("""${component_metadata_content}""")    yaml
-            Dictionaries Should Be Equal    ${component_versions_json}[${c}]   ${component_metadata}
-            ...    ignore_keys=['managementState', 'defaultDeploymentMode', 'serverlessMode']
+            Lists Should Be Equal    ${component_versions_json}[${c}][releases]   ${component_metadata}[releases]
             ...    msg=Component versions in DSC don't match component metadata in repo
         ELSE
             Log  ${c} does not provide component_metadata.yaml

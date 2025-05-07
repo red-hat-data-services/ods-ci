@@ -244,8 +244,8 @@ Open Dashboard Settings
         Click Element  xpath://button[@id="settings"]
     END
     Click Element  xpath://a[.="${settings_page}"]
-    IF    "${settings_page}" == "Notebook images"
-        ${exp_page_title}=    Set Variable    Notebook image settings
+    IF    "${settings_page}" == "Workbench images"
+        ${exp_page_title}=    Set Variable    Workbench images
     ELSE IF     "${settings_page}" == "Cluster settings"
         ${exp_page_title}=    Set Variable    Cluster settings
     ELSE IF     "${settings_page}" == "Serving runtimes"

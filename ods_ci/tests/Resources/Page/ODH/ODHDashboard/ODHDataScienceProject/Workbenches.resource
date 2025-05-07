@@ -201,7 +201,7 @@ Select Workbench Image
             ${image_name}=    Set Variable    Jupyter Data Science
         END
     END
-    Click Element    //a[@href="#notebook-image"]
+    Click Element    //a[@href="#name-and-description"]
     Wait Until Page Contains Element    ${WORKBENCH_IMAGE_MENU_BTN_XP}
     Click Element    ${WORKBENCH_IMAGE_MENU_BTN_XP}
     Wait Until Page Contains Element    ${WORKBENCH_IMAGE_ITEM_BTN_XP}\[text()="${image_name}"]    timeout=10s

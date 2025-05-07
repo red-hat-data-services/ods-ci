@@ -18,18 +18,18 @@ ${RAY_TORCH_CUDA_IMAGE_3.11}             quay.io/rhoai/ray@sha256:5077f9bb230dfa
 ${RAY_ROCM_IMAGE_3.11}                   quay.io/modh/ray@sha256:bc46827094a29062a3631f533ea373a26cc73ed5854c7352f890c6376d5840df
 # Corresponds to quay.io/rhoai/ray:2.35.0-py311-rocm61-torch24-fa26
 ${RAY_TORCH_ROCM_IMAGE_3.11}             quay.io/rhoai/ray@sha256:b0e129cd2f4cdea7ad7a7859031357ffd9915410551f94fbcb942af2198cdf78
-# Corresponds to quay.io/modh/fms-hf-tuning:v2.7.1
-${FMS_HF_TUNING_IMAGE}                   quay.io/modh/fms-hf-tuning@sha256:18a871cbb1fb16766266b2fb7e1e498259543a88ffb4422ebf7ba142e5e739b4
+# Corresponds to quay.io/modh/fms-hf-tuning:v2.8.2
+${FMS_HF_TUNING_IMAGE}                   quay.io/modh/fms-hf-tuning@sha256:1ad46fe1a23f41f190c49ec2549c64f484c88fe220888a7a5700dd857ca243cc
 # Corresponds to quay.io/modh/training:py311-cuda121-torch241
 ${CUDA_TRAINING_IMAGE_TORCH241}          quay.io/modh/training@sha256:f64f7bba3f1020d39491ac84d40d362a52e4822bdc11a33cfff021178b7c4097
 # Corresponds to quay.io/modh/training:py311-rocm62-torch241
 ${ROCM_TRAINING_IMAGE_TORCH241}          quay.io/modh/training@sha256:1104eb83d7ad9cfb63c1437be38d1615a669473c5b1c2da5a9a01ddd90daceb9
 # Corresponds to quay.io/modh/training:py311-cuda124-torch251
-${CUDA_TRAINING_IMAGE_TORCH251}          quay.io/modh/training@sha256:25611334b72c9b6d26b2e29289fc86efe237bd9089fdb2f3eb5c8ff69c19aca7
+${CUDA_TRAINING_IMAGE_TORCH251}          quay.io/modh/training@sha256:1d0caea3e5d56ff7d672954b1ad511e661df9bdb364d56879961169a4ca8dae0
 # Corresponds to quay.io/modh/training:py311-rocm62-torch251
-${ROCM_TRAINING_IMAGE_TORCH251}          quay.io/modh/training@sha256:2975182e2f8ea375717ab574aef8470da7cf95d23d00833035078673c8e5b25e
-# Corresponds to quay.io/modh/odh-generic-data-science-notebook:v3-20250320-3fa2d83
-${NOTEBOOK_IMAGE_3.11}                   quay.io/modh/odh-generic-data-science-notebook@sha256:5999547f847ca841fe067ff84e2972d2cbae598066c2418e236448e115c1728e
+${ROCM_TRAINING_IMAGE_TORCH251}          quay.io/modh/training@sha256:f98d70edc49203537d4fec005aaff68a4830b9c9ce2390bb4d7910b89c312b97
+# Corresponds to quay.io/modh/odh-generic-data-science-notebook:v3-20250417-b5cf05d
+${NOTEBOOK_IMAGE_3.11}                   quay.io/modh/odh-generic-data-science-notebook@sha256:bc67afab696eed960493d14559f6819dcad0b31dc90b8752e5089f022c5a3d4d
 ${NOTEBOOK_USER_NAME}                    ${TEST_USER_3.USERNAME}
 ${NOTEBOOK_USER_PASSWORD}                ${TEST_USER_3.PASSWORD}
 ${FMS_BINARY_NAME}                       fms

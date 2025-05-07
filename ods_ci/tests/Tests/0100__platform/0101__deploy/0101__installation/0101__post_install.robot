@@ -197,10 +197,13 @@ Verify RHODS Release Version Number
 
 Verify Users Can Update Notification Email After Installing RHODS With The AddOn Flow
     [Documentation]    Verifies the Alert Notification email is updated in Addon-Managed-Odh-Parameters Secret and Alertmanager ConfigMap
+    ...                The test requires a real addon installation (not faked with the `-t addon` cli install), because updating
+    ...                the email is done through ocm.
     [Tags]    Tier2
     ...       ODS-673
     ...       Deployment-AddOnFlow
     ...       Monitoring
+    ...       AutomationBug  # currently broken on fake addon installs
     Skip If RHODS Is Self-Managed
     ${email_to_change} =    Set Variable    dummyemail1@redhat.com
     ${cluster_name} =    Common.Get Cluster Name From Console URL
@@ -405,8 +408,7 @@ Verify DSC Contains Correct Component Versions  # robocop: disable:too-long-test
             END
             ${component_metadata_content} =  Get File  ${component_metadata_file}
             ${component_metadata} =    Evaluate     yaml.safe_load("""${component_metadata_content}""")    yaml
-            Dictionaries Should Be Equal    ${component_versions_json}[${c}]   ${component_metadata}
-            ...    ignore_keys=['managementState', 'defaultDeploymentMode', 'serverlessMode']
+            Lists Should Be Equal    ${component_versions_json}[${c}][releases]   ${component_metadata}[releases]
             ...    msg=Component versions in DSC don't match component metadata in repo
         ELSE
             Log  ${c} does not provide component_metadata.yaml

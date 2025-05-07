@@ -332,10 +332,9 @@ Verify No Application Pods Run With Anyuid SCC Or As Root
 Verify No Alerts Are Firing After Installation Except For DeadManSnitch    # robocop: disable:too-long-test-case
     [Documentation]    Verifies that, after installation, only the DeadManSnitch alert is firing
     [Tags]    Smoke
-    ...       Tier1
     ...       ODS-540
     ...       RHOAIENG-13079
-    ...       Monitoring
+    #...       Monitoring - just for tracking purposes but commented to not run the same test many times
     ...       Operator
     Skip If RHODS Is Self-Managed
     # If these numbers change, add also alert-specific tests

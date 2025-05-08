@@ -36,7 +36,8 @@ ${DEFAULT_OPERATOR_NAMESPACE_RHOAI}=    redhat-ods-operator
 ${DEFAULT_OPERATOR_NAMESPACE_ODH}=    opendatahub-operators
 ${DEFAULT_APPLICATIONS_NAMESPACE_RHOAI}=    redhat-ods-applications
 ${DEFAULT_APPLICATIONS_NAMESPACE_ODH}=    opendatahub
-${DEFAULT_WORKBENCHES_NAMESPACE}=    rhods-notebooks
+${DEFAULT_WORKBENCHES_NAMESPACE_RHOAI}=    rhods-notebooks
+${DEFAULT_WORKBENCHES_NAMESPACE_ODH}=    opendatahub
 ${CUSTOM_MANIFESTS}=    ${EMPTY}
 ${IS_NOT_PRESENT}=      1
 ${DSC_TEMPLATE}=    dsc_template.yml
@@ -621,7 +622,7 @@ Configure Custom Namespaces
        # If the applications namespace is not the default one, we need to apply some steps prior to installing ODH/RHOAI
        Configure Custom Applications Namespace    ${APPLICATIONS_NAMESPACE}
     END
-    IF  "${NOTEBOOKS_NAMESPACE}" != "${DEFAULT_WORKBENCHES_NAMESPACE}"
+    IF  "${NOTEBOOKS_NAMESPACE}" != "${DEFAULT_WORKBENCHES_NAMESPACE_RHOAI}" and "${NOTEBOOKS_NAMESPACE}" != "${DEFAULT_WORKBENCHES_NAMESPACE_ODH}"
        # If the workbenches namespace is not the default one, we need to create prior to installing ODH/RHOAI
        Configure Custom Workbenches Namespace    ${NOTEBOOKS_NAMESPACE}
     END

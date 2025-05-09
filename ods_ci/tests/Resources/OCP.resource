@@ -321,7 +321,7 @@ Get Resource Attribute
     ${rc}   ${value}=    Run And Return Rc And Output
     ...    oc get ${resource_type}/${resource_name} -n ${namespace} -o 'jsonpath={${attribute_path}}'
     Should Be Equal    "${rc}"    "0"    msg=${value}
-    IF    "${value}" != "${EMPTY}"
+    IF    "$value" != "$EMPTY"
         Log To Console    ${resource_type} ${resource_name} in the namespace ${namespace} attribute ${attribute_path} value is ${value}
     ELSE
         Log To Console    ${resource_type} ${resource_name} in the namespace ${namespace} attribute ${attribute_path} value is EMPTY

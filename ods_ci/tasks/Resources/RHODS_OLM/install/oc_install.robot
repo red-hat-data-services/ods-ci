@@ -106,7 +106,8 @@ Add StartingCSV To Subscription
     ...                startingCSV field in the sub. 
     ...                Needed for post-upgrade test suites to identify which RHOAI version
     ...                was installedbefore upgrading
-    ${rc}    ${out}=    Run And Return Rc And Output    sh ${file_path}/add_starting_csv.sh
+    ${rc}    ${out}=    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/add_starting_csv.sh
+    Log    ${out}    console=yes
     Run Keyword And Continue On Failure    Should Be Equal As Numbers    ${rc}    ${0}
     IF    ${rc} != ${0}
         Log    Unable to add startingCSV after RHOAI operator installation.\nCheck the cluster please    console=yes

@@ -203,28 +203,12 @@ Verify Distributed Workload Metrics Resources By Creating Ray Cluster Workload
     [Teardown]      Run Keywords        Cleanup Codeflare-SDK Setup     AND
     ...     Run Keyword If Test Failed      Codeflare Upgrade Tests Teardown        ${PRJ_UPGRADE}      ${DW_PROJECT_CREATED}       # robocop: disable:line-too-long
 
-Run Training Operator KFTO Setup PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_4_1)
-    [Documentation]    Run Training Operator KFTO Setup PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_4_1)
-    [Tags]      Upgrade    TrainingKubeflow
-    [Setup]     Prepare Training Operator KFTO E2E Test Suite
-    Skip If Operator Starting Version Is Not Supported      minimum_version=2.19.0
-    Run Training Operator KFTO Test    TestSetupPytorchjob    ${CUDA_TRAINING_IMAGE_TORCH241}
-    [Teardown]    Teardown Training Operator KFTO E2E Test Suite
-
 Run Training Operator KFTO Setup PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_5_1)
     [Documentation]    Run Training Operator KFTO Setup PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_5_1)
     [Tags]      Upgrade    TrainingKubeflow
     [Setup]     Prepare Training Operator KFTO E2E Test Suite
     Skip If Operator Starting Version Is Not Supported      minimum_version=2.19.0
     Run Training Operator KFTO Test    TestSetupPytorchjob    ${CUDA_TRAINING_IMAGE_TORCH251}
-    [Teardown]    Teardown Training Operator KFTO E2E Test Suite
-
-Run Training Operator KFTO Setup Sleep PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_4_1)
-    [Documentation]    Setup PyTorchJob which is kept running for 24 hours with NVIDIA CUDA image (PyTorch 2_4_1)
-    [Tags]      Upgrade    TrainingKubeflow
-    [Setup]     Prepare Training Operator KFTO E2E Test Suite
-    Skip If Operator Starting Version Is Not Supported      minimum_version=2.19.0
-    Run Training Operator KFTO Test    TestSetupSleepPytorchjob    ${CUDA_TRAINING_IMAGE_TORCH241}
     [Teardown]    Teardown Training Operator KFTO E2E Test Suite
 
 Run Training Operator KFTO Setup Sleep PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_5_1)

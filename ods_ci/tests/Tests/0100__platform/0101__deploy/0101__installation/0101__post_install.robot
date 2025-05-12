@@ -3,6 +3,7 @@ Documentation       Post install test cases that mainly verify OCP resources and
 Library             String
 Library             OperatingSystem
 Library             OpenShiftLibrary
+Library             yaml
 Library             ../../../../../libs/Helpers.py
 Resource            ../../../../Resources/RHOSi.resource
 Resource            ../../../../Resources/OCP.resource
@@ -328,6 +329,24 @@ Verify No Application Pods Run With Anyuid SCC Or As Root
     Should Be Equal As Integers	 ${return_code}	 0  msg=Error getting runAsUser of pods
     ${status} =    Run Keyword And Return Status    Should Be Empty    ${output}
     IF    not ${status}    Fail      msg=Some pods are running as root (UID=0)
+
+Verify PagerDuty Secret Is Correctly Stored
+    [Documentation]    Verifies that, after installation, the PagerDuty secret is correctly stored
+    [Tags]    Smoke
+    ...       ODS-500
+    ...       RHOAIENG-13069
+    #...       Monitoring - just for tracking purposes but commented to not run the same test many times
+    ...       Operator
+    Skip If RHODS Is Self-Managed
+    # Retrieving the pagerduty section from alertmanager configmap in the monitoring namespace
+    ${alertmanager_data}=       Get Resource Attribute    ${MONITORING_NAMESPACE}    ConfigMap     alertmanager     .data.alertmanager\\.yml
+    ${alertmanager_data_yml}=     yaml.Safe Load    ${alertmanager_data}
+    # Retrieving the pagerduty section from redhat-rhods-pagerduty secret in the monitoring namespace
+    ${redhat_rhods_pd_data_base64}=      Get Resource Attribute    ${MONITORING_NAMESPACE}    Secret     redhat-rhods-pagerduty     .data.PAGERDUTY_KEY
+    ${redhat_rhods_pd_data}=      Evaluate      base64.b64decode("${redhat_rhods_pd_data_base64}").decode('utf-8')  modules=base64
+    # Check that both values are equals
+    Should Be Equal As Strings      '${alertmanager_data_yml}[receivers][2][pagerduty_configs][0][service_key]'       '${redhat_rhods_pd_data}'
+
 
 Verify No Alerts Are Firing After Installation Except For DeadManSnitch    # robocop: disable:too-long-test-case
     [Documentation]    Verifies that, after installation, only the DeadManSnitch alert is firing

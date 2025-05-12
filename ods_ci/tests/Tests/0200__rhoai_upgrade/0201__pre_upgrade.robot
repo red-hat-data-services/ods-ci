@@ -39,7 +39,6 @@ ${UPGRADE_NS}    upgrade
 ${UPGRADE_CONFIG_MAP}    upgrade-config-map
 
 
-
 *** Test Cases ***
 Set PVC Size Via UI
     [Documentation]    Sets a Pod toleration via the admin UI
@@ -76,10 +75,13 @@ Verify RHODS Accept Multiple Admin Groups And CRD Gets Updates
     ...    ${TEST_USER.PASSWORD}
     ...    ${TEST_USER.AUTH_TYPE}
     Clear User Management Settings
-    Set Global Variable         @{adm_groups}     rhods-admins        rhods-users
-    Set Global Variable         @{allwd_groups}     system:authenticated
-    Add OpenShift Groups To Data Science Administrators     @{adm_groups}
-    Add OpenShift Groups To Data Science User Groups        @{allwd_groups}
+    # Create a configmap and store both groups
+    ${return_code}    ${cmd_output}=    Run And Return Rc And Output
+    ...    oc create configmap ${UPGRADE_CONFIG_MAP} -n ${UPGRADE_NS} --from-literal=adm_groups="rhods-admins | rhods-users" --from-literal=allwd_groups=system:authenticated
+    Should Be Equal As Integers     ${return_code}      0       msg=${cmd_output}
+
+    Add OpenShift Groups To Data Science Administrators     rhods-admins    rhods-users
+    Add OpenShift Groups To Data Science User Groups        system:authenticated
     Save Changes In User Management Setting
     [Teardown]      Dashboard Test Teardown
 

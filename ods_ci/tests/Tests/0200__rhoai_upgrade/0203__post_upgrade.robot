@@ -61,11 +61,20 @@ Verify RHODS User Groups
     Get Auth Cr Config Data
     @{admins}                Set Variable            ${AUTH_PAYLOAD[0]['spec']['adminGroups']}
     @{allowed}                 Set Variable            ${AUTH_PAYLOAD[0]['spec']['allowedGroups']}
-    FOR    ${group}    IN    @{adm_groups}
-        Should Contain Match        ${admins}        ${group}
+
+    ${return_code}    ${adm_groups}=    Run And Return Rc And Output
+    ...    oc get configmap ${UPGRADE_CONFIG_MAP} -n ${UPGRADE_NS} -o jsonpath='{.data.adm_groups}'
+    Should Be Equal As Integers     ${return_code}      0
+
+    ${return_code}    ${allwd_groups}=    Run And Return Rc And Output
+    ...    oc get configmap ${UPGRADE_CONFIG_MAP} -n ${UPGRADE_NS} -o jsonpath='{.data.allwd_groups}'
+    Should Be Equal As Integers     ${return_code}      0
+
+    FOR    ${group}    IN    @{admins}
+        Should Contain Match        ${admins}        ${group}       msg=admin groups did not match
     END
-    FOR    ${group}    IN    @{allwd_groups}
-        Should Contain Match        ${allowed}        ${group}
+    FOR    ${group}    IN    @{allowed}
+        Should Contain Match        ${allowed}        ${group}      msg=allowed groups did not match
     END
     [Teardown]      Set Default Users
 
@@ -362,6 +371,15 @@ Set Default Users
     Set Standard RHODS Groups Variables
     Set Default Access Groups Settings
     IF    not ${IS_SELF_MANAGED}    Managed RHOAI Upgrade Test Teardown
+    # Get upgrade-config-map to check whether it exists
+    ${rc}    ${cmd_output}=    Run And Return Rc And Output
+    ...    oc get configmap ${UPGRADE_CONFIG_MAP} -n ${UPGRADE_NS}
+    IF  ${rc} == 0
+        # Clean up upgrade-config-map
+        ${return_code}    ${cmd_output}=    Run And Return Rc And Output
+        ...    oc delete configmap ${UPGRADE_CONFIG_MAP} -n ${UPGRADE_NS}
+        Should Be Equal As Integers     ${return_code}      0       msg=${cmd_output}
+    END
 
 Delete OOTB Image
     [Documentation]    Delete the Custom notbook create

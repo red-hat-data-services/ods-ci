@@ -99,6 +99,19 @@ Install RHODS
       END
   END
   Wait Until Csv Is Ready    display_name=${csv_display_name}    operators_namespace=${OPERATOR_NAMESPACE}
+  Add StartingCSV To Subscription
+
+Add StartingCSV To Subscription
+    [Documentation]    Retrieves current RHOAI version from subscription status and add
+    ...                startingCSV field in the sub. 
+    ...                Needed for post-upgrade test suites to identify which RHOAI version
+    ...                was installedbefore upgrading
+    ${rc}    ${out}=    Run And Return Rc And Output    sh ${file_path}/add_starting_csv.sh
+    Run Keyword And Continue On Failure    Should Be Equal As Numbers    ${rc}    ${0}
+    IF    ${rc} != ${0}
+        Log    Unable to add startingCSV after RHOAI operator installation.\nCheck the cluster please    console=yes
+        ...    level=ERROR
+    END
 
 Verify RHODS Installation
   Set Global Variable    ${DASHBOARD_APP_NAME}    ${PRODUCT.lower()}-dashboard

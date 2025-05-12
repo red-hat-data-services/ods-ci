@@ -7,7 +7,6 @@ if [[ -z "${RHOAI_SUB_NAME}" ]]; then
   echo "No RHOAI_SUB_NAME was specified. Getting subscription name"
   RHOAI_SUB=$(oc get sub --all-namespaces -ojson | jq '.items[] | select(.spec.name=="rhods-operator") | .metadata.name + ","+ .metadata.namespace' | tr -d '"')
   IFS=',' read -ra RHOAI_SUB_DETAILS <<< "$RHOAI_SUB"
-  echo "${RHOAI_SUB}"
   echo "${RHOAI_SUB_DETAILS[@]}"
 fi
 

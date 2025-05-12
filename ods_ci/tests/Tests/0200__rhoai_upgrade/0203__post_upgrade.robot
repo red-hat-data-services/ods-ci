@@ -71,10 +71,10 @@ Verify RHODS User Groups
     Should Be Equal As Integers     ${return_code}      0
 
     FOR    ${group}    IN    @{admins}
-        Should Contain Match        ${admins}        ${group}       msg=admin groups did not match
+        Should Contain Match        ${admins}        ${group}
     END
     FOR    ${group}    IN    @{allowed}
-        Should Contain Match        ${allowed}        ${group}      msg=allowed groups did not match
+        Should Contain Match        ${allowed}        ${group}
     END
     [Teardown]      Set Default Users
 

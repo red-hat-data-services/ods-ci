@@ -14,7 +14,6 @@ fi
 if [[ -z "${RHOAI_VERSION}" ]]; then
   echo "No RHOAI_VERSION was specified. Getting currentCSV"
   RHOAI_VERSION=$(oc get sub -ojson ${RHOAI_SUB_DETAILS[0]} -n ${RHOAI_SUB_DETAILS[1]} | jq '.status.currentCSV' | tr -d '"')
-  # RHOAI_VERSION=$(oc get sub --all-namespaces -ojson | jq '.items[] | select(.spec.name=="rhods-operator") | .status.currentCSV')
 fi
 
 if [[ "${RHOAI_VERSION}" != "rhods-operator."* ]]; then

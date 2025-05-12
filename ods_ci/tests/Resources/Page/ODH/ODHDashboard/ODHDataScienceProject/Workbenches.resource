@@ -1,5 +1,6 @@
 *** Settings ***
 Documentation    Collection of keywords to interact with Workbenches
+Library        JupyterLibrary
 Resource       ../../../../Page/Components/Components.resource
 Resource       ../../../../Common.robot
 Resource       ../ODHDataScienceProject/Storages.resource
@@ -200,7 +201,7 @@ Select Workbench Image
             ${image_name}=    Set Variable    Jupyter Data Science
         END
     END
-    Click Element    //a[@href="#notebook-image"]
+    Click Element    //a[@href="#name-and-description"]
     Wait Until Page Contains Element    ${WORKBENCH_IMAGE_MENU_BTN_XP}
     Click Element    ${WORKBENCH_IMAGE_MENU_BTN_XP}
     Wait Until Page Contains Element    ${WORKBENCH_IMAGE_ITEM_BTN_XP}\[text()="${image_name}"]    timeout=10s
@@ -214,16 +215,10 @@ Select Workbench Image
             Fail    ${version} does not exist, use default/previous
         END
     END
-    IF  "${version}"=="previous"
-        # Let's reset the JupyterLibrary settings so that global variables for Jupyter 3 (default) are in place.
-        Update Globals For JupyterLab 3 Custom
-    # TODO: Create the missing Keyword "Update Globals For JupyterLab 4"
-    # ELSE
-        # For Jupyter 4, we need to update global default variable values (images 2024b and newer)
-        # This calls method from JupyterLibrary Version.resource module
-        # https://github.com/robots-from-jupyter/robotframework-jupyterlibrary/blob/9e25fcb89a5f1a723c59e9b96706e4c638e0d9be/src/JupyterLibrary/clients/jupyterlab/Version.resource
-        # Update Globals For JupyterLab 4
-    END
+    # For Jupyter 4, we need to update global default variable values (images 2024b and newer)
+    # This calls method from JupyterLibrary Version.resource module
+    # https://github.com/robots-from-jupyter/robotframework-jupyterlibrary/blob/9e25fcb89a5f1a723c59e9b96706e4c638e0d9be/src/JupyterLibrary/clients/jupyterlab/Version.resource
+    Update Globals For JupyterLab 4
 
 Verify Version Selection Dropdown
     [Documentation]    Verifies the version selection dropdown is present
@@ -343,8 +338,7 @@ Access To Workbench
     ${oauth_prompt_visible} =    Is OpenShift OAuth Login Prompt Visible
     IF  ${oauth_prompt_visible}    Click Button     Log in with OpenShift
     Run Keyword And Warn On Failure   Login To Openshift  ${username}  ${password}  ${auth_type}
-    ${authorization_required}=  Is Service Account Authorization Required
-    IF  ${authorization_required}  Authorize JupyterLab Service Account
+    Verify Service Account Authorization Not Required
     IF  "${expected_ide}"=="VSCode"
         Wait Until Page Contains Element  xpath://div[@class="menubar-menu-button"]  timeout=60s
         Wait Until Page Contains Element  xpath://div[@class="monaco-dialog-box"]  timeout=60s
@@ -374,14 +368,7 @@ Launch And Access Workbench
 Open Workbench
     [Documentation]    Clicks on "open" link for a given workbench and returns the handle of the current tab
     [Arguments]    ${workbench_title}
-    ${desc}=    Does Workbench Have A Description    ${workbench_title}
-    ${open_workbench_link}=    Set Variable
-    ...    ${WORKBENCH_SECTION_XP}//td[@data-label="Name"]//*[.="${workbench_title}"]
-    IF    ${desc}
-        ${open_workbench_link}=    Catenate    ${open_workbench_link}    /../../../td//a[.="Open"]
-    ELSE
-        ${open_workbench_link}=    Catenate    ${open_workbench_link}    /../../td//a[.="Open"]
-    END
+    ${open_workbench_link}=    Set Variable    //*[@data-testid="notebook-route-link" and .//*[text()="${workbench_title}"]]
     SeleniumLibrary.Wait Until Page Contains Element    ${open_workbench_link}    timeout=30s
     SeleniumLibrary.Click Link    ${open_workbench_link}
     ${previous_handle}=    SeleniumLibrary.Switch Window    NEW

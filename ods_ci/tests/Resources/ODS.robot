@@ -142,7 +142,7 @@ Wait Until RHODS Uninstallation Is Completed
 
 RHODS Namespaces Should Not Exist
     [Documentation]     Checks if the RHODS namespace do not exist on openshift
-    Verify Project Does Not Exists  rhods-notebook
+    Verify Project Does Not Exists  ${NOTEBOOKS_NAMESPACE}
     Verify Project Does Not Exists  ${MONITORING_NAMESPACE}
     Verify Project Does Not Exists  ${APPLICATIONS_NAMESPACE}
     Verify Project Does Not Exists  ${OPERATOR_NAMESPACE}
@@ -411,3 +411,19 @@ Wait For DSC Ready State
     ...    oc wait --timeout=${wait_time} --for jsonpath='{.status.conditions[].type}'=Ready -n ${namespace} dsc ${dsc_name}    # robocop: disable
     Should Be Equal As Integers    ${rc}     ${0}
     Log    ${out}    console=${out}
+
+Assign ${permission_type} Permissions To User ${username} In Project ${project_title} Using CLI
+    [Documentation]     Adds permissions to Data Science Projects using the CLI same as the ones added with the UI
+    # robocop: off=line-too-long,unnecessary-string-conversion
+    IF  "${permission_type}" == "Admin"
+        ${cluster_role}=   Set Variable    "admin"
+    ELSE IF   "${permission_type}" == "Contributor"
+        ${cluster_role}=   Set Variable    "edit"
+    ELSE
+        Fail    Usupported permission type ${permission_type}
+    END
+    ${rolebinding_suffix}=    Generate Random String    6   [LOWER]
+    ${rolebinding_name}=    Catenate    SEPARATOR=-    dashboard-permission    ${rolebinding_suffix}
+    Run And Verify Command    oc create rolebinding ${rolebinding_name} --clusterrole=${cluster_role} --user=${username} -n ${project_title}
+    Run And Verify Command    oc label rolebinding ${rolebinding_name} opendatahub.io/dashboard=true -n ${project_title}
+    Run And Verify Command    oc label rolebinding ${rolebinding_name} opendatahub.io/project-sharing=true -n ${project_title}

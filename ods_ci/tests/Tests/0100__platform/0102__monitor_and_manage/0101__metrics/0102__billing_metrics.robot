@@ -28,6 +28,7 @@ Verify OpenShift Monitoring Results Are Correct When Running Undefined Queries
     ...       Tier1
     ...       ODS-173
     ...       Monitoring
+    ...       AutomationBug
     Run OpenShift Metrics Query    ${METRIC_RHODS_UNDEFINED}   username=${OCP_ADMIN_USER.USERNAME}   password=${OCP_ADMIN_USER.PASSWORD}
     ...    auth_type=${OCP_ADMIN_USER.AUTH_TYPE}   retry_attempts=1
     Metrics.Verify Query Results Dont Contain Data
@@ -39,6 +40,7 @@ Test Billing Metric (Notebook Cpu Usage) On OpenShift Monitoring
     ...       Tier1
     ...       ODS-175
     ...       Monitoring
+    ...       AutomationBug
     Run Jupyter Notebook For 5 Minutes
     Verify Previus CPU Usage Is Greater Than Zero
     [Teardown]    CleanUp JupyterHub And Close All Browsers
@@ -84,6 +86,7 @@ Test Metric "Active_Users" On OpenShift Monitoring On Cluster Monitoring Prometh
     ...       ODS-1053
     ...       Tier1
     ...       Monitoring
+    ...       AutomationBug
     ${active_users_before} =    Run OpenShift Metrics Query
     ...    username=${OCP_ADMIN_USER.USERNAME}    password=${OCP_ADMIN_USER.PASSWORD}
     ...    auth_type=${OCP_ADMIN_USER.AUTH_TYPE}   query=cluster:usage:consumption:rhods:active_users
@@ -114,6 +117,7 @@ Test Metric "Active Notebook Pod Time" On OpenShift Monitoring - Cluster Monitor
     ...       ODS-1055
     ...       Tier1
     ...       Monitoring
+    ...       AutomationBug
     @{list_of_usernames} =    Create List    ${TEST_USER_3.USERNAME}    ${TEST_USER_4.USERNAME}
     Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
     ...    list_of_usernames=${list_of_usernames}
@@ -201,8 +205,7 @@ Iterative Image Test
     Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     Page Should Not Contain    403 : Forbidden
-    ${authorization_required} =    Is Service Account Authorization Required
-    IF    ${authorization_required}    Authorize JupyterLab Service Account
+    Verify Service Account Authorization Not Required
     Fix Spawner Status
     Spawn Notebook With Arguments    image=${image}
     Run Cell And Check Output    print("Hello World!")    Hello World!
@@ -223,8 +226,7 @@ CleanUp JupyterHub
     Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     Page Should Not Contain    403 : Forbidden
-    ${authorization_required} =    Is Service Account Authorization Required
-    IF    ${authorization_required}    Authorize JupyterLab Service Account
+    Verify Service Account Authorization Not Required
     # Additional check on running server
     ${control_panel_visible} =  Control Panel Is Visible
     IF  ${control_panel_visible}==True

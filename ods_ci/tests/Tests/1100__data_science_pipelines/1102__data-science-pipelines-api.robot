@@ -3,10 +3,8 @@ Documentation       Test suite for OpenShift Pipeline API
 Resource            ../../Resources/RHOSi.resource
 Resource            ../../Resources/ODS.robot
 Resource            ../../Resources/Common.robot
-Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource            ../../Resources/CLI/DataSciencePipelines/DataSciencePipelinesBackend.resource
-Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipelines.resource
 Library             DateTime
 Library             ../../../libs/DataSciencePipelinesAPI.py
 Library             ../../../libs/DataSciencePipelinesKfp.py
@@ -24,6 +22,7 @@ Verify Admin Users Can Create And Run a Data Science Pipeline Using The Api
     [Documentation]    Creates, runs pipelines with admin user. Double check the pipeline result and clean
     ...    the pipeline resources.
     [Tags]      Sanity    ODS-2083
+    Skip If Test Enviroment Is ROSA-HCP    msg=Skipped due to automation bug on ROSA-HCP (tracked at RHOAIENG-16414)
     End To End Pipeline Workflow Via Api    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}    pipelinesapi1
     [Teardown]   Projects.Delete Project Via CLI By Display Name    pipelinesapi1
 
@@ -65,8 +64,7 @@ Verify DSPO Operator Reconciliation Retry
     # Add the missing secret with storage credentials. The DSPO will reconcile and start the pipeline server pods
     # Note: as the credentials are dummy, the DSPA status won't be ready, but it's ok because in this test
     # we are just testing the DSPO reconciliation
-    ${rc}  ${out} =    Run And Return Rc And Output   oc apply -f ${DSPA_PATH}/dummy-storage-creds.yaml -n ${local_project_name}    # robocop: disable:line-too-long
-    IF    ${rc}!=0    Fail
+    Run And Verify Command    oc apply -f ${DSPA_PATH}/dummy-storage-creds.yaml -n ${local_project_name}
 
     # After reconciliation, the project should have at least one pod running
     Wait For Pods Number  1    namespace=${local_project_name}    timeout=60
@@ -94,8 +92,7 @@ End To End Pipeline Workflow Via Api
 Double Check If DSPA Was Created
     [Documentation]    Double check if DSPA was created
     [Arguments]     ${local_project_name}
-    ${rc}  ${out} =    Run And Return Rc And Output   oc get datasciencepipelinesapplications -n ${local_project_name}
-    IF    ${rc}!=0    Fail
+    Run And Verify Command    oc get datasciencepipelinesapplications -n ${local_project_name}
 
 Verify DSPO Logs Show Error Encountered When Parsing DSPA
     [Documentation]    DSPA must find an error because not all components were deployed
@@ -116,5 +113,4 @@ Verify DSPO Logs Show Error Encountered When Parsing DSPA
 
 Data Science Pipelines Suite Setup
     [Documentation]    Data Science Pipelines Suite Setup
-    Set Library Search Order    SeleniumLibrary
     RHOSi Setup

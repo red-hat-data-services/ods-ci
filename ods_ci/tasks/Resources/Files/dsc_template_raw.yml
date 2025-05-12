@@ -21,7 +21,10 @@ spec:
       managementState: <datasciencepipelines_value>
     kserve:
       devFlags: <kserve_devflags>
-      defaultDeploymentMode: Serverless
+      defaultDeploymentMode: RawDeployment
+      serving:
+        name: knative-serving
+        managementState: Removed
       managementState: <kserve_value>
     kueue:
       devFlags: <kueue_devflags>
@@ -41,12 +44,7 @@ spec:
     workbenches:
       devFlags: <workbenches_devflags>
       managementState: <workbenches_value>
-      workbenchNamespace: <workbenches_namespace>
     modelregistry:
       devFlags: <modelregistry_devflags>
       managementState: <modelregistry_value>
       registriesNamespace: <modelregistry_namespace>
-    feastoperator:
-      devFlags: <feastoperator_devflags>
-      managementState: <feastoperator_value>
-

@@ -31,9 +31,9 @@ ${KFNBC_MODAL_X_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[@aria-label="Clo
 ${KFNBC_CONTROL_PANEL_HEADER_XPATH} =    //h1[.="Notebook server control panel"]
 ${KFNBC_ENV_VAR_NAME_PRE} =    //span[.="Variable name"]/../../../div[@class="pf-v6-c-form__group-control"]
 ${DEFAULT_PYTHON_VER} =    3.11
-${PREVIOUS_PYTHON_VER} =    3.9
-${DEFAULT_NOTEBOOK_VER} =    2024.2
-${PREVIOUS_NOTEBOOK_VER} =    2024.1
+${PREVIOUS_PYTHON_VER} =    3.11
+${DEFAULT_NOTEBOOK_VER} =    2025.1
+${PREVIOUS_NOTEBOOK_VER} =    2024.2
 
 
 *** Keywords ***
@@ -78,25 +78,10 @@ Select Notebook Image
         END
     END
 
-    IF  "${version}"=="previous"
-        # Let's reset the JupyterLibrary settings so that global variables for Jupyter 3 (default) are in place.
-        Update Globals For JupyterLab 3 Custom
-    ELSE
-        # For Jupyter 4, we need to update global default variable values (images 2024b and newer)
-        # This calls method from JupyterLibrary Version.resource module
-        # https://github.com/robots-from-jupyter/robotframework-jupyterlibrary/blob/9e25fcb89a5f1a723c59e9b96706e4c638e0d9be/src/JupyterLibrary/clients/jupyterlab/Version.resource
-        Update Globals For JupyterLab 4
-    END
-
-Update Globals For JupyterLab 3 Custom
-    [Documentation]    Replace current selectors with JupyterLab 3-specific ones.
-    ...    This is the custom implementation since the original one doesn't really
-    ...    reverts defaults if they had been set to Jupyter 4 in the past already.
-    Set Global Variable    ${CM VERSION}    ${5}
-    Set Global Variable    ${CM CSS EDITOR}    .CodeMirror
-    Set Global Variable    ${CM JS INSTANCE}    .CodeMirror
-    Set Global Variable    ${JLAB CSS ACTIVE INPUT}    ${JLAB CSS ACTIVE CELL} ${CM CSS EDITOR}
-    Log    JupyterLab 3 is now the current version.
+    # For Jupyter 4, we need to update global default variable values (images 2024b and newer)
+    # This calls method from JupyterLibrary Version.resource module
+    # https://github.com/robots-from-jupyter/robotframework-jupyterlibrary/blob/9e25fcb89a5f1a723c59e9b96706e4c638e0d9be/src/JupyterLibrary/clients/jupyterlab/Version.resource
+    Update Globals For JupyterLab 4
 
 Verify Version Dropdown Is Present
     [Documentation]    Validates the version dropdown for a given Notebook image
@@ -373,8 +358,7 @@ Spawn Notebook With Arguments  # robocop: disable
             ${oauth_prompt_visible} =    Is OpenShift OAuth Login Prompt Visible
             IF  ${oauth_prompt_visible}    Click Button     Log in with OpenShift
             Run Keyword And Warn On Failure   Login To Openshift  ${username}  ${password}  ${auth_type}
-            ${authorization_required} =  Is Service Account Authorization Required
-            IF  ${authorization_required}  Authorize JupyterLab Service Account
+            Verify Service Account Authorization Not Required
 
             Wait Notebook To Be Loaded  ${image}    ${version}
             ${spawn_fail} =  Has Spawn Failed
@@ -411,8 +395,7 @@ Launch JupyterHub Spawner From Dashboard
     Menu.Navigate To Page    Applications    Enabled
     Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub  ${username}  ${password}  ${auth}
-    ${authorization_required} =  Is Service Account Authorization Required
-    IF  ${authorization_required}  Authorize JupyterLab Service Account
+    Verify Service Account Authorization Not Required
     Fix Spawner Status
     #Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']
     Wait Until Page Contains   Start server
@@ -701,8 +684,7 @@ Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
         Launch Jupyter From RHODS Dashboard Link
         Login To Jupyterhub    ${username}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
         Page Should Not Contain    403 : Forbidden
-        ${authorization_required} =    Is Service Account Authorization Required
-        IF    ${authorization_required}    Authorize JupyterLab Service Account
+        Verify Service Account Authorization Not Required
         Fix Spawner Status
         Spawn Notebook With Arguments
     END
@@ -719,8 +701,7 @@ CleanUp JupyterHub For N Users
         Launch Jupyter From RHODS Dashboard Link
         Login To Jupyterhub    ${username}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
         Page Should Not Contain    403 : Forbidden
-        ${authorization_required} =    Is Service Account Authorization Required
-        IF    ${authorization_required}    Authorize JupyterLab Service Account
+        Verify Service Account Authorization Not Required
         #Fix Spawner Status stops the current notebook, handling the different possible states
         Fix Spawner Status
     END

@@ -18,7 +18,7 @@ Navigate To Page
    Wait Until Page Contains    ${menu}
    ${menu}=     Set Variable If     "${menu}" == "Deployed models"      Model Serving    ${menu}
    IF  "${submenu}" == "${NONE}"    Run Keyword And Return
-   ...     Click Button    ${SIDEBAR_XP}//button[text()="${menu}"]
+   ...     Click Button    ${SIDEBAR_XP}//button[normalize-space(.)="${menu}"]
    ${is_menu_expanded}=    Menu.Is Menu Expanded  ${menu}
    IF    "${is_menu_expanded}" == "false"    Menu.Click Menu   ${menu}
    Wait Until Page Contains    ${submenu}
@@ -28,20 +28,20 @@ Navigate To Page
 Click Menu
    [Arguments]
    ...   ${menu}
-   Click Element    ${SIDEBAR_XP}//button[text()="${menu}"]
+   Click Element    ${SIDEBAR_XP}//button[normalize-space(.)="${menu}"]
 
 Click Submenu
    [Arguments]
    ...   ${submenu}
-   Click Element   ${SIDEBAR_XP}//a[text()="${submenu}"]
+   Click Element   ${SIDEBAR_XP}//a[normalize-space(.)="${submenu}"]
 
 Is Menu Expanded
    [Arguments]
    ...   ${menu}
-   ${is_menu_expanded}=    Get Element Attribute   ${SIDEBAR_XP}//button[text()="${menu}"]   attribute=aria-expanded
+   ${is_menu_expanded}=    Get Element Attribute   ${SIDEBAR_XP}//button[normalize-space(.)="${menu}"]   attribute=aria-expanded
    RETURN    ${is_menu_expanded}
 
 Page Should Contain Menu
    [Arguments]  ${menu}
-   Page Should Contain Element    ${SIDEBAR_XP}//button[text()="${menu}"]
+   Page Should Contain Element    ${SIDEBAR_XP}//button[normalize-space(.)="${menu}"]
 

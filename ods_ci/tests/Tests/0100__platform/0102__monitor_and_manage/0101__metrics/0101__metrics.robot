@@ -13,13 +13,16 @@ Test Tags           ExcludeOnODH
 
 *** Variables ***
 @{RECORD_GROUPS}    SLOs - Data Science Pipelines Operator    SLOs - Data Science Pipelines Application
-...    SLOs - Modelmesh Controller
-...    SLOs - ODH Model Controller
-...    SLOs - RHODS Operator v2
+...    SLOs - Modelmesh Controller    SLOs - CodeFlare Operator    SLOs - MCAD Controller    Usage Metrics
+...    SLOs - ODH Model Controller    SLOs - Kserve Controller Manager    SLOs - ODH Dashboard    Availability Metrics
+...    SLOs - RHODS Operator v2    SLOs - TrustyAI Controller Manager    SLOs - Notebook Controller
 
 @{ALERT_GROUPS}    SLOs-haproxy_backend_http_responses_dsp    RHODS Data Science Pipelines    SLOs-probe_success_dsp
 ...    SLOs-probe_success_modelmesh     SLOs-probe_success_dashboard    SLOs-probe_success_workbench
-...    DeadManSnitch
+...    DeadManSnitch     SLOs-probe_success_codeflare     Distributed Workloads CodeFlare     KubeFlow Training Operator
+...    SLOs-haproxy_backend_http_responses_dashboard     SLOs-probe_success_model_controller     SLOs-probe_success_kserve
+...    Distributed Workloads Kuberay     Distributed Workloads Kueue     RHODS-PVC-Usage     RHODS Notebook controllers
+...    SLOs-probe_success_trustyai
 
 
 *** Test Cases ***
@@ -226,6 +229,63 @@ Test RHOAI Dashboard Metrics Are Defined
         Should Contain    ${metrics_names}    ${metric}
     END
 
+Test RHOAI DSP Operator Recording Rules On Prometheus
+    [Documentation]   Verifies the RHOAI DSP Operator is recording some rules on Prometheus
+    [Tags]    Sanity
+    ...       Tier1
+    ...       ODS-2168
+    ...       RHOAIENG-13263
+    ...       Monitoring
+    Skip If RHODS Is Self-Managed
+    ${user_facing_endpoints_status_dsp_response} =    Prometheus.Run Query
+    ...    pm_url=${RHODS_PROMETHEUS_URL}
+    ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
+    ...    pm_query=probe_success{job="user_facing_endpoints_status_dsp", name="data-science-pipelines-operator"}
+    ${user_facing_endpoints_status_dsp} =   Run  echo '${user_facing_endpoints_status_dsp_response.text}' | jq .data.result[0].value[1]
+    Should Be True      ${user_facing_endpoints_status_dsp} == "1"
+
+    ${burnrate_5m_response} =    Prometheus.Run Query
+    ...    pm_url=${RHODS_PROMETHEUS_URL}
+    ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
+    ...    pm_query=sum by(instance) (probe_success:burnrate5m{instance=~"data-science-pipelines-operator"})
+    ${burnrate_5m} =   Run  echo '${burnrate_5m_response.text}' | jq .data.result[0].value[1]
+    Should Be True      ${burnrate_5m} == "0"
+
+    ${burnrate_30m_response} =    Prometheus.Run Query
+    ...    pm_url=${RHODS_PROMETHEUS_URL}
+    ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
+    ...    pm_query=sum by(instance) (probe_success:burnrate30m{instance=~"data-science-pipelines-operator"})
+    ${burnrate_30m} =   Run  echo '${burnrate_30m_response.text}' | jq .data.result[0].value[1]
+    Should Be True      ${burnrate_30m} == "0"
+
+    ${burnrate_1h_response} =    Prometheus.Run Query
+    ...    pm_url=${RHODS_PROMETHEUS_URL}
+    ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
+    ...    pm_query=sum by(instance) (probe_success:burnrate1h{instance=~"data-science-pipelines-operator"})
+    ${burnrate_1h} =   Run  echo '${burnrate_1h_response.text}' | jq .data.result[0].value[1]
+    Should Be True      ${burnrate_1h} == "0"
+
+    ${burnrate_2h_response} =    Prometheus.Run Query
+    ...    pm_url=${RHODS_PROMETHEUS_URL}
+    ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
+    ...    pm_query=sum by(instance) (probe_success:burnrate2h{instance=~"data-science-pipelines-operator"})
+    ${burnrate_2h} =   Run  echo '${burnrate_2h_response.text}' | jq .data.result[0].value[1]
+    Should Be True      ${burnrate_2h} == "0"
+
+    ${burnrate_6h_response} =    Prometheus.Run Query
+    ...    pm_url=${RHODS_PROMETHEUS_URL}
+    ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
+    ...    pm_query=sum by(instance) (probe_success:burnrate6h{instance=~"data-science-pipelines-operator"})
+    ${burnrate_6h} =   Run  echo '${burnrate_6h_response.text}' | jq .data.result[0].value[1]
+    Should Be True      ${burnrate_6h} == "0"
+
+    ${burnrate_1d_response} =    Prometheus.Run Query
+    ...    pm_url=${RHODS_PROMETHEUS_URL}
+    ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
+    ...    pm_query=sum by(instance) (probe_success:burnrate1d{instance=~"data-science-pipelines-operator"})
+    ${burnrate_1d} =   Run  echo '${burnrate_1d_response.text}' | jq .data.result[0].value[1]
+    Should Be True      ${burnrate_1d} == "0"
+
 *** Keywords ***
 Begin Metrics Web Test
     [Documentation]    Test Setup
@@ -278,8 +338,7 @@ Iterative Image Test
     Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     Page Should Not Contain    403 : Forbidden
-    ${authorization_required} =    Is Service Account Authorization Required
-    IF    ${authorization_required}    Authorize JupyterLab Service Account
+    Verify Service Account Authorization Not Required
     Fix Spawner Status
     Spawn Notebook With Arguments    image=${image}
     Run Cell And Check Output    print("Hello World!")    Hello World!

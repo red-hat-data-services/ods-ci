@@ -9,12 +9,18 @@ Resource            ../../../../Resources/OCP.resource
 Resource            ../../../../Resources/Page/OCPDashboard/OCPDashboard.resource
 Resource            ../../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Resource            ../../../../Resources/Page/ODH/Prometheus/Prometheus.robot
+Resource            ../../../../Resources/Page/ODH/Prometheus/Alerts.resource
 Resource            ../../../../Resources/ODS.robot
 Resource            ../../../../Resources/Page/ODH/Grafana/Grafana.resource
 Resource            ../../../../Resources/Page/HybridCloudConsole/HCCLogin.robot
 Resource            ../../../../Resources/Common.robot
 Suite Setup         RHOSi Setup
 Suite Teardown      RHOSi Teardown
+
+*** Variables ***
+${RHODS_OPERATOR_GIT_REPO}       %{RHODS_OPERATOR_GIT_REPO=https://github.com/red-hat-data-services/rhods-operator}
+${RHODS_OPERATOR_GIT_DIR}        ${OUTPUT DIR}/rhods-operator
+
 
 *** Test Cases ***
 Verify Dashbord has no message with NO Component Found
@@ -23,7 +29,7 @@ Verify Dashbord has no message with NO Component Found
     [Documentation]   Verify "NO Component Found" message dosen't display
     ...     on Rhods Dashbord page with bad subscription present in openshift
     [Setup]   Test Setup For Rhods Dashboard
-    Oc Apply  kind=Subscription  src=tests/Tests/0100__platform/0101__deploy/100__installation/bad_subscription.yaml
+    Oc Apply  kind=Subscription  src=tests/Tests/0100__platform/0101__deploy/0101__installation/bad_subscription.yaml
     Delete Dashboard Pods And Wait Them To Be Back
     Reload Page
     Menu.Navigate To Page    Applications    Explore
@@ -191,9 +197,14 @@ Verify RHODS Release Version Number
 
 Verify Users Can Update Notification Email After Installing RHODS With The AddOn Flow
     [Documentation]    Verifies the Alert Notification email is updated in Addon-Managed-Odh-Parameters Secret and Alertmanager ConfigMap
+    ...                The test requires a real addon installation (not faked with the `-t addon` cli install), because updating
+    ...                the email is done through ocm.
     [Tags]    Tier2
     ...       ODS-673
     ...       Deployment-AddOnFlow
+    ...       Monitoring
+    ...       AutomationBug  # currently broken on fake addon installs
+    Skip If RHODS Is Self-Managed
     ${email_to_change} =    Set Variable    dummyemail1@redhat.com
     ${cluster_name} =    Common.Get Cluster Name From Console URL
     ${current_email} =    Get Notification Email From Addon-Managed-Odh-Parameters Secret
@@ -226,7 +237,9 @@ Verify Monitoring Stack Is Reconciled Without Restarting The ODS Operator
     [Documentation]    Verify Monitoring Stack Is Reconciled Without Restarting The RHODS Operator
     [Tags]    Tier2
     ...       ODS-699
+    ...       Monitoring
     ...       Execution-Time-Over-15m
+    Skip If RHODS Is Self-Managed
     Replace "Prometheus" With "Grafana" In Rhods-Monitor-Federation
     Wait Until Operator Reverts "Grafana" To "Prometheus" In Rhods-Monitor-Federation
 
@@ -316,11 +329,101 @@ Verify No Application Pods Run With Anyuid SCC Or As Root
     ${status} =    Run Keyword And Return Status    Should Be Empty    ${output}
     IF    not ${status}    Fail      msg=Some pods are running as root (UID=0)
 
+Verify No Alerts Are Firing After Installation Except For DeadManSnitch    # robocop: disable:too-long-test-case
+    [Documentation]    Verifies that, after installation, only the DeadManSnitch alert is firing
+    [Tags]    Smoke
+    ...       ODS-540
+    ...       RHOAIENG-13079
+    #...       Monitoring - just for tracking purposes but commented to not run the same test many times
+    ...       Operator
+    Skip If RHODS Is Self-Managed
+    # If these numbers change, add also alert-specific tests
+    # Need to wait to stabilize alerts after installation
+    Run Keyword And Continue On Failure
+    ...    Wait Until Keyword Succeeds    5 min    0 sec    Verify Number Of Alerting Rules  47  inactive
+    Run Keyword And Continue On Failure
+    ...    Verify Number Of Alerting Rules  1  firing
+    # Order of keys in prometheus-configs.yaml
+    # deadmanssnitch-alerting.rules
+    Verify Alert Is Firing And Continue On Failure
+    ...    DeadManSnitch    DeadManSnitch
+    # codeflare-alerting.rules
+    Verify "CodeFlare Operator Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
+    Verify "Distributed Workloads CodeFlare" Alerts Are Not Firing And Continue On Failure
+    # trainingoperator-alerting.rules
+    Verify "KubeFlow Training Operator" Alerts Are Not Firing And Continue On Failure
+    # rhods-dashboard-alerting.rules
+    Verify "RHODS Dashboard Route Error Burn Rate" Alerts Are Not Firing And Continue On Failure
+    Verify "RHODS Dashboard Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
+    # data-science-pipelines-operator-alerting.rules
+    Verify "Data Science Pipelines Application Route Error Burn Rate" Alerts Are Not Firing And Continue On Failure
+    Verify "Data Science Pipelines Operator Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
+    Verify "RHODS Data Science Pipelines" Alerts Are Not Firing And Continue On Failure
+    # model-mesh-alerting.rules
+    Verify "Modelmesh Controller Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
+    # odh-model-controller-alerting.rules
+    Verify "ODH Model Controller Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
+    # kserve-alerting.rules
+    Verify "Kserve Controller Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
+    # ray-alerting.rules
+    Verify "Distributed Workloads Kuberay" Alerts Are Not Firing And Continue On Failure
+    # kueue-alerting.rules
+    Verify "Distributed Workloads Kueue" Alerts Are Not Firing And Continue On Failure
+    # workbenches-alerting.rules
+    Verify Alert Is Not Firing And Continue On Failure
+    ...    RHODS-PVC-Usage    User notebook pvc usage above 90%    alert-duration=120
+    Verify Alert Is Not Firing And Continue On Failure
+    ...    RHODS-PVC-Usage    User notebook pvc usage at 100%    alert-duration=120
+    Verify "Kubeflow Notebook Controller Pod Is Not Running" Alerts Are Not Firing And Continue On Failure
+    Verify "ODH Notebook Controller Pod Is Not Running" Alerts Are Not Firing And Continue On Failure
+    Verify "RHODS Jupyter Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
+    # trustyai-alerting.rules
+    Verify "TrustyAI Controller Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
+    # model-registry-operator-alerting.rules
+    # Model Registry not GA yet (Removed state), so its metrics are not enabled by default
+    # Verify "Model Registry Operator Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
+
+Verify DSC Contains Correct Component Versions  # robocop: disable:too-long-test-case
+    [Tags]    Smoke
+    ...       Operator
+    ...       RHOAIENG-12693
+    ...       ExcludeOnODH
+    [Documentation]   Verify that component versions are present in DSC status and match the release repo
+    Gather Release Attributes From DSC And DSCI
+    ${rhods_operator_branch} =  Remove String Using Regexp  ${DSC_RELEASE_VERSION}  \\.[0-9]+\$
+    Common.Clone Git Repository  ${RHODS_OPERATOR_GIT_REPO}  rhoai-${rhods_operator_branch}  ${RHODS_OPERATOR_GIT_DIR}
+    ${component_versions} =  Run
+    ...    oc get dsc default-dsc -o json | jq '.status.components'
+    ${component_versions_json} =    Evaluate     json.loads("""${component_versions}""")    json
+    ${components} =  List Directories In Directory    ${RHODS_OPERATOR_GIT_DIR}/prefetched-manifests
+    FOR  ${c}  IN  @{components}
+        ${component_metadata_file} =  Set Variable
+        ...     ${RHODS_OPERATOR_GIT_DIR}/prefetched-manifests/${c}/component_metadata.yaml
+        ${file_exists} =  Run Keyword And Return Status    File Should Exist  ${component_metadata_file}
+        IF  ${file_exists}
+            IF  $component_versions_json[$c]["managementState"] != "Managed"
+                Log  ${c} is not managed, skipping version check
+                CONTINUE
+            END
+            ${component_metadata_content} =  Get File  ${component_metadata_file}
+            ${component_metadata} =    Evaluate     yaml.safe_load("""${component_metadata_content}""")    yaml
+            Lists Should Be Equal    ${component_versions_json}[${c}][releases]   ${component_metadata}[releases]
+            ...    msg=Component versions in DSC don't match component metadata in repo
+        ELSE
+            Log  ${c} does not provide component_metadata.yaml
+        END
+    END
+    [Teardown]    Remove Directory  ${RHODS_OPERATOR_GIT_DIR}  recursive=True
+
+
 *** Keywords ***
 Delete Dashboard Pods And Wait Them To Be Back
     [Documentation]    Delete Dashboard Pods And Wait Them To Be Back
     Oc Delete    kind=Pod     namespace=${APPLICATIONS_NAMESPACE}    label_selector=app=${DASHBOARD_APP_NAME}
-    OpenShiftLibrary.Wait For Pods Status    namespace=${APPLICATIONS_NAMESPACE}  label_selector=app=${DASHBOARD_APP_NAME}  timeout=120
+    # This should not be necessary but the `oc wait` command was failing otherwise
+    Sleep    10s    msg=Wait for pods to be deleted.
+    Wait For Pods To Be Ready    label_selector=app=${DASHBOARD_APP_NAME}
+    ...    namespace=${APPLICATIONS_NAMESPACE}  timeout=180s
 
 Test Setup For Rhods Dashboard
     [Documentation]    Test Setup for Rhods Dashboard
@@ -451,8 +554,7 @@ Launch Notebook And Stop It    # robocop: disable
     Wait For RHODS Dashboard To Load
     Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
-    ${authorization_required} =    Is Service Account Authorization Required
-    IF    ${authorization_required}    Authorize JupyterLab Service Account
+    Verify Service Account Authorization Not Required
     Wait Until Page Contains    Start a notebook server
     Fix Spawner Status
     Spawn Notebook With Arguments    image=minimal-notebook

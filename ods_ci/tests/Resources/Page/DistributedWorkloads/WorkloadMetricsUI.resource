@@ -18,7 +18,7 @@ ${REFRESH_INTERNAL_MENU_XP}=    xpath=//button[@aria-label="Options menu"]
 @{REFRESH_INTERNAL_LIST}=    15 seconds    30 seconds    1 minute    5 minutes    15 minutes    30 minutes    1 hour    2 hours    1 day
 ${DISTRIBUITED_WORKLOAD_RESOURCE_METRICS_TITLE_XP}=    xpath=//div[text()="Distributed workload resource metrics"]
 ${REQUESTED_RESOURCES_TITLE_XP}=    xpath=//div[text()="Requested resources"]
-${RESOURCES_CONSUMING_TITLE_XP}=    xpath=//div[text()="Top resource-consuming distributed workloads"]
+${RESOURCES_CONSUMING_TITLE_XP}=    xpath=//div[text()="Top 5 resource-consuming distributed workloads"]
 ${MAX_RETRIES}=    3
 ${RAY_WORKLOAD_CREATED}=    False
 ${KUEUE_RESOURCES_SETUP_FILEPATH}=    tests/Resources/Page/DistributedWorkloads/kueue_resources_setup.sh
@@ -33,9 +33,9 @@ ${MEMORY_WARNING_XP}=    //*[@id="requested-resources-chart-Memory-ChartLegend-C
 *** Keywords ***
 Open Distributed Workload Metrics Home Page
     [Documentation]    This will launch to the distributed Workloads Home page
-    Wait Until Page Contains    Distributed Workload Metrics    timeout=30
-    Click Link    Distributed Workload Metrics
-    Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=Distributed Workload Metrics
+    Wait Until Page Contains    Distributed workloads    timeout=30
+    Click Link    Distributed workloads
+    Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=Distributed workloads
 
 Select Distributed Workload Project By Name
     [Documentation]    Select the project in distributed workload metrics page by project name

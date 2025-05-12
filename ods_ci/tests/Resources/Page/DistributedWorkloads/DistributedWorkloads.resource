@@ -6,8 +6,7 @@ Resource          ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 
 
 *** Variables ***
-${CODEFLARE-SDK-RELEASE-TAG}             v0.26.0
-${CODEFLARE-SDK-RELEASE-TAG-3.9}         adjustments-release-0.21.1
+${CODEFLARE-SDK-RELEASE-TAG}             v0.27.0
 ${CODEFLARE-SDK_DIR}                     codeflare-sdk
 ${CODEFLARE-SDK_REPO_URL}                %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
 ${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}  https://github.com/opendatahub-io/distributed-workloads/releases/latest/download
@@ -16,23 +15,21 @@ ${RAY_CUDA_IMAGE_3.11}                   quay.io/modh/ray@sha256:db667df1bc437a7
 # Corresponds to quay.io/rhoai/ray:2.35.0-py311-cu121-torch24-fa26
 ${RAY_TORCH_CUDA_IMAGE_3.11}             quay.io/rhoai/ray@sha256:5077f9bb230dfa88f34089fecdfcdaa8abc6964716a8a8325c7f9dcdf11bbbb3
 # Corresponds to quay.io/modh/ray:2.35.0-py311-rocm62
-${RAY_ROCM_IMAGE_3.11}                   quay.io/modh/ray@sha256:baeb1428a008ff109ae1afb372f804c574b4179cfa84c752f7afc609e0d44b3a
+${RAY_ROCM_IMAGE_3.11}                   quay.io/modh/ray@sha256:bc46827094a29062a3631f533ea373a26cc73ed5854c7352f890c6376d5840df
 # Corresponds to quay.io/rhoai/ray:2.35.0-py311-rocm61-torch24-fa26
 ${RAY_TORCH_ROCM_IMAGE_3.11}             quay.io/rhoai/ray@sha256:b0e129cd2f4cdea7ad7a7859031357ffd9915410551f94fbcb942af2198cdf78
-# Corresponds to quay.io/modh/ray:2.35.0-py39-cu121
-${RAY_CUDA_IMAGE_3.9}                    quay.io/modh/ray@sha256:0d715f92570a2997381b7cafc0e224cfa25323f18b9545acfd23bc2b71576d06
-# Corresponds to quay.io/rhoai/ray:2.35.0-py39-cu121-torch24-fa26
-${RAY_TORCH_CUDA_IMAGE_3.9}              quay.io/rhoai/ray@sha256:158b481b8e9110008d60ac9fb8d156eadd71cb057ac30382e62e3a231ceb39c0
-# Corresponds to quay.io/modh/fms-hf-tuning:v2.6.0
-${FMS_HF_TUNING_IMAGE}                   quay.io/modh/fms-hf-tuning@sha256:0c69cf850fd2e5850cdec1d81c303af5c3900359b97016958c9af6637ad8ee2e
+# Corresponds to quay.io/modh/fms-hf-tuning:v2.8.2
+${FMS_HF_TUNING_IMAGE}                   quay.io/modh/fms-hf-tuning@sha256:1ad46fe1a23f41f190c49ec2549c64f484c88fe220888a7a5700dd857ca243cc
 # Corresponds to quay.io/modh/training:py311-cuda121-torch241
-${CUDA_TRAINING_IMAGE}                   quay.io/modh/training@sha256:b98e373a972ff6f896a9dc054d56920e915675339c02ea7fa123e0f4bbef4d74
+${CUDA_TRAINING_IMAGE_TORCH241}          quay.io/modh/training@sha256:f64f7bba3f1020d39491ac84d40d362a52e4822bdc11a33cfff021178b7c4097
 # Corresponds to quay.io/modh/training:py311-rocm62-torch241
-${ROCM_TRAINING_IMAGE}                   quay.io/modh/training@sha256:02094ab6f98a9b8a8bea8ff72bde5b4ba6789d036ce19e15cfdea0146d288061
-# Corresponds to quay.io/modh/odh-generic-data-science-notebook:v3-2024b-20250212
-${NOTEBOOK_IMAGE_3.11}                   quay.io/modh/odh-generic-data-science-notebook@sha256:d0ba5fc23e2b3846763f60e8ade8a0f561cdcd2bf6717df6e732f6f8b68b89c4
-# Corresponds to quay.io/modh/odh-generic-data-science-notebook:v2-2024a-20250116
-${NOTEBOOK_IMAGE_3.9}                    quay.io/modh/odh-generic-data-science-notebook@sha256:3e51c462fc03b5ccb080f006ced86d36480da036fa04b8685a3e4d6d51a817ba
+${ROCM_TRAINING_IMAGE_TORCH241}          quay.io/modh/training@sha256:1104eb83d7ad9cfb63c1437be38d1615a669473c5b1c2da5a9a01ddd90daceb9
+# Corresponds to quay.io/modh/training:py311-cuda124-torch251
+${CUDA_TRAINING_IMAGE_TORCH251}          quay.io/modh/training@sha256:1d0caea3e5d56ff7d672954b1ad511e661df9bdb364d56879961169a4ca8dae0
+# Corresponds to quay.io/modh/training:py311-rocm62-torch251
+${ROCM_TRAINING_IMAGE_TORCH251}          quay.io/modh/training@sha256:f98d70edc49203537d4fec005aaff68a4830b9c9ce2390bb4d7910b89c312b97
+# Corresponds to quay.io/modh/odh-generic-data-science-notebook:v3-20250417-b5cf05d
+${NOTEBOOK_IMAGE_3.11}                   quay.io/modh/odh-generic-data-science-notebook@sha256:bc67afab696eed960493d14559f6819dcad0b31dc90b8752e5089f022c5a3d4d
 ${NOTEBOOK_USER_NAME}                    ${TEST_USER_3.USERNAME}
 ${NOTEBOOK_USER_PASSWORD}                ${TEST_USER_3.PASSWORD}
 ${FMS_BINARY_NAME}                       fms
@@ -128,15 +125,6 @@ Prepare Training Operator E2E Test Suite
         FAIL    Unable to retrieve ${test_binary} compiled binary
     END
     Create Directory    %{WORKSPACE}/codeflare-${test_binary}-logs
-    Enable Component    trainingoperator
-    Wait Component Ready    trainingoperator
-    Log To Console    "Additional waiting due to RHOAIENG-20295"
-    ${result} =    Run Process    oc wait --for\=condition\=Available --timeout\=300s -n ${APPLICATIONS_NAMESPACE} deployment/kubeflow-training-operator
-    ...    shell=true    stderr=STDOUT
-    Log To Console    ${result.stdout}
-    IF    ${result.rc} != 0
-        FAIL    Timeout waiting for deployment/kubeflow-training-operator to be available in ${APPLICATIONS_NAMESPACE}
-    END
 
 Prepare Training Operator SDK Test Suite
     [Documentation]    Prepare Training Operator SDK Test Suite
@@ -159,7 +147,6 @@ Teardown Training Operator E2E Test Suite
     [Arguments]        ${test_binary}
     Log To Console     "Removing test binaries"
     Remove File        ${test_binary}
-    Disable Component    trainingoperator
 
 Teardown Training Operator SDK Test Suite
     [Documentation]    Teardown Training Operator SDK Test Suite
@@ -215,7 +202,7 @@ Run Training Operator KFTO Test
 
 Run Training Operator KFTO SDK Test
     [Documentation]    Run Training Operator KFTO SDK Test
-    [Arguments]    ${TEST_NAME}
+    [Arguments]    ${TEST_NAME}    ${TRAINING_IMAGE}
     Log To Console    "Running test: ${TEST_NAME}"
     ${result} =    Run Process    ./${KFTO_BINARY_NAME} -test.run ${TEST_NAME}
     ...    shell=true
@@ -225,6 +212,7 @@ Run Training Operator KFTO SDK Test
     ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
     ...    env:ODH_NAMESPACE=${APPLICATIONS_NAMESPACE}
     ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-${KFTO_BINARY_NAME}-logs
+    ...    env:CODEFLARE_TEST_TRAINING_IMAGE=${TRAINING_IMAGE}
     ...    env:AWS_DEFAULT_ENDPOINT=${AWS_DEFAULT_ENDPOINT}
     ...    env:AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
     ...    env:AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}

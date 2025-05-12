@@ -4,9 +4,6 @@ Documentation       Test suite for OpenShift Pipeline using kfp python package
 Resource            ../../../Resources/RHOSi.resource
 Resource            ../../../Resources/ODS.robot
 Resource            ../../../Resources/Common.robot
-Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
-Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipelines.resource
-Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Permissions.resource
 Resource            ../../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource            ../../../Resources/CLI/DataSciencePipelines/DataSciencePipelinesBackend.resource
 Resource            ../../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
@@ -97,8 +94,7 @@ End To End Pipeline Workflow Using Kfp
     END
     # The run_robot_test.sh is sending the --variablefile ${TEST_VARIABLES_FILE} which may contain the `PIP_INDEX_URL`
     # and `PIP_TRUSTED_HOST` variables, e.g. for disconnected testing.
-    Launch Data Science Project Main Page    username=${admin_username}    password=${admin_password}
-    Assign Contributor Permissions To User ${username} in Project ${project}
+    ODS.Assign Contributor Permissions To User ${username} In Project ${project} Using CLI
     ${pip_index_url} =    Get Variable Value    ${PIP_INDEX_URL}    ${NONE}
     ${pip_trusted_host} =    Get Variable Value    ${PIP_TRUSTED_HOST}    ${NONE}
     Log    pip_index_url = ${pip_index_url} / pip_trusted_host = ${pip_trusted_host}

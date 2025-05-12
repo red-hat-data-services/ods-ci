@@ -93,73 +93,51 @@ Verify User Can Disable The Runtime
     [Tags]      Upgrade    ModelServing
     Disable Model Serving Runtime Using CLI     namespace=redhat-ods-applications
 
-Verify Model Can Be Deployed Via UI For Upgrade
+Verify Model Can Be Deployed For Upgrade
     # robocop: off=too-long-test-case
     # robocop: off=too-many-calls-in-test-case
-    [Documentation]    Verify Model Can Be Deployed Via UI For Upgrade
-    [Tags]                  Upgrade    ModelServing
-    [Setup]                 Begin Web Test
-    ${PRJ_TITLE}=           Set Variable            model-serving-upgrade
-    ${PRJ_DESCRIPTION}=     Set Variable            project used for model serving tests
-    ${MODEL_NAME}=          Set Variable            test-model
-    ${MODEL_CREATED}=       Set Variable            ${FALSE}
-    ${RUNTIME_NAME}=        Set Variable            Model Serving Test
-    ${INFERENCE_INPUT_OPENVINO}=    Set Variable
-    ...    @tests/Resources/Files/openvino-example-input.json
-    ${EXPECTED_INFERENCE_OUTPUT_OPENVINO}=    Set Variable
-    ...    {"model_name":"test-model__isvc-8655dc7979","model_version":"1","outputs":[{"name":"Func/StatefulPartitionedCall/output/_13:0","datatype":"FP32","shape":[1,1],"data":[0.99999994]}]}   # robocop: disable:line-too-long
-    ${runtime_pod_name}=    Replace String Using Regexp
-    ...    string=${RUNTIME_NAME}
-    ...    pattern=\\s
-    ...    replace_with=-
-    ${runtime_pod_name}=    Convert To Lower Case                           ${runtime_pod_name}
-    Fetch CA Certificate If RHODS Is Self-Managed
-    Clean All Models Of Current User
-    Open Data Science Projects Home Page
-    Wait For RHODS Dashboard To Load
-    ...    wait_for_cards=${FALSE}
-    ...    expected_page=Data Science Projects
-    Create Data Science Project     title=${PRJ_TITLE}      description=${PRJ_DESCRIPTION}
-    Create S3 Data Connection
-    ...    project_title=${PRJ_TITLE}
-    ...    dc_name=model-serving-connection
-    ...    aws_access_key=${S3.AWS_ACCESS_KEY_ID}
-    ...    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
-    ...    aws_bucket_name=ods-ci-s3
-    Create Model Server     token=${FALSE}      server_name=${RUNTIME_NAME}
-    Serve Model
-    ...    project_name=${PRJ_TITLE}
-    ...    model_name=${MODEL_NAME}
-    ...    framework=openvino_ir
-    ...    existing_data_connection=${TRUE}
-    ...    data_connection_name=model-serving-connection
-    ...    model_path=openvino-example-model
-    Run Keyword And Continue On Failure
-    ...    Wait Until Keyword Succeeds
-    ...    5 min
-    ...    10 sec
-    ...    Verify Openvino Deployment
-    ...    runtime_name=${runtime_pod_name}
-    ...    project_name=${PRJ_TITLE}
-    Run Keyword And Continue On Failure
-    ...    Wait Until Keyword Succeeds
-    ...    5 min
-    ...    10 sec
-    ...    Verify Serving Service
-    ...    project_name=${PRJ_TITLE}
-    Verify Model Status     ${MODEL_NAME}           success
-    Set Suite Variable      ${MODEL_CREATED}        ${TRUE}     # robocop: disable:replace-set-variable-with-var
-    Run Keyword And Continue On Failure
-    ...    Verify Model Inference
-    ...    ${MODEL_NAME}
-    ...    ${INFERENCE_INPUT_OPENVINO}
-    ...    ${EXPECTED_INFERENCE_OUTPUT_OPENVINO}
-    ...    token_auth=${FALSE}
-    Remove File     openshift_ca.crt
-    [Teardown]      Run Keywords        Dashboard Test Teardown
-    ...     AND
-    ...     Run Keyword If Test Failed      Get Events And Pod Logs     namespace=${PRJ_TITLE}
-    ...     label_selector=name=modelmesh-serving-${runtime_pod_name}
+    [Documentation]    Verify Model Can Be Deployed Via cli For Upgrade
+    [Tags]                  Upgrade    ModelServing    ModelServer
+    ${test_namespace}=         Set Variable    ovmsmodel-upgrade
+    ${inference_input}=        Set Variable    @tests/Resources/Files/modelmesh-mnist-input.json
+    ${exp_inference_output}=   Set Variable    {"model_name":"ovms-model","model_version":"1","outputs":[{"name":"Plus214_Output_0","datatype":"FP32","shape":[1,10],"data":[-8.233053,-7.7497034,-3.4236815,12.3630295,-12.079103,17.266596,-10.570976,0.7130762,3.321715,1.3621228]}]}    # robocop: off=line-too-long
+    ${model_name}=             Set Variable    ovms-model
+    ${MODEL_FORMAT}=           Set Variable    onnx
+    ${PROTOCOL}=               Set Variable    http
+    ${models_names}=           Create List     ${model_name}
+    ${OVMS_S3_DIR}             Set Variable    test-dir
+    ${OVMS_STORAGE_URI} =      Set Variable    s3://${S3.BUCKET_1.NAME}/${OVMS_S3_DIR}/
+    ${OVMS_RUNTIME_NAME}=      Set Variable    ovms-runtime
+    ${INFERENCESERVICE_FILLED_FILEPATH}=   Set Variable        ${INFERENCESERVICE_FILEPATH_NEW}/isvc_filled.yaml
+    ${DEFAULT_BUCKET_SA_NAME}=   Set Variable    models-bucket-sa
+    ${KSERVE_MODE}=             Set Variable     Serverless
+
+
+    Set Project And Runtime    runtime=${OVMS_RUNTIME_NAME}     protocol=${PROTOCOL}     namespace=${test_namespace}
+    Compile Inference Service YAML    isvc_name=${model_name}
+    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
+    ...    model_storage_uri=${OVMS_STORAGE_URI}
+    ...    model_format=${MODEL_FORMAT}    serving_runtime=${OVMS_RUNTIME_NAME}
+    ...    kserve_mode=${KSERVE_MODE}
+
+    Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
+    ...    namespace=${test_namespace}
+
+    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ...    namespace=${test_namespace}
+    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
+    ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
+    ${service_port}=    Extract Service Port    service_name=${model_name}-predictor    protocol=TCP
+    ...    namespace=${test_namespace}
+    IF   "${KSERVE_MODE}"=="RawDeployment"
+        Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}  local_port=${service_port}
+        ...    remote_port=${service_port}    process_alias=ovms-process
+    END
+    Verify Model Inference With Retries   model_name=${model_name}    inference_input=${inference_input}
+    ...    expected_inference_output=${exp_inference_output}   project_title=${test_namespace}
+    ...    deployment_mode=Cli  kserve_mode=${KSERVE_MODE}    service_port=${service_port}
+    ...    end_point=/v2/models/${model_name}/infer  retries=10
+
 
 Verify User Can Deploy Custom Runtime For Upgrade
     [Documentation]     Verify User Can Deploy Custom Runtime For Upgrade
@@ -228,20 +206,36 @@ Verify Distributed Workload Metrics Resources By Creating Ray Cluster Workload
     [Teardown]      Run Keywords        Cleanup Codeflare-SDK Setup     AND
     ...     Run Keyword If Test Failed      Codeflare Upgrade Tests Teardown        ${PRJ_UPGRADE}      ${DW_PROJECT_CREATED}       # robocop: disable:line-too-long
 
-Run Training Operator KFTO Setup PyTorchJob Test Use Case
-    [Documentation]    Run Training Operator KFTO Setup PyTorchJob Test Use Case
-    [Tags]      Upgrade    Training
+Run Training Operator KFTO Setup PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_4_1)
+    [Documentation]    Run Training Operator KFTO Setup PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_4_1)
+    [Tags]      Upgrade    TrainingKubeflow
     [Setup]     Prepare Training Operator KFTO E2E Test Suite
-    Skip If Operator Starting Version Is Not Supported      minimum_version=2.12.0
-    Run Training Operator KFTO Test    TestSetupPytorchjob    ${CUDA_TRAINING_IMAGE}
+    Skip If Operator Starting Version Is Not Supported      minimum_version=2.19.0
+    Run Training Operator KFTO Test    TestSetupPytorchjob    ${CUDA_TRAINING_IMAGE_TORCH241}
     [Teardown]    Teardown Training Operator KFTO E2E Test Suite
 
-Run Training Operator KFTO Setup Sleep PyTorchJob Test Use Case
-    [Documentation]    Setup PyTorchJob which is kept running for 24 hours
-    [Tags]      Upgrade    Training
+Run Training Operator KFTO Setup PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_5_1)
+    [Documentation]    Run Training Operator KFTO Setup PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_5_1)
+    [Tags]      Upgrade    TrainingKubeflow
     [Setup]     Prepare Training Operator KFTO E2E Test Suite
-    Skip If Operator Starting Version Is Not Supported      minimum_version=2.12.0
-    Run Training Operator KFTO Test    TestSetupSleepPytorchjob    ${CUDA_TRAINING_IMAGE}
+    Skip If Operator Starting Version Is Not Supported      minimum_version=2.19.0
+    Run Training Operator KFTO Test    TestSetupPytorchjob    ${CUDA_TRAINING_IMAGE_TORCH251}
+    [Teardown]    Teardown Training Operator KFTO E2E Test Suite
+
+Run Training Operator KFTO Setup Sleep PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_4_1)
+    [Documentation]    Setup PyTorchJob which is kept running for 24 hours with NVIDIA CUDA image (PyTorch 2_4_1)
+    [Tags]      Upgrade    TrainingKubeflow
+    [Setup]     Prepare Training Operator KFTO E2E Test Suite
+    Skip If Operator Starting Version Is Not Supported      minimum_version=2.19.0
+    Run Training Operator KFTO Test    TestSetupSleepPytorchjob    ${CUDA_TRAINING_IMAGE_TORCH241}
+    [Teardown]    Teardown Training Operator KFTO E2E Test Suite
+
+Run Training Operator KFTO Setup Sleep PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_5_1)
+    [Documentation]    Setup PyTorchJob which is kept running for 24 hours with NVIDIA CUDA image (PyTorch 2_5_1)
+    [Tags]      Upgrade    TrainingKubeflow
+    [Setup]     Prepare Training Operator KFTO E2E Test Suite
+    Skip If Operator Starting Version Is Not Supported      minimum_version=2.19.0
+    Run Training Operator KFTO Test    TestSetupSleepPytorchjob    ${CUDA_TRAINING_IMAGE_TORCH251}
     [Teardown]    Teardown Training Operator KFTO E2E Test Suite
 
 Data Science Pipelines Pre Upgrade Configuration

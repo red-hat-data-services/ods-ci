@@ -6,6 +6,7 @@ Library   DependencyLibrary
 Library   Process
 Library   RequestsLibrary
 Library   ../../libs/Helpers.py
+Resource  OCP.resource
 Resource  Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Resource  Page/ODH/JupyterHub/JupyterHubSpawner.robot
 Resource  ../../tasks/Resources/RHODS_OLM/install/oc_install.robot
@@ -33,8 +34,7 @@ Begin Web Test
     IF    ${jupyter_login}
         Launch Jupyter From RHODS Dashboard Link
         Login To Jupyterhub  ${username}  ${password}  ${auth_type}
-        ${authorization_required}=   Is Service Account Authorization Required
-        IF  ${authorization_required}  Authorize JupyterLab Service Account
+        Verify Service Account Authorization Not Required
         Fix Spawner Status
         Go To  ${ODH_DASHBOARD_URL}
     END
@@ -336,6 +336,16 @@ Skip If Namespace Does Not Exist
        Skip If    condition="${rc}"!="${0}"    msg=${msg}
     ELSE
        Skip If    condition="${rc}"!="${0}"    msg=This test is skipped because namespace ${namespace} does not exist
+    END
+
+Skip If Test Enviroment Is ROSA-HCP
+    [Documentation]    Skips test if test environment is ROSA_HCP
+    [Arguments]    ${msg}=${EMPTY}
+    ${is_rosa_hcp}=    Is Test Enviroment ROSA-HCP
+    IF    "${msg}" != "${EMPTY}"
+       Skip If    condition=${is_rosa_hcp}==${TRUE}    msg=${msg}
+    ELSE
+       Skip If    condition=${is_rosa_hcp}==${TRUE}    msg=This test is skipped for ROSA-HCP clusters
     END
 
 Run Keyword If RHODS Is Managed

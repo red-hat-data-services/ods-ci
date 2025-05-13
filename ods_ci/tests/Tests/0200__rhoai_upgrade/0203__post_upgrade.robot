@@ -62,13 +62,13 @@ Verify RHODS User Groups
     ${auth_admins}       Set Variable        ${AUTH_PAYLOAD[0]['spec']['adminGroups']}
     ${auth_allowed}      Set Variable        ${AUTH_PAYLOAD[0]['spec']['allowedGroups']}
 
-    ${return_code}    ${adm_groups}=    Run And Return Rc And Output
+    ${rc}    ${adm_groups}=    Run And Return Rc And Output
     ...    oc get configmap ${UPGRADE_CONFIG_MAP} -n ${UPGRADE_NS} -o jsonpath='{.data.adm_groups}'
-    Should Be Equal As Integers     ${return_code}      0
+    Should Be Equal As Integers     ${rc}      0
 
-    ${return_code}    ${allwd_groups}=    Run And Return Rc And Output
+    ${rc}    ${allwd_groups}=    Run And Return Rc And Output
     ...    oc get configmap ${UPGRADE_CONFIG_MAP} -n ${UPGRADE_NS} -o jsonpath='{.data.allwd_groups}'
-    Should Be Equal As Integers     ${return_code}      0
+    Should Be Equal As Integers     ${rc}      0
 
     Should Be Equal    "${adm_groups}"    "${auth_admins}"   msg="Admin groups are not equal"
     Should Be Equal    "${allwd_groups}"    "${auth_allowed}"   msg="Allowed groups are not equal"

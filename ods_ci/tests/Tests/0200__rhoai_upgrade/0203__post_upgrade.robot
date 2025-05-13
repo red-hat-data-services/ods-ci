@@ -59,10 +59,20 @@ Verify RHODS User Groups
     [Documentation]    Verify User Configuration after the upgrade
     [Tags]      Upgrade     Platform        RHOAIENG-19806
     Get Auth Cr Config Data
-    ${admin}                Set Variable            ${AUTH_PAYLOAD[0]['spec']['adminGroups']}
-    ${user}                 Set Variable            ${AUTH_PAYLOAD[0]['spec']['allowedGroups']}
-    Should Be Equal As Strings      '${admin}'      '['${ADMIN_GROUPS}']'
-    Should Be Equal As Strings      '${user}'       '['${ALLOWED_GROUPS}']'
+    ${auth_admins}       Set Variable        ${AUTH_PAYLOAD[0]['spec']['adminGroups']}
+    ${auth_allowed}      Set Variable        ${AUTH_PAYLOAD[0]['spec']['allowedGroups']}
+
+    ${rc}    ${adm_groups}=    Run And Return Rc And Output
+    ...    oc get configmap ${UPGRADE_CONFIG_MAP} -n ${UPGRADE_NS} -o jsonpath='{.data.adm_groups}'
+    Should Be Equal As Integers     ${rc}      0
+
+    ${rc}    ${allwd_groups}=    Run And Return Rc And Output
+    ...    oc get configmap ${UPGRADE_CONFIG_MAP} -n ${UPGRADE_NS} -o jsonpath='{.data.allwd_groups}'
+    Should Be Equal As Integers     ${rc}      0
+
+    Should Be Equal    "${adm_groups}"    "${auth_admins}"   msg="Admin groups are not equal"
+    Should Be Equal    "${allwd_groups}"    "${auth_allowed}"   msg="Allowed groups are not equal"
+
     [Teardown]      Set Default Users
 
 Verify Culler is Enabled
@@ -342,6 +352,15 @@ Set Default Users
     Set Standard RHODS Groups Variables
     Set Default Access Groups Settings
     IF    not ${IS_SELF_MANAGED}    Managed RHOAI Upgrade Test Teardown
+    # Get upgrade-config-map to check whether it exists
+    ${rc}    ${cmd_output}=    Run And Return Rc And Output
+    ...    oc get configmap ${UPGRADE_CONFIG_MAP} -n ${UPGRADE_NS}
+    IF  ${rc} == 0
+        # Clean up upgrade-config-map
+        ${return_code}    ${cmd_output}=    Run And Return Rc And Output
+        ...    oc delete configmap ${UPGRADE_CONFIG_MAP} -n ${UPGRADE_NS}
+        Should Be Equal As Integers     ${return_code}      0       msg=${cmd_output}
+    END
 
 Delete OOTB Image
     [Documentation]    Delete the Custom notbook create

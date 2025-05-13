@@ -67,7 +67,7 @@ Setting Pod Toleration Via UI
 Verify RHODS Accept Multiple Admin Groups And CRD Gets Updates
     [Documentation]    Verify that users can set multiple admin groups and
     ...    check OdhDashboardConfig CRD gets updated according to Admin UI
-    [Tags]      Upgrade     RHOAIENG-14306    Platform
+    [Tags]      Upgrade     RHOAIENG-14306    Platform      RHOAIENG-19806
     [Setup]     Begin Web Test
     # robocop: disable
     Launch Dashboard And Check User Management Option Is Available For The User
@@ -75,7 +75,12 @@ Verify RHODS Accept Multiple Admin Groups And CRD Gets Updates
     ...    ${TEST_USER.PASSWORD}
     ...    ${TEST_USER.AUTH_TYPE}
     Clear User Management Settings
-    Add OpenShift Groups To Data Science Administrators     rhods-admins        rhods-users
+    # Create a configmap and store both groups
+    ${return_code}    ${cmd_output}=    Run And Return Rc And Output
+    ...    oc create configmap ${UPGRADE_CONFIG_MAP} -n ${UPGRADE_NS} --from-literal=adm_groups="['rhods-admins', 'rhods-users']" --from-literal=allwd_groups="['system:authenticated']"
+    Should Be Equal As Integers     ${return_code}      0       msg=${cmd_output}
+
+    Add OpenShift Groups To Data Science Administrators     rhods-admins    rhods-users
     Add OpenShift Groups To Data Science User Groups        system:authenticated
     Save Changes In User Management Setting
     [Teardown]      Dashboard Test Teardown

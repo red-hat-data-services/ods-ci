@@ -59,8 +59,8 @@ Verify RHODS User Groups
     [Documentation]    Verify User Configuration after the upgrade
     [Tags]      Upgrade     Platform        RHOAIENG-19806
     Get Auth Cr Config Data
-    @{admins}                Set Variable            ${AUTH_PAYLOAD[0]['spec']['adminGroups']}
-    @{allowed}                 Set Variable            ${AUTH_PAYLOAD[0]['spec']['allowedGroups']}
+    ${auth_admins}       Set Variable        ${AUTH_PAYLOAD[0]['spec']['adminGroups']}
+    ${auth_allowed}      Set Variable        ${AUTH_PAYLOAD[0]['spec']['allowedGroups']}
 
     ${return_code}    ${adm_groups}=    Run And Return Rc And Output
     ...    oc get configmap ${UPGRADE_CONFIG_MAP} -n ${UPGRADE_NS} -o jsonpath='{.data.adm_groups}'
@@ -70,12 +70,9 @@ Verify RHODS User Groups
     ...    oc get configmap ${UPGRADE_CONFIG_MAP} -n ${UPGRADE_NS} -o jsonpath='{.data.allwd_groups}'
     Should Be Equal As Integers     ${return_code}      0
 
-    FOR    ${group}    IN    @{admins}
-        Should Contain Match        ${admins}        ${group}
-    END
-    FOR    ${group}    IN    @{allowed}
-        Should Contain Match        ${allowed}        ${group}
-    END
+    Should Be Equal    "${adm_groups}"    "${auth_admins}"   msg="Admin groups are not equal"
+    Should Be Equal    "${allwd_groups}"    "${auth_allowed}"   msg="Allowed groups are not equal"
+
     [Teardown]      Set Default Users
 
 Verify Culler is Enabled

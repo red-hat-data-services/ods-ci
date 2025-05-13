@@ -77,7 +77,7 @@ Verify RHODS Accept Multiple Admin Groups And CRD Gets Updates
     Clear User Management Settings
     # Create a configmap and store both groups
     ${return_code}    ${cmd_output}=    Run And Return Rc And Output
-    ...    oc create configmap ${UPGRADE_CONFIG_MAP} -n ${UPGRADE_NS} --from-literal=adm_groups="rhods-admins | rhods-users" --from-literal=allwd_groups=system:authenticated
+    ...    oc create configmap ${UPGRADE_CONFIG_MAP} -n ${UPGRADE_NS} --from-literal=adm_groups="['rhods-admins', 'rhods-users']" --from-literal=allwd_groups="['system:authenticated']"
     Should Be Equal As Integers     ${return_code}      0       msg=${cmd_output}
 
     Add OpenShift Groups To Data Science Administrators     rhods-admins    rhods-users

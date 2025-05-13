@@ -105,7 +105,7 @@ Add StartingCSV To Subscription
     [Documentation]    Retrieves current RHOAI version from subscription status and add
     ...                startingCSV field in the sub.
     ...                Needed for post-upgrade test suites to identify which RHOAI version
-    ...                was installedbefore upgrading
+    ...                was installed before upgrading
     Log    Patching RHOAI subscription to add startingCSV field    console=yes
     ${rc}    ${out} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/add_starting_csv.sh
     Log    ${out}    console=yes

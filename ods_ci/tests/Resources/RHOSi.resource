@@ -95,7 +95,7 @@ Required Global Variables Should Exist
 
 Fetch Cluster Type By Domain
     [Documentation]    This Keyword outputs the kind of cluster depending on the console URL domain
-    ${matches}=    Get Regexp Matches    ${OCP_CONSOLE_URL}    rh-ods
+    ${matches}=    Get Regexp Matches    ${OCP_CONSOLE_URL}    rh-ods|rhaiseng
     ${matches_len}=     Get Length      ${matches}
     IF  '${matches_len}' == '0'
         Set Global Variable    ${CLUSTER_TYPE}    managed

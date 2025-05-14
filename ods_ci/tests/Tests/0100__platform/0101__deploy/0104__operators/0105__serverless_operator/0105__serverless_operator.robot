@@ -145,7 +145,7 @@ Suite Setup
     Wait For DSC Ready State    ${OPERATOR_NAMESPACE}    default-dsc
     ${KSERVE_SERVING_STATE}=    Get DSC Component State    ${DSC_NAME}    kserve.serving    ${OPERATOR_NAMESPACE}
     ${INITIAL_KSERVE_MODE}=    Get Resource Attribute      ${OPERATOR_NAMESPACE}
-    ...                 DataScienceCluster      ${DSC_NAME}        .spec.components.kserve.defaultDeploymentMode
+    ...                 DataScienceCluster      ${DSC_NAME}        .status.components.kserve.defaultDeploymentMode
     Set Suite Variable    ${KSERVE_SERVING_STATE}
     Set Suite Variable    ${INITIAL_KSERVE_MODE}
     Log To Console    "Suite Setup: KServe.serving state: ${KSERVE_SERVING_STATE}"

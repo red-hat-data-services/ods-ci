@@ -36,7 +36,8 @@ ${DEFAULT_OPERATOR_NAMESPACE_RHOAI}=    redhat-ods-operator
 ${DEFAULT_OPERATOR_NAMESPACE_ODH}=    opendatahub-operators
 ${DEFAULT_APPLICATIONS_NAMESPACE_RHOAI}=    redhat-ods-applications
 ${DEFAULT_APPLICATIONS_NAMESPACE_ODH}=    opendatahub
-${DEFAULT_WORKBENCHES_NAMESPACE}=    rhods-notebooks
+${DEFAULT_WORKBENCHES_NAMESPACE_RHOAI}=    rhods-notebooks
+${DEFAULT_WORKBENCHES_NAMESPACE_ODH}=    opendatahub
 ${CUSTOM_MANIFESTS}=    ${EMPTY}
 ${IS_NOT_PRESENT}=      1
 ${DSC_TEMPLATE}=    dsc_template.yml
@@ -98,6 +99,21 @@ Install RHODS
       END
   END
   Wait Until Csv Is Ready    display_name=${csv_display_name}    operators_namespace=${OPERATOR_NAMESPACE}
+  Add StartingCSV To Subscription
+
+Add StartingCSV To Subscription
+    [Documentation]    Retrieves current RHOAI version from subscription status and add
+    ...                startingCSV field in the sub.
+    ...                Needed for post-upgrade test suites to identify which RHOAI version
+    ...                was installed before upgrading
+    Log    Patching RHOAI subscription to add startingCSV field    console=yes
+    ${rc}    ${out} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/add_starting_csv.sh
+    Log    ${out}    console=yes
+    Run Keyword And Continue On Failure    Should Be Equal As Numbers    ${rc}    ${0}
+    IF    ${rc} != ${0}
+        Log    Unable to add startingCSV after RHOAI operator installation.\nCheck the cluster please    console=yes
+        ...    level=ERROR
+    END
 
 Verify RHODS Installation
   Set Global Variable    ${DASHBOARD_APP_NAME}    ${PRODUCT.lower()}-dashboard
@@ -621,7 +637,7 @@ Configure Custom Namespaces
        # If the applications namespace is not the default one, we need to apply some steps prior to installing ODH/RHOAI
        Configure Custom Applications Namespace    ${APPLICATIONS_NAMESPACE}
     END
-    IF  "${NOTEBOOKS_NAMESPACE}" != "${DEFAULT_WORKBENCHES_NAMESPACE}"
+    IF  "${NOTEBOOKS_NAMESPACE}" != "${DEFAULT_WORKBENCHES_NAMESPACE_RHOAI}" and "${NOTEBOOKS_NAMESPACE}" != "${DEFAULT_WORKBENCHES_NAMESPACE_ODH}"
        # If the workbenches namespace is not the default one, we need to create prior to installing ODH/RHOAI
        Configure Custom Workbenches Namespace    ${NOTEBOOKS_NAMESPACE}
     END

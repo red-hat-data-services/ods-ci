@@ -67,7 +67,7 @@ Setting Pod Toleration Via UI
 Verify RHODS Accept Multiple Admin Groups And CRD Gets Updates
     [Documentation]    Verify that users can set multiple admin groups and
     ...    check OdhDashboardConfig CRD gets updated according to Admin UI
-    [Tags]      Upgrade     RHOAIENG-14306    Platform
+    [Tags]      Upgrade     RHOAIENG-14306    Platform      RHOAIENG-19806
     [Setup]     Begin Web Test
     # robocop: disable
     Launch Dashboard And Check User Management Option Is Available For The User
@@ -75,7 +75,12 @@ Verify RHODS Accept Multiple Admin Groups And CRD Gets Updates
     ...    ${TEST_USER.PASSWORD}
     ...    ${TEST_USER.AUTH_TYPE}
     Clear User Management Settings
-    Add OpenShift Groups To Data Science Administrators     rhods-admins        rhods-users
+    # Create a configmap and store both groups
+    ${return_code}    ${cmd_output}=    Run And Return Rc And Output
+    ...    oc create configmap ${UPGRADE_CONFIG_MAP} -n ${UPGRADE_NS} --from-literal=adm_groups="['rhods-admins', 'rhods-users']" --from-literal=allwd_groups="['system:authenticated']"
+    Should Be Equal As Integers     ${return_code}      0       msg=${cmd_output}
+
+    Add OpenShift Groups To Data Science Administrators     rhods-admins    rhods-users
     Add OpenShift Groups To Data Science User Groups        system:authenticated
     Save Changes In User Management Setting
     [Teardown]      Dashboard Test Teardown
@@ -203,28 +208,12 @@ Verify Distributed Workload Metrics Resources By Creating Ray Cluster Workload
     [Teardown]      Run Keywords        Cleanup Codeflare-SDK Setup     AND
     ...     Run Keyword If Test Failed      Codeflare Upgrade Tests Teardown        ${PRJ_UPGRADE}      ${DW_PROJECT_CREATED}       # robocop: disable:line-too-long
 
-Run Training Operator KFTO Setup PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_4_1)
-    [Documentation]    Run Training Operator KFTO Setup PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_4_1)
-    [Tags]      Upgrade    TrainingKubeflow
-    [Setup]     Prepare Training Operator KFTO E2E Test Suite
-    Skip If Operator Starting Version Is Not Supported      minimum_version=2.19.0
-    Run Training Operator KFTO Test    TestSetupPytorchjob    ${CUDA_TRAINING_IMAGE_TORCH241}
-    [Teardown]    Teardown Training Operator KFTO E2E Test Suite
-
 Run Training Operator KFTO Setup PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_5_1)
     [Documentation]    Run Training Operator KFTO Setup PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_5_1)
     [Tags]      Upgrade    TrainingKubeflow
     [Setup]     Prepare Training Operator KFTO E2E Test Suite
     Skip If Operator Starting Version Is Not Supported      minimum_version=2.19.0
     Run Training Operator KFTO Test    TestSetupPytorchjob    ${CUDA_TRAINING_IMAGE_TORCH251}
-    [Teardown]    Teardown Training Operator KFTO E2E Test Suite
-
-Run Training Operator KFTO Setup Sleep PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_4_1)
-    [Documentation]    Setup PyTorchJob which is kept running for 24 hours with NVIDIA CUDA image (PyTorch 2_4_1)
-    [Tags]      Upgrade    TrainingKubeflow
-    [Setup]     Prepare Training Operator KFTO E2E Test Suite
-    Skip If Operator Starting Version Is Not Supported      minimum_version=2.19.0
-    Run Training Operator KFTO Test    TestSetupSleepPytorchjob    ${CUDA_TRAINING_IMAGE_TORCH241}
     [Teardown]    Teardown Training Operator KFTO E2E Test Suite
 
 Run Training Operator KFTO Setup Sleep PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_5_1)

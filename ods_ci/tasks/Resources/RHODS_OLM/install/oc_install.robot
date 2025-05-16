@@ -28,7 +28,7 @@ ${SERVICEMESH_OP_NAME}=     servicemeshoperator
 ${SERVICEMESH_SUB_NAME}=    servicemeshoperator
 ${AUTHORINO_OP_NAME}=     authorino-operator
 ${AUTHORINO_SUB_NAME}=    authorino-operator
-${AUTHORINO_CHANNEL_NAME}=  tech-preview-v1
+${AUTHORINO_CHANNEL_NAME}=  stable
 ${RHODS_CSV_DISPLAY}=    Red Hat OpenShift AI
 ${ODH_CSV_DISPLAY}=    Open Data Hub Operator
 ${DEFAULT_OPERATOR_NAMESPACE_RHOAI}=    redhat-ods-operator
@@ -502,9 +502,6 @@ Catalog Is Ready
 
 Install Authorino Operator Via Cli
     [Documentation]    Install Authorino Operator Via CLI
-    IF   "${PRODUCT}" == "ODH"
-        Set Global Variable    $AUTHORINO_CHANNEL_NAME    stable
-    END
     Install ISV Operator From OperatorHub Via CLI    operator_name=${AUTHORINO_OP_NAME}
         ...    subscription_name=${AUTHORINO_SUB_NAME}
         ...    channel=${AUTHORINO_CHANNEL_NAME}
@@ -515,11 +512,6 @@ Install Authorino Operator Via Cli
           ...    retry=150
     Wait For Pods To Be Ready    label_selector=control-plane=authorino-operator
           ...    namespace=${OPENSHIFT_OPERATORS_NS}
-    IF   "${AUTHORINO_CHANNEL_NAME}" == "tech-preview-v1"
-    # This pod does not exist in the Stable channel version
-        Wait For Pods To Be Ready    label_selector=authorino-component=authorino-webhooks
-            ...    namespace=${OPENSHIFT_OPERATORS_NS}
-    END
 
 Install Service Mesh Operator Via Cli
     [Documentation]    Install Service Mesh Operator Via CLI

@@ -12,3 +12,4 @@ Run TestMnistSDK KFTO SDK test
     ...     DistributedWorkloads
     ...     TrainingKubeflow
     Run Training Operator KFTO SDK Test    TestMnistSDK   ${CUDA_TRAINING_IMAGE}
+

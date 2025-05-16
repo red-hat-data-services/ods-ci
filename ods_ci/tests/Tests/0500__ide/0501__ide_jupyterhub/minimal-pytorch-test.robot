@@ -17,6 +17,7 @@ Test Tags       JupyterHub
 ${NOTEBOOK_IMAGE} =         pytorch
 ${EXPECTED_CUDA_VERSION} =  12.6
 ${EXPECTED_CUDA_VERSION_N_1} =  12.4
+${TENSORBOARD_FRAME_XPATH} =  //iframe[contains(@id, "tensorboard-frame")]
 
 
 *** Test Cases ***
@@ -42,7 +43,8 @@ Verify Tensorboard Is Accessible
     Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Small
     Run Keyword And Ignore Error  Clone Git Repository And Run  https://github.com/redhat-rhods-qe/ods-ci-notebooks-main
     ...    ods-ci-notebooks-main/notebooks/500__jupyterhub/tensorboard/pytorch/tensorboard_profiling_pytorch.ipynb  10m
-    Select Frame    xpath://iframe[contains(@id, "tensorboard-frame")]
+    Wait Until Page Contains Element    xpath:${TENSORBOARD_FRAME_XPATH}    timeout=30s
+    Select Frame    xpath:${TENSORBOARD_FRAME_XPATH}
     Page Should Contain Element    xpath://html//mat-toolbar/span[.="TensorBoard"]
     Unselect Frame
 

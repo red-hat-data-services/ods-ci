@@ -37,6 +37,7 @@ Restore Default Deployment Sizes
     ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    notebook-controller-deployment     replicas=1
     ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    odh-notebook-controller-manager    replicas=1
     ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    rhods-dashboard                    replicas=2
+    ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    data-science-pipelines-operator-controller-manager  replicas=1
     ODS.Scale Deployment    ${MONITORING_NAMESPACE}      blackbox-exporter                  replicas=1
     ODS.Scale Deployment    ${MONITORING_NAMESPACE}      grafana                            replicas=2
     ODS.Scale Deployment    ${MONITORING_NAMESPACE}      prometheus                         replicas=1

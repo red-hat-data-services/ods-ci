@@ -82,10 +82,6 @@ Verify Alerts Are Fired When RHODS Dashboard Is Down    # robocop: disable:too-l
     ...       ODS-739
     ...       Monitoring
     ...       AutomationBug
-    Skip If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}
-    ...    ${RHODS_PROMETHEUS_TOKEN}
-    ...    SLOs-haproxy_backend_http_responses_dashboard
-    ...    RHODS Dashboard Route Error Burn Rate
 
     ODS.Scale Deployment    ${OPERATOR_NAMESPACE}    rhods-operator    replicas=0
     ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    rhods-dashboard    replicas=0
@@ -128,10 +124,6 @@ Verify Alert "Kubeflow notebook controller pod is not running" Is Fired When Kub
     [Tags]    Tier3
     ...       ODS-1700
     ...       Monitoring
-    Skip If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}
-    ...    ${RHODS_PROMETHEUS_TOKEN}
-    ...    RHODS Notebook controllers
-    ...    Kubeflow notebook controller pod is not running
 
     ODS.Scale Deployment    ${OPERATOR_NAMESPACE}        rhods-operator                    replicas=0
     ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    notebook-controller-deployment    replicas=0
@@ -160,10 +152,6 @@ Verify Alert "ODH notebook controller pod is not running" Is Fired When ODH Cont
     [Tags]    Tier3
     ...       ODS-1701
     ...       Monitoring
-    Skip If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}
-    ...    ${RHODS_PROMETHEUS_TOKEN}
-    ...    RHODS Notebook controllers
-    ...    ODH notebook controller pod is not running
 
     ODS.Scale Deployment    ${OPERATOR_NAMESPACE}        rhods-operator                     replicas=0
     ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    odh-notebook-controller-manager    replicas=0
@@ -333,6 +321,33 @@ Verify Data Science Pipelines Application Alerts
     ...    timeout=2 min
 
     [Teardown]    Delete Project Via CLI    ${PROJECT}
+
+
+Verify Data Science Pipelines Operator Alert Fires When Operator Is Down
+    [Documentation]     Verifies that alert "Data Science Pipelines Operator Probe Success Burn Rate (for 5m)" is fired
+    [Tags]    Tier3
+    ...       ODS-2166
+    ...       RHOAIENG-13262
+    ...       Monitoring
+
+    ODS.Scale Deployment    ${OPERATOR_NAMESPACE}        rhods-operator                                      replicas=0
+    ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    data-science-pipelines-operator-controller-manager  replicas=0
+
+    Prometheus.Wait Until Alert Is Pending    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    SLOs-probe_success_dsp
+    ...    Data Science Pipelines Operator Probe Success 5m and 1h Burn Rate high
+    ...    timeout=20 min
+
+    ODS.Restore Default Deployment Sizes
+
+    Prometheus.Wait Until Alert Is Inactive    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    SLOs-probe_success_dsp
+    ...    Data Science Pipelines Operator Probe Success 5m and 1h Burn Rate high
+    ...    timeout=10 min
+
+    [Teardown]    ODS.Restore Default Deployment Sizes
 
 *** Keywords ***
 Alerts Suite Setup
@@ -512,13 +527,6 @@ Verify Alert Has A Given Severity And Continue On Failure
     ...    ${alert}
     ...    ${alert-severity}
     ...    ${alert-duration}
-
-Skip If Alert Is Already Firing
-    [Documentation]    Skips tests if ${alert} is already firing
-    [Arguments]    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-duration}=${EMPTY}
-    ${alert_is_firing} =    Run Keyword And Return Status    Alert Should Be Firing
-    ...    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-duration}
-    Skip If    ${alert_is_firing}    msg=Test skiped because alert "${alert} ${alert-duration}" is already firing
 
 Check Cluster Name Contain "Aisrhods" Or Not
     [Documentation]     Return true if cluster name contains aisrhods and if not return false

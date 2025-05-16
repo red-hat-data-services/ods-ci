@@ -9,7 +9,7 @@ Resource          ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 ${CODEFLARE-SDK-RELEASE-TAG}             v0.27.0
 ${CODEFLARE-SDK_DIR}                     codeflare-sdk
 ${CODEFLARE-SDK_REPO_URL}                %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
-${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}  https://github.com/opendatahub-io/distributed-workloads/releases/latest/download
+${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}  https://github.com/opendatahub-io/distributed-workloads/releases/download/v2.19.0-10-04-2025
 # Corresponds to quay.io/modh/ray:2.35.0-py311-cu121
 ${RAY_CUDA_IMAGE_3.11}                   quay.io/modh/ray@sha256:db667df1bc437a7b0965e8031e905d3ab04b86390d764d120e05ea5a5c18d1b4
 # Corresponds to quay.io/rhoai/ray:2.35.0-py311-cu121-torch24-fa26
@@ -198,7 +198,7 @@ Run Training Operator KFTO Test
 
 Run Training Operator KFTO SDK Test
     [Documentation]    Run Training Operator KFTO SDK Test
-    [Arguments]    ${TEST_NAME}
+    [Arguments]    ${TEST_NAME}    ${TRAINING_IMAGE}
     Log To Console    "Running test: ${TEST_NAME}"
     ${result} =    Run Process    ./${KFTO_BINARY_NAME} -test.run ${TEST_NAME}
     ...    shell=true
@@ -208,6 +208,7 @@ Run Training Operator KFTO SDK Test
     ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
     ...    env:ODH_NAMESPACE=${APPLICATIONS_NAMESPACE}
     ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-${KFTO_BINARY_NAME}-logs
+    ...    env:CODEFLARE_TEST_TRAINING_IMAGE=${TRAINING_IMAGE}
     ...    env:AWS_DEFAULT_ENDPOINT=${AWS_DEFAULT_ENDPOINT}
     ...    env:AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
     ...    env:AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}

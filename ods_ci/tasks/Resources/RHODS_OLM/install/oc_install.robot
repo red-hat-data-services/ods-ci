@@ -96,6 +96,21 @@ Install RHODS
       END
   END
   Wait Until Csv Is Ready    display_name=${csv_display_name}    operators_namespace=${OPERATOR_NAMESPACE}
+  Add StartingCSV To Subscription
+
+Add StartingCSV To Subscription
+    [Documentation]    Retrieves current RHOAI version from subscription status and add
+    ...                startingCSV field in the sub.
+    ...                Needed for post-upgrade test suites to identify which RHOAI version
+    ...                was installed before upgrading
+    Log    Patching RHOAI subscription to add startingCSV field    console=yes
+    ${rc}    ${out} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/add_starting_csv.sh
+    Log    ${out}    console=yes
+    Run Keyword And Continue On Failure    Should Be Equal As Numbers    ${rc}    ${0}
+    IF    ${rc} != ${0}
+        Log    Unable to add startingCSV after RHOAI operator installation.\nCheck the cluster please    console=yes
+        ...    level=ERROR
+    END
 
 Verify RHODS Installation
   Set Global Variable    ${DASHBOARD_APP_NAME}    ${PRODUCT.lower()}-dashboard
@@ -436,13 +451,19 @@ Wait For DataScienceCluster CustomResource To Be Ready
 
 Component Should Be Enabled
     [Arguments]    ${component}    ${dsc_name}=${DSC_NAME}
-    ${status} =    Is Component Enabled    ${component}    ${dsc_name}
-    IF    '${status}' != 'true'    Fail
+    ${status} =   Set Variable   False
+    WHILE   '${status}' != 'true'    limit=60 seconds
+        ${status} =    Is Component Enabled    ${component}    ${dsc_name}
+        IF    '${status}' == 'true'    BREAK
+    END
 
 Component Should Not Be Enabled
     [Arguments]    ${component}    ${dsc_name}=${DSC_NAME}
-    ${status} =    Is Component Enabled    ${component}    ${dsc_name}
-    IF    '${status}' != 'false'    Fail
+    ${status} =   Set Variable   True
+    WHILE   '${status}' != 'false'    limit=60 seconds
+        ${status} =    Is Component Enabled    ${component}    ${dsc_name}
+        IF    '${status}' == 'false'    BREAK
+    END
 
 Is Component Enabled
     [Documentation]    Returns the enabled status of a single component (true/false)

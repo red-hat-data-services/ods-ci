@@ -302,8 +302,18 @@ Apply OpenShift Configuration
     [Arguments]    ${config}
     ${command}=    Set Variable    oc apply -f ${config}
     ${result}=    Run Process    ${command}    stdin=${config}    shell=True    stdout=PIPE    stderr=PIPE
-    Should Be Equal As Strings    ${result.rc}    0    The oc apply command failed
     Log    ${result.stdout}
+    Should Be Equal As Strings    ${result.rc}    0    The oc apply command failed
+
+Set Resource Attribute
+    [Documentation]    Sets the value of an attribute of a specific resource
+    [Arguments]    ${namespace}    ${resource_type}    ${resource_name}    ${attribute_path}    ${value}
+    ${result} =    Run Process    oc patch ${resource_type} ${resource_name} -n ${namespace} --type 'json' -p '[{"op" : "replace" ,"path" : "${attribute_path}" ,"value" : "${value}"}]'
+    ...    shell=true    stderr=STDOUT
+    IF    $result.rc != 0
+        FAIL    Can not set value ${value} to ${resource_type} ${resource_name} attribute ${attribute_path} in the namespace ${namespace}
+    END
+    Log To Console    ${resource_type} ${resource_name} in the namespace ${namespace} attribute ${attribute_path} value is ${value}
 
 Set Resource Attribute
     [Documentation]    Sets the value of an attribute of a specific resource

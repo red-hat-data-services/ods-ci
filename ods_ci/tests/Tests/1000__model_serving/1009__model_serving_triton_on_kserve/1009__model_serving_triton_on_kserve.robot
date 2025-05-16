@@ -76,7 +76,7 @@ ${INFERENCE_GRPC_INPUT_PYTHON}=     tests/Resources/Files/triton/kserve-triton-p
 *** Test Cases ***
 Test Onnx Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of an onnx model in Kserve using Triton
-    [Tags]    Sanity    RHOAIENG-11565
+    [Tags]    Sanity    RHOAIENG-11565      deprecatedTest
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    existing_project=${FALSE}
@@ -106,7 +106,7 @@ Test Onnx Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-l
 
 Test PYTORCH Model Rest Inference Via UI(Triton on Kserve)
     [Documentation]    Test the deployment of an pytorch model in Kserve using Triton
-    [Tags]    Tier2           RHOAIENG-11561
+    [Tags]    Tier2           RHOAIENG-11561        deprecatedTest
 
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
@@ -138,7 +138,7 @@ Test PYTORCH Model Rest Inference Via UI(Triton on Kserve)
 
 Test Onnx Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of an onnx model in Kserve using Triton
-    [Tags]    Tier2    RHOAIENG-9053
+    [Tags]    Tier2    RHOAIENG-9053        deprecatedTest
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    existing_project=${FALSE}
@@ -184,7 +184,7 @@ Test Onnx Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-l
 
 Test Tensorflow Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of an tensorflow model in Kserve using Triton
-    [Tags]    Tier2    RHOAIENG-9052
+    [Tags]    Tier2    RHOAIENG-9052        deprecatedTest
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    existing_project=${FALSE}
@@ -229,7 +229,7 @@ Test Tensorflow Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off
 
 Test KERAS Model Rest Inference Via UI(Triton on Kserve)
     [Documentation]    Test the deployment of an keras model in Kserve using Triton
-    [Tags]    Tier2      RHOAIENG-10328
+    [Tags]    Tier2      RHOAIENG-10328       deprecatedTest
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    existing_project=${FALSE}
@@ -260,7 +260,7 @@ Test KERAS Model Rest Inference Via UI(Triton on Kserve)
 
 Test KERAS Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of an keras model in Kserve using Triton
-    [Tags]    Tier2    RHOAIENG-10327
+    [Tags]    Tier2    RHOAIENG-10327       deprecatedTest
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    existing_project=${FALSE}
@@ -304,7 +304,7 @@ Test KERAS Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-
 
 Test Python Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of an python model in Kserve using Triton
-    [Tags]    Tier2    RHOAIENG-15374
+    [Tags]    Tier2    RHOAIENG-15374       deprecatedTest
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    existing_project=${FALSE}
@@ -350,7 +350,7 @@ Test Python Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too
 
 Test Python Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of an python model in Kserve using Triton
-    [Tags]    Tier2    RHOAIENG-15374
+    [Tags]    Tier2    RHOAIENG-15374       deprecatedTest
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    existing_project=${FALSE}
@@ -380,7 +380,7 @@ Test Python Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too
 
 Test FIL Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of an fil model in Kserve using Triton
-    [Tags]    Tier2    RHOAIENG-15649
+    [Tags]    Tier2    RHOAIENG-15649       deprecatedTest
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    existing_project=${FALSE}
@@ -410,7 +410,7 @@ Test FIL Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-lo
 
 Test FIL Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of an fil model in Kserve using Triton
-    [Tags]    Sanity    RHOAIENG-15823
+    [Tags]    Sanity    RHOAIENG-15823          deprecatedTest
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    existing_project=${FALSE}
@@ -454,7 +454,7 @@ Test FIL Model Grpc Inference Via UI (Triton on Kserve)    # robocop: off=too-lo
 
 Test Tensorflow Model Rest Inference Via UI (Triton on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of an tensorflow model in Kserve using Triton
-    [Tags]    Tier2    RHOAIENG-11568
+    [Tags]    Tier2    RHOAIENG-11568     deprecatedTest
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    existing_project=${FALSE}

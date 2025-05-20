@@ -30,7 +30,8 @@ Verify RHODS Operator Logs After Restart
    #Get the POD name
    ${data}       Run Keyword   Oc Get   kind=Pod     namespace=${OPERATOR_NAMESPACE}   label_selector=${OPERATOR_LABEL_SELECTOR}
    #Capture the logs based on containers
-   ${val}        Run   oc logs --tail=-1 ${data[0]['metadata']['name']} -n ${OPERATOR_NAMESPACE} -c ${OPERATOR_POD_CONTAINER_NAME}
+   ${rc}    ${val}    Run And Return Rc And Output   oc logs --tail=-1 ${data[0]['metadata']['name']} -n ${OPERATOR_NAMESPACE} -c ${OPERATOR_POD_CONTAINER_NAME}
+   Run Keyword And Continue On Failure    Should Be Equal As Integers    ${rc}    0    oc command didn't end successfully
    #To check if command has been successfully executed and the logs have been captured
    IF    len($val)==${0}     FAIL   Either OC command has not been executed successfully or Logs are not present
    #Filter the error msg from the log captured

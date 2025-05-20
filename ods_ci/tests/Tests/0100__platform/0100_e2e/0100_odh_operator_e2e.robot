@@ -24,6 +24,7 @@ Run Operator e2e tests
     ...    stderr=STDOUT
     ...    env:E2E_TEST_OPERATOR_NAMESPACE=redhat-ods-operator  # TODO: configurable for odh
     # any extra env vars we might need in the e2e tests can go here ^
+    IF  ${result.rc}!=0  Fail    e2e tests failed
     Log To Console    ${result.stdout}
 
 
@@ -36,6 +37,9 @@ E2e Setup
     ${operator_branch} =  Remove String Using Regexp  ${output}  \\.[0-9]+\$
     ${operator_branch} =  Remove String    ${operator_branch}  rhods-operator.  # TODO configurable for odh
     Common.Clone Git Repository  ${OPERATOR_GIT_REPO}  rhoai-${operator_branch}  ${OPERATOR_GIT_DIR}
+    ${rc}=  Run And Return Rc    command -v gotestsum
+    IF  ${rc}!=0  Run  go install gotest.tools/gotestsum@latest  # TODO: pre-install on jenkins agents
+
 
 E2e Teardown
     Remove Directory  ${OPERATOR_GIT_DIR}  recursive=True

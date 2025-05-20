@@ -30,7 +30,6 @@ Run Operator e2e tests
 
 *** Keywords ***
 E2e Setup
-    [Documentation]    Prepare codeflare-sdk E2E Test Suite
     RHOSi Setup
     #   cannot use 'Gather Release Attributes From DSC And DSCI' because DSC might not be present
     ${rc}  ${output}  Run And Return Rc And Output    oc get subscription -n ${OPERATOR_NAMESPACE} -l ${OPERATOR_SUBSCRIPTION_LABEL} -o jsonpath='{.items[0].status.currentCSV}'

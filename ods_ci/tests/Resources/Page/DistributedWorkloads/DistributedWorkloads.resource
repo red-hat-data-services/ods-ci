@@ -28,8 +28,8 @@ ${ROCM_TRAINING_IMAGE_TORCH241}          quay.io/modh/training@sha256:1104eb83d7
 ${CUDA_TRAINING_IMAGE_TORCH251}          quay.io/modh/training@sha256:1d0caea3e5d56ff7d672954b1ad511e661df9bdb364d56879961169a4ca8dae0
 # Corresponds to quay.io/modh/training:py311-rocm62-torch251
 ${ROCM_TRAINING_IMAGE_TORCH251}          quay.io/modh/training@sha256:f98d70edc49203537d4fec005aaff68a4830b9c9ce2390bb4d7910b89c312b97
-# Corresponds to quay.io/modh/odh-generic-data-science-notebook:v3-20250417-b5cf05d
-${NOTEBOOK_IMAGE_3.11}                   quay.io/modh/odh-generic-data-science-notebook@sha256:bc67afab696eed960493d14559f6819dcad0b31dc90b8752e5089f022c5a3d4d
+# Corresponds to quay.io/modh/odh-generic-data-science-notebook:v3-20250519
+${NOTEBOOK_IMAGE_3.11}                   quay.io/modh/odh-generic-data-science-notebook@sha256:1c585c849cc466fce6443f5c186fb9b642d21b5f3581515ada08bba2fbc3591f
 ${NOTEBOOK_USER_NAME}                    ${TEST_USER_3.USERNAME}
 ${NOTEBOOK_USER_PASSWORD}                ${TEST_USER_3.PASSWORD}
 ${FMS_BINARY_NAME}                       fms

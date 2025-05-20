@@ -38,7 +38,15 @@ E2e Setup
     ${operator_branch} =  Remove String    ${operator_branch}  rhods-operator.  # TODO configurable for odh
     Common.Clone Git Repository  ${OPERATOR_GIT_REPO}  rhoai-${operator_branch}  ${OPERATOR_GIT_DIR}
     ${rc}=  Run And Return Rc    command -v gotestsum
-    IF  ${rc}!=0  Run  go install gotest.tools/gotestsum@latest  # TODO: pre-install on jenkins agents
+    IF  ${rc}!=0
+        Log To Console    gotestsum not found, installing
+        Run  go install gotest.tools/gotestsum@latest  # TODO: pre-install on jenkins agents
+        ${rc}  ${output} =  Run And Return Rc And Output    go env
+        Log To Console    ${output}
+        ${rc}  ${output} =  Run And Return Rc And Output    $(go env GOPATH)/bin/gotestsum
+        Log To Console    ${output}
+        IF  ${rc}!=0  Fail    gotestsum install failed
+    END
 
 
 E2e Teardown

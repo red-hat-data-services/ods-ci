@@ -28,8 +28,8 @@ ${ROCM_TRAINING_IMAGE_TORCH241}          quay.io/modh/training@sha256:1104eb83d7
 ${CUDA_TRAINING_IMAGE_TORCH251}          quay.io/modh/training@sha256:1d0caea3e5d56ff7d672954b1ad511e661df9bdb364d56879961169a4ca8dae0
 # Corresponds to quay.io/modh/training:py311-rocm62-torch251
 ${ROCM_TRAINING_IMAGE_TORCH251}          quay.io/modh/training@sha256:f98d70edc49203537d4fec005aaff68a4830b9c9ce2390bb4d7910b89c312b97
-# Corresponds to quay.io/modh/odh-generic-data-science-notebook:v3-20250417-b5cf05d
-${NOTEBOOK_IMAGE_3.11}                   quay.io/modh/odh-generic-data-science-notebook@sha256:bc67afab696eed960493d14559f6819dcad0b31dc90b8752e5089f022c5a3d4d
+# Corresponds to quay.io/modh/odh-generic-data-science-notebook:v3-20250519
+${NOTEBOOK_IMAGE_3.11}                   quay.io/modh/odh-generic-data-science-notebook@sha256:1c585c849cc466fce6443f5c186fb9b642d21b5f3581515ada08bba2fbc3591f
 ${NOTEBOOK_USER_NAME}                    ${TEST_USER_3.USERNAME}
 ${NOTEBOOK_USER_PASSWORD}                ${TEST_USER_3.PASSWORD}
 ${FMS_BINARY_NAME}                       fms
@@ -159,10 +159,10 @@ Run Training Operator FMS Test
     ${result} =    Run Process    ./${FMS_BINARY_NAME} -test.run ${TEST_NAME}
     ...    shell=true
     ...    stderr=STDOUT
-    ...    env:CODEFLARE_TEST_TIMEOUT_SHORT=5m
-    ...    env:CODEFLARE_TEST_TIMEOUT_MEDIUM=10m
-    ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
-    ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-${FMS_BINARY_NAME}-logs
+    ...    env:TEST_TIMEOUT_SHORT=5m
+    ...    env:TEST_TIMEOUT_MEDIUM=10m
+    ...    env:TEST_TIMEOUT_LONG=20m
+    ...    env:TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-${FMS_BINARY_NAME}-logs
     ...    env:FMS_HF_TUNING_IMAGE=${FMS_HF_TUNING_IMAGE}
     ...    env:AWS_DEFAULT_ENDPOINT=${AWS_DEFAULT_ENDPOINT}
     ...    env:AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
@@ -182,11 +182,11 @@ Run Training Operator KFTO Test
     ${result} =    Run Process    ./${KFTO_BINARY_NAME} -test.run ${TEST_NAME}
     ...    shell=true
     ...    stderr=STDOUT
-    ...    env:CODEFLARE_TEST_TIMEOUT_SHORT=5m
-    ...    env:CODEFLARE_TEST_TIMEOUT_MEDIUM=10m
-    ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
-    ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-${KFTO_BINARY_NAME}-logs
-    ...    env:CODEFLARE_TEST_TRAINING_IMAGE=${TRAINING_IMAGE}
+    ...    env:TEST_TIMEOUT_SHORT=5m
+    ...    env:TEST_TIMEOUT_MEDIUM=10m
+    ...    env:TEST_TIMEOUT_LONG=20m
+    ...    env:TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-${KFTO_BINARY_NAME}-logs
+    ...    env:TEST_TRAINING_IMAGE=${TRAINING_IMAGE}
     ...    env:AWS_DEFAULT_ENDPOINT=${AWS_DEFAULT_ENDPOINT}
     ...    env:AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
     ...    env:AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
@@ -207,12 +207,12 @@ Run Training Operator KFTO SDK Test
     ${result} =    Run Process    ./${KFTO_BINARY_NAME} -test.run ${TEST_NAME}
     ...    shell=true
     ...    stderr=STDOUT
-    ...    env:CODEFLARE_TEST_TIMEOUT_SHORT=10m
-    ...    env:CODEFLARE_TEST_TIMEOUT_MEDIUM=15m
-    ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
+    ...    env:TEST_TIMEOUT_SHORT=10m
+    ...    env:TEST_TIMEOUT_MEDIUM=15m
+    ...    env:TEST_TIMEOUT_LONG=20m
     ...    env:ODH_NAMESPACE=${APPLICATIONS_NAMESPACE}
-    ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-${KFTO_BINARY_NAME}-logs
-    ...    env:CODEFLARE_TEST_TRAINING_IMAGE=${TRAINING_IMAGE}
+    ...    env:TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-${KFTO_BINARY_NAME}-logs
+    ...    env:TEST_TRAINING_IMAGE=${TRAINING_IMAGE}
     ...    env:AWS_DEFAULT_ENDPOINT=${AWS_DEFAULT_ENDPOINT}
     ...    env:AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
     ...    env:AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
@@ -271,11 +271,11 @@ Run DistributedWorkloads ODH Test
     ${result} =    Run Process    ./${ODH_BINARY_NAME} -test.run ${TEST_NAME}
     ...    shell=true
     ...    stderr=STDOUT
-    ...    env:CODEFLARE_TEST_TIMEOUT_SHORT=5m
-    ...    env:CODEFLARE_TEST_TIMEOUT_MEDIUM=10m
-    ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
-    ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/distributed-workloads-odh-logs
-    ...    env:CODEFLARE_TEST_RAY_IMAGE=${DW_RAY_IMAGE}
+    ...    env:TEST_TIMEOUT_SHORT=5m
+    ...    env:TEST_TIMEOUT_MEDIUM=10m
+    ...    env:TEST_TIMEOUT_LONG=20m
+    ...    env:TEST_OUTPUT_DIR=%{WORKSPACE}/distributed-workloads-odh-logs
+    ...    env:TEST_RAY_IMAGE=${DW_RAY_IMAGE}
     ...    env:ODH_NAMESPACE=${APPLICATIONS_NAMESPACE}
     ...    env:NOTEBOOK_USER_NAME=${NOTEBOOK_USER_NAME}
     ...    env:NOTEBOOK_USER_TOKEN=${NOTEBOOK_USER_TOKEN}

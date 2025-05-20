@@ -24,8 +24,8 @@ Run Operator e2e tests
     ...    stderr=STDOUT
     ...    env:E2E_TEST_OPERATOR_NAMESPACE=redhat-ods-operator  # TODO: configurable for odh
     # any extra env vars we might need in the e2e tests can go here ^
-    IF  ${result.rc}!=0  Fail    e2e tests failed
     Log To Console    ${result.stdout}
+    IF  ${result.rc}!=0  Fail    e2e tests failed
 
 
 *** Keywords ***

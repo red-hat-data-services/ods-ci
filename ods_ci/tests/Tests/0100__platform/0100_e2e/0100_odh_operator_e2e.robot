@@ -18,10 +18,10 @@ Run Operator e2e tests
     ...     e2e
     # ${e2e_test_name}=  Set Variable    ^TestOdhOperator   # sub-tests can be selected as e.g. ^TestOdhOperator/components/trainingoperator , but that does not work very well
     # the following only works on 2.21 and later, previous versions have different test flags
-    ${result}=    Run Process  cat /sys/fs/cgroup/cpu.max
-    Log To Console    ${result.stdout}
-    ${result}=    Run Process  cd ${OPERATOR_GIT_DIR} && time go test -c ./tests/e2e/
-    Log To Console    ${result.stdout}
+    ${rc}  ${output}=    Run And Return Rc And Output      find /sys/fs/cgroup ; cat /sys/fs/cgroup/cpu.max
+    Log To Console    ${output}
+    ${rc}  ${output}=    Run And Return Rc And Output      cd ${OPERATOR_GIT_DIR} && time go test -c ./tests/e2e/
+    Log To Console    ${output}
     ${result}=    Run Process  ls ${OPERATOR_GIT_DIR} && cd ${OPERATOR_GIT_DIR} && $(go env GOPATH)/bin/gotestsum -f standard-verbose --debug --junitfile-project-name rhods-operator-e2e --junitfile ${OUTPUT_DIR}/operator-e2e-junit.xml -- ./tests/e2e/ -run ^TestOdhOperator -v -timeout\=50m --operator-namespace\=$E2E_TEST_OPERATOR_NAMESPACE --test-components\=false --test-services\=false
     ...    shell=true
     ...    stderr=STDOUT

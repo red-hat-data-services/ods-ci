@@ -273,3 +273,10 @@ Run Training operator KFTO_MNIST multi-node multi-gpu test with AMD ROCm image (
     ...     TrainingKubeflow
     ...     TrainingOperator
     Run Training Operator KFTO Test    TestPyTorchJobMnistMultiNodeMultiGpuWithROCmPyTorch251
+
+Run Kueue Validating Admission Policy tests for Training operator's Pytorchjob
+    [Documentation]    Run Go Kueue Validating Admission Policy tests for Training operator's Pytorchjob'
+    [Tags]  DistributedWorkloads
+    ...     TrainingKubeflow
+    ...     TrainingOperator
+    Run Training Operator KFTO Test    TestValidatingAdmissionPolicy

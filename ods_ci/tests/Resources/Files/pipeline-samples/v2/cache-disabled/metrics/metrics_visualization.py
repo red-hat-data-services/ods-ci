@@ -22,7 +22,7 @@ from kfp.dsl import (component, Output, ClassificationMetrics, Metrics, HTML,
 _KFP_PACKAGE_PATH = os.getenv('KFP_PACKAGE_PATH')
 
 
-common_base_image = "registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61"
+common_base_image = "registry.redhat.io/ubi9/python-312@sha256:e80ff3673c95b91f0dafdbe97afb261eab8244d7fd8b47e20ffcbcfee27fb168"
 
 
 @component(

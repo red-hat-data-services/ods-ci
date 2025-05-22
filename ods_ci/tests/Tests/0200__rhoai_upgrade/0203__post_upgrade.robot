@@ -263,7 +263,7 @@ Run Training Operator KFTO Run PyTorchJob Test Use Case with NVIDIA CUDA image (
     [Tags]      Upgrade    TrainingKubeflow
     [Setup]     Prepare Training Operator KFTO E2E Test Suite
     Skip If Operator Starting Version Is Not Supported      minimum_version=2.19.0
-    Run Training Operator KFTO Test          TestRunPytorchjob    ${CUDA_TRAINING_IMAGE_TORCH251}
+    Run Training Operator KFTO Test          TestRunPytorchjob
     [Teardown]      Teardown Training Operator KFTO E2E Test Suite
 
 Run Training Operator KFTO Run Sleep PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_5_1)
@@ -271,7 +271,7 @@ Run Training Operator KFTO Run Sleep PyTorchJob Test Use Case with NVIDIA CUDA i
     [Tags]      Upgrade    TrainingKubeflow
     [Setup]     Prepare Training Operator KFTO E2E Test Suite
     Skip If Operator Starting Version Is Not Supported      minimum_version=2.19.0
-    Run Training Operator KFTO Test      TestVerifySleepPytorchjob    ${CUDA_TRAINING_IMAGE_TORCH251}
+    Run Training Operator KFTO Test      TestVerifySleepPytorchjob
     [Teardown]      Teardown Training Operator KFTO E2E Test Suite
 
 Verify that the must-gather image provides RHODS logs and info

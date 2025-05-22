@@ -177,7 +177,7 @@ Run Training Operator FMS Test
 
 Run Training Operator KFTO Test
     [Documentation]    Run Training Operator KFTO Test
-    [Arguments]    ${TEST_NAME}    ${TRAINING_IMAGE}
+    [Arguments]    ${TEST_NAME}
     Log To Console    "Running test: ${TEST_NAME}"
     ${result} =    Run Process    ./${KFTO_BINARY_NAME} -test.run ${TEST_NAME}
     ...    shell=true
@@ -186,7 +186,10 @@ Run Training Operator KFTO Test
     ...    env:TEST_TIMEOUT_MEDIUM=10m
     ...    env:TEST_TIMEOUT_LONG=20m
     ...    env:TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-${KFTO_BINARY_NAME}-logs
-    ...    env:TEST_TRAINING_IMAGE=${TRAINING_IMAGE}
+    ...    env:TEST_TRAINING_CUDA_PYTORCH_241_IMAGE=${CUDA_TRAINING_IMAGE_TORCH241}
+    ...    env:TEST_TRAINING_CUDA_PYTORCH_251_IMAGE=${CUDA_TRAINING_IMAGE_TORCH251}
+    ...    env:TEST_TRAINING_ROCM_PYTORCH_241_IMAGE=${ROCM_TRAINING_IMAGE_TORCH241}
+    ...    env:TEST_TRAINING_ROCM_PYTORCH_251_IMAGE=${ROCM_TRAINING_IMAGE_TORCH251}
     ...    env:AWS_DEFAULT_ENDPOINT=${AWS_DEFAULT_ENDPOINT}
     ...    env:AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
     ...    env:AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
@@ -202,7 +205,7 @@ Run Training Operator KFTO Test
 
 Run Training Operator KFTO SDK Test
     [Documentation]    Run Training Operator KFTO SDK Test
-    [Arguments]    ${TEST_NAME}    ${TRAINING_IMAGE}
+    [Arguments]    ${TEST_NAME}
     Log To Console    "Running test: ${TEST_NAME}"
     ${result} =    Run Process    ./${KFTO_BINARY_NAME} -test.run ${TEST_NAME}
     ...    shell=true
@@ -212,7 +215,10 @@ Run Training Operator KFTO SDK Test
     ...    env:TEST_TIMEOUT_LONG=20m
     ...    env:ODH_NAMESPACE=${APPLICATIONS_NAMESPACE}
     ...    env:TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-${KFTO_BINARY_NAME}-logs
-    ...    env:TEST_TRAINING_IMAGE=${TRAINING_IMAGE}
+    ...    env:TEST_TRAINING_CUDA_PYTORCH_241_IMAGE=${CUDA_TRAINING_IMAGE_TORCH241}
+    ...    env:TEST_TRAINING_CUDA_PYTORCH_251_IMAGE=${CUDA_TRAINING_IMAGE_TORCH251}
+    ...    env:TEST_TRAINING_ROCM_PYTORCH_241_IMAGE=${ROCM_TRAINING_IMAGE_TORCH241}
+    ...    env:TEST_TRAINING_ROCM_PYTORCH_251_IMAGE=${ROCM_TRAINING_IMAGE_TORCH251}
     ...    env:AWS_DEFAULT_ENDPOINT=${AWS_DEFAULT_ENDPOINT}
     ...    env:AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
     ...    env:AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}

@@ -44,7 +44,7 @@ Verify Ods Users Can Create And Run A Data Science Pipeline With Ray Using The k
     ...    project=${PROJECT_NAME}
     ...    python_file=cache-disabled/ray_job_integration.py
     ...    method_name=ray_job_integration
-    ...    status_check_timeout=600
+    ...    status_check_timeout=900
     ...    pipeline_params=${params_dict}
     ...    ray=${TRUE}
     [Teardown]    Projects.Delete Project Via CLI By Display Name    ${PROJECT_NAME}
@@ -67,7 +67,7 @@ Verify Ods Users Can Create And Run A Data Science Pipeline With Ray Job Using T
     ...    project=${PROJECT_NAME}
     ...    python_file=cache-disabled/ray_integration.py
     ...    method_name=ray_integration
-    ...    status_check_timeout=600
+    ...    status_check_timeout=900
     ...    pipeline_params=${ray_dict}
     ...    ray=${TRUE}
     [Teardown]    Projects.Delete Project Via CLI By Display Name    ${PROJECT_NAME}

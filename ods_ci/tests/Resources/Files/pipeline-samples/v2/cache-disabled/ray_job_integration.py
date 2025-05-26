@@ -1,7 +1,7 @@
 from kfp import compiler, dsl
 
 common_base_image = (
-    "registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61"
+    "registry.redhat.io/ubi9/python-312@sha256:e80ff3673c95b91f0dafdbe97afb261eab8244d7fd8b47e20ffcbcfee27fb168"
 )
 
 # image and the sdk has a fixed value because the version matters
@@ -348,9 +348,9 @@ minio
         mnist_file.write(training_script)
     with open(mnist_directory + "/mnist_pip_requirements.txt", "w") as pip_requirements_file:
         pip_requirements_file.write(pip_requirements)
-    
+
     assert_jobsubmit_withlogin(cluster, mnist_directory)
-    
+
     cluster.down()
 
 @dsl.pipeline(

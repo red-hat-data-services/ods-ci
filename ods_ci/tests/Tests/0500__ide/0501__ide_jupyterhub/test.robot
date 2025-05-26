@@ -37,7 +37,7 @@ Can Login To Jupyterhub
     ...      ODS-936
     Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     Verify Service Account Authorization Not Required
-    Wait Until Page Contains  Start a notebook server
+    Wait Until Page Contains  Start a basic workbench
 
 Can Spawn Notebook
     [Tags]  Smoke
@@ -103,7 +103,7 @@ Verify Notebook Spawner Modal Does Not Get Stuck When Requesting Too Many Resour
    [Documentation]    Try spawning a server size for which there's not enough resources
    ...    spawner modal should show an error instead of being stuck waiting for resources
    Select Container Size    X Large
-   Click Button    Start server
+   Click Button    Start workbench
    # This could fail because of https://bugzilla.redhat.com/show_bug.cgi?id=2132043
    Wait Until Page Contains    Insufficient resources to start    timeout=1min
    ...    error=Modal did not fail within 1 minute
@@ -116,5 +116,5 @@ Verify Unsupported Environment Variable Is Not Allowed
     [Arguments]    ${env_var}
     Add Spawner Environment Variable    ${env_var}    ${env_var}
     Page Should Contain    Invalid variable name. The name must consist of alphabetic characters, digits, '_', '-', or '.', and must not start with a digit.
-    Element Should Be Disabled    xpath://button[.="Start server"]
+    Element Should Be Disabled    xpath://button[.="Start workbench"]
     Remove Spawner Environment Variable    ${env_var}

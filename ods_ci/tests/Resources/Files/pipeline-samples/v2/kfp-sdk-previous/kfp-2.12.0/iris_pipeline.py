@@ -139,7 +139,7 @@ def train_model(
         pickle.dump(clf, f)
 
 
-@dsl.pipeline(name="iris-training-pipeline-kfp-2.7")
+@dsl.pipeline(name="iris-training-pipeline")
 def my_pipeline(
     standard_scaler: bool = True,
     neighbors: int = 3,

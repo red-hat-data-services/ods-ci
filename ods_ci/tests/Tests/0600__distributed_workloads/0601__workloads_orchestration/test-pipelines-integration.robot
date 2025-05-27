@@ -101,8 +101,11 @@ End To End Pipeline Workflow Using Kfp
     ${run_id}    Create Run From Pipeline Func    ${username}    ${password}    ${project}
     ...    ${python_file}    ${method_name}    pipeline_params=${pipeline_params}    pip_index_url=${pip_index_url}
     ...    pip_trusted_host=${pip_trusted_host}
-    ${run_status}    Check Run Status    ${run_id}    timeout=${status_check_timeout}
-    Should Be Equal As Strings    ${run_status}    SUCCEEDED    Pipeline run doesn't have a status that means success. Check the logs
+
+    DataSciencePipelinesBackend.Wait For Run Completion And Verify Status
+    ...    namespace=${project}    username=${admin_username}    password=${admin_password}
+    ...    pipeline_run_id=${run_id}    pipeline_run_timeout=${status_check_timeout}
+    ...    pipeline_run_expected_status=SUCCEEDED
 
 Data Science Pipelines Suite Setup
     [Documentation]    Data Science Pipelines Suite Setup

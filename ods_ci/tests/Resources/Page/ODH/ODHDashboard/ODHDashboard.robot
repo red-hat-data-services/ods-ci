@@ -135,7 +135,7 @@ Launch ${dashboard_app} From RHODS Dashboard Link
       Click Link   xpath:${CARDS_XP}//*[text()='${splits[0]} ']/../..//a
   ELSE
       IF    "${dashboard_app}" == "Jupyter"
-          Click Link    xpath://div[contains(@class,'pf-v6-l-gallery')]/div[contains(@class,'pf-v6-c-card')]/div[@class="pf-v6-c-card__title"]//span[text()="${dashboard_app}"]/../../..//div[contains(@class,"pf-v6-c-card__footer")]/a
+          Click Link    xpath://div[contains(@class,'pf-v6-l-gallery')]/div[contains(@class,'pf-v6-c-card')]/div[@class="pf-v6-c-card__title"]//span[text()="Start basic workbench"]/../../..//div[contains(@class,"pf-v6-c-card__footer")]/a
       ELSE
           Click Link    xpath://div[contains(@class,'pf-v6-l-gallery')]/div[contains(@class,'pf-v6-c-card')]/div[@class="pf-v6-c-card__title"]//span[text()="${dashboard_app}"]/../..//div[contains(@class,"pf-v6-c-card__footer")]/a
       END
@@ -154,8 +154,8 @@ Verify Service Is Enabled
   [Documentation]   Verify the service appears in Applications > Enabled
   [Arguments]  ${app_name}    ${timeout}=180s
   Menu.Navigate To Page    Applications    Enabled
-  # Jupyter App should always be listed
-  Wait Until Page Contains    Jupyter    timeout=30s
+  # Start basic workbench App should always be listed
+  Wait Until Page Contains    Start basic workbench    timeout=30s
   Wait Until Page Contains    ${app_name}    timeout=${timeout}
   Page Should Contain Element    xpath://div//*[.='${app_name}']/../..   message=${app_name} should be enabled in ODS Dashboard
   Page Should Not Contain Element    xpath://div//*[.='${app_name}']/..//div[contains(@class,'enabled-controls')]/span[contains(@class,'disabled-text')]  message=${app_name} is marked as Disabled. Check the license

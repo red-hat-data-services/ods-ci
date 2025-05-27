@@ -27,7 +27,7 @@ Can Login to Jupyterhub
     Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     Verify Service Account Authorization Not Required
     #Wait Until Page Contains Element    xpath://span[@id='jupyterhub-logo']
-    Wait Until Page Contains  Start a notebook server
+    Wait Until Page Contains  Start a basic workbench
 
 Can Spawn Notebook
     [Tags]    ODS-901    ODS-903

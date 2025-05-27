@@ -585,9 +585,21 @@ Install Kserve Dependencies
     Set Suite Variable   ${FILES_RESOURCES_DIRPATH}    tests/Resources/Files
     Set Suite Variable   ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
     Set Suite Variable   ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
-    Install Authorino Operator Via Cli
-    Install Service Mesh Operator Via Cli
-    Install Serverless Operator Via Cli
+    IF    "authorino" in ${dependencies}
+        Install Authorino Operator Via Cli
+    ELSE
+        Log To Console    message=Authorino Operator is skipped (not included in kserve dependencies)
+    END
+    IF    "servicemesh" in ${dependencies}
+        Install Service Mesh Operator Via Cli
+    ELSE
+        Log To Console    message=ServiceMesh Operator is skipped (not included in kserve dependencies)
+    END
+    IF    "serverless" in ${dependencies}
+        Install Serverless Operator Via Cli
+    ELSE
+        Log To Console    message=Serverless Operator is skipped (not included in kserve dependencies)
+    END
 
 Create Namespace With Label
     [Documentation]    Creates a namespace and adds a specific label to it

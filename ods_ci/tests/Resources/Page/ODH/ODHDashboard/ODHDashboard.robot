@@ -558,8 +558,8 @@ Open Notebook Images Page
     [Documentation]    Opens the RHODS dashboard and navigates to the Notebook Image Settings page
     Wait Until Page Contains    Settings
     Page Should Contain    Settings
-    Menu.Navigate To Page    Settings    Notebook images
-    Wait Until Page Contains    Notebook images
+    Menu.Navigate To Page    Settings    Workbench images
+    Wait Until Page Contains    Workbench images
     Wait Until Page Contains    Import new image    # This should assure us that the page content is ready
 
 Import New Custom Image
@@ -579,7 +579,7 @@ Import New Custom Image
 Open Custom Image Import Popup
     [Documentation]    Opens the Custom Image import view, using the appropriate button
     Click Element  xpath://button[.="Import new image"]
-    Wait Until Page Contains    Import notebook image
+    Wait Until Page Contains    Import workbench image
 
 Add Softwares To Custom Image
     [Documentation]    Loops through a dictionary to add software to the custom img metadata
@@ -628,7 +628,7 @@ Remove Package From Custom Image
 Delete Custom Image
     [Documentation]    Deletes a custom image through the dashboard UI.
     [Arguments]    ${image_name}
-    ${custom_image_kebab_btn}=    Set Variable    //td[.="${image_name}"]/../td[last()]//button
+    ${custom_image_kebab_btn}=    Set Variable    //tr[.//*[@data-label="Name"][.//*[.="${image_name}"]]]//button[@aria-label="Kebab toggle"]
     Click Button  xpath:${custom_image_kebab_btn}
     ${image_name_id}=  Replace String  ${image_name}  ${SPACE}  -
     Click Element  xpath://button[@id="${image_name_id}-delete-button"]
@@ -676,9 +676,9 @@ Verify Custom Image Description
     [Arguments]    ${image_name}    ${expected_description}
     ${custom_image_name_record}=    Set Variable    xpath://td[@data-label="Name"]/div/div/div[.="${image_name}"]
     ${exists}=  Run Keyword And Return Status  Page Should Contain Element
-    ...  ${custom_image_name_record}/../../../../td[@data-label="Description" and .="${expected_description}"]
+    ...  ${custom_image_name_record}/../../../..//*[@data-testid="table-row-title-description" and .="${expected_description}"]
     IF  ${exists}==False
-        ${desc}=  Get Text  ${custom_image_name_record}/../../../../td[@data-label="Description"]
+        ${desc}=  Get Text  ${custom_image_name_record}/../../../..//*[@data-testid="table-row-title-description"
         Log  Description for ${image_name} does not match ${expected_description} - Actual description is ${desc}
         FAIL
     END

@@ -53,7 +53,7 @@ deploymentSpec:
           \ not torch.cuda.is_available()\n        assert torch.cuda.device_count()\
           \ == 0\n        t = torch.tensor([5, 5, 5], dtype=torch.int64)\n    print(f\"\
           tensor: {t}\")\n    print(\"GPU availability test: PASS\")\n\n"
-        image: quay.io/modh/runtime-images@sha256:6340efaa92bc54bcede518e890492db626fb9fe96f028c2cd5251f286b2b2852
+        image: quay.io/modh/odh-pipeline-runtime-pytorch-rocm-py311-ubi9@sha256:d9fb9efa196afd97d8ff9c0bf4c5bd09a9f01bd03d1166bebf974c8bf18958c4
     exec-verify-gpu-availability-2:
       container:
         args:
@@ -91,7 +91,7 @@ deploymentSpec:
           \ not torch.cuda.is_available()\n        assert torch.cuda.device_count()\
           \ == 0\n        t = torch.tensor([5, 5, 5], dtype=torch.int64)\n    print(f\"\
           tensor: {t}\")\n    print(\"GPU availability test: PASS\")\n\n"
-        image: quay.io/modh/runtime-images@sha256:6340efaa92bc54bcede518e890492db626fb9fe96f028c2cd5251f286b2b2852
+        image: quay.io/modh/odh-pipeline-runtime-pytorch-rocm-py311-ubi9@sha256:d9fb9efa196afd97d8ff9c0bf4c5bd09a9f01bd03d1166bebf974c8bf18958c4
         resources:
           accelerator:
             count: '1'

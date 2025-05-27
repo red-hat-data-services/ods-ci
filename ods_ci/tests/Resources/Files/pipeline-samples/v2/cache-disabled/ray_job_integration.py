@@ -1,7 +1,7 @@
 from kfp import compiler, dsl
 
 common_base_image = (
-    "registry.redhat.io/ubi9/python-312@sha256:e80ff3673c95b91f0dafdbe97afb261eab8244d7fd8b47e20ffcbcfee27fb168"
+    "registry.redhat.io/ubi9/python-311@sha256:82a16d7c4da926081c0a4cc72a84d5ce37859b50a371d2f9364313f66b89adf7"
 )
 
 # image and the sdk has a fixed value because the version matters
@@ -321,7 +321,7 @@ minio
             worker_cpu_limits=1,
             worker_memory_requests=1,
             worker_memory_limits=2,
-            image="quay.io/modh/ray@sha256:db667df1bc437a7b0965e8031e905d3ab04b86390d764d120e05ea5a5c18d1b4",
+            image="quay.io/modh/ray@sha256:ac401c35d29cbd920ef982775f20e86d948b81eb67e83adbbbba8b29ad33ca31",
             verify_tls=False
         )
     )

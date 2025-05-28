@@ -39,13 +39,13 @@ Validate DSC creates all Serverless CRs
     Wait Knative Serving CR To Be In Ready State
 
     Wait Until Keyword Succeeds    5 min    0 sec
-    ...    Resource Should Exist     Gateway    knative-ingress-gateway     ${KNATIVESERVING_NS}
+    ...    Resource Should Exist     gateway.networking.istio.io    knative-ingress-gateway     ${KNATIVESERVING_NS}
 
     Wait Until Keyword Succeeds    5 min    0 sec
-    ...    Resource Should Exist     Gateway    knative-local-gateway     ${KNATIVESERVING_NS}
+    ...    Resource Should Exist     gateway.networking.istio.io    knative-local-gateway     ${KNATIVESERVING_NS}
 
     Wait Until Keyword Succeeds    5 min    0 sec
-    ...    Resource Should Exist     Gateway    kserve-local-gateway     ${ISTIO_NS}
+    ...    Resource Should Exist     gateway.networking.istio.io    kserve-local-gateway     ${ISTIO_NS}
 
     Wait Until Keyword Succeeds    5 min    0 sec
     ...    Resource Should Exist     Service    kserve-local-gateway     ${ISTIO_NS}
@@ -79,13 +79,13 @@ Validate DSC Kserve Serving Removed State
     Wait For DSC Conditions Reconciled    ${OPERATOR_NAMESPACE}    default-dsc
 
     Wait Until Keyword Succeeds    5 min    0 sec
-    ...    Is Resource Present     Gateway    knative-ingress-gateway     ${KNATIVESERVING_NS}   ${IS_NOT_PRESENT}
+    ...    Is Resource Present     gateway.networking.istio.io    knative-ingress-gateway     ${KNATIVESERVING_NS}   ${IS_NOT_PRESENT}
 
     Wait Until Keyword Succeeds    5 min    0 sec
-    ...    Is Resource Present     Gateway    knative-ingress-gateway     ${KNATIVESERVING_NS}   ${IS_NOT_PRESENT}
+    ...    Is Resource Present     gateway.networking.istio.io    knative-ingress-gateway     ${KNATIVESERVING_NS}   ${IS_NOT_PRESENT}
 
     Wait Until Keyword Succeeds    5 min    0 sec
-    ...    Is Resource Present      Gateway    kserve-local-gateway     ${ISTIO_NS}    ${IS_NOT_PRESENT}
+    ...    Is Resource Present     gateway.networking.istio.io    kserve-local-gateway     ${ISTIO_NS}    ${IS_NOT_PRESENT}
 
     Wait Until Keyword Succeeds    5 min    0 sec
     ...    Is Resource Present     Service    kserve-local-gateway     ${ISTIO_NS}    ${IS_NOT_PRESENT}
@@ -144,7 +144,7 @@ Restore Kserve Serving State
 
         # Note: May not need the following, as it is just a sanity-check
         Wait Until Keyword Succeeds    5 min    0 sec
-        ...    Resource Should Exist     Gateway    knative-ingress-gateway     ${KNATIVESERVING_NS}
+        ...    Resource Should Exist     gateway.networking.istio.io    knative-ingress-gateway     ${KNATIVESERVING_NS}
 
     ELSE
         Wait Until Keyword Succeeds    5 min    0 sec

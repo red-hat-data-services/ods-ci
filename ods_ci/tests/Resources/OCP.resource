@@ -223,7 +223,7 @@ Wait Until CRD Exists
     ...    Oc Get    kind=CustomResourceDefinition    name=${crd_fullname}
 
 Resource Should Exist
-    [Documentation]    Check resource existson a namespace
+    [Documentation]    Check resource exists on a namespace
     [Arguments]       ${resource}     ${resource_name}    ${namespace}
     ${rc}    ${out}=     Run and Return Rc And Output
     ...  oc get ${resource} ${resource_name} -n ${namespace}

@@ -22,3 +22,10 @@ Run runTestWithRemoteRegistryFunction test
     ...     FeatureStore
     ...     RHOAIENG-14799
     Run Feast Operator E2E Test    TestRemoteRegistryFeastCR
+
+Run runTestApplyAndMaterializeFeastDefinitions test
+    [Documentation]    Run Go E2E test: TestApplyAndMaterializeFeastDefinitions
+    [Tags]  Tier1
+    ...     FeatureStore
+    ...     RHOAIENG-26460
+    Run Feast Operator E2E Test    TestApplyAndMaterializeFeastDefinitions

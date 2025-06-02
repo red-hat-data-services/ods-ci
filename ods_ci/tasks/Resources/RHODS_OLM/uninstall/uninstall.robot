@@ -52,7 +52,7 @@ Uninstall RHODS In Self Managed Cluster Using CLI
   [Documentation]   UnInstall rhods on self-managedcluster using cli
   Clone OLM Install Repo
   ${return_code}    Run and Watch Command
-  ...    cd ${EXECDIR}/${OLM_DIR} && ./cleanup.sh -t operator -a "authorino serverless servicemesh clusterobservability tempo opentelemetry"
+  ...    cd ${EXECDIR}/${OLM_DIR} && ./cleanup.sh -t operator -a "authorino serverless servicemesh clusterobservability tempo opentelemetry kueue"
   ...    timeout=10 min
   Should Be Equal As Integers  ${return_code}   0   msg=Error detected while un-installing RHODS
 

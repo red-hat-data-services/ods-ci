@@ -37,6 +37,7 @@ ${S_SIZE}                   25
 ${DW_PROJECT_CREATED}       False
 ${UPGRADE_NS}    upgrade
 ${UPGRADE_CONFIG_MAP}    upgrade-config-map
+${USERGROUPS_CONFIG_MAP}    usergroups-config-map
 ${ALLOWED_GROUPS}       system:authenticated
 
 
@@ -63,11 +64,11 @@ Verify RHODS User Groups
     ${auth_allowed}      Set Variable        ${AUTH_PAYLOAD[0]['spec']['allowedGroups']}
 
     ${rc}    ${adm_groups}=    Run And Return Rc And Output
-    ...    oc get configmap ${UPGRADE_CONFIG_MAP} -n ${UPGRADE_NS} -o jsonpath='{.data.adm_groups}'
+    ...    oc get configmap ${USERGROUPS_CONFIG_MAP} -n ${UPGRADE_NS} -o jsonpath='{.data.adm_groups}'
     Should Be Equal As Integers     ${rc}      0
 
     ${rc}    ${allwd_groups}=    Run And Return Rc And Output
-    ...    oc get configmap ${UPGRADE_CONFIG_MAP} -n ${UPGRADE_NS} -o jsonpath='{.data.allwd_groups}'
+    ...    oc get configmap ${USERGROUPS_CONFIG_MAP} -n ${UPGRADE_NS} -o jsonpath='{.data.allwd_groups}'
     Should Be Equal As Integers     ${rc}      0
 
     Should Be Equal    "${adm_groups}"    "${auth_admins}"   msg="Admin groups are not equal"

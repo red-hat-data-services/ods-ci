@@ -229,10 +229,10 @@ OpenShift Resource Component Should Contain Field
     [Arguments]    ${resource_component}    ${field}
     Run Keyword And Continue On Failure    Should Contain    ${resource_component}    ${field}
 
-Verify RHODS Dashboard CR Contains Expected Values
+Verify Auth CR Contains Expected Values
     [Documentation]    Verifies if the group contains the expected value
     [Arguments]        &{exp_values}
-    ${config_cr}=  Oc Get  kind=OdhDashboardConfig  namespace=${APPLICATIONS_NAMESPACE}  name=odh-dashboard-config
+    ${config_cr}=  Oc Get  kind=Auth  name=auth
     FOR    ${json_path}    IN    @{exp_values.keys()}
         ${value}=    Extract Value From JSON Path    json_dict=${config_cr[0]}
         ...    path=${json_path}
@@ -241,9 +241,9 @@ Verify RHODS Dashboard CR Contains Expected Values
 
 Verify Default Access Groups Settings
     [Documentation]     Verifies that ODS contains the expected default groups settings
-    &{exp_values}=  Create Dictionary  spec.groupsConfig.adminGroups=${STANDARD_ADMINS_GROUP}
-    ...    spec.groupsConfig.allowedGroups=${STANDARD_SYSTEM_GROUP}
-    Verify RHODS Dashboard CR Contains Expected Values   &{exp_values}
+    &{exp_values}=  Create Dictionary  spec.adminGroups=${STANDARD_ADMINS_GROUP}
+    ...    spec.allowedGroups=${STANDARD_SYSTEM_GROUP}
+    Verify Auth CR Contains Expected Values   &{exp_values}
 
 Enable Access To Grafana Using OpenShift Port Forwarding
     [Documentation]  Enable Access to Grafana Using OpenShift Port-Forwarding

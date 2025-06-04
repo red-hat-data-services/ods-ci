@@ -6,7 +6,7 @@ Library           Process
 Resource          ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 Resource          ../../../tests/Resources/Common.robot
 Resource          ../../Resources/Page/FeatureStore/FeatureStore.resource
-
+Test Tags         ExcludeOnODH
 
 *** Test Cases ***
 Run runTestDeploySimpleCRFunc test

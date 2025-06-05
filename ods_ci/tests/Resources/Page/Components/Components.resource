@@ -1,4 +1,5 @@
 *** Settings ***
+Documentation    This is a resource file for the DSC components.
 Resource  Menu.robot
 Resource  ../../OCP.resource
 Resource  ../../ODS.robot
@@ -26,7 +27,6 @@ Set DSC Component Managed State And Wait For Completion
     END
 
     Wait For Resources To Be Available    ${deployment_name}    ${label_selector}
-
 
 Wait For Resources To Be Available
     [Documentation]    Wait until Deployment and Pod(s) are Available
@@ -96,9 +96,7 @@ Check That Image Pull Path Is Correct
     WHILE   '${rc}' != '0'    limit=5m
         ${rc}   ${image}=    Run And Return Rc And Output
         ...    oc get deployment/${deployment_name} -n ${APPLICATIONS_NAMESPACE} -o jsonpath="{..image}"
-        #Should Be Equal As Integers    ${rc}    0    msg=${image}
     END
-
 
     Log To Console    Check deployment ${deployment_name} pull path for image ${image}
     IF  "${image_pull_path}" in $image
@@ -106,7 +104,6 @@ Check That Image Pull Path Is Correct
     ELSE
         Fail    Deployment image  ${deployment_name} does not contain pull path '${image_pull_path}'
     END
-
 
 Check Model Registry Namespace
     [Documentation]    Check that DSC modelregistry.registriesNamespace is correct for ODH/RHOAI

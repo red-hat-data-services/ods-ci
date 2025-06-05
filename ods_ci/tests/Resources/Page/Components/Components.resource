@@ -83,7 +83,7 @@ Get DataScienceCluster Spec
     Should Be Equal As Integers    ${rc}    0
     RETURN    ${output}
 
-Check That Image Pull Path Is correct
+Check That Image Pull Path Is Correct
     [Documentation]     Check that the deployment Image Pull path is the correct one
     [Arguments]     ${deployment_name}      ${image_pull_path}
     # Skip pull path check if Deployment is in exclusion list

@@ -68,7 +68,7 @@ Validate Kueue Managed State
     ...    check that kueue deployment is created and pod is in Ready state
     [Tags]    Operator    Tier1    RHOAIENG-5435    kueue-managed    Integration
     Set DSC Component Managed State And Wait For Completion   kueue    ${KUEUE_DEPLOYMENT_NAME}    ${KUEUE_LABEL_SELECTOR}
-    Check That Image Pull Path Is correct    ${KUEUE_DEPLOYMENT_NAME}     ${KUEUE_IMAGE_PULL_PATH}
+    Check That Image Pull Path Is Correct    ${KUEUE_DEPLOYMENT_NAME}     ${KUEUE_IMAGE_PULL_PATH}
 
     [Teardown]     Restore DSC Component State    kueue    ${KUEUE_DEPLOYMENT_NAME}    ${KUEUE_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.KUEUE}
 
@@ -86,7 +86,7 @@ Validate Codeflare Managed State
     [Tags]    Operator    Tier1    RHOAIENG-5435    codeflare-managed      Integration      RHOAIENG-24666
 
     Set DSC Component Managed State And Wait For Completion   codeflare    ${CODEFLARE_DEPLOYMENT_NAME}    ${CODEFLARE_LABEL_SELECTOR}
-    Check That Image Pull Path Is correct    ${CODEFLARE_DEPLOYMENT_NAME}     ${IMAGE_PULL_PATH}
+    Check That Image Pull Path Is Correct    ${CODEFLARE_DEPLOYMENT_NAME}     ${IMAGE_PULL_PATH}
 
     [Teardown]     Restore DSC Component State    codeflare    ${CODEFLARE_DEPLOYMENT_NAME}    ${CODEFLARE_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.CODEFLARE}
 
@@ -104,7 +104,7 @@ Validate Ray Managed State
     [Tags]    Operator    Tier1    RHOAIENG-5435    ray-managed     Integration
 
     Set DSC Component Managed State And Wait For Completion   ray    ${RAY_DEPLOYMENT_NAME}    ${RAY_LABEL_SELECTOR}
-    Check That Image Pull Path Is correct    ${RAY_DEPLOYMENT_NAME}     ${IMAGE_PULL_PATH}
+    Check That Image Pull Path Is Correct    ${RAY_DEPLOYMENT_NAME}     ${IMAGE_PULL_PATH}
 
     [Teardown]     Restore DSC Component State    ray    ${RAY_DEPLOYMENT_NAME}    ${RAY_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.RAY}
 
@@ -122,7 +122,7 @@ Validate Training Operator Managed State
     [Tags]    Operator    Tier1    RHOAIENG-6627    training-managed      Integration
 
     Set DSC Component Managed State And Wait For Completion   trainingoperator    ${TRAINING_DEPLOYMENT_NAME}    ${TRAINING_LABEL_SELECTOR}
-    Check That Image Pull Path Is correct    ${TRAINING_DEPLOYMENT_NAME}     ${IMAGE_PULL_PATH}
+    Check That Image Pull Path Is Correct    ${TRAINING_DEPLOYMENT_NAME}     ${IMAGE_PULL_PATH}
 
     [Teardown]     Restore DSC Component State    trainingoperator    ${TRAINING_DEPLOYMENT_NAME}    ${TRAINING_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.TRAINING}
 
@@ -140,7 +140,7 @@ Validate Dashboard Managed State
     [Tags]    Operator    Tier1    RHOAIENG-7298    dashboard-managed      Integration
 
     Set DSC Component Managed State And Wait For Completion   dashboard    ${DASHBOARD_DEPLOYMENT_NAME}    ${DASHBOARD_LABEL_SELECTOR}
-    Check That Image Pull Path Is correct    ${DASHBOARD_DEPLOYMENT_NAME}     ${IMAGE_PULL_PATH}
+    Check That Image Pull Path Is Correct    ${DASHBOARD_DEPLOYMENT_NAME}     ${IMAGE_PULL_PATH}
 
     [Teardown]     Restore DSC Component State    dashboard    ${DASHBOARD_DEPLOYMENT_NAME}    ${DASHBOARD_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.DASHBOARD}
 
@@ -158,7 +158,7 @@ Validate Datasciencepipelines Managed State
     [Tags]    Operator    Tier1    RHOAIENG-7298    operator-datasciencepipelines-managed     Integration
 
     Set DSC Component Managed State And Wait For Completion   datasciencepipelines    ${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}    ${DATASCIENCEPIPELINES_LABEL_SELECTOR}
-    Check That Image Pull Path Is correct    ${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}     ${IMAGE_PULL_PATH}
+    Check That Image Pull Path Is Correct    ${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}     ${IMAGE_PULL_PATH}
 
     [Teardown]     Restore DSC Component State    datasciencepipelines    ${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}    ${DATASCIENCEPIPELINES_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.DATASCIENCEPIPELINES}
 
@@ -176,7 +176,7 @@ Validate TrustyAi Managed State
     [Tags]    Operator    Tier1    RHOAIENG-14018    trustyai-managed      Integration
 
     Set DSC Component Managed State And Wait For Completion   trustyai    ${TRUSTYAI_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${TRUSTYAI_CONTROLLER_MANAGER_LABEL_SELECTOR}
-    Check That Image Pull Path Is correct    ${TRUSTYAI_CONTROLLER_MANAGER_DEPLOYMENT_NAME}     ${IMAGE_PULL_PATH}
+    Check That Image Pull Path Is Correct    ${TRUSTYAI_CONTROLLER_MANAGER_DEPLOYMENT_NAME}     ${IMAGE_PULL_PATH}
 
     [Teardown]     Restore DSC Component State    trustyai    ${TRUSTYAI_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${TRUSTYAI_CONTROLLER_MANAGER_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.TRUSTYAI}
 
@@ -194,7 +194,7 @@ Validate Modelmeshserving Managed State
     [Tags]    Operator    Tier1    RHOAIENG-8546    modelmeshserving-managed      Integration
 
     Set DSC Component Managed State And Wait For Completion   modelmeshserving    ${MODELMESH_CONTROLLER_DEPLOYMENT_NAME}    ${MODELMESH_CONTROLLER_LABEL_SELECTOR}
-    Check That Image Pull Path Is correct    ${MODELMESH_CONTROLLER_DEPLOYMENT_NAME}     ${IMAGE_PULL_PATH}
+    Check That Image Pull Path Is Correct    ${MODELMESH_CONTROLLER_DEPLOYMENT_NAME}     ${IMAGE_PULL_PATH}
 
     # Check that ETC resources are ready
     Wait For Resources To Be Available    ${ETCD_DEPLOYMENT_NAME}    ${ETCD_LABEL_SELECTOR}
@@ -227,7 +227,7 @@ Validate ModelRegistry Managed State
     [Tags]    Operator    Tier1    RHOAIENG-10404    modelregistry-managed      Integration
 
     Set DSC Component Managed State And Wait For Completion   modelregistry    ${MODELREGISTRY_CONTROLLER__DEPLOYMENT_NAME}    ${MODELREGISTRY_CONTROLLER__LABEL_SELECTOR}
-    Check That Image Pull Path Is correct    ${MODELREGISTRY_CONTROLLER__DEPLOYMENT_NAME}     ${IMAGE_PULL_PATH}
+    Check That Image Pull Path Is Correct    ${MODELREGISTRY_CONTROLLER__DEPLOYMENT_NAME}     ${IMAGE_PULL_PATH}
 
     Check Model Registry Namespace
 
@@ -254,7 +254,7 @@ Validate KServe Controller Manager Managed State
     [Tags]    Operator    Tier1    RHOAIENG-7217    kserve-controller-manager-managed      Integration
 
     Set DSC Component Managed State And Wait For Completion   kserve    ${KSERVE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${KSERVE_CONTROLLER_MANAGER_LABEL_SELECTOR}
-    Check That Image Pull Path Is correct    ${KSERVE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}     ${IMAGE_PULL_PATH}
+    Check That Image Pull Path Is Correct    ${KSERVE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}     ${IMAGE_PULL_PATH}
 
     [Teardown]     Restore DSC Component State    kserve    ${KSERVE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${KSERVE_CONTROLLER_MANAGER_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.KSERVE}
 
@@ -276,7 +276,7 @@ Validate Workbenches Managed State
     [Tags]    Operator    Tier1    workbenches-managed     Integration
 
     Set DSC Component Managed State And Wait For Completion   workbenches    ${NOTEBOOK_DEPLOYMENT_NAME}    ${NOTEBOOK_CONTROLLER_MANAGER_LABEL_SELECTOR}
-    Check That Image Pull Path Is correct    ${NOTEBOOK_DEPLOYMENT_NAME}     ${IMAGE_PULL_PATH}
+    Check That Image Pull Path Is Correct    ${NOTEBOOK_DEPLOYMENT_NAME}     ${IMAGE_PULL_PATH}
 
     Wait For Resources To Be Available    ${NOTEBOOK_DEPLOYMENT_NAME}    ${NOTEBOOK_CONTROLLER_DEPLOYMENT_LABEL_SELECTOR}
 
@@ -298,7 +298,7 @@ Validate Feastoperator Managed State
     [Tags]    Operator    Tier1    feastoperator-managed      Integration      ExcludeOnODH
 
     Set DSC Component Managed State And Wait For Completion   feastoperator    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
-    Check That Image Pull Path Is correct    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}     ${IMAGE_PULL_PATH}
+    Check That Image Pull Path Is Correct    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}     ${IMAGE_PULL_PATH}
 
     [Teardown]     Restore DSC Component State    feastoperator    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}    ${SAVED_MANAGEMENT_STATES.TRUSTYAI}
 

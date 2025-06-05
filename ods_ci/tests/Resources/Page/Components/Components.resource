@@ -92,7 +92,7 @@ Check That Image Pull Path Is Correct
         RETURN
     END
 
-    ${rc} =   Set Variable   1
+    ${rc}=   Set Variable   1
     WHILE   '${rc}' != '0'    limit=5m
         ${rc}   ${image}=    Run And Return Rc And Output
         ...    oc get deployment/${deployment_name} -n ${APPLICATIONS_NAMESPACE} -o jsonpath="{..image}"

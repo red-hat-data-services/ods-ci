@@ -398,7 +398,7 @@ Verify Non Admin Can Serve And Query A Model    # robocop: off=too-long-test-cas
 
 Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector    # robocop: off=too-long-test-case
     [Documentation]    Deploys and queries flan-t5-large-grammar-synthesis model
-    [Tags]    Tier2    ODS-2441
+    [Tags]    Tier2    ODS-2441     Kserve-caikit
     [Setup]    Set Project And Runtime    namespace=grammar-model
     ${test_namespace}=    Set Variable     grammar-model
     ${flan_model_name}=    Set Variable    flan-t5-large-grammar-synthesis-caikit
@@ -421,7 +421,7 @@ Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector    # robocop: o
 
 Verify User Can Serve And Query Flan-t5 Large    # robocop: off=too-long-test-case
     [Documentation]    Deploys and queries flan-t5-large model
-    [Tags]    Tier2    ODS-2434
+    [Tags]    Tier2    ODS-2434     Kserve-caikit
     [Setup]    Set Project And Runtime    namespace=flan-t5-large3
     ${test_namespace}=    Set Variable     flan-t5-large3
     ${flan_model_name}=    Set Variable    flan-t5-large
@@ -551,7 +551,7 @@ Verify User Can Serve And Query A Model With Token    # robocop: off=too-long-te
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                With Token using Kserve and Caikit+TGIS runtime
     [Tags]    RHOAIENG-6333
-    ...       Tier1    AutomationBug
+    ...       Tier1    AutomationBug        Kserve-caikit
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}-cli
     ${test_namespace}=    Set Variable     ${TEST_NS}-cli
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit

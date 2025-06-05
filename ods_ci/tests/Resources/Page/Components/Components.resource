@@ -86,12 +86,6 @@ Get DataScienceCluster Spec
 Check That Image Pull Path Is Correct
     [Documentation]     Check that the deployment Image Pull path is the correct one
     [Arguments]     ${deployment_name}      ${image_pull_path}
-    # Skip pull path check if Deployment is in exclusion list
-    IF    $deployment_name in @{REDHATIO_PATH_CHECK_EXCLUSION_LIST}
-        Log To Console    Skip image pull path check for Deployment ${deployment_name}
-        RETURN
-    END
-
     ${rc}=   Set Variable   1
     WHILE   '${rc}' != '0'    limit=5m
         ${rc}   ${image}=    Run And Return Rc And Output

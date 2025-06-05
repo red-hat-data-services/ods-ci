@@ -6,7 +6,7 @@ Resource          ../../Resources/Page/FeatureStore/FeatureStore.resource
 Resource          ../../../tests/Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 Suite Setup       Prepare Feature Store Test Suite
 Suite Teardown    Cleanup Feature Store Setup
-
+Test Tags         ExcludeOnODH
 
 *** Test Cases ***
 Feature Store Smoke Test

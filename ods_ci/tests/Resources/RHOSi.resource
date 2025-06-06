@@ -125,11 +125,17 @@ Assign Vars According To Product
             Set Suite Variable    ${ADMIN_GROUPS}       rhods-admins', 'rhods-users
         END
         Set Suite Variable  ${MODEL_REGISTRY_NAMESPACE}    rhoai-model-registries
+        Set Suite Variable    ${IMAGE_PULL_PATH}        registry.redhat.io
+        Set Suite Variable    ${KUEUE_IMAGE_PULL_PATH}        registry.redhat.io
     ELSE IF    "${PRODUCT}" == "ODH"
         IF      "${OPERATOR_NAME}" == "rhods-operator"
             Set Suite Variable    ${OPERATOR_SUBSCRIPTION_LABEL}     operators.coreos.com/rhods-operator.${OPERATOR_NAMESPACE}
+            Set Suite Variable    ${IMAGE_PULL_PATH}        registry.redhat.io
+            Set Suite Variable    ${KUEUE_IMAGE_PULL_PATH}        registry.redhat.io
         ELSE IF     "${OPERATOR_NAME}" == "opendatahub-operator"
             Set Suite Variable    ${OPERATOR_SUBSCRIPTION_LABEL}     operators.coreos.com/opendatahub-operator.${OPERATOR_NAMESPACE}
+            Set Suite Variable    ${IMAGE_PULL_PATH}        quay.io
+            Set Suite Variable    ${KUEUE_IMAGE_PULL_PATH}        registry.k8s.io
         END
         Set Suite Variable    ${OPERATOR_APPNAME}  "Open Data Hub Operator"
         Set Suite Variable    ${OPERATOR_YAML_LABEL}  opendatahub-operator

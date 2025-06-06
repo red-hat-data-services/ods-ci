@@ -1,4 +1,5 @@
 *** Settings ***
+Documentation    This is a resource file for the DSC components.
 Resource  Menu.robot
 Resource  ../../OCP.resource
 Resource  ../../ODS.robot
@@ -26,8 +27,6 @@ Set DSC Component Managed State And Wait For Completion
     END
 
     Wait For Resources To Be Available    ${deployment_name}    ${label_selector}
-
-    Check Image Pull Path Is Redhatio    ${deployment_name}
 
 Wait For Resources To Be Available
     [Documentation]    Wait until Deployment and Pod(s) are Available
@@ -84,25 +83,20 @@ Get DataScienceCluster Spec
     Should Be Equal As Integers    ${rc}    0
     RETURN    ${output}
 
-Check Image Pull Path Is Redhatio
-    [Documentation]    Check that the Deployment Image Pull Path is registry.redhat.io
-    [Arguments]    ${deployment_name}
-
-    # Skip pull path check if Deployment is in exclusion list
-    IF    $deployment_name in @{REDHATIO_PATH_CHECK_EXCLUSTION_LIST}
-        Log To Console    Skip image pull path check for Deployment ${deployment_name}
-        RETURN
+Check That Image Pull Path Is Correct
+    [Documentation]     Check that the deployment Image Pull path is the correct one
+    [Arguments]     ${deployment_name}      ${image_pull_path}
+    ${rc}=   Set Variable   1
+    WHILE   '${rc}' != '0'    limit=5m
+        ${rc}   ${image}=    Run And Return Rc And Output
+        ...    oc get deployment/${deployment_name} -n ${APPLICATIONS_NAMESPACE} -o jsonpath="{..image}"
     END
 
-    ${rc}   ${image}=    Run And Return Rc And Output
-    ...    oc get deployment/${deployment_name} -n ${APPLICATIONS_NAMESPACE} -o jsonpath="{..image}"
-    Should Be Equal As Integers    ${rc}    0    msg=${image}
-
     Log To Console    Check deployment ${deployment_name} pull path for image ${image}
-    IF  "registry.redhat.io" in $image
-        Log To Console    Deployment ${deployment_name} image contains pull path registry.redhat.io
+    IF  "${image_pull_path}" in $image
+        Log To Console    Deployment ${deployment_name} image contains pull path '${image_pull_path}'
     ELSE
-        Fail    Deployment image  ${deployment_name} does not contain pull path registry.redhat.io
+        Fail    Deployment image  ${deployment_name} does not contain pull path '${image_pull_path}'
     END
 
 Check Model Registry Namespace

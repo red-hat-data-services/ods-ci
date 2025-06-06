@@ -69,12 +69,16 @@ Open Cluster By Name
   [Documentation]     Opens the cluster by name from the list of clusters.
   ${cluster_id} =     Get Cluster ID
   ${cluster_name}=    Get Cluster Name By Cluster ID    ${cluster_id}
-  Wait Until Page Contains Element  //input[@class="pf-v6-c-form-control cluster-list-filter"]
-  Input Text    //input[@class="pf-v6-c-form-control cluster-list-filter"]     ${cluster_name}
+  Click Link     Cluster List
+  Wait Until Page Contains Element  //input[@data-testid="filterInputClusterList"]
+  Click Element     //input[@data-testid="filterInputClusterList"]
+  Wait Until Element Is Enabled    //input[@data-testid="filterInputClusterList"]
+  Input Text    //input[@data-testid="filterInputClusterList"]     ${cluster_name}
   Sleep    1s
-  Wait Until Page Contains Element  //table[@class="pf-v6-c-table pf-m-grid-md"]//a    10
-  Click Link    //table[@class="pf-v6-c-table pf-m-grid-md"]//a
+  Wait Until Page Contains Element  //table[@aria-label="Cluster List"]//a    10
+  Click Link    //table[@aria-label="Cluster List"]//a
 
 Maybe Skip OCM Tour
   ${tour_modal} =  Run Keyword And Return Status  Page Should Contain Element  xpath=//div[@id="pendo-guide-container"]
   IF  ${tour_modal}  Click Element  xpath=//button[@class="_pendo-close-guide"]
+

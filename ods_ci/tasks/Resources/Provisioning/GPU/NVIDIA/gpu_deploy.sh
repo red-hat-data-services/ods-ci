@@ -22,10 +22,6 @@ oc wait --timeout=3m --for condition=Installed -n nvidia-gpu-operator installpla
 
 oc rollout status --watch --timeout=3m -n nvidia-gpu-operator deploy gpu-operator
 
-oc rollout status --watch --timeout=3m -n nvidia-gpu-operator deploy nfd-controller-manager
-
-oc wait --timeout=3m --for jsonpath='{.status.components.labelSelector.matchExpressions[].operator}'=Exists operator nfd.nvidia-gpu-operator
-
 oc wait --timeout=3m --for jsonpath='{.status.components.labelSelector.matchExpressions[].operator}'=Exists operator gpu-operator-certified.nvidia-gpu-operator
 
 function wait_until_pod_ready_status() {

@@ -126,14 +126,6 @@ Prepare Training Operator E2E Test Suite
     END
     Create Directory    %{WORKSPACE}/codeflare-${test_binary}-logs
 
-Prepare Training Operator SDK Test Suite
-    [Documentation]    Prepare Training Operator SDK Test Suite
-    Prepare Training Operator E2E Test Suite    ${KFTO_BINARY_NAME}
-    ${common_user_token} =    Generate User Token    ${NOTEBOOK_USER_NAME}    ${NOTEBOOK_USER_PASSWORD}
-    Set Suite Variable    ${NOTEBOOK_USER_TOKEN}   ${common_user_token}
-    Log To Console    "Log back as cluster admin"
-    Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
-
 Teardown Training Operator KFTO E2E Test Suite
     [Documentation]    Teardown Training Operator KFTO E2E Test Suite
     Teardown Training Operator E2E Test Suite    ${KFTO_BINARY_NAME}
@@ -147,10 +139,6 @@ Teardown Training Operator E2E Test Suite
     [Arguments]        ${test_binary}
     Log To Console     "Removing test binaries"
     Remove File        ${test_binary}
-
-Teardown Training Operator SDK Test Suite
-    [Documentation]    Teardown Training Operator SDK Test Suite
-    Teardown Training Operator E2E Test Suite    ${KFTO_BINARY_NAME}
 
 Run Training Operator FMS Test
     [Documentation]    Run Training Operator FMS Test
@@ -227,7 +215,7 @@ Run Training Operator KFTO SDK Test
     ...    env:PIP_INDEX_URL=${PIP_INDEX_URL}
     ...    env:PIP_TRUSTED_HOST=${PIP_TRUSTED_HOST}
     ...    env:NOTEBOOK_USER_NAME=${NOTEBOOK_USER_NAME}
-    ...    env:NOTEBOOK_USER_TOKEN=${NOTEBOOK_USER_TOKEN}
+    ...    env:NOTEBOOK_USER_PASSWORD=${NOTEBOOK_USER_PASSWORD}
     ...    env:NOTEBOOK_IMAGE=${NOTEBOOK_IMAGE_3.11}
     Log To Console    ${result.stdout}
     Check missing Go test    ${result.stdout}

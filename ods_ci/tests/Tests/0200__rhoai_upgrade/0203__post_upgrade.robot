@@ -252,7 +252,6 @@ Run Training Operator KFTO Run PyTorchJob Test Use Case with NVIDIA CUDA image (
     [Documentation]    Run Training Operator KFTO Run PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_5_1)
     [Tags]      Upgrade    TrainingKubeflow
     [Setup]     Prepare Training Operator KFTO E2E Test Suite
-    Skip If Operator Starting Version Is Not Supported      minimum_version=2.19.0
     Run Training Operator KFTO Test          TestRunPytorchjob    ${CUDA_TRAINING_IMAGE_TORCH251}
     [Teardown]      Teardown Training Operator KFTO E2E Test Suite
 
@@ -260,7 +259,6 @@ Run Training Operator KFTO Run Sleep PyTorchJob Test Use Case with NVIDIA CUDA i
     [Documentation]    Verify that running PyTorchJob Pod wasn't restarted with NVIDIA CUDA image (PyTorch 2_5_1)
     [Tags]      Upgrade    TrainingKubeflow
     [Setup]     Prepare Training Operator KFTO E2E Test Suite
-    Skip If Operator Starting Version Is Not Supported      minimum_version=2.19.0
     Run Training Operator KFTO Test      TestVerifySleepPytorchjob    ${CUDA_TRAINING_IMAGE_TORCH251}
     [Teardown]      Teardown Training Operator KFTO E2E Test Suite
 

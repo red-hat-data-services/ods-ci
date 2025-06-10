@@ -1,8 +1,8 @@
 *** Settings ***
 Documentation     KFTO SDK tests - https://github.com/opendatahub-io/distributed-workloads/blob/main/tests/kfto/kfto_mnist_sdk_test.go
 Resource          ../../../../tests/Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
-Suite Setup       Prepare Training Operator SDK Test Suite
-Suite Teardown    Teardown Training Operator SDK Test Suite
+Suite Setup       Prepare Training Operator KFTO E2E Test Suite
+Suite Teardown    Teardown Training Operator KFTO E2E Test Suite
 
 *** Test Cases ***
 Run TestMnistSDK KFTO SDK test with NVIDIA CUDA image (PyTorch 2_4_1)

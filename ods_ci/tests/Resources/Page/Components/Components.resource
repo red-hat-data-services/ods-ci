@@ -92,11 +92,25 @@ Check That Image Pull Path Is Correct
         ...    oc get deployment/${deployment_name} -n ${APPLICATIONS_NAMESPACE} -o jsonpath="{..image}"
     END
 
-    Log To Console    Check deployment ${deployment_name} pull path for image ${image}
-    IF  "${image_pull_path}" in $image
-        Log To Console    Deployment ${deployment_name} image contains pull path '${image_pull_path}'
-    ELSE
-        Fail    Deployment image  ${deployment_name} does not contain pull path '${image_pull_path}'
+
+    ${rc}   ${images}=    Run And Return Rc And Output
+    ...    oc get deployment/${deployment_name} -n ${APPLICATIONS_NAMESPACE} -o jsonpath="{..image}"
+    Should Be Equal As Integers    ${rc}    0    msg=${images}
+    ${images}=    Split String    ${images}    ${SPACE}
+
+    ${rc}   ${relatedImages}=    Run And Return Rc And Output
+    ...    oc get csv ${OPERATOR_NAME}.${RHODS_VERSION} -n ${OPERATOR_NAMESPACE} -o jsonpath="{.spec.relatedImages[*].image}"
+    Should Be Equal As Integers    ${rc}    0    msg=${relatedImages}
+    ${relatedImages}=    Split String    ${relatedImages}    ${SPACE}
+
+    FOR  ${image}    IN    @{images}
+        Log To Console    Check deployment ${deployment_name} pull path for image ${image}
+        Run Keyword And Continue On Failure
+        ...    Should Start With    ${image}    registry.redhat.io    msg=Deployment image pull path ${image} does not start with registry.redhat.io
+        Run Keyword And Continue On Failure
+        ...    Should Match Regexp    ${image}    @sha256:[a-f0-9]{64}$    msg=Deployment image pull path ${image} does not contain sha256 digest
+        Run Keyword And Continue On Failure
+        ...    Should Contain    ${relatedImages}    ${image}    msg=Deployment image pull path ${image} is not in CSV's relatedImages
     END
 
 Check Model Registry Namespace

@@ -120,8 +120,7 @@ Verify The Workload Metrics By Submitting Kueue Batch Workload
     Select Refresh Interval    15 seconds
     Check Requested Resources    ${PRJ_TITLE}    ${CPU_SHARED_QUOTA}    ${MEMEORY_SHARED_QUOTA}    0    0    Job
     Check Distributed Workload Resource Metrics Status    ${JOB_NAME_QUEUE}    Succeeded
-    # Once fixed  https://issues.redhat.com/browse/RHOAIENG-9092 update Job success message
-    Check Distributed Worklaod Status Overview    ${JOB_NAME_QUEUE}    Succeeded    No message
+    Check Distributed Worklaod Status Overview    ${JOB_NAME_QUEUE}    Succeeded    Finished
 
     ${result} =    Run Process  oc delete Job ${JOB_NAME_QUEUE} -n ${PRJ_TITLE}
     ...    shell=true    stderr=STDOUT

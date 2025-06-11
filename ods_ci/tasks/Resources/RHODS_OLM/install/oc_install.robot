@@ -152,6 +152,11 @@ Verify RHODS Installation
       Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}    dsc_template=${DSC_TEMPLATE}
   END
 
+  # Workaround for 2.21, add the default groups in the Auth instance
+  # Once the release-2.21 branch is cut, will revert this change, as its not needed for 2.22+
+  ${return_code}    ${output} =       Run And Return Rc And Output
+  ...    oc patch Auth auth -p '{"spec":{"adminGroups":["rhods-admins"],"allowedGroups":["system:authenticated"]}}' --type=merge
+
   ${dashboard} =    Is Component Enabled    dashboard    ${DSC_NAME}
   IF    "${dashboard}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}

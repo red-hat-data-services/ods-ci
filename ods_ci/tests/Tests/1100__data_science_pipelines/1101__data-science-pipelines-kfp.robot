@@ -52,7 +52,7 @@ Verify Users Can Create And Run A Pipeline That Uses Custom Python Packages To I
     ...    username=${TEST_USER_3.USERNAME}
     ...    password=${TEST_USER_3.PASSWORD}
     ...    project=${PROJECT_NAME}
-    ...    python_file=cache-disabled/iris_pipeline.py
+    ...    python_file=cache-disabled/pip_index_url/iris_pipeline_pip_index_url.py
     ...    method_name=my_pipeline
     ...    status_check_timeout=300
     ...    pipeline_params=${emtpy_dict}

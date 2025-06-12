@@ -18,8 +18,13 @@ Resource           ../../Resources/Common.robot
 
 
 *** Variables ***
-${MODELREGISTRY_BASE_FOLDER}         tests/Resources/CLI/ModelRegistry
-${MODEL_REGISTRY_DB_SAMPLES}         ${MODELREGISTRY_BASE_FOLDER}/samples/istio/mysql
+${MODELREGISTRY_BASE_FOLDER}=        tests/Resources/CLI/ModelRegistry
+${MODEL_REGISTRY_DB_SAMPLES}=        ${MODELREGISTRY_BASE_FOLDER}/samples/istio/mysql
+${OPERATOR_NS}                       ${OPERATOR_NAMESPACE}
+${APPLICATIONS_NS}                   ${APPLICATIONS_NAMESPACE}
+${DSC_NAME}                          default-dsc
+
+@{REDHATIO_PATH_CHECK_EXCLUSION_LIST}    model-registry-operator-controller-manager
 
 
 *** Test Cases ***

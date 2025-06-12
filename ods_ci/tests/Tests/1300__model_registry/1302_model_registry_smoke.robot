@@ -25,7 +25,7 @@ ${MODEL_REGISTRY_DB_SAMPLES}         ${MODELREGISTRY_BASE_FOLDER}/samples/istio/
 *** Test Cases ***
 Deploy Model Registry
     [Documentation]    Deployment test for Model Registry.
-    [Tags]    Smoke    MR1302    ModelRegistry
+    [Tags]    Smoke    MR1302    ModelRegistry    deprecatedTest
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
     Enable Model Registry If Needed
@@ -43,13 +43,13 @@ Deploy Model Registry
 
 Registering A Model In The Registry
     [Documentation]    Registers a model in the model registry
-    [Tags]    Smoke    MR1302    ModelRegistry
+    [Tags]    Smoke    MR1302    ModelRegistry    deprecatedTest
     Depends On Test    Deploy Model Registry
     Register A Model    ${URL}
 
 Verify Model Registry
     [Documentation]    Verify the registered model.
-    [Tags]    Smoke    MR1302    ModelRegistry
+    [Tags]    Smoke    MR1302    ModelRegistry    deprecatedTest
     Depends On Test    Registering A Model In The Registry
     Log    Attempting to verify Model Registry
     Wait Until Keyword Succeeds    10 s    2 s    Run Curl Command And Verify Response

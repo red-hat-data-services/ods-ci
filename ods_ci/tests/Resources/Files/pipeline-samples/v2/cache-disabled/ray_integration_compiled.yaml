@@ -45,7 +45,7 @@ deploymentSpec:
           \      head_cpu_limits=1,\n            head_memory_requests=4,\n       \
           \     head_memory_limits=4,\n            worker_cpu_requests=1,\n      \
           \      worker_cpu_limits=1,\n            worker_memory_requests=1,\n   \
-          \         worker_memory_limits=2,\n            image=\"quay.io/modh/ray@sha256:ac401c35d29cbd920ef982775f20e86d948b81eb67e83adbbbba8b29ad33ca31\"\
+          \         worker_memory_limits=2,\n            image=\"quay.io/modh/ray@sha256:a5b7c04a14f180d7ca6d06a5697f6bb684e40a26b95a0c872cac23b552741707\"\
           ,\n            verify_tls=False\n        )\n    )\n\n    # always clean\
           \ the resources\n    cluster.down()\n    print(cluster.status())\n    cluster.up()\n\
           \    cluster.wait_ready()\n    print(cluster.status())\n    print(cluster.details())\n\

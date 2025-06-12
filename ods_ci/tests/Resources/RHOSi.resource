@@ -60,7 +60,6 @@ RHOSi Setup
     Initialize Global Variables
     Run Keyword If RHODS Is Managed
     ...    Suite Availability Setup    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}
-    # TO DO: oc login
 
 RHOSi Teardown
     [Documentation]    Gets current availability metrics and compares them with the ones

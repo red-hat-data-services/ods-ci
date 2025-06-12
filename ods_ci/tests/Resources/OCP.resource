@@ -6,6 +6,31 @@ Resource   Page/OCPDashboard/Pods/Pods.robot
 
 
 *** Keywords ***
+Get Ocp Cluster Version
+    [Documentation]  Retrieves the OCP Cluster version, in a X.Y.Z format
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc get clusterversion -o jsonpath='{.items[].spec.desiredUpdate.version}'
+    IF    ${rc} != ${0}
+        Fail    msg=Cannot retrieve OCP cluster version.
+    END
+
+    RETURN   ${out}
+
+Compare Ocp Version
+    [Documentation]  Compares if version one is {compare} than version two following the format X.Y.Z
+    [Arguments]  ${version_one}  ${version_two}  ${compare}
+    @{version_one_split}=    Split String    ${version_one}    separator=.
+    @{version_two_split}=    Split String    ${version_two}    separator=.
+    IF  "${compare}" == "higher"
+         RETURN   (${version_one}[0] > ${version_two}[0]) OR (${version_one}[0] <= ${version_two}[0] AND ${version_one}[1] > ${version_two}[1]) AND (${version_one}[0] <= ${version_two}[0] AND ${version_one}[1] <= ${version_two}[1] AND ${version_one}[2] > ${version_two}[2])
+    ELSE IF   "${compare}" == "higher_or_equal"
+         RETURN   (${version_one}[0] >= ${version_two}[0]) OR (${version_one}[0] <= ${version_two}[0] AND ${version_one}[1] >= ${version_two}[1]) AND (${version_one}[0] <= ${version_two}[0] AND ${version_one}[1] <= ${version_two}[1] AND ${version_one}[2] >= ${version_two}[2])
+    ELSE IF   "${compare}" == "lower"
+         RETURN   (${version_one}[0] < ${version_two}[0]) OR (${version_one}[0] >= ${version_two}[0] AND ${version_one}[1] < ${version_two}[1]) AND (${version_one}[0] >= ${version_two}[0] AND ${version_one}[1] >= ${version_two}[1] AND ${version_one}[2] < ${version_two}[2])
+    ELSE IF   "${compare}" == "lower_or_equal"
+         RETURN   (${version_one}[0] <= ${version_two}[0]) OR (${version_one}[0] >= ${version_two}[0] AND ${version_one}[1] <= ${version_two}[1]) AND (${version_one}[0] >= ${version_two}[0] AND ${version_one}[1] >= ${version_two}[1] AND ${version_one}[2] <= ${version_two}[2])
+    END
+
 Verify DaemonSet Status
     [Documentation]  Verifies that a DaemonSet exists, and that the number
     ...    of available pods matches the number of desired pods

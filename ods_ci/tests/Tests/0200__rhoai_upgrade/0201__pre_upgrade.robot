@@ -37,6 +37,7 @@ ${DW_PROJECT_CREATED}       False
 ${CODE}     while True: import time ; time.sleep(10); print ("Hello")
 ${UPGRADE_NS}    upgrade
 ${UPGRADE_CONFIG_MAP}    upgrade-config-map
+${USERGROUPS_CONFIG_MAP}    usergroups-config-map
 
 
 *** Test Cases ***
@@ -75,6 +76,11 @@ Verify RHODS Accept Multiple Admin Groups And CRD Gets Updates
     ...    ${TEST_USER.PASSWORD}
     ...    ${TEST_USER.AUTH_TYPE}
     Clear User Management Settings
+    # Create a configmap and store both groups
+    ${return_code}    ${cmd_output}=    Run And Return Rc And Output
+    ...    oc create configmap ${USERGROUPS_CONFIG_MAP} -n ${UPGRADE_NS} --from-literal=adm_groups="['rhods-admins', 'rhods-users']" --from-literal=allwd_groups="['system:authenticated']"
+    Should Be Equal As Integers     ${return_code}      0       msg=${cmd_output}
+
     Add OpenShift Groups To Data Science Administrators     rhods-admins        rhods-users
     Add OpenShift Groups To Data Science User Groups        system:authenticated
     Save Changes In User Management Setting

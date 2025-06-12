@@ -53,8 +53,25 @@ Maybe Skip Tour
     IF  ${should_cont}==False
         RETURN
     END
-    ${tour_modal} =  Run Keyword And Return Status  Wait Until Page Contains Element  xpath=//div[@id='guided-tour-modal']  timeout=5s
-    IF  ${tour_modal}  Click Element  xpath=//div[@id='guided-tour-modal']/button
+    ${MODAL_GUIDED_TOUR_XPATH} =  Set Variable  xpath=//div[@id='guided-tour-modal']
+
+    ${tour_modal} =  Run Keyword And Return Status  Wait Until Page Contains Element  ${MODAL_GUIDED_TOUR_XPATH}  timeout=5s
+    IF  ${tour_modal}
+        # This xpath is for OCP 4.18 and older
+        ${MODAL_BUTTON_OLDER_XPATH} =  Set Variable  ${MODAL_GUIDED_TOUR_XPATH}/button
+        # This xpath is for OCP 4.19+
+        ${MODAL_BUTTON_NEWER_XPATH} =  Set Variable  ${MODAL_GUIDED_TOUR_XPATH}//button[@aria-label="Close"]
+
+        ${modal_older} =  Run Keyword And Return Status  Page Should Contain Element    ${MODAL_BUTTON_OLDER_XPATH}
+        ${modal_newer} =  Run Keyword And Return Status  Page Should Contain Element    ${MODAL_BUTTON_NEWER_XPATH}
+        IF  ${modal_older}
+            Click Element  ${MODAL_BUTTON_OLDER_XPATH}
+        ELSE IF  ${modal_newer}
+            Click Element  ${MODAL_BUTTON_NEWER_XPATH}
+        ELSE
+            Fail  Unexpected Guided tour modal window, please check and update the implementation.
+        END
+    END
 
 Get OpenShift Version
     [Documentation]   Get the installed openshitf version on the cluster.

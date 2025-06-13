@@ -136,7 +136,7 @@ Assign Vars According To Product
             Set Suite Variable    ${KSERVE_IMAGE_PULL_PATH}        quay.io
             ${CSV_NAME} =   Catenate    SEPARATOR=   ${OPERATOR_NAME}.  ${RHODS_VERSION}
             Set Suite Variable      ${CSV_NAME}
-        # ODH COMMUNITY
+            # ODH COMMUNITY
         ELSE IF     "${OPERATOR_NAME}" == "opendatahub-operator"
             Set Suite Variable    ${OPERATOR_SUBSCRIPTION_LABEL}     operators.coreos.com/opendatahub-operator.${OPERATOR_NAMESPACE}
             Set Suite Variable    ${IMAGE_PULL_PATH}        registry.redhat.io

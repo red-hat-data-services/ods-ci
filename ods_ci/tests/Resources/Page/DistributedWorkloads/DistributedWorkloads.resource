@@ -11,11 +11,11 @@ ${CODEFLARE-SDK_DIR}                     codeflare-sdk
 ${CODEFLARE-SDK_REPO_URL}                %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
 ${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}  https://github.com/opendatahub-io/distributed-workloads/releases/latest/download
 # Corresponds to quay.io/modh/ray:2.44.1-py311-cu121
-${RAY_CUDA_IMAGE_3.11}                   quay.io/modh/ray@sha256:ac401c35d29cbd920ef982775f20e86d948b81eb67e83adbbbba8b29ad33ca31
+${RAY_CUDA_IMAGE_3.11}                   quay.io/modh/ray@sha256:a5b7c04a14f180d7ca6d06a5697f6bb684e40a26b95a0c872cac23b552741707
 # Corresponds to quay.io/rhoai/ray:2.35.0-py311-cu121-torch24-fa26
 ${RAY_TORCH_CUDA_IMAGE_3.11}             quay.io/rhoai/ray@sha256:5077f9bb230dfa88f34089fecdfcdaa8abc6964716a8a8325c7f9dcdf11bbbb3
 # Corresponds to quay.io/modh/ray:2.44.1-py311-rocm62
-${RAY_ROCM_IMAGE_3.11}                   quay.io/modh/ray@sha256:a46a2a8b6d61f7679949d3fa3bcecc6c11381ec93620c8f4ac55b627a676abc2
+${RAY_ROCM_IMAGE_3.11}                   quay.io/modh/ray@sha256:48c7864989c8f22ef07772c698b761f5c1b58c6781e7a99518204d521bf56a4c
 # Corresponds to quay.io/rhoai/ray:2.35.0-py311-rocm61-torch24-fa26
 ${RAY_TORCH_ROCM_IMAGE_3.11}             quay.io/rhoai/ray@sha256:b0e129cd2f4cdea7ad7a7859031357ffd9915410551f94fbcb942af2198cdf78
 # Corresponds to quay.io/modh/fms-hf-tuning:v2.8.2
@@ -28,8 +28,8 @@ ${ROCM_TRAINING_IMAGE_TORCH241}          quay.io/modh/training@sha256:883739b576
 ${CUDA_TRAINING_IMAGE_TORCH251}          quay.io/modh/training@sha256:1d0caea3e5d56ff7d672954b1ad511e661df9bdb364d56879961169a4ca8dae0
 # Corresponds to quay.io/modh/training:py311-rocm62-torch251
 ${ROCM_TRAINING_IMAGE_TORCH251}          quay.io/modh/training@sha256:6cdae840fa029da33cccab620367e82404d24ddf67762eb4537a9bffe1af306d
-# Corresponds to quay.io/modh/odh-generic-data-science-notebook:v3-20250519
-${NOTEBOOK_IMAGE_3.11}                   quay.io/modh/odh-generic-data-science-notebook@sha256:1c585c849cc466fce6443f5c186fb9b642d21b5f3581515ada08bba2fbc3591f
+# Corresponds to quay.io/repository/modh/odh-workbench-jupyter-datascience-cpu-py311-ubi9:rhoai-2.21
+${NOTEBOOK_IMAGE_3.11}                   quay.io/modh/odh-workbench-jupyter-datascience-cpu-py311-ubi9@sha256:b9bab85bd74ca9243927d98434566588ad71130055be2073cd64ae3ca4cf2346
 ${NOTEBOOK_USER_NAME}                    ${TEST_USER_3.USERNAME}
 ${NOTEBOOK_USER_PASSWORD}                ${TEST_USER_3.PASSWORD}
 ${FMS_BINARY_NAME}                       fms
@@ -126,14 +126,6 @@ Prepare Training Operator E2E Test Suite
     END
     Create Directory    %{WORKSPACE}/codeflare-${test_binary}-logs
 
-Prepare Training Operator SDK Test Suite
-    [Documentation]    Prepare Training Operator SDK Test Suite
-    Prepare Training Operator E2E Test Suite    ${KFTO_BINARY_NAME}
-    ${common_user_token} =    Generate User Token    ${NOTEBOOK_USER_NAME}    ${NOTEBOOK_USER_PASSWORD}
-    Set Suite Variable    ${NOTEBOOK_USER_TOKEN}   ${common_user_token}
-    Log To Console    "Log back as cluster admin"
-    Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
-
 Teardown Training Operator KFTO E2E Test Suite
     [Documentation]    Teardown Training Operator KFTO E2E Test Suite
     Teardown Training Operator E2E Test Suite    ${KFTO_BINARY_NAME}
@@ -147,10 +139,6 @@ Teardown Training Operator E2E Test Suite
     [Arguments]        ${test_binary}
     Log To Console     "Removing test binaries"
     Remove File        ${test_binary}
-
-Teardown Training Operator SDK Test Suite
-    [Documentation]    Teardown Training Operator SDK Test Suite
-    Teardown Training Operator E2E Test Suite    ${KFTO_BINARY_NAME}
 
 Run Training Operator FMS Test
     [Documentation]    Run Training Operator FMS Test
@@ -227,7 +215,7 @@ Run Training Operator KFTO SDK Test
     ...    env:PIP_INDEX_URL=${PIP_INDEX_URL}
     ...    env:PIP_TRUSTED_HOST=${PIP_TRUSTED_HOST}
     ...    env:NOTEBOOK_USER_NAME=${NOTEBOOK_USER_NAME}
-    ...    env:NOTEBOOK_USER_TOKEN=${NOTEBOOK_USER_TOKEN}
+    ...    env:NOTEBOOK_USER_PASSWORD=${NOTEBOOK_USER_PASSWORD}
     ...    env:NOTEBOOK_IMAGE=${NOTEBOOK_IMAGE_3.11}
     Log To Console    ${result.stdout}
     Check missing Go test    ${result.stdout}

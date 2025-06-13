@@ -6,7 +6,7 @@ Resource         ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 
 
 *** Variables ***
-${FEATURE-STORE-RELEASE-TAG}             adjustment-release-v0.48.1
+${FEATURE-STORE-RELEASE-TAG}             adjustment-release-v0.49.0
 ${FEATURE-STORE_DIR}                     feature-store
 ${FEATURE-STORE_REPO_URL}                %{FEATURE-STORE_REPO_URL=https://github.com/opendatahub-io/feast.git}
 

@@ -101,6 +101,7 @@ Wait For RHODS Dashboard To Load
     ${half_timeout}=   Evaluate    int(${timeout}) / 2
     Wait For Condition    return document.title == ${dashboard_title}    timeout=${half_timeout}
     Wait Until Page Contains Element    xpath:${RHODS_LOGO_XPATH}    timeout=${timeout}
+    Run Keyword And Warn On Failure   Page Should Not Contain   Access permissions needed
     IF    "${expected_page}" == "${NONE}"
         Wait Until Page Contains Element    //div[@data-testid="home-page"]    timeout=${timeout}
     ELSE

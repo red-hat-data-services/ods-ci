@@ -2,12 +2,12 @@
 Documentation    Smoke Test for Model Registry Deployment
 Suite Setup        Setup Test Environment Non UI
 Suite Teardown     Teardown Model Registry Test Setup Non UI
+Library            BuiltIn
 Library            Collections
 Library            OperatingSystem
 Library            Process
 Library            OpenShiftLibrary
 Library            RequestsLibrary
-Library            BuiltIn
 Resource           ../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
@@ -23,8 +23,6 @@ ${MODEL_REGISTRY_DB_SAMPLES}=        ${MODELREGISTRY_BASE_FOLDER}/samples/istio/
 ${OPERATOR_NS}                       ${OPERATOR_NAMESPACE}
 ${APPLICATIONS_NS}                   ${APPLICATIONS_NAMESPACE}
 ${DSC_NAME}                          default-dsc
-
-@{REDHATIO_PATH_CHECK_EXCLUSTION_LIST}    model-registry-operator-controller-manager
 
 
 *** Test Cases ***

@@ -1,4 +1,5 @@
 *** Settings ***
+Documentation    This is a resource file for the DSC components.
 Resource  Menu.robot
 Resource  ../../OCP.resource
 Resource  ../../ODS.robot
@@ -26,8 +27,6 @@ Set DSC Component Managed State And Wait For Completion
     END
 
     Wait For Resources To Be Available    ${deployment_name}    ${label_selector}
-
-    Check Image Pull Path Is Redhatio    ${deployment_name}
 
 Wait For Resources To Be Available
     [Documentation]    Wait until Deployment and Pod(s) are Available
@@ -84,14 +83,13 @@ Get DataScienceCluster Spec
     Should Be Equal As Integers    ${rc}    0
     RETURN    ${output}
 
-Check Image Pull Path Is Redhatio
-    [Documentation]    Check that the Deployment Image Pull Path is registry.redhat.io
-    [Arguments]    ${deployment_name}
-
-    # Skip pull path check if Deployment is in exclusion list
-    IF    $deployment_name in @{REDHATIO_PATH_CHECK_EXCLUSTION_LIST}
-        Log To Console    Skip image pull path check for Deployment ${deployment_name}
-        RETURN
+Check That Image Pull Path Is Correct
+    [Documentation]     Check that the deployment Image Pull path is the correct one
+    [Arguments]     ${deployment_name}      ${image_pull_path}
+    ${rc}=   Set Variable   1
+    WHILE   '${rc}' != '0'    limit=5m
+        ${rc}   ${image}=    Run And Return Rc And Output
+        ...    oc get deployment/${deployment_name} -n ${APPLICATIONS_NAMESPACE} -o jsonpath="{..image}"
     END
 
     ${rc}   ${images}=    Run And Return Rc And Output
@@ -100,14 +98,14 @@ Check Image Pull Path Is Redhatio
     ${images}=    Split String    ${images}    ${SPACE}
 
     ${rc}   ${relatedImages}=    Run And Return Rc And Output
-    ...    oc get csv ${OPERATOR_NAME}.${RHODS_VERSION} -n ${OPERATOR_NAMESPACE} -o jsonpath="{.spec.relatedImages[*].image}"
+    ...    oc get csv ${CSV_NAME} -n ${OPERATOR_NAMESPACE} -o jsonpath="{.spec.relatedImages[*].image}"
     Should Be Equal As Integers    ${rc}    0    msg=${relatedImages}
     ${relatedImages}=    Split String    ${relatedImages}    ${SPACE}
 
     FOR  ${image}    IN    @{images}
         Log To Console    Check deployment ${deployment_name} pull path for image ${image}
         Run Keyword And Continue On Failure
-        ...    Should Start With    ${image}    registry.redhat.io    msg=Deployment image pull path ${image} does not start with registry.redhat.io
+        ...    Should Start With    ${image}   ${image_pull_path}    msg=Deployment image pull path ${image} does not start with registry.redhat.io
         Run Keyword And Continue On Failure
         ...    Should Match Regexp    ${image}    @sha256:[a-f0-9]{64}$    msg=Deployment image pull path ${image} does not contain sha256 digest
         Run Keyword And Continue On Failure

@@ -58,10 +58,7 @@ ${IS_NOT_PRESENT}                                       1
 ...                                                     WORKBENCHES=${EMPTY}
 ...                                                     FEASTOPERATOR=${EMPTY}
 
-@{CONTROLLERS_LIST}
-...    kserve-controller-manager
-...    odh-model-controller
-...    modelmesh-controller
+
 @{REDHATIO_PATH_CHECK_EXCLUSTION_LIST}    kserve-controller-manager
 
 

@@ -24,8 +24,6 @@ ${OPERATOR_NS}                       ${OPERATOR_NAMESPACE}
 ${APPLICATIONS_NS}                   ${APPLICATIONS_NAMESPACE}
 ${DSC_NAME}                          default-dsc
 
-@{REDHATIO_PATH_CHECK_EXCLUSION_LIST}    model-registry-operator-controller-manager
-
 
 *** Test Cases ***
 Deploy Model Registry

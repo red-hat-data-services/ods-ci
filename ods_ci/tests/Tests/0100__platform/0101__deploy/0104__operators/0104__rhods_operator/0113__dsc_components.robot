@@ -419,6 +419,7 @@ Validate KServe Controller Manager Managed State
     ...    RHOAIENG-7217
     ...    kserve-controller-manager-managed
     ...    Integration
+    ...    ExcludeOnODH
     ...    ExcludeOnODHCommunity
     ...    ExcludeOnRHOAI
     Set DSC Component Managed State And Wait For Completion

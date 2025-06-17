@@ -141,7 +141,7 @@ Assign Vars According To Product
             Set Suite Variable    ${OPERATOR_SUBSCRIPTION_LABEL}     operators.coreos.com/opendatahub-operator.${OPERATOR_NAMESPACE}
             Set Suite Variable    ${IMAGE_PULL_PATH}        registry.redhat.io
             Set Suite Variable    ${KSERVE_IMAGE_PULL_PATH}        quay.io
-            ${CSV_NAME} =   Catenate    SEPARATOR=   ${OPERATOR_NAME}.   ${RHODS_VERSION}
+            ${CSV_NAME} =   Catenate    SEPARATOR=   ${OPERATOR_NAME}.v   ${RHODS_VERSION}
             Set Suite Variable      ${CSV_NAME}
 
         END

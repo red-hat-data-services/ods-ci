@@ -241,8 +241,8 @@ Verify Auth CR Contains Expected Values
 
 Verify Default Access Groups Settings
     [Documentation]     Verifies that ODS contains the expected default groups settings
-    &{exp_values}=  Create Dictionary  spec.adminGroups=${STANDARD_ADMINS_GROUP}
-    ...    spec.allowedGroups=${STANDARD_SYSTEM_GROUP}
+    &{exp_values}=  Create Dictionary  spec.adminGroups=['${STANDARD_ADMINS_GROUP}']
+    ...    spec.allowedGroups=['${STANDARD_SYSTEM_GROUP}']
     Verify Auth CR Contains Expected Values   &{exp_values}
 
 Enable Access To Grafana Using OpenShift Port Forwarding

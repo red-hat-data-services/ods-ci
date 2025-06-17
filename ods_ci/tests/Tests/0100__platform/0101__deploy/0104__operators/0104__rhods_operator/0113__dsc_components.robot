@@ -497,6 +497,7 @@ Validate Feastoperator Managed State
     ...    feastoperator-managed
     ...    Integration
     ...    ExcludeOnODH
+    ...    ExcludeOnODHCommunity
     Set DSC Component Managed State And Wait For Completion
     ...    feastoperator
     ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}

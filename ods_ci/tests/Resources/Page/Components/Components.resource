@@ -97,9 +97,12 @@ Check That Image Pull Path Is Correct
     Should Be Equal As Integers    ${rc}    0    msg=${images}
     ${images}=    Split String    ${images}    ${SPACE}
 
-    ${rc}   ${relatedImages}=    Run And Return Rc And Output
-    ...    oc get csv ${CSV_NAME} -n ${OPERATOR_NAMESPACE} -o jsonpath="{.spec.relatedImages[*].image}"
-    Should Be Equal As Integers    ${rc}    0    msg=${relatedImages}
+    # Add a FOR loop for robustness
+    ${rc}=   Set Variable   1
+    WHILE   '${rc}' != '0'    limit=5m
+        ${rc}   ${relatedImages}=    Run And Return Rc And Output
+        ...    oc get csv ${CSV_NAME} -n ${OPERATOR_NAMESPACE} -o jsonpath="{.spec.relatedImages[*].image}"
+    END
     ${relatedImages}=    Split String    ${relatedImages}    ${SPACE}
 
     FOR  ${image}    IN    @{images}

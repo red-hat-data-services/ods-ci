@@ -39,9 +39,9 @@ Teardown Feast E2E Test Suite
 
 Run Feast Operator E2E Test
     [Documentation]   Run feast operator e2e test
-    [Arguments]   ${TEST_NAME}
+    [Arguments]   ${TEST_NAME}    ${TEST_TYPE}
     Log To Console    "Running feature-store operator e2e test: ${TEST_NAME}"
-    ${command}=    Set Variable    cd ${FEATURE-STORE_DIR}/infra/feast-operator && git fetch origin && git checkout ${FEATURE-STORE-RELEASE-TAG} && git branch && go test -timeout 5m ./test/e2e/ -v -ginkgo.focus=${TEST_NAME}
+    ${command}=    Set Variable    cd ${FEATURE-STORE_DIR}/infra/feast-operator && git fetch origin && git checkout ${FEATURE-STORE-RELEASE-TAG} && git branch && go test -timeout 10m ./test/${TEST_TYPE}/ -v -ginkgo.focus=${TEST_NAME}
     ${result}=    Run Process    ${command}
     ...    shell=true
     ...    env:RUN_ON_OPENSHIFT_CI=true
@@ -50,21 +50,3 @@ Run Feast Operator E2E Test
     IF    ${result.rc} != 0
         FAIL    Running test ${TEST_NAME} failed
     END
-
-Prepare Feature Store Upgrade Test
-    [Documentation]   Prepare feast operator upgrade test suite
-    Log To Console    Preparing Feast Upgrade Test Suite
-    # Patching with oc add , as replace will fail due to after post upgrade feast component spec missing in DSC (https://issues.redhat.com/browse/RHOAIENG-24221)
-    ${result} =    Run Process    oc get datascienceclusters.datasciencecluster.opendatahub.io -o name
-    ...    shell=true    stderr=STDOUT
-    IF    $result.stdout == ""
-        FAIL    Can not find datasciencecluster
-    END
-    ${cluster_name} =    Set Variable    ${result.stdout}
-    ${result} =    Run Process    oc patch ${cluster_name} --type 'json' -p '[{"op": "add", "path": "/spec/components/feastoperator", "value": {"managementState": "Managed"}}]'
-    ...    shell=true    stderr=STDOUT
-    IF    $result.rc != 0
-        FAIL    Can not enable feature store: ${result.stdout}
-    END
-    Log To Console    Component feature store state was set to Managed
-    Prepare Feast E2E Test Suite

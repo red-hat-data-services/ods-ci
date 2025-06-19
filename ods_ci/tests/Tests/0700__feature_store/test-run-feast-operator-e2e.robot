@@ -14,18 +14,18 @@ Run runTestDeploySimpleCRFunc test
     [Tags]  Sanity
     ...     FeatureStore
     ...     RHOAIENG-14799
-    Run Feast Operator E2E Test    TesDefaultFeastCR
+    Run Feast Operator E2E Test    TesDefaultFeastCR    e2e
 
 Run runTestWithRemoteRegistryFunction test
     [Documentation]    Run Go E2E test: runTestWithRemoteRegistryFunction
     [Tags]  Sanity
     ...     FeatureStore
     ...     RHOAIENG-14799
-    Run Feast Operator E2E Test    TestRemoteRegistryFeastCR
+    Run Feast Operator E2E Test    TestRemoteRegistryFeastCR    e2e
 
 Run runTestApplyAndMaterializeFeastDefinitions test
     [Documentation]    Run Go E2E test: TestApplyAndMaterializeFeastDefinitions
     [Tags]  Tier1
     ...     FeatureStore
     ...     RHOAIENG-26460
-    Run Feast Operator E2E Test    TestApplyAndMaterializeFeastDefinitions
+    Run Feast Operator E2E Test    TestApplyAndMaterializeFeastDefinitions    e2e

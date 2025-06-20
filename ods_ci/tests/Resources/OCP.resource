@@ -6,6 +6,66 @@ Resource   Page/OCPDashboard/Pods/Pods.robot
 
 
 *** Keywords ***
+Get Ocp Cluster Version
+    [Documentation]  Retrieves the OCP Cluster version, in a X.Y.Z format
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc get clusterversion -o jsonpath='{.items[].spec.desiredUpdate.version}'
+    IF    ${rc} != ${0}
+        Fail    msg=Cannot retrieve OCP cluster version.
+    END
+
+    RETURN   ${out}
+
+Compare Ocp Version
+    [Documentation]  Compares if version one is {compare} than version two following the format X.Y.Z
+    [Arguments]  ${version_one}  ${version_two}  ${compare}
+    @{version_one_no_minus}=    Split String     ${version_one}     separator=-
+    @{version_one_split}=    Split String    ${version_one_no_minus}[0]    separator=.
+    @{version_two_split}=    Split String    ${version_two}    separator=.
+    IF  "${compare}" == "higher"
+        IF   ${version_one_split}[0] > ${version_two_split}[0]
+            RETURN  True
+        ELSE IF    ${version_one_split}[1] > ${version_two_split}[1]
+            RETURN  True
+        ELSE IF    ${version_one_split}[2] > ${version_two_split}[2]
+            RETURN  True
+        ELSE
+            RETURN  False
+        END
+    ELSE IF   "${compare}" == "higher_or_equal"
+        IF   ${version_one_split}[0] >= ${version_two_split}[0]
+            RETURN  True
+        ELSE IF    ${version_one_split}[1] >= ${version_two_split}[1]
+            RETURN  True
+        ELSE IF    ${version_one_split}[2] >= ${version_two_split}[2]
+            RETURN  True
+        ELSE
+            RETURN  False
+        END
+    ELSE IF   "${compare}" == "lower"
+        IF   ${version_one_split}[0] < ${version_two_split}[0]
+            RETURN  True
+        ELSE IF    ${version_one_split}[1] < ${version_two_split}[1]
+            RETURN  True
+        ELSE IF    ${version_one_split}[2] < ${version_two_split}[2]
+            RETURN  True
+        ELSE
+            RETURN  False
+        END
+    ELSE IF   "${compare}" == "lower_or_equal"
+        IF   ${version_one_split}[0] <= ${version_two_split}[0]
+            RETURN  True
+        ELSE IF    ${version_one_split}[1] <= ${version_two_split}[1]
+            RETURN  True
+        ELSE IF    ${version_one_split}[2] <= ${version_two_split}[2]
+            RETURN  True
+        ELSE
+            RETURN  False
+        END
+    ELSE
+        FAIL    Unsupported comparison string: ${compare}
+    END
+
 Verify DaemonSet Status
     [Documentation]  Verifies that a DaemonSet exists, and that the number
     ...    of available pods matches the number of desired pods

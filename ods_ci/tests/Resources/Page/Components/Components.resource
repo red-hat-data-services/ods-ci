@@ -100,6 +100,7 @@ Check That Image Pull Path Is Correct
 
     ${rc}   ${relatedImages}=    Run And Return Rc And Output
     ...    oc get csv ${CSV_NAME} -n ${OPERATOR_NAMESPACE} -o jsonpath="{.spec.relatedImages[*].image}"
+    Should Be Equal As Integers    ${rc}    0    msg=${relatedImages}
     ${relatedImages}=    Split String    ${relatedImages}    ${SPACE}
 
     FOR  ${image}    IN    @{images}

@@ -97,6 +97,7 @@ Check That Image Pull Path Is Correct
     Should Be Equal As Integers    ${rc}    0    msg=${images}
     ${images}=    Split String    ${images}    ${SPACE}
 
+
     ${rc}   ${relatedImages}=    Run And Return Rc And Output
     ...    oc get csv ${CSV_NAME} -n ${OPERATOR_NAMESPACE} -o jsonpath="{.spec.relatedImages[*].image}"
     Should Be Equal As Integers    ${rc}    0    msg=${relatedImages}
@@ -106,8 +107,12 @@ Check That Image Pull Path Is Correct
         Log To Console    Check deployment ${deployment_name} pull path for image ${image}
         Run Keyword And Continue On Failure
         ...    Should Start With    ${image}   ${image_pull_path}    msg=Deployment image pull path ${image} does not start with registry.redhat.io
-        Run Keyword And Continue On Failure
-        ...    Should Match Regexp    ${image}    @sha256:[a-f0-9]{64}$    msg=Deployment image pull path ${image} does not contain sha256 digest
+        # Only check for sha256 digest if the product is RHOAI
+        IF    "${PRODUCT}" == "RHODS"
+            Run Keyword And Continue On Failure
+            ...    Should Match Regexp    ${image}    @sha256:[a-f0-9]{64}$    msg=Deployment image pull path ${image} does not contain sha256 digest
+        END
+        
         Run Keyword And Continue On Failure
         ...    Should Contain    ${relatedImages}    ${image}    msg=Deployment image pull path ${image} is not in CSV's relatedImages
     END

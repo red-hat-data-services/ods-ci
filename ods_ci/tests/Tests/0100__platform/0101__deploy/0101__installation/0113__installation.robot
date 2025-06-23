@@ -50,6 +50,44 @@ Verify User Can Access RHODS Documentation From OCM Console
   Page Should Contain Element       //div[@class="pf-l-flex pf-m-space-items-lg pf-m-column"]//a
   Verify Documentation Is Accessible
 
+Verify RHOAI Addon Validates Notification E-Mail Format
+  [Tags]  Sanity
+  ...     ODS-672
+  ...     RHOAI-13065
+  [Setup]   OCM Test Setup
+  Grant Cluster Editor To User  ${SSO.USERNAME}
+  Decide OCM URL And Open Link
+  Login To HCC  ${SSO.USERNAME}  ${SSO.PASSWORD}
+  Maybe Skip OCM Tour
+  Open Cluster By Name
+  Wait Until Page Contains Element    //*[@data-ouia-component-id="Add-ons"]
+  Click Element      //*[@data-ouia-component-id="Add-ons"]
+  Wait Until Page Contains Element      //div[@data-ouia-component-id="card-addon-managed-odh"]     10
+  Click Element     //div[@data-ouia-component-id="card-addon-managed-odh"]
+  Click Button    Install
+  Wait Until Page Contains Element  //input[@id="notification-email"]
+  @{email_values} =  Set Variable
+  ...       test@
+  ...       test@test.com,
+  ...       test@test.com test@test.com test@test.com
+  FOR  ${email_value}  IN   @{email_values}
+      Input Text    //input[@id="notification-email"]  ${email_value}
+      Click Button    //div[@aria-label="Configure Red Hat OpenShift AI"]//button[@type="submit"]
+      Wait Until Page Contains Element    //div[@aria-label="Configure Red Hat OpenShift AI"]//div[@data-testid="alert-error"]
+      Element Should Contain    //div[@aria-label="Configure Red Hat OpenShift AI"]//p      Add-on parameter value for 'notification-email' is invalid.
+  END
+
+Verify RHOAI Is Present In List Of Subscriptions
+  [Tags]  Sanity
+  ...     ODS-701
+  ...     RHOAI-13070
+  Skip If RHODS Is Self-Managed
+  ${addons} =  Run
+  ...    ocm get addons --parameter search="id like 'managed-odh'"
+  ${addons} =    Load Json String    ${addons}
+  ${num_addons}=  Get From Dictionary    ${addons}  size
+  Should Be Equal    ${num_addons}  ${1}
+
 
 *** Keywords ***
 Installation Suite Setup
@@ -63,8 +101,7 @@ Installation Suite Teardown
 OCM Test Setup
   [Documentation]   Setup for ODH in Openshift Installation Test Cases
   Skip If RHODS Is Self-Managed
-  Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
-  ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
+  Open Browser   browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
 
 Decide OCM URL And Open Link
   [Documentation]   Decides OCM URL based on the OpenShift Console URL and open the URL.
@@ -82,4 +119,12 @@ Verify Documentation Is Accessible
   ${status}=    Check HTTP Status Code    ${link}
   IF  ${status}!=200      FAIL
   ...     Documentation Is Not Accessible
+
+Grant Cluster Editor To User
+  [Documentation]    Grants Cluster Editor role on the cluster to a user so that it can initiate Addon installation
+  [Arguments]  ${username}
+  ${cluster_id} =     Get Cluster ID
+  ${subscription_id} =  Run
+  ...       ocm describe cluster ${cluster_id} --json | jq -r .subscription.id
+  Run       echo '{"account_username": "${username}", "role_id": "ClusterEditor"}' | ocm post /api/accounts_mgmt/v1/subscriptions/${subscription_id}/role_bindings
 

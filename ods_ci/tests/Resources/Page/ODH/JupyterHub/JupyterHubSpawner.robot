@@ -545,10 +545,15 @@ Get Container Size
    Wait Until Page Contains Element    ${KFNBC_CONTAINER_SIZE_TITLE}
    ...    timeout=30   error=Container size selector is not present in KFNBC Spawner
    Click Element    xpath:${KFNBC_CONTAINER_SIZE_DROPDOWN_XPATH}
-   Wait Until Page Contains Element    xpath://span[.="${container_size}"]/../..  timeout=10
+   Wait Until Page Contains Element    xpath://button[@role="option"]/span[.="${container_size}"]  timeout=10
+   Wait Until Page Contains Element
+   ...    xpath://li[@data-testid="${container_size}"]//span[contains(text(), "Limits")]  timeout=10
+   Sleep    1
    ${data}   Get Text  xpath://li[@data-testid="${container_size}"]//span[contains(text(), "Limits")]
    ${l_data}   Convert To Lower Case    ${data}
-   ${data}    Get Formated Container Size To Dictionary     ${l_data}
+   # Our Dashboard shows GiB, but the native interface of OpenShift uses just Gi
+   ${l_data_gi}    Replace String    ${l_data}    gib    gi
+   ${data}    Get Formated Container Size To Dictionary     ${l_data_gi}
    RETURN  ${data}
 
 Get Formated Container Size To Dictionary

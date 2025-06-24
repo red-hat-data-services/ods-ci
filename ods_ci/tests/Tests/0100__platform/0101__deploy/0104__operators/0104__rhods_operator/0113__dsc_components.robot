@@ -449,7 +449,7 @@ Validate KServe Controller Manager Removed State
 Validate Workbenches Managed State
     [Documentation]    Validate that the DSC Workbenches component Managed state creates the expected resources,
     ...    check that Workbenches deployment is created and pods are in Ready state
-    [Tags]      Operator        Tier1       workbenches-managed     Integration     ExcludeOnODHCommunity
+    [Tags]      Operator        Tier1       workbenches-managed     Integration
 
     Set DSC Component Managed State And Wait For Completion
     ...    workbenches
@@ -487,7 +487,6 @@ Validate Feastoperator Managed State
     ...    feastoperator-managed
     ...    Integration
     ...    ExcludeOnODH
-    ...    ExcludeOnODHCommunity
     Set DSC Component Managed State And Wait For Completion
     ...    feastoperator
     ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}

@@ -6,6 +6,16 @@ Resource   Page/OCPDashboard/Pods/Pods.robot
 
 
 *** Keywords ***
+Get Ocp Cluster Version
+    [Documentation]  Retrieves the OCP Cluster version, in a X.Y.Z format
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc get clusterversion -o jsonpath='{.items[].spec.desiredUpdate.version}'
+    IF    ${rc} != ${0}
+        Fail    msg=Cannot retrieve OCP cluster version.
+    END
+
+    RETURN   ${out}
+
 Verify DaemonSet Status
     [Documentation]  Verifies that a DaemonSet exists, and that the number
     ...    of available pods matches the number of desired pods

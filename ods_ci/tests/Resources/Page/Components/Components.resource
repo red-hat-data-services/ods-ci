@@ -106,7 +106,7 @@ Check That Image Pull Path Is Correct
     FOR  ${image}    IN    @{images}
         Log To Console    Check deployment ${deployment_name} pull path for image ${image}
         Run Keyword And Continue On Failure
-        ...    Should Start With    ${image}   ${image_pull_path}    msg=Deployment image pull path ${image} does not start with registry.redhat.io
+        ...    Should Start With    ${image}   ${image_pull_path}    msg=Deployment image pull path ${image} does not start with ${image_pull_path}
         # Only check for sha256 digest if the product is RHOAI
         IF    "${PRODUCT}" == "RHODS"
             Run Keyword And Continue On Failure

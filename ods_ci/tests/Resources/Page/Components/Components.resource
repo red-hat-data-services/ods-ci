@@ -111,10 +111,9 @@ Check That Image Pull Path Is Correct
         IF    "${PRODUCT}" == "RHODS"
             Run Keyword And Continue On Failure
             ...    Should Match Regexp    ${image}    @sha256:[a-f0-9]{64}$    msg=Deployment image pull path ${image} does not contain sha256 digest
+            Run Keyword And Continue On Failure
+            ...    Should Contain    ${relatedImages}    ${image}    msg=Deployment image pull path ${image} is not in CSV's relatedImages
         END
-        
-        Run Keyword And Continue On Failure
-        ...    Should Contain    ${relatedImages}    ${image}    msg=Deployment image pull path ${image} is not in CSV's relatedImages
     END
 
 Check Model Registry Namespace

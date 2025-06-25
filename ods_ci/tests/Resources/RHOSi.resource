@@ -83,6 +83,7 @@ Initialize Global Variables
     Assign Vars According To Product
     Set Prometheus Variables
     Set Global Variable    ${DASHBOARD_APP_NAME}    ${PRODUCT.lower()}-dashboard
+    Set Global Variable    ${RHODS_PACKAGE_NAME}    rhods-operator
 
 Required Global Variables Should Exist
     [Documentation]   Fails if new required global variables are not set

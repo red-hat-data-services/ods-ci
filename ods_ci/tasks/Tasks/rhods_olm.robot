@@ -10,12 +10,9 @@ Library          String
 ***Variables***
 ${cluster_type}                 selfmanaged
 ${image_url}                    ${EMPTY}
-${RHODS_OSD_INSTALL_REPO}       None
-@{SUPPORTED_TEST_ENV}           AWS   AWS_DIS   GCP   PSI   PSI_DIS   ROSA   IBM_CLOUD   CRC    AZURE	ROSA_HCP
 ${TEST_ENV}                     AWS
 ${INSTALL_TYPE}                 OperatorHub
 ${UPDATE_CHANNEL}               odh-nightlies
-${OLM_DIR}                      rhodsolm
 ${RHODS_VERSION}                None
 ${CATALOG_SOURCE}               redhat-operators
 
@@ -27,18 +24,18 @@ Can Install RHODS Operator
       Set Global Variable  ${MODEL_REGISTRY_NAMESPACE}    odh-model-registries
       Set Global Variable  ${OPERATOR_YAML_LABEL}  opendatahub-operator
       IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
-          Set Global Variable  ${OPERATOR_NAME}  rhods-operator
+          Set Global Variable  ${OPERATOR_DEPLOYMENT_NAME}  rhods-operator
       ELSE
-          Set Global Variable  ${OPERATOR_NAME}  opendatahub-operator
+          Set Global Variable  ${OPERATOR_DEPLOYMENT_NAME}  opendatahub-operator
       END
   ELSE
-      Set Global Variable  ${OPERATOR_NAME}  rhods-operator
+      Set Global Variable  ${OPERATOR_DEPLOYMENT_NAME}  rhods-operator
       Set Global Variable  ${OPERATOR_NAME_LABEL}  rhods-operator
       Set Global Variable  ${OPERATOR_YAML_LABEL}  rhods-operator
       Set Global Variable  ${MODEL_REGISTRY_NAMESPACE}    rhoai-model-registries
   END
   Given Selected Cluster Type ${cluster_type}
-  When Installing RHODS Operator ${image_url}
+  When Installing RHODS Operator    ${image_url}    ${install_plan_approval}    ${RHOAI_VERSION}
   Then RHODS Operator Should Be Installed
   [Teardown]   Install Teardown
 
@@ -46,12 +43,12 @@ Can Uninstall RHODS Operator
   [Tags]  uninstall
   IF  "${PRODUCT}" == "ODH"
       IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
-          Set Global Variable  ${OPERATOR_NAME}  rhods-operator
+          Set Global Variable  ${OPERATOR_DEPLOYMENT_NAME}  rhods-operator
       ELSE
-          Set Global Variable  ${OPERATOR_NAME}  opendatahub-operator
+          Set Global Variable  ${OPERATOR_DEPLOYMENT_NAME}  opendatahub-operator
       END
   ELSE
-      Set Global Variable  ${OPERATOR_NAME}  rhods-operator
+      Set Global Variable  ${OPERATOR_DEPLOYMENT_NAME}  rhods-operator
   END
   Given Selected Cluster Type ${cluster_type}
   When Uninstalling RHODS Operator

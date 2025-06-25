@@ -273,7 +273,6 @@ def generate_test_config_file(
         data["UPGRADE_TO_UPDATE_CHANNEL"] = config_data["UPGRADE_TO_UPDATE_CHANNEL"]
     if config_data.get("UPGRADE_TO_VERSION"):
         data["UPGRADE_TO_VERSION"] = config_data["UPGRADE_TO_VERSION"]
-
     data["RHODS_OSD_INSTALL_REPO"] = config_data["RHODS_OSD_INSTALL_REPO"]
     if config_data.get("NGC_API_KEY"):
         data["NGC_API_KEY"] = config_data["NGC_API_KEY"]

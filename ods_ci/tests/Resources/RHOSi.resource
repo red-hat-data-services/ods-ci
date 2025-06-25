@@ -148,6 +148,7 @@ Assign Vars According To Product
         Set Suite Variable    ${OPERATOR_APPNAME}  "Open Data Hub Operator"
         Set Suite Variable    ${OPERATOR_YAML_LABEL}  opendatahub-operator
         Set Suite Variable    ${OPERATOR_DEPLOYMENT_NAME}    opendatahub-operator-controller-manager
+        Set Suite Variable    ${CATALOG_SOURCE}    community-operators
         Set Suite Variable    ${OPERATOR_POD_CONTAINER_NAME}  manager
         Set Suite Variable    ${OPERATOR_LABEL_SELECTOR}    control-plane=controller-manager
         Set Suite Variable    ${DASHBOARD_DEPLOYMENT_NAME}    odh-dashboard

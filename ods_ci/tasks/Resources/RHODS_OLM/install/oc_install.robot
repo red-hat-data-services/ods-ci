@@ -101,7 +101,7 @@ Install RHODS
       ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "OperatorHub"
           IF  "${is_upgrade}" == "False"
               ${file_path} =    Set Variable    tasks/Resources/RHODS_OLM/install/
-              ${starting_csv} =  Set Variable    ""
+              ${starting_csv} =  Set Variable    ${EMPTY}
               IF  "${rhoai_version}" != "${EMPTY}"
                   Log    Start installing "${OPERATOR_NAME}" with version: ${rhoai_version}    console=yes
                   ${starting_csv} =  Set Variable    ${OPERATOR_DEPLOYMENT_NAME}.${rhoai_version}
@@ -140,22 +140,26 @@ Install RHODS
       END
   END
   Wait Until Csv Is Ready    display_name=${OPERATOR_NAME}    operators_namespace=${OPERATOR_NAMESPACE}
-  IF  "${is_upgrade}" == "False"
-      Add StartingCSV To Subscription
-  END
+  Add StartingCSV To Subscription
 
 Add StartingCSV To Subscription
     [Documentation]    Retrieves current RHOAI version from subscription status and add
-    ...                startingCSV field in the sub.
+    ...                startingCSV field in the subscription only if it is empty.
     ...                Needed for post-upgrade test suites to identify which RHOAI version
     ...                was installed before upgrading
-    Log    Patching RHOAI subscription to add startingCSV field    console=yes
-    ${rc}    ${out} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/add_starting_csv.sh
-    Log    ${out}    console=yes
-    Run Keyword And Continue On Failure    Should Be Equal As Numbers    ${rc}    ${0}
-    IF    ${rc} != ${0}
-        Log    Unable to add startingCSV after RHOAI operator installation.\nCheck the cluster please    console=yes
-        ...    level=ERROR
+    ${current_starting_csv} =    Run And Return Rc And Output    oc get subscription ${OPERATOR_SUBSCRIPTION_NAME} -n ${OPERATOR_NAMESPACE} -o jsonpath='{.spec.startingCSV}'
+    Log    Current startingCSV field: ${current_starting_csv}[1]    console=yes
+    IF    "${current_starting_csv}[1]" == ""
+        Log    StartingCSV field is empty, patching RHOAI subscription to add startingCSV field    console=yes
+        ${rc}    ${out} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/add_starting_csv.sh
+        Log    ${out}    console=yes
+        Run Keyword And Continue On Failure    Should Be Equal As Numbers    ${rc}    ${0}
+        IF    ${rc} != ${0}
+            Log    Unable to add startingCSV after RHOAI operator installation.\nCheck the cluster please    console=yes
+            ...    level=ERROR
+        END
+    ELSE
+        Log    StartingCSV field already exists: ${current_starting_csv}[1], skipping patch    console=yes
     END
 
 Verify RHODS Installation

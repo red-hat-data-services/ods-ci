@@ -7,6 +7,7 @@ Resource            ../../../../Resources/Common.robot
 Resource            ../../../../Resources/Page/OCPDashboard/Builds/Builds.robot
 Resource            ../../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Resource            ../../../../Resources/CLI/DataSciencePipelines/DataSciencePipelinesBackend.resource
+Resource            ../../../../Resources/Page/ODH/Prometheus/Triage.resource
 Library             OperatingSystem
 Library             SeleniumLibrary
 Library             JupyterLibrary
@@ -348,6 +349,50 @@ Verify Data Science Pipelines Operator Alert Fires When Operator Is Down
     ...    timeout=10 min
 
     [Teardown]    ODS.Restore Default Deployment Sizes
+
+Verify Alerts Have Links To The Triage Guide
+    [Documentation]    Verifies that all alerts have expected and working links to the triage guide
+    [Tags]    Tier3
+    ...       ODS-558
+    ...       RHOAIENG-13073
+    ...       Monitoring
+    ${all_rules}=    Get Rules    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    alert
+    ${all_rules}=    Get From Dictionary    ${all_rules['data']}    groups
+
+    FOR    ${rule}    IN    @{all_rules}
+        ${rule_name}=    Get From Dictionary    ${rule}    name
+        ${rules_list}=    Get From Dictionary    ${rule}    rules
+        FOR    ${sub_rule}    IN    @{rules_list}
+            ${name}=    Get From Dictionary    ${sub_rule}    name
+            ${exists}=    Run Keyword And Return Status    Dictionary Should Contain Key    ${sub_rule['annotations']}    triage
+            IF    not ${exists}
+                IF    '${name}' != 'DeadManSnitch'
+                    Run Keyword And Continue On Failure    FAIL    msg=Alert '${name}' does not have triage entry
+                END
+                CONTINUE
+            END
+            ${expected_triage_url}=    Set Variable    ${EMPTY}
+            FOR    ${item}    IN    &{TRIAGE_URLS}
+                ${matches}=    Get Regexp Matches    ${name}    ${item}[0]
+                IF  len(${matches}) > 0
+                    ${expected_triage_url}=    Set Variable    ${item}[1]
+                    BREAK
+                END
+            END
+            IF    '${expected_triage_url}' == ''
+                Run Keyword And Continue On Failure    FAIL    msg=TRIAGE_URLS does not have expected value for '${name}', please add it
+                CONTINUE
+            END
+            ${triage_url}=    Get From Dictionary    ${sub_rule['annotations']}    triage
+            Run Keyword And Continue On Failure    Should Be Equal    ${expected_triage_url}    ${triage_url}    msg=Triage URL does not match the expected one
+
+            ${result}=    Run Process    curl -s -o /dev/null -w '\%{http_code}\n' ${triage_url}
+            ...    shell=true
+            ...    stderr=STDOUT
+            Run Keyword And Continue On Failure    Should Be Equal As Integers	    ${result.rc}    0    msg=Downloading the triage document for ${sub_rule} failed
+            Run Keyword And Continue On Failure    Should Be Equal As Integers	    ${result.stdout}    200    msg=HTTP Status code was not 200
+        END
+    END
 
 *** Keywords ***
 Alerts Suite Setup

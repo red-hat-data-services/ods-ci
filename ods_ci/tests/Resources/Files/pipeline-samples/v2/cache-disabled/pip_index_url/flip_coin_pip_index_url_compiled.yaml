@@ -277,7 +277,7 @@ deploymentSpec:
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
           \ python3 -m pip install --quiet --no-warn-script-location --index-url $PIP_INDEX_URL\
-          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.10.1' '--no-deps' 'typing-extensions>=3.7.4,<5;\
+          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.13.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
           \ python_version<\"3.9\"' && \"$0\" \"$@\"\n"
         - sh
         - -ec
@@ -294,7 +294,7 @@ deploymentSpec:
           \ tails randomly.\"\"\"\n    import random  # noqa: PLC0415\n\n    result\
           \ = \"heads\" if random.randint(0, 1) == 0 else \"tails\"\n    print(result)\n\
           \    return result\n\n"
-        image: registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61
+        image: registry.redhat.io/ubi9/python-312@sha256:e80ff3673c95b91f0dafdbe97afb261eab8244d7fd8b47e20ffcbcfee27fb168
     exec-print-msg:
       container:
         args:
@@ -308,7 +308,7 @@ deploymentSpec:
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
           \ python3 -m pip install --quiet --no-warn-script-location --index-url $PIP_INDEX_URL\
-          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.10.1' '--no-deps' 'typing-extensions>=3.7.4,<5;\
+          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.13.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
           \ python_version<\"3.9\"' && \"$0\" \"$@\"\n"
         - sh
         - -ec
@@ -323,7 +323,7 @@ deploymentSpec:
         - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
           \ *\n\ndef print_msg(msg: str):\n    \"\"\"Print a message.\"\"\"\n    print(msg)\n\
           \n"
-        image: registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61
+        image: registry.redhat.io/ubi9/python-312@sha256:e80ff3673c95b91f0dafdbe97afb261eab8244d7fd8b47e20ffcbcfee27fb168
     exec-print-msg-2:
       container:
         args:
@@ -337,7 +337,7 @@ deploymentSpec:
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
           \ python3 -m pip install --quiet --no-warn-script-location --index-url $PIP_INDEX_URL\
-          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.10.1' '--no-deps' 'typing-extensions>=3.7.4,<5;\
+          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.13.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
           \ python_version<\"3.9\"' && \"$0\" \"$@\"\n"
         - sh
         - -ec
@@ -352,7 +352,7 @@ deploymentSpec:
         - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
           \ *\n\ndef print_msg(msg: str):\n    \"\"\"Print a message.\"\"\"\n    print(msg)\n\
           \n"
-        image: registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61
+        image: registry.redhat.io/ubi9/python-312@sha256:e80ff3673c95b91f0dafdbe97afb261eab8244d7fd8b47e20ffcbcfee27fb168
     exec-print-msg-3:
       container:
         args:
@@ -366,7 +366,7 @@ deploymentSpec:
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
           \ python3 -m pip install --quiet --no-warn-script-location --index-url $PIP_INDEX_URL\
-          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.10.1' '--no-deps' 'typing-extensions>=3.7.4,<5;\
+          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.13.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
           \ python_version<\"3.9\"' && \"$0\" \"$@\"\n"
         - sh
         - -ec
@@ -381,7 +381,7 @@ deploymentSpec:
         - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
           \ *\n\ndef print_msg(msg: str):\n    \"\"\"Print a message.\"\"\"\n    print(msg)\n\
           \n"
-        image: registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61
+        image: registry.redhat.io/ubi9/python-312@sha256:e80ff3673c95b91f0dafdbe97afb261eab8244d7fd8b47e20ffcbcfee27fb168
     exec-print-msg-4:
       container:
         args:
@@ -395,7 +395,7 @@ deploymentSpec:
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
           \ python3 -m pip install --quiet --no-warn-script-location --index-url $PIP_INDEX_URL\
-          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.10.1' '--no-deps' 'typing-extensions>=3.7.4,<5;\
+          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.13.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
           \ python_version<\"3.9\"' && \"$0\" \"$@\"\n"
         - sh
         - -ec
@@ -410,7 +410,7 @@ deploymentSpec:
         - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
           \ *\n\ndef print_msg(msg: str):\n    \"\"\"Print a message.\"\"\"\n    print(msg)\n\
           \n"
-        image: registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61
+        image: registry.redhat.io/ubi9/python-312@sha256:e80ff3673c95b91f0dafdbe97afb261eab8244d7fd8b47e20ffcbcfee27fb168
     exec-random-num:
       container:
         args:
@@ -424,7 +424,7 @@ deploymentSpec:
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
           \ python3 -m pip install --quiet --no-warn-script-location --index-url $PIP_INDEX_URL\
-          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.10.1' '--no-deps' 'typing-extensions>=3.7.4,<5;\
+          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.13.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
           \ python_version<\"3.9\"' && \"$0\" \"$@\"\n"
         - sh
         - -ec
@@ -441,7 +441,7 @@ deploymentSpec:
           \ random number between low and high.\"\"\"\n    import random  # noqa:\
           \ PLC0415\n\n    result = random.randint(low, high)\n    print(result)\n\
           \    return result\n\n"
-        image: registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61
+        image: registry.redhat.io/ubi9/python-312@sha256:e80ff3673c95b91f0dafdbe97afb261eab8244d7fd8b47e20ffcbcfee27fb168
     exec-random-num-2:
       container:
         args:
@@ -455,7 +455,7 @@ deploymentSpec:
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
           \ python3 -m pip install --quiet --no-warn-script-location --index-url $PIP_INDEX_URL\
-          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.10.1' '--no-deps' 'typing-extensions>=3.7.4,<5;\
+          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.13.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
           \ python_version<\"3.9\"' && \"$0\" \"$@\"\n"
         - sh
         - -ec
@@ -472,7 +472,7 @@ deploymentSpec:
           \ random number between low and high.\"\"\"\n    import random  # noqa:\
           \ PLC0415\n\n    result = random.randint(low, high)\n    print(result)\n\
           \    return result\n\n"
-        image: registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61
+        image: registry.redhat.io/ubi9/python-312@sha256:e80ff3673c95b91f0dafdbe97afb261eab8244d7fd8b47e20ffcbcfee27fb168
 pipelineInfo:
   description: Shows how to use dsl.If().
   name: conditional-execution-pipeline
@@ -518,7 +518,7 @@ root:
         taskInfo:
           name: flip-coin
 schemaVersion: 2.1.0
-sdkVersion: kfp-2.10.1
+sdkVersion: kfp-2.13.0
 ---
 platforms:
   kubernetes:
@@ -527,6 +527,9 @@ platforms:
         exec-flip-coin:
           configMapAsEnv:
           - configMapName: ds-pipeline-custom-env-vars
+            configMapNameParameter:
+              runtimeValue:
+                constant: ds-pipeline-custom-env-vars
             keyToEnv:
             - configMapKey: pip_index_url
               envVar: PIP_INDEX_URL
@@ -535,6 +538,9 @@ platforms:
         exec-print-msg:
           configMapAsEnv:
           - configMapName: ds-pipeline-custom-env-vars
+            configMapNameParameter:
+              runtimeValue:
+                constant: ds-pipeline-custom-env-vars
             keyToEnv:
             - configMapKey: pip_index_url
               envVar: PIP_INDEX_URL
@@ -543,6 +549,9 @@ platforms:
         exec-print-msg-2:
           configMapAsEnv:
           - configMapName: ds-pipeline-custom-env-vars
+            configMapNameParameter:
+              runtimeValue:
+                constant: ds-pipeline-custom-env-vars
             keyToEnv:
             - configMapKey: pip_index_url
               envVar: PIP_INDEX_URL
@@ -551,6 +560,9 @@ platforms:
         exec-print-msg-3:
           configMapAsEnv:
           - configMapName: ds-pipeline-custom-env-vars
+            configMapNameParameter:
+              runtimeValue:
+                constant: ds-pipeline-custom-env-vars
             keyToEnv:
             - configMapKey: pip_index_url
               envVar: PIP_INDEX_URL
@@ -559,6 +571,9 @@ platforms:
         exec-print-msg-4:
           configMapAsEnv:
           - configMapName: ds-pipeline-custom-env-vars
+            configMapNameParameter:
+              runtimeValue:
+                constant: ds-pipeline-custom-env-vars
             keyToEnv:
             - configMapKey: pip_index_url
               envVar: PIP_INDEX_URL
@@ -567,6 +582,9 @@ platforms:
         exec-random-num:
           configMapAsEnv:
           - configMapName: ds-pipeline-custom-env-vars
+            configMapNameParameter:
+              runtimeValue:
+                constant: ds-pipeline-custom-env-vars
             keyToEnv:
             - configMapKey: pip_index_url
               envVar: PIP_INDEX_URL
@@ -575,6 +593,9 @@ platforms:
         exec-random-num-2:
           configMapAsEnv:
           - configMapName: ds-pipeline-custom-env-vars
+            configMapNameParameter:
+              runtimeValue:
+                constant: ds-pipeline-custom-env-vars
             keyToEnv:
             - configMapKey: pip_index_url
               envVar: PIP_INDEX_URL

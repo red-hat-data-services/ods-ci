@@ -14,7 +14,7 @@ Library   OpenShiftLibrary
 
 
 *** Variables ***
-${KFNBC_SPAWNER_HEADER_TITLE} =    Start a notebook server
+${KFNBC_SPAWNER_HEADER_TITLE} =    Start a basic workbench
 ${JUPYTERHUB_DROPDOWN_XPATH} =    //button[@aria-label="Options menu"]
 ${KFNBC_CONTAINER_SIZE_TITLE} =    //div[.="Deployment size"]/..//span[.="Container Size"]
 ${KFNBC_CONTAINER_SIZE_DROPDOWN_XPATH} =  //label[@for="modal-notebook-container-size"]/../..//button[@aria-label="Options menu"]
@@ -54,7 +54,7 @@ Select Notebook Image
     [Arguments]    ${notebook_image}    ${version}=default
     ${KFNBC_IMAGE_ROW} =    Set Variable    //input[contains(@id, "${notebook_image}")]
     ${KFNBC_IMAGE_DROPDOWN} =    Set Variable    ${KFNBC_IMAGE_ROW}/../../div[contains(@class, "notebook-image-tags")]
-    Wait Until Element Is Visible    xpath://div[.="Notebook image"]/..
+    Wait Until Element Is Visible    xpath://div[.="Workbench image"]/..
     Wait Until Element Is Visible    xpath=${KFNBC_IMAGE_ROW}
     Element Should Be Enabled    xpath=${KFNBC_IMAGE_ROW}
     IF    "${version}"=="default"
@@ -204,7 +204,7 @@ Spawn Notebook
     #IF  ${version-check}==True
     #    Click Element  xpath://input[@id="checkbox-notebook-browser-tab-preference"]
     #END
-    Click Button  Start server
+    Click Button  Start workbench
     # Waiting for 60 seconds, since a long wait seems to redirect the user to the control panel
     # if the spawn was successful
     ${modal} =    Run Keyword And Return Status    Wait Until Page Contains Element
@@ -398,7 +398,7 @@ Launch JupyterHub Spawner From Dashboard
     Verify Service Account Authorization Not Required
     Fix Spawner Status
     #Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']
-    Wait Until Page Contains   Start server
+    Wait Until Page Contains   Start workbench
     Wait Until JupyterHub Spawner Is Ready
 
 Get Spawner Progress Message
@@ -448,10 +448,10 @@ Control Panel Is Visible
 
 Handle Control Panel
    [Documentation]  Handles control panel page
-   Wait Until Page Contains     Stop notebook server    timeout=30s
-   Click Button  Stop notebook server
-   Wait Until Page Contains Element  xpath://button[.="Stop server"]
-   Click Button  xpath://button[.="Stop server"]
+   Wait Until Page Contains     Stop workbench    timeout=30s
+   Click Button  Stop workbench
+   Wait Until Page Contains Element  xpath://button[@data-testid="stop-workbench-button"]
+   Click Button  xpath://button[@data-testid="stop-workbench-button"]
 
 Spawner Modal Is Visible
    [Documentation]  Checks if the spawner modal is present in the spawner page
@@ -545,10 +545,15 @@ Get Container Size
    Wait Until Page Contains Element    ${KFNBC_CONTAINER_SIZE_TITLE}
    ...    timeout=30   error=Container size selector is not present in KFNBC Spawner
    Click Element    xpath:${KFNBC_CONTAINER_SIZE_DROPDOWN_XPATH}
-   Wait Until Page Contains Element    xpath://span[.="${container_size}"]/../..  timeout=10
+   Wait Until Page Contains Element    xpath://button[@role="option"]/span[.="${container_size}"]  timeout=10
+   Wait Until Page Contains Element
+   ...    xpath://li[@data-testid="${container_size}"]//span[contains(text(), "Limits")]  timeout=10
+   Sleep    1
    ${data}   Get Text  xpath://li[@data-testid="${container_size}"]//span[contains(text(), "Limits")]
    ${l_data}   Convert To Lower Case    ${data}
-   ${data}    Get Formated Container Size To Dictionary     ${l_data}
+   # Our Dashboard shows GiB, but the native interface of OpenShift uses just Gi
+   ${l_data_gi}    Replace String    ${l_data}    gib    gi
+   ${data}    Get Formated Container Size To Dictionary     ${l_data_gi}
    RETURN  ${data}
 
 Get Formated Container Size To Dictionary

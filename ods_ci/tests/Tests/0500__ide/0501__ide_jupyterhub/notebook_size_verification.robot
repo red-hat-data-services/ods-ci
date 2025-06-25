@@ -25,7 +25,7 @@ Test Tags          JupyterHub
 *** Variables ***
 ${NAMESPACE}        ${NOTEBOOKS_NAMESPACE}
 # Anything above Small requires more memory than our standard testsing cluster can provide.
-# TODO: We shall come up with some solution in the future.
+# TODO: We shall come up with some solution in the future. E.g. just check the created Notebook CR only.
 @{NOTEBOOK_SIZE}    Small    # Medium    Large    X Large
 ${DEFAULT_SIZE}     {"limits":{"cpu":"2","memory":"8gi"},"requests":{"cpu":"1","memory":"8gi"}}
 ${CUSTOME_SIZE}     {"limits":{"cpu":"6","memory":"9gi"},"requests":{"cpu":"2","memory":"6gi"}}
@@ -86,7 +86,7 @@ Spawn Notebook And Verify Size
         ${dict_pod_data}    Evaluate    json.loads('''${data}''')    json
         IF    &{dict_pod_data} != &{jh_container_size}    Run Keyword And Continue On Failure
         ...    Fail    Container size didn't match.
-        ...    Pod container size '${dict_pod_data}' and JH conaintainer is '${jh_container_size}'
+        ...    Pod container size '${dict_pod_data}' and JH container is '${jh_container_size}'
         Fix Spawner Status
     END
 

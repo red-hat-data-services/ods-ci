@@ -39,7 +39,7 @@ Open Browser And Start Notebook As First User
     Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     Verify Service Account Authorization Not Required
-    Wait Until Page Contains    Start a notebook server
+    Wait Until Page Contains    Start a basic workbench
     Fix Spawner Status
     Spawn Notebook With Arguments    image=minimal-notebook
     @{old_browser} =    Get Browser Ids
@@ -60,7 +60,7 @@ Open Browser And Start Notebook As Second User With Env Vars
     Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub    ${TEST_USER_2.USERNAME}    ${TEST_USER_2.PASSWORD}    ${TEST_USER_2.AUTH_TYPE}
     Verify Service Account Authorization Not Required
-    Wait Until Page Contains    Start a notebook server
+    Wait Until Page Contains    Start a basic workbench
     Fix Spawner Status
     &{first_pod_details} =  Create Dictionary  pod_ip=${pod_ip}  pod_login=${pod_login_name}
     Spawn Notebook With Arguments    image=minimal-notebook    username=${TEST_USER_2.USERNAME}

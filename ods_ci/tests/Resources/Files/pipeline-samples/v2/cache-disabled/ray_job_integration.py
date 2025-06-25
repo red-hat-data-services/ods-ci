@@ -1,11 +1,11 @@
 from kfp import compiler, dsl
 
 common_base_image = (
-    "registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61"
+    "registry.redhat.io/ubi9/python-311@sha256:82a16d7c4da926081c0a4cc72a84d5ce37859b50a371d2f9364313f66b89adf7"
 )
 
 # image and the sdk has a fixed value because the version matters
-@dsl.component(packages_to_install=["codeflare-sdk==v0.27.0"], base_image=common_base_image)
+@dsl.component(packages_to_install=["codeflare-sdk==v0.28.1"], base_image=common_base_image)
 def ray_fn(
     AWS_DEFAULT_ENDPOINT: str,
     AWS_STORAGE_BUCKET: str,
@@ -321,7 +321,7 @@ minio
             worker_cpu_limits=1,
             worker_memory_requests=1,
             worker_memory_limits=2,
-            image="quay.io/modh/ray@sha256:db667df1bc437a7b0965e8031e905d3ab04b86390d764d120e05ea5a5c18d1b4",
+            image="quay.io/modh/ray@sha256:a5b7c04a14f180d7ca6d06a5697f6bb684e40a26b95a0c872cac23b552741707",
             verify_tls=False
         )
     )
@@ -348,9 +348,9 @@ minio
         mnist_file.write(training_script)
     with open(mnist_directory + "/mnist_pip_requirements.txt", "w") as pip_requirements_file:
         pip_requirements_file.write(pip_requirements)
-    
+
     assert_jobsubmit_withlogin(cluster, mnist_directory)
-    
+
     cluster.down()
 
 @dsl.pipeline(

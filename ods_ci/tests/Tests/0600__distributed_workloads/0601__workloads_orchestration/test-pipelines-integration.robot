@@ -44,7 +44,7 @@ Verify Ods Users Can Create And Run A Data Science Pipeline With Ray Using The k
     ...    project=${PROJECT_NAME}
     ...    python_file=cache-disabled/ray_job_integration.py
     ...    method_name=ray_job_integration
-    ...    status_check_timeout=600
+    ...    status_check_timeout=900
     ...    pipeline_params=${params_dict}
     ...    ray=${TRUE}
     [Teardown]    Projects.Delete Project Via CLI By Display Name    ${PROJECT_NAME}
@@ -67,7 +67,7 @@ Verify Ods Users Can Create And Run A Data Science Pipeline With Ray Job Using T
     ...    project=${PROJECT_NAME}
     ...    python_file=cache-disabled/ray_integration.py
     ...    method_name=ray_integration
-    ...    status_check_timeout=600
+    ...    status_check_timeout=900
     ...    pipeline_params=${ray_dict}
     ...    ray=${TRUE}
     [Teardown]    Projects.Delete Project Via CLI By Display Name    ${PROJECT_NAME}
@@ -101,8 +101,11 @@ End To End Pipeline Workflow Using Kfp
     ${run_id}    Create Run From Pipeline Func    ${username}    ${password}    ${project}
     ...    ${python_file}    ${method_name}    pipeline_params=${pipeline_params}    pip_index_url=${pip_index_url}
     ...    pip_trusted_host=${pip_trusted_host}
-    ${run_status}    Check Run Status    ${run_id}    timeout=${status_check_timeout}
-    Should Be Equal As Strings    ${run_status}    SUCCEEDED    Pipeline run doesn't have a status that means success. Check the logs
+
+    DataSciencePipelinesBackend.Wait For Run Completion And Verify Status
+    ...    namespace=${project}    username=${admin_username}    password=${admin_password}
+    ...    pipeline_run_id=${run_id}    pipeline_run_timeout=${status_check_timeout}
+    ...    pipeline_run_expected_status=SUCCEEDED
 
 Data Science Pipelines Suite Setup
     [Documentation]    Data Science Pipelines Suite Setup

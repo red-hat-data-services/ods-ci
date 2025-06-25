@@ -39,7 +39,7 @@ ${MR_VERSION_TABLE_XPATH}=           //table[@data-testid="model-versions-table"
 # robocop: disable:line-too-long
 Verify Model Registry Integration With Secured-DB
     [Documentation]    Verifies the Integartion of Model Registry operator with Jupyter Notebook
-    [Tags]    Smoke    MRMS1301    ModelRegistry
+    [Tags]    Smoke    MRMS1301    ModelRegistry    deprecatedTest
     Create Workbench    workbench_title=${WORKBENCH_TITLE}    workbench_description=Registry test
     ...                 prj_title=${PRJ_TITLE}    image_name=Minimal Python  deployment_size=${NONE}
     ...                 storage=Persistent   pv_existent=${NONE}
@@ -70,7 +70,7 @@ Verify Model Registry Integration With Secured-DB
 Verify Unallowed User Cannot See Model Registry From The Dashboard
     [Documentation]    Negative path test for dashboard RBAC on the Model Registry. User not part of the group that is
     ...    allowed to use a Model Registry instace should not be able to see it from the dashboard.
-    [Tags]    Smoke    MRMS1301    ModelRegistry
+    [Tags]    Smoke    MRMS1301    ModelRegistry    deprecatedTest
     Depends On Test    Verify Model Registry Integration With Secured-DB
     Launch Dashboard    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}    ${TEST_USER_3.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}

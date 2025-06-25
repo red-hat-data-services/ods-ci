@@ -14,7 +14,7 @@ spec:
       spec:
         containers:
         - name: ray-head
-          image: quay.io/modh/ray@sha256:0d715f92570a2997381b7cafc0e224cfa25323f18b9545acfd23bc2b71576d06
+          image: quay.io/modh/ray@sha256:a5b7c04a14f180d7ca6d06a5697f6bb684e40a26b95a0c872cac23b552741707
           ports:
           - containerPort: 6379
             name: gcs
@@ -43,7 +43,7 @@ spec:
       spec:
         containers:
         - name: ray-worker
-          image: quay.io/modh/ray@sha256:0d715f92570a2997381b7cafc0e224cfa25323f18b9545acfd23bc2b71576d06
+          image: quay.io/modh/ray@sha256:a5b7c04a14f180d7ca6d06a5697f6bb684e40a26b95a0c872cac23b552741707
           lifecycle:
             preStop:
               exec:

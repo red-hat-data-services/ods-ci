@@ -1,10 +1,9 @@
 *** Settings ***
-Documentation   RHODS_Pager_duty_key__VERIFICATION
-...             Verify PagerDuty dummy secret is correctly stored in when installing RHODS not using the add-on flow
+Documentation   RHODS_alertmanager__VERIFICATION
+...             Verify alertmanager secrets are correctly stored in when installing RHODS not using the add-on flow
 ...
 ...             = Variables =
 ...             | NAMESPACE                | Required |        RHODS Namespace/Project for RHODS operator POD |
-...             | REGEX_PATTERN            | Required |        Regular Expression Pattern to match the erro msg in capture log|
 ...             | Secret Name              | Required |        Secret Name|
 ...             | CONFIGMAP_NAME           | Required |        Name  of config map|
 
@@ -29,15 +28,32 @@ ${SECRET_NAME}          redhat-rhods-pagerduty
 *** Test Cases ***
 PagerDuty Dummy Secret Verification
      [Documentation]    Verification of PagerDuty Secret
-     [Tags]  Sanity
-     ...     Tier1
+     [Tags]  Smoke
      ...     ODS-737
+     ...     ODS-500
+     ...     RHOAIENG-13069
      ...     Deployment-Cli
-     ...       Monitoring
+     ...     Monitoring
      Skip If RHODS Is Self-Managed
      ${service_key}   Get PagerDuty Key From Alertmanager ConfigMap
      ${secret_key}    Get PagerDuty Key From Secrets
      Should Be Equal As Strings    ${service_key}   ${secret_key}   foo-bar
+
+Verify DeadManSnitch configuration
+    [Documentation]    Verification of DeadManSnitch configuration
+    [Tags]   Smoke
+    ...      ODS-648
+    ...      RHOAIENG-13268
+    ...      Monitoring
+    Skip If RHODS Is Self-Managed
+    ${rc}    Run And Return Rc
+    ...    oc get secret redhat-rhods-deadmanssnitch -n ${MONITORING_NAMESPACE}
+    Should Be Equal As Integers    ${rc}    0
+    ${secret_snitch_url}    Run
+    ...    oc get secret redhat-rhods-deadmanssnitch -n ${MONITORING_NAMESPACE} -o yaml | yq -r '.data.SNITCH_URL' | base64 -d
+    ${configmap_snitch_url}    Run
+    ...    oc get configmap alertmanager -n ${MONITORING_NAMESPACE} -o yaml | yq -r '.data["alertmanager.yml"] | from_yaml | .receivers[] | select(.name == "deadman-snitch") | .webhook_configs[0].url'
+    Should Start With    ${configmap_snitch_url}    ${secret_snitch_url}
 
 
 *** Keywords ***

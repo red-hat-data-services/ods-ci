@@ -82,7 +82,6 @@ Validate Kueue Managed State
     ...    RHOAIENG-5435
     ...    kueue-managed
     ...    Integration
-    ...    ExcludeOnODHCommunity
     Set DSC Component Managed State And Wait For Completion
     ...    kueue
     ...    ${KUEUE_DEPLOYMENT_NAME}
@@ -119,7 +118,6 @@ Validate Codeflare Managed State
     ...    codeflare-managed
     ...    Integration
     ...    RHOAIENG-24666
-    ...    ExcludeOnODHCommunity
     Set DSC Component Managed State And Wait For Completion
     ...    codeflare
     ...    ${CODEFLARE_DEPLOYMENT_NAME}
@@ -153,7 +151,6 @@ Validate Ray Managed State
     ...    RHOAIENG-5435
     ...    ray-managed
     ...    Integration
-    ...    ExcludeOnODHCommunity
     Set DSC Component Managed State And Wait For Completion
     ...    ray
     ...    ${RAY_DEPLOYMENT_NAME}
@@ -187,7 +184,6 @@ Validate Training Operator Managed State
     ...    RHOAIENG-6627
     ...    training-managed
     ...    Integration
-    ...    ExcludeOnODHCommunity
     Set DSC Component Managed State And Wait For Completion
     ...    trainingoperator
     ...    ${TRAINING_DEPLOYMENT_NAME}
@@ -221,7 +217,6 @@ Validate Dashboard Managed State
     ...    RHOAIENG-7298
     ...    dashboard-managed
     ...    Integration
-    ...    ExcludeOnODHCommunity
     Set DSC Component Managed State And Wait For Completion
     ...    dashboard
     ...    ${DASHBOARD_DEPLOYMENT_NAME}
@@ -255,7 +250,6 @@ Validate Datasciencepipelines Managed State
     ...    RHOAIENG-7298
     ...    operator-datasciencepipelines-managed
     ...    Integration
-    ...    ExcludeOnODHCommunity
     Set DSC Component Managed State And Wait For Completion
     ...    datasciencepipelines
     ...    ${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}
@@ -289,7 +283,6 @@ Validate TrustyAi Managed State
     ...    RHOAIENG-14018
     ...    trustyai-managed
     ...    Integration
-    ...    ExcludeOnODHCommunity
     Set DSC Component Managed State And Wait For Completion
     ...    trustyai
     ...    ${TRUSTYAI_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
@@ -325,7 +318,6 @@ Validate Modelmeshserving Managed State
     ...    RHOAIENG-8546
     ...    modelmeshserving-managed
     ...    Integration
-    ...    ExcludeOnODHCommunity
     Set DSC Component Managed State And Wait For Completion
     ...    modelmeshserving
     ...    ${MODELMESH_CONTROLLER_DEPLOYMENT_NAME}
@@ -385,7 +377,6 @@ Validate ModelRegistry Managed State
     ...    RHOAIENG-10404
     ...    modelregistry-managed
     ...    Integration
-    ...    ExcludeOnODHCommunity
     Set DSC Component Managed State And Wait For Completion
     ...    modelregistry
     ...    ${MODELREGISTRY_CONTROLLER__DEPLOYMENT_NAME}
@@ -428,7 +419,6 @@ Validate KServe Controller Manager Managed State
     ...    kserve-controller-manager-managed
     ...    Integration
     ...    ExcludeOnODH
-    ...    ExcludeOnODHCommunity
     ...    ExcludeOnRHOAI
     Set DSC Component Managed State And Wait For Completion
     ...    kserve
@@ -467,7 +457,7 @@ Validate KServe Controller Manager Removed State
 Validate Workbenches Managed State
     [Documentation]    Validate that the DSC Workbenches component Managed state creates the expected resources,
     ...    check that Workbenches deployment is created and pods are in Ready state
-    [Tags]      Operator        Tier1       workbenches-managed     Integration     ExcludeOnODHCommunity
+    [Tags]      Operator        Tier1       workbenches-managed     Integration
 
     Set DSC Component Managed State And Wait For Completion
     ...    workbenches

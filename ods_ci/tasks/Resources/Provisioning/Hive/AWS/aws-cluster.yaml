@@ -59,6 +59,9 @@ items:
       platform:
         aws:
           region: {{ aws_region|default("us-east-1") }}
+          propagateUserTags: true
+          userTags:
+            team: {{ team|default("unknown-team") }}
       pullSecret: {{ pull_secret|default("") }}
       sshKey: {{ ssh_key|default("") }}
 - apiVersion: v1

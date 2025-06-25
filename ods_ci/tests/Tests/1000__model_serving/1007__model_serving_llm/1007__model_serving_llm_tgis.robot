@@ -29,7 +29,7 @@ ${USE_GPU}=    ${FALSE}
 Verify User Can Serve And Query A Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and TGIS runtime
-    [Tags]    Sanity    ODS-2341
+    [Tags]    Sanity    ODS-2341        deprecatedTest
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${TEST_NS}-cli
     ${test_namespace}=    Set Variable     ${TEST_NS}-cli
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -119,7 +119,7 @@ Verify User Can Deploy Multiple Models In The Same Namespace    # robocop: off=t
 
 Verify User Can Deploy Multiple Models In Different Namespaces    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Checks if user can deploy and query multiple models in the different namespaces
-    [Tags]    Tier1    ODS-2378
+    [Tags]    Tier1    ODS-2378     deprecatedTest
     [Setup]    Run Keywords    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=singlemodel-multi1
     ...        AND
     ...        Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=singlemodel-multi2
@@ -393,7 +393,7 @@ Verify User Can Set Requests And Limits For A Model    # robocop: off=too-long-t
 Verify Model Can Be Served And Query On A GPU Node    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
     ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    Tier1    ODS-2381    Resources-GPU    NVIDIA-GPUs
+    [Tags]    Tier1    ODS-2381    Resources-GPU    NVIDIA-GPUs    Kserve-caikit
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=singlemodel-gpu
     ${test_namespace}=    Set Variable    singlemodel-gpu
     ${model_name}=    Set Variable    flan-t5-small-caikit
@@ -431,7 +431,7 @@ Verify Model Can Be Served And Query On A GPU Node    # robocop: off=too-long-te
 Verify Non Admin Can Serve And Query A Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Basic tests leveraging on a non-admin user for preparing, deploying and querying a LLM model
     ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    Tier1    ODS-2326
+    [Tags]    Tier1    ODS-2326     Kserve-caikit
     [Setup]    Run Keywords   Login To OCP Using API    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}  AND
     ...        Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=non-admin-test
     ${test_namespace}=    Set Variable     non-admin-test

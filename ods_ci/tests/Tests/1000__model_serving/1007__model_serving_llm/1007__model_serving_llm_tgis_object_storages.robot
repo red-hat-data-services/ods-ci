@@ -16,12 +16,12 @@ ${MODEL_S3_DIR}=    flan-t5-small-hf
 ${TEST_NS}=    tgis-storages
 ${TGIS_RUNTIME_NAME}=    tgis-runtime
 
-  
+
 *** Test Cases ***
 Verify User Can Serve And Query A Model From Minio
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and TGIS runtime fetching models from a MinIO server
-    [Tags]    Tier1    RHOAIENG-3490
+    [Tags]    Tier1    RHOAIENG-3490    deprecatedTest
     ${minio_namespace}=    Set Variable    minio-models
     ${minio_endpoint}=    Deploy MinIO    namespace=${minio_namespace}
     ${key}    ${pw}=    Get Minio Credentials    namespace=${minio_namespace}

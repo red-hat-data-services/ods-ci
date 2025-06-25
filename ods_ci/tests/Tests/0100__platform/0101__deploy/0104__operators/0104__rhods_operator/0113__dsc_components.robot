@@ -16,6 +16,9 @@ ${OPERATOR_NS}                                          ${OPERATOR_NAMESPACE}
 ${APPLICATIONS_NS}                                      ${APPLICATIONS_NAMESPACE}
 ${KNATIVE_SERVING_NS}                                   knative-serving
 ${DSC_NAME}                                             default-dsc
+${KUEUE_NS}                                             openshift-kueue-operator
+${KUEUE_OP_NAME}                                        kueue-operator
+${CERT_MANAGER_OP_NAME}                                 openshift-cert-manager-operator
 ${KUEUE_LABEL_SELECTOR}                                 app.kubernetes.io/name=kueue
 ${KUEUE_DEPLOYMENT_NAME}                                kueue-controller-manager
 ${CODEFLARE_LABEL_SELECTOR}                             app.kubernetes.io/name=codeflare-operator
@@ -73,15 +76,31 @@ ${IS_NOT_PRESENT}                                       1
 
 
 *** Test Cases ***
-Validate Kueue Managed State
+Validate Kueue Removed To Managed State Transition
     [Documentation]    Validate that the DSC Kueue component Managed state creates the expected resources,
     ...    check that kueue deployment is created and pod is in Ready state
     [Tags]
     ...    Operator
     ...    Tier1
     ...    RHOAIENG-5435
-    ...    kueue-managed
+    ...    kueue-managed-from-removed
     ...    Integration
+
+    ${initial_state}=    Get DSC Component State    ${DSC_NAME}    kueue    ${OPERATOR_NS}
+    ${ocp_version}=     Get Ocp Cluster Version
+    ${install_kueue_by_ocp_version}=    GTE    ${ocp_version}    4.18.0
+    IF    "${initial_state}" == "Unmanaged"
+            ${namespace_to_check}=    Set Variable    ${KUEUE_NS}
+    ELSE
+            ${namespace_to_check}=    Set Variable    ${APPLICATIONS_NAMESPACE}
+    END
+
+    Set DSC Component Removed State And Wait For Completion
+    ...    kueue
+    ...    ${KUEUE_DEPLOYMENT_NAME}
+    ...    ${KUEUE_LABEL_SELECTOR}
+    ...    namespace=${namespace_to_check}
+    Uninstall Kueue Operator CLI
     Set DSC Component Managed State And Wait For Completion
     ...    kueue
     ...    ${KUEUE_DEPLOYMENT_NAME}
@@ -90,23 +109,214 @@ Validate Kueue Managed State
     ...    ${KUEUE_DEPLOYMENT_NAME}
     ...    ${IMAGE_PULL_PATH}
 
-    [Teardown]      Restore DSC Component State     kueue       ${KUEUE_DEPLOYMENT_NAME}        ${KUEUE_LABEL_SELECTOR}     ${SAVED_MANAGEMENT_STATES.KUEUE}
+    [Teardown]      Restore Kueue Initial State
 
-Validate Kueue Removed State
-    [Documentation]    Validate that Kueue management state Removed does remove relevant resources.
+Validate Kueue Removed To Unmanaged State Transition
+    [Documentation]    Validate that the DSC Kueue component Unmanaged state creates the expected resources,
+    ...    check that kueue deployment is created and pod is in Ready state
+    [Tags]
+    ...    Operator
+    ...    Tier1
+    ...    kueue-unmanaged-from-removed
+    ...    Integration
+
+    ${initial_state}=    Get DSC Component State    ${DSC_NAME}    kueue    ${OPERATOR_NS}
+    ${ocp_version}=     Get Ocp Cluster Version
+    ${install_kueue_by_ocp_version}=    GTE    ${ocp_version}    4.18.0
+    IF    "${initial_state}" == "Unmanaged"
+            ${namespace_to_check}=    Set Variable    ${KUEUE_NS}
+    ELSE
+            ${namespace_to_check}=    Set Variable    ${APPLICATIONS_NAMESPACE}
+    END
+
+    IF    ${install_kueue_by_ocp_version}
+            ${kueue_installed} =   Check If Operator Is Installed Via CLI      ${KUEUE_OP_NAME}
+            IF    ${kueue_installed}
+                    Uninstall Kueue Operator CLI
+            END
+    END
+
+    Skip If    condition=${install_kueue_by_ocp_version}==False   msg="Unmanaged Kueue status is not supported in OCP ${ocp_version}. It needs to be 4.18+"
+    Set DSC Component Removed State And Wait For Completion
+    ...    kueue
+    ...    ${KUEUE_DEPLOYMENT_NAME}
+    ...    ${KUEUE_LABEL_SELECTOR}
+    ...    namespace=${namespace_to_check}
+    Set DSC Component Unmanaged State And Wait For Completion
+    ...    kueue
+    ...    ${KUEUE_DEPLOYMENT_NAME}
+    ...    ${KUEUE_LABEL_SELECTOR}
+    ...    namespace=${KUEUE_NS}
+    ...    wait_for_completion=False
+    Install Kueue Dependencies
+    Wait For Resources To Be Available
+    ...    ${KUEUE_DEPLOYMENT_NAME}
+    ...    ${KUEUE_LABEL_SELECTOR}
+    ...    namespace=${KUEUE_NS}
+    Check That Image Pull Path Is Correct
+    ...    ${KUEUE_DEPLOYMENT_NAME}
+    ...    ${IMAGE_PULL_PATH}
+    ...    namespace=${KUEUE_NS}
+
+    [Teardown]      Restore Kueue Initial State
+
+Validate Kueue Managed To Removed State Transition
+    [Documentation]    Validate that Kueue management state Removed does remove relevant resources when coming from
+    ...                Managed state
     [Tags]
     ...    Operator
     ...    Tier1
     ...    RHOAIENG-5435
-    ...    kueue-removed
+    ...    kueue-removed-from-managed
     ...    Integration
 
+    ${ocp_version}=     Get Ocp Cluster Version
+    ${install_kueue_by_ocp_version}=    GTE    ${ocp_version}    4.18.0
+    IF    ${install_kueue_by_ocp_version}
+            ${kueue_installed} =   Check If Operator Is Installed Via CLI      ${KUEUE_OP_NAME}
+            IF    ${kueue_installed}
+                    Uninstall Kueue Operator CLI
+            END
+    END
+    Set DSC Component Managed State And Wait For Completion
+    ...    kueue
+    ...    ${KUEUE_DEPLOYMENT_NAME}
+    ...    ${KUEUE_LABEL_SELECTOR}
     Set DSC Component Removed State And Wait For Completion
     ...    kueue
     ...    ${KUEUE_DEPLOYMENT_NAME}
     ...    ${KUEUE_LABEL_SELECTOR}
 
-    [Teardown]      Restore DSC Component State     kueue       ${KUEUE_DEPLOYMENT_NAME}        ${KUEUE_LABEL_SELECTOR}     ${SAVED_MANAGEMENT_STATES.KUEUE}
+    [Teardown]      Restore Kueue Initial State
+
+Validate Kueue Unmanaged To Removed State Transition
+    [Documentation]    Validate that Kueue management state Removed does remove relevant resources when coming from
+    ...                Unmanaged state.
+    [Tags]
+    ...    Operator
+    ...    Tier1
+    ...    kueue-removed-from-unmanaged
+    ...    Integration
+
+    ${initial_state}=    Get DSC Component State    ${DSC_NAME}    kueue    ${OPERATOR_NS}
+    ${ocp_version}=     Get Ocp Cluster Version
+    ${install_kueue_by_ocp_version}=    GTE    ${ocp_version}    4.18.0
+    IF    "${initial_state}" == "Unmanaged"
+            ${namespace_to_check}=    Set Variable    ${KUEUE_NS}
+    ELSE
+            ${namespace_to_check}=    Set Variable    ${APPLICATIONS_NAMESPACE}
+    END
+
+    Skip If    condition=${install_kueue_by_ocp_version}==False   msg="Unmanaged Kueue status is not supported in OCP ${ocp_version}. It needs to be 4.18+"
+    Set DSC Component Unmanaged State And Wait For Completion
+    ...    kueue
+    ...    ${KUEUE_DEPLOYMENT_NAME}
+    ...    ${KUEUE_LABEL_SELECTOR}
+    ...    namespace=${KUEUE_NS}
+    ...    wait_for_completion=False
+    Install Kueue Dependencies
+    Wait For Resources To Be Available
+    ...    ${KUEUE_DEPLOYMENT_NAME}
+    ...    ${KUEUE_LABEL_SELECTOR}
+    ...    namespace=${KUEUE_NS}
+    Set DSC Component Removed State And Wait For Completion
+    ...    kueue
+    ...    ${KUEUE_DEPLOYMENT_NAME}
+    ...    ${KUEUE_LABEL_SELECTOR}
+    ...    namespace=${KUEUE_NS}
+
+    [Teardown]      Restore Kueue Initial State
+
+Validate Kueue Unmanaged To Managed State Transition
+    [Documentation]    Validate that Kueue management state Managed does create relevant resources when coming from
+    ...                Unmanaged state. The kueue resources need to be removed from the kueue namespace and being
+    ...                present in the apps namespace.
+    [Tags]
+    ...    Operator
+    ...    Tier1
+    ...    kueue-managed-from-unmanaged
+    ...    Integration
+
+    ${ocp_version}=     Get Ocp Cluster Version
+    ${install_kueue_by_ocp_version}=    GTE    ${ocp_version}    4.18.0
+
+    Skip If    condition=${install_kueue_by_ocp_version}==False   msg="Unmanaged Kueue status is not supported in OCP ${ocp_version}. It needs to be 4.18+"
+    Set DSC Component Unmanaged State And Wait For Completion
+    ...    kueue
+    ...    ${KUEUE_DEPLOYMENT_NAME}
+    ...    ${KUEUE_LABEL_SELECTOR}
+    ...    namespace=${KUEUE_NS}
+    ...    wait_for_completion=False
+    Install Kueue Dependencies
+    Wait For Resources To Be Available
+    ...    ${KUEUE_DEPLOYMENT_NAME}
+    ...    ${KUEUE_LABEL_SELECTOR}
+    ...    namespace=${KUEUE_NS}
+    Set DSC Component Managed State And Wait For Completion
+    ...    kueue
+    ...    ${KUEUE_DEPLOYMENT_NAME}
+    ...    ${KUEUE_LABEL_SELECTOR}
+    ...    namespace=${APPLICATIONS_NAMESPACE}
+    ...    wait_for_completion=False
+    ${kueue_installed} =   Check If Operator Is Installed Via CLI      ${KUEUE_OP_NAME}
+    IF    ${kueue_installed}
+            Uninstall Kueue Operator CLI
+    END
+    Wait For Resources To Be Available
+    ...    ${KUEUE_DEPLOYMENT_NAME}
+    ...    ${KUEUE_LABEL_SELECTOR}
+    ...    namespace=${APPLICATIONS_NAMESPACE}
+    Wait For Resources To Be Removed
+    ...    ${KUEUE_DEPLOYMENT_NAME}
+    ...    ${KUEUE_LABEL_SELECTOR}
+    ...    namespace=${KUEUE_NS}
+
+    [Teardown]      Restore Kueue Initial State
+
+Validate Kueue Managed To Unmanaged State Transition
+    [Documentation]    Validate that Kueue management state Unmanaged does create relevant resources when coming from
+    ...                Managed state. The kueue resources need to be removed from the apps namespace and being
+    ...                present in the kueue namespace.
+    [Tags]
+    ...    Operator
+    ...    Tier1
+    ...    kueue-unmanaged-from-managed
+    ...    Integration
+
+    ${ocp_version}=     Get Ocp Cluster Version
+    ${install_kueue_by_ocp_version}=    GTE    ${ocp_version}    4.18.0
+
+    Skip If    condition=${install_kueue_by_ocp_version}==False   msg="Unmanaged Kueue status is not supported in OCP ${ocp_version}. It needs to be 4.18+"
+    Set DSC Component Managed State And Wait For Completion
+    ...    kueue
+    ...    ${KUEUE_DEPLOYMENT_NAME}
+    ...    ${KUEUE_LABEL_SELECTOR}
+    ...    namespace=${APPLICATIONS_NAMESPACE}
+    ...    wait_for_completion=False
+    ${kueue_installed} =   Check If Operator Is Installed Via CLI      ${KUEUE_OP_NAME}
+    IF    ${kueue_installed}
+            Uninstall Kueue Operator CLI
+    END
+    Wait For Resources To Be Available
+    ...    ${KUEUE_DEPLOYMENT_NAME}
+    ...    ${KUEUE_LABEL_SELECTOR}
+    ...    namespace=${APPLICATIONS_NAMESPACE}
+    Set DSC Component Unmanaged State And Wait For Completion
+    ...    kueue
+    ...    ${KUEUE_DEPLOYMENT_NAME}
+    ...    ${KUEUE_LABEL_SELECTOR}
+    ...    namespace=${KUEUE_NS}
+    Install Kueue Dependencies
+    Wait For Resources To Be Available
+    ...    ${KUEUE_DEPLOYMENT_NAME}
+    ...    ${KUEUE_LABEL_SELECTOR}
+    ...    namespace=${KUEUE_NS}
+    Wait For Resources To Be Removed
+    ...    ${KUEUE_DEPLOYMENT_NAME}
+    ...    ${KUEUE_LABEL_SELECTOR}
+    ...    namespace=${APPLICATIONS_NAMESPACE}
+
+    [Teardown]      Restore Kueue Initial State
 
 Validate Codeflare Managed State
     [Documentation]    Validate that the DSC Codeflare component Managed state creates the expected resources,
@@ -595,6 +805,41 @@ Suite Setup
 Suite Teardown
     [Documentation]    Suite Teardown
     RHOSi Teardown
+
+Restore Kueue Initial State
+    [Documentation]    Keyword to restore the initial state of the Kueue component. If the restored state is Unmanaged
+    ...                we need to ensure the Kueue Operator is installed, if not, we need to make sure is not installed.
+    ${current_state}=    Get DSC Component State    ${DSC_NAME}    kueue    ${OPERATOR_NS}
+    ${ocp_version}=     Get Ocp Cluster Version
+    ${install_kueue_by_ocp_version}=    GTE    ${ocp_version}    4.18.0
+    ${kueue_installed} =   Check If Operator Is Installed Via CLI      ${KUEUE_OP_NAME}
+    IF    "${SAVED_MANAGEMENT_STATES.KUEUE}" == "Managed"
+            IF    ${install_kueue_by_ocp_version}
+                    IF    ${kueue_installed}
+                            Uninstall Kueue Operator CLI
+                    END
+            END
+            ${namespace}=    Set Variable    ${APPLICATIONS_NAMESPACE}
+    ELSE IF    "${SAVED_MANAGEMENT_STATES.KUEUE}" == "Unmanaged"
+            IF    not ${kueue_installed}
+                    Install Kueue Dependencies
+            END
+            ${namespace}=    Set Variable    ${KUEUE_NS}
+    ELSE
+            IF    ${install_kueue_by_ocp_version}
+                    IF    ${kueue_installed}
+                            Uninstall Kueue Operator CLI
+                    END
+            END
+            IF       "${current_state}" == "Managed"
+                      ${namespace}=    Set Variable    ${APPLICATIONS_NAMESPACE}
+            ELSE IF        "${current_state}" == "Unmanaged"
+                      ${namespace}=    Set Variable    ${KUEUE_NS}
+            ELSE
+                      ${namespace}=    Set Variable    ${APPLICATIONS_NAMESPACE}
+            END
+    END
+    Restore DSC Component State     kueue       ${KUEUE_DEPLOYMENT_NAME}        ${KUEUE_LABEL_SELECTOR}     ${SAVED_MANAGEMENT_STATES.KUEUE}     ${namespace}
 
 Check Controller Conditions Are Accomplished
     [Documentation]    Wait for the conditions related to a specific controller are accomplished

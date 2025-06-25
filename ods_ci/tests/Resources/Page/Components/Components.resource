@@ -9,57 +9,83 @@ Resource  ../../ODS.robot
 Set DSC Component Removed State And Wait For Completion
     [Documentation]    Set component management state to 'Removed', and wait for deployment and pod to be removed.
     [Arguments]    ${component}    ${deployment_name}    ${label_selector}
+    ...            ${namespace}=${APPLICATIONS_NS}     ${wait_for_completion}=True
 
     ${management_state}=    Get DSC Component State    ${DSC_NAME}    ${component}    ${OPERATOR_NS}
     IF    "${management_state}" != "Removed"
             Set Component State    ${component}    Removed
     END
 
-    Wait For Resources To Be Removed    ${deployment_name}    ${label_selector}
+    IF     ${wait_for_completion}
+            Wait For Resources To Be Removed    ${deployment_name}    ${label_selector}     ${namespace}
+    END
 
 Set DSC Component Managed State And Wait For Completion
     [Documentation]    Set component management state to 'Managed', and wait for deployment and pod to be available.
     [Arguments]    ${component}    ${deployment_name}    ${label_selector}
+    ...            ${namespace}=${APPLICATIONS_NS}      ${wait_for_completion}=True
 
     ${management_state}=    Get DSC Component State    ${DSC_NAME}    ${component}    ${OPERATOR_NS}
     IF    "${management_state}" != "Managed"
             Set Component State    ${component}    Managed
     END
 
-    Wait For Resources To Be Available    ${deployment_name}    ${label_selector}
+    IF     ${wait_for_completion}
+            Wait For Resources To Be Available    ${deployment_name}    ${label_selector}
+    END
+
+Set DSC Component Unmanaged State And Wait For Completion
+    [Documentation]    Set component management state to 'Unmanaged'.
+    [Arguments]    ${component}    ${deployment_name}    ${label_selector}
+    ...            ${namespace}=${APPLICATIONS_NS}      ${wait_for_completion}=True
+
+    IF    "${component}" != "kueue"
+          FAIL    Component ${component} does not support Unmanaged state. Only kueue component supports it.
+    END
+
+    ${management_state}=    Get DSC Component State    ${DSC_NAME}    ${component}    ${OPERATOR_NS}
+    IF    "${management_state}" != "Unmanaged"
+            Set Component State    ${component}    Unmanaged
+    END
+
+    IF     ${wait_for_completion}
+            Wait For Resources To Be Available    ${deployment_name}    ${label_selector}    ${namespace}
+    END
 
 Wait For Resources To Be Available
     [Documentation]    Wait until Deployment and Pod(s) are Available
-    [Arguments]    ${deployment_name}    ${label_selector}
+    [Arguments]    ${deployment_name}    ${label_selector}    ${namespace}=${APPLICATIONS_NS}
     Wait Until Keyword Succeeds    5 min    0 sec
-    ...    Is Resource Present     Deployment    ${deployment_name}    ${APPLICATIONS_NS}    ${IS_PRESENT}
+    ...    Is Resource Present     Deployment    ${deployment_name}    ${namespace}    ${IS_PRESENT}
 
     Wait Until Keyword Succeeds    5 min    0 sec
-    ...    Check If Pod Exists    ${APPLICATIONS_NS}    ${label_selector}    ${FALSE}
+    ...    Check If Pod Exists    ${namespace}    ${label_selector}    ${FALSE}
 
     Wait Until Keyword Succeeds    8 min    0 sec
     ...    Is Pod Ready    ${label_selector}
 
 Wait For Resources To Be Removed
     [Documentation]    Wait until Deployment and Pod(s) to Removed
-    [Arguments]    ${deployment_name}    ${label_selector}
+    [Arguments]    ${deployment_name}    ${label_selector}     ${namespace}=${APPLICATIONS_NS}
 
     Wait Until Keyword Succeeds    5 min    0 sec
-    ...    Is Resource Present     Deployment    ${deployment_name}    ${APPLICATIONS_NS}    ${IS_NOT_PRESENT}
+    ...    Is Resource Present     Deployment    ${deployment_name}    ${namespace}    ${IS_NOT_PRESENT}
 
     Wait Until Keyword Succeeds    5 min    0 sec
-    ...    Check If Pod Does Not Exist    ${label_selector}    ${APPLICATIONS_NS}
+    ...    Check If Pod Does Not Exist    ${label_selector}    ${namespace}
 
 Restore DSC Component State
     [Documentation]    Set component management state to original state, wait for component resources to be available.
-    [Arguments]    ${component}    ${deployment_name}    ${LABEL_SELECTOR}    ${saved_state}
+    [Arguments]    ${component}    ${deployment_name}    ${LABEL_SELECTOR}    ${saved_state}     ${namespace}=${APPLICATIONS_NAMESPACE}
 
     ${current_state}=    Get DSC Component State    ${DSC_NAME}    ${component}    ${OPERATOR_NS}
     IF    "${current_state}" != "${saved_state}"
         IF    "${saved_state}" == "Managed"
             Set DSC Component Managed State And Wait For Completion    ${component}    ${deployment_name}    ${LABEL_SELECTOR}
         ELSE IF    "${saved_state}" == "Removed"
-            Set DSC Component Removed State And Wait For Completion    ${component}    ${deployment_name}    ${LABEL_SELECTOR}
+            Set DSC Component Removed State And Wait For Completion    ${component}    ${deployment_name}    ${LABEL_SELECTOR}      ${namespace}
+        ELSE IF    "${saved_state}" == "Unmanaged"
+            Set DSC Component Unmanaged State And Wait For Completion    ${component}     ${deployment_name}    ${LABEL_SELECTOR}      ${namespace}
         ELSE
             FAIL    Component ${component} state "${saved_state}" not supported at this time
         END
@@ -85,15 +111,15 @@ Get DataScienceCluster Spec
 
 Check That Image Pull Path Is Correct
     [Documentation]     Check that the deployment Image Pull path is the correct one
-    [Arguments]     ${deployment_name}      ${image_pull_path}
+    [Arguments]     ${deployment_name}      ${image_pull_path}      ${namespace}=${APPLICATIONS_NAMESPACE}
     ${rc}=   Set Variable   1
     WHILE   '${rc}' != '0'    limit=5m
         ${rc}   ${image}=    Run And Return Rc And Output
-        ...    oc get deployment/${deployment_name} -n ${APPLICATIONS_NAMESPACE} -o jsonpath="{..image}"
+        ...    oc get deployment/${deployment_name} -n ${namespace} -o jsonpath="{..image}"
     END
 
     ${rc}   ${images}=    Run And Return Rc And Output
-    ...    oc get deployment/${deployment_name} -n ${APPLICATIONS_NAMESPACE} -o jsonpath="{..image}"
+    ...    oc get deployment/${deployment_name} -n ${namespace} -o jsonpath="{..image}"
     Should Be Equal As Integers    ${rc}    0    msg=${images}
     ${images}=    Split String    ${images}    ${SPACE}
 

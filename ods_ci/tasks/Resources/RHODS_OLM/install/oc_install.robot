@@ -47,6 +47,14 @@ ${TELEMETRY_OP_NAME}=  opentelemetry-product
 ${TELEMETRY_SUB_NAME}=  opentelemetry-operator
 ${TELEMETRY_CHANNEL_NAME}=  stable
 ${TELEMETRY_NS}=  openshift-opentelemetry-operator
+${KUEUE_OP_NAME}=  kueue-operator
+${KUEUE_SUB_NAME}=  kueue-operator
+${KUEUE_CHANNEL_NAME}=  stable-v1.0
+${KUEUE_NS}=  openshift-kueue-operator
+${CERT_MANAGER_OP_NAME}=  openshift-cert-manager-operator
+${CERT_MANAGER_SUB_NAME}=  openshift-cert-manager-operator
+${CERT_MANAGER_CHANNEL_NAME}=  stable-v1
+${CERT_MANAGER_NS}=  cert-manager-operator
 ${RHODS_CSV_DISPLAY}=    Red Hat OpenShift AI
 ${ODH_CSV_DISPLAY}=    Open Data Hub Operator
 ${DEFAULT_OPERATOR_NAMESPACE_RHOAI}=    redhat-ods-operator
@@ -160,16 +168,6 @@ Verify RHODS Installation
       Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}    dsc_template=${DSC_TEMPLATE}
   END
 
-  ${dashboard} =    Is Component Enabled    dashboard    ${DSC_NAME}
-  IF    "${dashboard}" == "true"
-    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app=${DASHBOARD_APP_NAME}    timeout=1200s
-    IF  "${PRODUCT}" == "ODH"
-        #This line of code is strictly used for the exploratory cluster to accommodate UI/UX team requests
-        Add UI Admin Group To Dashboard Admin
-    END
-  END
-
   ${workbenches} =    Is Component Enabled    workbenches    ${DSC_NAME}
   IF    "${workbenches}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
@@ -206,8 +204,15 @@ Verify RHODS Installation
 
   ${kueue} =     Is Component Enabled     kueue    ${DSC_NAME}
   IF    "${kueue}" == "true"
-    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/part-of=kueue   timeout=400s
+      ${kueue_state}=    Get DSC Component State    ${DSC_NAME}    kueue    ${OPERATOR_NAMESPACE}
+      IF    "${kueue_state}" == "Unmanaged"
+             Install Kueue Dependencies
+             Wait For Deployment Replica To Be Ready    namespace=${KUEUE_NS}
+      ...    label_selector=app.kubernetes.io/part-of=kueue   timeout=400s
+      ELSE
+             Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+      ...    label_selector=app.kubernetes.io/part-of=kueue   timeout=400s
+      END
   END
 
   ${codeflare} =     Is Component Enabled     codeflare    ${DSC_NAME}
@@ -244,6 +249,16 @@ Verify RHODS Installation
   IF    "${feastoperator}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app.kubernetes.io/part-of=feastoperator   timeout=400s
+  END
+
+  ${dashboard} =    Is Component Enabled    dashboard    ${DSC_NAME}
+  IF    "${dashboard}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app=${DASHBOARD_APP_NAME}    timeout=1200s
+    IF  "${PRODUCT}" == "ODH"
+        #This line of code is strictly used for the exploratory cluster to accommodate UI/UX team requests
+        Add UI Admin Group To Dashboard Admin
+    END
   END
 
   IF    "${dashboard}" == "true" or "${workbenches}" == "true" or "${modelmeshserving}" == "true" or "${datasciencepipelines}" == "true" or "${kserve}" == "true" or "${kueue}" == "true" or "${codeflare}" == "true" or "${ray}" == "true" or "${trustyai}" == "true" or "${modelregistry}" == "true" or "${trainingoperator}" == "true"    # robocop: disable
@@ -517,6 +532,8 @@ Is Component Enabled
                RETURN    false
          ELSE IF    ${output} == "Managed"
               RETURN    true
+         ELSE IF    ${output} == "Unmanaged"
+              RETURN    true
          END
     END
 
@@ -621,6 +638,67 @@ Install Kserve Dependencies
     ELSE
         Log To Console    message=Serverless Operator is skipped (not included in kserve dependencies)
     END
+
+Install Cert Manager Operator Via Cli
+    [Documentation]    Install Cert Manager Operator Via CLI
+    ${is_installed} =   Check If Operator Is Installed Via CLI   ${CERT_MANAGER_OP_NAME}
+    IF    ${is_installed}
+        Log To Console    message=Cert Manager Operator is already installed
+    ELSE
+        ${rc}    ${out} =    Run And Return Rc And Output    oc create namespace ${CERT_MANAGER_NS}
+        Install ISV Operator From OperatorHub Via CLI    operator_name=${CERT_MANAGER_OP_NAME}
+             ...    namespace=${CERT_MANAGER_NS}
+             ...    subscription_name=${CERT_MANAGER_SUB_NAME}
+             ...    catalog_source_name=redhat-operators
+             ...    operator_group_name=cert-manager-operator
+             ...    operator_group_ns=${CERT_MANAGER_NS}
+             ...    operator_group_target_ns=${NONE}
+             ...    channel=${CERT_MANAGER_CHANNEL_NAME}
+        Wait Until Operator Subscription Last Condition Is
+             ...    type=CatalogSourcesUnhealthy    status=False
+             ...    reason=AllCatalogSourcesHealthy    subcription_name=${CERT_MANAGER_SUB_NAME}
+             ...    namespace=${CERT_MANAGER_NS}
+             ...    retry=150
+        Wait For Pods To Be Ready    label_selector=name=cert-manager-operator
+             ...    namespace=${CERT_MANAGER_NS}
+    END
+
+Install Kueue Operator Via Cli
+    [Documentation]    Install Kueue Operator Via CLI
+    ${is_installed} =   Check If Operator Is Installed Via CLI   ${KUEUE_OP_NAME}
+    ${ocp_version}=     Get Ocp Cluster Version
+    ${install_kueue_by_ocp_version}=    GTE    ${ocp_version}    4.18.0
+    # Kueue operator will be available just in OCP 4.18 and next versions
+    IF    ${is_installed}
+        Log To Console    message=Kueue Operator is already installed
+    ELSE IF   not ${install_kueue_by_ocp_version}
+        Log To Console    message=Kueue Operator is not available in OCP ${ocp_version}
+    ELSE
+        ${rc}    ${out} =    Run And Return Rc And Output    oc create namespace ${KUEUE_NS}
+        Install ISV Operator From OperatorHub Via CLI    operator_name=${KUEUE_OP_NAME}
+             ...    namespace=${KUEUE_NS}
+             ...    subscription_name=${KUEUE_SUB_NAME}
+             ...    catalog_source_name=redhat-operators
+             ...    operator_group_name=kueue-operators
+             ...    operator_group_ns=${KUEUE_NS}
+             ...    operator_group_target_ns=${NONE}
+             ...    channel=${KUEUE_CHANNEL_NAME}
+        Wait Until Operator Subscription Last Condition Is
+             ...    type=CatalogSourcesUnhealthy    status=False
+             ...    reason=AllCatalogSourcesHealthy    subcription_name=${KUEUE_SUB_NAME}
+             ...    namespace=${KUEUE_NS}
+             ...    retry=150
+        Wait For Pods To Be Ready    label_selector=name=openshift-kueue-operator
+             ...    namespace=${KUEUE_NS}
+    END
+
+Install Kueue Dependencies
+    [Documentation]    Install Dependent Operators For Kueue
+    Set Suite Variable   ${FILES_RESOURCES_DIRPATH}    tests/Resources/Files
+    Set Suite Variable   ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
+    Set Suite Variable   ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
+    Install Cert Manager Operator Via Cli
+    Install Kueue Operator Via Cli
 
 Install Cluster Observability Operator Via Cli
     [Documentation]    Install Cluster Observability Operator Via CLI

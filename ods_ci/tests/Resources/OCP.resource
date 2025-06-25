@@ -9,7 +9,7 @@ Resource   Page/OCPDashboard/Pods/Pods.robot
 Get Ocp Cluster Version
     [Documentation]  Retrieves the OCP Cluster version, in a X.Y.Z format
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc get clusterversion -o jsonpath='{.items[].spec.desiredUpdate.version}'
+    ...    oc get clusterversion version -o jsonpath='{.status.desired.version}'
     IF    ${rc} != ${0}
         Fail    msg=Cannot retrieve OCP cluster version.
     END

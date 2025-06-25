@@ -28,6 +28,19 @@ Set DSC Component Managed State And Wait For Completion
 
     Wait For Resources To Be Available    ${deployment_name}    ${label_selector}
 
+Set DSC Component Unmanaged State And Wait For Completion
+    [Documentation]    Set component management state to 'Unmanaged'.
+    [Arguments]    ${component}
+
+    IF    "${component}" != "kueue"
+          FAIL    Component ${component} does not support Unmanaged state. Only kueue component supports it.
+    END
+
+    ${management_state}=    Get DSC Component State    ${DSC_NAME}    ${component}    ${OPERATOR_NS}
+    IF    "${management_state}" != "Unmanaged"
+            Set Component State    ${component}    Unmanaged
+    END
+
 Wait For Resources To Be Available
     [Documentation]    Wait until Deployment and Pod(s) are Available
     [Arguments]    ${deployment_name}    ${label_selector}
@@ -60,6 +73,8 @@ Restore DSC Component State
             Set DSC Component Managed State And Wait For Completion    ${component}    ${deployment_name}    ${LABEL_SELECTOR}
         ELSE IF    "${saved_state}" == "Removed"
             Set DSC Component Removed State And Wait For Completion    ${component}    ${deployment_name}    ${LABEL_SELECTOR}
+        ELSE IF    "${saved_state}" == "Unmanaged"
+            Set DSC Component Unmanaged State And Wait For Completion    ${component}
         ELSE
             FAIL    Component ${component} state "${saved_state}" not supported at this time
         END

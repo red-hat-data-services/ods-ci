@@ -60,6 +60,9 @@ items:
         gcp:
           projectID: {{ gcp_project_id }}
           region: {{ gcp_region|default("us-central1") }}
+          userLabels:
+            - key: team
+              value: {{ team|default("unknown-team") }}
       pullSecret: {{ pull_secret|default("") }}
       sshKey: {{ ssh_key|default("") }}
 - apiVersion: v1

@@ -67,6 +67,8 @@ items:
           baseDomainResourceGroupName: {{ azure_domainresourcegroup }}
           cloudName: AzurePublicCloud
           region: {{ azure_region|default("eastus") }}
+          userTags:
+            team: {{ team|default("unknown-team") }}
       pullSecret: {{ pull_secret|default("") }}
       sshKey: {{ ssh_key|default("") }}
 - apiVersion: v1

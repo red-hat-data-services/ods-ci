@@ -58,10 +58,18 @@ ${IS_NOT_PRESENT}                                       1
 ...                                                     WORKBENCHES=${EMPTY}
 ...                                                     FEASTOPERATOR=${EMPTY}
 
-@{CONTROLLERS_LIST}
-...    kserve-controller-manager
-...    odh-model-controller
-...    modelmesh-controller
+@{CONTROLLERS_LIST}                                     # dashboard added in Suite Setup, since it's different in RHOAI vs ODH
+...                                                     codeflare-operator-manager
+...                                                     data-science-pipelines-operator-controller-manager
+...                                                     kuberay-operator
+...                                                     kueue-controller-manager
+...                                                     modelmesh-controller
+...                                                     notebook-controller-deployment
+...                                                     odh-model-controller
+...                                                     odh-notebook-controller-manager
+...                                                     trustyai-service-operator-controller-manager
+#...                                                     kserve-controller-manager  # RHOAIENG-27943
+#...                                                     kubeflow-training-operator # RHOAIENG-27944
 
 
 *** Test Cases ***
@@ -515,30 +523,51 @@ Validate Feastoperator Removed State
 
 Validate Support For Configuration Of Controller Resources
     [Documentation]    Validate support for configuration of controller resources in component deployments
-    [Tags]      Operator        Tier1       ODS-2664        Integration
-    FOR    ${controller}    IN    @{CONTROLLERS_LIST}
-        # robocop: disable
-        ${rc}=    Run And Return Rc
-        ...    oc patch Deployment ${controller} -n ${APPLICATIONS_NAMESPACE} --type=json -p="[{'op': 'replace', 'path': '/spec/template/spec/containers/0/resources/limits/cpu', 'value': '600m'}]"
-        Should Be Equal As Integers     ${rc}       ${0}
-        # robocop: disable
-        ${rc}=    Run And Return Rc
-        ...    oc patch Deployment ${controller} -n ${APPLICATIONS_NAMESPACE} --type=json -p="[{'op': 'replace', 'path': '/spec/template/spec/containers/0/resources/limits/memory', 'value': '6Gi'}]"
-        Should Be Equal As Integers     ${rc}       ${0}
-        # robocop: disable
-        ${rc}=    Run And Return Rc
-        ...    oc patch Deployment ${controller} -n ${APPLICATIONS_NAMESPACE} --type=json -p="[{'op': 'replace', 'path': '/spec/template/spec/serviceAccountName', 'value': 'random-sa-name'}]"
-        Should Be Equal As Integers     ${rc}       ${0}
+    [Tags]    Operator    Tier1    ODS-2664      Integration  RHOAIENG-12811
+    FOR   ${controller}    IN    @{CONTROLLERS_LIST}
+        ${new_cpu_limit}=  Set Variable  1001m
+        ${new_memory_limit}=  Set Variable  4001Mi
+        ${new_image}=  Set Variable  registry.invalid/test:latest
+        ${new_replicas}  Set Variable  0
 
-        Wait Until Keyword Succeeds     3 min       0 sec
-        ...     Check Controller Conditions Are Accomplished    ${controller}
+        # overwrite some fields
+        Patch Controller Deployment  ${controller}  /spec/template/spec/containers/0/resources/limits/cpu  '${new_cpu_limit}'
+        Patch Controller Deployment  ${controller}  /spec/template/spec/containers/0/resources/limits/memory  '${new_memory_limit}'
+        Patch Controller Deployment  ${controller}  /spec/template/spec/containers/0/image  '${new_image}'
+        Patch Controller Deployment  ${controller}  /spec/replicas  ${new_replicas}
 
-        # Restore old values
-        # delete the Deployment resource for operator to recreate
-        ${rc}=      Run And Return Rc
-        ...     oc delete Deployment ${controller} -n ${APPLICATIONS_NAMESPACE}
-        Should Be Equal As Integers     ${rc}       ${0}
+        Sleep    10s  Give time for operator to potentially reconcile our changes
+
+        # verify the allowlisted values are kept, non-allowlisted are reverted
+        Verify Deployment Patch Was Not Reverted  ${controller}  .spec.template.spec.containers[0].resources.limits.cpu  ${new_cpu_limit}
+        Verify Deployment Patch Was Not Reverted  ${controller}  .spec.template.spec.containers[0].resources.limits.memory  ${new_memory_limit}
+        Verify Deployment Patch Was Not Reverted      ${controller}  .spec.replicas  ${new_replicas}
+        Verify Deployment Patch Was Reverted  ${controller}  .spec.template.spec.containers[0].image  ${new_image}
+
+        # annotate the deployment so that the operator ignores the allowlist
+        Run  oc annotate deployment -n ${APPLICATIONS_NAMESPACE} ${controller} opendatahub.io/managed=true
+
+        # verify that all values get reverted
+        Wait Until Keyword Succeeds    1 min  10 s
+        ...     Verify Deployment Patch Was Reverted  ${controller}  .spec.template.spec.containers[0].resources.limits.cpu  ${new_cpu_limit}
+        Wait Until Keyword Succeeds    1 min  10 s
+        ...     Verify Deployment Patch Was Reverted  ${controller}  .spec.template.spec.containers[0].resources.limits.memory  ${new_memory_limit}
+        Wait Until Keyword Succeeds    1 min  10 s
+        ...     Verify Deployment Patch Was Reverted  ${controller}  .spec.replicas  ${new_replicas}
+
+        # patch again and verify that values get reverted immediately when the annotation is already in place
+        Patch Controller Deployment  ${controller}  /spec/template/spec/containers/0/resources/limits/cpu  '${new_cpu_limit}'
+        Patch Controller Deployment  ${controller}  /spec/template/spec/containers/0/resources/limits/memory  '${new_memory_limit}'
+        Patch Controller Deployment  ${controller}  /spec/template/spec/containers/0/image  '${new_image}'
+        Patch Controller Deployment  ${controller}  /spec/replicas  ${new_replicas}
+
+        Verify Deployment Patch Was Reverted  ${controller}  .spec.template.spec.containers[0].resources.limits.cpu  ${new_cpu_limit}
+        Verify Deployment Patch Was Reverted  ${controller}  .spec.template.spec.containers[0].resources.limits.memory  ${new_memory_limit}
+        Verify Deployment Patch Was Reverted  ${controller}  .spec.template.spec.containers[0].image  ${new_image}
+        Verify Deployment Patch Was Reverted  ${controller}  .spec.replicas  ${new_replicas}
     END
+
+    [Teardown]   Restore Component Deployments
 
 
 *** Keywords ***
@@ -561,6 +590,7 @@ Suite Setup
     ${SAVED_MANAGEMENT_STATES.WORKBENCHES}=    Get DSC Component State    ${DSC_NAME}    workbenches    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.FEASTOPERATOR}=    Get DSC Component State    ${DSC_NAME}    feastoperator    ${OPERATOR_NS}
     Set Suite Variable    ${SAVED_MANAGEMENT_STATES}
+    Append To List  ${CONTROLLERS_LIST}    ${DASHBOARD_DEPLOYMENT_NAME}
 
 Suite Teardown
     [Documentation]    Suite Teardown
@@ -580,3 +610,26 @@ Check Controller Conditions Are Accomplished
     Should Match    ${d_obj_dictionary.spec.template.spec.containers[0].resources.limits.cpu}    ${cpu_limit}
     Should Match    ${d_obj_dictionary.spec.template.spec.containers[0].resources.limits.memory}    ${memory_limit}
     Should Not Match    ${d_obj_dictionary.spec.template.spec.serviceAccountName}    random-sa-name
+
+Patch Controller Deployment
+    [Arguments]    ${controller}  ${patch_path}  ${patch_value}
+    ${rc}=    Run And Return Rc
+    ...    oc patch Deployment ${controller} -n ${APPLICATIONS_NAMESPACE} --type=json -p="[{'op': 'replace', 'path': '${patch_path}', 'value': ${patch_value}}]"    # robocop: disable
+    Should Be Equal As Integers    ${rc}    ${0}
+
+
+Verify Deployment Patch Was Not Reverted
+    [Arguments]    ${controller}  ${json_path}  ${expected}
+    ${rc}  ${actual}=  Run And Return Rc And Output    oc get deployment -n ${APPLICATIONS_NAMESPACE} ${controller} -o jsonpath='{${json_path}}'
+    Should Be Equal    ${actual}  ${expected}
+
+Verify Deployment Patch Was Reverted
+    [Arguments]    ${controller}  ${json_path}  ${expected}
+    ${rc}  ${actual}=  Run And Return Rc And Output    oc get deployment -n ${APPLICATIONS_NAMESPACE} ${controller} -o jsonpath='{${json_path}}'
+    Should Not Be Equal    ${actual}  ${expected}
+
+Restore Component Deployments
+    FOR   ${controller}    IN    @{CONTROLLERS_LIST}
+        # delete the Deployment resource for operator to recreate
+        Run  oc delete Deployment ${controller} -n ${APPLICATIONS_NAMESPACE}
+    END

@@ -430,7 +430,7 @@ Remove Items From Favorites
     END
     Close Browser
 
-RHODS Dahsboard Pod Should Contain OauthProxy Container
+RHODS Dashboard Pod Should Contain OauthProxy Container
     ${list_of_pods} =    Search Pod    namespace=${APPLICATIONS_NAMESPACE}    pod_regex=${DASHBOARD_APP_NAME}
     FOR    ${pod_name}    IN   @{list_of_pods}
         ${container_name} =    Get Containers    pod_name=${pod_name}    namespace=${APPLICATIONS_NAMESPACE}

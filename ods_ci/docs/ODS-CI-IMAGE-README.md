@@ -1,7 +1,7 @@
 # ODS-CI Container Image
 
 ## Important Note
-    With the switch to Poetry, the project directory structure has changed. You are now require to launch these commands from the root of the ods-ci repo, but the paths have to take into account the relative subfolder ods_ci. The examples shown here already deal with this new subfolder, but take care of double checking your paths if writing commands manually.
+    With the switch to Poetry, the project directory structure has changed. You are now required to launch these commands from the root of the ods-ci repo, but the paths have to take into account the relative subfolder ods_ci. The examples shown here already deal with this new subfolder, but take care of double checking your paths if writing commands manually.
 
 A [Dockerfile](../build/Dockerfile) is available for running tests in a container. Below you can read how to build and run ods-ci test suites container.
 
@@ -19,7 +19,7 @@ $ podman run --rm -v $PWD/ods_ci/test-variables.yml:/tmp/ods-ci/ods_ci/test-vari
 ```
 Additional arguments for container build
 * OC_VERSION (default: 4.13): version of OC CLI to download
-* OC_CHANNEL (default: stable): release channel to download OC CLI from,e.g, latest, candidate, etc
+* OC_CHANNEL (default: stable): release channel to download OC CLI from, e.g., latest, candidate, etc
 ```bash
 podman build -t ods-ci:master -f ods_ci/build/Dockerfile .
              --build-arg OC_CHANNEL=latest
@@ -34,16 +34,16 @@ podman build -t ods-ci:master -f ods_ci/build/Dockerfile .
 
 * ```ROBOT_EXTRA_ARGS```: it takes any robot framework arguments. Look at robot --help to see all the options (e.g., ```--log NONE```, ```--dryrun```) or at official [Robot Framework User Guide](https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html) 
 
-* ```SET_ENVIRONMENT``` (default: 0): it enables/disables the installation of Identity providers (HTPassword and LDAP) in the cluster. If 1, the IDPs are going to be installed before running the tests
+* ```SET_ENVIRONMENT``` (default: 0): it enables/disables the installation of Identity Providers (HTPassword and LDAP) in the cluster. If 1, the IDPs are going to be installed before running the tests
 
   * If ```SET_ENVIRONMENT``` = 1:
     - ```OC_HOST```: it contains the OpenShift API URL of the test cluster where the Identity Providers are going to be installed and tests are going to be executed.
-    - ```USE_OCM_IDP``` (default: 1): it sets the IDP creation script to use either OCM (OpenShift Cluster Manager) CLI and APIs or OC CLI to create the IDPs in the cluster. If it is sets to 0, OC CLI is used.
+    - ```USE_OCM_IDP``` (default: 1): it sets the IDP creation script to use either OCM (OpenShift Cluster Manager) CLI and APIs or OC CLI to create the IDPs in the cluster. If it is set to 0, OC CLI is used.
       - If ```USE_OCM_IDP``` = 1:
         - ```OCM_TOKEN```: it contains the authorization token to allow ODS-CI to install IDPs in the test cluster using OCM
         - ```OCM_ENV```: it contains the OCM environment name, e.g., staging vs production. If not set, OCM CLI assumes it is production.
     * ```RETURN_PW``` (default:1): 
-      - if ```RETURN_PW``` = 1: CLI will prints the user password and cluster admin username. It's recommended to use for Debug purposes only, where the CLI output is not made publicly available.
+      - if ```RETURN_PW``` = 1: CLI will print the user password and cluster admin username. It's recommended to use for Debug purposes only, where the CLI output is not made publicly available.
     * ```ods_ci/configs/templates/user_config.json```: this JSON file is necessary to instruct the image about desired user configuration. Check the dedicated section below.
   
 
@@ -51,9 +51,9 @@ podman build -t ods-ci:master -f ods_ci/build/Dockerfile .
 As mentioned in the previous paragraph, if you enable automatic IDP creation you need to either pass a custom configuration file or use the default one.
 
 You find field description inline in the below JSON file. Before reading it, there are a couple of notes:
-1. the install scripts assumes  you want to install a LDAP and HTPASSWD identity provider. 
+1. the install scripts assume  you want to install a LDAP and HTPASSWD identity provider.
 2. it assumes that the cluster-admin user is from HTP identity provider.
-3. it asusmes the users in test-variables.yml are mapped to LDAP users only.
+3. it assumes the users in test-variables.yml are mapped to LDAP users only.
 
 ```json
 {
@@ -67,9 +67,9 @@ You find field description inline in the below JSON file. Before reading it, the
             ],
             // suffix is the part(s) after the prefix: it accepts:
             // - "incremental": adds a numeric suffix after the prefix, the range is [1, "n_users"]
-            // - "incremental_with_rand_base": it adds a randomly generate portion before the numeric suffix. The number of random chars is controled by "rand_length" attribute
-            // - "custom": it adds to the suffix a custom suffix extracted from the passed "list" attribute. The number of users is controled by the length of the given list.
-            // - "custom_with_rand_base": t adds a randomly generate portion before the custom suffix. The number of random chars is controled by "rand_length" attribute.
+            // - "incremental_with_rand_base": it adds a randomly generated portion before the numeric suffix. The number of random chars is controlled by "rand_length" attribute
+            // - "custom": it adds to the suffix a custom suffix extracted from the passed "list" attribute. The number of users is controlled by the length of the given list.
+            // - "custom_with_rand_base": t adds a randomly generated portion before the custom suffix. The number of random chars is controlled by "rand_length" attribute.
             "suffixes": {
                 "professor-": {
                     "type": "incremental",
@@ -82,14 +82,14 @@ You find field description inline in the below JSON file. Before reading it, the
                     "n_users": 20
                 }
             },
-            // this is the pw for ldap users. If it is sets to "<GEN_RANDOM_PW>" it generates an alphanumeric random password.
+            // this is the pw for ldap users. If it is set to "<GEN_RANDOM_PW>" it generates a random alphanumeric password.
             "pw": "<GEN_RAMDOM_PW>",
-            // this is the mapping to the users in test-variables.yml file, which are used by automated tests. if you used random generated suffix, you can use the placeholder "<RAND_BASE>" to let script handling it.
+            // this is the mapping to the users in test-variables.yml file, which are used by automated tests. if you used a random generated suffix, you can use the placeholder "<RAND_BASE>" to let script handle it.
             "TEST_USER": "professor-<RAND_BASE>11",
             "TEST_USER_2": "student-<RAND_BASE>2",
             "TEST_USER_3": "student-<RAND_BASE>3",
             "TEST_USER_4":  "student-<RAND_BASE>4",
-            // all the user with the same prefix will be added to the mapped group.
+            // all the users with the same prefix will be added to the mapped group.
             "groups_map":{
                 "professor-": [
                     "professors"
@@ -111,7 +111,7 @@ You find field description inline in the below JSON file. Before reading it, the
                 }
             },
             "pw": "<GEN_RAMDOM_PW>",
-            // assignes cluster admin permissions to one of the given htp users
+            // assigns cluster admin permissions to one of the given htp users
             "cluster_admin_username":   "operator-<RAND_BASE>B"
         }
     }
@@ -168,7 +168,7 @@ After building the container, you can deploy the container in a pod running on O
 - login to a test cluster with ```oc login ...``` command. See [official documentation](https://docs.openshift.com/online/pro/cli_reference/get_started_cli.html) for more details
 - create the namespace/project "ods-ci"
 - create the service account by applying the rbac settings. See [this](./ods-ci_rbac.yaml)
-- create a secret to store your "test-variables.yml" file. Refer to main [README.md](ods_ci/README.md) to get your test-variables.yml file.
+- create a secret to store your "test-variables.yml" file. Refer to main [README.md](../README.md) to get your test-variables.yml file.
 - [optional] create a pull secret to fetch the ods-ci image from your registry if it is private. Ensure to patch the SA created at the previous step in order to add the pull secret name
 - [optional] create a PVC to store test artifacts. It is embedded in the sample [ods-ci_pod.yaml](./ods-ci_pod.yaml). If you don't want it, you can modify the YAML file as per your need
 
@@ -287,19 +287,19 @@ You could provide other variable files or single variables using the robot argum
 
 
 ### Deploy postfix smtp server
-To use localhost as smtp server while running ods-ci container, you could leverage on a postfix container. One [example](ods_ci/build/Dockerfile_smtpserver) is reported in this repo.
+To use localhost as smtp server while running ods-ci container, you could leverage on a postfix container. One [example](ods_ci/build/Dockerfile_smtpserver) is provided in this repo.
 If you are running ods-ci container on your local machine, you could use [podman](https://developers.redhat.com/blog/2019/01/15/podman-managing-containers-pods) to run both the containers, like this:
 ```bash
 podman run -d --pod new:<pod_name>  <postfix_imagename>:<image_label>
 podman run --rm --pod=<pod_name>
-                -v $PWD/ods_ci/test-variables.yml:/tmp/ods-ci/ods_ci/test-variables.yml:Z
+                -v $PWD/ods_ci/test-variables.yml:/tmp/ods_ci/ods_ci/test-variables.yml:Z
                 -v $PWD/ods_ci/test-output:/tmp/ods-ci/ods_ci/test-output:Z
                 -e ROBOT_EXTRA_ARGS='--email-report true --email-from myresults@redhat.com --email-to mymail@redhat.com'
                 -e RUN_SCRIPT_ARGS='--skip-oclogin false --set-urls-variables true --include Smoke'
                 ods-ci:1.24.0
 
 ```
-If you are running ods-ci container on a cluster you could use the pod template [ods-ci.pod_with_postfix.yaml](./ods-ci_pod_with_postfix.yaml) from this repository. Based on your case, you may need to merge [ods-ci.pod_with_postfix.yaml](./ods-ci_pod_with_postfix.yaml) with one of the yaml used in the above examples pod definitions.
+If you are running ods-ci container on a cluster you could use the pod template [ods-ci.pod_with_postfix.yaml](./ods-ci_pod_with_postfix.yaml) from this repository. Based on your case, you may need to merge [ods-ci.pod_with_postfix.yaml](./ods-ci_pod_with_postfix.yaml) with one of the YAML used in the above examples pod definitions.
 
 
 **NOTE**: Keep in mind that this solution is not working on OSD clusters as reported [here](https://access.redhat.com/solutions/880233).

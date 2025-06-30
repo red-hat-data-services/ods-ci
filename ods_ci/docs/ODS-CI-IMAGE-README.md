@@ -69,7 +69,7 @@ You find field description inline in the below JSON file. Before reading it, the
             // - "incremental": adds a numeric suffix after the prefix, the range is [1, "n_users"]
             // - "incremental_with_rand_base": it adds a randomly generated portion before the numeric suffix. The number of random chars is controlled by "rand_length" attribute
             // - "custom": it adds to the suffix a custom suffix extracted from the passed "list" attribute. The number of users is controlled by the length of the given list.
-            // - "custom_with_rand_base": t adds a randomly generated portion before the custom suffix. The number of random chars is controlled by "rand_length" attribute.
+            // - "custom_with_rand_base": it adds a randomly generated portion before the custom suffix. The number of random characters is controlled by the "rand_length" attribute.
             "suffixes": {
                 "professor-": {
                     "type": "incremental",

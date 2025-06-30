@@ -46,7 +46,7 @@ Verify That Login Page Is Shown When Reaching The RHODS Page
     ...         ODS-694
     ...         ODS-355
     [Setup]     Test Setup For Login Page
-    RHODS Dahsboard Pod Should Contain OauthProxy Container
+    RHODS Dashboard Pod Should Contain OauthProxy Container
     Check OpenShift Login Visible
 
 Verify Content In RHODS Explore Section

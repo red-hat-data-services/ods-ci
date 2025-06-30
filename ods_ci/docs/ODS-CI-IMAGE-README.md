@@ -32,7 +32,7 @@ podman build -t ods-ci:master -f ods_ci/build/Dockerfile .
 
 * ```RUN_SCRIPT_ARGS```: it takes the run arguments to pass to ods-ci robot wrapper script ```run_robot_test.sh```. All the details in the dedicated document file [RUN_ARGUMENTS.md](./RUN_ARGUMENTS.md)
 
-* ```ROBOT_EXTRA_ARGS```: it takes any robot framework arguments. Look at robot --help to see all the options (e.g., ```--log NONE```, ```--dryrun```) or at official [Robot Framework User Guide](https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html) 
+* ```ROBOT_EXTRA_ARGS```: it takes any robot framework arguments. Look at robot --help to see all the options (e.g., ```--log NONE```, ```--dryrun```) or at official [Robot Framework User Guide](https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html)
 
 * ```SET_ENVIRONMENT``` (default: 0): it enables/disables the installation of Identity Providers (HTPassword and LDAP) in the cluster. If 1, the IDPs are going to be installed before running the tests
 
@@ -42,16 +42,16 @@ podman build -t ods-ci:master -f ods_ci/build/Dockerfile .
       - If ```USE_OCM_IDP``` = 1:
         - ```OCM_TOKEN```: it contains the authorization token to allow ODS-CI to install IDPs in the test cluster using OCM
         - ```OCM_ENV```: it contains the OCM environment name, e.g., staging vs production. If not set, OCM CLI assumes it is production.
-    * ```RETURN_PW``` (default:1): 
+    * ```RETURN_PW``` (default:1):
       - if ```RETURN_PW``` = 1: CLI will print the user password and cluster admin username. It's recommended to use for Debug purposes only, where the CLI output is not made publicly available.
     * ```ods_ci/configs/templates/user_config.json```: this JSON file is necessary to instruct the image about desired user configuration. Check the dedicated section below.
-  
+
 
 ## User Configuration JSON File
 As mentioned in the previous paragraph, if you enable automatic IDP creation you need to either pass a custom configuration file or use the default one.
 
 You find field description inline in the below JSON file. Before reading it, there are a couple of notes:
-1. the install scripts assume  you want to install a LDAP and HTPASSWD identity provider.
+1. the install scripts assume you want to install a LDAP and HTPASSWD identity provider.
 2. it assumes that the cluster-admin user is from HTP identity provider.
 3. it assumes the users in test-variables.yml are mapped to LDAP users only.
 
@@ -168,7 +168,7 @@ After building the container, you can deploy the container in a pod running on O
 - login to a test cluster with ```oc login ...``` command. See [official documentation](https://docs.openshift.com/online/pro/cli_reference/get_started_cli.html) for more details
 - create the namespace/project "ods-ci"
 - create the service account by applying the rbac settings. See [this](./ods-ci_rbac.yaml)
-- create a secret to store your "test-variables.yml" file. Refer to main [README.md](../README.md) to get your test-variables.yml file.
+- create a secret to store your "test-variables.yml" file. Refer to the main [README.md](../../README.md) to get your test-variables.yml file.
 - [optional] create a pull secret to fetch the ods-ci image from your registry if it is private. Ensure to patch the SA created at the previous step in order to add the pull secret name
 - [optional] create a PVC to store test artifacts. It is embedded in the sample [ods-ci_pod.yaml](./ods-ci_pod.yaml). If you don't want it, you can modify the YAML file as per your need
 
@@ -222,7 +222,7 @@ test execution using the container in a OpenShift pod - minimum configuration, e
         - name: SET_ENVIRONMENT
           value: "1"
         - name: OCM_ENV
-          value: "staging"                    
+          value: "staging"
         - name: OCM_TOKEN
           value: "my-ocm-token"
         - name: RUN_SCRIPT_ARGS
@@ -250,7 +250,7 @@ test execution using the container in a OpenShift pod - minimum configuration, e
         - name: SET_ENVIRONMENT
           value: "1"
         - name: OCM_ENV
-          value: "staging"                    
+          value: "staging"
         - name: OCM_TOKEN
           value: "my-ocm-token"
         - name: RUN_SCRIPT_ARGS
@@ -258,7 +258,7 @@ test execution using the container in a OpenShift pod - minimum configuration, e
         - name: ROBOT_EXTRA_ARGS
           value: "-i Smoke --dryrun"
 ```
-**NOTE**: when letting the container install the IDPs, the container automatically modifies the test-variables.yml.example to set the user login credentials. We suggest not to overwrite the test-variables.yaml like done in Example 2 (i.e., ```--test-variables-file /tmp/ods-ci-test-variables/test-variables.yml```). 
+**NOTE**: when letting the container install the IDPs, the container automatically modifies the test-variables.yml.example to set the user login credentials. We suggest not to overwrite the test-variables.yaml like done in Example 2 (i.e., ```--test-variables-file /tmp/ods-ci-test-variables/test-variables.yml```).
 You could provide other variable files or single variables using the robot arguments, like below. Although, the solution below has not been tested. If you fall under this use case, please contact ods-qe@redhat.com
 ```yaml
       image: quay.io/modh/ods-ci:latest
@@ -271,7 +271,7 @@ You could provide other variable files or single variables using the robot argum
         - name: SET_ENVIRONMENT
           value: "1"
         - name: OCM_ENV
-          value: "staging"                    
+          value: "staging"
         - name: OCM_TOKEN
           value: "my-ocm-token"
         - name: RUN_SCRIPT_ARGS
@@ -292,7 +292,7 @@ If you are running ods-ci container on your local machine, you could use [podman
 ```bash
 podman run -d --pod new:<pod_name>  <postfix_imagename>:<image_label>
 podman run --rm --pod=<pod_name>
-                -v $PWD/ods_ci/test-variables.yml:/tmp/ods_ci/ods_ci/test-variables.yml:Z
+                -v $PWD/ods_ci/test-variables.yml:/tmp/ods-ci/ods_ci/test-variables.yml:Z
                 -v $PWD/ods_ci/test-output:/tmp/ods-ci/ods_ci/test-output:Z
                 -e ROBOT_EXTRA_ARGS='--email-report true --email-from myresults@redhat.com --email-to mymail@redhat.com'
                 -e RUN_SCRIPT_ARGS='--skip-oclogin false --set-urls-variables true --include Smoke'

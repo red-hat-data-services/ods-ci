@@ -83,7 +83,7 @@ You find field description inline in the below JSON file. Before reading it, the
                 }
             },
             // this is the pw for ldap users. If it is set to "<GEN_RANDOM_PW>" it generates a random alphanumeric password.
-            "pw": "<GEN_RAMDOM_PW>",
+            "pw": "<GEN_RANDOM_PW>",
             // this is the mapping to the users in test-variables.yml file, which are used by automated tests. if you used a random generated suffix, you can use the placeholder "<RAND_BASE>" to let script handle it.
             "TEST_USER": "professor-<RAND_BASE>11",
             "TEST_USER_2": "student-<RAND_BASE>2",
@@ -110,7 +110,7 @@ You find field description inline in the below JSON file. Before reading it, the
                     "list": ["A","B","C"]
                 }
             },
-            "pw": "<GEN_RAMDOM_PW>",
+            "pw": "<GEN_RANDOM_PW>",
             // assigns cluster admin permissions to one of the given htp users
             "cluster_admin_username":   "operator-<RAND_BASE>B"
         }

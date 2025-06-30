@@ -29,7 +29,7 @@
                     "list": [".","^","$","*","?","(",")","[","]","{","}","|","@",";"]
                 }
             },
-            "pw": "<GEN_RAMDOM_PW>",
+            "pw": "<GEN_RANDOM_PW>",
             "TEST_USER": "ldap-op-<RAND_BASE>1",
             "TEST_USER_2": "ldap-op-<RAND_BASE>2",
             "TEST_USER_3": "ldap-usr-<RAND_BASE>3",
@@ -67,7 +67,7 @@
                     "n_users": 2
                 }
             },
-            "pw": "<GEN_RAMDOM_PW>",
+            "pw": "<GEN_RANDOM_PW>",
             "cluster_admin_username":   "htp-user-<RAND_BASE>"
         }
     }

@@ -86,7 +86,7 @@ function generate_users_creds(){
   USERS_ARR=()
   PWS_ARR=()
   pw=$(echo $idp | jq -r '.pw')
-  if [[ "$pw" =  "<GEN_RAMDOM_PW>" ]]
+  if [[ "$pw" =  "<GEN_RANDOM_PW>" ]]
       then
           pw=$(generate_rand_string "64")
             if [ "${RETURN_PW}" -eq 1 ]
@@ -338,7 +338,7 @@ function validate_user_config_fields_and_values(){
   idp=$(jq --arg idpname $1 '.[][$idpname]' configs/templates/user_config.json)
   pw=$(echo $idp | jq -r '.pw')
   if  [[ $pw = "null" || -z "${pw// }" ]]; then
-    echo ".pw must be set with a custom value (i.e., no empty string or whitespacesonly) or <GEN_RAMDOM_PW>"
+    echo ".pw must be set with a custom value (i.e., no empty string or whitespacesonly) or <GEN_RANDOM_PW>"
     exit 1
   fi
   if [[ $1 = "ldap" ]]; then

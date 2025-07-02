@@ -59,7 +59,7 @@ class DataSciencePipelinesKfp:
     def create_experiment(self, name: str, description: str | None = None, namespace: str | None = None):
         """
         Creates a pipeline experiment and returns experiment_id.
-        If the experiment already exists also return experiment_id
+        If the experiment already exists also returns experiment_id
         """
         response = self.client.create_experiment(name, description, namespace)
         return response.experiment_id
@@ -284,7 +284,7 @@ class DataSciencePipelinesKfp:
 
     @keyword
     def get_run_status(self, run_id):
-        """###Gets run status"""
+        """Gets run status"""
         response = self.client.get_run(run_id)
         return response.state
 

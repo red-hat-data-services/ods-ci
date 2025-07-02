@@ -48,15 +48,17 @@ Login To Openshift
     ${should_login} =    Does Current Sub Domain Start With    https://oauth
     IF  not ${should_login}    RETURN
     # If here we need to login
-    Wait Until Element is Visible  xpath://div[@class="pf-c-login"]  timeout=10s
+    # pf-c-login = for OpenShift 4.18 and earlier
+    # pf-v6-c-login = for OpenShift 4.19+
+    Wait Until Element is Visible  xpath://div[@class="pf-c-login" or @class="pf-v6-c-login"]  timeout=10s
     ${select_auth_type} =  Does Login Require Authentication Type
     IF  ${select_auth_type}  Select Login Authentication Type   ${ocp_user_auth_type}
     Wait Until Page Contains  Log in to your account
     Input Text  id=inputUsername  ${ocp_user_name}
     Input Text  id=inputPassword  ${ocp_user_pw}
     Click Button   //*[@type="submit"]
-    Maybe Skip Tour
     Wait Until Page Does Not Contain    Log in to your account    timeout=30s
+    Maybe Skip Tour
 
 Log In Should Be Requested
     [Documentation]    Passes if the login page appears and fails otherwise

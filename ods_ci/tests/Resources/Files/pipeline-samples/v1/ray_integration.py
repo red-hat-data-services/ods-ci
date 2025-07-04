@@ -23,7 +23,7 @@ def ray_fn(openshift_server: str, openshift_token: str) -> int:
             min_memory=1,
             max_memory=1,
             num_gpus=0,
-            image="quay.io/project-codeflare/ray:latest-py39-cu118",
+            image="quay.io/modh/ray:2.47.1-py311-cu121",
             instascale=False,
         )
     )

@@ -23,6 +23,7 @@ Resource            ../../Resources/CLI/DataSciencePipelines/DataSciencePipeline
 Resource            ../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 Resource            ../../Resources/Page/DistributedWorkloads/WorkloadMetricsUI.resource
 Resource            ../../Resources/Page/ModelRegistry/ModelRegistry.resource
+Resource            ../../Resources/Page/FeatureStore/FeatureStore.resource
 
 Suite Setup         Upgrade Suite Setup
 Suite Teardown      RHOSi Teardown
@@ -251,6 +252,13 @@ Long Running Jupyter Notebook
     Should Be Equal As Integers     ${return_code}    0    msg=${cmd_output}
 
     Close Browser
+
+Run Feast operator Preupgrade Test Use Case
+    [Documentation]    Run Test to Create Feature store CR
+    [Tags]  Upgrade    FeatureStoreUpgrade
+    [Setup]    Prepare Feast E2E Test Suite
+    Run Feast Operator E2E Test    feastPreUpgrade    e2e_rhoai
+    [Teardown]    Teardown Feast E2E Test Suite
 
 
 *** Keywords ***

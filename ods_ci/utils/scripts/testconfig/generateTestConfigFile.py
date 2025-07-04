@@ -270,6 +270,8 @@ def generate_test_config_file(
         data["PIP_TRUSTED_HOST"] = config_data["PIP_TRUSTED_HOST"]
     if config_data.get("PIP_CA_BUNDLE"):
         data["PIP_CA_BUNDLE"] = config_data["PIP_CA_BUNDLE"]
+    if config_data.get("OPENAI_API_KEY"):
+        data["OPENAI_API_KEY"] = config_data["OPENAI_API_KEY"]
 
     # Git mirror details (optional)
     if config_data.get("GIT_HTTP_URL"):

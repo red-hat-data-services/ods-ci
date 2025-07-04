@@ -30,7 +30,7 @@ and its upstream project, [Open Data Hub](https://opendatahub.io/).
      * Test user credentials.
      * Browser webdriver to use for testing.
 
-  3. Run this script that will create the virtual environment, install the required packages and kickoff the Robot test suite.
+  3. Run this script that will create the virtual environment, install the required packages and kick off the Robot test suite.
   ```bash
      # Running all the tests
      sh run_robot_test.sh

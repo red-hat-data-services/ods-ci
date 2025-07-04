@@ -416,7 +416,7 @@ Handle Stop Workbench Confirmation Modal
     Run Keyword And Continue On Failure    Page Should Contain    Stop workbench?
     IF    ${from_running} == ${TRUE}
         Run Keyword And Continue On Failure
-        ...    Page Should Contain    Any unsaved changes to the ${workbench_title} workbench will be lost.
+        ...    Page Should Contain    Any unsaved changes to the ${workbench_title} will be lost.
         Run Keyword And Continue On Failure
         ...    Page Should Contain    To save changes, open the workbench.
         Run Keyword And Continue On Failure

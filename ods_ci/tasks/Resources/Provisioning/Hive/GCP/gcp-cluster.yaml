@@ -56,6 +56,7 @@ items:
         serviceNetwork:
         - 172.30.0.0/16
       fips: {{ fips_validation|default("false") }}
+      featureSet: TechPreviewNoUpgrade
       platform:
         gcp:
           projectID: {{ gcp_project_id }}

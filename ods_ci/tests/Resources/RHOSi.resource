@@ -112,6 +112,7 @@ Assign Vars According To Product
         Set Suite Variable    ${OPERATOR_APPNAME}     "Red Hat OpenShift AI"
         Set Suite Variable    ${OPERATOR_YAML_LABEL}  rhods-operator
         Set Suite Variable    ${OPERATOR_DEPLOYMENT_NAME}    rhods-operator
+        Set Suite Variable    ${CATALOG_SOURCE}    redhat-operators
         Set Suite Variable    ${OPERATOR_POD_CONTAINER_NAME}  rhods-operator
         Set Suite Variable    ${OPERATOR_LABEL_SELECTOR}    name=rhods-operator
         Set Suite Variable    ${DASHBOARD_DEPLOYMENT_NAME}    rhods-dashboard
@@ -120,7 +121,7 @@ Assign Vars According To Product
             Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     addon-managed-odh
             Set Suite Variable    ${ADMIN_GROUPS}       dedicated-admins
         ELSE
-            Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     rhoai-operator-dev
+            Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     rhods-operator
             Set Suite Variable    ${ADMIN_GROUPS}       rhods-admins', 'rhods-users
         END
         Set Suite Variable  ${MODEL_REGISTRY_NAMESPACE}    rhoai-model-registries
@@ -148,6 +149,7 @@ Assign Vars According To Product
         Set Suite Variable    ${OPERATOR_APPNAME}  "Open Data Hub Operator"
         Set Suite Variable    ${OPERATOR_YAML_LABEL}  opendatahub-operator
         Set Suite Variable    ${OPERATOR_DEPLOYMENT_NAME}    opendatahub-operator-controller-manager
+        Set Suite Variable    ${CATALOG_SOURCE}    community-operators
         Set Suite Variable    ${OPERATOR_POD_CONTAINER_NAME}  manager
         Set Suite Variable    ${OPERATOR_LABEL_SELECTOR}    control-plane=controller-manager
         Set Suite Variable    ${DASHBOARD_DEPLOYMENT_NAME}    odh-dashboard

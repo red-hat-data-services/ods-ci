@@ -35,6 +35,10 @@ ${CLUSTER_OBS_OP_NAME}=  cluster-observability-operator
 ${CLUSTER_OBS_SUB_NAME}=  cluster-observability-operator
 ${CLUSTER_OBS_CHANNEL_NAME}=  stable
 ${CLUSTER_OBS_NS}=  openshift-cluster-observability-operator
+${CMA_OP_NAME}=  openshift-custom-metrics-autoscaler-operator
+${CMA_SUB_NAME}=  openshift-custom-metrics-autoscaler-operator
+${CMA_NS}=  openshift-keda
+${CMA_CHANNEL_NAME}=  stable
 ${TEMPO_OP_NAME}=  tempo-product
 ${TEMPO_SUB_NAME}=  tempo-operator
 ${TEMPO_CHANNEL_NAME}=  stable
@@ -726,6 +730,30 @@ Install OpenTelemetry Operator Via Cli
           Log To Console    message=OpenTelemetry Operator is already installed
     END
 
+Install Custom Metrics Autoscaler Operator Via Cli
+    [Documentation]    Install Custom Metrics Autoscaler Operator (KEDA) Via CLI
+    ${is_installed} =    Check If Operator Is Installed Via CLI    ${CMA_OP_NAME}
+    IF    not ${is_installed}
+        ${rc}    ${out} =    Run And Return Rc And Output    oc create namespace ${CMA_NS}
+        Install ISV Operator From OperatorHub Via CLI    operator_name=${CMA_OP_NAME}
+            ...    namespace=${CMA_NS}
+            ...    subscription_name=${CMA_SUB_NAME}
+            ...    catalog_source_name=redhat-operators
+            ...    operator_group_name=openshift-keda-operator
+            ...    operator_group_ns=${CMA_NS}
+            ...    operator_group_target_ns=${NONE}
+            ...    channel=${CMA_CHANNEL_NAME}
+        Wait Until Operator Subscription Last Condition Is
+            ...    type=CatalogSourcesUnhealthy    status=False
+            ...    reason=AllCatalogSourcesHealthy    subcription_name=${CMA_SUB_NAME}
+            ...    namespace=${CMA_NS}
+            ...    retry=150
+        Wait For Pods To Be Ready    label_selector=name=custom-metrics-autoscaler-operator
+            ...    namespace=${CMA_NS}
+    ELSE
+        Log To Console    message=Custom Metrics Autoscaler Operator (KEDA) is already installed
+    END
+
 Install Observability Dependencies
     [Documentation]    Install dependent operators related to Observability
     Set Suite Variable   ${FILES_RESOURCES_DIRPATH}    tests/Resources/Files
@@ -734,6 +762,7 @@ Install Observability Dependencies
     Install Cluster Observability Operator Via Cli
     Install Tempo Operator Via Cli
     Install OpenTelemetry Operator Via Cli
+    Install Custom Metrics AutoScaler Operator Via Cli
 
 Create Namespace With Label
     [Documentation]    Creates a namespace and adds a specific label to it

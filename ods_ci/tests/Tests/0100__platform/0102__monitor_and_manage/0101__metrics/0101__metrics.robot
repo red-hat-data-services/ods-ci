@@ -4,8 +4,8 @@ Resource            ../../../../Resources/RHOSi.resource
 Resource            ../../../../Resources/ODS.robot
 Resource            ../../../../Resources/Common.robot
 Library             DateTime
-Suite Setup         RHOSi Setup
-Suite Teardown      RHOSi Teardown
+Suite Setup         Metrics Suite Setup
+Suite Teardown      Metrics Suite Teardown
 Test Setup          Begin Metrics Web Test
 Test Teardown       End Metrics Web Test
 Test Tags           ExcludeOnODH
@@ -287,6 +287,17 @@ Test RHOAI DSP Operator Recording Rules On Prometheus
     Should Be True      ${burnrate_1d} == "0"
 
 *** Keywords ***
+Metrics Suite Setup
+    [Documentation]    Test suite configuration
+    # Skip If RHODS Is Self-Managed
+    RHOSi Setup
+    Configure Monitoring Test Suite
+
+Metrics Suite Teardown
+    [Documentation]    Test suite teardown
+    # Skip If RHODS Is Self-Managed
+    RHOSi Teardown
+
 Begin Metrics Web Test
     [Documentation]    Test Setup
     Set Library Search Order    SeleniumLibrary

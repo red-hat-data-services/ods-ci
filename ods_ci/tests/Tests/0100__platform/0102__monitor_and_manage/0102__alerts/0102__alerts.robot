@@ -398,8 +398,9 @@ Verify Alerts Have Links To The Triage Guide
 Alerts Suite Setup
     [Documentation]    Test suite configuration
     Set Library Search Order    SeleniumLibrary
-    Skip If RHODS Is Self-Managed
+    # Skip If RHODS Is Self-Managed
     RHOSi Setup
+    Configure Monitoring Test Suite
 
 Alerts Suite Teardown
     [Documentation]    Test suite teardown

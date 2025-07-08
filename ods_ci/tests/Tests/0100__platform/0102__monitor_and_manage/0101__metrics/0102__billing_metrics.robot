@@ -130,7 +130,8 @@ Test Metric "Active Notebook Pod Time" On OpenShift Monitoring - Cluster Monitor
 
 *** Keywords ***
 Billing Metrics Suite Setup
-    Set Library Search Order  SeleniumLibrary
+    Set Library Search Order  SeleniumLibraryç
+    Configure Monitoring Test Suite
     RHOSi Setup
 
 CleanUp JupyterHub And Close All Browsers

@@ -21,7 +21,7 @@ Suite Teardown  RHOSi Teardown
 
 *** Variables ***
 ${NAMESPACE}            ${MONITORING_NAMESPACE}
-${CONFIGMAP_NAME}         alertmanager
+${CONFIGMAP_NAME}       alertmanager
 ${SECRET_NAME}          redhat-rhods-pagerduty
 
 
@@ -66,7 +66,7 @@ Get PagerDuty Key From Alertmanager ConfigMap
      RETURN     ${key[-1]}
 
 Get PagerDuty Key From Secrets
-     [Documentation]    Get Secert Key From Secrets
+     [Documentation]    Get Secret Key From Secrets
      ${new}     Oc Get  kind=Secret  namespace=${namespace}   field_selector=metadata.name==${SECRET_NAME}
      ${body}    Set Variable    ${new[0]['data']['PAGERDUTY_KEY']}
      ${string}  Evaluate    base64.b64decode('${body}').decode('ascii')      modules=base64

@@ -241,6 +241,7 @@ Verify Monitoring Stack Is Reconciled Without Restarting The ODS Operator
     ...       Monitoring
     ...       Execution-Time-Over-15m
     Skip If RHODS Is Self-Managed
+    Configure Monitoring Test Suite
     Replace "Prometheus" With "Grafana" In Rhods-Monitor-Federation
     Wait Until Operator Reverts "Grafana" To "Prometheus" In Rhods-Monitor-Federation
 

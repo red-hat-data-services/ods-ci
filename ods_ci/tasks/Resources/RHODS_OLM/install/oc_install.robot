@@ -79,7 +79,6 @@ Install RHODS
   END
   Install Kserve Dependencies
   Install Kueue Dependencies
-  Install Observability Dependencies
   Clone OLM Install Repo
   Configure Custom Namespaces
   IF   "${PRODUCT}" == "ODH"
@@ -656,84 +655,6 @@ Install Kueue Dependencies
     Set Suite Variable   ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
     Set Suite Variable   ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
     Install Kueue Operator Via Cli
-
-Install Cluster Observability Operator Via Cli
-    [Documentation]    Install Cluster Observability Operator Via CLI
-    ${is_installed} =   Check If Operator Is Installed Via CLI   ${CLUSTER_OBS_OP_NAME}
-    IF    not ${is_installed}
-          ${rc}    ${out} =    Run And Return Rc And Output    oc create namespace ${CLUSTER_OBS_NS}
-          Install ISV Operator From OperatorHub Via CLI    operator_name=${CLUSTER_OBS_OP_NAME}
-             ...    subscription_name=${CLUSTER_OBS_SUB_NAME}
-             ...    namespace=${CLUSTER_OBS_NS}
-             ...    catalog_source_name=redhat-operators
-             ...    operator_group_name=openshift-cluster-observability-operator
-             ...    operator_group_ns=${CLUSTER_OBS_NS}
-             ...    operator_group_target_ns=${NONE}
-          Wait Until Operator Subscription Last Condition Is
-             ...    type=CatalogSourcesUnhealthy    status=False
-             ...    reason=AllCatalogSourcesHealthy    subcription_name=${CLUSTER_OBS_SUB_NAME}
-             ...    namespace=${CLUSTER_OBS_NS}
-             ...    retry=150
-          Wait For Pods To Be Ready    label_selector=app.kubernetes.io/part-of=observability-operator
-             ...    namespace=${CLUSTER_OBS_NS}
-    ELSE
-          Log To Console    message=Cluster Observability Operator is already installed
-    END
-
-Install Tempo Operator Via Cli
-    [Documentation]    Install Tempo Operator Via CLI
-    ${is_installed} =   Check If Operator Is Installed Via CLI   ${TEMPO_OP_NAME}
-    IF    not ${is_installed}
-          ${rc}    ${out} =    Run And Return Rc And Output    oc create namespace ${TEMPO_NS}
-          Install ISV Operator From OperatorHub Via CLI    operator_name=${TEMPO_OP_NAME}
-             ...    subscription_name=${TEMPO_SUB_NAME}
-             ...    namespace=${TEMPO_NS}
-             ...    catalog_source_name=redhat-operators
-             ...    operator_group_name=openshift-tempo-operator
-             ...    operator_group_ns=${TEMPO_NS}
-             ...    operator_group_target_ns=${NONE}
-          Wait Until Operator Subscription Last Condition Is
-             ...    type=CatalogSourcesUnhealthy    status=False
-             ...    reason=AllCatalogSourcesHealthy    subcription_name=${TEMPO_SUB_NAME}
-             ...    namespace=${TEMPO_NS}
-             ...    retry=150
-          Wait For Pods To Be Ready    label_selector=app.kubernetes.io/part-of=tempo-operator
-             ...    namespace=${TEMPO_NS}
-    ELSE
-          Log To Console    message=Tempo Operator is already installed
-    END
-
-Install OpenTelemetry Operator Via Cli
-    [Documentation]    Install OpenTelemetry Operator Via CLI
-    ${is_installed} =   Check If Operator Is Installed Via CLI   ${TELEMETRY_OP_NAME}
-    IF    not ${is_installed}
-          ${rc}    ${out} =    Run And Return Rc And Output    oc create namespace ${TELEMETRY_NS}
-          Install ISV Operator From OperatorHub Via CLI    operator_name=${TELEMETRY_OP_NAME}
-             ...    subscription_name=${TELEMETRY_SUB_NAME}
-             ...    namespace=${TELEMETRY_NS}
-             ...    catalog_source_name=redhat-operators
-             ...    operator_group_name=openshift-opentelemetry-operator
-             ...    operator_group_ns=${TELEMETRY_NS}
-             ...    operator_group_target_ns=${NONE}
-          Wait Until Operator Subscription Last Condition Is
-             ...    type=CatalogSourcesUnhealthy    status=False
-             ...    reason=AllCatalogSourcesHealthy    subcription_name=${TELEMETRY_SUB_NAME}
-             ...    namespace=${TELEMETRY_NS}
-             ...    retry=150
-          Wait For Pods To Be Ready    label_selector=app.kubernetes.io/name=opentelemetry-operator
-             ...    namespace=${TELEMETRY_NS}
-    ELSE
-          Log To Console    message=OpenTelemetry Operator is already installed
-    END
-
-Install Observability Dependencies
-    [Documentation]    Install dependent operators related to Observability
-    Set Suite Variable   ${FILES_RESOURCES_DIRPATH}    tests/Resources/Files
-    Set Suite Variable   ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
-    Set Suite Variable   ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
-    Install Cluster Observability Operator Via Cli
-    Install Tempo Operator Via Cli
-    Install OpenTelemetry Operator Via Cli
 
 Create Namespace With Label
     [Documentation]    Creates a namespace and adds a specific label to it

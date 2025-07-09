@@ -83,7 +83,10 @@ Install RHODS
   END
   Install Kserve Dependencies
   Install Kueue Dependencies
-  Install Observability Dependencies
+  ${install_observability_operators} =    Get Variable Value    ${INSTALL_OBSERVABILITY_OPERATORS}    true
+  IF    "${install_observability_operators}" == "true"
+          Install Observability Dependencies
+  END
   Clone OLM Install Repo
   Configure Custom Namespaces
   IF   "${PRODUCT}" == "ODH"

@@ -338,6 +338,33 @@ Get Resource Attribute
     END
     RETURN    ${value}
 
+Wait For Installplan And Approve It
+    [Documentation]    Wait for the operator's installplan to appear then approve it in case of Manual installplan approval
+    [Arguments]    ${namespace}    ${operator_name}     ${subscription_name}    ${operator_version}=${EMPTY}
+    ${csv} =    Evaluate    '${operator_name}.${operator_version}' if '${operator_version}' else '${operator_name}'
+    Log    The csv is: ${csv}    console=yes
+    Wait Until Keyword Succeeds    10m    5s    Check If Resource Exists By Command Output    oc get installplans -n ${namespace} -o yaml | grep "${csv}"
+    ${installplan_name}=    Run   oc get subscription ${subscription_name} -n ${namespace} -o json | jq '.status.installplan.name'
+    IF    "${operator_version}" != "${EMPTY}"
+        ${installplan_version_exist}=    Run And Return Rc   oc get installplan -n ${namespace} | grep "${operator_version}"
+        IF    ${installplan_version_exist} != 0
+            ${installplans}=    Run   oc get installplan -n ${namespace}
+            FAIL    Failed to find installplan for operator: ${operator_name} version: ${operator_version}\nExisting installplans:\n${installplans}
+        END
+    END
+    ${installplan_approval}=     Get Resource Attribute      ${namespace}
+    ...      InstallPlan       ${installplan_name}        .spec.approval
+    Log    The installplan approval for: ${installplan_name} is ${installplan_approval}    console=yes
+    IF    "${installplan_approval}" == "Manual"
+        Log    Start approving the installplan: ${installplan_name}...    console=yes
+        ${patch_status} =    Run And Return Rc    oc patch installplan ${installplan_name} -n ${namespace} -p '{"spec":{"approved": true}}' --type=merge
+        IF    ${patch_status} == 0
+            Log    Approving the installplan ${installplan_name} successfully!!    console=yes
+        ELSE
+            FAIL    Failed to approving the installplan ${installplan_name}
+        END
+    END
+
 Wait For Namespace To Be Active
     [Documentation]    Waits for a given namespace to become active
     [Arguments]    ${namespace}    ${timeout}=30s

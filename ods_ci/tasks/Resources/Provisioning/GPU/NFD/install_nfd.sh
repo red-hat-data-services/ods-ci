@@ -17,6 +17,7 @@ declare -A images=(
     ["4.17"]="registry.redhat.io\/openshift4\/ose-node-feature-discovery-rhel9@sha256:154cf3f1ddaf895d7ecd04947bd455a930132f72acc6e8bde8c26bc123184ace"
     # 4.18 is a pre-release image. We need to update it later
     ["4.18"]="registry.redhat.io\/openshift4\/ose-node-feature-discovery-rhel9@sha256:510cb4351253492455664b6c323f54dc2f6f2f8791c5e92ba6b7e60b8adb357c"
+    ["4.19"]="registry.redhat.io\/openshift4\/ose-node-feature-discovery-rhel9@sha256:d23fe6bcb36bdbe0e61a30f8ab7cb90e6dea25a399d87c3ba3d94415a61735b8"
 )
 if [ "${images[$xyVersion]}" ]; then
     imageUrl="${images[$xyVersion]}"
@@ -25,7 +26,7 @@ else
     imageUrl="${images["4.17"]}"
     echo "WARNING: I don't know the sha for $xyVersion. Re-using default 4.17 $imageUrl. It might not work!"
 fi
-#sed -i'' -e "s/<imageUrl>/$imageUrl/g" $NFD_INSTANCE
+sed -i'' -e "s/<imageUrl>/$imageUrl/g" $NFD_INSTANCE
 # temporary sleep until latest oc binary is available and --for=create is supported
 sleep 10s
 oc apply -f "$NFD_INSTANCE"

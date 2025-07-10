@@ -8,7 +8,7 @@ spec:
   topologyupdater: false # False by default
   operand:
     # Image URL example: registry.redhat.io/openshift4/ose-node-feature-discovery:v4.11
-    image: registry.redhat.io/openshift4/ose-node-feature-discovery-rhel9@sha256:510cb4351253492455664b6c323f54dc2f6f2f8791c5e92ba6b7e60b8adb357c
+    image: <imageUrl>
     imagePullPolicy: Always
   workerConfig:
     configData: |

@@ -50,8 +50,13 @@ ${TELEMETRY_NS}=  openshift-opentelemetry-operator
 ${KUEUE_OP_NAME}=  kueue-operator
 ${KUEUE_SUB_NAME}=  kueue-operator
 # This channel for Kueue may be changing when the Operator becomes GA
-${KUEUE_CHANNEL_NAME}=  stable-v0.2
+${KUEUE_CHANNEL_NAME}=  stable-v1.0
 ${KUEUE_NS}=  openshift-kueue-operator
+${CERT_MANAGER_OP_NAME}=  cert-manager-operator
+${CERT_MANAGER_SUB_NAME}=  openshift-cert-manager-operator
+# This channel for Kueue may be changing when the Operator becomes GA
+${CERT_MANAGER_CHANNEL_NAME}=  stable-v1.0
+${CERT_MANAGER_NS}=  cert-manager-operator
 ${RHODS_CSV_DISPLAY}=    Red Hat OpenShift AI
 ${ODH_CSV_DISPLAY}=    Open Data Hub Operator
 ${DEFAULT_OPERATOR_NAMESPACE_RHOAI}=    redhat-ods-operator
@@ -212,8 +217,13 @@ Verify RHODS Installation
 
   ${kueue} =     Is Component Enabled     kueue    ${DSC_NAME}
   IF    "${kueue}" == "true"
-    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/part-of=kueue   timeout=400s
+      ${kueue_state}=    Get DSC Component State    ${DSC_NAME}    kueue    ${OPERATOR_NS}
+      IF    "${kueue_state}" == "Unmanaged"
+             Install Kueue Dependencies
+      ELSE
+             Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+      ...    label_selector=app.kubernetes.io/part-of=kueue   timeout=400s
+      END
   END
 
   ${codeflare} =     Is Component Enabled     codeflare    ${DSC_NAME}
@@ -523,6 +533,8 @@ Is Component Enabled
                RETURN    false
          ELSE IF    ${output} == "Managed"
               RETURN    true
+         ELSE IF    ${output} == "Unmanaged"
+              RETURN    true
          END
     END
 
@@ -628,6 +640,35 @@ Install Kserve Dependencies
         Log To Console    message=Serverless Operator is skipped (not included in kserve dependencies)
     END
 
+Install Cert Manager Operator Via Cli
+    [Documentation]    Install Cert Manager Operator Via CLI
+    ${is_installed} =   Check If Operator Is Installed Via CLI   ${CERT_MANAGER_OP_NAME}
+    ${ocp_version}=     Get Ocp Cluster Version
+    ${install_kueue_by_ocp_version}=    GTE    ${ocp_version}    4.18.0
+    # Cert Manager operator will be available just in the same versions as Kueue
+    IF    ${is_installed}
+        Log To Console    message=Cert Manager Operator is already installed
+    ELSE IF   not ${install_kueue_by_ocp_version}
+        Log To Console    message=Cert Manager Operator is not available in OCP ${ocp_version}
+    ELSE
+        ${rc}    ${out} =    Run And Return Rc And Output    oc create namespace ${CERT_MANAGER_NS}
+        Install ISV Operator From OperatorHub Via CLI    operator_name=${CERT_MANAGER_OP_NAME}
+             ...    namespace=${CERT_MANAGER_NS}
+             ...    subscription_name=${CERT_MANAGER_SUB_NAME}
+             ...    catalog_source_name=redhat-operators
+             ...    operator_group_name=cert-manager-operator
+             ...    operator_group_ns=${CERT_MANAGER_NS}
+             ...    operator_group_target_ns=${NONE}
+             ...    channel=${CERT_MANAGER_CHANNEL_NAME}
+        Wait Until Operator Subscription Last Condition Is
+             ...    type=CatalogSourcesUnhealthy    status=False
+             ...    reason=AllCatalogSourcesHealthy    subcription_name=${CERT_MANAGER_SUB_NAME}
+             ...    namespace=${CERT_MANAGER_NS}
+             ...    retry=150
+        Wait For Pods To Be Ready    label_selector=name=cert-manager-operator
+             ...    namespace=${CERT_MANAGER_NS}
+    END
+
 Install Kueue Operator Via Cli
     [Documentation]    Install Kueue Operator Via CLI
     ${is_installed} =   Check If Operator Is Installed Via CLI   ${KUEUE_OP_NAME}
@@ -662,6 +703,7 @@ Install Kueue Dependencies
     Set Suite Variable   ${FILES_RESOURCES_DIRPATH}    tests/Resources/Files
     Set Suite Variable   ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
     Set Suite Variable   ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
+    Install Cert Manager Operator Via Cli
     Install Kueue Operator Via Cli
 
 Install Cluster Observability Operator Via Cli

@@ -73,15 +73,19 @@ ${IS_NOT_PRESENT}                                       1
 
 
 *** Test Cases ***
-Validate Kueue Managed State
+Validate Kueue Removed To Managed State Transition
     [Documentation]    Validate that the DSC Kueue component Managed state creates the expected resources,
     ...    check that kueue deployment is created and pod is in Ready state
     [Tags]
     ...    Operator
     ...    Tier1
     ...    RHOAIENG-5435
-    ...    kueue-managed
+    ...    kueue-managed-from-removed
     ...    Integration
+    Set DSC Component Removed State And Wait For Completion
+    ...    kueue
+    ...    ${KUEUE_DEPLOYMENT_NAME}
+    ...    ${KUEUE_LABEL_SELECTOR}
     Set DSC Component Managed State And Wait For Completion
     ...    kueue
     ...    ${KUEUE_DEPLOYMENT_NAME}
@@ -92,21 +96,60 @@ Validate Kueue Managed State
 
     [Teardown]      Restore DSC Component State     kueue       ${KUEUE_DEPLOYMENT_NAME}        ${KUEUE_LABEL_SELECTOR}     ${SAVED_MANAGEMENT_STATES.KUEUE}
 
-Validate Kueue Removed State
-    [Documentation]    Validate that Kueue management state Removed does remove relevant resources.
+Validate Kueue Removed To Unmanaged State Transition
+    [Documentation]    Validate that the DSC Kueue component Unmanaged state creates the expected resources,
+    ...    check that kueue deployment is created and pod is in Ready state
+    [Tags]
+    ...    Operator
+    ...    Tier1
+    ...    kueue-unmanaged-from-removed
+    ...    Integration
+    Set DSC Component Removed State And Wait For Completion
+    ...    kueue
+    ...    ${KUEUE_DEPLOYMENT_NAME}
+    ...    ${KUEUE_LABEL_SELECTOR}
+    Set DSC Component Unmanaged State And Wait For Completion
+    ...    kueue
+    Check That Image Pull Path Is Correct
+    ...    ${KUEUE_DEPLOYMENT_NAME}
+    ...    ${IMAGE_PULL_PATH}
+
+    [Teardown]      Restore DSC Component State     kueue       ${KUEUE_DEPLOYMENT_NAME}        ${KUEUE_LABEL_SELECTOR}     ${SAVED_MANAGEMENT_STATES.KUEUE}
+
+Validate Kueue Managed To Removed State Transition
+    [Documentation]    Validate that Kueue management state Removed does remove relevant resources when coming from
+    ...                Managed state
     [Tags]
     ...    Operator
     ...    Tier1
     ...    RHOAIENG-5435
-    ...    kueue-removed
+    ...    kueue-removed-from-managed
     ...    Integration
-
+    Set DSC Component Managed State And Wait For Completion
+    ...    kueue
+    ...    ${KUEUE_DEPLOYMENT_NAME}
+    ...    ${KUEUE_LABEL_SELECTOR}
     Set DSC Component Removed State And Wait For Completion
     ...    kueue
     ...    ${KUEUE_DEPLOYMENT_NAME}
     ...    ${KUEUE_LABEL_SELECTOR}
 
     [Teardown]      Restore DSC Component State     kueue       ${KUEUE_DEPLOYMENT_NAME}        ${KUEUE_LABEL_SELECTOR}     ${SAVED_MANAGEMENT_STATES.KUEUE}
+
+Validate Kueue Unmanaged To Removed State Transition
+    [Documentation]    Validate that Kueue management state Removed does remove relevant resources when coming from
+    ...                Unmanaged state
+    [Tags]
+    ...    Operator
+    ...    Tier1
+    ...    kueue-removed-from-unmanaged
+    ...    Integration
+    Set DSC Component Unmanaged State And Wait For Completion
+    ...    kueue
+    Set DSC Component Removed State And Wait For Completion
+    ...    kueue
+    ...    ${KUEUE_DEPLOYMENT_NAME}
+    ...    ${KUEUE_LABEL_SELECTOR}
 
 Validate Codeflare Managed State
     [Documentation]    Validate that the DSC Codeflare component Managed state creates the expected resources,

@@ -401,7 +401,7 @@ Stop Workbench
     ${is_starting}=      Run Keyword And Return Status   Workbench Status Should Be
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STARTING}
     IF    ${is_started} == ${TRUE} or ${is_starting} == ${TRUE}
-        Click Button    xpath=//div[@data-testid="table-row-title"]//*[text()="${workbench_title}"]/ancestor::tr//button[@data-testid="notebook-stop-action"]
+        Click Button    xpath=//div[@data-testid="table-row-title"]//*[text()="${workbench_title}"]/ancestor::tr//button[@data-testid="state-action-toggle"]
         Wait Until Generic Modal Appears
         Handle Stop Workbench Confirmation Modal    workbench_title=${workbench_title}
         ...    press_cancel=${press_cancel}

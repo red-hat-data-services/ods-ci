@@ -74,7 +74,7 @@ Upgrade Test Teardown
     # robocop: off=too-many-calls-in-keyword
     [Documentation]     Upgrade Test Teardown
     End Web Test
-    Skip If RHODS Is Self-Managed
+    Skip If RHODS Is Self-Managed And New Observability Stack Is Disabled    # TODO Observability: We don't configure alerts yet with new observability stack, so may likely fail
     ${expression} =    Set Variable    rhods_aggregate_availability&step=1
     ${resp} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    ${expression}
     Log    rhods_aggregate_availability: ${resp.json()["data"]["result"][0]["value"][-1]}

@@ -382,23 +382,37 @@ Run Query Range
 
 Set Prometheus Variables
     [Documentation]    Update Global Variables RHODS_PROMETHEUS_URL and RHODS_PROMETHEUS_TOKEN if missing
-    ${result} 	Run Process 	oc get route -l app\=prometheus -A -o jsonpath\='{.items[0].metadata.namespace}'    shell=yes
+    ${enable_new_observability_stack}=    Is New Observability Stack Enabled
+    IF    ${enable_new_observability_stack}
+        ${prometheus_route_name}=    Set Variable    data-science-prometheus-route
+        ${protocol}=    Set Variable    http
+        ${service_account}=    Set Variable    data-science-monitoringstack-prometheus
+    ELSE
+        ${prometheus_route_name}=    Set Variable    prometheus
+        ${protocol}=    Set Variable    https
+        ${service_account}=    Set Variable    prometheus
+    END
+
+    ${result}= 	Run Process 	oc get route ${prometheus_route_name} -n ${MONITORING_NAMESPACE} -o jsonpath\='{.spec.host}'    shell=yes
     IF    ${result.rc} == 0
-        ${prom_namespace}=    Set Variable    ${result.stdout}
-        Log    Prometheus is running in the namespace: ${prom_namespace}    console=True
+        ${prometheus_url}=    Set Variable    ${result.stdout}
+        Log    Prometheus is running at spec.host: ${prometheus_url}    console=True
         IF    "${RHODS_PROMETHEUS_URL}" == "" or "${RHODS_PROMETHEUS_URL}" == "PROMETHEUS_URL"
-            ${result} 	Run Process 	oc get route prometheus -n ${prom_namespace} -o jsonpath\='{.spec.host}'    shell=yes
-            Should Be True    ${result.rc} == 0    Error getting Prometheus host: ${result.stderr}
-            ${RHODS_PROMETHEUS_URL}=    Set Variable    https://${result.stdout}
-            Log    Prometheus URL: ${RHODS_PROMETHEUS_URL}    console=True
+            ${RHODS_PROMETHEUS_URL}=    Set Variable    ${protocol}://${prometheus_url}
+            Log    Setting RHODS_PROMETHEUS_URL to: ${RHODS_PROMETHEUS_URL}    console=True
             Set Global Variable   ${RHODS_PROMETHEUS_URL}
+        ELSE
+            Log    Skipping setting RHODS_PROMETHEUS_URL, it already has value: ${RHODS_PROMETHEUS_URL}    console=True
         END
         IF    "${RHODS_PROMETHEUS_TOKEN}" == "" or "${RHODS_PROMETHEUS_TOKEN}" == "PROMETHEUS_TOKEN"
-            ${result} 	Run Process 	oc create token prometheus -n ${prom_namespace} --duration 6h    shell=yes
+            ${result}= 	Run Process 	oc create token ${service_account} -n ${MONITORING_NAMESPACE} --duration 6h    shell=yes
             Should Be True    ${result.rc} == 0    Error creating Prometheus token: ${result.stderr}
             ${RHODS_PROMETHEUS_TOKEN}=    Set Variable    ${result.stdout}
+            Log    Setting RHODS_PROMETHEUS_TOKEN for service account ${service_account}    console=True
             Set Global Variable   ${RHODS_PROMETHEUS_TOKEN}
+        ELSE
+            Log    Skipping setting RHODS_PROMETHEUS_TOKEN, it is already set    console=True
         END
     ELSE
-        Log    message=No Prometheus namespace found   level=WARN
+        Log    message=No Prometheus found   level=WARN
     END

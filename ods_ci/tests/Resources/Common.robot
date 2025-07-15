@@ -314,6 +314,17 @@ Skip If RHODS Is Managed
        Skip If    condition=${is_self_managed}==False    msg=This test is skipped for Managed RHODS
     END
 
+Skip If RHODS Is Self-Managed And New Observability Stack Is Disabled
+    [Documentation]    Skips test if RHODS is installed as Self-managed and ${ENABLE_NEW_OBSERVABILITY_STACK} == false
+    [Arguments]    ${msg}=${EMPTY}
+    ${is_self_managed}=    Is RHODS Self-Managed
+    ${enable_new_observability_stack} =    Is New Observability Stack Enabled
+    Set Local Variable    ${message}    This test is skipped for Self-managed RHODS and New Observability Stack disabled
+    IF    "${msg}" != "${EMPTY}"
+       Set Local Variable    ${message}    ${msg}
+    END
+    Skip If    condition=${is_self_managed} and not ${enable_new_observability_stack}    msg=${message}
+
 Skip If Namespace Does Not Exist
     [Documentation]    Skips test if ${namespace} does not exist in the cluster
     [Arguments]    ${namespace}    ${msg}=${EMPTY}
@@ -615,3 +626,12 @@ Delete All ${resource_type} In Namespace By Name
     ${result} =    Run Process    ${list_resources} | ${xargs_patch} && ${list_resources} | ${xargs_delete}
     ...    shell=true    stderr=STDOUT
     Log    ${result.stdout}    console=yes
+
+Is New Observability Stack Enabled
+    [Documentation]    Checks whether new observability stack is enabled, controlled by ENABLE_NEW_OBSERVABILITY_STACK test variable.
+    ...    Returns ${TRUE} if new observability stack is enabled by the variable, i.e. ENABLE_NEW_OBSERVABILITY_STACK
+    ...    has a value which can be converted to boolean True (True|true|"True"|"true")
+    ...    Returns ${FALSE} otherwise, i.e. the variable is not defined or has a false value
+    ${enable_new_observability_stack} =    Get Variable Value    ${ENABLE_NEW_OBSERVABILITY_STACK}    false
+    ${enable_new_observability_stack} =    Convert To Boolean    ${enable_new_observability_stack}
+    RETURN    ${enable_new_observability_stack}

@@ -398,12 +398,12 @@ Verify Alerts Have Links To The Triage Guide
 Alerts Suite Setup
     [Documentation]    Test suite configuration
     Set Library Search Order    SeleniumLibrary
-    Skip If RHODS Is Self-Managed
+    Skip If RHODS Is Self-Managed And New Observability Stack Is Disabled    # TODO Observability: We don't configure alerts yet with new observability stack, so may likely fail
     RHOSi Setup
 
 Alerts Suite Teardown
     [Documentation]    Test suite teardown
-    Skip If RHODS Is Self-Managed
+    Skip If RHODS Is Self-Managed And New Observability Stack Is Disabled
     RHOSi Teardown
 
 Teardown PVC Alert Test

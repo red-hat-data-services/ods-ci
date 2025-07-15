@@ -47,11 +47,6 @@ ${TELEMETRY_OP_NAME}=  opentelemetry-product
 ${TELEMETRY_SUB_NAME}=  opentelemetry-operator
 ${TELEMETRY_CHANNEL_NAME}=  stable
 ${TELEMETRY_NS}=  openshift-opentelemetry-operator
-${KUEUE_OP_NAME}=  kueue-operator
-${KUEUE_SUB_NAME}=  kueue-operator
-# This channel for Kueue may be changing when the Operator becomes GA
-${KUEUE_CHANNEL_NAME}=  stable-v0.2
-${KUEUE_NS}=  openshift-kueue-operator
 ${RHODS_CSV_DISPLAY}=    Red Hat OpenShift AI
 ${ODH_CSV_DISPLAY}=    Open Data Hub Operator
 ${DEFAULT_OPERATOR_NAMESPACE_RHOAI}=    redhat-ods-operator
@@ -82,7 +77,6 @@ Install RHODS
       Set Suite Variable    ${DSCI_TEMPLATE}    ${DSCI_TEMPLATE_RAW}    # robocop: disable
   END
   Install Kserve Dependencies
-  Install Kueue Dependencies
   ${install_observability_operators} =    Get Variable Value    ${INSTALL_OBSERVABILITY_OPERATORS}    true
   IF    "${install_observability_operators}" == "true"
           Install Observability Dependencies
@@ -627,42 +621,6 @@ Install Kserve Dependencies
     ELSE
         Log To Console    message=Serverless Operator is skipped (not included in kserve dependencies)
     END
-
-Install Kueue Operator Via Cli
-    [Documentation]    Install Kueue Operator Via CLI
-    ${is_installed} =   Check If Operator Is Installed Via CLI   ${KUEUE_OP_NAME}
-    ${ocp_version}=     Get Ocp Cluster Version
-    ${install_kueue_by_ocp_version}=    GTE    ${ocp_version}    4.18.0
-    # Kueue operator will be available just in OCP 4.18 and next versions
-    IF    ${is_installed}
-        Log To Console    message=Kueue Operator is already installed
-    ELSE IF   not ${install_kueue_by_ocp_version}
-        Log To Console    message=Kueue Operator is not available in OCP ${ocp_version}
-    ELSE
-        ${rc}    ${out} =    Run And Return Rc And Output    oc create namespace ${KUEUE_NS}
-        Install ISV Operator From OperatorHub Via CLI    operator_name=${KUEUE_OP_NAME}
-             ...    namespace=${KUEUE_NS}
-             ...    subscription_name=${KUEUE_SUB_NAME}
-             ...    catalog_source_name=redhat-operators
-             ...    operator_group_name=kueue-operators
-             ...    operator_group_ns=${KUEUE_NS}
-             ...    operator_group_target_ns=${NONE}
-             ...    channel=${KUEUE_CHANNEL_NAME}
-        Wait Until Operator Subscription Last Condition Is
-             ...    type=CatalogSourcesUnhealthy    status=False
-             ...    reason=AllCatalogSourcesHealthy    subcription_name=${KUEUE_SUB_NAME}
-             ...    namespace=${KUEUE_NS}
-             ...    retry=150
-        Wait For Pods To Be Ready    label_selector=name=openshift-kueue-operator
-             ...    namespace=${KUEUE_NS}
-    END
-
-Install Kueue Dependencies
-    [Documentation]    Install Dependent Operators For Kueue
-    Set Suite Variable   ${FILES_RESOURCES_DIRPATH}    tests/Resources/Files
-    Set Suite Variable   ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
-    Set Suite Variable   ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
-    Install Kueue Operator Via Cli
 
 Install Cluster Observability Operator Via Cli
     [Documentation]    Install Cluster Observability Operator Via CLI

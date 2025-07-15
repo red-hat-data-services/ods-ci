@@ -398,12 +398,10 @@ Verify Alerts Have Links To The Triage Guide
 Alerts Suite Setup
     [Documentation]    Test suite configuration
     Set Library Search Order    SeleniumLibrary
-    Skip If RHODS Is Self-Managed
     RHOSi Setup
 
 Alerts Suite Teardown
     [Documentation]    Test suite teardown
-    Skip If RHODS Is Self-Managed
     RHOSi Teardown
 
 Teardown PVC Alert Test

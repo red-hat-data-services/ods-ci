@@ -229,7 +229,7 @@ Data Science Pipelines Pre Upgrade Configuration
 
 Model Registry Pre Upgrade Set Up
     [Documentation]    Creates a Model Registry instance and registers a model/version
-    [Tags]      Upgrade     ModelRegistryUpgrade
+    [Tags]      Upgrade     ModelRegistryUpgrade    deprecatedTest
     Model Registry Pre Upgrade Scenario
 
 Long Running Jupyter Notebook

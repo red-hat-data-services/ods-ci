@@ -11,6 +11,7 @@ Run TestMnistSDK KFTO SDK test with NVIDIA CUDA image (PyTorch 2_4_1)
     ...     KFTOSDK
     ...     DistributedWorkloads
     ...     TrainingKubeflow
+    ...     deprecatedTest
     Run Training Operator KFTO SDK Test    TestMnistSDKPyTorch241
 
 Run TestMnistSDK KFTO SDK test with NVIDIA CUDA image (PyTorch 2_5_1)
@@ -19,4 +20,5 @@ Run TestMnistSDK KFTO SDK test with NVIDIA CUDA image (PyTorch 2_5_1)
     ...     KFTOSDK
     ...     DistributedWorkloads
     ...     TrainingKubeflow
+    ...     deprecatedTest
     Run Training Operator KFTO SDK Test    TestMnistSDKPyTorch251

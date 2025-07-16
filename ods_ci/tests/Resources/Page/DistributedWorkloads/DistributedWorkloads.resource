@@ -18,8 +18,6 @@ ${RAY_TORCH_CUDA_IMAGE_3.11}             quay.io/rhoai/ray@sha256:5077f9bb230dfa
 ${RAY_ROCM_IMAGE_3.11}                   quay.io/modh/ray@sha256:48c7864989c8f22ef07772c698b761f5c1b58c6781e7a99518204d521bf56a4c
 # Corresponds to quay.io/rhoai/ray:2.35.0-py311-rocm61-torch24-fa26
 ${RAY_TORCH_ROCM_IMAGE_3.11}             quay.io/rhoai/ray@sha256:b0e129cd2f4cdea7ad7a7859031357ffd9915410551f94fbcb942af2198cdf78
-# Corresponds to quay.io/modh/fms-hf-tuning:v2.8.2
-${FMS_HF_TUNING_IMAGE}                   quay.io/modh/fms-hf-tuning@sha256:1ad46fe1a23f41f190c49ec2549c64f484c88fe220888a7a5700dd857ca243cc
 # Corresponds to quay.io/modh/training:py311-cuda121-torch241
 ${CUDA_TRAINING_IMAGE_TORCH241}          quay.io/modh/training@sha256:f64f7bba3f1020d39491ac84d40d362a52e4822bdc11a33cfff021178b7c4097
 # Corresponds to quay.io/modh/training:py311-rocm62-torch241
@@ -32,7 +30,6 @@ ${ROCM_TRAINING_IMAGE_TORCH251}          quay.io/modh/training@sha256:6cdae840fa
 ${NOTEBOOK_IMAGE_3.11}                   quay.io/modh/odh-workbench-jupyter-datascience-cpu-py311-ubi9@sha256:48c2be818e8d2a5005a69e2c76f9a2d40ddeb1d03376e04516ca6da13418c887
 ${NOTEBOOK_USER_NAME}                    ${TEST_USER_3.USERNAME}
 ${NOTEBOOK_USER_PASSWORD}                ${TEST_USER_3.PASSWORD}
-${FMS_BINARY_NAME}                       fms
 ${KFTO_BINARY_NAME}                      kfto
 ${ODH_BINARY_NAME}                       odh
 ${PIP_INDEX_URL}                         ${PIP_INDEX_URL}
@@ -109,10 +106,6 @@ Prepare Training Operator KFTO E2E Test Suite
     [Documentation]    Prepare Training Operator KFTO E2E Test Suite
     Prepare Training Operator E2E Test Suite    ${KFTO_BINARY_NAME}
 
-Prepare Training Operator FMS E2E Test Suite
-    [Documentation]    Prepare Training Operator FMS E2E Test Suite
-    Prepare Training Operator E2E Test Suite    ${FMS_BINARY_NAME}
-
 Prepare Training Operator E2E Test Suite
     [Documentation]    Prepare Training Operator E2E Test Suite
     [Arguments]        ${test_binary}
@@ -130,38 +123,11 @@ Teardown Training Operator KFTO E2E Test Suite
     [Documentation]    Teardown Training Operator KFTO E2E Test Suite
     Teardown Training Operator E2E Test Suite    ${KFTO_BINARY_NAME}
 
-Teardown Training Operator FMS E2E Test Suite
-    [Documentation]    Teardown Training Operator FMS E2E Test Suite
-    Teardown Training Operator E2E Test Suite    ${FMS_BINARY_NAME}
-
 Teardown Training Operator E2E Test Suite
     [Documentation]    Teardown Training Operator E2E Test Suite
     [Arguments]        ${test_binary}
     Log To Console     "Removing test binaries"
     Remove File        ${test_binary}
-
-Run Training Operator FMS Test
-    [Documentation]    Run Training Operator FMS Test
-    [Arguments]    ${TEST_NAME}
-    Log To Console    "Running test: ${TEST_NAME}"
-    ${result} =    Run Process    ./${FMS_BINARY_NAME} -test.run ${TEST_NAME}
-    ...    shell=true
-    ...    stderr=STDOUT
-    ...    env:TEST_TIMEOUT_SHORT=5m
-    ...    env:TEST_TIMEOUT_MEDIUM=10m
-    ...    env:TEST_TIMEOUT_LONG=20m
-    ...    env:TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-${FMS_BINARY_NAME}-logs
-    ...    env:FMS_HF_TUNING_IMAGE=${FMS_HF_TUNING_IMAGE}
-    ...    env:AWS_DEFAULT_ENDPOINT=${AWS_DEFAULT_ENDPOINT}
-    ...    env:AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-    ...    env:AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-    ...    env:AWS_STORAGE_BUCKET_DOWNLOAD=${AWS_STORAGE_BUCKET}
-    ...    env:AWS_STORAGE_BUCKET_DOWNLOAD_MODEL_PATH=models/granite-3b-code-base-2k
-    Log To Console    ${result.stdout}
-    Check missing Go test    ${result.stdout}
-    IF    ${result.rc} != 0
-        FAIL    ${TEST_NAME} failed
-    END
 
 Run Training Operator KFTO Test
     [Documentation]    Run Training Operator KFTO Test

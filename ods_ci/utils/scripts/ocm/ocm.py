@@ -194,14 +194,17 @@ class OpenshiftClusterManager:
         replace_vars["CHANNEL_GROUP"] = self.channel_group
 
         if self.cloud_provider == "aws":
-            aws_replace_vars = {
+            aws_creds_replace_vars = {
                 "AWS_ACCESS_KEY_ID": self.aws_access_key_id,
                 "AWS_SECRET_ACCESS_KEY": self.aws_secret_access_key,
                 "AWS_ACCOUNT_ID": self.aws_account_id,
+            }
+            aws_replace_vars = {   
                 "REGION": self.aws_region,  # TODO: move to generic region variable
                 "COMPUTE_MACHINE_TYPE": self.aws_instance_type, # TODO: move to generic compute-machine-type variable
                 "COMPUTE_NODES": self.num_compute_nodes,    # TODO: move to generic compute-nodes variable
             }
+            replace_vars.update(aws_creds_replace_vars)
             replace_vars.update(aws_replace_vars)
             #cmd = (
             #    "ocm --v={} create cluster --provider {} --aws-account-id {} "
@@ -261,6 +264,8 @@ class OpenshiftClusterManager:
             self.ocm_verbose_level, output_file
         )
         ret = execute_command(cmd)
+        reducted_output = self.hide_values_in_op_json(gcp_replace_vars + aws_replace_vars, json.load(open(output_file)))
+        json.dump(reducted_output, open(output_file, "w"))
         if ret is None:
             log.error(f"Failed to create osd cluster {self.cluster_name}")
             sys.exit(1)

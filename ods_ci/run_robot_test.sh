@@ -335,8 +335,6 @@ if [[ ${SKIP_INSTALL} -eq 0 ]]; then
     echo "We ran already before and settled in venv we linked into '${basepath}/../.venv'."
   elif [[ -d "${virtenv}" ]]; then
     echo "Using a pre-created virtual environment in '${virtenv}' for poetry to save time."
-    poetry update
-    poetry lock
     poetry config --local virtualenvs.in-project true
     # Workaround for Poetry urllib3 connection error
     poetry config --local installer.parallel false
@@ -390,8 +388,6 @@ if ! ${SUBFOLDER}; then
   esac
 fi
 
-poetry update
-poetry lock
 robot ${TEST_EXCLUDE_TAG} ${TEST_INCLUDE_TAG} -d ${TEST_ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html ${TEST_VARIABLES} --variablefile ${TEST_VARIABLES_FILE} --exclude TBC ${EXTRA_ROBOT_ARGS} ${TEST_CASE_FILE}
 # shellcheck disable=SC2116
 exit_status=$(echo $?)

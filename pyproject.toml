@@ -26,7 +26,7 @@ dependencies = [
     "escapism>=1.0.1,<2.0.0",
     "semver>=2.0.0,<3.0.0",
     "rpaframework>=27.2.0,<28.0.0",
-    "pexpect>=4.8.0,<5.0.0",
+    "pexpect>=4.9.0,<5.0.0",
     "python-openstackclient>=6.2.0,<7.0.0",
     "awscli>=1.27.100,<2.0.0",
     # When you update the kfp or kfp-kubernetes, make a copy of iris-pipeline in pipeline-samples/v2/kfp-sdk-previous

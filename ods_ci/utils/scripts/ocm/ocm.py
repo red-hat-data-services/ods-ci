@@ -257,7 +257,6 @@ class OpenshiftClusterManager:
         template_file = "create-cluster.jinja"
         output_file = "create-cluster-{}.json".format(self.cluster_name)
         self._render_template(template_file, output_file, replace_vars)
-        cluster_id = self.get_osd_cluster_id()
         cmd = "ocm --v={} post /api/clusters_mgmt/v1/clusters --body={}".format(
             self.ocm_verbose_level, output_file
         )

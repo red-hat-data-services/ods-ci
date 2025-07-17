@@ -32,6 +32,8 @@ class OpenshiftClusterManager:
         self.token = args.get("token")
         self.testing_platform = args.get("testing_platform")
         self.cluster_name = args.get("cluster_name")
+        self.team = args.get("team")
+        self.fips = args.get("fips")
         self.aws_region = args.get("aws_region")
         self.aws_instance_type = args.get("aws_instance_type")
         self.num_compute_nodes = args.get("num_compute_nodes")
@@ -139,7 +141,14 @@ class OpenshiftClusterManager:
 
     def osd_cluster_create(self):
         """Creates OSD cluster"""
-
+        replace_vars = {}
+        replace_vars["CLUSTER_NAME"] = self.cluster_name
+        replace_vars["TEAM"] = self.team if self.team else "unknown"
+        replace_vars["FIPS"] = self.fips if self.fips else "false"
+        replace_vars["REGION"] = self.region
+        replace_vars["COMPUTE_NODES"] = self.compute_nodes
+        replace_vars["COMPUTE_MACHINE_TYPE"] = self.compute_machine_type
+        replace_vars["CLOUD_PROVIDER"] = self.cloud_provider
         if (self.channel_group == "candidate") and (self.testing_platform == "prod"):
             log.error("Channel group 'candidate' is available only for stage environment.")
             sys.exit(1)
@@ -181,47 +190,77 @@ class OpenshiftClusterManager:
             else:
                 log.error("Invalid channel group. Values can be 'stable' or 'candidate'.")
 
+        replace_vars["OCP_VERSION"] = self.openshift_version
+        replace_vars["CHANNEL_GROUP"] = self.channel_group
+
         if self.cloud_provider == "aws":
-            cmd = (
-                "ocm --v={} create cluster --provider {} --aws-account-id {} "
-                "--aws-access-key-id {} --aws-secret-access-key {} "
-                "--ccs --region {} --compute-nodes {} "
-                "--compute-machine-type {} {} {}"
-                "{}".format(
-                    self.ocm_verbose_level,
-                    self.cloud_provider,
-                    self.aws_account_id,
-                    self.aws_access_key_id,
-                    self.aws_secret_access_key,
-                    self.aws_region,
-                    self.num_compute_nodes,
-                    self.aws_instance_type,
-                    version,
-                    channel_grp,
-                    self.cluster_name,
-                )
-            )
+            aws_replace_vars = {
+                "AWS_ACCESS_KEY_ID": self.aws_access_key_id,
+                "AWS_SECRET_ACCESS_KEY": self.aws_secret_access_key,
+                "AWS_ACCOUNT_ID": self.aws_account_id,
+                "REGION": self.aws_region,  # TODO: move to generic region variable
+                "COMPUTE_MACHINE_TYPE": self.aws_instance_type, # TODO: move to generic compute-machine-type variable
+                "COMPUTE_NODES": self.num_compute_nodes,    # TODO: move to generic compute-nodes variable
+            }
+            replace_vars.update(aws_replace_vars)
+            #cmd = (
+            #    "ocm --v={} create cluster --provider {} --aws-account-id {} "
+            #    "--aws-access-key-id {} --aws-secret-access-key {} "
+            #    "--ccs --region {} --compute-nodes {} "
+            #    "--compute-machine-type {} {} {}"
+            #    "{}".format(
+            #        self.ocm_verbose_level,
+            #        self.cloud_provider,
+            #        self.aws_account_id,
+            #        self.aws_access_key_id,
+            #        self.aws_secret_access_key,
+            #        self.aws_region,
+            #        self.num_compute_nodes,
+            #        self.aws_instance_type,
+            #        version,
+            #        channel_grp,
+            #        self.cluster_name,
+            #    )
+            #)
         elif self.cloud_provider == "gcp":
+            gcp_replace_vars = {
+                "GCP_SA_PROJECT_ID": self.gcp_sa_project_id,
+                "GCP_SA_PRIVATE_KEY_ID": self.gcp_sa_private_key_id,
+                "GCP_SA_PRIVATE_KEY": self.gcp_sa_private_key,
+                "GCP_SA_CLIENT_ID": self.gcp_sa_client_id,
+                "GCP_SA_CLIENT_EMAIL": self.gcp_sa_client_email,
+                "GCP_SA_CLIENT_CERT_URL": self.gcp_sa_client_cert_url,
+            }
+            replace_vars.update(gcp_replace_vars)
             # Create service account file
-            self._create_service_account_file()
-            cmd = (
-                "ocm --v={} create cluster --provider {} --service-account-file {} "
-                "--ccs --region {} --compute-nodes {} "
-                "--compute-machine-type {} {} {}"
-                "{}".format(
-                    self.ocm_verbose_level,
-                    self.cloud_provider,
-                    self.service_account_file,
-                    self.region,
-                    self.compute_nodes,
-                    self.compute_machine_type,
-                    version,
-                    channel_grp,
-                    self.cluster_name,
-                )
-            )
+            # self._create_service_account_file()
+            #cmd = (
+            #    "ocm --v={} create cluster --provider {} --service-account-file {} "
+            #    "--ccs --region {} --compute-nodes {} "
+            #    "--compute-machine-type {} {} {}"
+            #    "{}".format(
+            #        self.ocm_verbose_level,
+            #        self.cloud_provider,
+            #        self.service_account_file,
+            #        self.region,
+            #        self.compute_nodes,
+            #        self.compute_machine_type,
+            #        version,
+            #        channel_grp,
+            #        self.cluster_name,
+            #    )
+            #)
         else:
             raise ValueError(f"{self.cloud_provider=} is not supported.")
+
+        # execute
+        template_file = "create-cluster.jinja"
+        output_file = "create-cluster-{}.json".format(self.cluster_name)
+        self._render_template(template_file, output_file, replace_vars)
+        cluster_id = self.get_osd_cluster_id()
+        cmd = "ocm --v={} post /api/clusters_mgmt/v1/clusters --body={}".format(
+            self.ocm_verbose_level, output_file
+        )
         ret = execute_command(cmd)
         if ret is None:
             log.error(f"Failed to create osd cluster {self.cluster_name}")
@@ -1423,6 +1462,21 @@ if __name__ == "__main__":
         default="qeaisrhods-xyz",
     )
 
+    optional_create_cluster_parser.add_argument(
+        "--team",
+        help="Team name",
+        action="store",
+        dest="team",
+        default="unknown",
+        metavar=""
+    )
+    optional_create_cluster_parser.add_argument(
+        "--fips",
+        help="FIPS mode",
+        action="store",
+        dest="fips",
+        default="false",
+    )
     aws_create_cluster_parser.add_argument(
         "--aws-account-id ",
         help="aws account id",

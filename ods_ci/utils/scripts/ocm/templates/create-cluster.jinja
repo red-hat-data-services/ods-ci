@@ -4,10 +4,10 @@
       "id": "{{ CLOUD_PROVIDER }}"
     },
     "version": {
-      "id": "{{ OCP_VERSION }}",
-      "channel_group": "{{ CHANNEL_GROUP }}"
+      "channel_group": "{{ CHANNEL_GROUP }}",
+      "id": "openshift-v{{ OCP_VERSION }}"
     },
-    "fips": "{{ FIPS }}",
+    "fips": {{ FIPS }},
     "region": {
       "id": "{{ REGION }}"
     },

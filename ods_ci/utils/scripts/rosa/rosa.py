@@ -167,9 +167,8 @@ def main():
     rosa_cluster_create_parser.add_argument(
         "--fips",
         required=False,
-        action="store",
+        action="store_true",
         dest="fips",
-        default=False,
     )
     rosa_cluster_manager = RosaClusterManager()
 

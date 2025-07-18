@@ -144,7 +144,7 @@ class OpenshiftClusterManager:
         values_to_hide = []
         replace_vars = {}
         replace_vars["CLUSTER_NAME"] = self.cluster_name
-        replace_vars["TEAM"] = self.team if self.team else "unknown"
+        replace_vars["TEAM"] = self.team if self.team else "unknown-team"
         replace_vars["FIPS"] = "true" if self.fips else "false"
         replace_vars["REGION"] = self.region
         replace_vars["COMPUTE_NODES"] = self.compute_nodes

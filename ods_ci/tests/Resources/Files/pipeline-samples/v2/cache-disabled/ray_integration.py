@@ -24,7 +24,8 @@ def ray_fn() -> int:
             worker_cpu_limits=1,
             worker_memory_requests=1,
             worker_memory_limits=2,
-            image="quay.io/modh/ray@sha256:a5b7c04a14f180d7ca6d06a5697f6bb684e40a26b95a0c872cac23b552741707",
+            # Corresponds to quay.io/modh/ray:2.47.1-py311-cu121
+            image="quay.io/modh/ray@sha256:6d076aeb38ab3c34a6a2ef0f58dc667089aa15826fa08a73273c629333e12f1e",
             verify_tls=False
         )
     )

@@ -145,7 +145,7 @@ class OpenshiftClusterManager:
         replace_vars = {}
         replace_vars["CLUSTER_NAME"] = self.cluster_name
         replace_vars["TEAM"] = self.team if self.team else "unknown"
-        replace_vars["FIPS"] = self.fips if self.fips else "false"
+        replace_vars["FIPS"] = "true" if self.fips else "false"
         replace_vars["REGION"] = self.region
         replace_vars["COMPUTE_NODES"] = self.compute_nodes
         replace_vars["COMPUTE_MACHINE_TYPE"] = self.compute_machine_type
@@ -1450,9 +1450,8 @@ if __name__ == "__main__":
     optional_create_cluster_parser.add_argument(
         "--fips",
         help="FIPS mode",
-        action="store",
+        action="store_true",
         dest="fips",
-        default="false",
     )
     aws_create_cluster_parser.add_argument(
         "--aws-account-id ",

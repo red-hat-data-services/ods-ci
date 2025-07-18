@@ -24,6 +24,8 @@ class RosaClusterManager:
         self.compute_machine_type = args.get("compute_machine_type")
         self.rosa_version = args.get("rosa_version")
         self.channel_name = args.get("channel_name")
+        self.tags = args.get("tags")
+        self.fips = args.get("fips")
 
     def set_rosa_version(self):
         version_match = re.match(r"(\d+\.\d+)\-latest", self.rosa_version)
@@ -63,6 +65,9 @@ class RosaClusterManager:
             self.compute_nodes,
             self.compute_machine_type,
             self.rosa_version,
+            True,   # sts
+            self.fips,
+            self.tags,
         )
         wait_for_osd_cluster_to_be_ready(self.cluster_name)
 
@@ -150,6 +155,21 @@ def main():
         action="store",
         dest="channel_name",
         help="Channel Group stable/candidate",
+    )
+    rosa_cluster_create_parser.add_argument(
+        "--tags",
+        required=False,
+        action="store",
+        dest="tags",
+        help="Comma-separated AWS UserTags, for example: 'key value, foo bar'",
+        default="",
+    )
+    rosa_cluster_create_parser.add_argument(
+        "--fips",
+        required=False,
+        action="store",
+        dest="fips",
+        default=False,
     )
     rosa_cluster_manager = RosaClusterManager()
 

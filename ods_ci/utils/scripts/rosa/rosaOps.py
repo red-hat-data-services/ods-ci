@@ -36,6 +36,8 @@ def rosa_create_cluster(
     compute_machine_type,
     rosa_version,
     sts=True,
+    fips=False,
+    tags="",    # comma-separated, for example: 'key value, foo bar'
 ):
     cmd_rosa_create_cluster = [
         "rosa",
@@ -54,6 +56,8 @@ def rosa_create_cluster(
         rosa_version,
         "--channel-group",
         channel_name,
+        "--fips" if fips else "",
+        f"--tags {tags}" if tags.strip() else "",
     ]
 
     if sts is True:

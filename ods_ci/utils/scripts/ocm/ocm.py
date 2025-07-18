@@ -215,6 +215,10 @@ class OpenshiftClusterManager:
                 "GCP_SA_CLIENT_ID": self.gcp_sa_client_id,
                 "GCP_SA_CLIENT_EMAIL": self.gcp_sa_client_email,
                 "GCP_SA_CLIENT_CERT_URL": self.gcp_sa_client_cert_url,
+                "AUTH_TYPE": self.gcp_auth_type,
+                "AUTH_URI": self.gcp_auth_uri,
+                "TOKEN_URI": self.gcp_token_uri,
+                "AUTH_CERT_URL": self.gcp_auth_cert_url,
             }
             replace_vars.update(gcp_replace_vars)
             values_to_hide.extend(gcp_replace_vars.values())
@@ -896,26 +900,6 @@ class OpenshiftClusterManager:
         # Waiting 5 minutes to ensure all the cluster services are
         # up even after cluster is in ready state
         time.sleep(300)
-
-    def _create_service_account_file(self):
-        """
-        Creates GCP service account file
-        """
-
-        replace_vars = {
-            "PROJECT_ID": self.gcp_sa_project_id,
-            "PRIVATE_KEY_ID": self.gcp_sa_priv_key_id,
-            "PRIVATE_KEY": self.gcp_sa_private_key,
-            "CLIENT_EMAIL": self.gcp_sa_client_email,
-            "CLIENT_ID": self.gcp_sa_client_id,
-            "CLIENT_CERT_URL": self.gcp_sa_client_cert_url,
-            "AUTH_TYPE": self.gcp_auth_type,
-            "AUTH_URI": self.gcp_auth_uri,
-            "TOKEN_URI": self.gcp_token_uri,
-            "AUTH_CERT_URL": self.gcp_auth_cert_url,
-        }
-        template_file = "create_gcp_sa_json.jinja"
-        self._render_template(template_file, self.service_account_file, replace_vars)
 
     def install_rhods_addon(self):
         if not self.is_addon_installed():

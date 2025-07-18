@@ -144,7 +144,7 @@ class OpenshiftClusterManager:
         values_to_hide = []
         replace_vars = {}
         replace_vars["CLUSTER_NAME"] = self.cluster_name
-        replace_vars["TEAM"] = self.team if self.team else "unknown-team"
+        replace_vars["TEAM"] = self.team
         replace_vars["FIPS"] = "true" if self.fips else "false"
         replace_vars["REGION"] = self.region
         replace_vars["COMPUTE_NODES"] = self.compute_nodes
@@ -153,7 +153,6 @@ class OpenshiftClusterManager:
         if (self.channel_group == "candidate") and (self.testing_platform == "prod"):
             log.error("Channel group 'candidate' is available only for stage environment.")
             sys.exit(1)
-
         version = ""
         if self.openshift_version != "":
             version_match = re.match(r"(\d+\.\d+)\-latest", self.openshift_version)
@@ -1448,7 +1447,7 @@ if __name__ == "__main__":
         help="Team name",
         action="store",
         dest="team",
-        default="unknown",
+        default="unknown-team",
         metavar=""
     )
     optional_create_cluster_parser.add_argument(

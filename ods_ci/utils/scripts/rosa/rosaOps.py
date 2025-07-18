@@ -57,7 +57,7 @@ def rosa_create_cluster(
         "--channel-group",
         channel_name,
         "--fips" if fips else "",
-        f"--tags {tags}" if tags.strip() else "",
+        f"--tags '{tags}'" if tags.strip() else "",
     ]
 
     if sts is True:

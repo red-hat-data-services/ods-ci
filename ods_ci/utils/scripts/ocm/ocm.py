@@ -211,7 +211,7 @@ class OpenshiftClusterManager:
         elif self.cloud_provider == "gcp":
             gcp_replace_vars = {
                 "GCP_SA_PROJECT_ID": self.gcp_sa_project_id,
-                "GCP_SA_PRIVATE_KEY_ID": self.gcp_sa_private_key_id,
+                "GCP_SA_PRIVATE_KEY_ID": self.gcp_sa_priv_key_id,
                 "GCP_SA_PRIVATE_KEY": self.gcp_sa_private_key,
                 "GCP_SA_CLIENT_ID": self.gcp_sa_client_id,
                 "GCP_SA_CLIENT_EMAIL": self.gcp_sa_client_email,

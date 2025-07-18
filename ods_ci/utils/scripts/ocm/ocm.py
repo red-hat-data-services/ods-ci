@@ -141,6 +141,7 @@ class OpenshiftClusterManager:
 
     def osd_cluster_create(self):
         """Creates OSD cluster"""
+        values_to_hide = []
         replace_vars = {}
         replace_vars["CLUSTER_NAME"] = self.cluster_name
         replace_vars["TEAM"] = self.team if self.team else "unknown"
@@ -206,25 +207,7 @@ class OpenshiftClusterManager:
             }
             replace_vars.update(aws_creds_replace_vars)
             replace_vars.update(aws_replace_vars)
-            #cmd = (
-            #    "ocm --v={} create cluster --provider {} --aws-account-id {} "
-            #    "--aws-access-key-id {} --aws-secret-access-key {} "
-            #    "--ccs --region {} --compute-nodes {} "
-            #    "--compute-machine-type {} {} {}"
-            #    "{}".format(
-            #        self.ocm_verbose_level,
-            #        self.cloud_provider,
-            #        self.aws_account_id,
-            #        self.aws_access_key_id,
-            #        self.aws_secret_access_key,
-            #        self.aws_region,
-            #        self.num_compute_nodes,
-            #        self.aws_instance_type,
-            #        version,
-            #        channel_grp,
-            #        self.cluster_name,
-            #    )
-            #)
+            values_to_hide.extend(aws_creds_replace_vars.values())
         elif self.cloud_provider == "gcp":
             gcp_replace_vars = {
                 "GCP_SA_PROJECT_ID": self.gcp_sa_project_id,
@@ -235,24 +218,7 @@ class OpenshiftClusterManager:
                 "GCP_SA_CLIENT_CERT_URL": self.gcp_sa_client_cert_url,
             }
             replace_vars.update(gcp_replace_vars)
-            # Create service account file
-            # self._create_service_account_file()
-            #cmd = (
-            #    "ocm --v={} create cluster --provider {} --service-account-file {} "
-            #    "--ccs --region {} --compute-nodes {} "
-            #    "--compute-machine-type {} {} {}"
-            #    "{}".format(
-            #        self.ocm_verbose_level,
-            #        self.cloud_provider,
-            #        self.service_account_file,
-            #        self.region,
-            #        self.compute_nodes,
-            #        self.compute_machine_type,
-            #        version,
-            #        channel_grp,
-            #        self.cluster_name,
-            #    )
-            #)
+            values_to_hide.extend(gcp_replace_vars.values())
         else:
             raise ValueError(f"{self.cloud_provider=} is not supported.")
 
@@ -264,8 +230,7 @@ class OpenshiftClusterManager:
             self.ocm_verbose_level, output_file
         )
         ret = execute_command(cmd)
-        reducted_output = self.hide_values_in_op_json(gcp_replace_vars + aws_replace_vars, json.load(open(output_file)))
-        json.dump(reducted_output, open(output_file, "w"))
+        self.hide_values_in_file(output_file, values_to_hide)
         if ret is None:
             log.error(f"Failed to create osd cluster {self.cluster_name}")
             sys.exit(1)
@@ -569,6 +534,14 @@ class OpenshiftClusterManager:
                 if p["id"] == field:
                     p["value"] = "##hidden##"
         return json.dumps(json_dict)
+
+    def hide_values_in_file(self, filepath=None, values=[]):
+        with open(filepath, "r") as f:
+            text = f.read()
+        for value in values:
+            text = text.replace(value, "##hidden##")
+        with open(filepath, "w") as f:
+            f.write(text)
 
     def install_addon(
         self,

@@ -910,6 +910,10 @@ class OpenshiftClusterManager:
             "CLIENT_EMAIL": self.gcp_sa_client_email,
             "CLIENT_ID": self.gcp_sa_client_id,
             "CLIENT_CERT_URL": self.gcp_sa_client_cert_url,
+            "AUTH_TYPE": self.gcp_auth_type,
+            "AUTH_URI": self.gcp_auth_uri,
+            "TOKEN_URI": self.gcp_token_uri,
+            "AUTH_CERT_URL": self.gcp_auth_cert_url,
         }
         template_file = "create_gcp_sa_json.jinja"
         self._render_template(template_file, self.service_account_file, replace_vars)
@@ -1645,6 +1649,38 @@ if __name__ == "__main__":
                 action="store",
                 dest="gcp_sa_client_cert_url",
                 required=True,
+            )
+
+            required_create_cluster_parser.add_argument(
+                "--gcp-auth-type",
+                help="gcp auth type",
+                action="store",
+                dest="gcp_auth_type",
+                required=True,
+            )
+
+            required_create_cluster_parser.add_argument(
+                "--gcp-auth-uri",
+                help="gcp auth uri",
+                action="store",
+                dest="gcp_auth_uri",
+                required=True,  
+            )
+
+            required_create_cluster_parser.add_argument(
+                "--gcp-token-uri",
+                help="gcp token uri",
+                action="store",
+                dest="gcp_token_uri",
+                required=True,  
+            )
+
+            required_create_cluster_parser.add_argument(
+                "--gcp-auth-cert-url",
+                help="gcp auth cert url",
+                action="store",
+                dest="gcp_auth_cert_url",
+                required=True,  
             )
 
             optional_create_cluster_parser.add_argument(

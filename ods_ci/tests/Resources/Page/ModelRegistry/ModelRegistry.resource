@@ -368,7 +368,7 @@ Model Registry Pre Upgrade Scenario
     [Documentation]    Creates a Model Registry instance and registers a model/version
     Prepare Model Registry Test Setup
     Create Workbench    workbench_title=${WORKBENCH_TITLE}    workbench_description=Registry test
-    ...                 prj_title=${PRJ_TITLE}    image_name=Minimal Python  deployment_size=${NONE}
+    ...                 prj_title=${PRJ_TITLE}    image_name=Jupyter | Minimal | CPU | Python 3.11  deployment_size=${NONE}
     ...                 storage=Persistent   pv_existent=${NONE}
     ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}
     Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}

@@ -1,11 +1,10 @@
 from kfp import compiler, dsl, kubernetes
 from kfp.dsl import PipelineTask
 
-#  Runtime: Pytorch with CUDA and Python 3.9 (UBI 9)
-#  Images for each release can be found here (in the branch for the release)
-common_base_image = (
-    "quay.io/modh/runtime-images@sha256:e1f7ad986f694236a818796af290a99b4e7f73d44cd39ca45860087644d136dd"
-)
+#  Runtime: Pytorch with CUDA and Python 3.11 (UBI 9)
+# The images for each release can be found in
+# https://github.com/red-hat-data-services/rhoai-disconnected-install-helper/blob/main/rhoai-2.21.md
+common_base_image = "quay.io/modh/odh-pipeline-runtime-pytorch-cuda-py311-ubi9@sha256:4706be608af3f33c88700ef6ef6a99e716fc95fc7d2e879502e81c0022fd840e"
 
 
 def add_gpu_toleration(task: PipelineTask, accelerator_type: str, accelerator_limit: int):

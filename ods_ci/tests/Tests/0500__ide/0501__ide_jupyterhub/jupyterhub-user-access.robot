@@ -30,7 +30,7 @@ Verify User Can Set Custom RHODS Groups
     ...                command. There is an another test that changes users/groups
     ...                via ODH Dashboard UI in `Settings -> User management` section, see:
     ...                `Verify Unauthorized User Is Not Able To Spawn Jupyter Notebook` in
-    ...                tests/Tests/400__ods_dashboard/413__ods_dashboard_user_mgmt.robot
+    ...                tests/Tests/400__ods_dashboard/405__ods_dashboard_user_mgmt.robot
     [Tags]  Tier1
     ...     ODS-293    ODS-503
     [Setup]      Set Standard RHODS Groups Variables
@@ -135,7 +135,7 @@ Check New Access Configuration Works As Expected
     Login To RHODS Dashboard    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}    ${TEST_USER_3.AUTH_TYPE}
     # Note: we expect the Jupyter notebook spawner page because in previous step we logged out from this particular
     # page and since it is preserved in the URL, we will be navigated to that page after the login again.
-    Wait For RHODS Dashboard To Load    expected_page=Start a notebook server    wait_for_cards=${FALSE}
+    Wait For RHODS Dashboard To Load    expected_page=Start a basic workbench    wait_for_cards=${FALSE}
     Run Keyword And Continue On Failure    Verify Jupyter Access Level    expected_result=user
     Capture Page Screenshot    perm_user_custom.png
     Logout From RHODS Dashboard
@@ -150,7 +150,7 @@ Check Standard Access Configuration Works As Expected
     Capture Page Screenshot    perm_admin_std.png
     Logout From RHODS Dashboard
     Login To RHODS Dashboard  ${TEST_USER_4.USERNAME}  ${TEST_USER_4.PASSWORD}  ${TEST_USER_4.AUTH_TYPE}
-    Wait For RHODS Dashboard To Load    expected_page=Start a notebook server
+    Wait For RHODS Dashboard To Load    expected_page=Start a basic workbench
     ...    wait_for_cards=${FALSE}
     Run Keyword And Continue On Failure   Verify Jupyter Access Level   expected_result=user
     Capture Page Screenshot    perm_user_std.png

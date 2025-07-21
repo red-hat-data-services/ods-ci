@@ -6,7 +6,7 @@ Library           Process
 Resource          ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 Resource          ../../../tests/Resources/Common.robot
 Resource          ../../Resources/Page/FeatureStore/FeatureStore.resource
-
+Test Tags         ExcludeOnODH
 
 *** Test Cases ***
 Run runTestDeploySimpleCRFunc test
@@ -14,11 +14,18 @@ Run runTestDeploySimpleCRFunc test
     [Tags]  Sanity
     ...     FeatureStore
     ...     RHOAIENG-14799
-    Run Feast Operator E2E Test    TesDefaultFeastCR
+    Run Feast Operator E2E Test    TesDefaultFeastCR    e2e
 
 Run runTestWithRemoteRegistryFunction test
     [Documentation]    Run Go E2E test: runTestWithRemoteRegistryFunction
     [Tags]  Sanity
     ...     FeatureStore
     ...     RHOAIENG-14799
-    Run Feast Operator E2E Test    TestRemoteRegistryFeastCR
+    Run Feast Operator E2E Test    TestRemoteRegistryFeastCR    e2e
+
+Run runTestApplyAndMaterializeFeastDefinitions test
+    [Documentation]    Run Go E2E test: TestApplyAndMaterializeFeastDefinitions
+    [Tags]  Tier1
+    ...     FeatureStore
+    ...     RHOAIENG-26460
+    Run Feast Operator E2E Test    TestApplyAndMaterializeFeastDefinitions    e2e

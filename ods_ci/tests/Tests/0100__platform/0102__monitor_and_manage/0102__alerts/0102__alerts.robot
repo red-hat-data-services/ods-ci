@@ -7,6 +7,7 @@ Resource            ../../../../Resources/Common.robot
 Resource            ../../../../Resources/Page/OCPDashboard/Builds/Builds.robot
 Resource            ../../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Resource            ../../../../Resources/CLI/DataSciencePipelines/DataSciencePipelinesBackend.resource
+Resource            ../../../../Resources/Page/ODH/Prometheus/Triage.resource
 Library             OperatingSystem
 Library             SeleniumLibrary
 Library             JupyterLibrary
@@ -82,10 +83,6 @@ Verify Alerts Are Fired When RHODS Dashboard Is Down    # robocop: disable:too-l
     ...       ODS-739
     ...       Monitoring
     ...       AutomationBug
-    Skip If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}
-    ...    ${RHODS_PROMETHEUS_TOKEN}
-    ...    SLOs-haproxy_backend_http_responses_dashboard
-    ...    RHODS Dashboard Route Error Burn Rate
 
     ODS.Scale Deployment    ${OPERATOR_NAMESPACE}    rhods-operator    replicas=0
     ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    rhods-dashboard    replicas=0
@@ -128,10 +125,6 @@ Verify Alert "Kubeflow notebook controller pod is not running" Is Fired When Kub
     [Tags]    Tier3
     ...       ODS-1700
     ...       Monitoring
-    Skip If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}
-    ...    ${RHODS_PROMETHEUS_TOKEN}
-    ...    RHODS Notebook controllers
-    ...    Kubeflow notebook controller pod is not running
 
     ODS.Scale Deployment    ${OPERATOR_NAMESPACE}        rhods-operator                    replicas=0
     ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    notebook-controller-deployment    replicas=0
@@ -160,10 +153,6 @@ Verify Alert "ODH notebook controller pod is not running" Is Fired When ODH Cont
     [Tags]    Tier3
     ...       ODS-1701
     ...       Monitoring
-    Skip If Alert Is Already Firing    ${RHODS_PROMETHEUS_URL}
-    ...    ${RHODS_PROMETHEUS_TOKEN}
-    ...    RHODS Notebook controllers
-    ...    ODH notebook controller pod is not running
 
     ODS.Scale Deployment    ${OPERATOR_NAMESPACE}        rhods-operator                     replicas=0
     ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    odh-notebook-controller-manager    replicas=0
@@ -333,6 +322,77 @@ Verify Data Science Pipelines Application Alerts
     ...    timeout=2 min
 
     [Teardown]    Delete Project Via CLI    ${PROJECT}
+
+
+Verify Data Science Pipelines Operator Alert Fires When Operator Is Down
+    [Documentation]     Verifies that alert "Data Science Pipelines Operator Probe Success Burn Rate (for 5m)" is fired
+    [Tags]    Tier3
+    ...       ODS-2166
+    ...       RHOAIENG-13262
+    ...       Monitoring
+
+    ODS.Scale Deployment    ${OPERATOR_NAMESPACE}        rhods-operator                                      replicas=0
+    ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    data-science-pipelines-operator-controller-manager  replicas=0
+
+    Prometheus.Wait Until Alert Is Pending    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    SLOs-probe_success_dsp
+    ...    Data Science Pipelines Operator Probe Success 5m and 1h Burn Rate high
+    ...    timeout=20 min
+
+    ODS.Restore Default Deployment Sizes
+
+    Prometheus.Wait Until Alert Is Inactive    ${RHODS_PROMETHEUS_URL}
+    ...    ${RHODS_PROMETHEUS_TOKEN}
+    ...    SLOs-probe_success_dsp
+    ...    Data Science Pipelines Operator Probe Success 5m and 1h Burn Rate high
+    ...    timeout=10 min
+
+    [Teardown]    ODS.Restore Default Deployment Sizes
+
+Verify Alerts Have Links To The Triage Guide
+    [Documentation]    Verifies that all alerts have expected and working links to the triage guide
+    [Tags]    Tier3
+    ...       ODS-558
+    ...       RHOAIENG-13073
+    ...       Monitoring
+    ${all_rules}=    Get Rules    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    alert
+    ${all_rules}=    Get From Dictionary    ${all_rules['data']}    groups
+
+    FOR    ${rule}    IN    @{all_rules}
+        ${rule_name}=    Get From Dictionary    ${rule}    name
+        ${rules_list}=    Get From Dictionary    ${rule}    rules
+        FOR    ${sub_rule}    IN    @{rules_list}
+            ${name}=    Get From Dictionary    ${sub_rule}    name
+            ${exists}=    Run Keyword And Return Status    Dictionary Should Contain Key    ${sub_rule['annotations']}    triage
+            IF    not ${exists}
+                IF    '${name}' != 'DeadManSnitch'
+                    Run Keyword And Continue On Failure    FAIL    msg=Alert '${name}' does not have triage entry
+                END
+                CONTINUE
+            END
+            ${expected_triage_url}=    Set Variable    ${EMPTY}
+            FOR    ${item}    IN    &{TRIAGE_URLS}
+                ${matches}=    Get Regexp Matches    ${name}    ${item}[0]
+                IF  len(${matches}) > 0
+                    ${expected_triage_url}=    Set Variable    ${item}[1]
+                    BREAK
+                END
+            END
+            IF    '${expected_triage_url}' == ''
+                Run Keyword And Continue On Failure    FAIL    msg=TRIAGE_URLS does not have expected value for '${name}', please add it
+                CONTINUE
+            END
+            ${triage_url}=    Get From Dictionary    ${sub_rule['annotations']}    triage
+            Run Keyword And Continue On Failure    Should Be Equal    ${expected_triage_url}    ${triage_url}    msg=Triage URL does not match the expected one
+
+            ${result}=    Run Process    curl -s -o /dev/null -w '\%{http_code}\n' ${triage_url}
+            ...    shell=true
+            ...    stderr=STDOUT
+            Run Keyword And Continue On Failure    Should Be Equal As Integers	    ${result.rc}    0    msg=Downloading the triage document for ${sub_rule} failed
+            Run Keyword And Continue On Failure    Should Be Equal As Integers	    ${result.stdout}    200    msg=HTTP Status code was not 200
+        END
+    END
 
 *** Keywords ***
 Alerts Suite Setup
@@ -512,13 +572,6 @@ Verify Alert Has A Given Severity And Continue On Failure
     ...    ${alert}
     ...    ${alert-severity}
     ...    ${alert-duration}
-
-Skip If Alert Is Already Firing
-    [Documentation]    Skips tests if ${alert} is already firing
-    [Arguments]    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-duration}=${EMPTY}
-    ${alert_is_firing} =    Run Keyword And Return Status    Alert Should Be Firing
-    ...    ${pm_url}    ${pm_token}    ${rule_group}    ${alert}    ${alert-duration}
-    Skip If    ${alert_is_firing}    msg=Test skiped because alert "${alert} ${alert-duration}" is already firing
 
 Check Cluster Name Contain "Aisrhods" Or Not
     [Documentation]     Return true if cluster name contains aisrhods and if not return false

@@ -36,9 +36,9 @@ deploymentSpec:
         - -c
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
-          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.10.1'\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.13.0'\
           \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"'  &&\
-          \  python3 -m pip install --quiet --no-warn-script-location 'codeflare-sdk==v0.27.0'\
+          \  python3 -m pip install --quiet --no-warn-script-location 'codeflare-sdk==v0.28.1'\
           \ && \"$0\" \"$@\"\n"
         - sh
         - -ec
@@ -205,7 +205,7 @@ deploymentSpec:
           \      head_cpu_limits=1,\n            head_memory_requests=4,\n       \
           \     head_memory_limits=4,\n            worker_cpu_requests=1,\n      \
           \      worker_cpu_limits=1,\n            worker_memory_requests=1,\n   \
-          \         worker_memory_limits=2,\n            image=\"quay.io/modh/ray@sha256:db667df1bc437a7b0965e8031e905d3ab04b86390d764d120e05ea5a5c18d1b4\"\
+          \         worker_memory_limits=2,\n            image=\"quay.io/modh/ray@sha256:a5b7c04a14f180d7ca6d06a5697f6bb684e40a26b95a0c872cac23b552741707\"\
           ,\n            verify_tls=False\n        )\n    )\n\n    # always clean\
           \ the resources\n    cluster.down()\n    print(cluster.status())\n    cluster.up()\n\
           \    cluster.wait_ready()\n    print(cluster.status())\n    print(cluster.details())\n\
@@ -221,7 +221,7 @@ deploymentSpec:
           ) as pip_requirements_file:\n        pip_requirements_file.write(pip_requirements)\n\
           \n    assert_jobsubmit_withlogin(cluster, mnist_directory)\n\n    cluster.down()\n\
           \n"
-        image: registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61
+        image: registry.redhat.io/ubi9/python-311@sha256:82a16d7c4da926081c0a4cc72a84d5ce37859b50a371d2f9364313f66b89adf7
 pipelineInfo:
   description: Ray Integration Test
   name: ray-integration-test
@@ -259,4 +259,4 @@ root:
       AWS_STORAGE_BUCKET_MNIST_DIR:
         parameterType: STRING
 schemaVersion: 2.1.0
-sdkVersion: kfp-2.9.0
+sdkVersion: kfp-2.13.0

@@ -34,7 +34,7 @@ ${WORKBENCH_STATUS_RUNNING}=                  Running
 ${WORKBENCH_STATUS_STARTING}=                 Starting
 ${WORKBENCH_STATUS_FAILED}=                   Failed
 ${WORKBENCH_IMAGE_VER_LABEL}=        //label[@for="workbench-image-version-selection"]
-${WORKBENCH_IMAGE_VER_BUTTON}=       ${WORKBENCH_IMAGE_VER_LABEL}/../..//button
+${WORKBENCH_IMAGE_VER_BUTTON}=       //button[@data-testid="workbench-image-version-selection"]
 ${WORKBENCH_IMAGE_VER_DROPDOWN}=     //*[@id="workbench-image-version-selection"]
 # Standard Data Science https://github.com/red-hat-data-services/notebooks/blob/main/manifests/base/jupyter-datascience-notebook-imagestream.yaml
 # vs
@@ -201,7 +201,7 @@ Select Workbench Image
             ${image_name}=    Set Variable    Jupyter Data Science
         END
     END
-    Click Element    //a[@href="#notebook-image"]
+    Click Element    //a[@href="#name-and-description"]
     Wait Until Page Contains Element    ${WORKBENCH_IMAGE_MENU_BTN_XP}
     Click Element    ${WORKBENCH_IMAGE_MENU_BTN_XP}
     Wait Until Page Contains Element    ${WORKBENCH_IMAGE_ITEM_BTN_XP}\[text()="${image_name}"]    timeout=10s
@@ -222,14 +222,26 @@ Select Workbench Image
 
 Verify Version Selection Dropdown
     [Documentation]    Verifies the version selection dropdown is present
-    ...                uses the recommended image by default, and has two options
+    ...                uses the latest image by default, and has two options
     Wait Until Page Contains Element    xpath=${WORKBENCH_IMAGE_VER_LABEL}
     Wait Until Page Contains Element    xpath=${WORKBENCH_IMAGE_VER_BUTTON}
     Click Element    xpath=${WORKBENCH_IMAGE_VER_BUTTON}
-    Page Should Contain Element    xpath=${WORKBENCH_IMAGE_VER_BUTTON}//div[contains(text(),"Recommended")]
     Wait Until Page Contains Element    xpath=${WORKBENCH_IMAGE_VER_DROPDOWN}
-    Page Should Contain Element    xpath=${WORKBENCH_IMAGE_VER_DROPDOWN}//span//div[contains(text(), "${DEFAULT_NOTEBOOK_VER}")]
+
+    # Check that the default value of the image version is truly the default one
+    Page Should Contain Element    xpath=${WORKBENCH_IMAGE_VER_BUTTON}//*[contains(text(), "${DEFAULT_NOTEBOOK_VER}")]
+
+    ${default_ntb_version_selection_xpath}=    Set Variable    ${WORKBENCH_IMAGE_VER_DROPDOWN}//span//div[contains(text(), "${DEFAULT_NOTEBOOK_VER}")]
+
+    # Check that there is the default ntb image version present in the selection
+    Page Should Contain Element    xpath=${default_ntb_version_selection_xpath}
+    # Check that there is the previous ntb image version present in the selection
     Page Should Contain Element    xpath=${WORKBENCH_IMAGE_VER_DROPDOWN}//span//div[contains(text(), "${PREVIOUS_NOTEBOOK_VER}")]
+    # Check that we have the "Latest" label present in the selection
+    Page Should Contain Element    xpath=${WORKBENCH_IMAGE_VER_DROPDOWN}//*[@data-testid="notebook-image-availability"]//*[contains(text(),"Latest")]
+    # Check that the "Latest" label is assigned to the expected default ntb image version in the selection
+    Page Should Contain Element    xpath=${default_ntb_version_selection_xpath}/..//*[@data-testid="notebook-image-availability"]//*[contains(text(),"Latest")]
+
     Click Element    xpath=${WORKBENCH_IMAGE_VER_BUTTON}
 
 Select Workbench Image Version
@@ -389,7 +401,7 @@ Stop Workbench
     ${is_starting}=      Run Keyword And Return Status   Workbench Status Should Be
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STARTING}
     IF    ${is_started} == ${TRUE} or ${is_starting} == ${TRUE}
-        Click Button    xpath=//div[@data-testid="table-row-title"]//*[text()="${workbench_title}"]/ancestor::tr//button[@data-testid="notebook-stop-action"]
+        Click Button    xpath=//div[@data-testid="table-row-title"]//*[text()="${workbench_title}"]/ancestor::tr//button[@data-testid="state-action-toggle"]
         Wait Until Generic Modal Appears
         Handle Stop Workbench Confirmation Modal    workbench_title=${workbench_title}
         ...    press_cancel=${press_cancel}
@@ -404,7 +416,7 @@ Handle Stop Workbench Confirmation Modal
     Run Keyword And Continue On Failure    Page Should Contain    Stop workbench?
     IF    ${from_running} == ${TRUE}
         Run Keyword And Continue On Failure
-        ...    Page Should Contain    Any unsaved changes to the ${workbench_title} workbench will be lost.
+        ...    Page Should Contain    Any unsaved changes to the ${workbench_title} will be lost.
         Run Keyword And Continue On Failure
         ...    Page Should Contain    To save changes, open the workbench.
         Run Keyword And Continue On Failure

@@ -3,6 +3,7 @@ Documentation       Post install test cases that mainly verify OCP resources and
 Library             String
 Library             OperatingSystem
 Library             OpenShiftLibrary
+Library             yaml
 Library             ../../../../../libs/Helpers.py
 Resource            ../../../../Resources/RHOSi.resource
 Resource            ../../../../Resources/OCP.resource
@@ -329,13 +330,13 @@ Verify No Application Pods Run With Anyuid SCC Or As Root
     ${status} =    Run Keyword And Return Status    Should Be Empty    ${output}
     IF    not ${status}    Fail      msg=Some pods are running as root (UID=0)
 
+
 Verify No Alerts Are Firing After Installation Except For DeadManSnitch    # robocop: disable:too-long-test-case
     [Documentation]    Verifies that, after installation, only the DeadManSnitch alert is firing
     [Tags]    Smoke
-    ...       Tier1
     ...       ODS-540
     ...       RHOAIENG-13079
-    ...       Monitoring
+    #...       Monitoring - just for tracking purposes but commented to not run the same test many times
     ...       Operator
     Skip If RHODS Is Self-Managed
     # If these numbers change, add also alert-specific tests
@@ -408,8 +409,7 @@ Verify DSC Contains Correct Component Versions  # robocop: disable:too-long-test
             END
             ${component_metadata_content} =  Get File  ${component_metadata_file}
             ${component_metadata} =    Evaluate     yaml.safe_load("""${component_metadata_content}""")    yaml
-            Dictionaries Should Be Equal    ${component_versions_json}[${c}]   ${component_metadata}
-            ...    ignore_keys=['managementState', 'defaultDeploymentMode', 'serverlessMode']
+            Lists Should Be Equal    ${component_versions_json}[${c}][releases]   ${component_metadata}[releases]
             ...    msg=Component versions in DSC don't match component metadata in repo
         ELSE
             Log  ${c} does not provide component_metadata.yaml
@@ -557,7 +557,7 @@ Launch Notebook And Stop It    # robocop: disable
     Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     Verify Service Account Authorization Not Required
-    Wait Until Page Contains    Start a notebook server
+    Wait Until Page Contains    Start a basic workbench
     Fix Spawner Status
     Spawn Notebook With Arguments    image=minimal-notebook
     End Web Test

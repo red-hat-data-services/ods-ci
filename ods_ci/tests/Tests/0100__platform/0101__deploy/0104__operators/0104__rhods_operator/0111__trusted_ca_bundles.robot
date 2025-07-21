@@ -58,7 +58,13 @@ Validate Trusted CA Bundles State Unmanaged
     # Trusted CA Bundle managementStatus 'Unmanaged' should NOT result in bundle being overwirtten by operator
     Set Custom CA Bundle Value On ConfigMap
     ...    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    random-ca-bundle-value    ${TEST_NS}    5s
-    Wait Until Keyword Succeeds    10 min    0 sec
+    ${rc}   ${output}=    Run And Return Rc And Output
+    ...    oc get project test-trustedcabundle -o yaml
+    Log To Console          ${output}
+    ${rc}   ${output}=    Run And Return Rc And Output
+    ...    oc get configmap ${TRUSTED_CA_BUNDLE_CONFIGMAP} -n ${TEST_NS} -o yaml | grep ${CUSTOM_CA_BUNDLE}
+    Log To Console          ${output}
+    Wait Until Keyword Succeeds    5 min    0 sec
     ...    Is CA Bundle Value Present    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    random-ca-bundle-value    ${TEST_NS}    ${IS_PRESENT}
 
     [Teardown]     Restore DSCI Trusted CA Bundle Settings    ${SAVED_CUSTOM_CA_BUNDLE}

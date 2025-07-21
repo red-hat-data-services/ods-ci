@@ -6,9 +6,11 @@ Resource         ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 
 
 *** Variables ***
-${FEATURE-STORE-RELEASE-TAG}             adjustment-release-v0.48.1
+${FEATURE-STORE-RELEASE-TAG}             adjustment-release-v0.49.0
 ${FEATURE-STORE_DIR}                     feature-store
 ${FEATURE-STORE_REPO_URL}                %{FEATURE-STORE_REPO_URL=https://github.com/opendatahub-io/feast.git}
+${NOTEBOOK_IMAGE}                        quay.io/modh/odh-workbench-jupyter-datascience-cpu-py311-ubi9@sha256:48c2be818e8d2a5005a69e2c76f9a2d40ddeb1d03376e04516ca6da13418c887
+${FEAST_VERSION}                         0.48.1
 
 
 *** Keywords ***
@@ -39,9 +41,9 @@ Teardown Feast E2E Test Suite
 
 Run Feast Operator E2E Test
     [Documentation]   Run feast operator e2e test
-    [Arguments]   ${TEST_NAME}
+    [Arguments]   ${TEST_NAME}    ${TEST_TYPE}
     Log To Console    "Running feature-store operator e2e test: ${TEST_NAME}"
-    ${command}=    Set Variable    cd ${FEATURE-STORE_DIR}/infra/feast-operator && git fetch origin && git checkout ${FEATURE-STORE-RELEASE-TAG} && git branch && go test -timeout 5m ./test/e2e/ -v -ginkgo.focus=${TEST_NAME}
+    ${command}=    Set Variable    cd ${FEATURE-STORE_DIR}/infra/feast-operator && git fetch origin && git checkout ${FEATURE-STORE-RELEASE-TAG} && git branch && go test -timeout 10m ./test/${TEST_TYPE}/ -v -ginkgo.focus=${TEST_NAME}
     ${result}=    Run Process    ${command}
     ...    shell=true
     ...    env:RUN_ON_OPENSHIFT_CI=true
@@ -51,20 +53,22 @@ Run Feast Operator E2E Test
         FAIL    Running test ${TEST_NAME} failed
     END
 
-Prepare Feature Store Upgrade Test
-    [Documentation]   Prepare feast operator upgrade test suite
-    Log To Console    Preparing Feast Upgrade Test Suite
-    # Patching with oc add , as replace will fail due to after post upgrade feast component spec missing in DSC (https://issues.redhat.com/browse/RHOAIENG-24221)
-    ${result} =    Run Process    oc get datascienceclusters.datasciencecluster.opendatahub.io -o name
-    ...    shell=true    stderr=STDOUT
-    IF    $result.stdout == ""
-        FAIL    Can not find datasciencecluster
+Run Feast Notebook Test
+    [Documentation]    Run feast Notebook test
+    [Arguments]   ${TEST_NAME}
+    Log To Console    "Running feature-store Notebook test: ${TEST_NAME}"
+    ${command}=    Set Variable    cd ${FEATURE-STORE_DIR}/infra/feast-operator && git fetch origin && git checkout ${FEATURE-STORE-RELEASE-TAG} && git branch && go test -timeout 10m ./test/e2e_rhoai/ -v -ginkgo.focus=${TEST_NAME}
+    ${result}=    Run Process    ${command}
+    ...    shell=true
+    ...    stderr=STDOUT
+    ...    env:RUN_ON_OPENSHIFT_CI=true
+    ...    env:NOTEBOOK_IMAGE=${NOTEBOOK_IMAGE}
+    ...    env:FEAST_VERSION=${FEAST_VERSION}
+    ...    env:APPLICATIONS_NAMESPACE=${APPLICATIONS_NAMESPACE}
+    ...    env:OPENAI_API_KEY=${OPENAI_API_KEY}
+    ...    env:PIP_INDEX_URL=${PIP_INDEX_URL}
+    ...    env:PIP_TRUSTED_HOST=${PIP_TRUSTED_HOST}
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Running test ${TEST_NAME} failed
     END
-    ${cluster_name} =    Set Variable    ${result.stdout}
-    ${result} =    Run Process    oc patch ${cluster_name} --type 'json' -p '[{"op": "add", "path": "/spec/components/feastoperator", "value": {"managementState": "Managed"}}]'
-    ...    shell=true    stderr=STDOUT
-    IF    $result.rc != 0
-        FAIL    Can not enable feature store: ${result.stdout}
-    END
-    Log To Console    Component feature store state was set to Managed
-    Prepare Feast E2E Test Suite

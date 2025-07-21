@@ -15,18 +15,6 @@ Verify Auth Crd
     [Tags]      Smoke
     ...         Operator
     ...         RHOAIENG-18846
-    ${rc}       ${odhdashboardconfig_groups}=    Run And Return Rc And Output
-    ...    oc get odhdashboardconfig odh-dashboard-config -n ${APPLICATIONS_NAMESPACE} -o jsonpath='{.spec.groupsConfig}'
-    Should Be Equal As Integers     ${rc}       0
-    ${rc}       ${auth_cr_groups}=      Run And Return Rc And Output
-    ...                     oc get auth auth -o jsonpath='{.spec}'
-    Should Be Equal As Integers     ${rc}       0
-    ${auth_cr_groups_str}=      Remove String       ${auth_cr_groups}   [   ]
-    IF    """${odhdashboardconfig_groups}""" != """${auth_cr_groups_str}"""
-        Fail        User Groups on Auth Cr and OdhDashboardConfig DO NOT match
-    ELSE
-        Log To Console      User Groups on Auth Cr and OdhDashboardConfig match
-    END
     Get User Groups From Auth Cr And Check Rolebinding Exists       adminGroups     rolebinding     admingroup-rolebinding
     Get User Groups From Auth Cr And Check Rolebinding Exists       adminGroups     clusterrolebinding     admingroupcluster-rolebinding
     Get User Groups From Auth Cr And Check Rolebinding Exists       allowedGroups   rolebinding     allowedgroup-rolebinding

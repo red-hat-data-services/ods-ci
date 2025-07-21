@@ -65,7 +65,7 @@ deploymentSpec:
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
           \ python3 -m pip install --quiet --no-warn-script-location --index-url $PIP_INDEX_URL\
-          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.10.1' '--no-deps' 'typing-extensions>=3.7.4,<5;\
+          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.13.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
           \ python_version<\"3.9\"'  &&  python3 -m pip install --quiet --no-warn-script-location\
           \ --index-url $PIP_INDEX_URL --trusted-host $PIP_TRUSTED_HOST 'pandas==2.2.0'\
           \ && \"$0\" \"$@\"\n"
@@ -109,7 +109,7 @@ deploymentSpec:
           , \"Sepal_Width\", \"Petal_Length\", \"Petal_Width\", \"Labels\"]\n    df\
           \ = pd.read_csv(StringIO(data), names=col_names)\n\n    with open(iris_dataset.path,\
           \ \"w\") as f:\n        df.to_csv(f)\n\n"
-        image: registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61
+        image: registry.redhat.io/ubi9/python-312@sha256:e80ff3673c95b91f0dafdbe97afb261eab8244d7fd8b47e20ffcbcfee27fb168
     exec-normalize-dataset:
       container:
         args:
@@ -123,7 +123,7 @@ deploymentSpec:
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
           \ python3 -m pip install --quiet --no-warn-script-location --index-url $PIP_INDEX_URL\
-          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.10.1' '--no-deps' 'typing-extensions>=3.7.4,<5;\
+          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.13.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
           \ python_version<\"3.9\"'  &&  python3 -m pip install --quiet --no-warn-script-location\
           \ --index-url $PIP_INDEX_URL --trusted-host $PIP_TRUSTED_HOST 'pandas==2.2.0'\
           \ 'scikit-learn==1.4.0' && \"$0\" \"$@\"\n"
@@ -148,7 +148,7 @@ deploymentSpec:
           \    normalized_iris_dataset.metadata[\"state\"] = \"Normalized\"\n    with\
           \ open(normalized_iris_dataset.path, \"w\") as f:\n        df.to_csv(f)\n\
           \n"
-        image: registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61
+        image: registry.redhat.io/ubi9/python-312@sha256:e80ff3673c95b91f0dafdbe97afb261eab8244d7fd8b47e20ffcbcfee27fb168
     exec-train-model:
       container:
         args:
@@ -162,7 +162,7 @@ deploymentSpec:
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
           \ python3 -m pip install --quiet --no-warn-script-location --index-url $PIP_INDEX_URL\
-          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.10.1' '--no-deps' 'typing-extensions>=3.7.4,<5;\
+          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.13.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
           \ python_version<\"3.9\"'  &&  python3 -m pip install --quiet --no-warn-script-location\
           \ --index-url $PIP_INDEX_URL --trusted-host $PIP_TRUSTED_HOST 'pandas==2.2.0'\
           \ 'scikit-learn==1.4.0' && \"$0\" \"$@\"\n"
@@ -193,7 +193,7 @@ deploymentSpec:
           \ predictions).tolist(),  # .tolist() to convert np array to list.\n   \
           \ )\n\n    model.metadata[\"framework\"] = \"scikit-learn\"\n    with open(model.path,\
           \ \"wb\") as f:\n        pickle.dump(clf, f)\n\n"
-        image: registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61
+        image: registry.redhat.io/ubi9/python-312@sha256:e80ff3673c95b91f0dafdbe97afb261eab8244d7fd8b47e20ffcbcfee27fb168
 pipelineInfo:
   name: iris-training-pipeline
 root:
@@ -250,7 +250,7 @@ root:
         isOptional: true
         parameterType: BOOLEAN
 schemaVersion: 2.1.0
-sdkVersion: kfp-2.10.1
+sdkVersion: kfp-2.13.0
 ---
 platforms:
   kubernetes:
@@ -259,6 +259,9 @@ platforms:
         exec-create-dataset:
           configMapAsEnv:
           - configMapName: ds-pipeline-custom-env-vars
+            configMapNameParameter:
+              runtimeValue:
+                constant: ds-pipeline-custom-env-vars
             keyToEnv:
             - configMapKey: pip_index_url
               envVar: PIP_INDEX_URL
@@ -267,6 +270,9 @@ platforms:
         exec-normalize-dataset:
           configMapAsEnv:
           - configMapName: ds-pipeline-custom-env-vars
+            configMapNameParameter:
+              runtimeValue:
+                constant: ds-pipeline-custom-env-vars
             keyToEnv:
             - configMapKey: pip_index_url
               envVar: PIP_INDEX_URL
@@ -275,6 +281,9 @@ platforms:
         exec-train-model:
           configMapAsEnv:
           - configMapName: ds-pipeline-custom-env-vars
+            configMapNameParameter:
+              runtimeValue:
+                constant: ds-pipeline-custom-env-vars
             keyToEnv:
             - configMapKey: pip_index_url
               envVar: PIP_INDEX_URL

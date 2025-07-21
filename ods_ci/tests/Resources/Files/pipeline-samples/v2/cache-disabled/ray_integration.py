@@ -1,12 +1,12 @@
 from kfp import compiler, dsl
 
 common_base_image = (
-    "registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61"
+    "registry.redhat.io/ubi9/python-311@sha256:82a16d7c4da926081c0a4cc72a84d5ce37859b50a371d2f9364313f66b89adf7"
 )
 
 
 # image and the sdk has a fixed value because the version matters
-@dsl.component(packages_to_install=["codeflare-sdk==v0.27.0"], base_image=common_base_image)
+@dsl.component(packages_to_install=["codeflare-sdk==v0.28.1"], base_image=common_base_image)
 def ray_fn() -> int:
     import ray  # noqa: PLC0415
     from codeflare_sdk import generate_cert  # noqa: PLC0415
@@ -24,7 +24,7 @@ def ray_fn() -> int:
             worker_cpu_limits=1,
             worker_memory_requests=1,
             worker_memory_limits=2,
-            image="quay.io/modh/ray@sha256:0d715f92570a2997381b7cafc0e224cfa25323f18b9545acfd23bc2b71576d06",
+            image="quay.io/modh/ray@sha256:a5b7c04a14f180d7ca6d06a5697f6bb684e40a26b95a0c872cac23b552741707",
             verify_tls=False
         )
     )

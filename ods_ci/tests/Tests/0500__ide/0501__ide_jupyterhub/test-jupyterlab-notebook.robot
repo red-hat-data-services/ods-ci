@@ -28,7 +28,7 @@ Can Login to Jupyterhub
   Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Verify Service Account Authorization Not Required
   #Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']
-  Wait Until Page Contains  Start a notebook server
+  Wait Until Page Contains  Start a basic workbench
 
 Can Spawn Notebook
   [Tags]  Sanity
@@ -85,7 +85,7 @@ Refine Notebook Controller Routes
     ${ele}    Get WebElement   //button[.="Restart"]
     Execute Javascript    arguments[0].click();     ARGUMENTS    ${ele}
     Switch Window  locator=NEW
-    Wait Until Page Contains    Start a notebook server   timeout=60s
+    Wait Until Page Contains    Start a basic workbench   timeout=60s
 
 Spawn Jupyter Notebook When Notebook CR Is Deleted
     [Documentation]   When you have a Notebook, and you delete that Notebook CR,

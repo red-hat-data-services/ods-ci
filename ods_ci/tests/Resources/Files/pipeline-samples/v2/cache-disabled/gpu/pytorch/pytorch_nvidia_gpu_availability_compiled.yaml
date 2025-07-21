@@ -28,7 +28,7 @@ deploymentSpec:
         - -c
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
-          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.10.1'\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.13.0'\
           \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
           $0\" \"$@\"\n"
         - sh
@@ -53,7 +53,7 @@ deploymentSpec:
           \ not torch.cuda.is_available()\n        assert torch.cuda.device_count()\
           \ == 0\n        t = torch.tensor([5, 5, 5], dtype=torch.int64)\n    print(f\"\
           tensor: {t}\")\n    print(\"GPU availability test: PASS\")\n\n"
-        image: quay.io/modh/runtime-images@sha256:e1f7ad986f694236a818796af290a99b4e7f73d44cd39ca45860087644d136dd
+        image: quay.io/modh/odh-pipeline-runtime-pytorch-cuda-py311-ubi9@sha256:4706be608af3f33c88700ef6ef6a99e716fc95fc7d2e879502e81c0022fd840e
     exec-verify-gpu-availability-2:
       container:
         args:
@@ -66,7 +66,7 @@ deploymentSpec:
         - -c
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
-          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.10.1'\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.13.0'\
           \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
           $0\" \"$@\"\n"
         - sh
@@ -91,7 +91,7 @@ deploymentSpec:
           \ not torch.cuda.is_available()\n        assert torch.cuda.device_count()\
           \ == 0\n        t = torch.tensor([5, 5, 5], dtype=torch.int64)\n    print(f\"\
           tensor: {t}\")\n    print(\"GPU availability test: PASS\")\n\n"
-        image: quay.io/modh/runtime-images@sha256:e1f7ad986f694236a818796af290a99b4e7f73d44cd39ca45860087644d136dd
+        image: quay.io/modh/odh-pipeline-runtime-pytorch-cuda-py311-ubi9@sha256:4706be608af3f33c88700ef6ef6a99e716fc95fc7d2e879502e81c0022fd840e
         resources:
           accelerator:
             count: '1'
@@ -128,7 +128,7 @@ root:
         taskInfo:
           name: verify-gpu-availability-2
 schemaVersion: 2.1.0
-sdkVersion: kfp-2.10.1
+sdkVersion: kfp-2.13.0
 ---
 platforms:
   kubernetes:

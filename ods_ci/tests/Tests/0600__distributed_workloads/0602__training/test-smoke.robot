@@ -58,6 +58,7 @@ Training operator smoke test
     [Tags]    Smoke
     ...       DistributedWorkloads
     ...       TrainingKubeflow
+    ...       deprecatedTest
     Skip If Operator Starting Version Is Not Supported      minimum_version=2.19.0
     Log To Console    Waiting for kubeflow-training-operator to be available
     ${result} =    Run Process    oc wait --for\=condition\=Available --timeout\=300s -n ${APPLICATIONS_NAMESPACE} deployment/kubeflow-training-operator

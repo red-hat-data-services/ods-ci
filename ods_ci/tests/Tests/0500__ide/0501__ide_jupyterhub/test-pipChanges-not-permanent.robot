@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation    TC to verify Pip changes are not permenemt
+Documentation    TC to verify Pip changes are not permanent
 ...    after restarting notebook
 
 Resource         ../../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource

@@ -135,7 +135,7 @@ Launch ${dashboard_app} From RHODS Dashboard Link
       Click Link   xpath:${CARDS_XP}//*[text()='${splits[0]} ']/../..//a
   ELSE
       IF    "${dashboard_app}" == "Jupyter"
-          Click Link    xpath://div[contains(@class,'pf-v6-l-gallery')]/div[contains(@class,'pf-v6-c-card')]/div[@class="pf-v6-c-card__title"]//span[text()="${dashboard_app}"]/../../..//div[contains(@class,"pf-v6-c-card__footer")]/a
+          Click Link    xpath://div[contains(@class,'pf-v6-l-gallery')]/div[contains(@class,'pf-v6-c-card')]/div[@class="pf-v6-c-card__title"]//span[text()="Start basic workbench"]/../../..//div[contains(@class,"pf-v6-c-card__footer")]/a
       ELSE
           Click Link    xpath://div[contains(@class,'pf-v6-l-gallery')]/div[contains(@class,'pf-v6-c-card')]/div[@class="pf-v6-c-card__title"]//span[text()="${dashboard_app}"]/../..//div[contains(@class,"pf-v6-c-card__footer")]/a
       END
@@ -154,8 +154,8 @@ Verify Service Is Enabled
   [Documentation]   Verify the service appears in Applications > Enabled
   [Arguments]  ${app_name}    ${timeout}=180s
   Menu.Navigate To Page    Applications    Enabled
-  # Jupyter App should always be listed
-  Wait Until Page Contains    Jupyter    timeout=30s
+  # Start basic workbench App should always be listed
+  Wait Until Page Contains    Start basic workbench    timeout=30s
   Wait Until Page Contains    ${app_name}    timeout=${timeout}
   Page Should Contain Element    xpath://div//*[.='${app_name}']/../..   message=${app_name} should be enabled in ODS Dashboard
   Page Should Not Contain Element    xpath://div//*[.='${app_name}']/..//div[contains(@class,'enabled-controls')]/span[contains(@class,'disabled-text')]  message=${app_name} is marked as Disabled. Check the license
@@ -558,8 +558,8 @@ Open Notebook Images Page
     [Documentation]    Opens the RHODS dashboard and navigates to the Notebook Image Settings page
     Wait Until Page Contains    Settings
     Page Should Contain    Settings
-    Menu.Navigate To Page    Settings    Notebook images
-    Wait Until Page Contains    Notebook images
+    Menu.Navigate To Page    Settings    Workbench images
+    Wait Until Page Contains    Workbench images
     Wait Until Page Contains    Import new image    # This should assure us that the page content is ready
 
 Import New Custom Image
@@ -579,7 +579,7 @@ Import New Custom Image
 Open Custom Image Import Popup
     [Documentation]    Opens the Custom Image import view, using the appropriate button
     Click Element  xpath://button[.="Import new image"]
-    Wait Until Page Contains    Import notebook image
+    Wait Until Page Contains    Import workbench image
 
 Add Softwares To Custom Image
     [Documentation]    Loops through a dictionary to add software to the custom img metadata
@@ -628,7 +628,7 @@ Remove Package From Custom Image
 Delete Custom Image
     [Documentation]    Deletes a custom image through the dashboard UI.
     [Arguments]    ${image_name}
-    ${custom_image_kebab_btn}=    Set Variable    //td[.="${image_name}"]/../td[last()]//button
+    ${custom_image_kebab_btn}=    Set Variable    //tr[.//*[@data-label="Name"][.//*[.="${image_name}"]]]//button[@aria-label="Kebab toggle"]
     Click Button  xpath:${custom_image_kebab_btn}
     ${image_name_id}=  Replace String  ${image_name}  ${SPACE}  -
     Click Element  xpath://button[@id="${image_name_id}-delete-button"]
@@ -676,9 +676,9 @@ Verify Custom Image Description
     [Arguments]    ${image_name}    ${expected_description}
     ${custom_image_name_record}=    Set Variable    xpath://td[@data-label="Name"]/div/div/div[.="${image_name}"]
     ${exists}=  Run Keyword And Return Status  Page Should Contain Element
-    ...  ${custom_image_name_record}/../../../../td[@data-label="Description" and .="${expected_description}"]
+    ...  ${custom_image_name_record}/../../../..//*[@data-testid="table-row-title-description" and .="${expected_description}"]
     IF  ${exists}==False
-        ${desc}=  Get Text  ${custom_image_name_record}/../../../../td[@data-label="Description"]
+        ${desc}=  Get Text  ${custom_image_name_record}/../../../..//*[@data-testid="table-row-title-description"
         Log  Description for ${image_name} does not match ${expected_description} - Actual description is ${desc}
         FAIL
     END

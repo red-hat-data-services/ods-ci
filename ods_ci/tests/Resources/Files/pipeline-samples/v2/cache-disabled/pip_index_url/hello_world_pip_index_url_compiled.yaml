@@ -25,7 +25,7 @@ deploymentSpec:
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
           \ python3 -m pip install --quiet --no-warn-script-location --index-url $PIP_INDEX_URL\
-          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.10.1' '--no-deps' 'typing-extensions>=3.7.4,<5;\
+          \ --trusted-host $PIP_TRUSTED_HOST 'kfp==2.13.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
           \ python_version<\"3.9\"'  &&  python3 -m pip install --quiet --no-warn-script-location\
           \ --index-url $PIP_INDEX_URL --trusted-host $PIP_TRUSTED_HOST 'pyfiglet==1.0.2'\
           \ && \"$0\" \"$@\"\n"
@@ -47,7 +47,7 @@ deploymentSpec:
           ])\n    print(\"pip_trusted_host:\" + os.environ[\"PIP_TRUSTED_HOST\"])\n\
           \    print(\"------------------------------------------------------------------\"\
           )\n\n    f = Figlet(font=\"slant\")\n    print(f.renderText(message))\n\n"
-        image: registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61
+        image: registry.redhat.io/ubi9/python-312@sha256:e80ff3673c95b91f0dafdbe97afb261eab8244d7fd8b47e20ffcbcfee27fb168
 pipelineInfo:
   description: Pipeline that prints a hello message
   name: hello-world-pipeline
@@ -71,7 +71,7 @@ root:
         isOptional: true
         parameterType: STRING
 schemaVersion: 2.1.0
-sdkVersion: kfp-2.10.1
+sdkVersion: kfp-2.13.0
 ---
 platforms:
   kubernetes:
@@ -80,6 +80,9 @@ platforms:
         exec-print-message:
           configMapAsEnv:
           - configMapName: ds-pipeline-custom-env-vars
+            configMapNameParameter:
+              runtimeValue:
+                constant: ds-pipeline-custom-env-vars
             keyToEnv:
             - configMapKey: pip_index_url
               envVar: PIP_INDEX_URL

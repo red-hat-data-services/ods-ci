@@ -6,33 +6,30 @@ Resource          ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 
 
 *** Variables ***
-${CODEFLARE-SDK-RELEASE-TAG}             v0.27.0
+${CODEFLARE-SDK-RELEASE-TAG}             v0.28.1
 ${CODEFLARE-SDK_DIR}                     codeflare-sdk
 ${CODEFLARE-SDK_REPO_URL}                %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
 ${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}  https://github.com/opendatahub-io/distributed-workloads/releases/latest/download
-# Corresponds to quay.io/modh/ray:2.35.0-py311-cu121
-${RAY_CUDA_IMAGE_3.11}                   quay.io/modh/ray@sha256:db667df1bc437a7b0965e8031e905d3ab04b86390d764d120e05ea5a5c18d1b4
+# Corresponds to quay.io/modh/ray:2.44.1-py311-cu121
+${RAY_CUDA_IMAGE_3.11}                   quay.io/modh/ray@sha256:a5b7c04a14f180d7ca6d06a5697f6bb684e40a26b95a0c872cac23b552741707
 # Corresponds to quay.io/rhoai/ray:2.35.0-py311-cu121-torch24-fa26
 ${RAY_TORCH_CUDA_IMAGE_3.11}             quay.io/rhoai/ray@sha256:5077f9bb230dfa88f34089fecdfcdaa8abc6964716a8a8325c7f9dcdf11bbbb3
-# Corresponds to quay.io/modh/ray:2.35.0-py311-rocm62
-${RAY_ROCM_IMAGE_3.11}                   quay.io/modh/ray@sha256:bc46827094a29062a3631f533ea373a26cc73ed5854c7352f890c6376d5840df
+# Corresponds to quay.io/modh/ray:2.44.1-py311-rocm62
+${RAY_ROCM_IMAGE_3.11}                   quay.io/modh/ray@sha256:48c7864989c8f22ef07772c698b761f5c1b58c6781e7a99518204d521bf56a4c
 # Corresponds to quay.io/rhoai/ray:2.35.0-py311-rocm61-torch24-fa26
 ${RAY_TORCH_ROCM_IMAGE_3.11}             quay.io/rhoai/ray@sha256:b0e129cd2f4cdea7ad7a7859031357ffd9915410551f94fbcb942af2198cdf78
-# Corresponds to quay.io/modh/fms-hf-tuning:v2.7.1
-${FMS_HF_TUNING_IMAGE}                   quay.io/modh/fms-hf-tuning@sha256:18a871cbb1fb16766266b2fb7e1e498259543a88ffb4422ebf7ba142e5e739b4
 # Corresponds to quay.io/modh/training:py311-cuda121-torch241
 ${CUDA_TRAINING_IMAGE_TORCH241}          quay.io/modh/training@sha256:f64f7bba3f1020d39491ac84d40d362a52e4822bdc11a33cfff021178b7c4097
 # Corresponds to quay.io/modh/training:py311-rocm62-torch241
-${ROCM_TRAINING_IMAGE_TORCH241}          quay.io/modh/training@sha256:1104eb83d7ad9cfb63c1437be38d1615a669473c5b1c2da5a9a01ddd90daceb9
+${ROCM_TRAINING_IMAGE_TORCH241}          quay.io/modh/training@sha256:883739b576b485d79966d8c894fdd9ebebd226605a2abe8b33593ca67c87a394
 # Corresponds to quay.io/modh/training:py311-cuda124-torch251
-${CUDA_TRAINING_IMAGE_TORCH251}          quay.io/modh/training@sha256:25611334b72c9b6d26b2e29289fc86efe237bd9089fdb2f3eb5c8ff69c19aca7
+${CUDA_TRAINING_IMAGE_TORCH251}          quay.io/modh/training@sha256:1d0caea3e5d56ff7d672954b1ad511e661df9bdb364d56879961169a4ca8dae0
 # Corresponds to quay.io/modh/training:py311-rocm62-torch251
-${ROCM_TRAINING_IMAGE_TORCH251}          quay.io/modh/training@sha256:2975182e2f8ea375717ab574aef8470da7cf95d23d00833035078673c8e5b25e
-# Corresponds to quay.io/modh/odh-generic-data-science-notebook:v3-20250320-3fa2d83
-${NOTEBOOK_IMAGE_3.11}                   quay.io/modh/odh-generic-data-science-notebook@sha256:5999547f847ca841fe067ff84e2972d2cbae598066c2418e236448e115c1728e
+${ROCM_TRAINING_IMAGE_TORCH251}          quay.io/modh/training@sha256:6cdae840fa029da33cccab620367e82404d24ddf67762eb4537a9bffe1af306d
+# Corresponds to quay.io/repository/modh/odh-workbench-jupyter-datascience-cpu-py311-ubi9:rhoai-2.22
+${NOTEBOOK_IMAGE_3.11}                   quay.io/modh/odh-workbench-jupyter-datascience-cpu-py311-ubi9@sha256:48c2be818e8d2a5005a69e2c76f9a2d40ddeb1d03376e04516ca6da13418c887
 ${NOTEBOOK_USER_NAME}                    ${TEST_USER_3.USERNAME}
 ${NOTEBOOK_USER_PASSWORD}                ${TEST_USER_3.PASSWORD}
-${FMS_BINARY_NAME}                       fms
 ${KFTO_BINARY_NAME}                      kfto
 ${ODH_BINARY_NAME}                       odh
 ${PIP_INDEX_URL}                         ${PIP_INDEX_URL}
@@ -109,10 +106,6 @@ Prepare Training Operator KFTO E2E Test Suite
     [Documentation]    Prepare Training Operator KFTO E2E Test Suite
     Prepare Training Operator E2E Test Suite    ${KFTO_BINARY_NAME}
 
-Prepare Training Operator FMS E2E Test Suite
-    [Documentation]    Prepare Training Operator FMS E2E Test Suite
-    Prepare Training Operator E2E Test Suite    ${FMS_BINARY_NAME}
-
 Prepare Training Operator E2E Test Suite
     [Documentation]    Prepare Training Operator E2E Test Suite
     [Arguments]        ${test_binary}
@@ -126,21 +119,9 @@ Prepare Training Operator E2E Test Suite
     END
     Create Directory    %{WORKSPACE}/codeflare-${test_binary}-logs
 
-Prepare Training Operator SDK Test Suite
-    [Documentation]    Prepare Training Operator SDK Test Suite
-    Prepare Training Operator E2E Test Suite    ${KFTO_BINARY_NAME}
-    ${common_user_token} =    Generate User Token    ${NOTEBOOK_USER_NAME}    ${NOTEBOOK_USER_PASSWORD}
-    Set Suite Variable    ${NOTEBOOK_USER_TOKEN}   ${common_user_token}
-    Log To Console    "Log back as cluster admin"
-    Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
-
 Teardown Training Operator KFTO E2E Test Suite
     [Documentation]    Teardown Training Operator KFTO E2E Test Suite
     Teardown Training Operator E2E Test Suite    ${KFTO_BINARY_NAME}
-
-Teardown Training Operator FMS E2E Test Suite
-    [Documentation]    Teardown Training Operator FMS E2E Test Suite
-    Teardown Training Operator E2E Test Suite    ${FMS_BINARY_NAME}
 
 Teardown Training Operator E2E Test Suite
     [Documentation]    Teardown Training Operator E2E Test Suite
@@ -148,45 +129,21 @@ Teardown Training Operator E2E Test Suite
     Log To Console     "Removing test binaries"
     Remove File        ${test_binary}
 
-Teardown Training Operator SDK Test Suite
-    [Documentation]    Teardown Training Operator SDK Test Suite
-    Teardown Training Operator E2E Test Suite    ${KFTO_BINARY_NAME}
-
-Run Training Operator FMS Test
-    [Documentation]    Run Training Operator FMS Test
-    [Arguments]    ${TEST_NAME}
-    Log To Console    "Running test: ${TEST_NAME}"
-    ${result} =    Run Process    ./${FMS_BINARY_NAME} -test.run ${TEST_NAME}
-    ...    shell=true
-    ...    stderr=STDOUT
-    ...    env:CODEFLARE_TEST_TIMEOUT_SHORT=5m
-    ...    env:CODEFLARE_TEST_TIMEOUT_MEDIUM=10m
-    ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
-    ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-${FMS_BINARY_NAME}-logs
-    ...    env:FMS_HF_TUNING_IMAGE=${FMS_HF_TUNING_IMAGE}
-    ...    env:AWS_DEFAULT_ENDPOINT=${AWS_DEFAULT_ENDPOINT}
-    ...    env:AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-    ...    env:AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-    ...    env:AWS_STORAGE_BUCKET_DOWNLOAD=${AWS_STORAGE_BUCKET}
-    ...    env:AWS_STORAGE_BUCKET_DOWNLOAD_MODEL_PATH=models/granite-3b-code-base-2k
-    Log To Console    ${result.stdout}
-    Check missing Go test    ${result.stdout}
-    IF    ${result.rc} != 0
-        FAIL    ${TEST_NAME} failed
-    END
-
 Run Training Operator KFTO Test
     [Documentation]    Run Training Operator KFTO Test
-    [Arguments]    ${TEST_NAME}    ${TRAINING_IMAGE}
+    [Arguments]    ${TEST_NAME}
     Log To Console    "Running test: ${TEST_NAME}"
     ${result} =    Run Process    ./${KFTO_BINARY_NAME} -test.run ${TEST_NAME}
     ...    shell=true
     ...    stderr=STDOUT
-    ...    env:CODEFLARE_TEST_TIMEOUT_SHORT=5m
-    ...    env:CODEFLARE_TEST_TIMEOUT_MEDIUM=10m
-    ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
-    ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-${KFTO_BINARY_NAME}-logs
-    ...    env:CODEFLARE_TEST_TRAINING_IMAGE=${TRAINING_IMAGE}
+    ...    env:TEST_TIMEOUT_SHORT=5m
+    ...    env:TEST_TIMEOUT_MEDIUM=10m
+    ...    env:TEST_TIMEOUT_LONG=20m
+    ...    env:TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-${KFTO_BINARY_NAME}-logs
+    ...    env:TEST_TRAINING_CUDA_PYTORCH_241_IMAGE=${CUDA_TRAINING_IMAGE_TORCH241}
+    ...    env:TEST_TRAINING_CUDA_PYTORCH_251_IMAGE=${CUDA_TRAINING_IMAGE_TORCH251}
+    ...    env:TEST_TRAINING_ROCM_PYTORCH_241_IMAGE=${ROCM_TRAINING_IMAGE_TORCH241}
+    ...    env:TEST_TRAINING_ROCM_PYTORCH_251_IMAGE=${ROCM_TRAINING_IMAGE_TORCH251}
     ...    env:AWS_DEFAULT_ENDPOINT=${AWS_DEFAULT_ENDPOINT}
     ...    env:AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
     ...    env:AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
@@ -202,17 +159,20 @@ Run Training Operator KFTO Test
 
 Run Training Operator KFTO SDK Test
     [Documentation]    Run Training Operator KFTO SDK Test
-    [Arguments]    ${TEST_NAME}    ${TRAINING_IMAGE}
+    [Arguments]    ${TEST_NAME}
     Log To Console    "Running test: ${TEST_NAME}"
     ${result} =    Run Process    ./${KFTO_BINARY_NAME} -test.run ${TEST_NAME}
     ...    shell=true
     ...    stderr=STDOUT
-    ...    env:CODEFLARE_TEST_TIMEOUT_SHORT=10m
-    ...    env:CODEFLARE_TEST_TIMEOUT_MEDIUM=15m
-    ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
+    ...    env:TEST_TIMEOUT_SHORT=10m
+    ...    env:TEST_TIMEOUT_MEDIUM=15m
+    ...    env:TEST_TIMEOUT_LONG=20m
     ...    env:ODH_NAMESPACE=${APPLICATIONS_NAMESPACE}
-    ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-${KFTO_BINARY_NAME}-logs
-    ...    env:CODEFLARE_TEST_TRAINING_IMAGE=${TRAINING_IMAGE}
+    ...    env:TEST_OUTPUT_DIR=%{WORKSPACE}/codeflare-${KFTO_BINARY_NAME}-logs
+    ...    env:TEST_TRAINING_CUDA_PYTORCH_241_IMAGE=${CUDA_TRAINING_IMAGE_TORCH241}
+    ...    env:TEST_TRAINING_CUDA_PYTORCH_251_IMAGE=${CUDA_TRAINING_IMAGE_TORCH251}
+    ...    env:TEST_TRAINING_ROCM_PYTORCH_241_IMAGE=${ROCM_TRAINING_IMAGE_TORCH241}
+    ...    env:TEST_TRAINING_ROCM_PYTORCH_251_IMAGE=${ROCM_TRAINING_IMAGE_TORCH251}
     ...    env:AWS_DEFAULT_ENDPOINT=${AWS_DEFAULT_ENDPOINT}
     ...    env:AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
     ...    env:AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
@@ -221,7 +181,7 @@ Run Training Operator KFTO SDK Test
     ...    env:PIP_INDEX_URL=${PIP_INDEX_URL}
     ...    env:PIP_TRUSTED_HOST=${PIP_TRUSTED_HOST}
     ...    env:NOTEBOOK_USER_NAME=${NOTEBOOK_USER_NAME}
-    ...    env:NOTEBOOK_USER_TOKEN=${NOTEBOOK_USER_TOKEN}
+    ...    env:NOTEBOOK_USER_PASSWORD=${NOTEBOOK_USER_PASSWORD}
     ...    env:NOTEBOOK_IMAGE=${NOTEBOOK_IMAGE_3.11}
     Log To Console    ${result.stdout}
     Check missing Go test    ${result.stdout}
@@ -271,11 +231,11 @@ Run DistributedWorkloads ODH Test
     ${result} =    Run Process    ./${ODH_BINARY_NAME} -test.run ${TEST_NAME}
     ...    shell=true
     ...    stderr=STDOUT
-    ...    env:CODEFLARE_TEST_TIMEOUT_SHORT=5m
-    ...    env:CODEFLARE_TEST_TIMEOUT_MEDIUM=10m
-    ...    env:CODEFLARE_TEST_TIMEOUT_LONG=20m
-    ...    env:CODEFLARE_TEST_OUTPUT_DIR=%{WORKSPACE}/distributed-workloads-odh-logs
-    ...    env:CODEFLARE_TEST_RAY_IMAGE=${DW_RAY_IMAGE}
+    ...    env:TEST_TIMEOUT_SHORT=5m
+    ...    env:TEST_TIMEOUT_MEDIUM=10m
+    ...    env:TEST_TIMEOUT_LONG=20m
+    ...    env:TEST_OUTPUT_DIR=%{WORKSPACE}/distributed-workloads-odh-logs
+    ...    env:TEST_RAY_IMAGE=${DW_RAY_IMAGE}
     ...    env:ODH_NAMESPACE=${APPLICATIONS_NAMESPACE}
     ...    env:NOTEBOOK_USER_NAME=${NOTEBOOK_USER_NAME}
     ...    env:NOTEBOOK_USER_TOKEN=${NOTEBOOK_USER_TOKEN}

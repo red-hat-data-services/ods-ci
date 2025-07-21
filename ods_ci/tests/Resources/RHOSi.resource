@@ -60,7 +60,6 @@ RHOSi Setup
     Initialize Global Variables
     Run Keyword If RHODS Is Managed
     ...    Suite Availability Setup    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}
-    # TO DO: oc login
 
 RHOSi Teardown
     [Documentation]    Gets current availability metrics and compares them with the ones
@@ -79,9 +78,9 @@ Initialize Global Variables
     [Documentation]   Sets global variables
     [Arguments]    ${force_fetch}=False
     Fetch Cluster Type By Domain
-    Assign Vars According To Product
     ${RHODS_VERSION}=    Get RHODS Version    ${force_fetch}
     Set Global Variable   ${RHODS_VERSION}
+    Assign Vars According To Product
     Set Prometheus Variables
     Set Global Variable    ${DASHBOARD_APP_NAME}    ${PRODUCT.lower()}-dashboard
 
@@ -95,7 +94,7 @@ Required Global Variables Should Exist
 
 Fetch Cluster Type By Domain
     [Documentation]    This Keyword outputs the kind of cluster depending on the console URL domain
-    ${matches}=    Get Regexp Matches    ${OCP_CONSOLE_URL}    rh-ods
+    ${matches}=    Get Regexp Matches    ${OCP_CONSOLE_URL}    rh-ods|rhaiseng
     ${matches_len}=     Get Length      ${matches}
     IF  '${matches_len}' == '0'
         Set Global Variable    ${CLUSTER_TYPE}    managed
@@ -106,10 +105,10 @@ Fetch Cluster Type By Domain
 Assign Vars According To Product
     [Documentation]    Assign vars related to product
     # Common vars
-    Set Suite Variable    ${OPERATOR_SUBSCRIPTION_LABEL}     operators.coreos.com/rhods-operator.${OPERATOR_NAMESPACE}
     Set Suite Variable    ${AUTHORINO_CR_NS}    ${APPLICATIONS_NAMESPACE}-auth-provider
     # Product specific vars
     IF    "${PRODUCT}" == "RHODS"
+        Set Suite Variable    ${OPERATOR_SUBSCRIPTION_LABEL}     operators.coreos.com/rhods-operator.${OPERATOR_NAMESPACE}
         Set Suite Variable    ${OPERATOR_APPNAME}     "Red Hat OpenShift AI"
         Set Suite Variable    ${OPERATOR_YAML_LABEL}  rhods-operator
         Set Suite Variable    ${OPERATOR_DEPLOYMENT_NAME}    rhods-operator
@@ -125,7 +124,27 @@ Assign Vars According To Product
             Set Suite Variable    ${ADMIN_GROUPS}       rhods-admins', 'rhods-users
         END
         Set Suite Variable  ${MODEL_REGISTRY_NAMESPACE}    rhoai-model-registries
+        Set Suite Variable    ${IMAGE_PULL_PATH}        registry.redhat.io
+        Set Suite Variable    ${KSERVE_IMAGE_PULL_PATH}        registry.redhat.io
+        ${CSV_NAME} =   Catenate    SEPARATOR=   ${OPERATOR_NAME}.     ${RHODS_VERSION}
+        Set Suite Variable      ${CSV_NAME}
     ELSE IF    "${PRODUCT}" == "ODH"
+        # ODH-nightlies
+        IF      "${OPERATOR_NAME}" == "rhods-operator"
+            Set Suite Variable    ${OPERATOR_SUBSCRIPTION_LABEL}     operators.coreos.com/rhods-operator.${OPERATOR_NAMESPACE}
+            Set Suite Variable    ${IMAGE_PULL_PATH}        registry.redhat.io
+            Set Suite Variable    ${KSERVE_IMAGE_PULL_PATH}        quay.io
+            ${CSV_NAME} =   Catenate    SEPARATOR=   opendatahub-operator.  ${RHODS_VERSION}
+            Set Suite Variable      ${CSV_NAME}
+            # ODH COMMUNITY
+        ELSE IF     "${OPERATOR_NAME}" == "opendatahub-operator"
+            Set Suite Variable    ${OPERATOR_SUBSCRIPTION_LABEL}     operators.coreos.com/opendatahub-operator.${OPERATOR_NAMESPACE}
+            Set Suite Variable    ${IMAGE_PULL_PATH}        registry.redhat.io
+            Set Suite Variable    ${KSERVE_IMAGE_PULL_PATH}        quay.io
+            ${CSV_NAME} =   Catenate    SEPARATOR=   ${OPERATOR_NAME}.v   ${RHODS_VERSION}
+            Set Suite Variable      ${CSV_NAME}
+
+        END
         Set Suite Variable    ${OPERATOR_APPNAME}  "Open Data Hub Operator"
         Set Suite Variable    ${OPERATOR_YAML_LABEL}  opendatahub-operator
         Set Suite Variable    ${OPERATOR_DEPLOYMENT_NAME}    opendatahub-operator-controller-manager

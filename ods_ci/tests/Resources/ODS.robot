@@ -37,6 +37,7 @@ Restore Default Deployment Sizes
     ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    notebook-controller-deployment     replicas=1
     ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    odh-notebook-controller-manager    replicas=1
     ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    rhods-dashboard                    replicas=2
+    ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    data-science-pipelines-operator-controller-manager  replicas=1
     ODS.Scale Deployment    ${MONITORING_NAMESPACE}      blackbox-exporter                  replicas=1
     ODS.Scale Deployment    ${MONITORING_NAMESPACE}      grafana                            replicas=2
     ODS.Scale Deployment    ${MONITORING_NAMESPACE}      prometheus                         replicas=1
@@ -101,7 +102,7 @@ Apply Access Groups Settings
 Set Access Groups Settings
     [Documentation]    Changes the rhods-groups config map to set the new access configuration
     [Arguments]     ${admins_group}   ${users_group}
-    ${return_code}    ${output}    Run And Return Rc And Output    oc patch OdhDashboardConfig odh-dashboard-config -n ${APPLICATIONS_NAMESPACE} --type=merge -p '{"spec": {"groupsConfig": {"adminGroups": "${admins_group}","allowedGroups": "${users_group}"}}}'   #robocop:disable
+    ${return_code}    ${output}    Run And Return Rc And Output    oc patch Auth auth --type=merge -p '{"spec": {"adminGroups": ["${admins_group}"], "allowedGroups": ["${users_group}"]}}'   #robocop:disable
     Should Be Equal As Integers        ${return_code}   0    msg=Patch to group settings failed
 
 Set Default Access Groups Settings
@@ -228,10 +229,10 @@ OpenShift Resource Component Should Contain Field
     [Arguments]    ${resource_component}    ${field}
     Run Keyword And Continue On Failure    Should Contain    ${resource_component}    ${field}
 
-Verify RHODS Dashboard CR Contains Expected Values
+Verify Auth CR Contains Expected Values
     [Documentation]    Verifies if the group contains the expected value
     [Arguments]        &{exp_values}
-    ${config_cr}=  Oc Get  kind=OdhDashboardConfig  namespace=${APPLICATIONS_NAMESPACE}  name=odh-dashboard-config
+    ${config_cr}=  Oc Get  kind=Auth  name=auth
     FOR    ${json_path}    IN    @{exp_values.keys()}
         ${value}=    Extract Value From JSON Path    json_dict=${config_cr[0]}
         ...    path=${json_path}
@@ -240,9 +241,9 @@ Verify RHODS Dashboard CR Contains Expected Values
 
 Verify Default Access Groups Settings
     [Documentation]     Verifies that ODS contains the expected default groups settings
-    &{exp_values}=  Create Dictionary  spec.groupsConfig.adminGroups=${STANDARD_ADMINS_GROUP}
-    ...    spec.groupsConfig.allowedGroups=${STANDARD_SYSTEM_GROUP}
-    Verify RHODS Dashboard CR Contains Expected Values   &{exp_values}
+    &{exp_values}=  Create Dictionary  spec.adminGroups=['${STANDARD_ADMINS_GROUP}']
+    ...    spec.allowedGroups=['${STANDARD_SYSTEM_GROUP}']
+    Verify Auth CR Contains Expected Values   &{exp_values}
 
 Enable Access To Grafana Using OpenShift Port Forwarding
     [Documentation]  Enable Access to Grafana Using OpenShift Port-Forwarding

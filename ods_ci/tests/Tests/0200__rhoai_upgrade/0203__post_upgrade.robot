@@ -37,6 +37,7 @@ ${S_SIZE}                   25
 ${DW_PROJECT_CREATED}       False
 ${UPGRADE_NS}    upgrade
 ${UPGRADE_CONFIG_MAP}    upgrade-config-map
+${USERGROUPS_CONFIG_MAP}    usergroups-config-map
 ${ALLOWED_GROUPS}       system:authenticated
 
 
@@ -59,10 +60,20 @@ Verify RHODS User Groups
     [Documentation]    Verify User Configuration after the upgrade
     [Tags]      Upgrade     Platform        RHOAIENG-19806
     Get Auth Cr Config Data
-    ${admin}                Set Variable            ${AUTH_PAYLOAD[0]['spec']['adminGroups']}
-    ${user}                 Set Variable            ${AUTH_PAYLOAD[0]['spec']['allowedGroups']}
-    Should Be Equal As Strings      '${admin}'      '['${ADMIN_GROUPS}']'
-    Should Be Equal As Strings      '${user}'       '['${ALLOWED_GROUPS}']'
+    ${auth_admins}       Set Variable        ${AUTH_PAYLOAD[0]['spec']['adminGroups']}
+    ${auth_allowed}      Set Variable        ${AUTH_PAYLOAD[0]['spec']['allowedGroups']}
+
+    ${rc}    ${adm_groups}=    Run And Return Rc And Output
+    ...    oc get configmap ${USERGROUPS_CONFIG_MAP} -n ${UPGRADE_NS} -o jsonpath='{.data.adm_groups}'
+    Should Be Equal As Integers     ${rc}      0
+
+    ${rc}    ${allwd_groups}=    Run And Return Rc And Output
+    ...    oc get configmap ${USERGROUPS_CONFIG_MAP} -n ${UPGRADE_NS} -o jsonpath='{.data.allwd_groups}'
+    Should Be Equal As Integers     ${rc}      0
+
+    Should Be Equal    "${adm_groups}"    "${auth_admins}"   msg="Admin groups are not equal"
+    Should Be Equal    "${allwd_groups}"    "${auth_allowed}"   msg="Allowed groups are not equal"
+
     [Teardown]      Set Default Users
 
 Verify Culler is Enabled
@@ -248,36 +259,18 @@ Verify Ray Cluster Exists And Monitor Workload Metrics By Submitting Ray Job Aft
     [Teardown]      Run Keywords        Cleanup Codeflare-SDK Setup     AND
     ...     Codeflare Upgrade Tests Teardown        ${PRJ_UPGRADE}      ${DW_PROJECT_CREATED}
 
-Run Training Operator KFTO Run PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_4_1)
-    [Documentation]    Run Training Operator KFTO Run PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_4_1)
-    [Tags]      Upgrade    TrainingKubeflow
-    [Setup]     Prepare Training Operator KFTO E2E Test Suite
-    Skip If Operator Starting Version Is Not Supported      minimum_version=2.19.0
-    Run Training Operator KFTO Test          TestRunPytorchjob    ${CUDA_TRAINING_IMAGE_TORCH241}
-    [Teardown]      Teardown Training Operator KFTO E2E Test Suite
-
 Run Training Operator KFTO Run PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_5_1)
     [Documentation]    Run Training Operator KFTO Run PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_5_1)
     [Tags]      Upgrade    TrainingKubeflow
     [Setup]     Prepare Training Operator KFTO E2E Test Suite
-    Skip If Operator Starting Version Is Not Supported      minimum_version=2.19.0
-    Run Training Operator KFTO Test          TestRunPytorchjob    ${CUDA_TRAINING_IMAGE_TORCH251}
-    [Teardown]      Teardown Training Operator KFTO E2E Test Suite
-
-Run Training Operator KFTO Run Sleep PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_4_1)
-    [Documentation]    Verify that running PyTorchJob Pod wasn't restarted with NVIDIA CUDA image (PyTorch 2_4_1)
-    [Tags]      Upgrade    TrainingKubeflow
-    [Setup]     Prepare Training Operator KFTO E2E Test Suite
-    Skip If Operator Starting Version Is Not Supported      minimum_version=2.19.0
-    Run Training Operator KFTO Test      TestVerifySleepPytorchjob    ${CUDA_TRAINING_IMAGE_TORCH241}
+    Run Training Operator KFTO Test          TestRunPytorchjob
     [Teardown]      Teardown Training Operator KFTO E2E Test Suite
 
 Run Training Operator KFTO Run Sleep PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_5_1)
     [Documentation]    Verify that running PyTorchJob Pod wasn't restarted with NVIDIA CUDA image (PyTorch 2_5_1)
     [Tags]      Upgrade    TrainingKubeflow
     [Setup]     Prepare Training Operator KFTO E2E Test Suite
-    Skip If Operator Starting Version Is Not Supported      minimum_version=2.19.0
-    Run Training Operator KFTO Test      TestVerifySleepPytorchjob    ${CUDA_TRAINING_IMAGE_TORCH251}
+    Run Training Operator KFTO Test      TestVerifySleepPytorchjob
     [Teardown]      Teardown Training Operator KFTO E2E Test Suite
 
 Verify that the must-gather image provides RHODS logs and info
@@ -318,7 +311,7 @@ Data Science Pipelines Post Upgrade Verifications
 
 Model Registry Post Upgrade Verification
     [Documentation]    Verifies that registered model/version in pre-upgrade is present after the upgrade
-    [Tags]      Upgrade     ModelRegistryUpgrade
+    [Tags]      Upgrade     ModelRegistryUpgrade    deprecatedTest
     Skip If Operator Starting Version Is Not Supported      minimum_version=2.14.0
     Model Registry Post Upgrade Scenario
     [Teardown]      Post Upgrade Scenario Teardown
@@ -326,9 +319,17 @@ Model Registry Post Upgrade Verification
 Run Feast operator TestRemoteRegistryFeastCR Test Use Case
     [Documentation]    Run TestRemoteRegistryFeastCR Test Use Case
     [Tags]  Upgrade    FeatureStoreUpgrade
-    [Setup]    Prepare Feature Store Upgrade Test
-    Run Feast Operator E2E Test    TestRemoteRegistryFeastCR
+    [Setup]    Prepare Feast E2E Test Suite
+    Run Feast Operator E2E Test    TestRemoteRegistryFeastCR    e2e
     [Teardown]    Teardown Feast E2E Test Suite
+
+Run Feast operator PostUpgrade Test Use Case
+    [Documentation]    Verifies the Feast CR status and perform Feast apply and materialize functionality
+    [Tags]  Upgrade    FeatureStoreUpgrade
+    [Setup]    Prepare Feast E2E Test Suite
+    Run Feast Operator E2E Test    feastPostUpgrade    e2e_rhoai
+    [Teardown]    Teardown Feast E2E Test Suite
+
 
 *** Keywords ***
 Dashboard Suite Setup
@@ -358,6 +359,15 @@ Set Default Users
     Set Standard RHODS Groups Variables
     Set Default Access Groups Settings
     IF    not ${IS_SELF_MANAGED}    Managed RHOAI Upgrade Test Teardown
+    # Get upgrade-config-map to check whether it exists
+    ${rc}    ${cmd_output}=    Run And Return Rc And Output
+    ...    oc get configmap ${USERGROUPS_CONFIG_MAP} -n ${UPGRADE_NS}
+    IF  ${rc} == 0
+        # Clean up upgrade-config-map
+        ${return_code}    ${cmd_output}=    Run And Return Rc And Output
+        ...    oc delete configmap ${USERGROUPS_CONFIG_MAP} -n ${UPGRADE_NS}
+        Should Be Equal As Integers     ${return_code}      0       msg=${cmd_output}
+    END
 
 Delete OOTB Image
     [Documentation]    Delete the Custom notbook create

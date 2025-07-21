@@ -6,6 +6,16 @@ Resource   Page/OCPDashboard/Pods/Pods.robot
 
 
 *** Keywords ***
+Get Ocp Cluster Version
+    [Documentation]  Retrieves the OCP Cluster version, in a X.Y.Z format
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc get clusterversion version -o jsonpath='{.status.desired.version}'
+    IF    ${rc} != ${0}
+        Fail    msg=Cannot retrieve OCP cluster version.
+    END
+
+    RETURN   ${out}
+
 Verify DaemonSet Status
     [Documentation]  Verifies that a DaemonSet exists, and that the number
     ...    of available pods matches the number of desired pods
@@ -223,7 +233,7 @@ Wait Until CRD Exists
     ...    Oc Get    kind=CustomResourceDefinition    name=${crd_fullname}
 
 Resource Should Exist
-    [Documentation]    Check resource existson a namespace
+    [Documentation]    Check resource exists on a namespace
     [Arguments]       ${resource}     ${resource_name}    ${namespace}
     ${rc}    ${out}=     Run and Return Rc And Output
     ...  oc get ${resource} ${resource_name} -n ${namespace}
@@ -321,7 +331,7 @@ Get Resource Attribute
     ${rc}   ${value}=    Run And Return Rc And Output
     ...    oc get ${resource_type}/${resource_name} -n ${namespace} -o 'jsonpath={${attribute_path}}'
     Should Be Equal    "${rc}"    "0"    msg=${value}
-    IF    "${value}" != "${EMPTY}"
+    IF    "$value" != "$EMPTY"
         Log To Console    ${resource_type} ${resource_name} in the namespace ${namespace} attribute ${attribute_path} value is ${value}
     ELSE
         Log To Console    ${resource_type} ${resource_name} in the namespace ${namespace} attribute ${attribute_path} value is EMPTY

@@ -2,12 +2,12 @@
 Documentation    Smoke Test for Model Registry Deployment
 Suite Setup        Setup Test Environment Non UI
 Suite Teardown     Teardown Model Registry Test Setup Non UI
+Library            BuiltIn
 Library            Collections
 Library            OperatingSystem
 Library            Process
 Library            OpenShiftLibrary
 Library            RequestsLibrary
-Library            BuiltIn
 Resource           ../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource           ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
@@ -24,13 +24,11 @@ ${OPERATOR_NS}                       ${OPERATOR_NAMESPACE}
 ${APPLICATIONS_NS}                   ${APPLICATIONS_NAMESPACE}
 ${DSC_NAME}                          default-dsc
 
-@{REDHATIO_PATH_CHECK_EXCLUSTION_LIST}    model-registry-operator-controller-manager
-
 
 *** Test Cases ***
 Deploy Model Registry
     [Documentation]    Deployment test for Model Registry.
-    [Tags]    Smoke    MR1302    ModelRegistry
+    [Tags]    Smoke    MR1302    ModelRegistry    deprecatedTest
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
     Enable Model Registry If Needed
@@ -48,13 +46,13 @@ Deploy Model Registry
 
 Registering A Model In The Registry
     [Documentation]    Registers a model in the model registry
-    [Tags]    Smoke    MR1302    ModelRegistry
+    [Tags]    Smoke    MR1302    ModelRegistry    deprecatedTest
     Depends On Test    Deploy Model Registry
     Register A Model    ${URL}
 
 Verify Model Registry
     [Documentation]    Verify the registered model.
-    [Tags]    Smoke    MR1302    ModelRegistry
+    [Tags]    Smoke    MR1302    ModelRegistry    deprecatedTest
     Depends On Test    Registering A Model In The Registry
     Log    Attempting to verify Model Registry
     Wait Until Keyword Succeeds    10 s    2 s    Run Curl Command And Verify Response

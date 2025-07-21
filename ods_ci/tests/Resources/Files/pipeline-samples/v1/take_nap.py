@@ -17,12 +17,12 @@ def wake_up(message: str):
 
 take_nap_op = components.create_component_from_func(
     take_nap,
-    base_image="registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61",
+    base_image="registry.redhat.io/ubi9/python-312@sha256:e80ff3673c95b91f0dafdbe97afb261eab8244d7fd8b47e20ffcbcfee27fb168",
 )
 
 wake_up_op = components.create_component_from_func(
     wake_up,
-    base_image="registry.redhat.io/ubi8/python-39@sha256:3523b184212e1f2243e76d8094ab52b01ea3015471471290d011625e1763af61",
+    base_image="registry.redhat.io/ubi9/python-312@sha256:e80ff3673c95b91f0dafdbe97afb261eab8244d7fd8b47e20ffcbcfee27fb168",
 )
 
 

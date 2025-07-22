@@ -39,9 +39,12 @@ ${WORKBENCH_IMAGE_VER_DROPDOWN}=     //*[@id="workbench-image-version-selection"
 # Standard Data Science https://github.com/red-hat-data-services/notebooks/blob/main/manifests/base/jupyter-datascience-notebook-imagestream.yaml
 # vs
 # Jupyter Data Science https://github.com/opendatahub-io/notebooks/blob/main/manifests/base/jupyter-datascience-notebook-imagestream.yaml
-&{IMAGE_ID_MAPPING}=                 Minimal Python=minimal-notebook    CUDA=minimal-gpu   PyTorch=pytorch
-...                                  Standard Data Science=data-science-notebook    Jupyter Data Science=datascience-notebook
-...                                  TensorFlow=tensorflow
+&{IMAGE_ID_MAPPING}=                 Jupyter | Minimal | CPU | Python 3.11=minimal-notebook
+...                                  Jupyter | Minimal | CUDA | Python 3.11=minimal-gpu
+...                                  Jupyter | PyTorch | CUDA | Python 3.11=pytorch
+...                                  Jupyter | Data Science | CPU | Python 3.11=data-science-notebook
+...                                  Jupyter | Data Science | CPU | Python 3.11=datascience-notebook
+...                                  Jupyter | TensorFlow | CUDA | Python 3.11=tensorflow
 ${KEYVALUE_TYPE}=        Key / value
 ${UPLOAD_TYPE}=        Upload
 ${ENV_VARIABLES_SECTION_XP}=        xpath=//section[@aria-label="Environment variables"]
@@ -195,12 +198,6 @@ Select An Existent PV
 Select Workbench Image
     [Documentation]    Selects a Jupyter image in the workbench creation page
     [Arguments]     ${image_name}    ${version}=default
-    IF  "${PRODUCT}" == "ODH"
-        # The name of the Standard Data Science image in ODH is Jupyter Data Science
-        IF  "${image_name}" == "Standard Data Science"
-            ${image_name}=    Set Variable    Jupyter Data Science
-        END
-    END
     Click Element    //a[@href="#name-and-description"]
     Wait Until Page Contains Element    ${WORKBENCH_IMAGE_MENU_BTN_XP}
     Click Element    ${WORKBENCH_IMAGE_MENU_BTN_XP}

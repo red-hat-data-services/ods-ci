@@ -212,14 +212,14 @@ Verify Distributed Workload Metrics Resources By Creating Ray Cluster Workload
 
 Run Training Operator KFTO Setup PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_5_1)
     [Documentation]    Run Training Operator KFTO Setup PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_5_1)
-    [Tags]      Upgrade    TrainingKubeflow
+    [Tags]      Upgrade    TrainingKubeflow    deprecatedTest
     [Setup]     Prepare Training Operator KFTO E2E Test Suite
     Run Training Operator KFTO Test    TestSetupPytorchjob
     [Teardown]    Teardown Training Operator KFTO E2E Test Suite
 
 Run Training Operator KFTO Setup Sleep PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_5_1)
     [Documentation]    Setup PyTorchJob which is kept running for 24 hours with NVIDIA CUDA image (PyTorch 2_5_1)
-    [Tags]      Upgrade    TrainingKubeflow
+    [Tags]      Upgrade    TrainingKubeflow    deprecatedTest
     [Setup]     Prepare Training Operator KFTO E2E Test Suite
     Run Training Operator KFTO Test    TestSetupSleepPytorchjob
     [Teardown]    Teardown Training Operator KFTO E2E Test Suite

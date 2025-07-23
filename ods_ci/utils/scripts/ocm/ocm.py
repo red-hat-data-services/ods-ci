@@ -209,7 +209,6 @@ class OpenshiftClusterManager:
             values_to_hide.extend(aws_creds_replace_vars.values())
         elif self.cloud_provider == "gcp":
             gcp_replace_vars = {
-                "GCP_SA_PROJECT_ID": self.gcp_sa_project_id,
                 "GCP_SA_PRIVATE_KEY_ID": self.gcp_sa_priv_key_id,
                 "GCP_SA_PRIVATE_KEY": self.gcp_sa_private_key,
                 "GCP_SA_CLIENT_ID": self.gcp_sa_client_id,
@@ -219,6 +218,7 @@ class OpenshiftClusterManager:
                 "AUTH_URI": self.gcp_auth_uri,
                 "TOKEN_URI": self.gcp_token_uri,
                 "AUTH_CERT_URL": self.gcp_auth_cert_url,
+                "GCP_SA_PROJECT_ID": self.gcp_sa_project_id,
             }
             replace_vars.update(gcp_replace_vars)
             values_to_hide.extend(gcp_replace_vars.values())

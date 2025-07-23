@@ -37,7 +37,7 @@ def rosa_create_cluster(
     rosa_version,
     sts=True,
     fips=False,
-    tags="",    # comma-separated, for example: 'key value, foo bar'
+    tags="",  # comma-separated, for example: 'key value, foo bar'
 ):
     cmd_rosa_create_cluster = [
         "rosa",

@@ -65,7 +65,7 @@ class RosaClusterManager:
             self.compute_nodes,
             self.compute_machine_type,
             self.rosa_version,
-            True,   # sts
+            True,  # sts
             self.fips,
             self.tags,
         )

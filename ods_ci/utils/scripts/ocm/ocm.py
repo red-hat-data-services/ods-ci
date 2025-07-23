@@ -199,10 +199,10 @@ class OpenshiftClusterManager:
                 "AWS_SECRET_ACCESS_KEY": self.aws_secret_access_key,
                 "AWS_ACCOUNT_ID": self.aws_account_id,
             }
-            aws_replace_vars = {   
+            aws_replace_vars = {
                 "REGION": self.aws_region,  # TODO: move to generic region variable
-                "COMPUTE_MACHINE_TYPE": self.aws_instance_type, # TODO: move to generic compute-machine-type variable
-                "COMPUTE_NODES": self.num_compute_nodes,    # TODO: move to generic compute-nodes variable
+                "COMPUTE_MACHINE_TYPE": self.aws_instance_type,  # TODO: move to generic compute-machine-type variable
+                "COMPUTE_NODES": self.num_compute_nodes,  # TODO: move to generic compute-nodes variable
             }
             replace_vars.update(aws_creds_replace_vars)
             replace_vars.update(aws_replace_vars)
@@ -229,9 +229,7 @@ class OpenshiftClusterManager:
         template_file = "create-cluster.jinja"
         output_file = "create-cluster-{}.json".format(self.cluster_name)
         self._render_template(template_file, output_file, replace_vars)
-        cmd = "ocm --v={} post /api/clusters_mgmt/v1/clusters --body={}".format(
-            self.ocm_verbose_level, output_file
-        )
+        cmd = "ocm --v={} post /api/clusters_mgmt/v1/clusters --body={}".format(self.ocm_verbose_level, output_file)
         ret = execute_command(cmd)
         self.hide_values_in_file(output_file, values_to_hide)
         if ret is None:
@@ -1647,7 +1645,7 @@ if __name__ == "__main__":
                 help="gcp auth uri",
                 action="store",
                 dest="gcp_auth_uri",
-                required=True,  
+                required=True,
             )
 
             required_create_cluster_parser.add_argument(
@@ -1655,7 +1653,7 @@ if __name__ == "__main__":
                 help="gcp token uri",
                 action="store",
                 dest="gcp_token_uri",
-                required=True,  
+                required=True,
             )
 
             required_create_cluster_parser.add_argument(
@@ -1663,7 +1661,7 @@ if __name__ == "__main__":
                 help="gcp auth cert url",
                 action="store",
                 dest="gcp_auth_cert_url",
-                required=True,  
+                required=True,
             )
 
             optional_create_cluster_parser.add_argument(

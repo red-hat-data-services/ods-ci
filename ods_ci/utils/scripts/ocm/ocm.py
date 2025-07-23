@@ -214,10 +214,10 @@ class OpenshiftClusterManager:
                 "GCP_SA_CLIENT_ID": self.gcp_sa_client_id,
                 "GCP_SA_CLIENT_EMAIL": self.gcp_sa_client_email,
                 "GCP_SA_CLIENT_CERT_URL": self.gcp_sa_client_cert_url,
-                "AUTH_TYPE": self.gcp_auth_type,
-                "AUTH_URI": self.gcp_auth_uri,
-                "TOKEN_URI": self.gcp_token_uri,
-                "AUTH_CERT_URL": self.gcp_auth_cert_url,
+                "GCP_AUTH_TYPE": self.gcp_auth_type,
+                "GCP_AUTH_URI": self.gcp_auth_uri,
+                "GCP_TOKEN_URI": self.gcp_token_uri,
+                "GCP_AUTH_CERT_URL": self.gcp_auth_cert_url,
                 "GCP_SA_PROJECT_ID": self.gcp_sa_project_id,
             }
             replace_vars.update(gcp_replace_vars)

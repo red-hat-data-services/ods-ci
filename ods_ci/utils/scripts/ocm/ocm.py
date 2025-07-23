@@ -176,20 +176,6 @@ class OpenshiftClusterManager:
         else:
             log.info("Using the latest osd version available ...")
 
-        channel_grp = ""
-        if self.channel_group != "":
-            if self.channel_group in ("stable", "candidate"):
-                if version == "":
-                    log.error(
-                        "Please enter openshift version as argument. "
-                        "Channel group option is used along with openshift version."
-                    )
-                    sys.exit(1)
-                else:
-                    channel_grp = "--channel-group {} ".format(self.channel_group)
-            else:
-                log.error("Invalid channel group. Values can be 'stable' or 'candidate'.")
-
         replace_vars["OCP_VERSION"] = self.openshift_version
         replace_vars["CHANNEL_GROUP"] = self.channel_group
 
@@ -1432,6 +1418,7 @@ if __name__ == "__main__":
         default="unknown-team",
         metavar=""
     )
+
     optional_create_cluster_parser.add_argument(
         "--fips",
         help="FIPS mode",

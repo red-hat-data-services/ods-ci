@@ -261,14 +261,14 @@ Verify Ray Cluster Exists And Monitor Workload Metrics By Submitting Ray Job Aft
 
 Run Training Operator KFTO Run PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_5_1)
     [Documentation]    Run Training Operator KFTO Run PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_5_1)
-    [Tags]      Upgrade    TrainingKubeflow
+    [Tags]      Upgrade    TrainingKubeflow    deprecatedTest
     [Setup]     Prepare Training Operator KFTO E2E Test Suite
     Run Training Operator KFTO Test          TestRunPytorchjob
     [Teardown]      Teardown Training Operator KFTO E2E Test Suite
 
 Run Training Operator KFTO Run Sleep PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_5_1)
     [Documentation]    Verify that running PyTorchJob Pod wasn't restarted with NVIDIA CUDA image (PyTorch 2_5_1)
-    [Tags]      Upgrade    TrainingKubeflow
+    [Tags]      Upgrade    TrainingKubeflow    deprecatedTest
     [Setup]     Prepare Training Operator KFTO E2E Test Suite
     Run Training Operator KFTO Test      TestVerifySleepPytorchjob
     [Teardown]      Teardown Training Operator KFTO E2E Test Suite

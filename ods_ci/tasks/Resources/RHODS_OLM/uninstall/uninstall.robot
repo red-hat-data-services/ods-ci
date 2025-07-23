@@ -11,6 +11,8 @@ ${OPENSHIFT_OPERATORS_NS}=    openshift-operators
 ${KNATIVE_SERVING_NS}=      knative-serving
 ${KNATIVE_EVENTING_NS}=       knative-eventing
 ${ISTIO_SYSTEM_NS}=       istio-system
+${KUEUE_NS}=    openshift-kueue-operator
+${CERT_MANAGER_NS}=    cert-manager-operator
 
 
 *** Keywords ***
@@ -52,7 +54,7 @@ Uninstall RHODS In Self Managed Cluster Using CLI
   [Documentation]   UnInstall rhods on self-managedcluster using cli
   Clone OLM Install Repo
   ${return_code}    Run and Watch Command
-  ...    cd ${EXECDIR}/${OLM_DIR} && ./cleanup.sh -t operator -a "authorino serverless servicemesh clusterobservability tempo opentelemetry kueue"
+  ...    cd ${EXECDIR}/${OLM_DIR} && ./cleanup.sh -t operator -a "authorino serverless servicemesh clusterobservability tempo opentelemetry kueue certmanager"
   ...    timeout=10 min
   Should Be Equal As Integers  ${return_code}   0   msg=Error detected while un-installing RHODS
 
@@ -132,6 +134,29 @@ Uninstall Serverless Operator CLI
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete operatorgroup --all -n ${SERVERLESS_NS} --ignore-not-found
     Should Be Equal As Integers  ${return_code}   0   msg=Error deleting Serverless operator group
+
+Uninstall Kueue Operator CLI
+    [Documentation]    Keyword to uninstall the Kueue Operator
+    Log To Console    message=Deleting Kueue CR From Cluster
+    ${return_code}    ${output}    Run And Return Rc And Output
+    ...    oc delete Kueue --all --ignore-not-found
+    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting Kueue CRs
+    Wait Until Keyword Succeeds    2 min    0 sec
+    ...        Check Number Of Resource Instances Equals To      Kueue     ${KUEUE_NS}      0
+    Log To Console    message=Deleting Kueue Operator Subscription From Cluster
+    ${return_code}    ${csv_name}    Run And Return Rc And Output
+    ...    oc get subscription kueue-operator -n ${KUEUE_NS} -o json | jq '.status.currentCSV' | tr -d '"'
+    IF  "${return_code}" == "0" and "${csv_name}" != "${EMPTY}"
+       ${return_code}    ${output}    Run And Return Rc And Output
+       ...    oc delete clusterserviceversion ${csv_name} -n ${KUEUE_NS}
+       Should Be Equal As Integers  ${return_code}   0   msg=Error deleting Kueue CSV ${csv_name}
+    END
+    ${return_code}    ${output}    Run And Return Rc And Output
+    ...    oc delete subscription kueue-operator -n ${KUEUE_NS}
+    Log To Console    message=Deleting Kueue Operator Group From Cluster
+    ${return_code}    ${output}    Run And Return Rc And Output
+    ...    oc delete operatorgroup --all -n ${KUEUE_NS} --ignore-not-found
+    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting Kueue operator group
 
 Check Number Of Resource Instances Equals To
     [Documentation]    Keyword to check if the amount of instances of a specific CRD in a given namespace

@@ -261,14 +261,14 @@ Verify Ray Cluster Exists And Monitor Workload Metrics By Submitting Ray Job Aft
 
 Run Training Operator KFTO Run PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_5_1)
     [Documentation]    Run Training Operator KFTO Run PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_5_1)
-    [Tags]      Upgrade    TrainingKubeflow
+    [Tags]      Upgrade    TrainingKubeflow    deprecatedTest
     [Setup]     Prepare Training Operator KFTO E2E Test Suite
     Run Training Operator KFTO Test          TestRunPytorchjob
     [Teardown]      Teardown Training Operator KFTO E2E Test Suite
 
 Run Training Operator KFTO Run Sleep PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_5_1)
     [Documentation]    Verify that running PyTorchJob Pod wasn't restarted with NVIDIA CUDA image (PyTorch 2_5_1)
-    [Tags]      Upgrade    TrainingKubeflow
+    [Tags]      Upgrade    TrainingKubeflow    deprecatedTest
     [Setup]     Prepare Training Operator KFTO E2E Test Suite
     Run Training Operator KFTO Test      TestVerifySleepPytorchjob
     [Teardown]      Teardown Training Operator KFTO E2E Test Suite
@@ -311,7 +311,7 @@ Data Science Pipelines Post Upgrade Verifications
 
 Model Registry Post Upgrade Verification
     [Documentation]    Verifies that registered model/version in pre-upgrade is present after the upgrade
-    [Tags]      Upgrade     ModelRegistryUpgrade
+    [Tags]      Upgrade     ModelRegistryUpgrade    deprecatedTest
     Skip If Operator Starting Version Is Not Supported      minimum_version=2.14.0
     Model Registry Post Upgrade Scenario
     [Teardown]      Post Upgrade Scenario Teardown

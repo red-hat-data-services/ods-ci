@@ -23,7 +23,7 @@ ${CERTS_BASE_FOLDER}=    tests/Resources/CLI/ModelServing
 ${NOTEBOOK_FILENAME}=    caikit-py-query.ipynb
 ${CERTS_GENERATED}=    ${FALSE}
 ${WORKBENCH_TITLE}=    caikit-nlp-client-wrk
-${NB_IMAGE}=        Minimal Python
+${NB_IMAGE}=       Jupyter | Minimal | CPU | Python 3.11
 @{FILES_TO_UPLOAD}=    ${CERTS_BASE_FOLDER}/${NOTEBOOK_FILENAME}    ${CERTS_BASE_FOLDER}/openshift_ca_istio_knative.crt
 ...    ${CERTS_BASE_FOLDER}/client_certs/public.crt    ${CERTS_BASE_FOLDER}/client_certs/private.key
 

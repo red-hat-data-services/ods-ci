@@ -10,7 +10,7 @@ Test Tags          Dashboard
 ${PRJ_BASE_TITLE}=              ODS-CI DS Project
 ${PRJ_DESCRIPTION}=             ${PRJ_BASE_TITLE} is a test project for validating DS Project Sharing feature
 ${WORKBENCH_DESCRIPTION}=       a test workbench to check project sharing
-${NB_IMAGE}=                    Minimal Python
+${NB_IMAGE}=                    Jupyter | Minimal | CPU | Python 3.11
 ${PV_NAME}=                     ods-ci-project-sharing
 ${PV_DESCRIPTION}=              it is a PV created to test DS Projects Sharing feature
 ${PV_SIZE}=                     1

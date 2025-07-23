@@ -22,7 +22,7 @@ ${SEP_DISPLAYED_NAME}=    Starburst Enterprise
 ${DS_PROJECT_NAME}=    ds-sep
 ${DS_WORKBENCH_NAME}=    ds-sep-bench
 ${DS_PRJ_DESCRIPTION}=    DS project to test Starburst Enterprise integration
-${NB_IMAGE}=    Minimal Python
+${NB_IMAGE}=   Jupyter | Minimal | CPU | Python 3.11
 ${SEP_CR_FILEPATH}=    ${FILES_RESOURCES_DIRPATH}/starburst-enterprise-cr.json    # taken (and slightly changed) from https://github.com/starburstdata/redhat-marketplace-operators/blob/main/operators/starburst-enterprise-helm-operator-rhmp/402.1.0/manifests/starburst-enterprise-helm-operator-rhmp.clusterserviceversion.yaml
 ${SEP_SECRET_TEMPLATE_FILEPATH}=    ${FILES_RESOURCES_DIRPATH}/starburst-template-secret.yaml
 ${GET_SQL_FUNC}=    import pandas\ndef get_sql(sql, connector):\n\tcur = connector.cursor()\n\tcur.execute(sql)\n\treturn pandas.DataFrame(cur.fetchall(), columns=[c[0] for c in cur.description])\nprint("get_sql function defined")    # robocop: disable

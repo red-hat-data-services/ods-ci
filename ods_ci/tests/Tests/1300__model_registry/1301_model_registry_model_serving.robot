@@ -41,7 +41,7 @@ Verify Model Registry Integration With Secured-DB
     [Documentation]    Verifies the Integartion of Model Registry operator with Jupyter Notebook
     [Tags]    Smoke    MRMS1301    ModelRegistry    deprecatedTest
     Create Workbench    workbench_title=${WORKBENCH_TITLE}    workbench_description=Registry test
-    ...                 prj_title=${PRJ_TITLE}    image_name=Minimal Python  deployment_size=${NONE}
+    ...                 prj_title=${PRJ_TITLE}    image_name=Jupyter | Minimal | CPU | Python 3.11  deployment_size=${NONE}
     ...                 storage=Persistent   pv_existent=${NONE}
     ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}
     Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}

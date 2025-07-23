@@ -95,12 +95,22 @@ Validate Kueue Removed To Managed State Transition
             ${namespace_to_check}=    Set Variable    ${APPLICATIONS_NAMESPACE}
     END
 
+    IF    ${install_kueue_by_ocp_version}
+            ${kueue_installed} =   Check If Operator Is Installed Via CLI    ${KUEUE_OP_NAME}
+            IF    ${kueue_installed}
+                    Uninstall Kueue Operator CLI
+            END
+    END
+
     Set DSC Component Removed State And Wait For Completion
     ...    kueue
     ...    ${KUEUE_DEPLOYMENT_NAME}
     ...    ${KUEUE_LABEL_SELECTOR}
     ...    namespace=${namespace_to_check}
-    Uninstall Kueue Operator CLI
+    ${kueue_installed} =   Check If Operator Is Installed Via CLI      ${KUEUE_OP_NAME}
+    IF    ${kueue_installed}
+            Uninstall Kueue Operator CLI
+    END
     Set DSC Component Managed State And Wait For Completion
     ...    kueue
     ...    ${KUEUE_DEPLOYMENT_NAME}
@@ -219,6 +229,7 @@ Validate Kueue Unmanaged To Removed State Transition
     ...    ${KUEUE_DEPLOYMENT_NAME}
     ...    ${KUEUE_LABEL_SELECTOR}
     ...    namespace=${KUEUE_NS}
+    Uninstall Kueue Operator CLI
     Set DSC Component Removed State And Wait For Completion
     ...    kueue
     ...    ${KUEUE_DEPLOYMENT_NAME}
@@ -258,10 +269,7 @@ Validate Kueue Unmanaged To Managed State Transition
     ...    ${KUEUE_LABEL_SELECTOR}
     ...    namespace=${APPLICATIONS_NAMESPACE}
     ...    wait_for_completion=False
-    ${kueue_installed} =   Check If Operator Is Installed Via CLI      ${KUEUE_OP_NAME}
-    IF    ${kueue_installed}
-            Uninstall Kueue Operator CLI
-    END
+    Uninstall Kueue Operator CLI
     Wait For Resources To Be Available
     ...    ${KUEUE_DEPLOYMENT_NAME}
     ...    ${KUEUE_LABEL_SELECTOR}
@@ -306,6 +314,7 @@ Validate Kueue Managed To Unmanaged State Transition
     ...    ${KUEUE_DEPLOYMENT_NAME}
     ...    ${KUEUE_LABEL_SELECTOR}
     ...    namespace=${KUEUE_NS}
+    ...    wait_for_completion=False
     Install Kueue Dependencies
     Wait For Resources To Be Available
     ...    ${KUEUE_DEPLOYMENT_NAME}

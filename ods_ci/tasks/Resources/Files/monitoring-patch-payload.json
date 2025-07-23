@@ -1,0 +1,27 @@
+{
+    "spec": {
+        "monitoring": {
+            "managementState": "Managed",
+            "metrics": {
+                "storage": {
+                    "size": "5Gi",
+                    "retention": "1d"
+                },
+                "resources": {
+                    "cpulimit": "500m",
+                    "memorylimit": "512Mi",
+                    "cpurequest": "100m",
+                    "memoryrequest": "256Mi"
+                },
+                "replicas": 2
+            },
+            "traces": {
+                "sampleRatio": "0.1",
+                "storage": {
+                    "backend": "pv",
+                    "size": "5Gi"
+                }
+            }
+        }
+    }
+}

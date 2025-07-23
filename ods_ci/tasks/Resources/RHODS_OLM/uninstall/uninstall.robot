@@ -137,12 +137,6 @@ Uninstall Serverless Operator CLI
 
 Uninstall Kueue Operator CLI
     [Documentation]    Keyword to uninstall the Kueue Operator
-    Log To Console    message=Deleting Kueue CR From Cluster
-    ${return_code}    ${output}    Run And Return Rc And Output
-    ...    oc delete Kueue --all --ignore-not-found
-    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting Kueue CRs
-    Wait Until Keyword Succeeds    2 min    0 sec
-    ...        Check Number Of Resource Instances Equals To      Kueue     ${KUEUE_NS}      0
     Log To Console    message=Deleting Kueue Operator Subscription From Cluster
     ${return_code}    ${csv_name}    Run And Return Rc And Output
     ...    oc get subscription kueue-operator -n ${KUEUE_NS} -o json | jq '.status.currentCSV' | tr -d '"'
@@ -157,6 +151,12 @@ Uninstall Kueue Operator CLI
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete operatorgroup --all -n ${KUEUE_NS} --ignore-not-found
     Should Be Equal As Integers  ${return_code}   0   msg=Error deleting Kueue operator group
+    Log To Console    message=Deleting Kueue CR From Cluster
+    ${return_code}    ${output}    Run And Return Rc And Output
+    ...    oc patch kueues.kueue.openshift.io cluster --type=merge -p '{"metadata": {"finalizers":null}}'
+    ${return_code}    ${output}    Run And Return Rc And Output
+    ...    oc delete kueues.kueue.openshift.io --all --ignore-not-found
+    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting Kueue CR
 
 Check Number Of Resource Instances Equals To
     [Documentation]    Keyword to check if the amount of instances of a specific CRD in a given namespace

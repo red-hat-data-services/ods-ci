@@ -118,5 +118,7 @@ Check Feast Instance Pod Images Pull Path Is Correct
         Run Keyword And Continue On Failure
         ...    Should Start With    ${image}   ${image_pull_path}    msg=Deployment image pull path ${image} does not start with ${image_pull_path}
         Run Keyword And Continue On Failure
+            ...    Should Match Regexp    ${image}    @sha256:[a-f0-9]{64}$    msg=Deployment image pull path ${image} does not contain sha256 digest
+        Run Keyword And Continue On Failure
         ...    Should Be Equal As Strings    ${featureServerImage}    ${image}
     END

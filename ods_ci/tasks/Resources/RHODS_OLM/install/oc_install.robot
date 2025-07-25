@@ -208,7 +208,7 @@ Verify RHODS Installation
       IF    "${kueue_state}" == "Unmanaged"
              Install Kueue Dependencies
              Wait For Deployment Replica To Be Ready    namespace=${KUEUE_NS}
-      ...    label_selector=app.kubernetes.io/part-of=kueue   timeout=400s
+      ...    label_selector=app.kubernetes.io/name=kueue   timeout=400s
       ELSE
              Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
       ...    label_selector=app.kubernetes.io/part-of=kueue   timeout=400s
@@ -284,6 +284,8 @@ Clone OLM Install Repo
   [Documentation]   Clone OLM git repo
   ${return_code}    ${output}     Run And Return Rc And Output    git clone ${RHODS_OSD_INSTALL_REPO} ${EXECDIR}/${OLM_DIR}
   Log To Console    ${output}
+  ${return_code}    ${output}     Run And Return Rc And Output    cd ${EXECDIR}/${OLM_DIR} && git checkout main
+  Log To Console    ${output}
   Should Be Equal As Integers   ${return_code}   0
 
 Install RHODS In Self Managed Cluster Using CLI
@@ -302,7 +304,7 @@ Install RHODS In Managed Cluster Using CLI
   Should Be Equal As Integers   ${return_code}   0  msg=Error detected while installing RHODS
 
 Wait For Pods Numbers
-  [Documentation]   Wait for number of pod during installtion
+  [Documentation]   Wait for number of pod during installation
   [Arguments]     ${count}     ${namespace}     ${label_selector}    ${timeout}
   ${status}   Set Variable   False
   FOR    ${counter}    IN RANGE   ${timeout}
@@ -324,7 +326,8 @@ Apply DSCInitialization CustomResource
     ${return_code}    ${output} =    Run And Return Rc And Output    oc get DSCInitialization --output json | jq -j '.items | length'
     Log To Console    output : ${output}, return_code : ${return_code}
     IF  ${output} != 0
-        Log to Console    Skip creation of DSCInitialization
+        Log to Console    Skip creation of DSCInitialization, patching the Monitoring info in the created one by the operator
+        Patch DSCInitialization With Monitoring Info
         RETURN
     END
     ${file_path} =    Set Variable    tasks/Resources/Files/
@@ -348,7 +351,15 @@ Create DSCInitialization CustomResource Using Test Variables
     Run    sed -i'' -e 's/<dsci_name>/${dsci_name}/' ${file_path}dsci_apply.yml
     Run    sed -i'' -e 's/<application_namespace>/${APPLICATIONS_NAMESPACE}/' ${file_path}dsci_apply.yml
     Run    sed -i'' -e 's/<monitoring_namespace>/${MONITORING_NAMESPACE}/' ${file_path}dsci_apply.yml
+    Run    sed -i'' -e 's/<monitoring_value>/Managed/' ${file_path}dsci_apply.yml
     Run    sed -i'' -e 's/<operator_yaml_label>/${OPERATOR_YAML_LABEL}/' ${file_path}dsci_apply.yml
+
+Patch DSCInitialization With Monitoring Info
+    [Documentation]  Patches the DSCInitialization with the Monitoring info in case is created by the operator
+    ${file_path} =    Set Variable    tasks/Resources/Files/
+    ${rc}   ${output}=    Run And Return Rc And Output
+    ...         oc patch DSCInitialization/default-dsci -n ${OPERATOR_NAMESPACE} --patch-file="${file_path}monitoring-patch-payload.json" --type merge    #robocop:disable
+    Should Be Equal    "${rc}"    "0"   msg=${output}
 
 Wait For DSCInitialization CustomResource To Be Ready
     [Documentation]   Wait ${timeout} seconds for DSCInitialization CustomResource To Be Ready
@@ -406,6 +417,8 @@ Apply DataScienceCluster CustomResource
                     Component Should Not Be Enabled    ${cmp}
             ELSE IF    '${COMPONENTS.${cmp}}' == 'Managed'
                     Component Should Be Enabled    ${cmp}
+            ELSE IF    '${COMPONENTS.${cmp}}' == 'Unmanaged'
+                    Component Should Be Enabled    ${cmp}
             ELSE IF    '${COMPONENTS.${cmp}}' == 'Removed'
                     Component Should Not Be Enabled    ${cmp}
             END
@@ -424,6 +437,8 @@ Create DataScienceCluster CustomResource Using Test Variables
                 Run    sed -i'' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
             ELSE IF    '${COMPONENTS.${cmp}}' == 'Managed'
                 Run    sed -i'' -e 's/<${cmp}_value>/Managed/' ${file_path}dsc_apply.yml
+            ELSE IF    '${COMPONENTS.${cmp}}' == 'Unmanaged'
+                Run    sed -i'' -e 's/<${cmp}_value>/Unmanaged/' ${file_path}dsc_apply.yml
             ELSE IF    '${COMPONENTS.${cmp}}' == 'Removed'
                 Run    sed -i'' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
             END
@@ -449,6 +464,8 @@ Generate CustomManifest In DSC YAML
             Log To Console      ${status}
             IF    '${status}' == 'Managed'
                 Run    sed -i'' -e 's/<${cmp}_value>/Managed/' ${file_path}dsc_apply.yml
+            ELSE IF    '${status}' == 'Unmanaged'
+                Run    sed -i'' -e 's/<${cmp}_value>/Unmanaged/' ${file_path}dsc_apply.yml
             ELSE IF    '${status}' == 'Removed'
                 Run    sed -i'' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
             END

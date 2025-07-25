@@ -123,7 +123,12 @@ def change_component_state(components):
     for component in components_list:
         comp, state = component.split(":")
         print(comp, state)
-        component_states[comp] = "Managed" if state.lower() == "managed" else "Removed"
+        if state.lower() == "managed":
+            component_states[comp] = "Managed"
+        elif state.lower() == "unmanaged":
+            component_states[comp] = "Unmanaged"
+        else:
+            component_states[comp] = "Removed"
         print(component_states[comp])
 
     print(component_states)

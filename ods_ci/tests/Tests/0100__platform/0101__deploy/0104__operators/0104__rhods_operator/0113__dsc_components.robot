@@ -780,10 +780,14 @@ Validate Support For Configuration Of Controller Resources
         Patch Controller Deployment  ${controller}  /spec/template/spec/containers/0/image  '${new_image}'
         Patch Controller Deployment  ${controller}  /spec/replicas  ${new_replicas}
 
-        Verify Deployment Patch Was Reverted  ${controller}  .spec.template.spec.containers[0].resources.limits.cpu  ${new_cpu_limit}
-        Verify Deployment Patch Was Reverted  ${controller}  .spec.template.spec.containers[0].resources.limits.memory  ${new_memory_limit}
-        Verify Deployment Patch Was Reverted  ${controller}  .spec.template.spec.containers[0].image  ${new_image}
-        Verify Deployment Patch Was Reverted  ${controller}  .spec.replicas  ${new_replicas}
+        Wait Until Keyword Succeeds    30 s  5 s
+        ...     Verify Deployment Patch Was Reverted  ${controller}  .spec.template.spec.containers[0].resources.limits.cpu  ${new_cpu_limit}
+        Wait Until Keyword Succeeds    30 s  5 s
+        ...     Verify Deployment Patch Was Reverted  ${controller}  .spec.template.spec.containers[0].resources.limits.memory  ${new_memory_limit}
+        Wait Until Keyword Succeeds    30 s  5 s
+        ...     Verify Deployment Patch Was Reverted  ${controller}  .spec.template.spec.containers[0].image  ${new_image}
+        Wait Until Keyword Succeeds    30 s  5 s
+        ...     Verify Deployment Patch Was Reverted  ${controller}  .spec.replicas  ${new_replicas}
     END
 
     [Teardown]   Restore Component Deployments

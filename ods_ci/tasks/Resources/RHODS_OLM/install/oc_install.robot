@@ -85,8 +85,8 @@ Install RHODS
       Set Suite Variable    ${DSCI_TEMPLATE}    ${DSCI_TEMPLATE_RAW}    # robocop: disable
   END
   Install Kserve Dependencies
-  ${install_observability_operators} =    Get Variable Value    ${INSTALL_OBSERVABILITY_OPERATORS}    true
-  IF    "${install_observability_operators}" == "true"
+  ${enable_new_observability_stack} =    Get Variable Value    ${ENABLE_NEW_OBSERVABILITY_STACK}    true
+  IF    "${enable_new_observability_stack}" == "true"
           Install Observability Dependencies
   END
   Clone OLM Install Repo
@@ -326,8 +326,12 @@ Apply DSCInitialization CustomResource
     ${return_code}    ${output} =    Run And Return Rc And Output    oc get DSCInitialization --output json | jq -j '.items | length'
     Log To Console    output : ${output}, return_code : ${return_code}
     IF  ${output} != 0
-        Log to Console    Skip creation of DSCInitialization, patching the Monitoring info in the created one by the operator
-        Patch DSCInitialization With Monitoring Info
+        Log to Console    Skip creation of DSCInitialization
+        ${enable_new_observability_stack} =    Get Variable Value    ${ENABLE_NEW_OBSERVABILITY_STACK}    true
+        IF    "${enable_new_observability_stack}" == "true"
+                  Log to Console    Patching the Monitoring info in the created one by the operator
+                  Patch DSCInitialization With Monitoring Info
+        END
         RETURN
     END
     ${file_path} =    Set Variable    tasks/Resources/Files/
@@ -351,8 +355,19 @@ Create DSCInitialization CustomResource Using Test Variables
     Run    sed -i'' -e 's/<dsci_name>/${dsci_name}/' ${file_path}dsci_apply.yml
     Run    sed -i'' -e 's/<application_namespace>/${APPLICATIONS_NAMESPACE}/' ${file_path}dsci_apply.yml
     Run    sed -i'' -e 's/<monitoring_namespace>/${MONITORING_NAMESPACE}/' ${file_path}dsci_apply.yml
-    Run    sed -i'' -e 's/<monitoring_value>/Managed/' ${file_path}dsci_apply.yml
     Run    sed -i'' -e 's/<operator_yaml_label>/${OPERATOR_YAML_LABEL}/' ${file_path}dsci_apply.yml
+    ${ENABLE_NEW_OBSERVABILITY_STACK} =    Get Variable Value    ${ENABLE_NEW_OBSERVABILITY_STACK}    true
+        IF    "${ENABLE_NEW_OBSERVABILITY_STACK}" == "true"
+                Run    sed -i'' -e 's/<monitoring_value>/Managed/' ${file_path}dsci_apply.yml
+        ELSE
+            IF     "${cluster_type}" == "selfmanaged"
+                    Run    sed -i'' -e 's/<monitoring_value>/Removed/' ${file_path}dsci_apply.yml
+            ELSE
+                    # If the cluster is managed, we need to set the value as Managed to keep the old monitoring stack
+                    # Once the old one is deprecated, we can remove this logic
+                    Run    sed -i'' -e 's/<monitoring_value>/Managed/' ${file_path}dsci_apply.yml
+            END
+        END
 
 Patch DSCInitialization With Monitoring Info
     [Documentation]  Patches the DSCInitialization with the Monitoring info in case is created by the operator

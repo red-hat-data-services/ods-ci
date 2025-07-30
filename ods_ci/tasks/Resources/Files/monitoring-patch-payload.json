@@ -1,7 +1,7 @@
 {
     "spec": {
         "monitoring": {
-            "managementState": "Managed",
+            "managementState": "<monitoring_value>",
             "metrics": {
                 "storage": {
                     "size": "5Gi",

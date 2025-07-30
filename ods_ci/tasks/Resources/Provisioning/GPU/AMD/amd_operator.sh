@@ -3,7 +3,7 @@ set -e
 
 GPU_INSTALL_DIR="$(dirname "$0")"
 AMD_DC_NS="kube-amd-gpu"
-ROCM_VERSION="6.2.2"
+ROCM_VERSION="6.4.2"
 
 function create_registry_network() {
     oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"storage":{"emptyDir":{}}}}'
@@ -196,6 +196,7 @@ spec:
   publisher: RHOAI QE
   sourceType: grpc
 EOF
+    sleep 10s
     oc wait --timeout="120s" --for=condition=ready=true pod -n openshift-marketplace -l olm.catalogSource=certified-operators-416-amd
     sed -i'' -e "s/certified-operators/certified-operators-416-amd/g" "$GPU_INSTALL_DIR/amd_gpu_install.yaml"
   fi

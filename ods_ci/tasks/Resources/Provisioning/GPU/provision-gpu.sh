@@ -8,7 +8,7 @@ KUSTOMIZE_PATH="$PWD/tasks/Resources/Provisioning/Hive/GPU"
 MACHINESET_PATH="$KUSTOMIZE_PATH/base/source-machineset.yaml"
 
 # Check if existing machineset GPU already exists
-EXISTING_GPU_MACHINESET="$(oc get machineset -n openshift-machine-api -o jsonpath="{.items[?(@.metadata.annotations['machine\.openshift\.io/GPU']>'0')].metadata.name}")"
+EXISTING_GPU_MACHINESET="$(oc get machinesets.machine.openshift.io -n openshift-machine-api -o jsonpath="{.items[?(@.metadata.annotations['machine\.openshift\.io/GPU']>'0')].metadata.name}")"
 if [[ -n "$EXISTING_GPU_MACHINESET" ]] ; then
   echo "Machine-set for GPU already exists"
   oc get machinesets -A --show-labels
@@ -16,7 +16,7 @@ if [[ -n "$EXISTING_GPU_MACHINESET" ]] ; then
 fi
 
 # Select the first machineset as a template for the GPU machineset
-SOURCE_MACHINESET=$(oc get machineset -n openshift-machine-api -o name | head -n1)
+SOURCE_MACHINESET=$(oc get machinesets.machine.openshift.io -n openshift-machine-api -o name | head -n1)
 oc get -o yaml -n openshift-machine-api $SOURCE_MACHINESET  > $MACHINESET_PATH
 
 # rename machine set in the template file
@@ -31,4 +31,12 @@ sed -i'' -e "s/INSTANCE_TYPE/$INSTANCE_TYPE/g" $KUSTOMIZE_PATH/overlays/$PROVIDE
 oc apply --kustomize $KUSTOMIZE_PATH/overlays/$PROVIDER
 
 # Add GPU label to the new machine-set
-oc patch machinesets -n openshift-machine-api "$NEW_MACHINESET_NAME" -p '{"metadata":{"labels":{"gpu-machineset":"true"}}}' --type=merge
+oc patch machinesets.machine.openshift.io -n openshift-machine-api "$NEW_MACHINESET_NAME" -p '{"metadata":{"labels":{"gpu-machineset":"true"}}}' --type=merge
+# wait for the machine to be Ready
+echo "Waiting for GPU Node to be Ready"
+oc wait --timeout=$MACHINE_WAIT_TIMEOUT --for jsonpath='{.status.readyReplicas}'=1 machinesets.machine.openshift.io $NEW_MACHINESET_NAME -n openshift-machine-api
+ if [ $? -ne 0 ]; then
+  echo "Machine Set $NEW_MACHINESET_NAME does not have its Machines in Running status after $MACHINE_WAIT_TIMEOUT timeout"
+  echo "Please check the cluster"
+  exit 1
+fi

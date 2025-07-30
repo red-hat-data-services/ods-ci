@@ -327,11 +327,7 @@ Apply DSCInitialization CustomResource
     Log To Console    output : ${output}, return_code : ${return_code}
     IF  ${output} != 0
         Log to Console    Skip creation of DSCInitialization
-        ${enable_new_observability_stack} =    Get Variable Value    ${ENABLE_NEW_OBSERVABILITY_STACK}    true
-        IF    "${enable_new_observability_stack}" == "true"
-                  Log to Console    Patching the Monitoring info in the created one by the operator
-                  Patch DSCInitialization With Monitoring Info
-        END
+        Patch DSCInitialization With Monitoring Info
         RETURN
     END
     ${file_path} =    Set Variable    tasks/Resources/Files/
@@ -372,6 +368,18 @@ Create DSCInitialization CustomResource Using Test Variables
 Patch DSCInitialization With Monitoring Info
     [Documentation]  Patches the DSCInitialization with the Monitoring info in case is created by the operator
     ${file_path} =    Set Variable    tasks/Resources/Files/
+    ${ENABLE_NEW_OBSERVABILITY_STACK} =    Get Variable Value    ${ENABLE_NEW_OBSERVABILITY_STACK}    true
+        IF    "${ENABLE_NEW_OBSERVABILITY_STACK}" == "true"
+                Run    sed -i'' -e 's/<monitoring_value>/Managed/' ${file_path}monitoring-patch-payload.json
+        ELSE
+            IF     "${cluster_type}" == "selfmanaged"
+                    Run    sed -i'' -e 's/<monitoring_value>/Removed/' ${file_path}monitoring-patch-payload.json
+            ELSE
+                    # If the cluster is managed, we need to set the value as Managed to keep the old monitoring stack
+                    # Once the old one is deprecated, we can remove this logic
+                    Run    sed -i'' -e 's/<monitoring_value>/Managed/' ${file_path}monitoring-patch-payload.json
+            END
+        END
     ${rc}   ${output}=    Run And Return Rc And Output
     ...         oc patch DSCInitialization/default-dsci -n ${OPERATOR_NAMESPACE} --patch-file="${file_path}monitoring-patch-payload.json" --type merge    #robocop:disable
     Should Be Equal    "${rc}"    "0"   msg=${output}

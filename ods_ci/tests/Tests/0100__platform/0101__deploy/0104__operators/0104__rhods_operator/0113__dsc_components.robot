@@ -163,10 +163,7 @@ Validate Kueue Removed To Unmanaged State Transition
     ...    ${KUEUE_DEPLOYMENT_NAME}
     ...    ${KUEUE_LABEL_SELECTOR}
     ...    namespace=${KUEUE_NS}
-    Check That Image Pull Path Is Correct
-    ...    ${KUEUE_DEPLOYMENT_NAME}
-    ...    ${IMAGE_PULL_PATH}
-    ...    namespace=${KUEUE_NS}
+    # Omit the image pull path check because Kueue is now running as a dependent operator, its image is not managed by us
 
     [Teardown]      Restore Kueue Initial State
 

@@ -114,6 +114,9 @@ Verify Pipelines Integration With Elyra Running Hello World Pipeline Test     # 
     Wait Until Page Contains Element    xpath=//a[.="Run Details."]    timeout=30s
     ${pipeline_run_name} =    Get Pipeline Run Name
     Switch To Pipeline Execution Page
+    # We opened the Run Details page, now we validate the pipeline name is displayed
+    Wait Until Page Contains    ${pipeline_run_name}    timeout=20s
+    Log    Successfully validated Run Details link for pipeline: ${pipeline_run_name}
     # We need to navigate to the page because the project name hold a state
     # In a fresh cluster, if not state found, it will select the first one
     # In this case, the first could not be the project created

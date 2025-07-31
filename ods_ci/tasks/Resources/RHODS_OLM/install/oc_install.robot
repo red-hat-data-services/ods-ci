@@ -158,14 +158,23 @@ Verify RHODS Installation
             Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
             Wait For DSCInitialization CustomResource To Be Ready
             Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
+       ELSE
+            # If managed and RHOAI, we need to wait for the operator to create the DSCI and then patch it with
+            # the monitoring info in case the new obs stack flag is enabled
+            Wait Until Keyword Succeeds    5 min    0 sec
+            ...        Run And Return Rc      oc get DSCInitialization ${DSCI_NAME}
+            ${ENABLE_NEW_OBSERVABILITY_STACK} =    Get Variable Value    ${ENABLE_NEW_OBSERVABILITY_STACK}    true
+            IF    "${ENABLE_NEW_OBSERVABILITY_STACK}" == "true"
+                    Patch DSCInitialization With Monitoring Info
+            END
        END
   ELSE
       IF  "${APPLICATIONS_NAMESPACE}" != "${DEFAULT_APPLICATIONS_NAMESPACE_RHOAI}" and "${APPLICATIONS_NAMESPACE}" != "${DEFAULT_APPLICATIONS_NAMESPACE_ODH}"
           Create DSCI With Custom Namespaces
       END
-      Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}    dsci_template=${DSCI_TEMPLATE}
+      Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
       Wait For DSCInitialization CustomResource To Be Ready
-      Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}    dsc_template=${DSC_TEMPLATE}
+      Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
   END
 
   ${workbenches} =    Is Component Enabled    workbenches    ${DSC_NAME}
@@ -323,11 +332,14 @@ Wait For Pods Numbers
 Apply DSCInitialization CustomResource
     [Documentation]
     [Arguments]        ${dsci_name}=${DSCI_NAME}    ${dsci_template}=${DSCI_TEMPLATE}
+    ${ENABLE_NEW_OBSERVABILITY_STACK} =    Get Variable Value    ${ENABLE_NEW_OBSERVABILITY_STACK}    true
     ${return_code}    ${output} =    Run And Return Rc And Output    oc get DSCInitialization --output json | jq -j '.items | length'
     Log To Console    output : ${output}, return_code : ${return_code}
     IF  ${output} != 0
-        Log to Console    Skip creation of DSCInitialization
-        Patch DSCInitialization With Monitoring Info
+        Log to Console    Skip creation of DSCInitialization because its already created by the operator
+        IF    "${ENABLE_NEW_OBSERVABILITY_STACK}" == "true"
+                Patch DSCInitialization With Monitoring Info
+        END
         RETURN
     END
     ${file_path} =    Set Variable    tasks/Resources/Files/
@@ -342,6 +354,9 @@ Apply DSCInitialization CustomResource
     Log To Console    ${output}
     Should Be Equal As Integers  ${return_code}  0  msg=Error detected while applying DSCI CR
     Remove File    ${file_path}dsci_apply.yml
+    IF    "${ENABLE_NEW_OBSERVABILITY_STACK}" == "true"
+                Patch DSCInitialization With Monitoring Info
+    END
 
 Create DSCInitialization CustomResource Using Test Variables
     [Documentation]
@@ -352,34 +367,10 @@ Create DSCInitialization CustomResource Using Test Variables
     Run    sed -i'' -e 's/<application_namespace>/${APPLICATIONS_NAMESPACE}/' ${file_path}dsci_apply.yml
     Run    sed -i'' -e 's/<monitoring_namespace>/${MONITORING_NAMESPACE}/' ${file_path}dsci_apply.yml
     Run    sed -i'' -e 's/<operator_yaml_label>/${OPERATOR_YAML_LABEL}/' ${file_path}dsci_apply.yml
-    ${ENABLE_NEW_OBSERVABILITY_STACK} =    Get Variable Value    ${ENABLE_NEW_OBSERVABILITY_STACK}    true
-        IF    "${ENABLE_NEW_OBSERVABILITY_STACK}" == "true"
-                Run    sed -i'' -e 's/<monitoring_value>/Managed/' ${file_path}dsci_apply.yml
-        ELSE
-            IF     "${cluster_type}" == "selfmanaged"
-                    Run    sed -i'' -e 's/<monitoring_value>/Removed/' ${file_path}dsci_apply.yml
-            ELSE
-                    # If the cluster is managed, we need to set the value as Managed to keep the old monitoring stack
-                    # Once the old one is deprecated, we can remove this logic
-                    Run    sed -i'' -e 's/<monitoring_value>/Managed/' ${file_path}dsci_apply.yml
-            END
-        END
 
 Patch DSCInitialization With Monitoring Info
-    [Documentation]  Patches the DSCInitialization with the Monitoring info in case is created by the operator
+    [Documentation]  Patches the DSCInitialization with the Monitoring info if the new obs stack is being used
     ${file_path} =    Set Variable    tasks/Resources/Files/
-    ${ENABLE_NEW_OBSERVABILITY_STACK} =    Get Variable Value    ${ENABLE_NEW_OBSERVABILITY_STACK}    true
-        IF    "${ENABLE_NEW_OBSERVABILITY_STACK}" == "true"
-                Run    sed -i'' -e 's/<monitoring_value>/Managed/' ${file_path}monitoring-patch-payload.json
-        ELSE
-            IF     "${cluster_type}" == "selfmanaged"
-                    Run    sed -i'' -e 's/<monitoring_value>/Removed/' ${file_path}monitoring-patch-payload.json
-            ELSE
-                    # If the cluster is managed, we need to set the value as Managed to keep the old monitoring stack
-                    # Once the old one is deprecated, we can remove this logic
-                    Run    sed -i'' -e 's/<monitoring_value>/Managed/' ${file_path}monitoring-patch-payload.json
-            END
-        END
     ${rc}   ${output}=    Run And Return Rc And Output
     ...         oc patch DSCInitialization/default-dsci -n ${OPERATOR_NAMESPACE} --patch-file="${file_path}monitoring-patch-payload.json" --type merge    #robocop:disable
     Should Be Equal    "${rc}"    "0"   msg=${output}

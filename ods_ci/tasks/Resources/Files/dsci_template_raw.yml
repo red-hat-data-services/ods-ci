@@ -11,22 +11,7 @@ metadata:
 spec:
     applicationsNamespace: <application_namespace>
     monitoring:
-        metrics:
-            replicas: 2
-            resources:
-                cpulimit: 500m
-                cpurequest: 100m
-                memorylimit: 512Mi
-                memoryrequest: 256Mi
-            storage:
-                retention: 1d
-                size: 5Gi
-        traces:
-            sampleRatio: "0.1"
-            storage:
-                backend: "pv"
-                size: "5Gi"
-        managementState: <monitoring_value>
+        managementState: Managed
         namespace: <monitoring_namespace>
     serviceMesh:
         managementState: Removed

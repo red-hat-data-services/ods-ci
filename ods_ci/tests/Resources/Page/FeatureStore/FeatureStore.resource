@@ -6,9 +6,9 @@ Resource         ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 
 
 *** Variables ***
-${FEATURE-STORE-RELEASE-TAG}             adjustment-release-v0.49.0
+${FEATURE-STORE-RELEASE-TAG}             v0.50.0
 ${FEATURE-STORE_DIR}                     feature-store
-${FEATURE-STORE_REPO_URL}                %{FEATURE-STORE_REPO_URL=https://github.com/opendatahub-io/feast.git}
+${FEATURE-STORE_REPO_URL}                %{FEATURE-STORE_REPO_URL=https://github.com/feast-dev/feast.git}
 ${NOTEBOOK_IMAGE}                        quay.io/modh/odh-workbench-jupyter-datascience-cpu-py311-ubi9@sha256:48c2be818e8d2a5005a69e2c76f9a2d40ddeb1d03376e04516ca6da13418c887
 ${FEAST_VERSION}                         0.48.1
 

@@ -5,7 +5,7 @@ NFD_INSTALL_DIR="$(dirname "$0")"
 NFD_INSTANCE=$NFD_INSTALL_DIR/nfd_deploy.yaml
 echo "Installing NFD operator"
 oc apply -f "$NFD_INSTALL_DIR/nfd_operator.yaml"
-oc wait --timeout=3m --for jsonpath='{.status.state}'=AtLatestKnown -n openshift-nfd sub nfd
+oc wait --timeout=20m --for jsonpath='{.status.state}'=AtLatestKnown -n openshift-nfd sub nfd
 
 ocpVersion=$(oc version --output json | jq '.openshiftVersion' | tr -d '"')
 IFS='.' read -ra ocpVersionSplit <<< "$ocpVersion"

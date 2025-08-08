@@ -229,11 +229,6 @@ Data Science Pipelines Pre Upgrade Configuration
     [Tags]      Upgrade     DataSciencePipelines-Backend
     DataSciencePipelinesUpgradeTesting.Setup Environment For Upgrade Testing
 
-Model Registry Pre Upgrade Set Up
-    [Documentation]    Creates a Model Registry instance and registers a model/version
-    [Tags]      Upgrade     ModelRegistryUpgrade    deprecatedTest
-    Model Registry Pre Upgrade Scenario
-
 Long Running Jupyter Notebook
     [Documentation]    Launch a long running notebook before the upgrade
     [Tags]      Upgrade    IDE

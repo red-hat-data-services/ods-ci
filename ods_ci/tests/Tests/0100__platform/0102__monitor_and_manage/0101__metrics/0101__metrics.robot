@@ -32,7 +32,6 @@ Test Existence of Prometheus Alerting Rules
     ...       Tier1
     ...       ODS-509
     ...       Monitoring
-    Skip If RHODS Is Self-Managed
     Check Prometheus Alerting Rules
 
 Test Existence of Prometheus Recording Rules
@@ -41,7 +40,6 @@ Test Existence of Prometheus Recording Rules
     ...       Tier1
     ...       ODS-510
     ...       Monitoring
-    Skip If RHODS Is Self-Managed
     Check Prometheus Recording Rules
 
 Test Metric "Notebook CPU Usage" On ODS Prometheus
@@ -50,7 +48,6 @@ Test Metric "Notebook CPU Usage" On ODS Prometheus
     ...       Tier1
     ...       ODS-178
     ...       Monitoring
-    Skip If RHODS Is Self-Managed
     ${cpu_usage_before} =    Read Current CPU Usage
     Run Jupyter Notebook For 5 Minutes
     Wait Until Keyword Succeeds    10 times   30s
@@ -63,7 +60,6 @@ Test Metric "Rhods_Total_Users" On ODS Prometheus
     ...       Tier1
     ...       ODS-628
     ...       Monitoring
-    Skip If RHODS Is Self-Managed
     # Note: the expression ends with "step=1" to obtain the value for current second
     ${expression} =    Set Variable    rhods_total_users&step=1
     ${rhods_total_users} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}
@@ -89,7 +85,6 @@ Test Metric Existence For "Rhods_Aggregate_Availability" On ODS Prometheus
     ...       Tier1
     ...       ODS-636
     ...       Monitoring
-    Skip If RHODS Is Self-Managed
     ${expression} =    Set Variable    rhods_aggregate_availability&step=1
     ${resp} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    ${expression}
     Log    rhods_aggregate_availability: ${resp.json()["data"]["result"][0]["value"][-1]}
@@ -103,7 +98,6 @@ Test Targets Are Available And Up In RHOAI Prometheus
     ...       ODS-179
     ...       RHOAIENG-13066
     ...       Monitoring
-    Skip If RHODS Is Self-Managed
     @{targets} =    Prometheus.Get Target Pools Which Have State Up
     ...    pm_url=${RHODS_PROMETHEUS_URL}
     ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
@@ -132,7 +126,6 @@ Test RHOAI Operator Metrics Are Defined
     ...       ODS-192
     ...       RHOAIENG-13081
     ...       Monitoring
-    Skip If RHODS Is Self-Managed
     @{expected_metric_names} =    Create List  controller_runtime_active_workers
     ...                                     controller_runtime_max_concurrent_reconciles  controller_runtime_reconcile_errors_total
     ...                                     controller_runtime_reconcile_time_seconds_bucket  controller_runtime_reconcile_time_seconds_count
@@ -176,7 +169,6 @@ Test RHOAI Dashboard Metrics By Code Are Defined
     ...       ODS-195
     ...       RHOAIENG-13261
     ...       Monitoring
-    Skip If RHODS Is Self-Managed
     ${response_by_code} =    Prometheus.Run Query
     ...    pm_url=${RHODS_PROMETHEUS_URL}
     ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
@@ -210,7 +202,6 @@ Test RHOAI Dashboard Metrics Are Defined
     ...       ODS-194
     ...       RHOAIENG-13260
     ...       Monitoring
-    Skip If RHODS Is Self-Managed
     ${response} =    Prometheus.Run Query
     ...    pm_url=${RHODS_PROMETHEUS_URL}
     ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
@@ -236,7 +227,6 @@ Test RHOAI DSP Operator Recording Rules On Prometheus
     ...       ODS-2168
     ...       RHOAIENG-13263
     ...       Monitoring
-    Skip If RHODS Is Self-Managed
     ${user_facing_endpoints_status_dsp_response} =    Prometheus.Run Query
     ...    pm_url=${RHODS_PROMETHEUS_URL}
     ...    pm_token=${RHODS_PROMETHEUS_TOKEN}

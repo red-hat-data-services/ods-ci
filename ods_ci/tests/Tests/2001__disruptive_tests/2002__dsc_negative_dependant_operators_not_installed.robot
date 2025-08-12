@@ -18,6 +18,7 @@ Suite Teardown      Suite Teardown
 *** Variables ***
 ${OPERATOR_NS}                              ${OPERATOR_NAMESPACE}
 ${DSCI_NAME}                                default-dsci
+${DSC_NAME}                                 default-dsc
 ${SERVICE_MESH_OPERATOR_NS}                 openshift-operators
 ${SERVICE_MESH_CR_NS}                       istio-system
 ${SERVICE_MESH_CR_NAME}                     data-science-smcp
@@ -160,6 +161,11 @@ Suite Setup
     ELSE
       Set Global Variable  ${OPERATOR_YAML_LABEL}  rhods-operator
     END
+    # If the Kserve mode is RawDeployment, then all the tests need to be skipped, as they are only usable in Serverless mode
+    ${KSERVE_MODE}=    Get Resource Attribute      ${OPERATOR_NAMESPACE}
+    ...                 DataScienceCluster      ${DSC_NAME}        .status.components.kserve.defaultDeploymentMode
+    Skip If    condition="${KSERVE_MODE}" == "RawDeployment"     msg="This test needs to be skipped if KServe mode is RawDeployment"
+
 
 Suite Teardown
     [Documentation]    Suite Teardown

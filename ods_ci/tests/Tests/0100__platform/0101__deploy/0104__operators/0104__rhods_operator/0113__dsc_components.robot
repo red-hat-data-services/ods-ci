@@ -117,7 +117,7 @@ Validate Kueue Removed To Managed State Transition
     ...    ${KUEUE_LABEL_SELECTOR}
     Check That Image Pull Path Is Correct
     ...    ${KUEUE_DEPLOYMENT_NAME}
-    ...    ${IMAGE_PULL_PATH}
+    ...    ${KUEUE_IMAGE_PULL_PATH}
 
     [Teardown]      Restore Kueue Initial State
 

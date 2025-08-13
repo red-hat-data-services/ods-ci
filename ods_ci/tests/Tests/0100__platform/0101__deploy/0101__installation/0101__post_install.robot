@@ -403,7 +403,7 @@ Verify DSC Contains Correct Component Versions  # robocop: disable:too-long-test
         ...     ${RHODS_OPERATOR_GIT_DIR}/prefetched-manifests/${c}/component_metadata.yaml
         ${file_exists} =  Run Keyword And Return Status    File Should Exist  ${component_metadata_file}
         IF  ${file_exists}
-            IF  $component_versions_json[$c]["managementState"] != "Managed"
+            IF  $component_versions_json[$c] == {} or $component_versions_json[$c]["managementState"] != "Managed"
                 Log  ${c} is not managed, skipping version check
                 CONTINUE
             END

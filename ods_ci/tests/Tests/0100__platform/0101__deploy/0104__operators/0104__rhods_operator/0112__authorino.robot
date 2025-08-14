@@ -26,7 +26,6 @@ ${IS_NOT_PRESENT}                       1
 Validate Authorino Resources
     [Documentation]    The purpose of this Test Case is to validate that Authorino resources have been created.
     [Tags]    Operator    Tier1    RHOAIENG-5092
-
     # Validate that Authorino CR has been created
     Wait Until Keyword Succeeds    2 min    0 sec
     ...    Is Resource Present    Authorino    ${AUTHORINO_CR_NAME}    ${AUTHORINO_CR_NS}    ${IS_PRESENT}
@@ -37,6 +36,8 @@ Validate Authorino Resources
 *** Keywords ***
 Suite Setup
     [Documentation]    Suite Setup
+    ${authorino_installed} =   Check If Operator Is Installed Via CLI   authorino-operator
+    Skip If    condition=not ${authorino_installed}   msg="This test is skipped if the Authorino Operator is not installed"
     RHOSi Setup
     Wait Until Operator Ready    ${SERVICE_MESH_OPERATOR_DEPLOYMENT_NAME}    ${SERVICE_MESH_OPERATOR_NS}
     Wait Until Operator Ready    ${OPERATOR_DEPLOYMENT_NAME}    ${OPERATOR_NS}

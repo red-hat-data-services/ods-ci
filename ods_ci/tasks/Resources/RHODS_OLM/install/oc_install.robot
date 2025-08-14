@@ -69,22 +69,26 @@ ${DSC_TEMPLATE}=    dsc_template.yml
 ${DSC_TEMPLATE_RAW}=    dsc_template_raw.yml
 ${DSCI_TEMPLATE}=    dsci_template.yml
 ${DSCI_TEMPLATE_RAW}=    dsci_template_raw.yml
-@{KSERVE_DEPENDENCIES}=    authorino
-...    servicemesh
-...    serverless
+@{RHOAI_DEPENDENCIES}=    Create List
 ${CONFIG_ENV}=    ${EMPTY}
 
 *** Keywords ***
 Install RHODS
   [Arguments]  ${cluster_type}     ${image_url}
+  ${install_authorino_dependency} =    Get Variable Value    ${INSTALL_AUTHORINO_DEPENDENCY}    true
+  IF    "${install_authorino_dependency}" == "true"
+      Append To List     ${RHOAI_DEPENDENCIES}     authorino
+  END
   ${kserve_raw_deployment} =    Get Variable Value    ${KSERVE_RAW_DEPLOYMENT}    false
   IF    "${kserve_raw_deployment}" == "true"
-      Set Suite Variable    @{KSERVE_DEPENDENCIES}    authorino        # robocop: disable
       Set Suite Variable    ${CONFIG_ENV}    -e DISABLE_DSC_CONFIG    # robocop: disable
       Set Suite Variable    ${DSC_TEMPLATE}    ${DSC_TEMPLATE_RAW}    # robocop: disable
       Set Suite Variable    ${DSCI_TEMPLATE}    ${DSCI_TEMPLATE_RAW}    # robocop: disable
+  ELSE
+      Append To List     ${RHOAI_DEPENDENCIES}     servicemesh
+      Append To List     ${RHOAI_DEPENDENCIES}     serverless
   END
-  Install Kserve Dependencies
+  Install Rhoai Dependencies
   ${enable_new_observability_stack} =    Get Variable Value    ${ENABLE_NEW_OBSERVABILITY_STACK}    true
   IF    "${enable_new_observability_stack}" == "true"
           Install Observability Dependencies
@@ -135,7 +139,7 @@ Add StartingCSV To Subscription
     ...                startingCSV field in the sub.
     ...                Needed for post-upgrade test suites to identify which RHOAI version
     ...                was installed before upgrading
-    Log    Patching RHOAI subscription to add startingCSV field    console=yes
+    Log    Patching ODH/RHOAI subscription to add startingCSV field    console=yes
     ${rc}    ${out} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/add_starting_csv.sh
     Log    ${out}    console=yes
     Run Keyword And Continue On Failure    Should Be Equal As Numbers    ${rc}    ${0}
@@ -648,26 +652,26 @@ Install Serverless Operator Via Cli
         Log To Console    message=Serverless Operator is already installed
     END
 
-Install Kserve Dependencies
-    [Documentation]    Install Dependent Operators For Kserve
-    [Arguments]    ${dependencies}=${KSERVE_DEPENDENCIES}
+Install Rhoai Dependencies
+    [Documentation]    Install Dependent Operators For Rhoai
+    [Arguments]    ${dependencies}=${RHOAI_DEPENDENCIES}
     Set Suite Variable   ${FILES_RESOURCES_DIRPATH}    tests/Resources/Files
     Set Suite Variable   ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
     Set Suite Variable   ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
     IF    "authorino" in ${dependencies}
         Install Authorino Operator Via Cli
     ELSE
-        Log To Console    message=Authorino Operator is skipped (not included in kserve dependencies)
+        Log To Console    message=Authorino Operator is skipped (not included in rhoai dependencies)
     END
     IF    "servicemesh" in ${dependencies}
         Install Service Mesh Operator Via Cli
     ELSE
-        Log To Console    message=ServiceMesh Operator is skipped (not included in kserve dependencies)
+        Log To Console    message=ServiceMesh Operator is skipped (not included in rhoai dependencies)
     END
     IF    "serverless" in ${dependencies}
         Install Serverless Operator Via Cli
     ELSE
-        Log To Console    message=Serverless Operator is skipped (not included in kserve dependencies)
+        Log To Console    message=Serverless Operator is skipped (not included in rhoai dependencies)
     END
 
 Install Cert Manager Operator Via Cli
@@ -941,6 +945,7 @@ Get DSC Component State
     Log To Console    Component ${component} state ${state}
 
     RETURN    ${state}
+
 Enable Component
     [Documentation]    Enables a component in Data Science Cluster
     [Arguments]    ${component}

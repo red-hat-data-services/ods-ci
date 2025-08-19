@@ -1411,16 +1411,7 @@ if __name__ == "__main__":
     )
 
     optional_create_cluster_parser.add_argument(
-<<<<<<< HEAD
         "--team", help="Team name", action="store", dest="team", default="unknown-team", metavar=""
-=======
-        "--team",
-        help="Team name",
-        action="store",
-        dest="team",
-        metavar="",
-        default="unknown-team",
->>>>>>> 58ab39c7 (add the upgrade option to our tests)
     )
 
     optional_create_cluster_parser.add_argument(

@@ -2,6 +2,8 @@
     "spec": {
         "monitoring": {
             "managementState": "Managed",
+            "collectorReplicas": 2,
+            "alerting": {},
             "metrics": {
                 "storage": {
                     "size": "5Gi",
@@ -12,10 +14,10 @@
                     "memorylimit": "512Mi",
                     "cpurequest": "100m",
                     "memoryrequest": "256Mi"
-                },
-                "replicas": 2
+                }
             },
             "traces": {
+                "exporters": {},
                 "sampleRatio": "0.1",
                 "storage": {
                     "backend": "pv",

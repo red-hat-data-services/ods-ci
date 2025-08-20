@@ -898,11 +898,11 @@ Create DSCI With Custom Namespaces
     # This is needed because by default, the DSCI is automatically created pointing to the default apps namespace.
     Wait Until Keyword Succeeds    2 min    0 sec
     ...        Run And Return Rc      oc get DSCInitialization default-dsci
-    ${delete_dsci_rc} =    Run And Return Rc    oc delete DSCInitialization --all --ignore-not-found
+    ${delete_dsci_rc}    ${delete_dsci_out}    Run And Return Rc And Output    oc delete DSCInitialization --all --ignore-not-found
     IF   ${delete_dsci_rc} == 0
          Log To Console    DSCInitialization CRs successfully deleted
     ELSE
-         FAIL     Cannot delete DSCInitialization CRs
+         FAIL     Cannot delete DSCInitialization CRs: ${delete_dsci_out}
     END
     ${delete_auth_rc} =    Run And Return Rc    oc delete Auth --all --ignore-not-found
     IF   ${delete_auth_rc} == 0

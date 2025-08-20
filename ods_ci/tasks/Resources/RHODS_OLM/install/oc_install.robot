@@ -76,6 +76,7 @@ ${CONFIG_ENV}=    ${EMPTY}
 ${NFS_OP_NAME}=    nfs-provisioner-operator
 ${NFS_SUB_NAME}=    nfs-provisioner-operator-sub
 ${NFS_CHANNEL_NAME}=    alpha
+${RESOURCES_DIRPATH}=    tasks/Resources/Files
 
 *** Keywords ***
 Install RHODS
@@ -1013,3 +1014,16 @@ Install NFS Operator Via Cli
     ELSE
           Log To Console    message=NFS Operator is already installed
     END
+
+Deploy NFS Provisioner
+    [Documentation]    Deploy a NFS instance, shared
+    [Arguments]    ${storage_size}
+    ${default_sc} =    Get Default Storage Class Name
+    Set Test Variable    ${storage_class}    ${default_sc}
+    Set Test Variable    ${storage_size}
+    Create File From Template    ${RESOURCES_DIRPATH}/nfsprovisioner_template.yaml    ${RESOURCES_DIRPATH}/nfsprovisioner_cr.yaml
+    ${rc}    ${output}=    Run And Return Rc And Output
+    ...    oc apply -f ${RESOURCES_DIRPATH}/nfsprovisioner_cr.yaml
+    Should Be Equal As Integers    ${rc}    0
+    Log    ${output}    console=yes
+    # TODO: Check if the NFS server is ready

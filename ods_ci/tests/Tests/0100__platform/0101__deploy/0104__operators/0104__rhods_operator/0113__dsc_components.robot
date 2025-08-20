@@ -907,7 +907,6 @@ Patch Controller Deployment
     ...    oc patch Deployment ${controller} -n ${APPLICATIONS_NAMESPACE} --type=json -p="[{'op': 'replace', 'path': '${patch_path}', 'value': ${patch_value}}]"    # robocop: disable
     Should Be Equal As Integers    ${rc}    ${0}
 
-
 Verify Deployment Patch Was Not Reverted
     [Arguments]    ${controller}  ${json_path}  ${expected}
     ${rc}  ${actual}=  Run And Return Rc And Output    oc get deployment -n ${APPLICATIONS_NAMESPACE} ${controller} -o jsonpath='{${json_path}}'

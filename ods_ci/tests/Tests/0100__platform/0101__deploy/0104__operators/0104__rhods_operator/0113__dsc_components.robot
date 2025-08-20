@@ -12,54 +12,54 @@ Suite Teardown      Suite Teardown
 
 
 *** Variables ***
-${OPERATOR_NS}                                          ${OPERATOR_NAMESPACE}
-${APPLICATIONS_NS}                                      ${APPLICATIONS_NAMESPACE}
-${KNATIVE_SERVING_NS}                                   knative-serving
-${DSC_NAME}                                             default-dsc
-${KUEUE_NS}                                             openshift-kueue-operator
-${KUEUE_OP_NAME}                                        kueue-operator
-${CERT_MANAGER_OP_NAME}                                 openshift-cert-manager-operator
-${KUEUE_LABEL_SELECTOR}                                 app.kubernetes.io/name=kueue
-${KUEUE_DEPLOYMENT_NAME}                                kueue-controller-manager
-${CODEFLARE_LABEL_SELECTOR}                             app.kubernetes.io/name=codeflare-operator
-${CODEFLARE_DEPLOYMENT_NAME}                            codeflare-operator-manager
-${RAY_LABEL_SELECTOR}                                   app.kubernetes.io/name=kuberay
-${RAY_DEPLOYMENT_NAME}                                  kuberay-operator
-${TRAINING_LABEL_SELECTOR}                              app.kubernetes.io/name=training-operator
-${TRAINING_DEPLOYMENT_NAME}                             kubeflow-training-operator
-${DATASCIENCEPIPELINES_LABEL_SELECTOR}                  app.kubernetes.io/name=data-science-pipelines-operator
-${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}                 data-science-pipelines-operator-controller-manager
-${MODELMESH_CONTROLLER_LABEL_SELECTOR}                  app.kubernetes.io/instance=modelmesh-controller
-${MODELMESH_CONTROLLER_DEPLOYMENT_NAME}                 modelmesh-controller
-${ETCD_LABEL_SELECTOR}                                  component=model-mesh-etcd
-${ETCD_DEPLOYMENT_NAME}                                 etcd
-${ODH_MODEL_CONTROLLER_LABEL_SELECTOR}                  app=odh-model-controller
-${ODH_MODEL_CONTROLLER_DEPLOYMENT_NAME}                 odh-model-controller
-${MODELREGISTRY_CONTROLLER_LABEL_SELECTOR}              control-plane=model-registry-operator
-${MODELREGISTRY_CONTROLLER_DEPLOYMENT_NAME}             model-registry-operator-controller-manager
-${KSERVE_CONTROLLER_MANAGER_LABEL_SELECTOR}             control-plane=kserve-controller-manager
-${KSERVE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}            kserve-controller-manager
-${TRUSTYAI_CONTROLLER_MANAGER_LABEL_SELECTOR}           app.kubernetes.io/part-of=trustyai
-${TRUSTYAI_CONTROLLER_MANAGER_DEPLOYMENT_NAME}          trustyai-service-operator-controller-manager
-${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}      app.kubernetes.io/part-of=feastoperator
-${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}     feast-operator-controller-manager
-${NOTEBOOK_CONTROLLER_DEPLOYMENT_LABEL_SELECTOR}        component.opendatahub.io/name=kf-notebook-controller
-${NOTEBOOK_CONTROLLER_MANAGER_LABEL_SELECTOR}           component.opendatahub.io/name=odh-notebook-controller
-${NOTEBOOK_DEPLOYMENT_NAME}                             notebook-controller-deployment
-${IS_NOT_PRESENT}                                       1
+${OPERATOR_NS}                                              ${OPERATOR_NAMESPACE}
+${APPLICATIONS_NS}                                          ${APPLICATIONS_NAMESPACE}
+${KNATIVE_SERVING_NS}                                       knative-serving
+${DSC_NAME}                                                 default-dsc
+${KUEUE_LABEL_SELECTOR}                                     app.kubernetes.io/name=kueue
+${KUEUE_DEPLOYMENT_NAME}                                    kueue-controller-manager
+${CODEFLARE_LABEL_SELECTOR}                                 app.kubernetes.io/name=codeflare-operator
+${CODEFLARE_DEPLOYMENT_NAME}                                codeflare-operator-manager
+${RAY_LABEL_SELECTOR}                                       app.kubernetes.io/name=kuberay
+${RAY_DEPLOYMENT_NAME}                                      kuberay-operator
+${TRAINING_LABEL_SELECTOR}                                  app.kubernetes.io/name=training-operator
+${TRAINING_DEPLOYMENT_NAME}                                 kubeflow-training-operator
+${DATASCIENCEPIPELINES_LABEL_SELECTOR}                      app.kubernetes.io/name=data-science-pipelines-operator
+${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}                     data-science-pipelines-operator-controller-manager
+${MODELMESH_CONTROLLER_LABEL_SELECTOR}                      app.kubernetes.io/instance=modelmesh-controller
+${MODELMESH_CONTROLLER_DEPLOYMENT_NAME}                     modelmesh-controller
+${ETCD_LABEL_SELECTOR}                                      component=model-mesh-etcd
+${ETCD_DEPLOYMENT_NAME}                                     etcd
+${ODH_MODEL_CONTROLLER_LABEL_SELECTOR}                      app=odh-model-controller
+${ODH_MODEL_CONTROLLER_DEPLOYMENT_NAME}                     odh-model-controller
+${MODELREGISTRY_CONTROLLER_LABEL_SELECTOR}                  control-plane=model-registry-operator
+${MODELREGISTRY_CONTROLLER_DEPLOYMENT_NAME}                 model-registry-operator-controller-manager
+${KSERVE_CONTROLLER_MANAGER_LABEL_SELECTOR}                 control-plane=kserve-controller-manager
+${KSERVE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}                kserve-controller-manager
+${TRUSTYAI_CONTROLLER_MANAGER_LABEL_SELECTOR}               app.kubernetes.io/part-of=trustyai
+${TRUSTYAI_CONTROLLER_MANAGER_DEPLOYMENT_NAME}              trustyai-service-operator-controller-manager
+${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}          app.kubernetes.io/part-of=feastoperator
+${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}         feast-operator-controller-manager
+${LLAMASTACKOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}     app.kubernetes.io/part-of=llamastackoperator
+${LLAMASTACKOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    llama-stack-k8s-operator-controller-manager
+${NOTEBOOK_CONTROLLER_DEPLOYMENT_LABEL_SELECTOR}            component.opendatahub.io/name=kf-notebook-controller
+${NOTEBOOK_CONTROLLER_MANAGER_LABEL_SELECTOR}               component.opendatahub.io/name=odh-notebook-controller
+${NOTEBOOK_DEPLOYMENT_NAME}                                 notebook-controller-deployment
+${IS_NOT_PRESENT}                                           1
 &{SAVED_MANAGEMENT_STATES}
-...                                                     RAY=${EMPTY}
-...                                                     KUEUE=${EMPTY}
-...                                                     CODEFLARE=${EMPTY}
-...                                                     TRAINING=${EMPTY}
-...                                                     DASHBOARD=${EMPTY}
-...                                                     DATASCIENCEPIPELINES=${EMPTY}
-...                                                     MODELMESHERVING=${EMPTY}
-...                                                     MODELREGISTRY=${EMPTY}
-...                                                     KSERVE=${EMPTY}
-...                                                     TRUSTYAI=${EMPTY}
-...                                                     WORKBENCHES=${EMPTY}
-...                                                     FEASTOPERATOR=${EMPTY}
+...                                                         RAY=${EMPTY}
+...                                                         KUEUE=${EMPTY}
+...                                                         CODEFLARE=${EMPTY}
+...                                                         TRAINING=${EMPTY}
+...                                                         DASHBOARD=${EMPTY}
+...                                                         DATASCIENCEPIPELINES=${EMPTY}
+...                                                         MODELMESHERVING=${EMPTY}
+...                                                         MODELREGISTRY=${EMPTY}
+...                                                         KSERVE=${EMPTY}
+...                                                         TRUSTYAI=${EMPTY}
+...                                                         WORKBENCHES=${EMPTY}
+...                                                         FEASTOPERATOR=${EMPTY}
+...                                                         LLAMASTACKOPERATOR=${EMPTY}
 
 @{CONTROLLERS_LIST}                                     # dashboard added in Suite Setup, since it's different in RHOAI vs ODH
 ...                                                     codeflare-operator-manager
@@ -737,6 +737,40 @@ Validate Feastoperator Removed State
 
     [Teardown]      Restore DSC Component State     feastoperator       ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}     ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.FEASTOPERATOR}
 
+Validate Llamastackoperator Managed State
+    [Documentation]    Validate that the DSC Llamastackoperator component Managed state creates the expected resources,
+    ...    check that LlamastackOperator deployment is created and pod is in Ready state
+    [Tags]
+    ...    Operator
+    ...    Tier1
+    ...    llamastackoperator-managed
+    ...    Integration
+    Set DSC Component Managed State And Wait For Completion
+    ...    llamastackoperator
+    ...    ${LLAMASTACKOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${LLAMASTACKOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
+    Check That Image Pull Path Is Correct
+    ...    ${LLAMASTACKOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${IMAGE_PULL_PATH}
+
+    [Teardown]      Restore DSC Component State     llamastackoperator       ${LLAMASTACKOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}     ${LLAMASTACKOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.LLAMASTACKOPERATOR}
+
+Validate Llamastackoperator Removed State
+    [Documentation]    Validate that LlamastackOperator management state Removed does remove relevant resources.
+    [Tags]
+    ...    Operator
+    ...    Tier1
+    ...    llamastackoperator-removed
+    ...    Integration
+
+    Set DSC Component Removed State And Wait For Completion
+    ...    llamastackoperator
+    ...    ${LLAMASTACKOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${LLAMASTACKOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
+
+    [Teardown]      Restore DSC Component State     llamastackoperator       ${LLAMASTACKOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}     ${LLAMASTACKOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.LLAMASTACKOPERATOR}
+
+
 Validate Support For Configuration Of Controller Resources
     [Documentation]    Validate support for configuration of controller resources in component deployments
     [Tags]    Operator    Tier1    ODS-2664      Integration  RHOAIENG-12811
@@ -809,6 +843,7 @@ Suite Setup
     ${SAVED_MANAGEMENT_STATES.TRUSTYAI}=     Get DSC Component State    ${DSC_NAME}    trustyai    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.WORKBENCHES}=    Get DSC Component State    ${DSC_NAME}    workbenches    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.FEASTOPERATOR}=    Get DSC Component State    ${DSC_NAME}    feastoperator    ${OPERATOR_NS}
+    ${SAVED_MANAGEMENT_STATES.LLAMASTACKOPERATOR}=    Get DSC Component State    ${DSC_NAME}    llamastackoperator    ${OPERATOR_NS}
     Set Suite Variable    ${SAVED_MANAGEMENT_STATES}
     Append To List  ${CONTROLLERS_LIST}    ${DASHBOARD_DEPLOYMENT_NAME}
 
@@ -871,7 +906,6 @@ Patch Controller Deployment
     ${rc}=    Run And Return Rc
     ...    oc patch Deployment ${controller} -n ${APPLICATIONS_NAMESPACE} --type=json -p="[{'op': 'replace', 'path': '${patch_path}', 'value': ${patch_value}}]"    # robocop: disable
     Should Be Equal As Integers    ${rc}    ${0}
-
 
 Verify Deployment Patch Was Not Reverted
     [Arguments]    ${controller}  ${json_path}  ${expected}

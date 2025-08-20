@@ -49,4 +49,6 @@ spec:
     feastoperator:
       devFlags: <feastoperator_devflags>
       managementState: <feastoperator_value>
-
+    llamastackoperator:
+      devFlags: <llamastackoperator_devflags>
+      managementState: <llamastackoperator_value>

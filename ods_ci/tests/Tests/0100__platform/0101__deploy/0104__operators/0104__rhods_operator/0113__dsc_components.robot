@@ -745,7 +745,6 @@ Validate Llamastackoperator Managed State
     ...    Tier1
     ...    llamastackoperator-managed
     ...    Integration
-    ...    ExcludeOnODH
     Set DSC Component Managed State And Wait For Completion
     ...    llamastackoperator
     ...    ${LLAMASTACKOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
@@ -763,7 +762,6 @@ Validate Llamastackoperator Removed State
     ...    Tier1
     ...    llamastackoperator-removed
     ...    Integration
-    ...    ExcludeOnODH
 
     Set DSC Component Removed State And Wait For Completion
     ...    llamastackoperator

@@ -26,6 +26,8 @@ ${SERVERLESS_OP_NAME}=     serverless-operator
 ${SERVERLESS_SUB_NAME}=    serverless-operator
 ${SERVERLESS_NS}=    openshift-serverless
 ${OPENSHIFT_OPERATORS_NS}=    openshift-operators
+${COMMUNITY_OPERATORS_NS}=    openshift-marketplace
+${COMMUNITY_OPERATORS_CS}=    community-operators
 ${SERVICEMESH_OP_NAME}=     servicemeshoperator
 ${SERVICEMESH_SUB_NAME}=    servicemeshoperator
 ${AUTHORINO_OP_NAME}=     authorino-operator
@@ -71,6 +73,9 @@ ${DSCI_TEMPLATE}=    dsci_template.yml
 ${DSCI_TEMPLATE_RAW}=    dsci_template_raw.yml
 @{RHOAI_DEPENDENCIES}=    Create List
 ${CONFIG_ENV}=    ${EMPTY}
+${NFS_OP_NAME}=    nfs-provisioner-operator
+${NFS_SUB_NAME}=    nfs-provisioner-operator-sub
+${NFS_CHANNEL_NAME}=    alpha
 
 *** Keywords ***
 Install RHODS
@@ -990,4 +995,21 @@ Add UI Admin Group To Dashboard Admin
               ${rc}  ${output}=    Run And Return Rc And Output
               ...    oc patch OdhDashboardConfig odh-dashboard-config -n ${APPLICATIONS_NAMESPACE} --type merge -p '{"spec":{"groupsConfig":{"adminGroups":"odh-admins,odh-ux-admins"}}}'  #robocop: disable
               IF  ${rc} != ${0}     Log    message=Unable to update the admin config   level=WARN
+    END
+
+Install NFS Operator Via Cli
+    [Documentation]    Install NFS Operator Via CLI
+    ${is_installed} =   Check If Operator Is Installed Via CLI   ${NFS_OP_NAME}
+    IF    not ${is_installed}
+          Install ISV Operator From OperatorHub Via CLI    operator_name=${NFS_OP_NAME}
+             ...    subscription_name=${NFS_SUB_NAME}
+             ...    catalog_source_name=${COMMUNITY_OPERATORS_CS}
+          Wait Until Operator Subscription Last Condition Is
+             ...    type=CatalogSourcesUnhealthy    status=False
+             ...    reason=AllCatalogSourcesHealthy    subcription_name=${NFS_SUB_NAME}
+             ...    retry=150
+          Wait For Pods To Be Ready    label_selector=name=nfs-operator
+             ...    namespace=${COMMUNITY_OPERATORS_NS}
+    ELSE
+          Log To Console    message=NFS Operator is already installed
     END

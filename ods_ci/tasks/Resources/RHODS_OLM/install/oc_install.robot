@@ -22,6 +22,7 @@ ${DSCI_NAME} =    default-dsci
 ...    workbenches
 ...    modelregistry
 ...    feastoperator
+...    llamastackoperator
 ${SERVERLESS_OP_NAME}=     serverless-operator
 ${SERVERLESS_SUB_NAME}=    serverless-operator
 ${SERVERLESS_NS}=    openshift-serverless
@@ -262,6 +263,12 @@ Verify RHODS Installation
   IF    "${feastoperator}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app.kubernetes.io/part-of=feastoperator   timeout=400s
+  END
+
+  ${llamastackoperator} =    Is Component Enabled    llamastackoperator    ${DSC_NAME}
+  IF    "${llamastackoperator}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/part-of=llamastackoperator   timeout=400s
   END
 
   ${dashboard} =    Is Component Enabled    dashboard    ${DSC_NAME}

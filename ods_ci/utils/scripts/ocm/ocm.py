@@ -1415,8 +1415,8 @@ if __name__ == "__main__":
         help="Team name",
         action="store",
         dest="team",
+        metavar="",
         default="unknown-team",
-        metavar=""
     )
 
     optional_create_cluster_parser.add_argument(

@@ -122,6 +122,9 @@ Assign Vars According To Product
         ELSE
             Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     rhoai-operator-dev
             Set Suite Variable    ${ADMIN_GROUPS}       rhods-admins', 'rhods-users
+            IF  "${INSTALL_TYPE}" == "OperatorHub"
+                Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     rhods-operator
+            END
         END
         Set Suite Variable  ${MODEL_REGISTRY_NAMESPACE}    rhoai-model-registries
         Set Suite Variable    ${IMAGE_PULL_PATH}        registry.redhat.io

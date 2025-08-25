@@ -1,7 +1,7 @@
 apiVersion: cache.jhouse.com/v1alpha1
 kind: NFSProvisioner
 metadata:
-  name: nfsprovisioner
+  name: ${nfs_provisioner_name}
   namespace: openshift-operators
 spec:
   nfsImageConfiguration:

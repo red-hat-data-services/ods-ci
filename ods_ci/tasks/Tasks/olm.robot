@@ -8,6 +8,7 @@ Suite Teardown    RHOSi Teardown
 
 *** Variables ***
 ${STORAGE_SIZE}=    100G
+${NFS_PROVISIONER_NAME}=    nfs-provisioner
 
 
 *** Tasks ***
@@ -15,5 +16,5 @@ Install NFS Operator
     [Documentation]    Installs and configures the NFS Operator
     [Tags]    nfs-operator-deploy
     Install NFS Operator Via Cli
-    Deploy NFS Provisioner    ${STORAGE_SIZE}
+    Deploy NFS Provisioner    ${STORAGE_SIZE}    ${NFS_PROVISIONER_NAME}
     

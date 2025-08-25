@@ -27,6 +27,8 @@ ${SERVERLESS_OP_NAME}=     serverless-operator
 ${SERVERLESS_SUB_NAME}=    serverless-operator
 ${SERVERLESS_NS}=    openshift-serverless
 ${OPENSHIFT_OPERATORS_NS}=    openshift-operators
+${COMMUNITY_OPERATORS_NS}=    openshift-marketplace
+${COMMUNITY_OPERATORS_CS}=    community-operators
 ${SERVICEMESH_OP_NAME}=     servicemeshoperator
 ${SERVICEMESH_SUB_NAME}=    servicemeshoperator
 ${AUTHORINO_OP_NAME}=     authorino-operator
@@ -72,6 +74,11 @@ ${DSCI_TEMPLATE}=    dsci_template.yml
 ${DSCI_TEMPLATE_RAW}=    dsci_template_raw.yml
 @{RHOAI_DEPENDENCIES}=    Create List
 ${CONFIG_ENV}=    ${EMPTY}
+${NFS_OP_NAME}=    nfs-provisioner-operator
+${NFS_OP_NS}=    openshift-operators
+${NFS_SUB_NAME}=    nfs-provisioner-operator-sub
+${NFS_CHANNEL_NAME}=    alpha
+${RESOURCES_DIRPATH}=    tasks/Resources/Files
 
 *** Keywords ***
 Install RHODS
@@ -998,3 +1005,36 @@ Add UI Admin Group To Dashboard Admin
               ...    oc patch OdhDashboardConfig odh-dashboard-config -n ${APPLICATIONS_NAMESPACE} --type merge -p '{"spec":{"groupsConfig":{"adminGroups":"odh-admins,odh-ux-admins"}}}'  #robocop: disable
               IF  ${rc} != ${0}     Log    message=Unable to update the admin config   level=WARN
     END
+
+Install NFS Operator Via Cli
+    [Documentation]    Install NFS Operator Via CLI
+    ${is_installed} =   Check If Operator Is Installed Via CLI   ${NFS_OP_NAME}
+    IF    not ${is_installed}
+          Install ISV Operator From OperatorHub Via CLI    operator_name=${NFS_OP_NAME}
+             ...    subscription_name=${NFS_SUB_NAME}
+             ...    catalog_source_name=${COMMUNITY_OPERATORS_CS}
+             ...    channel=${NFS_CHANNEL_NAME}
+             ...    namespace=${NFS_OP_NS}
+          Wait Until Operator Subscription Last Condition Is
+             ...    type=CatalogSourcesUnhealthy    status=False
+             ...    reason=AllCatalogSourcesHealthy    subcription_name=${NFS_SUB_NAME}
+             ...    retry=150
+             ...    namespace=${NFS_OP_NS}
+    ELSE
+          Log To Console    message=NFS Operator is already installed
+    END
+
+Deploy NFS Provisioner
+    [Documentation]    Deploy a NFS instance, shared
+    [Arguments]    ${storage_size}    ${nfs_provisioner_name}
+    ${default_sc} =    Get Default Storage Class Name
+    Set Test Variable    ${storage_class}    ${default_sc}
+    Set Test Variable    ${storage_size}
+    Set Test Variable    ${nfs_provisioner_name}
+    Create File From Template    ${RESOURCES_DIRPATH}/nfsprovisioner_template.yaml    ${RESOURCES_DIRPATH}/nfsprovisioner_cr.yaml
+    ${rc}    ${output}=    Run And Return Rc And Output
+    ...    oc apply -f ${RESOURCES_DIRPATH}/nfsprovisioner_cr.yaml
+    Should Be Equal As Integers    ${rc}    0
+    Log    ${output}    console=yes
+    Wait For Pods To Be Ready    label_selector=nfsprovisioner_cr=${nfs_provisioner_name}
+    ...    namespace=${NFS_OP_NS}

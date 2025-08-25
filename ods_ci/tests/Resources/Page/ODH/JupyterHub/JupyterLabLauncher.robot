@@ -341,7 +341,7 @@ Maybe Close Popup
       # Check if a popup exists
       ${accept} =    Get WebElements    xpath://div[contains(concat(' ',normalize-space(@class),' '),' jp-Dialog-footer ')]
       # Click the right most button of the popup
-      IF    ${accept}    Click Element    xpath://div[contains(concat(' ',normalize-space(@class),' '),' jp-Dialog-footer ')]/button[last()]
+      IF    ${accept}    Click Element    xpath://div[contains(concat(' ',normalize-space(@class),' '),' jp-Dialog-footer ')]//button[last()]
       Capture Page Screenshot
     END
 

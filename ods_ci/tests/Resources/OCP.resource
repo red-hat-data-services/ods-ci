@@ -386,7 +386,7 @@ Get Access Token
     RETURN    ${out}
 
 Get Default Storage Class Name
-    [Documentation]    Get the default storage class name
+    [Documentation]    Gets the default storage class name from the cluster
     ${rc}    ${sc}=    Run And Return Rc And Output
     ...    oc get storageclass -ojson | jq '.items[].metadata | select(.annotations."storageclass.kubernetes.io/is-default-class"=="true") | .name' | tr -d '"'
     RETURN    ${sc}

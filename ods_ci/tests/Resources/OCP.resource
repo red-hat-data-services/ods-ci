@@ -384,3 +384,10 @@ Get Access Token
     ${rc}    ${out}=    Run And Return Rc And Output    oc whoami -t
     Should Be Equal As Integers    ${rc}    ${0}    Command 'oc whoami -t' returned non-zero exit code: ${rc}
     RETURN    ${out}
+
+Get Default Storage Class Name
+    [Documentation]    Gets the default storage class name from the cluster
+    ${rc}    ${sc}=    Run And Return Rc And Output
+    ...    oc get storageclass -ojson | jq '.items[].metadata | select(.annotations."storageclass.kubernetes.io/is-default-class"=="true") | .name' | tr -d '"'
+    Should Be Equal As Integers    ${rc}    ${0}
+    RETURN    ${sc}

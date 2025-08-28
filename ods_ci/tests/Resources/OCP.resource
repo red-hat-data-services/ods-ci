@@ -68,7 +68,8 @@ Verify Notebook CR Is Running
     @{cr_obj} =  OpenShiftLibrary.Oc Get  kind=Notebook  name=${cr_name}
     &{cr_obj_dictionary} =  Set Variable  ${cr_obj}[0]
     Should Match  ${cr_obj_dictionary.metadata.name}  ${cr_name}
-    Should Be Equal  ${cr_obj_dictionary.status.conditions[0].type}  Running
+    Should Not Be Empty  ${cr_obj_dictionary.status.containerState.running.startedAt}
+    Should Be Equal  ${cr_obj_dictionary.status.readyReplicas}  ${1}
 
 Is RHODS Self-Managed
     [Documentation]     Returns ${FALSE} if RHODS Managed (i.e., Cloud version) is installed

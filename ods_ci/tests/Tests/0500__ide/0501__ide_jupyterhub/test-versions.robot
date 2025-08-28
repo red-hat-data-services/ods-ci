@@ -18,8 +18,8 @@ Test Tags          JupyterHub
 *** Variables ***
 @{status_list}      # robocop: disable
 &{package_versions}      # robocop: disable
-${JupyterLab_Version}         v4.2
-${JupyterLab-git_Version}     v0.50
+${JupyterLab_Version}         v4.4
+${JupyterLab-git_Version}     v0.51
 
 
 *** Test Cases ***

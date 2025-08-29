@@ -209,7 +209,7 @@ Set Notebook Culler Timeout
     Input Text  //input[@id="minute-input"]  ${minutes}
     Sleep  0.5s
     ${changed_setting} =  Run Keyword And Return Status    Page Should Contain Element
-    ...    xpath://button[.="Save changes"][@aria-disabled="false"]
+    ...    xpath://button[@data-testid="submit-cluster-settings" and not(contains(@class, 'disabled'))]
     IF  ${changed_setting}==True
         Save Changes In Cluster Settings
     END
@@ -239,9 +239,9 @@ Open Dashboard Settings
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
     Sleep  1s
     ${settings_hidden} =  Run Keyword And Return Status  Page Should Contain Element
-    ...    xpath://section[@aria-labelledby="settings"][@hidden=""]
+    ...    xpath://button[string()="Settings"]/../section[@hidden]
     IF  ${settings_hidden}==True
-        Click Element  xpath://button[@id="settings"]
+        Click Element  xpath://button[string()="Settings"]
     END
     Click Element  xpath://a[.="${settings_page}"]
     IF    "${settings_page}" == "Workbench images"

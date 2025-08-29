@@ -300,6 +300,7 @@ Verify RHODS Notebooks Network Policies
     Should Be Equal As Strings    ${policy_oauth}    ${expected_policy_oauth}
     Log    ${policy_oauth}
     Log    ${expected_policy_oauth}
+    [Teardown]    Delete User Notebook CR    ${TEST_USER.USERNAME}
 
 Verify All The Pods Are Using Image Digest Instead Of Tags
     [Documentation]    Verifies that the all the rhods pods are using image digest

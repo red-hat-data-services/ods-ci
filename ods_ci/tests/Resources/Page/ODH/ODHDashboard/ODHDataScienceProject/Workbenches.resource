@@ -381,7 +381,26 @@ Open Workbench
     SeleniumLibrary.Wait Until Page Contains Element    ${open_workbench_link}    timeout=30s
     SeleniumLibrary.Click Link    ${open_workbench_link}
     ${previous_handle}=    SeleniumLibrary.Switch Window    NEW
+
+    # Wait and retry if workbench is not ready yet
+    Wait Until Keyword Succeeds    2 min    5s    Verify Workbench Is Available
+
     RETURN    ${previous_handle}
+
+Verify Workbench Is Available
+    [Documentation]    Verifies that the workbench is available and ready to use.
+    ...                If "Application is not available" is detected, reload the page to retry.
+    ${app_not_available}=    Run Keyword And Return Status
+    ...    SeleniumLibrary.Page Should Contain    Application is not available
+    IF    ${app_not_available}
+        Log    msg=Application is not available, reloading page to retry...    level=INFO
+        SeleniumLibrary.Reload Page
+        # Give the page a moment to load after reload
+        Sleep    2s
+        Fail    msg=Application is not available - page reloaded for retry
+    END
+    # If we reach here, the application is available
+    Log    msg=Workbench application is available and ready    level=INFO
 
 Does Workbench Have A Description
     [Documentation]    Checks if a Workbench has a description in the list view of the project

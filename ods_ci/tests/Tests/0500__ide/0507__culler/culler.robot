@@ -44,6 +44,7 @@ Verify Culler Kills Inactive Server
     [Tags]    Tier2
     ...       ODS-1254
     ...       Execution-Time-Over-15m
+    [Setup]    Graceful Clean Up User Notebook CR    ${TEST_USER.USERNAME}
     Spawn Server And Run Notebook Which Will Not Keep Server Active
     Wait Until Culler Timeout
     Verify That Inactive Server Has Been Culled Within A Specific Window Of Time
@@ -54,6 +55,7 @@ Verify Culler Does Not Kill Active Server
     [Tags]    Tier2
     ...       ODS-1253
     ...       Execution-Time-Over-15m
+    [Setup]    Graceful Clean Up User Notebook CR    ${TEST_USER.USERNAME}
     Spawn Server And Run Notebook To Keep Server Active For More Than 10 Minutes
     Wait Until Culler Timeout Plus A Drift Window Which By Default Equals 12 Minutes
     Check If Server Pod Still Exists
@@ -63,6 +65,7 @@ Verify Do Not Stop Idle Notebooks
     [Tags]    Tier2
     ...       ODS-1230
     ...       Execution-Time-Over-15m
+    [Setup]    Graceful Clean Up User Notebook CR    ${TEST_USER.USERNAME}
     Disable Notebook Culler
     Close Browser
     Spawn Server And Run Notebook Which Will Not Keep Server Active
@@ -129,7 +132,19 @@ Get Notebook Culler Timeout From Culler Pod
 Teardown
     [Documentation]    Teardown for the test
     Disable Notebook Culler
-    Launch JupyterHub Spawner From Dashboard
+    Graceful Clean Up User Notebook CR    ${TEST_USER.USERNAME}
+
+Graceful Clean Up User Notebook CR
+    [Documentation]    Gracefully cleans up user notebook CR
+    [Arguments]    ${username}=${TEST_USER.USERNAME}
+    # Clean up any existing notebook CR for the test user to prevent conflicts
+    TRY
+        Delete User Notebook CR    ${username}
+        Log    Warning: Deleted a Notebook CR for ${username}: this may be a problem in a previous test cleanup!    level=WARN
+    EXCEPT    AS    ${error}
+        # This is expected if the CR doesn't exist, or if the workbench isn't running, so we can ignore it
+        No Operation
+    END
     End Web Test
 
 Spawn Server And Run Notebook To Keep Server Active For More Than 10 Minutes
@@ -176,8 +191,8 @@ Verify That Inactive Server Has Been Culled Within A Specific Window Of Time
     ...    within an acceptable window of time. There are two arguments that can be set:
     ...    acceptable_drift: control the threshold after which the test fails, in seconds
     ...    loop_control: controls for how long the test should keep checking for the presence
-    ...        inactive server. Integer that gets multiplied by 30s.
-    [Arguments]    ${acceptable_drift}=120    ${loop_control}=20
+    ...        inactive server. Integer that gets multiplied by 15s.
+    [Arguments]    ${acceptable_drift}=120    ${loop_control}=40
     ${notebook_pod_name} =  Get User Notebook Pod Name  ${TEST_USER.USERNAME}
     ${culled} =  Set Variable  False
     ${drift} =  Set Variable  ${0}
@@ -187,11 +202,11 @@ Verify That Inactive Server Has Been Culled Within A Specific Window Of Time
         ...    Pods not found in search  OpenShiftLibrary.Search Pods
         ...    ${notebook_pod_name}  namespace=${NOTEBOOKS_NAMESPACE}
         Exit For Loop If  ${culled}==True
-        Sleep  30s
-        ${drift} =  Evaluate  ${drift}+${30}
+        Sleep  15s
+        ${drift} =  Evaluate  ${drift}+${15}
     END
     IF  ${drift}>${acceptable_drift}
-        Fail    Drift was over ${acceptable_drift} seconds, it was ${drift} seconds
+        Fail    Drift was ${drift} seconds which is more than acceptable drift of ${acceptable_drift} seconds
     END
 
 Wait Until Culler Timeout

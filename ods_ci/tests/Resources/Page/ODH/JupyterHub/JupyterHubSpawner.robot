@@ -198,12 +198,6 @@ Spawn Notebook
     ...    If ${expect_autoscaling} is set to ${True} also expects a "TriggeredScaleUp" message in the
     ...    spawn modal.
     [Arguments]  ${spawner_timeout}=600 seconds  ${same_tab}=${True}  ${expect_autoscaling}=${False}
-    # TODO: Make sure server spawns in same tab in 1.17+
-    # Currently no way to know if option already selected or not
-    #${version-check}=   Is RHODS Version Greater Or Equal Than  1.17.0
-    #IF  ${version-check}==True
-    #    Click Element  xpath://input[@id="checkbox-notebook-browser-tab-preference"]
-    #END
     Click Button  Start workbench
     # Waiting for 60 seconds, since a long wait seems to redirect the user to the control panel
     # if the spawn was successful
@@ -270,6 +264,8 @@ Spawn Notebook
         Click Button    Open in new tab
         Switch Window    NEW
     END
+    # Wait and retry if workbench is not ready yet
+    Wait Until Keyword Succeeds    2 min    5s    Verify Workbench Is Available
 
 Has Spawn Failed
     [Documentation]    Checks if spawning the image has failed

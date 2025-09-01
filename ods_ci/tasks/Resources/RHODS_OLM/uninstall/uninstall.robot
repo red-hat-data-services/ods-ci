@@ -17,6 +17,18 @@ ${CERT_MANAGER_NS}=    cert-manager-operator
 
 *** Keywords ***
 Uninstalling RHODS Operator
+  IF  "${cluster_type}" == "selfmanaged"
+      Set Global Variable    ${CATALOG_NAME}    rhoai-catalog-dev
+  ELSE IF  "${cluster_type}" == "managed"
+      Set Global Variable    ${CATALOG_NAME}     addon-managed-odh-catalog
+      #For managed cluster
+      IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
+           Set Global Variable    ${CATALOG_NAME}    rhoai-catalog-dev
+      END
+  ELSE
+      FAIL    Provided test environment and install type ${INSTALL_TYPE} ${UPDATE_CHANNEL} ${cluster_type} combination
+      ...     is not supported
+  END
   Run Keywords
   ...  Log  Uninstalling RHODS operator in ${cluster_type}  console=yes  AND
   ...  Uninstall RHODS

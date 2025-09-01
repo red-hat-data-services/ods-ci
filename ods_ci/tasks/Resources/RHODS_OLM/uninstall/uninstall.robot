@@ -31,9 +31,12 @@ Uninstall RHODS
   END
 
 Uninstall RHODS In OSD
+  [Documentation]   UnInstall rhods on managed cluster using cli
   Clone OLM Install Repo
-  ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${OLM_DIR} && ./cleanup.sh -t addon   #robocop:disable
-  Should Be Equal As Integers  ${return_code}   0   msg=Error detected while un-installing RHODS
+  ${return_code}    Run and Watch Command
+  ...    cd ${EXECDIR}/${OLM_DIR} && ./cleanup.sh -t addon -a "authorino serverless servicemesh clusterobservability tempo opentelemetry kueue certmanager cma"
+  ...    timeout=10 min
+  Should Be Equal As Integers  ${return_code}   0   msg=Error detected while un-installing ODH/RHOAI
   Log To Console   ${output}
 
 Uninstall RHODS In Self Managed Cluster
@@ -51,12 +54,13 @@ RHODS Operator Should Be Uninstalled
   Log  RHODS has been uninstalled  console=yes
 
 Uninstall RHODS In Self Managed Cluster Using CLI
-  [Documentation]   UnInstall rhods on self-managedcluster using cli
+  [Documentation]   UnInstall rhods on self-managed cluster using cli
   Clone OLM Install Repo
   ${return_code}    Run and Watch Command
   ...    cd ${EXECDIR}/${OLM_DIR} && ./cleanup.sh -t operator -a "authorino serverless servicemesh clusterobservability tempo opentelemetry kueue certmanager cma"
   ...    timeout=10 min
-  Should Be Equal As Integers  ${return_code}   0   msg=Error detected while un-installing RHODS
+  Should Be Equal As Integers  ${return_code}   0   msg=Error detected while un-installing ODH/RHOAI
+  Log To Console   ${output}
 
 Uninstall RHODS In Self Managed Cluster For Operatorhub
   [Documentation]   Uninstall rhods on self-managed cluster for operatorhub installtion

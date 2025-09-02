@@ -91,7 +91,7 @@ Run Kuberay E2E Test
     ...    env:KUBERAY_TEST_TIMEOUT_SHORT=2m
     ...    env:KUBERAY_TEST_TIMEOUT_MEDIUM=10m
     ...    env:KUBERAY_TEST_TIMEOUT_LONG=12m
-    ...    env:KUBERAY_TEST_RAY_IMAGE=${RAY_CUDA_IMAGE_3.11}
+    ...    env:KUBERAY_TEST_RAY_IMAGE=${RAY_CUDA_IMAGE_3.12}
     ...    env:KUBERAY_TEST_OUTPUT_DIR=%{WORKSPACE}/kuberay-logs
     ...    shell=true
     ...    stderr=STDOUT

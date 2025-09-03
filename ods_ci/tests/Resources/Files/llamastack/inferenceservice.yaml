@@ -1,0 +1,123 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  annotations:
+    opendatahub.io/hardware-profile-namespace: redhat-ods-applications
+    opendatahub.io/legacy-hardware-profile-name: migrated-gpu-mglzi-serving
+    openshift.io/display-name: lllama-3-2-3b-instruct
+    serving.kserve.io/deploymentMode: RawDeployment
+  name: llama-3-2-3b-instruct
+  generation: 1
+  managedFields:
+    - apiVersion: serving.kserve.io/v1beta1
+      fieldsType: FieldsV1
+      fieldsV1:
+        'f:spec':
+          'f:predictor':
+            'f:model':
+              'f:env': {}
+      manager: unknown
+      operation: Update
+    - apiVersion: serving.kserve.io/v1beta1
+      fieldsType: FieldsV1
+      fieldsV1:
+        'f:metadata':
+          'f:annotations':
+            .: {}
+            'f:opendatahub.io/hardware-profile-namespace': {}
+            'f:opendatahub.io/legacy-hardware-profile-name': {}
+            'f:openshift.io/display-name': {}
+            'f:serving.kserve.io/deploymentMode': {}
+          'f:finalizers':
+            .: {}
+            'v:"inferenceservice.finalizers"': {}
+            'v:"odh.inferenceservice.finalizers"': {}
+          'f:labels':
+            .: {}
+            'f:opendatahub.io/dashboard': {}
+        'f:spec':
+          .: {}
+          'f:predictor':
+            .: {}
+            'f:automountServiceAccountToken': {}
+            'f:maxReplicas': {}
+            'f:minReplicas': {}
+            'f:model':
+              .: {}
+              'f:args': {}
+              'f:modelFormat':
+                .: {}
+                'f:name': {}
+              'f:name': {}
+              'f:resources':
+                .: {}
+                'f:limits':
+                  .: {}
+                  'f:cpu': {}
+                  'f:memory': {}
+                  'f:nvidia.com/gpu': {}
+                'f:requests':
+                  .: {}
+                  'f:cpu': {}
+                  'f:memory': {}
+                  'f:nvidia.com/gpu': {}
+              'f:runtime': {}
+              'f:storageUri': {}
+      manager: Mozilla
+      operation: Update
+    - apiVersion: serving.kserve.io/v1beta1
+      fieldsType: FieldsV1
+      fieldsV1:
+        'f:status':
+          .: {}
+          'f:address':
+            .: {}
+            'f:url': {}
+          'f:components':
+            .: {}
+            'f:predictor': {}
+          'f:conditions': {}
+          'f:deploymentMode': {}
+          'f:modelStatus':
+            .: {}
+            'f:states':
+              .: {}
+              'f:activeModelState': {}
+              'f:targetModelState': {}
+            'f:transitionStatus': {}
+          'f:observedGeneration': {}
+          'f:url': {}
+      manager: manager
+      operation: Update
+      subresource: status
+  namespace: llamastack
+  labels:
+    opendatahub.io/dashboard: 'true'
+spec:
+  predictor:
+    automountServiceAccountToken: false
+    maxReplicas: 1
+    minReplicas: 1
+    model:
+      args:
+        - '--dtype=half'
+        - '--max-model-len=20000'
+        - '--gpu-memory-utilization=0.95'
+        - '--enable-chunked-prefill'
+        - '--enable-auto-tool-choice'
+        - '--tool-call-parser=llama3_json'
+        - '--chat-template=/app/data/template/tool_chat_template_llama3.2_json.jinja'
+      modelFormat:
+        name: vLLM
+      name: ''
+      resources:
+        limits:
+          cpu: '1'
+          memory: 10Gi
+          nvidia.com/gpu: '1'
+        requests:
+          cpu: '1'
+          memory: 10Gi
+          nvidia.com/gpu: '1'
+      runtime: llama-32-3b-instruct
+      storageUri: 'oci://quay.io/redhat-ai-services/modelcar-catalog:llama-3.2-3b-instruct'

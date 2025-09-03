@@ -13,7 +13,6 @@ metadata:
     - manager: unknown
       operation: Update
       apiVersion: v1
-      time: '2025-09-03T12:43:40Z'
       fieldsType: FieldsV1
       fieldsV1:
         'f:data':

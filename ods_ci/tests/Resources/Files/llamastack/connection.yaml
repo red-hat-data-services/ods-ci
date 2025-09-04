@@ -7,27 +7,9 @@ metadata:
     opendatahub.io/dashboard: 'true'
   annotations:
     opendatahub.io/connection-type-ref: uri-v1
-    openshift.io/description: ''
-    openshift.io/display-name: llama-3.2-3b-instruct
-  managedFields:
-    - manager: unknown
-      operation: Update
-      apiVersion: v1
-      fieldsType: FieldsV1
-      fieldsV1:
-        'f:data':
-          .: {}
-          'f:URI': {}
-        'f:metadata':
-          'f:annotations':
-            .: {}
-            'f:opendatahub.io/connection-type-ref': {}
-            'f:openshift.io/description': {}
-            'f:openshift.io/display-name': {}
-          'f:labels':
-            .: {}
-            'f:opendatahub.io/dashboard': {}
-        'f:type': {}
-data:
-  URI: b2NpOi8vcXVheS5pby9yZWRoYXQtYWktc2VydmljZXMvbW9kZWxjYXItY2F0YWxvZzpsbGFtYS0zLjItM2ItaW5zdHJ1Y3Q=
+    openshift.io/description: 'Connection to Llama 3.2 3B instruct model from Red Hat AI Services model catalog for AI/ML workloads and inference tasks'
+    openshift.io/display-name: llama-3-2-3b-instruct
+stringData:
+  URI: oci://quay.io/redhat-ai-services/modelcar-catalog:llama-3.2-3b-instruct
 type: Opaque
+immutable: true

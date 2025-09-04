@@ -8,51 +8,9 @@ metadata:
     opendatahub.io/accelerator-name: migrated-gpu
     openshift.io/display-name: llama-32-3b-instruct
     opendatahub.io/template-display-name: vLLM NVIDIA GPU ServingRuntime for KServe
-    kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"serving.kserve.io/v1alpha1","kind":"ServingRuntime","metadata":{"annotations":{"opendatahub.io/accelerator-name":"","opendatahub.io/apiProtocol":"REST","opendatahub.io/recommended-accelerators":"[\"nvidia.com/gpu\"]","opendatahub.io/runtime-version":"v0.9.2.1","opendatahub.io/serving-runtime-scope":"global","opendatahub.io/template-display-name":"vLLM NVIDIA GPU ServingRuntime for KServe","opendatahub.io/template-name":"vllm-cuda-runtime","openshift.io/display-name":"llama-32-3b-instruct"},"generation":1,"labels":{"opendatahub.io/dashboard":"true"},"managedFields":[{"apiVersion":"serving.kserve.io/v1alpha1","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:annotations":{".":{},"f:opendatahub.io/accelerator-name":{},"f:opendatahub.io/apiProtocol":{},"f:opendatahub.io/recommended-accelerators":{},"f:opendatahub.io/runtime-version":{},"f:opendatahub.io/serving-runtime-scope":{},"f:opendatahub.io/template-display-name":{},"f:opendatahub.io/template-name":{},"f:openshift.io/display-name":{}},"f:labels":{".":{},"f:opendatahub.io/dashboard":{}}},"f:spec":{".":{},"f:annotations":{".":{},"f:prometheus.io/path":{},"f:prometheus.io/port":{}},"f:containers":{},"f:multiModel":{},"f:supportedModelFormats":{},"f:volumes":{}}},"manager":"unknown","operation":"Update"}],"name":"llama-32-3b-instruct","namespace":"llamastack","resourceVersion":"5534790"},"spec":{"annotations":{"prometheus.io/path":"/metrics","prometheus.io/port":"8080"},"containers":[{"args":["--port=8080","--model=/mnt/models","--served-model-name={{.Name}}"],"command":["python","-m","vllm.entrypoints.openai.api_server"],"env":[{"name":"HF_HOME","value":"/tmp/hf_home"}],"image":"quay.io/modh/vllm@sha256:db766445a1e3455e1bf7d16b008f8946fcbe9f277377af7abb81ae358805e7e2","name":"kserve-container","ports":[{"containerPort":8080,"protocol":"TCP"}],"volumeMounts":[{"mountPath":"/dev/shm","name":"shm"}]}],"multiModel":false,"supportedModelFormats":[{"autoSelect":true,"name":"vLLM"}],"volumes":[{"emptyDir":{"medium":"Memory","sizeLimit":"2Gi"},"name":"shm"}]}}
     opendatahub.io/recommended-accelerators: '["nvidia.com/gpu"]'
     opendatahub.io/apiProtocol: REST
-  resourceVersion: '5579092'
   name: llama-32-3b-instruct
-  generation: 1
-  managedFields:
-    - apiVersion: serving.kserve.io/v1alpha1
-      fieldsType: FieldsV1
-      fieldsV1:
-        'f:metadata':
-          'f:annotations':
-            'f:opendatahub.io/template-display-name': {}
-            'f:opendatahub.io/recommended-accelerators': {}
-            'f:kubectl.kubernetes.io/last-applied-configuration': {}
-            'f:opendatahub.io/apiProtocol': {}
-            .: {}
-            'f:openshift.io/display-name': {}
-            'f:opendatahub.io/template-name': {}
-            'f:opendatahub.io/serving-runtime-scope': {}
-            'f:opendatahub.io/runtime-version': {}
-          'f:labels':
-            .: {}
-            'f:opendatahub.io/dashboard': {}
-        'f:spec':
-          .: {}
-          'f:annotations':
-            .: {}
-            'f:prometheus.io/path': {}
-            'f:prometheus.io/port': {}
-          'f:containers': {}
-          'f:multiModel': {}
-          'f:supportedModelFormats': {}
-          'f:volumes': {}
-      manager: kubectl-client-side-apply
-      operation: Update
-    - apiVersion: serving.kserve.io/v1alpha1
-      fieldsType: FieldsV1
-      fieldsV1:
-        'f:metadata':
-          'f:annotations':
-            'f:opendatahub.io/accelerator-name': {}
-      manager: unknown
-      operation: Update
   namespace: llamastack
   labels:
     opendatahub.io/dashboard: 'true'
@@ -64,7 +22,7 @@ spec:
     - args:
         - '--port=8080'
         - '--model=/mnt/models'
-        - '--served-model-name={{.Name}}'
+        - '--served-model-name=llama-3-2-3b-instruct'
       command:
         - python
         - '-m'
@@ -80,6 +38,18 @@ spec:
       volumeMounts:
         - mountPath: /dev/shm
           name: shm
+      resources:
+        requests:
+          nvidia.com/gpu: 1
+          cpu: "2"
+          memory: 8Gi
+        limits:
+          nvidia.com/gpu: 1
+          cpu: "4"
+          memory: 16Gi
+      securityContext:
+        allowPrivilegeEscalation: false
+        runAsNonRoot: true
   multiModel: false
   supportedModelFormats:
     - autoSelect: true

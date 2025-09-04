@@ -1,0 +1,33 @@
+# This is a basic workflow that is manually triggered
+
+name: Self hosted runners
+
+# Controls when the action will run. Workflow runs when manually triggered using the UI
+# or API.
+on:
+  workflow_dispatch:
+    # Inputs the workflow accepts.
+    inputs:
+      name:
+        # Friendly description to be shown in the UI instead of 'name'
+        description: 'Person to greet'
+        # Default value if no value is explicitly provided
+        default: 'World'
+        # Input has to be provided for the workflow to run
+        required: true
+        # The data type of the input
+        type: string
+
+jobs:
+  build:
+    runs-on: [self-hosted, fedora-vm-01]  # must match your runner labels
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show system info
+        run: |
+          cat /etc/os-release
+          uname -a
+      - name: Build
+        run: |
+          make build
+

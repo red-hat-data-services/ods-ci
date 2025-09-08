@@ -40,7 +40,7 @@ Verify RHODS Operator Logs After Restart
    ${entry_msg}      Remove Duplicates      ${match_list}
    ${length}         Get Length   ${entry_msg}
    #Verify if captured logs has any error entry if yes fail the TC
-   IF   ${length} != ${0}    FAIL    There are some error entry present in opeartor logs '${entry_msg}'
+   IF   ${length} != ${0}    FAIL    There are some error entry present in operator logs '${entry_msg}'
    ...       ELSE   Log   Operator log looks clean
 
 

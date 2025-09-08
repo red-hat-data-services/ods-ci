@@ -40,6 +40,8 @@ Validate Service Mesh State Unmanaged
     [Tags]    Operator    Tier1    ODS-2526    ServiceMesh-Unmanaged
 
     Set Service Mesh Management State    Unmanaged    ${OPERATOR_NS}
+    #Adding this minor timeout to avoid race condition where the SMCP is recreated
+    Sleep     15s
     Delete Service Mesh Control Plane    ${SERVICE_MESH_CR_NS}
     Wait Until Keyword Succeeds    5 min    0 sec
     ...    Is Resource Present    ServiceMeshControlPlane    ${SERVICE_MESH_CR_NAME}     ${SERVICE_MESH_CR_NS}    ${IS_NOT_PRESENT}

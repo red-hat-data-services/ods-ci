@@ -179,7 +179,7 @@ Get RHODS Version
             ${RHODS_VERSION}=  Run  oc get csv -n ${OPERATOR_NAMESPACE} | grep "opendatahub" | awk -F ' {2,}' '{print $3}'
         END
     END
-    Log  Product:${PRODUCT} Version:${RHODS_VERSION}
+    Log    Product:${PRODUCT} Version:${RHODS_VERSION}    console=yes
     RETURN  ${RHODS_VERSION}
 
 #robocop: disable: line-too-long
@@ -196,20 +196,6 @@ Get CodeFlare Version
     END
     Log  Product:${PRODUCT} CodeFlare Version:${CODEFLARE_VERSION}
     RETURN  ${CODEFLARE_VERSION}
-
-#robocop: disable: line-too-long
-Wait Until Csv Is Ready
-  [Documentation]   Waits ${timeout} for Operators CSV '${display_name}' to have status phase 'Succeeded'
-  [Arguments]    ${display_name}    ${timeout}=10m    ${operators_namespace}=openshift-operators
-  Log    Waiting ${timeout} for Operator CSV '${display_name}' in ${operators_namespace} to have status phase 'Succeeded'    console=yes
-  WHILE   True    limit=${timeout}
-  ...    on_limit_message=${timeout} Timeout exceeded waiting for CSV '${display_name}' to be created
-    ${csv_created}=    Run Process    oc get csv --no-headers -n ${operators_namespace} | awk '/${display_name}/ {print \$1}'    shell=yes
-    IF    "${csv_created.stdout}" == "${EMPTY}"    CONTINUE
-    ${csv_ready}=    Run Process
-    ...    oc wait --timeout\=${timeout} --for jsonpath\='{.status.phase}'\=Succeeded csv -n ${operators_namespace} ${csv_created.stdout}    shell=yes
-    IF    ${csv_ready.rc} == ${0}    BREAK
-  END
 
 Get Cluster ID
     [Documentation]     Retrieves the ID of the currently connected cluster
@@ -327,6 +313,17 @@ Skip If RHODS Is Managed
     ELSE
        Skip If    condition=${is_self_managed}==False    msg=This test is skipped for Managed RHODS
     END
+
+Skip If RHODS Is Self-Managed And New Observability Stack Is Disabled
+    [Documentation]    Skips test if RHODS is installed as Self-managed and ${ENABLE_NEW_OBSERVABILITY_STACK} == false
+    [Arguments]    ${msg}=${EMPTY}
+    ${is_self_managed}=    Is RHODS Self-Managed
+    ${enable_new_observability_stack} =    Is New Observability Stack Enabled
+    Set Local Variable    ${message}    This test is skipped for Self-managed RHODS and New Observability Stack disabled
+    IF    "${msg}" != "${EMPTY}"
+       Set Local Variable    ${message}    ${msg}
+    END
+    Skip If    condition=${is_self_managed} and not ${enable_new_observability_stack}    msg=${message}
 
 Skip If Namespace Does Not Exist
     [Documentation]    Skips test if ${namespace} does not exist in the cluster
@@ -629,3 +626,12 @@ Delete All ${resource_type} In Namespace By Name
     ${result} =    Run Process    ${list_resources} | ${xargs_patch} && ${list_resources} | ${xargs_delete}
     ...    shell=true    stderr=STDOUT
     Log    ${result.stdout}    console=yes
+
+Is New Observability Stack Enabled
+    [Documentation]    Checks whether new observability stack is enabled, controlled by ENABLE_NEW_OBSERVABILITY_STACK test variable.
+    ...    Returns ${TRUE} if new observability stack is enabled by the variable, i.e. ENABLE_NEW_OBSERVABILITY_STACK
+    ...    has a value which can be converted to boolean True (True|true|"True"|"true")
+    ...    Returns ${FALSE} otherwise, i.e. the variable is not defined or has a false value
+    ${enable_new_observability_stack} =    Get Variable Value    ${ENABLE_NEW_OBSERVABILITY_STACK}    false
+    ${enable_new_observability_stack} =    Convert To Boolean    ${enable_new_observability_stack}
+    RETURN    ${enable_new_observability_stack}

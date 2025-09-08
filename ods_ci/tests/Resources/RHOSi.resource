@@ -58,7 +58,7 @@ RHOSi Setup
     Protect Sensitive Variables In Keywords
     Required Global Variables Should Exist
     Initialize Global Variables
-    Run Keyword If RHODS Is Managed
+    Run Keyword If RHODS Is Managed     # TODO Observability: Adapt test when only new monitoring stack is supported
     ...    Suite Availability Setup    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}
 
 RHOSi Teardown
@@ -66,7 +66,7 @@ RHOSi Teardown
     ...                stored at RHOSi setup
     ...                The suggested usage of this keyword is to call it inside all the Suite Teardown keywords.
     ...                Do Not extend this keyword for high-level setup, e.g., don't close browser
-    Run Keyword If RHODS Is Managed
+    Run Keyword If RHODS Is Managed     # TODO Observability: Adapt test when only new monitoring stack is supported
     ...    Suite Availability Teardown    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}
 
 Protect Sensitive Variables In Keywords
@@ -122,6 +122,9 @@ Assign Vars According To Product
         ELSE
             Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     rhoai-operator-dev
             Set Suite Variable    ${ADMIN_GROUPS}       rhods-admins', 'rhods-users
+            IF  "${INSTALL_TYPE}" == "OperatorHub"
+                Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     rhods-operator
+            END
         END
         Set Suite Variable  ${MODEL_REGISTRY_NAMESPACE}    rhoai-model-registries
         Set Suite Variable    ${IMAGE_PULL_PATH}        registry.redhat.io

@@ -34,7 +34,8 @@ PagerDuty Dummy Secret Verification
      ...     RHOAIENG-13069
      ...     Deployment-Cli
      ...     Monitoring
-     Skip If RHODS Is Self-Managed
+     Skip If RHODS Is Self-Managed    # TODO Observability: We don't reconfigure new stack alertmanager yet
+                                      # PagerDuty will likely be just on a managed cluster
      ${service_key}   Get PagerDuty Key From Alertmanager ConfigMap
      ${secret_key}    Get PagerDuty Key From Secrets
      Should Be Equal As Strings    ${service_key}   ${secret_key}   foo-bar
@@ -45,7 +46,8 @@ Verify DeadManSnitch configuration
     ...      ODS-648
     ...      RHOAIENG-13268
     ...      Monitoring
-    Skip If RHODS Is Self-Managed
+    Skip If RHODS Is Self-Managed    # TODO Observability: We don't reconfigure new stack alertmanager yet
+                                     # DeadManSnitch will likely be just on a managed cluster
     ${rc}    Run And Return Rc
     ...    oc get secret redhat-rhods-deadmanssnitch -n ${MONITORING_NAMESPACE}
     Should Be Equal As Integers    ${rc}    0

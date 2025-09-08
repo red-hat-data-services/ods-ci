@@ -48,6 +48,10 @@ Install ISV Operator From OperatorHub Via CLI    # robocop: disable
     IF  "${operator_name}" == "openshift-custom-metrics-autoscaler-operator"
         ${operator_name}=    Set Variable    custom-metrics-autoscaler
     END
+    # TODO: Remove this once the operator_name will be openshift-cert-manager-operator
+    IF  "${operator_name}" == "openshift-cert-manager-operator"
+        ${operator_name}=    Set Variable    cert-manager-operator
+    END
     Wait For Installplan And Approve It    ${namespace}    ${operator_name}    ${subscription_name}
     Wait Until Keyword Succeeds    1 min    0 sec
     ...    Is Resource Present    Subscription    ${subscription_name}     ${namespace}    ${IS_PRESENT}

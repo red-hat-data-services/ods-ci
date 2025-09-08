@@ -51,7 +51,7 @@ Test Metric "Rhods_Total_Users" On Cluster Monitoring Prometheus
     ...       ODS-634
     ...       Tier1
     ...       Monitoring
-    Skip If RHODS Is Self-Managed
+    Skip If RHODS Is Self-Managed   # TODO Observability: We don't propagate data yet from new stack
     ${value} =    Run OpenShift Metrics Query    query=rhods_total_users   username=${OCP_ADMIN_USER.USERNAME}   password=${OCP_ADMIN_USER.PASSWORD}
     ...    auth_type=${OCP_ADMIN_USER.AUTH_TYPE}
     ${value_from_promothues} =    Fire Query On RHODS Prometheus And Return Value    query=rhods_total_users
@@ -65,7 +65,7 @@ Test Metric "Rhods_Aggregate_Availability" On Cluster Monitoring Prometheus
     ...       ODS-637
     ...       Tier1
     ...       Monitoring
-    Skip If RHODS Is Self-Managed
+    Skip If RHODS Is Self-Managed   # TODO Observability: We don't propagate data yet from new stack
 
     ${value_openshift_observe} =    Run OpenShift Metrics Query
     ...    query=rhods_aggregate_availability   username=${OCP_ADMIN_USER.USERNAME}   password=${OCP_ADMIN_USER.PASSWORD}

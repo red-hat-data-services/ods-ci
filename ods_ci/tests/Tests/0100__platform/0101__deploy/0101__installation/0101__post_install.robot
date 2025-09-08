@@ -86,7 +86,8 @@ Verify That Prometheus Image Is A CPaaS Built Image
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-734
-    Skip If RHODS Is Self-Managed
+    Skip If RHODS Is Self-Managed    # TODO Observability: Test can be removed once we fully onboard on the new stack.
+                                     # Observability operator deploys Prometheus for us.
     Wait For Pods To Be Ready    label_selector=deployment=prometheus
     ...    namespace=${MONITORING_NAMESPACE}    timeout=60s
     ${pod} =    Find First Pod By Name    namespace=${MONITORING_NAMESPACE}    pod_regex=prometheus-
@@ -100,7 +101,7 @@ Verify That Blackbox-exporter Image Is A CPaaS Built Image
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-735
-    Skip If RHODS Is Self-Managed
+    Skip If RHODS Is Self-Managed    # TODO Observability: We don't deploy blackbox-exporter yet on self-managed
     Wait For Pods To Be Ready    label_selector=deployment=blackbox-exporter
     ...    namespace=${MONITORING_NAMESPACE}    timeout=60s
     ${pod} =    Find First Pod By Name    namespace=${MONITORING_NAMESPACE}    pod_regex=blackbox-exporter-
@@ -112,7 +113,8 @@ Verify That Alert Manager Image Is A CPaaS Built Image
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-733
-    Skip If RHODS Is Self-Managed
+    Skip If RHODS Is Self-Managed    # TODO Observability: Test can be removed once we fully onboard on the new stack.
+                                     # Observability operator deploys alertmanager for us.
     Wait For Pods To Be Ready    label_selector=deployment=prometheus
     ...    namespace=${MONITORING_NAMESPACE}    timeout=60s
     ${pod} =    Find First Pod By Name    namespace=${MONITORING_NAMESPACE}    pod_regex=prometheus-
@@ -152,7 +154,8 @@ Verify That Blackbox-exporter Is Protected With Auth-proxy
     ...     Tier1
     ...     ODS-1090
 
-    Skip If RHODS Is Self-Managed
+    Skip If RHODS Is Self-Managed    # TODO Observability: We don't deploy blackbox-exporter yet on self-managed
+                                     # Oauth Proxy won't be used in new monitoring stack, it will be kube-rbac-proxy
 
     Verify BlackboxExporter Includes Oauth Proxy
 
@@ -205,7 +208,8 @@ Verify Users Can Update Notification Email After Installing RHODS With The AddOn
     ...       Deployment-AddOnFlow
     ...       Monitoring
     ...       AutomationBug  # currently broken on fake addon installs
-    Skip If RHODS Is Self-Managed
+    Skip If RHODS Is Self-Managed    # TODO Observability: We don't reconfigure new stack alertmanager yet
+                                     # Only applicable to managed clusters
     ${email_to_change} =    Set Variable    dummyemail1@redhat.com
     ${cluster_name} =    Common.Get Cluster Name From Console URL
     ${current_email} =    Get Notification Email From Addon-Managed-Odh-Parameters Secret
@@ -240,7 +244,8 @@ Verify Monitoring Stack Is Reconciled Without Restarting The ODS Operator
     ...       ODS-699
     ...       Monitoring
     ...       Execution-Time-Over-15m
-    Skip If RHODS Is Self-Managed
+    Skip If RHODS Is Self-Managed    # TODO Observability: Likely needs to be revisited if it makes sense. Probably we
+                                     # can change MonitoringStack/Otel collector and see if it reconciles back
     Replace "Prometheus" With "Grafana" In Rhods-Monitor-Federation
     Wait Until Operator Reverts "Grafana" To "Prometheus" In Rhods-Monitor-Federation
 
@@ -339,7 +344,7 @@ Verify No Alerts Are Firing After Installation Except For DeadManSnitch    # rob
     ...       RHOAIENG-13079
     #...       Monitoring - just for tracking purposes but commented to not run the same test many times
     ...       Operator
-    Skip If RHODS Is Self-Managed
+    Skip If RHODS Is Self-Managed And New Observability Stack Is Disabled    # TODO Observability: We don't configure alerts yet with new observability stack, so may likely fail
     # If these numbers change, add also alert-specific tests
     # Need to wait to stabilize alerts after installation
     Run Keyword And Continue On Failure

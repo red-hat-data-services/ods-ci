@@ -105,8 +105,8 @@ Install RHODS
       Append To List     ${RHOAI_DEPENDENCIES}     serverless
   END
   Install Rhoai Dependencies
-  ${enable_new_observability_stack} =    Get Variable Value    ${ENABLE_NEW_OBSERVABILITY_STACK}    true
-  IF    "${enable_new_observability_stack}" == "true"
+  ${enable_new_observability_stack} =    Is New Observability Stack Enabled
+  IF    ${enable_new_observability_stack}
           Install Observability Dependencies
   END
   Clone OLM Install Repo
@@ -201,8 +201,8 @@ Verify RHODS Installation
             # the monitoring info in case the new obs stack flag is enabled
             Wait Until Keyword Succeeds    5 min    0 sec
             ...        Run And Return Rc      oc get DSCInitialization ${DSCI_NAME}
-            ${ENABLE_NEW_OBSERVABILITY_STACK} =    Get Variable Value    ${ENABLE_NEW_OBSERVABILITY_STACK}    true
-            IF    "${ENABLE_NEW_OBSERVABILITY_STACK}" == "true"
+            ${enable_new_observability_stack} =    Is New Observability Stack Enabled
+            IF    ${enable_new_observability_stack}
                     Patch DSCInitialization With Monitoring Info
             END
        END
@@ -382,12 +382,12 @@ Wait For Pods Numbers
 Apply DSCInitialization CustomResource
     [Documentation]
     [Arguments]        ${dsci_name}=${DSCI_NAME}    ${dsci_template}=${DSCI_TEMPLATE}
-    ${ENABLE_NEW_OBSERVABILITY_STACK} =    Get Variable Value    ${ENABLE_NEW_OBSERVABILITY_STACK}    true
+    ${enable_new_observability_stack} =    Is New Observability Stack Enabled
     ${return_code}    ${output} =    Run And Return Rc And Output    oc get DSCInitialization --output json | jq -j '.items | length'
     Log To Console    output : ${output}, return_code : ${return_code}
     IF  ${output} != 0
         Log to Console    Skip creation of DSCInitialization because its already created by the operator
-        IF    "${ENABLE_NEW_OBSERVABILITY_STACK}" == "true"
+        IF    ${enable_new_observability_stack}
                 Patch DSCInitialization With Monitoring Info
         END
         RETURN
@@ -404,7 +404,7 @@ Apply DSCInitialization CustomResource
     Log To Console    ${output}
     Should Be Equal As Integers  ${return_code}  0  msg=Error detected while applying DSCI CR
     Remove File    ${file_path}dsci_apply.yml
-    IF    "${ENABLE_NEW_OBSERVABILITY_STACK}" == "true"
+    IF    ${enable_new_observability_stack}
                 Patch DSCInitialization With Monitoring Info
     END
 

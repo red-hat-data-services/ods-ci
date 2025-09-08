@@ -361,11 +361,15 @@ Wait Until Csv Is Ready
   END
 
 Search Install Plan
-    [Documentation]    Search for an install plan by CSV name and namespace
-    [Arguments]    ${csv_name}    ${namespace}
+    [Documentation]    Search for an install plan by CSV name and namespace and waits for its information to be available in the sub CR     #robocop:disable
+    [Arguments]    ${csv_name}    ${sub_name}    ${namespace}
     ${rc}  ${out}=    Run and Return Rc and Output      oc get installplan -n ${namespace} -ojson | jq '.items[].spec.clusterServiceVersionNames[] | select(. | contains("${csv_name}"))'
     Log    Waiting for Search Install Plan : ${csv_name} in ${namespace}    console=yes
     Should Not Be Empty    ${out}
+    ${rc}  ${out}=    Run and Return Rc and Output      oc get subscription ${sub_name} -n ${namespace} -o json | jq '.status.installplan.name'
+    Log    Waiting for Install Plan being available in the Subscription CR : ${sub_name} in ${namespace}    console=yes
+    Should Not Be Empty    ${out}
+    Should Not Be Equal  ${out}  null
 
 Wait For Installplan And Approve It
     [Documentation]    In case of Manual installplan approval, wait for the operator's installplan to appear
@@ -373,7 +377,7 @@ Wait For Installplan And Approve It
     [Arguments]    ${namespace}    ${operator_name}     ${subscription_name}    ${operator_version}=${EMPTY}
     ${csv}=    Evaluate    '${operator_name}.${operator_version}' if '${operator_version}' else '${operator_name}'
     Log    The csv is: ${csv}, operator_version: ${operator_version}, operator_name: ${operator_name}, subscription_name: ${subscription_name}    console=yes    #robocop:disable
-    Wait Until Keyword Succeeds    10m    5s    Search Install Plan    ${csv}    ${namespace}
+    Wait Until Keyword Succeeds    10m    5s    Search Install Plan    ${csv}    ${subscription_name}    ${namespace}
     ${installplan_name}=    Run   oc get subscription ${subscription_name} -n ${namespace} -o json | jq '.status.installplan.name'    #robocop:disable
     IF    "${operator_version}" != "${EMPTY}"
         ${installplan_version_exist}=    Run And Return Rc   oc get installplan ${installplan_name} -n ${namespace} | grep "${operator_version}"    #robocop:disable

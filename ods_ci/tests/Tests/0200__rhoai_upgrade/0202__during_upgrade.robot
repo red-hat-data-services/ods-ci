@@ -107,7 +107,8 @@ RHODS Version Should Be Greater Than
     ${ver} =  Get RHODS Version    True
     ${ver} =  Fetch From Left  ${ver}  -
     Log    The initial RHODS operator version is: ${initial_version} the current version is: ${ver}    console=yes
-    Should Be True    '${ver}' > '${initial_version}'    msg=Version wasn't greater than initial one ${initial_version}
+    ${version_gt} =  Gt     ${ver}     ${initial_version}
+    Should Be True    ${version_gt}    msg=Version ${ver} wasn't greater than initial one ${initial_version}
 
 Get Operator Pod Creation Date
     [Documentation]    Retrieves the creation date of the RHODS operator pod.

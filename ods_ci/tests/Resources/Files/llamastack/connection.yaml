@@ -8,8 +8,7 @@ metadata:
   annotations:
     opendatahub.io/connection-type-ref: uri-v1
     openshift.io/description: 'Connection to Llama 3.2 3B instruct model from Red Hat AI Services model catalog for AI/ML workloads and inference tasks'
-    openshift.io/display-name: llama-3-2-3b-instruct
+    openshift.io/display-name: llama-3.2-3b-instruct
 stringData:
   URI: oci://quay.io/redhat-ai-services/modelcar-catalog:llama-3.2-3b-instruct
 type: Opaque
-immutable: true

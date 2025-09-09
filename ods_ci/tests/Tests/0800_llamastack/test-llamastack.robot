@@ -10,17 +10,19 @@ Resource            ../../Resources/ServiceMesh.resource
 *** Variables ***
 ${LLAMASTACK_NAMESPACE}         llamastack
 ${LLAMASTACK_CR_FILE}           ./tests/Resources/Files/llamastack/llamastackdistribution.yaml
+${NOTEBOOK_CR_FILE}             ./tests/Resources/Files/llamastack/notebook.yaml
 ${CONNECTION_CR_FILE}           ./tests/Resources/Files/llamastack/connection.yaml
 ${INFERENCE_SERVICE_CR_FILE}    ./tests/Resources/Files/llamastack/inferenceservice.yaml
 ${SERVING_RUNTIME_CR_FILE}      ./tests/Resources/Files/llamastack/servingruntime.yaml
 ${LLAMASTACK_CR_NAME}           llamastack-custom-distribution
+${NOTEBOOK_CR_NAME}             llamastack-notebook
+${LLAMASTACK_INFERENCE_SCRIPT}  ./tests/Resources/Files/llamastack/llamastack_inference.py
+${NOTEBOOK_PV_CR_FILE}          ./tests/Resources/Files/llamastack/notebook-pvc.yaml
 
 
 *** Test Cases ***
-Running LlamaStack Operator with ODH
-    [Documentation]    Runs the LlamaStack operator with ODH and verifies basic readiness of resources per ODH guide.
-    # ODS-CI RobotFramework Style Guide:
-    # https://docs.google.com/document/d/11ZJOPI1uq-0Wl6a2V8fkAv_TQhfzp9t_IjXAheaJxmQ/edit?tab=t.0#heading=h.s819p3c5ud7p
+Setup LlamaStack Environment
+    [Documentation]    Sets up the LlamaStack environment with connection, inference service, and distribution
     [Tags]      llamastack          Integration     Resources-GPU       NVIDIA-GPUs
     [Setup]     Setup Test Environment
 
@@ -37,6 +39,33 @@ Running LlamaStack Operator with ODH
     Run And Verify Command    oc apply -f ${LLAMASTACK_CR_FILE} -n ${LLAMASTACK_NAMESPACE}
 
     Verify LlamaStack Deployment
+
+Deploy LlamaStack Notebook
+    [Documentation]    Deploys and verifies the LlamaStack notebook with PVC
+    [Tags]      llamastack          Integration     Resources-GPU       NVIDIA-GPUs
+
+    # Create notebook PVC
+    Run And Verify Command    oc apply -f ${NOTEBOOK_PV_CR_FILE} -n ${LLAMASTACK_NAMESPACE}
+
+    # Create Notebook CR
+    Run And Verify Command    oc apply -f ${NOTEBOOK_CR_FILE} -n ${LLAMASTACK_NAMESPACE}
+
+    # Verify the notebook deployment with retry logic
+    Wait Until Keyword Succeeds    5 min    20s     Verify Notebook CR Is Running    ${NOTEBOOK_CR_NAME}
+
+Test LlamaStack Inference
+    [Documentation]    Tests LlamaStack inference by installing dependencies and running Python script
+    [Tags]      llamastack          Integration     Resources-GPU       NVIDIA-GPUs
+
+    # Install dependencies
+    Run Command In Container    pip install llama-stack
+
+    # Copy Python script to container
+    Copy File To Container    ${LLAMASTACK_INFERENCE_SCRIPT}    /opt/app-root/src/llamastack_inference.py
+
+    # Execute complete Python test script
+    Run Command In Container    python /opt/app-root/src/llamastack_inference.py
+
     [Teardown]      Teardown Test Environment
 
 
@@ -55,14 +84,14 @@ Setup Test Environment
     # Wait for serving runtime to be ready
     Wait Until Keyword Succeeds    2 min    10s    Check Serving Runtime Ready
 
-    # Ensure the CRD is present first
-    Wait Until CRD Exists    llamastackdistributions.llamastack.io
-
     # Set DSCI serviceMesh managementState to Removed
     Set Service Mesh Management State    Removed    ${APPLICATIONS_NAMESPACE}
 
     # Configure DSC components
     Configure DSC Components
+
+    # Ensure the CRD is present
+    Wait Until CRD Exists    llamastackdistributions.llamastack.io
 
     # Verify the setup by checking that required pods are running
     Verify Required Pods Are Running
@@ -76,6 +105,9 @@ Configure DSC Components
     ${rc}    ${output}=    Run And Return Rc And Output    oc patch DataScienceCluster/default-dsc -n ${OPERATOR_NAMESPACE} --type='json' -p='${patch_data}'        #robocop: disable: line-too-long
     Should Be Equal As Integers    ${rc}    0    msg=Failed to configure DSC components: ${output}
     Log    Successfully configured DSC components: kserve.serving.managementState=Removed, kserve.defaultDeploymentMode=RawDeployment, kserve.RawDeploymentServiceConfig=Headed, llamastackoperator.managementState=Managed     #robocop: disable: line-too-long
+    # Verify the patch was applied correctly
+    ${rc}    ${current_state}=    Run And Return Rc And Output    oc get DataScienceCluster/default-dsc -n ${OPERATOR_NAMESPACE} -o jsonpath='{.spec.components.kserve.serving.managementState}'        #robocop: disable: line-too-long
+    Should Be Equal As Strings    ${current_state}    Removed    msg=DSC patch verification failed: kserve.serving.managementState is not Removed    #robocop: disable: line-too-long
 
 Create Serving Runtime From YAML
     [Documentation]    Creates a serving runtime from YAML file in the llamastack namespace
@@ -113,12 +145,25 @@ Get LlamaStackDistribution Pod
     RETURN    ${pods}
 
 Check Pod Condition
-    [Documentation]    Generic keyword to check a specific pod condition
+    [Documentation]    Checks a specific pod condition
     [Arguments]    ${pod}    ${condition_type}
     ${jp}=    Set Variable    {.status.conditions[?(@.type=="${condition_type}")].status}
     ${rc}    ${status}=    Run And Return Rc And Output    oc get ${pod} -n ${LLAMASTACK_NAMESPACE} -o jsonpath='${jp}'        #robocop: disable:line-too-long
     Should Be Equal As Integers    ${rc}    0    msg=Failed to get ${condition_type} status for ${pod}: ${status}
+    Should Not Be Empty    ${status}    msg=Condition ${condition_type} not found for ${pod}
     Should Be Equal As Strings    ${status}    True    msg=${condition_type} is not True for ${pod}: ${status}
+
+Get First Pod By Name
+    [Documentation]    Gets the first pod by name in the specified namespace
+    [Arguments]    ${namespace}    ${pod_name_pattern}
+    ${rc}    ${pods}=    Run And Return Rc And Output    oc get pods -n ${namespace} -l app=${pod_name_pattern} -o name        #robocop: disable: line-too-long
+    Should Be Equal As Integers    ${rc}    0    msg=Failed to get pods for ${pod_name_pattern} in namespace ${namespace}: ${pods}        #robocop: disable: line-too-long
+    Should Not Be Empty    ${pods}    msg=No pods found for ${pod_name_pattern} in namespace ${namespace}
+    @{pod_list}=    Split String    ${pods}
+    ${first_pod}=    Get From List    ${pod_list}    0
+    # Remove the 'pod/' prefix from the pod name
+    ${pod_name}=    Remove String    ${first_pod}    pod/
+    RETURN    ${pod_name}
 
 Check All Pod Conditions
     [Documentation]    Checks all required pod conditions at once
@@ -191,8 +236,44 @@ Verify LlamaStack Deployment
     # Check that LlamaStack pods have ready conditions
     Wait Until Keyword Succeeds    2 min    10s    Check LlamaStackDistribution Pod Ready
 
+Verify Notebook CR Is Running
+    [Documentation]    Verifies that the notebook CR is running
+    [Arguments]    ${notebook_name}
+    ${rc}    ${output}=    Run And Return Rc And Output    oc get notebook -n ${LLAMASTACK_NAMESPACE}        #robocop: disable: line-too-long
+    Should Be Equal As Integers    ${rc}    0    msg=Notebook CR not found: ${output}
+    Should Not Be Empty    ${output}    msg=Notebook CR output is empty
+
+    # Check that all pods are running in the namespace
+    Wait For Pods To Be Ready
+    ...    label_selector=app=${notebook_name}
+    ...    namespace=${LLAMASTACK_NAMESPACE}
+    ...    timeout=5m
+
+Run Command In Container
+    [Documentation]    Executes a command in the notebook container using context variables
+    [Arguments]    ${command}    ${container_name}=${EMPTY}
+    ${pod_name}=    Get First Pod By Name    ${LLAMASTACK_NAMESPACE}    ${NOTEBOOK_CR_NAME}
+    Should Not Be Empty    ${pod_name}    msg=No pods found for notebook ${NOTEBOOK_CR_NAME}
+    IF    "${container_name}" == "${EMPTY}"
+        ${rc}    ${output}=    Run And Return Rc And Output    oc exec -n ${LLAMASTACK_NAMESPACE} ${pod_name} -- ${command}    #robocop: disable: line-too-long
+    ELSE
+        ${rc}    ${output}=    Run And Return Rc And Output    oc exec -n ${LLAMASTACK_NAMESPACE} ${pod_name} -c ${container_name} -- ${command}    #robocop: disable: line-too-long
+    END
+    Should Be Equal As Integers    ${rc}    0    msg=Failed to run command in container: ${output}
+    Log    Successfully ran command in container: ${output}
+    RETURN    ${output}
+
+Copy File To Container
+    [Documentation]    Copies a file to the notebook container
+    [Arguments]    ${source_file}    ${destination_path}
+    ${pod_name}=    Get First Pod By Name    ${LLAMASTACK_NAMESPACE}    ${NOTEBOOK_CR_NAME}
+    Should Not Be Empty    ${pod_name}    msg=No pods found for notebook ${NOTEBOOK_CR_NAME}
+    ${rc}    ${output}=    Run And Return Rc And Output    oc cp ${source_file} ${LLAMASTACK_NAMESPACE}/${pod_name}:${destination_path} -c llamastack-notebook        #robocop: disable: line-too-long
+    Should Be Equal As Integers    ${rc}    0    msg=Failed to copy file to container: ${output}
+    Log    Successfully copied file to container: ${output}
+
 Teardown Test Environment
-    [Documentation]    Cleans up the test environment by deleting the CR and namespace,
+    [Documentation]    Cleans up the test environment by deleting resources
     ...    and reverting DSCI serviceMesh managementState and DSC components
     # Revert DSCI serviceMesh managementState back to Managed
     Set Service Mesh Management State    Managed    ${APPLICATIONS_NAMESPACE}

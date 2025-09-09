@@ -11,7 +11,7 @@ This script tests the LlamaStack deployment by:
 
 import sys
 
-from llama_stack_client import LlamaStackClient
+from llama_stack_client import LlamaStackClient  # type: ignore[import-untyped]
 
 
 def main():

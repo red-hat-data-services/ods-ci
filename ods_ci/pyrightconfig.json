@@ -9,5 +9,6 @@
   "reportMissingImports": "warning",
   "reportMissingTypeStubs": "none",
   "pythonVersion": "3.11",
-  "typeCheckingMode": "basic"
+  "typeCheckingMode": "basic",
+  "reportGeneralTypeIssues": "warning"
 }

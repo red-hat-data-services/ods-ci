@@ -1,0 +1,13 @@
+{
+  "include": [
+    "tests/Resources/Files/llamastack/"
+  ],
+  "exclude": [
+    "**/node_modules",
+    "**/__pycache__"
+  ],
+  "reportMissingImports": "warning",
+  "reportMissingTypeStubs": "none",
+  "pythonVersion": "3.11",
+  "typeCheckingMode": "basic"
+}

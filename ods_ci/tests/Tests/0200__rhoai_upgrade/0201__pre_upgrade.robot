@@ -201,7 +201,7 @@ Verify Distributed Workload Metrics Resources By Creating Ray Cluster Workload
     Click Button    ${WORKLOAD_STATUS_TAB_XP}
     Check Distributed Workload Resource Metrics Status      ${JOB_NAME}     Running
     Check Distributed Worklaod Status Overview      ${JOB_NAME}     Running
-    ...     All pods were ready or succeeded since the workload admission
+    ...     All pods reached readiness and the workload is running
 
     Click Button    ${PROJECT_METRICS_TAB_XP}
     Check Distributed Workload Resource Metrics Chart       ${PRJ_UPGRADE}      ${cpu_requested}

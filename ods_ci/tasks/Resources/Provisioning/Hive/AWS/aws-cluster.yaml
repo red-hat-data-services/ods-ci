@@ -34,14 +34,14 @@ items:
       baseDomain: {{ base_domain }}
       compute:
       - name: worker
-        architecture: {{ aws_worker_architecture|default("amd64") }}
+        architecture: {{ aws_worker_architecture|default("x86_64") }}
         platform:
           aws:
             type: {{ worker_node_instance_type|default("m5.2xlarge") }}
         replicas: {{ worker_node_replicas|default("2") }}
       controlPlane:
         name: master
-        architecture: {{ aws_master_architecture|default("amd64") }}
+        architecture: {{ aws_master_architecture|default("x86_64") }}
         platform:
           aws:
             type: {{ master_node_instance_type|default("m5.2xlarge") }}

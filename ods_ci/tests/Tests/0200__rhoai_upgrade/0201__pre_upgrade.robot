@@ -9,6 +9,7 @@ Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboardResources.
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Resource            ../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
+Resource            ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/ModelServer.resource
 Resource            ../../Resources/Page/ODH/AiApps/Anaconda.resource
@@ -263,6 +264,7 @@ Launch Notebook
     ...    ${username}=${TEST_USER2.USERNAME}
     ...    ${password}=${TEST_USER2.PASSWORD}
     ...    ${auth_type}=${TEST_USER2.AUTH_TYPE}
+    Clean All Standalone Notebooks
     Begin Web Test    username=${username}    password=${password}    auth_type=${auth_type}
     Launch Jupyter From RHODS Dashboard Link
     Spawn Notebook With Arguments

@@ -111,6 +111,11 @@ Install RHODS
   END
   Clone OLM Install Repo
   Configure Custom Namespaces
+  IF   "${PRODUCT}" == "ODH"
+       ${csv_display_name} =    Set Variable    ${ODH_CSV_DISPLAY}
+  ELSE
+       ${csv_display_name} =    Set Variable    ${RHODS_CSV_DISPLAY}
+  END
   IF   "${cluster_type}" == "selfmanaged"
       IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "Cli"
              Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
@@ -156,7 +161,7 @@ Install RHODS
           FAIL    Provided test environment is not supported
       END
   END
-  Wait Until Csv Is Ready    display_name=${OPERATOR_NAME}    operators_namespace=${OPERATOR_NAMESPACE}
+  Wait Until Csv Is Ready    display_name=${csv_display_name}    operators_namespace=${OPERATOR_NAMESPACE}
   IF  "${is_upgrade}" == "False"
       Add StartingCSV To Subscription
   END

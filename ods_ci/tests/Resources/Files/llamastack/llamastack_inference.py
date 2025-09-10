@@ -9,6 +9,7 @@ This script tests the LlamaStack deployment by:
 4. Performing a chat completion
 """
 
+import os
 import sys
 
 from llama_stack_client import LlamaStackClient  # type: ignore[import-untyped]
@@ -18,7 +19,7 @@ def main():
     """Main function to execute the LlamaStack inference test."""
     try:
         # Create client with the service URL
-        service_url = "http://llamastack-custom-distribution-service.llamastack.svc.cluster.local:8321"
+        service_url = os.environ.get("LLAMASTACK_URL", "http://llamastack-custom-distribution-service.llamastack.svc.cluster.local:8321")
         client = LlamaStackClient(base_url=service_url)
 
         # Register the model

@@ -20,6 +20,9 @@ oc wait --timeout=3m --for jsonpath='{.status.state}'=AtLatestKnown -n nvidia-gp
 
 oc wait --timeout=3m --for condition=Installed -n nvidia-gpu-operator installplan --all
 
+# temporary fix for OSD clusters OHSS-46634
+oc label namespace nvidia-gpu-operator openshift.io/cluster-monitoring=true
+
 sleep 5
 
 oc rollout status --watch --timeout=3m -n nvidia-gpu-operator deploy gpu-operator

@@ -14,16 +14,21 @@ import sys
 
 from llama_stack_client import LlamaStackClient  # type: ignore[import-untyped]
 
+# Model ID constant to avoid duplication
+MODEL_ID = "llama-3-2-3b-instruct"
+
 
 def main():
     """Main function to execute the LlamaStack inference test."""
     try:
         # Create client with the service URL
-        service_url = os.environ.get("LLAMASTACK_URL", "http://llamastack-custom-distribution-service.llamastack.svc.cluster.local:8321")
+        service_url = os.environ.get(
+            "LLAMASTACK_URL", "http://llamastack-custom-distribution-service.llamastack.svc.cluster.local:8321"
+        )
         client = LlamaStackClient(base_url=service_url)
 
         # Register the model
-        client.models.register(provider_id="vllm-inference", model_type="llm", model_id="llama-3-2-3b-instruct")
+        client.models.register(provider_id="vllm-inference", model_type="llm", model_id=MODEL_ID)
 
         # List models to verify registration
         models = client.models.list()
@@ -35,7 +40,7 @@ def main():
                 {"role": "system", "content": "You are a friendly assistant."},
                 {"role": "user", "content": "Write a two-sentence poem about llama."},
             ],
-            model_id="llama-3-2-3b-instruct",
+            model_id=MODEL_ID,
         )
 
         # Validate and print the response

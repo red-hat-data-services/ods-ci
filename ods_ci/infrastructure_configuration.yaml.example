@@ -3,4 +3,16 @@ infrastructure_configurations:
     hive_cluster_name: rhodsawstest
     hive_claim_name: rhodsawstestclaim
     use_cluster_pool: True
-    
+    # AWS
+    aws_worker_architecture: "x86_64"  # or "arm64" 
+    aws_master_architecture: "x86_64"  # or "arm64"
+    # ARM64-compatible instance type mappings
+    aws_arch_instance_mappings:
+        x86_64:
+            worker_default: "m5.2xlarge"
+            master_default: "m5.2xlarge" 
+            gpu_default: "g4dn.xlarge"
+        arm64:
+            worker_default: "m6g.2xlarge"  # Graviton2
+            master_default: "m6g.2xlarge"  # Graviton2  
+            gpu_default: "g5g.xlarge"     # Graviton2 + T4G GPU

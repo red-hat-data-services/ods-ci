@@ -37,14 +37,14 @@ items:
         architecture: {{ aws_worker_architecture|default("x86_64") }}
         platform:
           aws:
-            type: {{ worker_node_instance_type|default("m5.2xlarge") }}
+            type: {{ get_arch_compatible_instance(worker_node_instance_type, aws_worker_architecture) }}
         replicas: {{ worker_node_replicas|default("2") }}
       controlPlane:
         name: master
         architecture: {{ aws_master_architecture|default("x86_64") }}
         platform:
           aws:
-            type: {{ master_node_instance_type|default("m5.2xlarge") }}
+            type: {{ get_arch_compatible_instance(master_node_instance_type, aws_master_architecture) }} 
         replicas: {{ master_node_replicas|default("3") }}
       metadata:
         name: aws-sno

@@ -13,10 +13,11 @@ items:
           namespace: <OPERATOR_NAMESPACE>
       spec:
           channel: <UPDATE_CHANNEL>
-          installPlanApproval: Automatic
+          installPlanApproval: <INSTALL_PLAN_APPROVAL>
           name: <OPERATOR_NAME>
           source: <CATALOG_SOURCE>
           sourceNamespace: openshift-marketplace
+          startingCSV: <STARTING_CSV>
   -   apiVersion: operators.coreos.com/v1
       kind: OperatorGroup
       metadata:

@@ -1,0 +1,191 @@
+apiVersion: kubeflow.org/v1
+kind: Notebook
+metadata:
+  annotations:
+    notebooks.opendatahub.io/inject-oauth: 'true'
+    opendatahub.io/image-display-name: Jupyter | Minimal | CPU | Python 3.11
+    opendatahub.io/accelerator-name: ''
+    openshift.io/description: 'Jupyter notebook for LlamaStack testing and inference with llama-stack client integration'
+    openshift.io/display-name: llamastack-notebook
+    notebooks.opendatahub.io/last-image-version-git-commit-selection: 16f7c8f
+    notebooks.opendatahub.io/last-image-selection: 's2i-minimal-notebook:2025.1'
+    opendatahub.io/legacy-hardware-profile-name: ''
+    notebooks.opendatahub.io/last-size-selection: Small
+    opendatahub.io/username: htpasswd-cluster-admin-user
+    opendatahub.io/hardware-profile-name: ''
+  name: llamastack-notebook
+  generation: 3
+  namespace: llamastack
+  labels:
+    app: llamastack-notebook
+    opendatahub.io/dashboard: 'true'
+    opendatahub.io/odh-managed: 'true'
+    opendatahub.io/user: htpasswd-2dcluster-2dadmin-2duser
+spec:
+  template:
+    spec:
+      containers:
+        - resources:
+            limits:
+              cpu: '2'
+              memory: 8Gi
+            requests:
+              cpu: '1'
+              memory: 8Gi
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /notebook/llamastack/llamastack-notebook/api
+              port: notebook-port
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: llamastack-notebook
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /notebook/llamastack/llamastack-notebook/api
+              port: notebook-port
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          env:
+            - name: NOTEBOOK_ARGS
+              value: |-
+                --ServerApp.port=8888
+                                  --ServerApp.token=''
+                                  --ServerApp.password=''
+                                  --ServerApp.base_url=/notebook/llamastack/llamastack-notebook
+                                  --ServerApp.quit_button=False
+                                  --ServerApp.tornado_settings={"user":"htpasswd-2dcluster-2dadmin-2duser","hub_host":"https://rhods-dashboard-redhat-ods-applications.apps.plfrmllam05-pool-ghm5r.aws.rh-ods.com","hub_prefix":"/projects/llamastack"}
+            - name: JUPYTER_IMAGE
+              value: 'image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/s2i-minimal-notebook:2025.1'
+            - name: PIP_CERT
+              value: /etc/pki/tls/custom-certs/ca-bundle.crt
+            - name: REQUESTS_CA_BUNDLE
+              value: /etc/pki/tls/custom-certs/ca-bundle.crt
+            - name: SSL_CERT_FILE
+              value: /etc/pki/tls/custom-certs/ca-bundle.crt
+            - name: PIPELINES_SSL_SA_CERTS
+              value: /etc/pki/tls/custom-certs/ca-bundle.crt
+            - name: GIT_SSL_CAINFO
+              value: /etc/pki/tls/custom-certs/ca-bundle.crt
+          ports:
+            - containerPort: 8888
+              name: notebook-port
+              protocol: TCP
+          imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: /opt/app-root/src/
+              name: llamastack-notebook-storage
+            - mountPath: /dev/shm
+              name: shm
+            - mountPath: /etc/pki/tls/custom-certs/ca-bundle.crt
+              name: trusted-ca
+              readOnly: true
+              subPath: ca-bundle.crt
+            - mountPath: /opt/app-root/pipeline-runtimes/
+              name: runtime-images
+          envFrom:
+            - secretRef:
+                name: llama-32-3b-instruct
+          image: 'image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/s2i-minimal-notebook:2025.1'
+          workingDir: /opt/app-root/src
+        - resources:
+            limits:
+              cpu: 100m
+              memory: 64Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /oauth/healthz
+              port: oauth-proxy
+              scheme: HTTPS
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: oauth-proxy
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /oauth/healthz
+              port: oauth-proxy
+              scheme: HTTPS
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          env:
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          ports:
+            - containerPort: 8443
+              name: oauth-proxy
+              protocol: TCP
+          imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: /etc/oauth/client
+              name: oauth-client
+            - mountPath: /etc/oauth/config
+              name: oauth-config
+            - mountPath: /etc/tls/private
+              name: tls-certificates
+          image: 'registry.redhat.io/openshift4/ose-oauth-proxy-rhel9@sha256:ca21e218e26c46e3c63d926241846f8f307fd4a586cc4b04147da49af6018ef5'
+          args:
+            - '--provider=openshift'
+            - '--https-address=:8443'
+            - '--http-address='
+            - '--openshift-service-account=llamastack-notebook'
+            - '--cookie-secret-file=/etc/oauth/config/cookie_secret'
+            - '--cookie-expire=24h0m0s'
+            - '--tls-cert=/etc/tls/private/tls.crt'
+            - '--tls-key=/etc/tls/private/tls.key'
+            - '--upstream=http://localhost:8888'
+            - '--upstream-ca=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt'
+            - '--email-domain=*'
+            - '--skip-provider-button'
+            - '--client-id=llamastack-notebook-llamastack-oauth-client'
+            - '--client-secret-file=/etc/oauth/client/secret'
+            - '--scope=user:info user:check-access'
+      enableServiceLinks: false
+      serviceAccountName: llamastack-notebook
+      volumes:
+        - name: llamastack-notebook-storage
+          persistentVolumeClaim:
+            claimName: llamastack-notebook-storage
+        - emptyDir:
+            medium: Memory
+          name: shm
+        - configMap:
+            items:
+              - key: ca-bundle.crt
+                path: ca-bundle.crt
+            name: workbench-trusted-ca-bundle
+            optional: true
+          name: trusted-ca
+        - configMap:
+            name: pipeline-runtime-images
+            optional: true
+          name: runtime-images
+        - name: oauth-config
+          secret:
+            defaultMode: 420
+            secretName: llamastack-notebook-oauth-config
+        - name: oauth-client
+          secret:
+            defaultMode: 420
+            secretName: llamastack-notebook-oauth-client
+        - name: tls-certificates
+          secret:
+            defaultMode: 420
+            secretName: llamastack-notebook-tls

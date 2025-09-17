@@ -2,12 +2,12 @@
     "spec": {
         "monitoring": {
             "managementState": "Managed",
-            "collectorReplicas": 2,
             "alerting": {},
             "metrics": {
+                "exporters": {},
                 "storage": {
                     "size": "5Gi",
-                    "retention": "1d"
+                    "retention": "90d"
                 },
                 "resources": {
                     "cpulimit": "500m",
@@ -22,6 +22,9 @@
                 "storage": {
                     "backend": "pv",
                     "size": "5Gi"
+                },
+                "tls": {
+                    "enabled": true
                 }
             }
         }

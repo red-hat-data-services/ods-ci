@@ -44,7 +44,7 @@ items:
         architecture: {{ aws_master_architecture|default("x86_64") }}
         platform:
           aws:
-            type: {{ master_node_instance_type }} 
+            type: {{ master_node_instance_type }}
         replicas: {{ master_node_replicas|default("3") }}
       metadata:
         name: aws-sno

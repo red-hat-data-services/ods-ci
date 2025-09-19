@@ -19,7 +19,10 @@ The infrastructure configuration variables are used to configure the infrastruct
 | `ssh_key` | The SSH key to use for the cluster. | `""` | `all` |
 | `AWS_ACCESS_KEY_ID` | The AWS access key ID. | `""` | `aws` |
 | `AWS_SECRET_ACCESS_KEY` | The AWS secret access key. | `""` | `aws` |
-| `release_image` | The OpenShift image to use for the cluster. | `"quay.io/openshift-release-dev/ocp-release:4.10.42-x86_64"` | `all` |
+| `aws_worker_architecture` | Architecture for AWS worker nodes | `x86_64` | `aws` |
+| `aws_master_architecture` | Architecture for AWS master nodes | `x86_64` | `aws` | 
+| `aws_arch_instance_mappings` | Instance type mappings for different architectures | `{}` | `aws` |
+| `release_image` | The OpenShift image to use for the cluster. | `"quay.io/openshift-release-dev/ocp-release:4.15.25-multi"` | `all` |
 | `gcp_region` | The GCP region to use for the cluster. | `us-central1` | `gcp` |
 | `gcp_project_id` | The GCP project ID to use for the cluster. | `""` | `gcp` |
 | `gcp_region` | The GCP region to use for the cluster. | `us-central1` | `gcp` |

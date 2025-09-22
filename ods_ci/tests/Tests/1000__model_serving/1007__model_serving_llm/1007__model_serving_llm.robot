@@ -51,7 +51,7 @@ ${CAIKIT_TGIS_RUNTIME_NAME}=    caikit-tgis-runtime
 Verify External Dependency Operators Can Be Deployed
     [Documentation]    Checks the pre-required Operators can be installed
     ...                and configured
-    [Tags]    ODS-2326   Kserve-caikit
+    [Tags]    ODS-2326   Kserve-caikit    deprecatedTest
     Pass Execution    message=Installation done as part of Suite Setup.
 
 Verify User Can Serve And Query A Model    # robocop: off=too-long-test-case
@@ -113,7 +113,7 @@ Verify User Can Deploy Multiple Models In The Same Namespace    # robocop: off=t
 
 Verify User Can Deploy Multiple Models In Different Namespaces    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Checks if user can deploy and query multiple models in the different namespaces
-    [Tags]    Sanity    ODS-2378
+    [Tags]    Sanity    ODS-2378        deprecatedTest
     [Setup]    Run Keywords    Set Project And Runtime    namespace=singlemodel-multi1
     ...        AND
     ...        Set Project And Runtime    namespace=singlemodel-multi2
@@ -301,7 +301,7 @@ Verify User Can Validate Scale To Zero    # robocop: off=too-long-test-case,too-
 
 Verify User Can Set Requests And Limits For A Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Checks if user can set HW request and limits on their inference service object
-    [Tags]    Sanity    ODS-2380
+    [Tags]    Sanity    ODS-2380        deprecatedTest
     [Setup]    Set Project And Runtime    namespace=hw-res
     ${test_namespace}=    Set Variable    hw-res
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -339,7 +339,7 @@ Verify User Can Set Requests And Limits For A Model    # robocop: off=too-long-t
 Verify Model Can Be Served And Query On A GPU Node    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
     ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    Sanity    ODS-2381    Resources-GPU    NVIDIA-GPUs   Kserve-caikit
+    [Tags]    Sanity    ODS-2381    Resources-GPU    NVIDIA-GPUs   Kserve-caikit        deprecatedTest
     [Setup]    Set Project And Runtime    namespace=singlemodel-gpu
     ${test_namespace}=    Set Variable    singlemodel-gpu
     ${model_name}=    Set Variable    flan-t5-small-caikit
@@ -398,7 +398,7 @@ Verify Non Admin Can Serve And Query A Model    # robocop: off=too-long-test-cas
 
 Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector    # robocop: off=too-long-test-case
     [Documentation]    Deploys and queries flan-t5-large-grammar-synthesis model
-    [Tags]    Tier2    ODS-2441     Kserve-caikit
+    [Tags]    Tier2    ODS-2441     Kserve-caikit       deprecatedTest
     [Setup]    Set Project And Runtime    namespace=grammar-model
     ${test_namespace}=    Set Variable     grammar-model
     ${flan_model_name}=    Set Variable    flan-t5-large-grammar-synthesis-caikit
@@ -421,7 +421,7 @@ Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector    # robocop: o
 
 Verify User Can Serve And Query Flan-t5 Large    # robocop: off=too-long-test-case
     [Documentation]    Deploys and queries flan-t5-large model
-    [Tags]    Tier2    ODS-2434     Kserve-caikit
+    [Tags]    Tier2    ODS-2434     Kserve-caikit       deprecatedTest
     [Setup]    Set Project And Runtime    namespace=flan-t5-large3
     ${test_namespace}=    Set Variable     flan-t5-large3
     ${flan_model_name}=    Set Variable    flan-t5-large
@@ -448,7 +448,7 @@ Verify Runtime Upgrade Does Not Affect Deployed Models    # robocop: off=too-lon
     ...                must remain unchanged after the runtime upgrade.
     ...                ATTENTION: this is an approximation of the runtime upgrade scenario, however
     ...                the real case scenario will be defined once RHODS actually ships the Caikit runtime.
-    [Tags]    Sanity    ODS-2404
+    [Tags]    Sanity    ODS-2404        deprecatedTest
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}-up
     ${test_namespace}=    Set Variable     ${TEST_NS}-up
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -483,7 +483,7 @@ Verify User Can Access Model Metrics From UWM    # robocop: off=too-long-test-ca
     ...                PARTIALLY DONE: it is checking number of requests, number of successful requests
     ...                and model pod cpu usage. Waiting for a complete list of expected metrics and
     ...                derived metrics.
-    [Tags]    Sanity    ODS-2401
+    [Tags]    Sanity    ODS-2401        deprecatedTest
     [Setup]    Set Project And Runtime    namespace=singlemodel-metrics    enable_metrics=${TRUE}
     ${test_namespace}=    Set Variable     singlemodel-metrics
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -524,7 +524,7 @@ Verify User Can Access Model Metrics From UWM    # robocop: off=too-long-test-ca
 Verify User Can Query A Model Using HTTP Calls    # robocop: off=too-long-test-case
     [Documentation]    From RHOAI 2.5 HTTP is allowed and default querying protocol.
     ...                This tests deploys the runtime enabling HTTP port and send queries to the model
-    [Tags]    ODS-2501    Sanity
+    [Tags]    ODS-2501    Sanity        deprecatedTest
     [Setup]    Set Project And Runtime    namespace=kserve-http    protocol=http
     ${test_namespace}=    Set Variable     kserve-http
     ${model_name}=    Set Variable    flan-t5-small-caikit
@@ -551,7 +551,7 @@ Verify User Can Serve And Query A Model With Token    # robocop: off=too-long-te
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                With Token using Kserve and Caikit+TGIS runtime
     [Tags]    RHOAIENG-6333
-    ...       Tier1    AutomationBug        Kserve-caikit
+    ...       Tier1    AutomationBug        Kserve-caikit       deprecatedTest
     [Setup]    Set Project And Runtime    namespace=${TEST_NS}-cli
     ${test_namespace}=    Set Variable     ${TEST_NS}-cli
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit

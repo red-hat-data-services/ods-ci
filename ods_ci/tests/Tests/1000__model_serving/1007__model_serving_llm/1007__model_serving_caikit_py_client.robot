@@ -33,7 +33,7 @@ Verify User Can Use Caikit Nlp Client From Workbenches
     [Documentation]    Deploy two KServe models with Caikit+TGIS runtime (one for grpc and one for HTTP protocol),
     ...                create a workbench and run a Jupyter notebook to query a kserve model
     ...                using the caikit-nlp-client python library
-    [Tags]    Tier2    ODS-2595
+    [Tags]    Tier2    ODS-2595         deprecatedTest
     [Setup]    Run Keywords
     ...    Setup Models
     ...    AND

@@ -32,7 +32,7 @@ Verify User Can Serve And Query A Model Using The UI
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                using Kserve and Caikit runtime
     ...                Intermittently failing: RHOAIENG-3148
-    [Tags]    Sanity    ODS-2519    ODS-2522    FlakyTest
+    [Tags]    Sanity    ODS-2519    ODS-2522    FlakyTest     deprecatedTest
     [Setup]    Set Up Project    namespace=${TEST_NS}
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -76,7 +76,7 @@ Verify User Can Deploy Multiple Models In The Same Namespace Using The UI    # r
 
 Verify User Can Deploy Multiple Models In Different Namespaces Using The UI
     [Documentation]    Checks if user can deploy and query multiple models in the different namespaces
-    [Tags]    Sanity    ODS-2549
+    [Tags]    Sanity    ODS-2549    deprecatedTest
     [Setup]    Set Up Project    namespace=singlemodel-multi1
     ${model_one_name}=    Set Variable    bloom-560m-caikit
     ${model_two_name}=    Set Variable    flan-t5-small-caikit
@@ -112,7 +112,7 @@ Verify Model Pods Are Deleted When No Inference Service Is Present Using The UI
 
 Verify User Can Set Requests And Limits For A Model Using The UI    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Checks if user can set HW request and limits on their inference service object
-    [Tags]    Sanity    ODS-2551
+    [Tags]    Sanity    ODS-2551        deprecatedTest
     [Setup]    Set Up Project    namespace=hw-res
     ${test_namespace}=    Set Variable    hw-res
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -151,7 +151,7 @@ Verify User Can Set Requests And Limits For A Model Using The UI    # robocop: o
 Verify Model Can Be Served And Query On A GPU Node Using The UI    # robocop: off=too-long-test-case
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
     ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    Sanity    ODS-2523   Resources-GPU    NVIDIA-GPUs
+    [Tags]    Sanity    ODS-2523   Resources-GPU    NVIDIA-GPUs     deprecatedTest
     [Setup]    Set Up Project    namespace=singlemodel-gpu
     ${test_namespace}=    Set Variable    singlemodel-gpu
     ${model_name}=    Set Variable    flan-t5-small-caikit
@@ -287,7 +287,7 @@ Verify User Can Query A Token Protected Model Using The UI Without Token After D
     [Documentation]    Deploying and querying a Token Protected LLM model using Kserve and Caikit runtime.
     ...                Verify the token Works and without Token it Does not Work.
     ...                Disable the token authentication and verify that the model can be queried without token.
-    [Tags]    Sanity    RHOAIENG-4603
+    [Tags]    Sanity    RHOAIENG-4603       deprecatedTest
     [Setup]    Set Up Project    namespace=${TEST_NS}
     ${test_namespace}=    Set Variable     ${TEST_NS}
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -400,7 +400,7 @@ Verify User With Edit Permission Can Deploy Query And Delete A LLM    # robocop:
     [Documentation]    This test case verifies that a user with Edit permission on a DS Project can still deploy, query
     ...    and delete a LLM served with caikit
     ...    Issue reported for this test in the past: https://issues.redhat.com/browse/RHOAIENG-548
-    [Tags]    Sanity    ODS-2581
+    [Tags]    Sanity    ODS-2581        deprecatedTest
     [Setup]    Set Up Project    namespace=${TEST_NS}-edit-permission
     ${test_namespace}=    Set Variable     ${TEST_NS}-edit-permission
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -437,7 +437,7 @@ Verify User With Edit Permission Can Deploy Query And Delete A LLM    # robocop:
 Verify User With Admin Permission Can Deploy Query And Delete A LLM    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    This test case verifies that a user with Admin permission on a DS Project can still deploy, query
     ...    and delete a LLM served with caikit
-    [Tags]    Sanity    Tier1    ODS-2582
+    [Tags]    Sanity    Tier1    ODS-2582       deprecatedTest
     [Setup]    Set Up Project    namespace=${TEST_NS}-admin-permission
     ${test_namespace}=    Set Variable     ${TEST_NS}-admin-permission
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit

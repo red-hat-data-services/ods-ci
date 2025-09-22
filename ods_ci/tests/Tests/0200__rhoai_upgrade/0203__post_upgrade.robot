@@ -121,7 +121,7 @@ Verify Custom Image Is Present
 
 Verify Disable Runtime Is Present
     [Documentation]    Disable the Serving runtime using Cli
-    [Tags]      Upgrade    ModelServing
+    [Tags]      Upgrade    ModelServing         deprecatedTest
     ${rn}       Set Variable        ${payload[0]['spec']['templateDisablement']}
     List Should Contain Value       ${rn}       ovms-gpu
     [Teardown]      Enable Model Serving Runtime Using CLI      namespace=redhat-ods-applications
@@ -169,7 +169,7 @@ Test Inference Post RHODS Upgrade
     # robocop: off=too-many-calls-in-test-case
     # robocop: off=too-long-test-case
     [Documentation]    Test the inference result after having deployed a model
-    [Tags]                  Upgrade    ModelServing    ModelServer
+    [Tags]                  Upgrade    ModelServing    ModelServer      deprecatedTest
     Set Suite Variable    ${TEST_NS}    ovmsmodel-upgrade
     Set Suite Variable    ${KSERVE_MODE}    Serverless    # RawDeployment   # Serverless
     Set Suite Variable    ${INFERENCE_INPUT}    @tests/Resources/Files/modelmesh-mnist-input.json
@@ -193,7 +193,7 @@ Test Inference Post RHODS Upgrade
 
 Verify Custom Runtime Exists After Upgrade
     [Documentation]    Test the inference result after having deployed a model that requires Token Authentication
-    [Tags]      Upgrade    ModelServing
+    [Tags]      Upgrade    ModelServing         deprecatedTest
     [Setup]     Begin Web Test
     Menu.Navigate To Page       Settings        Serving runtimes
     Wait Until Page Contains        Add serving runtime     timeout=15s

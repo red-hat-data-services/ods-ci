@@ -52,7 +52,7 @@ Verify Openvino_IR Model Via UI (OVMS on Kserve)
 Verify Tensorflow Model Via UI (OVMS on Kserve)    # robocop: off=too-long-test-case
     [Documentation]    Test the deployment of a tensorflow (.pb) model in Kserve using OVMS
     [Tags]    Sanity
-    ...       ODS-2627
+    ...       ODS-2627      deprecatedTest
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}    existing_project=${TRUE}
     Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
@@ -75,7 +75,7 @@ Verify Tensorflow Model Via UI (OVMS on Kserve)    # robocop: off=too-long-test-
 Test Onnx Model Via UI (OVMS on Kserve)
     [Documentation]    Test the deployment of an onnx model in Kserve using OVMS
     [Tags]    Sanity
-    ...       ODS-2628
+    ...       ODS-2628      deprecatedTest
     Open Data Science Projects Home Page
     Create Data Science Project    title=${SECOND_PROJECT}    description=${PRJ_DESCRIPTION}
     ...    existing_project=${FALSE}
@@ -106,7 +106,7 @@ Verify Multiple Projects With Same Model (OVMS on Kserve)
 Verify GPU Model Deployment Via UI (OVMS on Kserve)    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Test the deployment of an openvino_ir model on a model server with GPUs attached
     [Tags]    Tier1    Resources-GPU    NVIDIA-GPUs
-    ...       ODS-2630    ODS-2631    ProductBug    RHOAIENG-3355
+    ...       ODS-2630    ODS-2631    ProductBug    RHOAIENG-3355       deprecatedTest
     ${requests}=    Create Dictionary    nvidia.com/gpu=1
     ${limits}=    Create Dictionary    nvidia.com/gpu=1
     Clean All Models Of Current User

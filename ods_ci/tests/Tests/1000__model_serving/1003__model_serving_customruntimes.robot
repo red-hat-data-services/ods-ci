@@ -22,7 +22,7 @@ ${MODEL_SERVER_NAME}=    ODS-CI CustomServingRuntime Server
 *** Test Cases ***
 Verify RHODS Admins Can Import A Custom Serving Runtime Template By Uploading A YAML file
     [Documentation]    Verifies an admin user can import custom runtimes via upload function
-    [Tags]    Smoke    ODS-2276
+    [Tags]    Smoke    ODS-2276         deprecatedTest
     Open Dashboard Settings    settings_page=Serving runtimes
     Upload Serving Runtime Template    runtime_filepath=${OVMS_RUNTIME_FILEPATH}
     ...    serving_platform=multi      runtime_protocol=gRPC
@@ -31,7 +31,7 @@ Verify RHODS Admins Can Import A Custom Serving Runtime Template By Uploading A 
 
 Verify RHODS Admins Can Delete A Custom Serving Runtime Template
     [Documentation]    Verifies an admin user can delete a custom serving runtime
-    [Tags]    Smoke    ODS-2279
+    [Tags]    Smoke    ODS-2279     deprecatedTest
     [Setup]    Create Test Serving Runtime Template If Not Exists
     Open Dashboard Settings    settings_page=Serving runtimes
     Delete Serving Runtime Template    displayed_name=${UPLOADED_OVMS_DISPLAYED_NAME}
@@ -40,7 +40,7 @@ Verify RHODS Admins Can Delete A Custom Serving Runtime Template
 
 Verify RHODS Admins Can Import A Custom Serving Runtime Template For Each Serving Platform
     [Documentation]    Imports a Custom Serving Runtime for each supported serving platform
-    [Tags]    Sanity    ODS-2542
+    [Tags]    Sanity    ODS-2542        deprecatedTest
     [Setup]    Generate Runtime YAMLs
     Open Dashboard Settings    settings_page=Serving runtimes
     ${RUNTIME_SINGLE_FILEPATH}=    Set Variable    ${RESOURCES_DIRPATH}/csr_single_model.yaml
@@ -61,7 +61,7 @@ Verify RHODS Admins Can Import A Custom Serving Runtime Template For Each Servin
 Verify RHODS Users Can Deploy A Model Using A Custom Serving Runtime    # robocop: off=too-long-test-case,too-many-calls-in-test-case,line-too-long
     [Documentation]    Verifies that a model can be deployed using only the UI.
     ...    At the end of the process, verifies the correct resources have been deployed.
-    [Tags]    Tier1    ODS-2281    ModelMesh
+    [Tags]    Tier1    ODS-2281    ModelMesh        deprecatedTest
     [Setup]    Run Keywords
     ...    Skip If Component Is Not Enabled    modelmeshserving
     ...    AND

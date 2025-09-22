@@ -254,7 +254,7 @@ DataScienceCluster Should Fail Because Service Mesh Operator Is Not Installed
     ${rc}    ${logs}=    Run And Return Rc And Output
     ...    oc logs -l ${OPERATOR_LABEL_SELECTOR} -c ${OPERATOR_POD_CONTAINER_NAME} -n ${OPERATOR_NS} --ignore-errors
 
-    Should Contain    ${logs}    failed to find the pre-requisite Service Mesh Operator subscription, please ensure Service Mesh Operator is installed.    #robocop:disable
+    Should Contain    ${logs}    ServiceMesh v2 Operator pre-condition check failed: failed to find the pre-requisite operator subscription \\"servicemeshoperator\\", please ensure operator is installed. missing operator \\"servicemeshoperator\\"    #robocop:disable
 
 DataScienceCluster Should Fail Because Serverless Operator Is Not Installed
     [Documentation]   Keyword to check the DSC conditions when serverless operator is not installed.

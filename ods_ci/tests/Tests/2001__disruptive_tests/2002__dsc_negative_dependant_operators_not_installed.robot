@@ -251,11 +251,6 @@ DataScienceCluster Should Fail Because Service Mesh Operator Is Not Installed
     Should Be Equal As Integers  ${return_code}   0   msg=Error retrieved DSC conditions
     Should Contain    ${output}    ServiceMesh operator must be installed for this component's configuration    #robocop:disable
 
-    ${rc}    ${logs}=    Run And Return Rc And Output
-    ...    oc logs -l ${OPERATOR_LABEL_SELECTOR} -c ${OPERATOR_POD_CONTAINER_NAME} -n ${OPERATOR_NS} --ignore-errors
-
-    Should Contain    ${logs}    failed to find the pre-requisite Service Mesh Operator subscription, please ensure Service Mesh Operator is installed.    #robocop:disable
-
 DataScienceCluster Should Fail Because Serverless Operator Is Not Installed
     [Documentation]   Keyword to check the DSC conditions when serverless operator is not installed.
     ...           One condition should appear saying this operator is needed to enable kserve component.

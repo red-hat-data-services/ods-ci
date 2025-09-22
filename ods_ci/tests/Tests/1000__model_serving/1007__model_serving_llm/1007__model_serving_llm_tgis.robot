@@ -173,7 +173,7 @@ Verify User Can Deploy Multiple Models In Different Namespaces    # robocop: off
 
 Verify Model Upgrade Using Canaray Rollout    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Checks if user can apply Canary Rollout as deployment strategy
-    [Tags]    Tier1    ODS-2372    ServerlessOnly
+    [Tags]    Tier1    ODS-2372    ServerlessOnly       deprecatedTest
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=canary-model-upgrade
     ${test_namespace}=    Set Variable    canary-model-upgrade
     ${isvc_name}=    Set Variable    canary-caikit
@@ -219,7 +219,7 @@ Verify Model Upgrade Using Canaray Rollout    # robocop: off=too-long-test-case,
 Verify Model Pods Are Deleted When No Inference Service Is Present    # robocop: off=too-long-test-case
     [Documentation]    Checks if model pods gets successfully deleted after
     ...                deleting the KServe InferenceService object
-    [Tags]    Tier2    ODS-2373
+    [Tags]    Tier2    ODS-2373     deprecatedTest
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=no-infer-kserve
     ${flan_isvc_name}=    Set Variable    flan-t5-small-caikit
     ${model_name}=    Set Variable    flan-t5-small-caikit
@@ -246,7 +246,7 @@ Verify User Can Change The Minimum Number Of Replicas For A Model    # robocop: 
     ...                of a deployed model.
     ...                Affected by:  https://issues.redhat.com/browse/SRVKS-1175
     ...                When running on GPUs, it requires 3 GPUs
-    [Tags]    Tier1    ODS-2376
+    [Tags]    Tier1    ODS-2376     deprecatedTest
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${TEST_NS}-reps
     ${test_namespace}=    Set Variable     ${TEST_NS}-reps
     ${model_name}=    Set Variable    flan-t5-small-caikit
@@ -286,7 +286,7 @@ Verify User Can Change The Minimum Number Of Replicas For A Model    # robocop: 
 
 Verify User Can Autoscale Using Concurrency    # robocop: off=too-long-test-case
     [Documentation]    Checks if model successfully scale up based on concurrency metrics (KPA)
-    [Tags]    Tier1    ODS-2377    ServerlessOnly
+    [Tags]    Tier1    ODS-2377    ServerlessOnly       deprecatedTest
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=autoscale-con
     ${test_namespace}=    Set Variable    autoscale-con
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -313,7 +313,7 @@ Verify User Can Autoscale Using Concurrency    # robocop: off=too-long-test-case
 
 Verify User Can Validate Scale To Zero    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Checks if model successfully scale down to 0 if there's no traffic
-    [Tags]    Tier1    ODS-2379    ServerlessOnly
+    [Tags]    Tier1    ODS-2379    ServerlessOnly       deprecatedTest
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=autoscale-zero
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
     ${models_names}=    Create List    ${flan_model_name}
@@ -346,7 +346,7 @@ Verify User Can Validate Scale To Zero    # robocop: off=too-long-test-case,too-
 
 Verify User Can Set Requests And Limits For A Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Checks if user can set HW request and limits on their inference service object
-    [Tags]    Tier1    ODS-2380
+    [Tags]    Tier1    ODS-2380     deprecatedTest
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=hw-res
     ${test_namespace}=    Set Variable    hw-res
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -393,7 +393,7 @@ Verify User Can Set Requests And Limits For A Model    # robocop: off=too-long-t
 Verify Model Can Be Served And Query On A GPU Node    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model on GPU node
     ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    Tier1    ODS-2381    Resources-GPU    NVIDIA-GPUs    Kserve-caikit
+    [Tags]    Tier1    ODS-2381    Resources-GPU    NVIDIA-GPUs    Kserve-caikit    deprecatedTest
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=singlemodel-gpu
     ${test_namespace}=    Set Variable    singlemodel-gpu
     ${model_name}=    Set Variable    flan-t5-small-caikit
@@ -431,7 +431,7 @@ Verify Model Can Be Served And Query On A GPU Node    # robocop: off=too-long-te
 Verify Non Admin Can Serve And Query A Model    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Basic tests leveraging on a non-admin user for preparing, deploying and querying a LLM model
     ...                using Kserve and Caikit+TGIS runtime
-    [Tags]    Tier1    ODS-2326     Kserve-caikit
+    [Tags]    Tier1    ODS-2326     Kserve-caikit       deprecatedTest
     [Setup]    Run Keywords   Login To OCP Using API    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}  AND
     ...        Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=non-admin-test
     ${test_namespace}=    Set Variable     non-admin-test
@@ -466,7 +466,7 @@ Verify Non Admin Can Serve And Query A Model    # robocop: off=too-long-test-cas
 
 Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector    # robocop: off=too-long-test-case
     [Documentation]    Deploys and queries flan-t5-large-grammar-synthesis model
-    [Tags]    Tier2    ODS-2441
+    [Tags]    Tier2    ODS-2441     deprecatedTest
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=grammar-model
     ${test_namespace}=    Set Variable     grammar-model
     ${flan_model_name}=    Set Variable    flan-t5-large-grammar-synthesis-caikit
@@ -497,7 +497,7 @@ Verify User Can Serve And Query Flan-t5 Grammar Syntax Corrector    # robocop: o
 
 Verify User Can Serve And Query Flan-t5 Large    # robocop: off=too-long-test-case
     [Documentation]    Deploys and queries flan-t5-large model
-    [Tags]    Tier2    ODS-2434
+    [Tags]    Tier2    ODS-2434     deprecatedTest
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=flan-t5-large3
     ${test_namespace}=    Set Variable     flan-t5-large3
     ${flan_model_name}=    Set Variable    flan-t5-large
@@ -531,7 +531,7 @@ Verify Runtime Upgrade Does Not Affect Deployed Models    # robocop: off=too-lon
     ...                must remain unchanged after the runtime upgrade.
     ...                ATTENTION: this is an approximation of the runtime upgrade scenario, however
     ...                the real case scenario will be defined once RHODS actually ships the Caikit runtime.
-    [Tags]    Tier1    ODS-2404
+    [Tags]    Tier1    ODS-2404         deprecatedTest
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${TEST_NS}-up
     ${test_namespace}=    Set Variable     ${TEST_NS}-up
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit
@@ -622,7 +622,7 @@ Verify User Can Access Model Metrics From UWM    # robocop: off=too-long-test-ca
 Verify User Can Query A Model Using HTTP Calls    # robocop: off=too-long-test-case
     [Documentation]    From RHOAI 2.5 HTTP is allowed and default querying protocol.
     ...                This tests deploys the runtime enabling HTTP port and send queries to the model
-    [Tags]    ODS-2501    Tier1    ProductBug
+    [Tags]    ODS-2501    Tier1    ProductBug       deprecatedTest
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=kserve-http    protocol=http
     ${test_namespace}=    Set Variable     kserve-http
     ${model_name}=    Set Variable    flan-t5-small-caikit
@@ -650,7 +650,7 @@ Verify User Can Serve And Query A Model With Token    # robocop: off=too-long-te
     [Documentation]    Basic tests for preparing, deploying and querying a LLM model
     ...                With Token using Kserve and Caikit+TGIS runtime
     [Tags]    RHOAIENG-6306
-    ...       Tier1    AutomationBug
+    ...       Tier1    AutomationBug        deprecatedTest
     [Setup]    Set Project And Runtime    runtime=${TGIS_RUNTIME_NAME}     namespace=${TEST_NS}-cli
     ${test_namespace}=    Set Variable     ${TEST_NS}-cli
     ${flan_model_name}=    Set Variable    flan-t5-small-caikit

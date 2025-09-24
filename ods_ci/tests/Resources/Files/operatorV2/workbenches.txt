@@ -1,17 +1,14 @@
 ConfigMap               dsg-prune-flag
 ConfigMap               kube-root-ca.crt
-ConfigMap               modelmesh-controller-leader-lock
 ConfigMap               notebook-controller-config
 ConfigMap               notebooks-parameters
 ConfigMap               odh-common-config
 ConfigMap               openshift-service-ca.crt
 Deployment              notebook-controller-deployment
 Deployment              odh-notebook-controller-manager
-Endpoints               modelmesh-serving
 Endpoints               notebook-controller-service
 Endpoints               odh-notebook-controller-service
 Endpoints               odh-notebook-controller-webhook-service
-EndpointSlice           modelmesh-serving
 EndpointSlice           notebook-controller-service
 EndpointSlice           odh-notebook-controller-service
 EndpointSlice           odh-notebook-controller-webhook-service
@@ -57,7 +54,6 @@ ImageTag                rstudio-notebook:2023.1
 ImageTag                s2i-lab-elyra:v0.2.1
 KIND                    NAME
 Lease                   f9eb95d5.opendatahub.io
-Lease                   modelmesh-controller-leader-lock
 Lease                   odh-model-controller
 NetworkPolicy           opendatahub
 OdhDashboardConfig      odh-dashboard-config
@@ -89,7 +85,6 @@ Secret                  notebook-controller-service-account-token
 Secret                  odh-notebook-controller-manager-dockercfg
 Secret                  odh-notebook-controller-manager-token
 Secret                  odh-notebook-controller-webhook-cert
-Service                 modelmesh-serving
 Service                 notebook-controller-service
 Service                 odh-notebook-controller-service
 Service                 odh-notebook-controller-webhook-service
@@ -98,4 +93,3 @@ ServiceAccount          default
 ServiceAccount          deployer
 ServiceAccount          notebook-controller-service-account
 ServiceAccount          odh-notebook-controller-manager
-ServiceMonitor          modelmesh-metrics-monitor

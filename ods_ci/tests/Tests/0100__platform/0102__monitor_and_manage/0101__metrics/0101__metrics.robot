@@ -13,12 +13,10 @@ Test Tags           ExcludeOnODH
 
 *** Variables ***
 @{RECORD_GROUPS}    SLOs - Data Science Pipelines Operator    SLOs - Data Science Pipelines Application
-...    SLOs - Modelmesh Controller    SLOs - CodeFlare Operator    SLOs - MCAD Controller    Usage Metrics
 ...    SLOs - ODH Model Controller    SLOs - Kserve Controller Manager    SLOs - ODH Dashboard    Availability Metrics
 ...    SLOs - RHODS Operator v2    SLOs - TrustyAI Controller Manager    SLOs - Notebook Controller
 
 @{ALERT_GROUPS}    SLOs-haproxy_backend_http_responses_dsp    RHODS Data Science Pipelines    SLOs-probe_success_dsp
-...    SLOs-probe_success_modelmesh     SLOs-probe_success_dashboard    SLOs-probe_success_workbench
 ...    DeadManSnitch     SLOs-probe_success_codeflare     Distributed Workloads CodeFlare     KubeFlow Training Operator
 ...    SLOs-haproxy_backend_http_responses_dashboard     SLOs-probe_success_model_controller     SLOs-probe_success_kserve
 ...    Distributed Workloads Kuberay     Distributed Workloads Kueue     RHODS-PVC-Usage     RHODS Notebook controllers
@@ -116,7 +114,6 @@ Test Targets Are Available And Up In RHOAI Prometheus
     List Should Contain Value    ${targets}    KubeRay Operator
     List Should Contain Value    ${targets}    Kubeflow Notebook Controller Service Metrics
     List Should Contain Value    ${targets}    Kueue Operator
-    List Should Contain Value    ${targets}    Modelmesh Controller
     List Should Contain Value    ${targets}    ODH Model Controller
     List Should Contain Value    ${targets}    ODH Notebook Controller Service Metrics
     List Should Contain Value    ${targets}    TrustyAI Controller Manager
@@ -140,7 +137,7 @@ Test RHOAI Operator Metrics Are Defined
 
     @{expected_controller_names} =     Create List  auth  codeflare  dashboard
     ...                                    datasciencecluster  datasciencepipelines  dscinitialization  kserve  kueue
-    ...                                    modelcontroller  modelmeshserving  modelregistry  monitoring  ray
+    ...                                    modelcontroller  modelregistry  monitoring  ray
     ...                                    trainingoperator  trustyai  workbenches
 
     FOR   ${controller}    IN    @{expected_controller_names}

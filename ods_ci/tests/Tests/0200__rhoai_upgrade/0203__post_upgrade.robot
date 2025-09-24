@@ -165,32 +165,6 @@ Verify POD Status
     Oc Get      kind=Namespace      field_selector=metadata.name=${NOTEBOOKS_NAMESPACE}
     Log     "Verified rhods-notebook"
 
-Test Inference Post RHODS Upgrade
-    # robocop: off=too-many-calls-in-test-case
-    # robocop: off=too-long-test-case
-    [Documentation]    Test the inference result after having deployed a model
-    [Tags]                  Upgrade    ModelServing    ModelServer      deprecatedTest
-    Set Suite Variable    ${TEST_NS}    ovmsmodel-upgrade
-    Set Suite Variable    ${KSERVE_MODE}    Serverless    # RawDeployment   # Serverless
-    Set Suite Variable    ${INFERENCE_INPUT}    @tests/Resources/Files/modelmesh-mnist-input.json
-    Set Suite Variable    ${EXPECTED_INFERENCE_OUTPUT}    {"model_name":"ovms-model","model_version":"1","outputs":[{"name":"Plus214_Output_0","datatype":"FP32","shape":[1,10],"data":[-8.233053,-7.7497034,-3.4236815,12.3630295,-12.079103,17.266596,-10.570976,0.7130762,3.321715,1.3621228]}]}    # robocop: off=line-too-long
-    Setup Test Variables    model_name=ovms-model    use_gpu=${FALSE}
-    ...    kserve_mode=${KSERVE_MODE}
-
-    ${pod_name}=  Get Pod Name    namespace=${TEST_NS}
-    ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ${service_port}=    Extract Service Port    service_name=${model_name}-predictor    protocol=TCP
-    ...    namespace=${TEST_NS}
-    IF   "${KSERVE_MODE}"=="RawDeployment"
-        Start Port-forwarding    namespace=${TEST_NS}    pod_name=${pod_name}  local_port=${service_port}
-        ...    remote_port=${service_port}    process_alias=ovms-process
-    END
-    Verify Model Inference With Retries   model_name=${model_name}    inference_input=${INFERENCE_INPUT}
-    ...    expected_inference_output=${EXPECTED_INFERENCE_OUTPUT}   project_title=${TEST_NS}
-    ...    deployment_mode=Cli  kserve_mode=${KSERVE_MODE}    service_port=${service_port}
-    ...    end_point=/v2/models/${model_name}/infer  retries=2
-    [Teardown]      Run     oc delete project ${TEST_NS}
-
 Verify Custom Runtime Exists After Upgrade
     [Documentation]    Test the inference result after having deployed a model that requires Token Authentication
     [Tags]      Upgrade    ModelServing         deprecatedTest

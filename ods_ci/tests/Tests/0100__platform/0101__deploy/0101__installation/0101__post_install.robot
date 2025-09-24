@@ -367,8 +367,6 @@ Verify No Alerts Are Firing After Installation Except For DeadManSnitch    # rob
     Verify "Data Science Pipelines Application Route Error Burn Rate" Alerts Are Not Firing And Continue On Failure
     Verify "Data Science Pipelines Operator Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
     Verify "RHODS Data Science Pipelines" Alerts Are Not Firing And Continue On Failure
-    # model-mesh-alerting.rules
-    Verify "Modelmesh Controller Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
     # odh-model-controller-alerting.rules
     Verify "ODH Model Controller Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
     # kserve-alerting.rules

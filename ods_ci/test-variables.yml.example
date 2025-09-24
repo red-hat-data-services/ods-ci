@@ -73,7 +73,6 @@ COMPONENTS:
   datasciencepipelines: Managed
   ray: Managed
   codeflare: Managed
-  modelmeshserving: Managed
   workbenches: Managed
   kserve: Managed
   trustyai: Managed

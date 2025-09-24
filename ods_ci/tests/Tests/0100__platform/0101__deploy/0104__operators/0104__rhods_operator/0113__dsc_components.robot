@@ -26,10 +26,6 @@ ${TRAINING_LABEL_SELECTOR}                                  app.kubernetes.io/na
 ${TRAINING_DEPLOYMENT_NAME}                                 kubeflow-training-operator
 ${DATASCIENCEPIPELINES_LABEL_SELECTOR}                      app.kubernetes.io/name=data-science-pipelines-operator
 ${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}                     data-science-pipelines-operator-controller-manager
-${MODELMESH_CONTROLLER_LABEL_SELECTOR}                      app.kubernetes.io/instance=modelmesh-controller
-${MODELMESH_CONTROLLER_DEPLOYMENT_NAME}                     modelmesh-controller
-${ETCD_LABEL_SELECTOR}                                      component=model-mesh-etcd
-${ETCD_DEPLOYMENT_NAME}                                     etcd
 ${ODH_MODEL_CONTROLLER_LABEL_SELECTOR}                      app=odh-model-controller
 ${ODH_MODEL_CONTROLLER_DEPLOYMENT_NAME}                     odh-model-controller
 ${MODELREGISTRY_CONTROLLER_LABEL_SELECTOR}                  control-plane=model-registry-operator
@@ -53,7 +49,6 @@ ${IS_NOT_PRESENT}                                           1
 ...                                                         TRAINING=${EMPTY}
 ...                                                         DASHBOARD=${EMPTY}
 ...                                                         DATASCIENCEPIPELINES=${EMPTY}
-...                                                         MODELMESHERVING=${EMPTY}
 ...                                                         MODELREGISTRY=${EMPTY}
 ...                                                         KSERVE=${EMPTY}
 ...                                                         TRUSTYAI=${EMPTY}
@@ -66,7 +61,6 @@ ${IS_NOT_PRESENT}                                           1
 ...                                                     data-science-pipelines-operator-controller-manager
 ...                                                     kuberay-operator
 #...                                                     kueue-controller-manager   # RHOAIENG-34529
-...                                                     modelmesh-controller
 ...                                                     notebook-controller-deployment
 ...                                                     odh-model-controller
 ...                                                     odh-notebook-controller-manager
@@ -334,65 +328,6 @@ Validate TrustyAi Removed State
 
     [Teardown]      Restore DSC Component State     trustyai        ${TRUSTYAI_CONTROLLER_MANAGER_DEPLOYMENT_NAME}      ${TRUSTYAI_CONTROLLER_MANAGER_LABEL_SELECTOR}       ${SAVED_MANAGEMENT_STATES.TRUSTYAI}
 
-Validate Modelmeshserving Managed State
-    [Documentation]    Validate that the DSC Modelmeshserving component Managed state creates the expected resources,
-    ...    check that Modelmeshserving deployment is created and pods are in Ready state
-    [Tags]
-    ...    Operator
-    ...    Tier1
-    ...    RHOAIENG-8546
-    ...    modelmeshserving-managed
-    ...    Integration
-    Set DSC Component Managed State And Wait For Completion
-    ...    modelmeshserving
-    ...    ${MODELMESH_CONTROLLER_DEPLOYMENT_NAME}
-    ...    ${MODELMESH_CONTROLLER_LABEL_SELECTOR}
-    Check That Image Pull Path Is Correct       ${MODELMESH_CONTROLLER_DEPLOYMENT_NAME}     ${IMAGE_PULL_PATH}
-
-    # Check that ETC resources are ready
-    Wait For Resources To Be Available
-    ...    ${ETCD_DEPLOYMENT_NAME}
-    ...    ${ETCD_LABEL_SELECTOR}
-
-    # Check that ODH Model Controller resources are ready
-    Wait For Resources To Be Available
-    ...    ${ODH_MODEL_CONTROLLER_DEPLOYMENT_NAME}
-    ...    ${ODH_MODEL_CONTROLLER_LABEL_SELECTOR}
-
-    [Teardown]      Restore DSC Component State     modelmeshserving        ${MODELMESH_CONTROLLER_DEPLOYMENT_NAME}     ${MODELMESH_CONTROLLER_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.MODELMESHERVING}
-
-Validate Modelmeshserving Removed State
-    [Documentation]    Validate that Modelmeshserving management state Removed does remove relevant resources.
-    [Tags]
-    ...    Operator
-    ...    Tier1
-    ...    RHOAIENG-8546
-    ...    modelmeshserving-removed
-    ...    Integration
-
-    Set DSC Component Removed State And Wait For Completion
-    ...    modelmeshserving
-    ...    ${MODELMESH_CONTROLLER_DEPLOYMENT_NAME}
-    ...    ${MODELMESH_CONTROLLER_LABEL_SELECTOR}
-
-    # Check that ETC resources are removed
-    Wait For Resources To Be Removed
-    ...    ${ETCD_DEPLOYMENT_NAME}
-    ...    ${ETCD_LABEL_SELECTOR}
-
-    # Check that ODH Model Controller resources are removed, if KServe managementState is Removed
-    ${state}=    Get DSC Component State
-    ...    ${DSC_NAME}
-    ...    kserve
-    ...    ${OPERATOR_NS}
-    IF    "${state}" == "Removed"
-        Wait For Resources To Be Removed
-        ...    ${ODH_MODEL_CONTROLLER_DEPLOYMENT_NAME}
-        ...    ${ODH_MODEL_CONTROLLER_LABEL_SELECTOR}
-    END
-
-    [Teardown]      Restore DSC Component State     modelmeshserving        ${MODELMESH_CONTROLLER_DEPLOYMENT_NAME}     ${MODELMESH_CONTROLLER_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.MODELMESHERVING}
-
 Validate ModelRegistry Managed State
     [Documentation]    Validate that the DSC ModelRegistry component Managed state creates the expected resources,
     ...    check that ModelRegistry deployment is created and pod is in Ready state
@@ -646,7 +581,6 @@ Suite Setup
     ${SAVED_MANAGEMENT_STATES.TRAINING}=     Get DSC Component State    ${DSC_NAME}    trainingoperator    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.DASHBOARD}=     Get DSC Component State    ${DSC_NAME}    dashboard    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.DATASCIENCEPIPELINES}=     Get DSC Component State    ${DSC_NAME}    datasciencepipelines    ${OPERATOR_NS}
-    ${SAVED_MANAGEMENT_STATES.MODELMESHERVING}=     Get DSC Component State    ${DSC_NAME}    modelmeshserving    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.MODELREGISTRY}=     Get DSC Component State    ${DSC_NAME}    modelregistry    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.KSERVE}=     Get DSC Component State    ${DSC_NAME}    kserve    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.TRUSTYAI}=     Get DSC Component State    ${DSC_NAME}    trustyai    ${OPERATOR_NS}

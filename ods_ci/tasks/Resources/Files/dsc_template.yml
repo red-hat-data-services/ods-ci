@@ -26,9 +26,6 @@ spec:
     kueue:
       devFlags: <kueue_devflags>
       managementState: <kueue_value>
-    modelmeshserving:
-      devFlags: <modelmeshserving_devflags>
-      managementState: <modelmeshserving_value>
     ray:
       devFlags: <ray_devflags>
       managementState: <ray_value>

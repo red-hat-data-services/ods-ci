@@ -475,15 +475,6 @@ Verify "ODH Model Controller Probe Success Burn Rate" Alerts Severity And Contin
     Verify Alert Has A Given Severity And Continue On Failure
     ...    SLOs-probe_success_workbench    ODH Model Controller Probe Success 2h and 1d Burn Rate high    warning    alert-duration=3600
 
-Verify "Modelmesh Controller Probe Success Burn Rate" Alerts Severity And Continue On Failure
-    [Documentation]    Verifies that alert "Modelmesh Controller Probe Success Burn Rate" severity
-    Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success_workbench    Modelmesh Controller Probe Success 5m and 1h Burn Rate high    critical    alert-duration=120
-    Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success_workbench    Modelmesh Controller Probe Success 30m and 6h Burn Rate high    critical    alert-duration=900
-    Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success_workbench    Modelmesh Controller Probe Success 2h and 1d Burn Rate high    warning    alert-duration=3600
-
 Verify "KServe Controller Probe Success Burn Rate" Alerts Severity And Continue On Failure
     [Documentation]    Verifies that alert "KServe Controller Probe Success Burn Rate" severity
     Verify Alert Has A Given Severity And Continue On Failure

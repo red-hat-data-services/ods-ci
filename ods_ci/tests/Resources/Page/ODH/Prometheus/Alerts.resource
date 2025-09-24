@@ -116,16 +116,6 @@ Verify "RHODS Data Science Pipelines" Alerts Are Not Firing And Continue On Fail
     Verify Alert Is Not Firing And Continue On Failure
     ...    RHODS Data Science Pipelines    Data Science Pipeline ScheduledWorkflows Unavailable    alert-duration=120
 
-Verify "Modelmesh Controller Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
-    [Documentation]    Verifies that alert "Modelmesh Controller Probe Success Burn Rate" is not firing
-    ...     for all alert durations
-    Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-probe_success_modelmesh    Modelmesh Controller Probe Success 5m and 1h Burn Rate high    alert-duration=120
-    Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-probe_success_modelmesh    Modelmesh Controller Probe Success 30m and 6h Burn Rate high    alert-duration=900
-    Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-probe_success_modelmesh    Modelmesh Controller Probe Success 2h and 1d Burn Rate high    alert-duration=3600
-
 Verify "ODH Model Controller Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
     [Documentation]    Verifies that alert "ODH Model Controller Probe Success Burn Rate" is not firing
     ...     for all alert durations

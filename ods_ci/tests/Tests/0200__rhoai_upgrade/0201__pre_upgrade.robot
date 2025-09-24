@@ -17,7 +17,6 @@ Resource            ../../Resources/Common.robot
 Resource            ../../Resources/Page/OCPDashboard/Pods/Pods.robot
 Resource            ../../Resources/Page/OCPDashboard/Builds/Builds.robot
 Resource            ../../Resources/Page/HybridCloudConsole/OCM.robot
-Resource            ../../Resources/CLI/ModelServing/modelmesh.resource
 Resource            ../../Resources/CLI/DataSciencePipelines/DataSciencePipelinesUpgradeTesting.resource
 Resource            ../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 Resource            ../../Resources/Page/DistributedWorkloads/WorkloadMetricsUI.resource

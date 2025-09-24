@@ -15,7 +15,6 @@ ${DSCI_NAME} =    default-dsci
 ...    datasciencepipelines
 ...    kserve
 ...    kueue
-...    modelmeshserving
 ...    ray
 ...    trainingoperator
 ...    trustyai
@@ -221,16 +220,6 @@ Verify RHODS Installation
     Log  Verified Notebooks NS: ${NOTEBOOKS_NAMESPACE}
   END
 
-  ${modelmeshserving} =    Is Component Enabled    modelmeshserving    ${DSC_NAME}
-  IF    "${modelmeshserving}" == "true"
-    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app=odh-model-controller    timeout=400s
-    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=component=model-mesh-etcd    timeout=400s
-    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/name=modelmesh-controller    timeout=400s
-  END
-
   ${datasciencepipelines} =    Is Component Enabled    datasciencepipelines    ${DSC_NAME}
   IF    "${datasciencepipelines}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
@@ -308,7 +297,7 @@ Verify RHODS Installation
     END
   END
 
-  IF    "${dashboard}" == "true" or "${workbenches}" == "true" or "${modelmeshserving}" == "true" or "${datasciencepipelines}" == "true" or "${kserve}" == "true" or "${kueue}" == "true" or "${codeflare}" == "true" or "${ray}" == "true" or "${trustyai}" == "true" or "${modelregistry}" == "true" or "${trainingoperator}" == "true"    # robocop: disable
+  IF    "${dashboard}" == "true" or "${workbenches}" == "true" or "${datasciencepipelines}" == "true" or "${kserve}" == "true" or "${kueue}" == "true" or "${codeflare}" == "true" or "${ray}" == "true" or "${trustyai}" == "true" or "${modelregistry}" == "true" or "${trainingoperator}" == "true"    # robocop: disable
       Log To Console    Waiting for pod status in ${APPLICATIONS_NAMESPACE}
       Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=200
       Log  Verified Applications NS: ${APPLICATIONS_NAMESPACE}  console=yes

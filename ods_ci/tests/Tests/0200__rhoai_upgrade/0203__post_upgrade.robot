@@ -8,11 +8,9 @@ Resource            ../../Resources/OCP.resource
 Resource            ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboardResources.resource
-Resource            ../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Resource            ../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
-Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/ModelServer.resource
 Resource            ../../Resources/Page/ODH/AiApps/Anaconda.resource
 Resource            ../../Resources/Page/LoginPage.robot
 Resource            ../../Resources/Page/OCPLogin/OCPLogin.robot
@@ -24,7 +22,6 @@ Resource            ../../Resources/Page/DistributedWorkloads/DistributedWorkloa
 Resource            ../../Resources/Page/DistributedWorkloads/WorkloadMetricsUI.resource
 Resource            ../../Resources/CLI/MustGather/MustGather.resource
 Resource            ../../Resources/CLI/DataSciencePipelines/DataSciencePipelinesUpgradeTesting.resource
-Resource            ../../Resources/Page/ModelRegistry/ModelRegistry.resource
 Resource            ../../Resources/Page/FeatureStore/FeatureStore.resource
 
 Suite Setup         Upgrade Suite Setup
@@ -119,13 +116,6 @@ Verify Custom Image Is Present
     IF    not ${status}    Fail    Notebook image is deleted after the upgrade
     [Teardown]      Delete OOTB Image
 
-Verify Disable Runtime Is Present
-    [Documentation]    Disable the Serving runtime using Cli
-    [Tags]      Upgrade    ModelServing         deprecatedTest
-    ${rn}       Set Variable        ${payload[0]['spec']['templateDisablement']}
-    List Should Contain Value       ${rn}       ovms-gpu
-    [Teardown]      Enable Model Serving Runtime Using CLI      namespace=redhat-ods-applications
-
 Reset PVC Size Via UI
     [Documentation]    Sets a Pod toleration via the admin UI
     [Tags]      Upgrade    Dashboard
@@ -164,43 +154,6 @@ Verify POD Status
     Log     Verified ${MONITORING_NAMESPACE}        console=yes
     Oc Get      kind=Namespace      field_selector=metadata.name=${NOTEBOOKS_NAMESPACE}
     Log     "Verified rhods-notebook"
-
-Test Inference Post RHODS Upgrade
-    # robocop: off=too-many-calls-in-test-case
-    # robocop: off=too-long-test-case
-    [Documentation]    Test the inference result after having deployed a model
-    [Tags]                  Upgrade    ModelServing    ModelServer      deprecatedTest
-    Set Suite Variable    ${TEST_NS}    ovmsmodel-upgrade
-    Set Suite Variable    ${KSERVE_MODE}    Serverless    # RawDeployment   # Serverless
-    Set Suite Variable    ${INFERENCE_INPUT}    @tests/Resources/Files/modelmesh-mnist-input.json
-    Set Suite Variable    ${EXPECTED_INFERENCE_OUTPUT}    {"model_name":"ovms-model","model_version":"1","outputs":[{"name":"Plus214_Output_0","datatype":"FP32","shape":[1,10],"data":[-8.233053,-7.7497034,-3.4236815,12.3630295,-12.079103,17.266596,-10.570976,0.7130762,3.321715,1.3621228]}]}    # robocop: off=line-too-long
-    Setup Test Variables    model_name=ovms-model    use_gpu=${FALSE}
-    ...    kserve_mode=${KSERVE_MODE}
-
-    ${pod_name}=  Get Pod Name    namespace=${TEST_NS}
-    ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ${service_port}=    Extract Service Port    service_name=${model_name}-predictor    protocol=TCP
-    ...    namespace=${TEST_NS}
-    IF   "${KSERVE_MODE}"=="RawDeployment"
-        Start Port-forwarding    namespace=${TEST_NS}    pod_name=${pod_name}  local_port=${service_port}
-        ...    remote_port=${service_port}    process_alias=ovms-process
-    END
-    Verify Model Inference With Retries   model_name=${model_name}    inference_input=${INFERENCE_INPUT}
-    ...    expected_inference_output=${EXPECTED_INFERENCE_OUTPUT}   project_title=${TEST_NS}
-    ...    deployment_mode=Cli  kserve_mode=${KSERVE_MODE}    service_port=${service_port}
-    ...    end_point=/v2/models/${model_name}/infer  retries=2
-    [Teardown]      Run     oc delete project ${TEST_NS}
-
-Verify Custom Runtime Exists After Upgrade
-    [Documentation]    Test the inference result after having deployed a model that requires Token Authentication
-    [Tags]      Upgrade    ModelServing         deprecatedTest
-    [Setup]     Begin Web Test
-    Menu.Navigate To Page       Settings        Serving runtimes
-    Wait Until Page Contains        Add serving runtime     timeout=15s
-    Page Should Contain Element     //tr[@id='caikit-runtime']
-    Delete Serving Runtime Template From CLI By Runtime Name OR Display Name
-    ...    runtime_name=caikit-runtime
-    [Teardown]      Dashboard Test Teardown
 
 Verify Ray Cluster Exists And Monitor Workload Metrics By Submitting Ray Job After Upgrade
     # robocop: off=too-long-test-case
@@ -259,19 +212,7 @@ Verify Ray Cluster Exists And Monitor Workload Metrics By Submitting Ray Job Aft
     [Teardown]      Run Keywords        Cleanup Codeflare-SDK Setup     AND
     ...     Codeflare Upgrade Tests Teardown        ${PRJ_UPGRADE}      ${DW_PROJECT_CREATED}
 
-Run Training Operator KFTO Run PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_5_1)
-    [Documentation]    Run Training Operator KFTO Run PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_5_1)
-    [Tags]      Upgrade    TrainingKubeflow    deprecatedTest
-    [Setup]     Prepare Training Operator KFTO E2E Test Suite
-    Run Training Operator KFTO Test          TestRunPytorchjob
-    [Teardown]      Teardown Training Operator KFTO E2E Test Suite
 
-Run Training Operator KFTO Run Sleep PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_5_1)
-    [Documentation]    Verify that running PyTorchJob Pod wasn't restarted with NVIDIA CUDA image (PyTorch 2_5_1)
-    [Tags]      Upgrade    TrainingKubeflow    deprecatedTest
-    [Setup]     Prepare Training Operator KFTO E2E Test Suite
-    Run Training Operator KFTO Test      TestVerifySleepPytorchjob
-    [Teardown]      Teardown Training Operator KFTO E2E Test Suite
 
 Verify that the must-gather image provides RHODS logs and info
     [Documentation]    Tests the must-gather image for ODH/RHOAI after upgrading

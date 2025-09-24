@@ -104,8 +104,6 @@ Fetch Cluster Type By Domain
 
 Assign Vars According To Product
     [Documentation]    Assign vars related to product
-    # Common vars
-    Set Suite Variable    ${AUTHORINO_CR_NS}    ${APPLICATIONS_NAMESPACE}-auth-provider
     # Product specific vars
     IF    "${PRODUCT}" == "RHODS"
         Set Suite Variable    ${OPERATOR_SUBSCRIPTION_LABEL}     operators.coreos.com/rhods-operator.${OPERATOR_NAMESPACE}

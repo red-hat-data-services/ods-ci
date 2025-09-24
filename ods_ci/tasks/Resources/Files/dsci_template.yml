@@ -1,4 +1,4 @@
-apiVersion: dscinitialization.opendatahub.io/v1
+apiVersion: dscinitialization.opendatahub.io/v2
 kind: DSCInitialization
 metadata:
   name: <dsci_name>
@@ -13,15 +13,6 @@ spec:
     monitoring:
         managementState: Managed
         namespace: <monitoring_namespace>
-    serviceMesh:
-        auth:
-            audiences:
-                - 'https://kubernetes.default.svc'
-        controlPlane:
-            metricsCollection: Istio
-            name: data-science-smcp
-            namespace: istio-system
-        managementState: Managed
     trustedCABundle:
         customCABundle: ''
         managementState: Managed

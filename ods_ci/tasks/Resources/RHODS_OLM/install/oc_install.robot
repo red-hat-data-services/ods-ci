@@ -23,17 +23,9 @@ ${DSCI_NAME} =    default-dsci
 ...    modelregistry
 ...    feastoperator
 ...    llamastackoperator
-${SERVERLESS_OP_NAME}=     serverless-operator
-${SERVERLESS_SUB_NAME}=    serverless-operator
-${SERVERLESS_NS}=    openshift-serverless
 ${OPENSHIFT_OPERATORS_NS}=    openshift-operators
 ${COMMUNITY_OPERATORS_NS}=    openshift-marketplace
 ${COMMUNITY_OPERATORS_CS}=    community-operators
-${SERVICEMESH_OP_NAME}=     servicemeshoperator
-${SERVICEMESH_SUB_NAME}=    servicemeshoperator
-${AUTHORINO_OP_NAME}=     authorino-operator
-${AUTHORINO_SUB_NAME}=    authorino-operator
-${AUTHORINO_CHANNEL_NAME}=  stable
 ${CLUSTER_OBS_OP_NAME}=  cluster-observability-operator
 ${CLUSTER_OBS_SUB_NAME}=  cluster-observability-operator
 ${CLUSTER_OBS_CHANNEL_NAME}=  stable
@@ -69,10 +61,7 @@ ${DEFAULT_WORKBENCHES_NAMESPACE_ODH}=    opendatahub
 ${CUSTOM_MANIFESTS}=    ${EMPTY}
 ${IS_NOT_PRESENT}=      1
 ${DSC_TEMPLATE}=    dsc_template.yml
-${DSC_TEMPLATE_RAW}=    dsc_template_raw.yml
 ${DSCI_TEMPLATE}=    dsci_template.yml
-${DSCI_TEMPLATE_RAW}=    dsci_template_raw.yml
-@{RHOAI_DEPENDENCIES}=    Create List
 ${CONFIG_ENV}=    ${EMPTY}
 ${NFS_OP_NAME}=    nfs-provisioner-operator
 ${NFS_OP_NS}=    openshift-operators
@@ -91,20 +80,6 @@ Install RHODS
   Log    Start installing RHOAI with:\n\- cluster type: ${cluster_type}\n\- image_url: ${image_url}\n\- update_channel: ${UPDATE_CHANNEL}    console=yes    #robocop:disable
   Log    \- rhoai_version: ${rhoai_version}\n\- is_upgrade: ${is_upgrade}\n\- install_plan_approval: ${install_plan_approval}\n\- CATALOG_SOURCE: ${CATALOG_SOURCE}   console=yes    #robocop:disable
   Assign Vars According To Product
-  ${install_authorino_dependency} =    Get Variable Value    ${INSTALL_AUTHORINO_DEPENDENCY}    true
-  IF    "${install_authorino_dependency}" == "true"
-      Append To List     ${RHOAI_DEPENDENCIES}     authorino
-  END
-  ${kserve_raw_deployment} =    Get Variable Value    ${KSERVE_RAW_DEPLOYMENT}    false
-  IF    "${kserve_raw_deployment}" == "true"
-      Set Suite Variable    ${CONFIG_ENV}    -e DISABLE_DSC_CONFIG    # robocop: disable
-      Set Suite Variable    ${DSC_TEMPLATE}    ${DSC_TEMPLATE_RAW}    # robocop: disable
-      Set Suite Variable    ${DSCI_TEMPLATE}    ${DSCI_TEMPLATE_RAW}    # robocop: disable
-  ELSE
-      Append To List     ${RHOAI_DEPENDENCIES}     servicemesh
-      Append To List     ${RHOAI_DEPENDENCIES}     serverless
-  END
-  Install Rhoai Dependencies
   ${enable_new_observability_stack} =    Is New Observability Stack Enabled
   IF    ${enable_new_observability_stack}
           Install Observability Dependencies
@@ -656,90 +631,6 @@ Catalog Is Ready
     ...    oc get catalogsources ${catalog_name} -n ${namespace} -o json | jq ."status.connectionState.lastObservedState"    # robocop: disable:line-too-long
     Should Be Equal As Integers   ${rc}  0  msg=Error detected while getting CatalogSource status state
     Should Be Equal As Strings    "READY"    ${output}
-
-Install Authorino Operator Via Cli
-    [Documentation]    Install Authorino Operator Via CLI
-    ${is_installed} =   Check If Operator Is Installed Via CLI   ${AUTHORINO_OP_NAME}
-    IF    not ${is_installed}
-          Install ISV Operator From OperatorHub Via CLI    operator_name=${AUTHORINO_OP_NAME}
-             ...    subscription_name=${AUTHORINO_SUB_NAME}
-             ...    channel=${AUTHORINO_CHANNEL_NAME}
-             ...    catalog_source_name=redhat-operators
-          Wait Until Operator Subscription Last Condition Is
-             ...    type=CatalogSourcesUnhealthy    status=False
-             ...    reason=AllCatalogSourcesHealthy    subcription_name=${AUTHORINO_SUB_NAME}
-             ...    retry=150
-          Wait For Pods To Be Ready    label_selector=control-plane=authorino-operator
-             ...    namespace=${OPENSHIFT_OPERATORS_NS}
-    ELSE
-          Log To Console    message=Authorino Operator is already installed
-    END
-
-Install Service Mesh Operator Via Cli
-    [Documentation]    Install Service Mesh Operator Via CLI
-    ${is_installed} =   Check If Operator Is Installed Via CLI   ${SERVICEMESH_OP_NAME}
-    IF    not ${is_installed}
-          Install ISV Operator From OperatorHub Via CLI    operator_name=${SERVICEMESH_OP_NAME}
-             ...    subscription_name=${SERVICEMESH_SUB_NAME}
-             ...    catalog_source_name=redhat-operators
-          Wait Until Operator Subscription Last Condition Is
-             ...    type=CatalogSourcesUnhealthy    status=False
-             ...    reason=AllCatalogSourcesHealthy    subcription_name=${SERVICEMESH_SUB_NAME}
-             ...    retry=150
-          Wait For Pods To Be Ready    label_selector=name=istio-operator
-             ...    namespace=${OPENSHIFT_OPERATORS_NS}
-    ELSE
-          Log To Console    message=Service Mesh Operator is already installed
-    END
-
-Install Serverless Operator Via Cli
-    [Documentation]    Install Serverless Operator Via CLI
-    ${is_installed} =   Check If Operator Is Installed Via CLI   ${SERVERLESS_OP_NAME}
-    IF    not ${is_installed}
-        ${rc}    ${out} =    Run And Return Rc And Output    oc create namespace ${SERVERLESS_NS}
-        Install ISV Operator From OperatorHub Via CLI    operator_name=${SERVERLESS_OP_NAME}
-             ...    namespace=${SERVERLESS_NS}
-             ...    subscription_name=${SERVERLESS_SUB_NAME}
-             ...    catalog_source_name=redhat-operators
-             ...    operator_group_name=serverless-operators
-             ...    operator_group_ns=${SERVERLESS_NS}
-             ...    operator_group_target_ns=${NONE}
-        Wait Until Operator Subscription Last Condition Is
-             ...    type=CatalogSourcesUnhealthy    status=False
-             ...    reason=AllCatalogSourcesHealthy    subcription_name=${SERVERLESS_SUB_NAME}
-             ...    namespace=${SERVERLESS_NS}
-             ...    retry=150
-        Wait For Pods To Be Ready    label_selector=name=knative-openshift
-             ...    namespace=${SERVERLESS_NS}
-        Wait For Pods To Be Ready    label_selector=name=knative-openshift-ingress
-             ...    namespace=${SERVERLESS_NS}
-        Wait For Pods To Be Ready    label_selector=name=knative-operator
-             ...    namespace=${SERVERLESS_NS}
-    ELSE
-        Log To Console    message=Serverless Operator is already installed
-    END
-
-Install Rhoai Dependencies
-    [Documentation]    Install Dependent Operators For Rhoai
-    [Arguments]    ${dependencies}=${RHOAI_DEPENDENCIES}
-    Set Suite Variable   ${FILES_RESOURCES_DIRPATH}    tests/Resources/Files
-    Set Suite Variable   ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
-    Set Suite Variable   ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
-    IF    "authorino" in ${dependencies}
-        Install Authorino Operator Via Cli
-    ELSE
-        Log To Console    message=Authorino Operator is skipped (not included in rhoai dependencies)
-    END
-    IF    "servicemesh" in ${dependencies}
-        Install Service Mesh Operator Via Cli
-    ELSE
-        Log To Console    message=ServiceMesh Operator is skipped (not included in rhoai dependencies)
-    END
-    IF    "serverless" in ${dependencies}
-        Install Serverless Operator Via Cli
-    ELSE
-        Log To Console    message=Serverless Operator is skipped (not included in rhoai dependencies)
-    END
 
 Install Cert Manager Operator Via Cli
     [Documentation]    Install Cert Manager Operator Via CLI

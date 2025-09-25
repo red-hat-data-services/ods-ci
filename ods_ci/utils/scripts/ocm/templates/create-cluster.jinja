@@ -23,12 +23,20 @@
       "compute_machine_type": {
         "id": "{{ COMPUTE_MACHINE_TYPE }}"
       }
+      {% if ARCHITECTURE == "arm64" %}
+        ,"multi_arch": {
+            "enabled": true
+        }
+        {% endif %}
     },
     {% if CLOUD_PROVIDER == "aws" %}
     "aws": {
       "access_key_id": "{{ AWS_ACCESS_KEY_ID }}",
       "secret_access_key": "{{ AWS_SECRET_ACCESS_KEY }}",
       "account_id": "{{ AWS_ACCOUNT_ID }}",
+      {% if ARCHITECTURE == "arm64" %}
+        "multi_arch": true,
+        {% endif %}
       "tags": {
           "team": "{{ TEAM }}"
       }

@@ -4,7 +4,6 @@ Documentation       Deploying LlamaStack following ODH docs: https://github.com/
 Resource            ../../Resources/OCP.resource
 Resource            ../../Resources/ODS.robot
 Resource            ../../Resources/Common.robot
-Resource            ../../Resources/ServiceMesh.resource
 
 
 *** Variables ***
@@ -83,9 +82,6 @@ Setup Test Environment
 
     # Wait for serving runtime to be ready
     Wait Until Keyword Succeeds    2 min    10s    Check Serving Runtime Ready
-
-    # Set DSCI serviceMesh managementState to Removed
-    Set Service Mesh Management State    Removed    ${APPLICATIONS_NAMESPACE}
 
     # Configure DSC components
     Configure DSC Components
@@ -274,22 +270,19 @@ Copy File To Container
 
 Teardown Test Environment
     [Documentation]    Cleans up the test environment by deleting resources
-    ...    and reverting DSCI serviceMesh managementState and DSC components
-    # Revert DSCI serviceMesh managementState back to Managed
-    Set Service Mesh Management State    Managed    ${APPLICATIONS_NAMESPACE}
-
+    ...    and reverting DSC components
     # Revert DSC components to original state
     Revert DSC Components
 
     # Delete the LlamaStackDistribution CR
-    Run And Return Rc    oc delete LlamaStackDistribution ${LLAMASTACK_CR_NAME} -n ${LLAMASTACK_NAMESPACE} --ignore-not-found        #robocop: disable: line-too-long  
+    Run And Return Rc    oc delete LlamaStackDistribution ${LLAMASTACK_CR_NAME} -n ${LLAMASTACK_NAMESPACE} --ignore-not-found        #robocop: disable: line-too-long
 
     # Delete the serving runtime
     Run And Return Rc    oc delete servingruntime llama-32-3b-instruct -n ${LLAMASTACK_NAMESPACE} --ignore-not-found
 
     # Remove finalizers from inference service before deletion
-    ${finalizer_patch_data}=    Set Variable    [{"op": "remove", "path": "/metadata/finalizers"}]        #robocop: disable: line-too-long  
-    Run And Return Rc    oc patch inferenceservice -n ${LLAMASTACK_NAMESPACE} --all --type='json' -p='${finalizer_patch_data}' --ignore-not-found        #robocop: disable: line-too-long  
+    ${finalizer_patch_data}=    Set Variable    [{"op": "remove", "path": "/metadata/finalizers"}]        #robocop: disable: line-too-long
+    Run And Return Rc    oc patch inferenceservice -n ${LLAMASTACK_NAMESPACE} --all --type='json' -p='${finalizer_patch_data}' --ignore-not-found        #robocop: disable: line-too-long
 
     # Delete the inference service
     Run And Return Rc    oc delete inferenceservice -n ${LLAMASTACK_NAMESPACE} --all --ignore-not-found

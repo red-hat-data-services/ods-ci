@@ -421,7 +421,7 @@ Check Particular Text Is Present In Rhods-operator's Log
     [Arguments]         ${text_to_check}
     Open OCP Console
     Login To Openshift    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}    ${OCP_ADMIN_USER.AUTH_TYPE}
-    Maybe Skip Tour
+    Maybe Skip Tour    ${OCP_ADMIN_USER.USERNAME}
     ${val_result}=  Get Pod Logs From UI  namespace=${OPERATOR_NAMESPACE}
     ...                                   pod_search_term=rhods-operator
     ...                                   container_button_id=rhods-deployer-link

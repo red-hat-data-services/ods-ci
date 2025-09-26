@@ -58,7 +58,7 @@ Login To Openshift
     Input Text  id=inputPassword  ${ocp_user_pw}
     Click Button   //*[@type="submit"]
     Wait Until Page Does Not Contain    Log in to your account    timeout=30s
-    Maybe Skip Tour
+    Maybe Skip Tour    ${ocp_user_name}
 
 Log In Should Be Requested
     [Documentation]    Passes if the login page appears and fails otherwise

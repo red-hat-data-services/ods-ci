@@ -108,7 +108,7 @@ Verify The Workload Metrics By Submitting Kueue Batch Workload
 
 
     Check Distributed Workload Resource Metrics Status    ${JOB_NAME_QUEUE}    Running
-    Check Distributed Worklaod Status Overview    ${JOB_NAME_QUEUE}    Running    All pods were ready or succeeded since the workload admission
+    Check Distributed Worklaod Status Overview    ${JOB_NAME_QUEUE}    Running    All pods reached readiness and the workload is running
 
     Click Button    ${PROJECT_METRICS_TAB_XP}
 

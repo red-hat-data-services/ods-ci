@@ -108,7 +108,7 @@ Verify The Workload Metrics By Submitting Kueue Batch Workload
 
 
     Check Distributed Workload Resource Metrics Status    ${JOB_NAME_QUEUE}    Running
-    Check Distributed Worklaod Status Overview    ${JOB_NAME_QUEUE}    Running    All pods were ready or succeeded since the workload admission
+    Check Distributed Worklaod Status Overview    ${JOB_NAME_QUEUE}    Running    All pods reached readiness and the workload is running
 
     Click Button    ${PROJECT_METRICS_TAB_XP}
 
@@ -158,7 +158,7 @@ Verify The Workload Metrics By Submitting Ray Workload
     Check Requested Resources    ${PRJ_TITLE}    ${CPU_SHARED_QUOTA}    ${MEMEORY_SHARED_QUOTA}    ${cpu_requested}    ${memory_requested}    RayCluster
 
     Check Distributed Workload Resource Metrics Status    ${RAY_CLUSTER_NAME}    Running
-    Check Distributed Worklaod Status Overview    ${RAY_CLUSTER_NAME}    Running    All pods were ready or succeeded since the workload admission
+    Check Distributed Worklaod Status Overview    ${RAY_CLUSTER_NAME}    Running    All pods reached readiness and the workload is running
 
     Click Button    ${PROJECT_METRICS_TAB_XP}
     Check Distributed Workload Resource Metrics Chart    ${PRJ_TITLE}    ${cpu_requested}    ${memory_requested}    RayCluster    ${RAY_CLUSTER_NAME}

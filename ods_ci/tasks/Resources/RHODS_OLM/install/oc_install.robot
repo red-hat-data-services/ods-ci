@@ -228,7 +228,7 @@ Verify RHODS Installation
       ...    ${OPERATOR_NAMESPACE}      ${IS_PRESENT}
       Wait Until Keyword Succeeds    3 min    0 sec
       ...    Is Resource Present    Auth    auth
-      ...    ${OPERATOR_NAMESPACE}      ${IS_NOT_PRESENT}
+      ...    ${OPERATOR_NAMESPACE}      ${IS_PRESENT}
       ${enable_new_observability_stack} =    Is New Observability Stack Enabled
       IF    ${enable_new_observability_stack}
               Patch DSCInitialization With Monitoring Info

@@ -203,7 +203,7 @@ def generate_test_config_file(
     with open(config_file, "r") as fh:
         data = yaml.safe_load(fh)
 
-    print(config_data)
+    print(f"config_data (python): {config_data}")
 
     data["BROWSER"]["NAME"] = config_data["BROWSER"]["NAME"]
     data["S3"]["AWS_ACCESS_KEY_ID"] = config_data["S3"]["AWS_ACCESS_KEY_ID"]

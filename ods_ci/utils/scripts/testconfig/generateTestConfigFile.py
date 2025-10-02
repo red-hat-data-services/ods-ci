@@ -317,6 +317,10 @@ def generate_test_config_file(
     if config_data.get("MARIADB_CA_BUNDLE"):
         data["MARIADB_CA_BUNDLE"] = config_data["MARIADB_CA_BUNDLE"]
 
+    # External cluster auth (optional)
+    if config_data.get("EXTERNAL_AUTH"):
+        data["EXTERNAL_AUTH"] = config_data["EXTERNAL_AUTH"]
+
     if components:
         print("Setting components")
         print(components)

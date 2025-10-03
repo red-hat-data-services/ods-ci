@@ -34,12 +34,14 @@ items:
       baseDomain: {{ base_domain }}
       compute:
       - name: worker
+        architecture: {{ aws_worker_architecture|default("amd64") }}
         platform:
           aws:
             type: {{ worker_node_instance_type|default("m5.2xlarge") }}
         replicas: {{ worker_node_replicas|default("2") }}
       controlPlane:
         name: master
+        architecture: {{ aws_master_architecture|default("amd64") }}
         platform:
           aws:
             type: {{ master_node_instance_type|default("m5.2xlarge") }}
@@ -79,4 +81,4 @@ items:
     name: {{ image_set|default("rhods-openshift") }}
     namespace: {{ hive_claim_ns }}
   spec:
-    releaseImage: {{ openshift_image|default("quay.io/openshift-release-dev/ocp-release:4.15.25-x86_64") }}
+    releaseImage: {{ openshift_image|default("quay.io/openshift-release-dev/ocp-release:4.15.25-multi") }}

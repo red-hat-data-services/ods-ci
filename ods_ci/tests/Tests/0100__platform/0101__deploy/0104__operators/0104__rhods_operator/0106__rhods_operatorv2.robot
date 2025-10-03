@@ -10,7 +10,7 @@ Suite Teardown   Patch DataScienceCluster CustomResource To Original Configurati
 
 
 *** Variables ***
-@{COMPONENTS} =    dashboard    datasciencepipelines    kserve    modelmeshserving    workbenches    codeflare    ray
+@{COMPONENTS} =    dashboard    datasciencepipelines    kserve    workbenches    codeflare    ray
 ${DSC_NAME} =    default
 ${PATCH_PREFIX} =    oc patch datasciencecluster ${DSC_NAME} --type='merge' -p '{"spec": {"components": {
 @{ORIGINAL_CONFIGURATION}
@@ -22,7 +22,6 @@ Verify Dashboard Component
     Component Should Be Enabled    dashboard
     Component Should Not Be Enabled    datasciencepipelines
     Component Should Not Be Enabled    kserve
-    Component Should Not Be Enabled    modelmeshserving
     Component Should Not Be Enabled    workbenches
 
 Verify DataSciencePipelines Component
@@ -31,16 +30,6 @@ Verify DataSciencePipelines Component
     Component Should Be Enabled    datasciencepipelines
     Component Should Not Be Enabled    dashboard
     Component Should Not Be Enabled    kserve
-    Component Should Not Be Enabled    modelmeshserving
-    Component Should Not Be Enabled    workbenches
-
-Verify ModelMeshServing Component
-    [Documentation]
-    Run Keyword And Continue On Failure    Verify Component Resources    component=modelmeshserving
-    Component Should Be Enabled    modelmeshserving
-    Component Should Not Be Enabled    dashboard
-    Component Should Not Be Enabled    kserve
-    Component Should Not Be Enabled    modelmeshserving
     Component Should Not Be Enabled    workbenches
 
 Verify Workbenches Component
@@ -49,7 +38,6 @@ Verify Workbenches Component
     Component Should Be Enabled    workbenches
     Component Should Not Be Enabled    dashboard
     Component Should Not Be Enabled    kserve
-    Component Should Not Be Enabled    modelmeshserving
     Component Should Not Be Enabled    datasciencepipelines
 
 Verify Kserve Component
@@ -58,7 +46,6 @@ Verify Kserve Component
     Component Should Be Enabled    kserve
     Component Should Not Be Enabled    dashboard
     Component Should Not Be Enabled    workbenches
-    Component Should Not Be Enabled    modelmeshserving
     Component Should Not Be Enabled    datasciencepipelines
 
 Verify No Components Enabled
@@ -67,7 +54,6 @@ Verify No Components Enabled
     Component Should Not Be Enabled    datasciencepipelines
     Component Should Not Be Enabled    dashboard
     Component Should Not Be Enabled    kserve
-    Component Should Not Be Enabled    modelmeshserving
     Component Should Not Be Enabled    workbenches
 
 

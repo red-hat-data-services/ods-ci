@@ -85,8 +85,33 @@ function rerun_accelerator_migration() {
 }
 
 wait_until_pod_ready_status  "gpu-operator"
-oc get csv -n nvidia-gpu-operator "$CSVNAME" -o jsonpath='{.metadata.annotations.alm-examples}' | jq .[0] > clusterpolicy.json
-oc apply -f clusterpolicy.json
+
+echo "Applying NVIDIA vendor label NodeFeatureRule for GPU detection"
+oc apply -f "${GPU_INSTALL_DIR}/nvidia-vendor-label-rule.yaml"
+
+echo "Waiting for NFD to add NVIDIA vendor labels to GPU nodes..."
+timeout=300
+elapsed=0
+gpu_nodes_found=false
+while [ $elapsed -lt $timeout ]; do
+  gpu_node_count=$(oc get nodes -l feature.node.kubernetes.io/pci-10de.present=true --no-headers 2>/dev/null | wc -l)
+  if [ "$gpu_node_count" -gt 0 ]; then
+    echo "Found $gpu_node_count GPU node(s) with NVIDIA vendor label"
+    gpu_nodes_found=true
+    break
+  fi
+  echo "Waiting for NVIDIA vendor labels on GPU nodes... ($elapsed/$timeout)"
+  sleep 5
+  elapsed=$((elapsed + 5))
+done
+
+if [ "$gpu_nodes_found" = false ]; then
+  echo "WARNING: No GPU nodes found with NVIDIA vendor label after ${timeout}s"
+  echo "GPU operator may not be able to deploy to nodes"
+fi
+
+echo "Applying NVIDIA GPU ClusterPolicy"
+oc apply -f "${GPU_INSTALL_DIR}/cluster-policy.yaml"
 wait_until_pod_ready_status "nvidia-device-plugin-daemonset" 600
 wait_until_pod_ready_status "nvidia-container-toolkit-daemonset"
 wait_until_pod_ready_status "nvidia-dcgm-exporter"

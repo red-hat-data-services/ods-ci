@@ -30,10 +30,10 @@ ${KFNBC_MODAL_CLOSE_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Close"]
 ${KFNBC_MODAL_X_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[@aria-label="Close"]
 ${KFNBC_CONTROL_PANEL_HEADER_XPATH} =    //h1[.="Notebook server control panel"]
 ${KFNBC_ENV_VAR_NAME_PRE} =    //span[.="Variable name"]/../../../div[@class="pf-v6-c-form__group-control"]
-${DEFAULT_PYTHON_VER} =    3.11
+${DEFAULT_PYTHON_VER} =    3.12
 ${PREVIOUS_PYTHON_VER} =    3.11
-${DEFAULT_NOTEBOOK_VER} =    2025.1
-${PREVIOUS_NOTEBOOK_VER} =    2024.2
+${DEFAULT_NOTEBOOK_VER} =    2025.2
+${PREVIOUS_NOTEBOOK_VER} =    2025.1
 
 
 *** Keywords ***
@@ -350,7 +350,7 @@ Spawn Notebook With Arguments  # robocop: disable
                 END
             END
             Spawn Notebook    ${spawner_timeout}    ${same_tab}
-            Run Keyword And Warn On Failure    Wait Until Page Contains    Log in with OpenShift    timeout=15s
+            Run Keyword And Warn On Failure    Wait Until Page Contains    Log in with    timeout=15s
             ${oauth_prompt_visible} =    Is OpenShift OAuth Login Prompt Visible
             IF  ${oauth_prompt_visible}    Click Button     Log in with OpenShift
             Run Keyword And Warn On Failure   Login To Openshift  ${username}  ${password}  ${auth_type}

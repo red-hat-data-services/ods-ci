@@ -30,10 +30,10 @@ ${KFNBC_MODAL_CLOSE_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Close"]
 ${KFNBC_MODAL_X_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[@aria-label="Close"]
 ${KFNBC_CONTROL_PANEL_HEADER_XPATH} =    //h1[.="Notebook server control panel"]
 ${KFNBC_ENV_VAR_NAME_PRE} =    //span[.="Variable name"]/../../../div[@class="pf-v6-c-form__group-control"]
-${DEFAULT_PYTHON_VER} =    3.11
+${DEFAULT_PYTHON_VER} =    3.12
 ${PREVIOUS_PYTHON_VER} =    3.11
-${DEFAULT_NOTEBOOK_VER} =    2025.1
-${PREVIOUS_NOTEBOOK_VER} =    2024.2
+${DEFAULT_NOTEBOOK_VER} =    2025.2
+${PREVIOUS_NOTEBOOK_VER} =    2025.1
 
 
 *** Keywords ***

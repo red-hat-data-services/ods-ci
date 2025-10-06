@@ -18,7 +18,7 @@ echo "Wait for Nvidia GPU Operator Subscription, InstallPlan and Deployment to c
 
 oc wait --timeout=20m --for jsonpath='{.status.state}'=AtLatestKnown -n nvidia-gpu-operator sub gpu-operator-certified
 
-oc wait --timeout=20m --for condition=Installed -n nvidia-gpu-operator installplan --all
+oc wait --timeout=8m --for condition=Installed -n nvidia-gpu-operator installplan --all
 
 sleep 5
 

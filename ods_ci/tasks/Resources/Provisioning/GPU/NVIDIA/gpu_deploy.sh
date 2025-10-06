@@ -16,7 +16,7 @@ oc apply -f "$GPU_INSTALL_DIR/gpu_install.yaml"
 
 echo "Wait for Nvidia GPU Operator Subscription, InstallPlan and Deployment to complete"
 
-oc wait --timeout=20m --for jsonpath='{.status.state}'=AtLatestKnown -n nvidia-gpu-operator sub gpu-operator-certified
+oc wait --timeout=8m --for jsonpath='{.status.state}'=AtLatestKnown -n nvidia-gpu-operator sub gpu-operator-certified
 
 oc wait --timeout=8m --for condition=Installed -n nvidia-gpu-operator installplan --all
 

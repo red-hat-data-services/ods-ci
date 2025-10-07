@@ -176,7 +176,6 @@ class OpenshiftClusterManager:
         else:
             log.info("Using the latest osd version available ...")
 
-        channel_grp = ""
         if self.channel_group != "":
             if self.channel_group in ("stable", "candidate"):
                 if version == "":
@@ -185,8 +184,6 @@ class OpenshiftClusterManager:
                         "Channel group option is used along with openshift version."
                     )
                     sys.exit(1)
-                else:
-                    channel_grp = "--channel-group {} ".format(self.channel_group)
             else:
                 log.error("Invalid channel group. Values can be 'stable' or 'candidate'.")
 

@@ -23,6 +23,9 @@ ${DSCI_NAME} =    default-dsci
 ...    modelregistry
 ...    feastoperator
 ...    llamastackoperator
+${LWS_OP_NAME}=    openshift-lws-operator
+${LWS_OP_NS}=    openshift-lws-operator
+${LWS_SUB_NAME}=    leader-worker-set
 ${OPENSHIFT_OPERATORS_NS}=    openshift-operators
 ${COMMUNITY_OPERATORS_NS}=    openshift-marketplace
 ${COMMUNITY_OPERATORS_CS}=    community-operators
@@ -631,6 +634,23 @@ Catalog Is Ready
     ...    oc get catalogsources ${catalog_name} -n ${namespace} -o json | jq ."status.connectionState.lastObservedState"    # robocop: disable:line-too-long
     Should Be Equal As Integers   ${rc}  0  msg=Error detected while getting CatalogSource status state
     Should Be Equal As Strings    "READY"    ${output}
+
+Install Leader Worker Set Operator Via Cli
+    [Documentation]    Install Leader Worker Set Operator Via CLI
+    ${is_installed} =   Check If Operator Is Installed Via CLI   ${LWS_OP_NAME}
+    IF    not ${is_installed}
+          Install ISV Operator From OperatorHub Via CLI    operator_name=${LWS_OP_NAME}
+             ...    subscription_name=${LWS_SUB_NAME}
+             ...    catalog_source_name=redhat-operators
+          Wait Until Operator Subscription Last Condition Is
+             ...    type=CatalogSourcesUnhealthy    status=False
+             ...    reason=AllCatalogSourcesHealthy    subcription_name=${LWS_SUB_NAME}
+             ...    retry=150
+          Wait For Pods To Be Ready    label_selector=name=openshift-lws-operator
+             ...    namespace=${LWS_OP_NS}
+    ELSE
+          Log To Console    message=Leader Worker Set Operator is already installed
+    END
 
 Install Cert Manager Operator Via Cli
     [Documentation]    Install Cert Manager Operator Via CLI

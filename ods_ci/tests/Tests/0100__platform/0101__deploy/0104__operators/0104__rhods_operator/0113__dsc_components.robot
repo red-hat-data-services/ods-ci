@@ -18,8 +18,6 @@ ${KNATIVE_SERVING_NS}                                       knative-serving
 ${DSC_NAME}                                                 default-dsc
 ${KUEUE_LABEL_SELECTOR}                                     app.kubernetes.io/name=kueue
 ${KUEUE_DEPLOYMENT_NAME}                                    kueue-controller-manager
-${CODEFLARE_LABEL_SELECTOR}                                 app.kubernetes.io/name=codeflare-operator
-${CODEFLARE_DEPLOYMENT_NAME}                                codeflare-operator-manager
 ${RAY_LABEL_SELECTOR}                                       app.kubernetes.io/name=kuberay
 ${RAY_DEPLOYMENT_NAME}                                      kuberay-operator
 ${TRAINING_LABEL_SELECTOR}                                  app.kubernetes.io/name=training-operator
@@ -45,7 +43,6 @@ ${IS_NOT_PRESENT}                                           1
 &{SAVED_MANAGEMENT_STATES}
 ...                                                         RAY=${EMPTY}
 ...                                                         KUEUE=${EMPTY}
-...                                                         CODEFLARE=${EMPTY}
 ...                                                         TRAINING=${EMPTY}
 ...                                                         DASHBOARD=${EMPTY}
 ...                                                         DATASCIENCEPIPELINES=${EMPTY}
@@ -57,7 +54,6 @@ ${IS_NOT_PRESENT}                                           1
 ...                                                         LLAMASTACKOPERATOR=${EMPTY}
 
 @{CONTROLLERS_LIST}                                     # dashboard added in Suite Setup, since it's different in RHOAI vs ODH
-...                                                     codeflare-operator-manager
 ...                                                     data-science-pipelines-operator-controller-manager
 ...                                                     kuberay-operator
 #...                                                     kueue-controller-manager   # RHOAIENG-34529
@@ -126,40 +122,6 @@ Validate Kueue Unmanaged To Removed State Transition
     ...    namespace=${KUEUE_NS}
 
     [Teardown]      Restore Kueue Initial State
-
-Validate Codeflare Managed State
-    [Documentation]    Validate that the DSC Codeflare component Managed state creates the expected resources,
-    ...    check that Codeflare deployment is created and pod is in Ready state
-    [Tags]
-    ...    Operator
-    ...    Tier1
-    ...    RHOAIENG-5435
-    ...    codeflare-managed
-    ...    Integration
-    ...    RHOAIENG-24666
-    Set DSC Component Managed State And Wait For Completion
-    ...    codeflare
-    ...    ${CODEFLARE_DEPLOYMENT_NAME}
-    ...    ${CODEFLARE_LABEL_SELECTOR}
-    Check That Image Pull Path Is Correct       ${CODEFLARE_DEPLOYMENT_NAME}        ${IMAGE_PULL_PATH}
-
-    [Teardown]      Restore DSC Component State     codeflare       ${CODEFLARE_DEPLOYMENT_NAME}        ${CODEFLARE_LABEL_SELECTOR}     ${SAVED_MANAGEMENT_STATES.CODEFLARE}
-
-Validate Codeflare Removed State
-    [Documentation]    Validate that Codeflare management state Removed does remove relevant resources.
-    [Tags]
-    ...    Operator
-    ...    Tier1
-    ...    RHOAIENG-5435
-    ...    codeflare-removed
-    ...    Integration
-
-    Set DSC Component Removed State And Wait For Completion
-    ...    codeflare
-    ...    ${CODEFLARE_DEPLOYMENT_NAME}
-    ...    ${CODEFLARE_LABEL_SELECTOR}
-
-    [Teardown]      Restore DSC Component State     codeflare       ${CODEFLARE_DEPLOYMENT_NAME}        ${CODEFLARE_LABEL_SELECTOR}     ${SAVED_MANAGEMENT_STATES.CODEFLARE}
 
 Validate Ray Managed State
     [Documentation]    Validate that the DSC Ray component Managed state creates the expected resources,
@@ -577,7 +539,6 @@ Suite Setup
     Wait For DSC Ready State    ${OPERATOR_NS}     ${DSC_NAME}
     ${SAVED_MANAGEMENT_STATES.RAY}=     Get DSC Component State    ${DSC_NAME}    ray    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.KUEUE}=     Get DSC Component State    ${DSC_NAME}    kueue    ${OPERATOR_NS}
-    ${SAVED_MANAGEMENT_STATES.CODEFLARE}=     Get DSC Component State    ${DSC_NAME}    codeflare    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.TRAINING}=     Get DSC Component State    ${DSC_NAME}    trainingoperator    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.DASHBOARD}=     Get DSC Component State    ${DSC_NAME}    dashboard    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.DATASCIENCEPIPELINES}=     Get DSC Component State    ${DSC_NAME}    datasciencepipelines    ${OPERATOR_NS}

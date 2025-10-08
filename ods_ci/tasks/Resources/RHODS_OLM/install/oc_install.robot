@@ -10,8 +10,7 @@ Resource   ../../../../tests/Resources/OCP.resource
 *** Variables ***
 ${DSC_NAME} =    default-dsc
 ${DSCI_NAME} =    default-dsci
-@{COMPONENT_LIST} =    codeflare
-...    dashboard
+@{COMPONENT_LIST} =    dashboard
 ...    datasciencepipelines
 ...    kserve
 ...    kueue
@@ -245,12 +244,6 @@ Verify RHODS Installation
     ...    label_selector=app.kubernetes.io/name=kueue   timeout=400s
   END
 
-  ${codeflare} =     Is Component Enabled     codeflare    ${DSC_NAME}
-  IF    "${codeflare}" == "true"
-    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/part-of=codeflare   timeout=400s
-  END
-
   ${ray} =     Is Component Enabled     ray    ${DSC_NAME}
   IF    "${ray}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
@@ -297,7 +290,7 @@ Verify RHODS Installation
     END
   END
 
-  IF    "${dashboard}" == "true" or "${workbenches}" == "true" or "${datasciencepipelines}" == "true" or "${kserve}" == "true" or "${kueue}" == "true" or "${codeflare}" == "true" or "${ray}" == "true" or "${trustyai}" == "true" or "${modelregistry}" == "true" or "${trainingoperator}" == "true"    # robocop: disable
+  IF    "${dashboard}" == "true" or "${workbenches}" == "true" or "${datasciencepipelines}" == "true" or "${kserve}" == "true" or "${kueue}" == "true" or "${ray}" == "true" or "${trustyai}" == "true" or "${modelregistry}" == "true" or "${trainingoperator}" == "true"    # robocop: disable
       Log To Console    Waiting for pod status in ${APPLICATIONS_NAMESPACE}
       Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=200
       Log  Verified Applications NS: ${APPLICATIONS_NAMESPACE}  console=yes

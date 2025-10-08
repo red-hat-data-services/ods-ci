@@ -10,9 +10,6 @@ metadata:
       app.kubernetes.io/part-of: <operator_yaml_label>
 spec:
   components:
-    codeflare:
-      devFlags: <codeflare_devflags>
-      managementState: <codeflare_value>
     dashboard:
       devFlags: <dashboard_devflags>
       managementState: <dashboard_value>

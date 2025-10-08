@@ -887,20 +887,6 @@ class OpenshiftClusterManager:
 
     def install_rhods_addon(self):
         if not self.is_addon_installed():
-            # Install dependency operators for rhoai deployment:
-            # Authorino
-            dependency_operator = "authorino-operator"
-            self.install_openshift_isv(dependency_operator, "tech-preview-v1", "redhat-operators")
-            self.wait_for_isv_installation_to_complete(dependency_operator, namespace="openshift-operators")
-            # ServiceMesh
-            dependency_operator = "servicemeshoperator"
-            self.install_openshift_isv(dependency_operator, "stable", "redhat-operators")
-            self.wait_for_isv_installation_to_complete(dependency_operator, namespace="openshift-operators")
-            # Serverless
-            dependency_operator = "serverless-operator"
-            self.install_openshift_isv(dependency_operator, "stable", "redhat-operators")
-            self.wait_for_isv_installation_to_complete(dependency_operator, namespace="openshift-operators")
-
             # Deploy rhoai
             self.install_rhods()
             self.wait_for_addon_installation_to_complete()

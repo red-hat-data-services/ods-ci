@@ -1,4 +1,4 @@
-apiVersion: datasciencecluster.opendatahub.io/v1
+apiVersion: datasciencecluster.opendatahub.io/v2
 kind: DataScienceCluster
 metadata:
   name: <dsc_name>
@@ -21,7 +21,7 @@ spec:
       managementState: <datasciencepipelines_value>
     kserve:
       devFlags: <kserve_devflags>
-      defaultDeploymentMode: Serverless
+      defaultDeploymentMode: RawDeployment
       managementState: <kserve_value>
     kueue:
       devFlags: <kueue_devflags>

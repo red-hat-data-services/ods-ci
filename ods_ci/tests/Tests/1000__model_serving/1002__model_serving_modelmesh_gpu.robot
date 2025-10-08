@@ -27,6 +27,7 @@ Verify GPU Model Deployment Via UI    # robocop: off=too-long-test-case,too-many
     [Documentation]    Test the deployment of an openvino_ir model on a model server with GPUs attached
     [Tags]    Sanity    Resources-GPU    NVIDIA-GPUs
     ...       ODS-2214
+    ...       deprecatedTest
     Clean All Models Of Current User
     Open Data Science Projects Home Page
     Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=Data Science Projects
@@ -59,6 +60,7 @@ Test Inference Load On GPU
     [Documentation]    Test the inference load on the GPU after sending random requests to the endpoint
     [Tags]    Sanity    Resources-GPU    NVIDIA-GPUs
     ...       ODS-2213
+    ...       deprecatedTest
     ${url}=    Get Model Route Via UI    ${MODEL_NAME}
     Send Random Inference Request     endpoint=${url}    no_requests=100
     # Verify metric DCGM_FI_PROF_GR_ENGINE_ACTIVE goes over 0

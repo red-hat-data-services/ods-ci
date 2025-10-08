@@ -3,9 +3,6 @@ Documentation       Contains Triage URLs Mappings
 
 
 *** Variables ***
-${CODEFLARE_OPERATOR_AVAILABILITY_TRIAGE_URL}                       https://gitlab.cee.redhat.com/service/managed-tenants-sops/-/blob/main/RHODS/Distributed-Workloads/codeflare-operator-availability.md
-${CODEFLARE_OPERATOR_ABSENT_OVER_TIME_TRIAGE_URL}                   https://gitlab.cee.redhat.com/service/managed-tenants-sops/-/blob/main/RHODS/Distributed-Workloads/codeflare-operator-absent-over-time.md
-${CODEFLARE_OPERATOR_PROBE_SUCCESS_BURN_RATE_TRIAGE_URL}            https://gitlab.cee.redhat.com/service/managed-tenants-sops/-/blob/main/RHODS/Distributed-Workloads/codeflare-operator-probe-success-burn-rate.md
 ${DSP_APP_COMPONENT_READINESS_STATUS_TRIAGE_URL}                    https://gitlab.cee.redhat.com/service/managed-tenants-sops/-/blob/main/RHODS/Data-Science-Pipelines/data-science-pipelines-application-component-readiness-status.md
 ${DSP_APP_ERROR_BURN_RATE_TRIAGE_URL}                               https://gitlab.cee.redhat.com/service/managed-tenants-sops/-/blob/main/RHODS/Data-Science-Pipelines/data-science-pipelines-application-error-burn-rate.md
 ${DSP_OPERATOR_PROBE_SUCCESS_BURN_RATE_TRIAGE_URL}                  https://gitlab.cee.redhat.com/service/managed-tenants-sops/-/blob/main/RHODS/Data-Science-Pipelines/data-science-pipelines-operator-probe-success-burn-rate.md
@@ -23,10 +20,7 @@ ${NOTEBOOK_PVC_USAGE_TRIAGE_URL}                                    https://gitl
 ${RHODS_JUPYTER_PROBE_SUCCESS_BURN_RATE_TRIAGE_URL}                 https://gitlab.cee.redhat.com/service/managed-tenants-sops/-/blob/main/RHODS/Jupyter/rhods-jupyter-probe-success-burn-rate.md
 
 
-&{TRIAGE_URLS}                          CodeFlare Operator is not running=${CODEFLARE_OPERATOR_AVAILABILITY_TRIAGE_URL}
-...                                     CodeFlare Operator taking too long to be up=${CODEFLARE_OPERATOR_ABSENT_OVER_TIME_TRIAGE_URL}
-...                                     CodeFlare Operator Probe Success.*=${CODEFLARE_OPERATOR_PROBE_SUCCESS_BURN_RATE_TRIAGE_URL}
-...                                     Data Science Pipeline.*Unavailable=${DSP_APP_COMPONENT_READINESS_STATUS_TRIAGE_URL}
+&{TRIAGE_URLS}                          Data Science Pipeline.*Unavailable=${DSP_APP_COMPONENT_READINESS_STATUS_TRIAGE_URL}
 ...                                     Data Science Pipelines Application Route Error.*=${DSP_APP_ERROR_BURN_RATE_TRIAGE_URL}
 ...                                     Data Science Pipelines Operator Probe Success.*=${DSP_OPERATOR_PROBE_SUCCESS_BURN_RATE_TRIAGE_URL}
 ...                                     Kserve Controller Probe Success.*=${KSERVE_CONTROLLER_PROBE_SUCCESS_BURN_RATE_TRIAGE_URL}

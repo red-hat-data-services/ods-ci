@@ -10,7 +10,6 @@ Suite Teardown      Suite Teardown
 *** Variables ***
 ${APPLICATIONS_NS}                              ${APPLICATIONS_NAMESPACE}
 ${KUEUE_LABEL_SELECTOR}                         app.kubernetes.io/name=kueue
-${CODEFLARE_LABEL_SELECTOR}                     app.kubernetes.io/name=codeflare-operator
 ${RAY_LABEL_SELECTOR}                           app.kubernetes.io/name=kuberay
 ${TRAINING_LABEL_SELECTOR}                      app.kubernetes.io/name=training-operator
 ${DATASCIENCEPIPELINES_LABEL_SELECTOR}          app.kubernetes.io/name=data-science-pipelines-operator
@@ -26,7 +25,6 @@ Check For Correct Component Images
     [Documentation]    The purpose is to enforce the check of correct component images on their deployments.
     [Tags]                  Operator                RHOAIENG-12576          Smoke
     [Template]          Check Image On Csv And Deployment
-    codeflare               codeflare-operator-manager                              ${CODEFLARE_LABEL_SELECTOR}                     odh_codeflare_operator_image
     modelregistry           model-registry-operator-controller-manager              ${MODELREGISTRY_CONTROLLER_LABEL_SELECTOR}      odh_mlmd_grpc_server_image
     modelregistry           model-registry-operator-controller-manager              ${MODELREGISTRY_CONTROLLER_LABEL_SELECTOR}      odh_model_registry_image
     trustyai                trustyai-service-operator-controller-manager            ${TRUSTYAI_CONTROLLER_MANAGER_LABEL_SELECTOR}   odh_trustyai_service_operator_image

@@ -72,7 +72,6 @@ COMPONENTS:
   dashboard: Managed
   datasciencepipelines: Managed
   ray: Managed
-  codeflare: Managed
   workbenches: Managed
   kserve: Managed
   trustyai: Managed

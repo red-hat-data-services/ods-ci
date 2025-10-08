@@ -493,15 +493,6 @@ Verify "Data Science Pipelines Operator Probe Success Burn Rate" Alerts Severity
     Verify Alert Has A Given Severity And Continue On Failure
     ...    SLOs-probe_success_workbench    Data Science Pipelines Operator Probe Success 2h and 1d Burn Rate high    info    alert-duration=3600
 
-Verify "CodeFlare Operator Probe Success Burn Rate" Alerts Severity And Continue On Failure
-    [Documentation]    Verifies that alert "CodeFlare Operator Probe Success Burn Rate" severity
-    Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success_workbench    CodeFlare Operator Probe Success 5m and 1h Burn Rate high    critical    alert-duration=120
-    Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success_workbench    CodeFlare Operator Probe Success 30m and 6h Burn Rate high    critical    alert-duration=900
-    Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success_workbench    CodeFlare Operator Probe Success 2h and 1d Burn Rate high    warning    alert-duration=3600
-
 Verify "RHODS Dashboard Route Error Burn Rate" Alerts Severity And Continue On Failure
     [Documentation]    Verifies that alert "RHODS Dashboard Route Error Burn Rate" severity
     Verify Alert Has A Given Severity And Continue On Failure

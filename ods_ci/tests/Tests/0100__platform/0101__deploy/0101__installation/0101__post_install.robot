@@ -355,9 +355,6 @@ Verify No Alerts Are Firing After Installation Except For DeadManSnitch    # rob
     # deadmanssnitch-alerting.rules
     Verify Alert Is Firing And Continue On Failure
     ...    DeadManSnitch    DeadManSnitch
-    # codeflare-alerting.rules
-    Verify "CodeFlare Operator Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
-    Verify "Distributed Workloads CodeFlare" Alerts Are Not Firing And Continue On Failure
     # trainingoperator-alerting.rules
     Verify "KubeFlow Training Operator" Alerts Are Not Firing And Continue On Failure
     # rhods-dashboard-alerting.rules

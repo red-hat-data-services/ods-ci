@@ -31,25 +31,3 @@ Ray smoke test
     Log To Console    kuberay-operator service exists
     Verify container images    kuberay-operator    kuberay-operator    odh-kuberay-operator-controller
 
-Codeflare smoke test
-    [Documentation]    Check that Codeflare deployment and its monitoring service are up and running
-    [Tags]    Smoke
-    ...       DistributedWorkloads
-    ...       TrainingRay
-    ...       ODS-2675
-    Log To Console    Waiting for codeflare-operator-manager to be available
-    ${result} =    Run Process    oc wait --for\=condition\=Available --timeout\=60s -n ${APPLICATIONS_NAMESPACE} deployment/codeflare-operator-manager
-    ...    shell=true    stderr=STDOUT
-    Log To Console    ${result.stdout}
-    IF    ${result.rc} != 0
-        FAIL    Timeout waiting for deployment/codeflare-operator-manager to be available in ${APPLICATIONS_NAMESPACE}
-    END
-    ${result} =    Run Process    oc get service -n ${APPLICATIONS_NAMESPACE} codeflare-operator-manager-metrics
-    ...    shell=true    stderr=STDOUT
-    Log To Console    ${result.stdout}
-    IF    ${result.rc} != 0
-        FAIL    Can not find codeflare-operator-manager-metrics service in ${APPLICATIONS_NAMESPACE}
-    END
-    Log To Console    codeflare-operator-manager-metrics service exists
-    Verify container images    codeflare-operator-manager    manager    odh-codeflare-operator
-

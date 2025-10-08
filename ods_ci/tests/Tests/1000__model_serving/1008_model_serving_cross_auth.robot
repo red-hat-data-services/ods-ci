@@ -32,7 +32,7 @@ ${SECOND_EXPECTED_INFERENCE_OUTPUT}=    {"model_name":"${SECOND_MODEL_NAME}__isv
 Test Cross Model Authentication On Kserve
     [Documentation]    Tests for the presence of CVE-2024-7557 when using Kserve
     [Tags]    Sanity    ProductBug
-    ...       RHOAIENG-11007    RHOAIENG-12048
+    ...       RHOAIENG-11007    RHOAIENG-12048    deprecatedTest
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}
     ...    existing_project=${FALSE}

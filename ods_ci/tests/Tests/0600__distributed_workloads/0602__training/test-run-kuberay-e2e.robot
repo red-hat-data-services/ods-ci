@@ -13,7 +13,7 @@ ${KUBERAY_RELEASE_ASSETS}     %{KUBERAY_RELEASE_ASSETS=https://github.com/openda
 *** Test Cases ***
 Run TestRayJob test
     [Documentation]    Run Go E2E test: TestRayJob
-    [Tags]  Tier1
+    [Tags]  deprecatedTest
     ...     DistributedWorkloads
     ...     TrainingRay
     ...     Kuberay
@@ -21,7 +21,7 @@ Run TestRayJob test
 
 Run TestRayJobWithClusterSelector test
     [Documentation]    Run Go E2E test: TestRayJobWithClusterSelector
-    [Tags]  Sanity
+    [Tags]  deprecatedTest
     ...     DistributedWorkloads
     ...     TrainingRay
     ...     Kuberay
@@ -29,7 +29,7 @@ Run TestRayJobWithClusterSelector test
 
 Run TestRayJobSuspend test
     [Documentation]    Run Go E2E test: TestRayJobSuspend
-    [Tags]  Tier1
+    [Tags]  deprecatedTest
     ...     DistributedWorkloads
     ...     TrainingRay
     ...     Kuberay
@@ -37,7 +37,7 @@ Run TestRayJobSuspend test
 
 Run TestRayJobLightWeightMode test
     [Documentation]    Run Go E2E test: TestRayJobLightWeightMode
-    [Tags]  Tier1
+    [Tags]  deprecatedTest
     ...     DistributedWorkloads
     ...     TrainingRay
     ...     Kuberay

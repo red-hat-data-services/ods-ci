@@ -122,7 +122,7 @@ Wait For Pods To Be Ready
     ...                This keyword can also check for the expected number of the pod replicas using `${exp_replicas}`
     ...                argument.
     [Arguments]    ${label_selector}    ${namespace}    ${timeout}=600s    ${exp_replicas}=${NONE}
-    Wait Until Keyword Succeeds    ${timeout}    10s
+    Wait Until Keyword Succeeds    ${timeout}    5s
     ...    Check If Pod Exists    namespace=${namespace}    label_selector=${label_selector}
     ...    status_only=${FALSE}
     WHILE   True    limit=${timeout}
@@ -130,6 +130,9 @@ Wait For Pods To Be Ready
         ...    oc wait --for=condition=ready=true pod -l ${label_selector} -n ${namespace} --timeout=${timeout}
         IF    ${rc} == ${0}
             BREAK
+        ELSE
+            Log To Console
+            ...    msg=Pod defined by selector "${label_selector}" in "${namespace}" namespace is not ready, retrying.
         END
     END
     IF    "${exp_replicas}" != "${NONE}"

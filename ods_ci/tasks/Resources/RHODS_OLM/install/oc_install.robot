@@ -247,15 +247,13 @@ Verify RHODS Installation
 
   ${kueue} =     Is Component Enabled     kueue    ${DSC_NAME}
   IF    "${kueue}" == "true"
-      ${kueue_state}=    Get DSC Component State    ${DSC_NAME}    kueue    ${OPERATOR_NAMESPACE}
-      IF    "${kueue_state}" == "Unmanaged"
-             Install Kueue Dependencies
-             Wait For Deployment Replica To Be Ready    namespace=${KUEUE_NS}
-      ...    label_selector=app.kubernetes.io/name=kueue   timeout=400s
-      ELSE
-             Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-      ...    label_selector=app.kubernetes.io/part-of=kueue   timeout=400s
-      END
+    ${kueue_state}=    Get DSC Component State    ${DSC_NAME}    kueue    ${OPERATOR_NAMESPACE}
+    IF    "${kueue_state}" == "Managed"
+        Fail    msg=Kueue Managed mode is not supported on ODH/RHOAI 3.0+
+    END
+    Install Kueue Dependencies
+    Wait For Deployment Replica To Be Ready    namespace=${KUEUE_NS}
+    ...    label_selector=app.kubernetes.io/name=kueue   timeout=400s
   END
 
   ${codeflare} =     Is Component Enabled     codeflare    ${DSC_NAME}
@@ -659,13 +657,8 @@ Install Cert Manager Operator Via Cli
 Install Kueue Operator Via Cli
     [Documentation]    Install Kueue Operator Via CLI
     ${is_installed} =   Check If Operator Is Installed Via CLI   ${KUEUE_OP_NAME}
-    ${ocp_version}=     Get Ocp Cluster Version
-    ${install_kueue_by_ocp_version}=    GTE    ${ocp_version}    4.18.0
-    # Kueue operator will be available just in OCP 4.18 and next versions
     IF    ${is_installed}
         Log To Console    message=Kueue Operator is already installed
-    ELSE IF   not ${install_kueue_by_ocp_version}
-        Log To Console    message=Kueue Operator is not available in OCP ${ocp_version}
     ELSE
         ${rc}    ${out} =    Run And Return Rc And Output    oc create namespace ${KUEUE_NS}
         Install ISV Operator From OperatorHub Via CLI    operator_name=${KUEUE_OP_NAME}

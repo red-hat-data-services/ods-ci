@@ -26,6 +26,9 @@ ${SERVERLESS_SUB_NAME}=    serverless-operator
 ${SERVERLESS_NS}=    openshift-serverless
 ${SERVICEMESH_OP_NAME}=     servicemeshoperator
 ${SERVICEMESH_SUB_NAME}=    servicemeshoperator
+${LWS_OP_NAME}=    openshift-lws-operator
+${LWS_OP_NS}=    openshift-lws-operator
+${LWS_SUB_NAME}=    leader-worker-set
 ${OPENSHIFT_OPERATORS_NS}=    openshift-operators
 ${COMMUNITY_OPERATORS_NS}=    openshift-marketplace
 ${COMMUNITY_OPERATORS_CS}=    community-operators
@@ -233,6 +236,7 @@ Verify RHODS Installation
 
   ${kserve} =    Is Component Enabled    kserve    ${DSC_NAME}
   IF    "${kserve}" == "true"
+    Install KServe Dependencies
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app=odh-model-controller    timeout=400s
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
@@ -618,6 +622,23 @@ Catalog Is Ready
     Should Be Equal As Integers   ${rc}  0  msg=Error detected while getting CatalogSource status state
     Should Be Equal As Strings    "READY"    ${output}
 
+Install Leader Worker Set Operator Via Cli
+    [Documentation]    Install Leader Worker Set Operator Via CLI
+    ${is_installed} =   Check If Operator Is Installed Via CLI   ${LWS_OP_NAME}
+    IF    not ${is_installed}
+          Install ISV Operator From OperatorHub Via CLI    operator_name=${LWS_OP_NAME}
+             ...    subscription_name=${LWS_SUB_NAME}
+             ...    catalog_source_name=redhat-operators
+          Wait Until Operator Subscription Last Condition Is
+             ...    type=CatalogSourcesUnhealthy    status=False
+             ...    reason=AllCatalogSourcesHealthy    subcription_name=${LWS_SUB_NAME}
+             ...    retry=150
+          Wait For Pods To Be Ready    label_selector=name=openshift-lws-operator
+             ...    namespace=${LWS_OP_NS}
+    ELSE
+          Log To Console    message=Leader Worker Set Operator is already installed
+    END
+
 Install Cert Manager Operator Via Cli
     [Documentation]    Install Cert Manager Operator Via CLI
     ${is_installed} =   Check If Operator Is Installed Via CLI   ${CERT_MANAGER_OP_NAME}
@@ -665,6 +686,14 @@ Install Kueue Operator Via Cli
         Wait For Pods To Be Ready    label_selector=name=openshift-kueue-operator
              ...    namespace=${KUEUE_NS}
     END
+
+Install KServe Dependencies
+    [Documentation]    Install Dependent Operators For KServe
+    Set Suite Variable   ${FILES_RESOURCES_DIRPATH}    tests/Resources/Files
+    Set Suite Variable   ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
+    Set Suite Variable   ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
+    Install Cert Manager Operator Via Cli
+    Install Leader Worker Set Operator Via Cli
 
 Install Kueue Dependencies
     [Documentation]    Install Dependent Operators For Kueue

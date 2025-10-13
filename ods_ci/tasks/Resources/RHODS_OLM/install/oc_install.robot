@@ -627,13 +627,14 @@ Install Leader Worker Set Operator Via Cli
     [Documentation]    Install Leader Worker Set Operator Via CLI
     ${is_installed} =   Check If Operator Is Installed Via CLI   ${LWS_OP_NAME}
     IF    not ${is_installed}
+          ${rc}    ${out} =    Run And Return Rc And Output    oc create namespace ${LWS_OP_NS}
           Install ISV Operator From OperatorHub Via CLI    operator_name=${LWS_OP_NAME}
              ...    subscription_name=${LWS_SUB_NAME}
              ...    namespace=${LWS_OP_NS}
              ...    catalog_source_name=redhat-operators
              ...    operator_group_name=openshift-lws-operator
              ...    operator_group_ns=${LWS_OP_NS}
-             ...    operator_group_target_ns=${NONE}
+             ...    operator_group_target_ns=${LWS_OP_NS}
              ...    channel=${LWS_CHANNEL_NAME}
           Wait Until Operator Subscription Last Condition Is
              ...    type=CatalogSourcesUnhealthy    status=False

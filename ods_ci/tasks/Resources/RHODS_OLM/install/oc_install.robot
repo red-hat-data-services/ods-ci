@@ -627,6 +627,7 @@ Install Leader Worker Set Operator Via Cli
     [Documentation]    Install Leader Worker Set Operator Via CLI
     ${is_installed} =   Check If Operator Is Installed Via CLI   ${LWS_OP_NAME}
     IF    not ${is_installed}
+          ${rc}    ${out} =    Run And Return Rc And Output    oc create namespace ${LWS_OP_NS}
           Install ISV Operator From OperatorHub Via CLI    operator_name=${LWS_OP_NAME}
              ...    subscription_name=${LWS_SUB_NAME}
              ...    namespace=${LWS_OP_NS}

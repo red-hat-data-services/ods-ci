@@ -26,9 +26,10 @@ ${SERVERLESS_SUB_NAME}=    serverless-operator
 ${SERVERLESS_NS}=    openshift-serverless
 ${SERVICEMESH_OP_NAME}=     servicemeshoperator
 ${SERVICEMESH_SUB_NAME}=    servicemeshoperator
-${LWS_OP_NAME}=    openshift-lws-operator
+${LWS_OP_NAME}=    leader-worker-set
 ${LWS_OP_NS}=    openshift-lws-operator
 ${LWS_SUB_NAME}=    leader-worker-set
+${LWS_CHANNEL_NAME}=  stable-v1.0
 ${OPENSHIFT_OPERATORS_NS}=    openshift-operators
 ${COMMUNITY_OPERATORS_NS}=    openshift-marketplace
 ${COMMUNITY_OPERATORS_CS}=    community-operators
@@ -628,7 +629,12 @@ Install Leader Worker Set Operator Via Cli
     IF    not ${is_installed}
           Install ISV Operator From OperatorHub Via CLI    operator_name=${LWS_OP_NAME}
              ...    subscription_name=${LWS_SUB_NAME}
+             ...    namespace=${LWS_OP_NS}
              ...    catalog_source_name=redhat-operators
+             ...    operator_group_name=openshift-lws-operator
+             ...    operator_group_ns=${LWS_OP_NS}
+             ...    operator_group_target_ns=${NONE}
+             ...    channel=${LWS_CHANNEL_NAME}
           Wait Until Operator Subscription Last Condition Is
              ...    type=CatalogSourcesUnhealthy    status=False
              ...    reason=AllCatalogSourcesHealthy    subcription_name=${LWS_SUB_NAME}

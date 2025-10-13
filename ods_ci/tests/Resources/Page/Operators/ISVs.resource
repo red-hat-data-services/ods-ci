@@ -35,7 +35,8 @@ Install ISV Operator From OperatorHub Via CLI    # robocop: disable
     ${rc}    ${out}=    Run And Return Rc And Output    sed -i'' -e "s/<OPERATOR_NAME>/${operator_name}/g" ${operator_sub_filepath}    # robocop: disable
     ${rc}    ${out}=    Run And Return Rc And Output    sed -i'' -e "s/<CATALOG_SOURCE>/${catalog_source_name}/g" ${operator_sub_filepath}    # robocop: disable
     ${rc}    ${out}=    Run And Return Rc And Output    sed -i'' -e "s/<CS_NAMESPACE>/${cs_namespace}/g" ${operator_sub_filepath}    # robocop: disable
-    Oc Apply    kind=Subscription    src=${operator_sub_filepath}
+    ${return_code}    ${output} =    Run And Return Rc And Output    oc apply -f ${operator_sub_filepath}
+    Log To Console    ${output}
     # TODO: Remove this once the operator_name will be tempo-operator
     IF  "${operator_name}" == "tempo-product"
         ${operator_name}=    Set Variable    tempo-operator

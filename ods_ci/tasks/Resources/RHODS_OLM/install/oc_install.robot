@@ -638,6 +638,7 @@ Install Leader Worker Set Operator Via Cli
           Wait Until Operator Subscription Last Condition Is
              ...    type=CatalogSourcesUnhealthy    status=False
              ...    reason=AllCatalogSourcesHealthy    subcription_name=${LWS_SUB_NAME}
+             ...    namespace=${LWS_OP_NS}
              ...    retry=150
           Wait For Pods To Be Ready    label_selector=name=openshift-lws-operator
              ...    namespace=${LWS_OP_NS}

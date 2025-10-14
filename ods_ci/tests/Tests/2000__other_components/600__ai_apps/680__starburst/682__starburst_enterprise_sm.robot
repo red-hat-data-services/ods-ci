@@ -103,7 +103,7 @@ Starburst Enterprise Suite Setup    # robocop: disable
     ...    operator_group_target_ns=${NAMESPACE}
     Wait Until Operator Subscription Last Condition Is
     ...    type=CatalogSourcesUnhealthy    status=False
-    ...    reason=AllCatalogSourcesHealthy    subcription_name=${SUBSCRIPTION_NAME}
+    ...    reason=AllCatalogSourcesHealthy    subscription_name=${SUBSCRIPTION_NAME}
     ...    namespace=${NAMESPACE}
     Create Starburst Enteprise License Secret
     Wait Until CRD Exists    crd_fullname=starburstenterprises.charts.starburstdata.com

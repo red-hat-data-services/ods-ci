@@ -638,7 +638,7 @@ Install Leader Worker Set Operator Via Cli
              ...    channel=${LWS_CHANNEL_NAME}
           Wait Until Operator Subscription Last Condition Is
              ...    type=CatalogSourcesUnhealthy    status=False
-             ...    reason=AllCatalogSourcesHealthy    subcription_name=${LWS_SUB_NAME}
+             ...    reason=AllCatalogSourcesHealthy    subscription_name=${LWS_SUB_NAME}
              ...    namespace=${LWS_OP_NS}
              ...    retry=150
           Wait For Pods To Be Ready    label_selector=name=openshift-lws-operator
@@ -664,7 +664,7 @@ Install Cert Manager Operator Via Cli
              ...    channel=${CERT_MANAGER_CHANNEL_NAME}
         Wait Until Operator Subscription Last Condition Is
              ...    type=CatalogSourcesUnhealthy    status=False
-             ...    reason=AllCatalogSourcesHealthy    subcription_name=${CERT_MANAGER_SUB_NAME}
+             ...    reason=AllCatalogSourcesHealthy    subscription_name=${CERT_MANAGER_SUB_NAME}
              ...    namespace=${CERT_MANAGER_NS}
              ...    retry=150
         Wait For Pods To Be Ready    label_selector=name=cert-manager-operator
@@ -688,7 +688,7 @@ Install Kueue Operator Via Cli
              ...    channel=${KUEUE_CHANNEL_NAME}
         Wait Until Operator Subscription Last Condition Is
              ...    type=CatalogSourcesUnhealthy    status=False
-             ...    reason=AllCatalogSourcesHealthy    subcription_name=${KUEUE_SUB_NAME}
+             ...    reason=AllCatalogSourcesHealthy    subscription_name=${KUEUE_SUB_NAME}
              ...    namespace=${KUEUE_NS}
              ...    retry=150
         Wait For Pods To Be Ready    label_selector=name=openshift-kueue-operator
@@ -720,7 +720,7 @@ Install Service Mesh Operator Via Cli
              ...    catalog_source_name=redhat-operators
           Wait Until Operator Subscription Last Condition Is
              ...    type=CatalogSourcesUnhealthy    status=False
-             ...    reason=AllCatalogSourcesHealthy    subcription_name=${SERVICEMESH_SUB_NAME}
+             ...    reason=AllCatalogSourcesHealthy    subscription_name=${SERVICEMESH_SUB_NAME}
              ...    retry=150
           Wait For Pods To Be Ready    label_selector=name=istio-operator
              ...    namespace=${OPENSHIFT_OPERATORS_NS}
@@ -742,7 +742,7 @@ Install Serverless Operator Via Cli
              ...    operator_group_target_ns=${NONE}
         Wait Until Operator Subscription Last Condition Is
              ...    type=CatalogSourcesUnhealthy    status=False
-             ...    reason=AllCatalogSourcesHealthy    subcription_name=${SERVERLESS_SUB_NAME}
+             ...    reason=AllCatalogSourcesHealthy    subscription_name=${SERVERLESS_SUB_NAME}
              ...    namespace=${SERVERLESS_NS}
              ...    retry=150
         Wait For Pods To Be Ready    label_selector=name=knative-openshift
@@ -777,7 +777,7 @@ Install Cluster Observability Operator Via Cli
              ...    operator_group_target_ns=${NONE}
           Wait Until Operator Subscription Last Condition Is
              ...    type=CatalogSourcesUnhealthy    status=False
-             ...    reason=AllCatalogSourcesHealthy    subcription_name=${CLUSTER_OBS_SUB_NAME}
+             ...    reason=AllCatalogSourcesHealthy    subscription_name=${CLUSTER_OBS_SUB_NAME}
              ...    namespace=${CLUSTER_OBS_NS}
              ...    retry=150
           Wait For Pods To Be Ready    label_selector=app.kubernetes.io/part-of=observability-operator
@@ -800,7 +800,7 @@ Install Tempo Operator Via Cli
              ...    operator_group_target_ns=${NONE}
           Wait Until Operator Subscription Last Condition Is
              ...    type=CatalogSourcesUnhealthy    status=False
-             ...    reason=AllCatalogSourcesHealthy    subcription_name=${TEMPO_SUB_NAME}
+             ...    reason=AllCatalogSourcesHealthy    subscription_name=${TEMPO_SUB_NAME}
              ...    namespace=${TEMPO_NS}
              ...    retry=150
           Wait For Pods To Be Ready    label_selector=app.kubernetes.io/part-of=tempo-operator
@@ -823,7 +823,7 @@ Install OpenTelemetry Operator Via Cli
              ...    operator_group_target_ns=${NONE}
           Wait Until Operator Subscription Last Condition Is
              ...    type=CatalogSourcesUnhealthy    status=False
-             ...    reason=AllCatalogSourcesHealthy    subcription_name=${TELEMETRY_SUB_NAME}
+             ...    reason=AllCatalogSourcesHealthy    subscription_name=${TELEMETRY_SUB_NAME}
              ...    namespace=${TELEMETRY_NS}
              ...    retry=150
           Wait For Pods To Be Ready    label_selector=app.kubernetes.io/name=opentelemetry-operator
@@ -847,7 +847,7 @@ Install Custom Metrics Autoscaler Operator Via Cli
             ...    channel=${CMA_CHANNEL_NAME}
         Wait Until Operator Subscription Last Condition Is
             ...    type=CatalogSourcesUnhealthy    status=False
-            ...    reason=AllCatalogSourcesHealthy    subcription_name=${CMA_SUB_NAME}
+            ...    reason=AllCatalogSourcesHealthy    subscription_name=${CMA_SUB_NAME}
             ...    namespace=${CMA_NS}
             ...    retry=150
         Wait For Pods To Be Ready    label_selector=name=custom-metrics-autoscaler-operator
@@ -1031,7 +1031,7 @@ Install NFS Operator Via Cli
              ...    namespace=${NFS_OP_NS}
           Wait Until Operator Subscription Last Condition Is
              ...    type=CatalogSourcesUnhealthy    status=False
-             ...    reason=AllCatalogSourcesHealthy    subcription_name=${NFS_SUB_NAME}
+             ...    reason=AllCatalogSourcesHealthy    subscription_name=${NFS_SUB_NAME}
              ...    retry=150
              ...    namespace=${NFS_OP_NS}
     ELSE

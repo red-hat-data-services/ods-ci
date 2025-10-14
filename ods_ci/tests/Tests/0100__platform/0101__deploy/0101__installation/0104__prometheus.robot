@@ -13,7 +13,8 @@ Verify Prometheus Is Shipped And Enabled Within ODS
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-232
-    Skip If RHODS Is Self-Managed
+    Skip If RHODS Is Self-Managed    # TODO Observability: How far we want to test the deployed resources, maybe we don't need that thorough check now MonitoringStack is deploying it
+                                     # Add MonitoringStack checks instead of it
     @{prometheus_pods_info} =    Fetch Prometheus Pods Info
     @{prometheus_deployment_info} =    Fetch Prometheus Deployments Info
     @{prometheus_services_info} =    Fetch Prometheus Services Info

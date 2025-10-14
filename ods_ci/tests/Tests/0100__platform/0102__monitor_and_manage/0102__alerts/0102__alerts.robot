@@ -398,12 +398,12 @@ Verify Alerts Have Links To The Triage Guide
 Alerts Suite Setup
     [Documentation]    Test suite configuration
     Set Library Search Order    SeleniumLibrary
-    Skip If RHODS Is Self-Managed
+    Skip If RHODS Is Self-Managed And New Observability Stack Is Disabled    # TODO Observability: We don't configure alerts yet with new observability stack, so may likely fail
     RHOSi Setup
 
 Alerts Suite Teardown
     [Documentation]    Test suite teardown
-    Skip If RHODS Is Self-Managed
+    Skip If RHODS Is Self-Managed And New Observability Stack Is Disabled
     RHOSi Teardown
 
 Teardown PVC Alert Test
@@ -475,15 +475,6 @@ Verify "ODH Model Controller Probe Success Burn Rate" Alerts Severity And Contin
     Verify Alert Has A Given Severity And Continue On Failure
     ...    SLOs-probe_success_workbench    ODH Model Controller Probe Success 2h and 1d Burn Rate high    warning    alert-duration=3600
 
-Verify "Modelmesh Controller Probe Success Burn Rate" Alerts Severity And Continue On Failure
-    [Documentation]    Verifies that alert "Modelmesh Controller Probe Success Burn Rate" severity
-    Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success_workbench    Modelmesh Controller Probe Success 5m and 1h Burn Rate high    critical    alert-duration=120
-    Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success_workbench    Modelmesh Controller Probe Success 30m and 6h Burn Rate high    critical    alert-duration=900
-    Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success_workbench    Modelmesh Controller Probe Success 2h and 1d Burn Rate high    warning    alert-duration=3600
-
 Verify "KServe Controller Probe Success Burn Rate" Alerts Severity And Continue On Failure
     [Documentation]    Verifies that alert "KServe Controller Probe Success Burn Rate" severity
     Verify Alert Has A Given Severity And Continue On Failure
@@ -501,15 +492,6 @@ Verify "Data Science Pipelines Operator Probe Success Burn Rate" Alerts Severity
     ...    SLOs-probe_success_workbench    Data Science Pipelines Operator Probe Success 30m and 6h Burn Rate high    info    alert-duration=900
     Verify Alert Has A Given Severity And Continue On Failure
     ...    SLOs-probe_success_workbench    Data Science Pipelines Operator Probe Success 2h and 1d Burn Rate high    info    alert-duration=3600
-
-Verify "CodeFlare Operator Probe Success Burn Rate" Alerts Severity And Continue On Failure
-    [Documentation]    Verifies that alert "CodeFlare Operator Probe Success Burn Rate" severity
-    Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success_workbench    CodeFlare Operator Probe Success 5m and 1h Burn Rate high    critical    alert-duration=120
-    Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success_workbench    CodeFlare Operator Probe Success 30m and 6h Burn Rate high    critical    alert-duration=900
-    Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success_workbench    CodeFlare Operator Probe Success 2h and 1d Burn Rate high    warning    alert-duration=3600
 
 Verify "RHODS Dashboard Route Error Burn Rate" Alerts Severity And Continue On Failure
     [Documentation]    Verifies that alert "RHODS Dashboard Route Error Burn Rate" severity
@@ -584,7 +566,7 @@ Check Particular Text Is Present In Rhods-operator's Log
     [Arguments]         ${text_to_check}
     Open OCP Console
     Login To Openshift    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}    ${OCP_ADMIN_USER.AUTH_TYPE}
-    Maybe Skip Tour
+    Maybe Skip Tour    ${OCP_ADMIN_USER.USERNAME}
     ${val_result}=  Get Pod Logs From UI  namespace=${OPERATOR_NAMESPACE}
     ...                                   pod_search_term=rhods-operator
     ...                                   container_button_id=rhods-deployer-link

@@ -6,16 +6,20 @@ Resource          ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 
 
 *** Variables ***
-${CODEFLARE-SDK-RELEASE-TAG}             v0.28.1
+${CODEFLARE-SDK-RELEASE-TAG}             v0.31.1
 ${CODEFLARE-SDK_DIR}                     codeflare-sdk
 ${CODEFLARE-SDK_REPO_URL}                %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
 ${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}  https://github.com/opendatahub-io/distributed-workloads/releases/latest/download
-# Corresponds to quay.io/modh/ray:2.44.1-py311-cu121
-${RAY_CUDA_IMAGE_3.11}                   quay.io/modh/ray@sha256:a5b7c04a14f180d7ca6d06a5697f6bb684e40a26b95a0c872cac23b552741707
+# Corresponds to quay.io/modh/ray:2.47.1-py312-cu128
+${RAY_CUDA_IMAGE_3.12}                   quay.io/modh/ray@sha256:fb6f207de63e442c67bb48955cf0584f3704281faf17b90419cfa274fdec63c5
+# Corresponds to quay.io/modh/ray:2.47.1-py311-cu121
+${RAY_CUDA_IMAGE_3.11}                   quay.io/modh/ray@sha256:6d076aeb38ab3c34a6a2ef0f58dc667089aa15826fa08a73273c629333e12f1e
 # Corresponds to quay.io/rhoai/ray:2.35.0-py311-cu121-torch24-fa26
 ${RAY_TORCH_CUDA_IMAGE_3.11}             quay.io/rhoai/ray@sha256:5077f9bb230dfa88f34089fecdfcdaa8abc6964716a8a8325c7f9dcdf11bbbb3
-# Corresponds to quay.io/modh/ray:2.44.1-py311-rocm62
-${RAY_ROCM_IMAGE_3.11}                   quay.io/modh/ray@sha256:48c7864989c8f22ef07772c698b761f5c1b58c6781e7a99518204d521bf56a4c
+# Corresponds to quay.io/modh/ray:2.47.1-py312-rocm62
+${RAY_ROCM_IMAGE_3.12}                   quay.io/modh/ray@sha256:f374130bf615a44d048fabbc75f4e6fb687446981383e3e815bda1dcda608964
+# Corresponds to quay.io/modh/ray:2.47.1-py311-rocm62
+${RAY_ROCM_IMAGE_3.11}                   quay.io/modh/ray@sha256:6091617d45d5681058abecda57e0ee33f57b8855618e2509f1a354a20cc3403c
 # Corresponds to quay.io/rhoai/ray:2.35.0-py311-rocm61-torch24-fa26
 ${RAY_TORCH_ROCM_IMAGE_3.11}             quay.io/rhoai/ray@sha256:b0e129cd2f4cdea7ad7a7859031357ffd9915410551f94fbcb942af2198cdf78
 # Corresponds to quay.io/modh/training:py311-cuda121-torch241
@@ -61,11 +65,24 @@ Prepare Codeflare-SDK Test Setup
     # Perform oc login with Test User
     Login To OCP Using API    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}
 
+Prepare Codeflare-SDK Upgrade Test Setup
+    [Documentation]   Prepare codeflare-sdk upgrade tests with RBAC setup and namespace creation
+    Clone Git Repository    ${CODEFLARE-SDK_REPO_URL}    ${CODEFLARE-SDK-RELEASE-TAG}    ${CODEFLARE-SDK_DIR}
+
+    # Setup Kueue RBAC permissions as admin before switching to test user
+    Setup Kueue Batch User RoleBinding
+
+    # Create the test namespace as admin
+    Create Test Namespace For Codeflare Test
+
+    # Perform oc login with Test User
+    Login To OCP Using API    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}
+
 Run Codeflare-SDK Test
     [Documentation]   Run codeflare-sdk Test
     [Arguments]    ${TEST_TYPE}    ${TEST_NAME}    ${PYTHON_VERSION}    ${RAY_IMAGE}    ${RELEASE_BRANCH}
     Log To Console    "Running codeflare-sdk test: ${TEST_NAME}"
-    ${result} =    Run Process  cd ${CODEFLARE-SDK_DIR} && git fetch origin && git checkout ${RELEASE_BRANCH} && git branch && poetry env use ${PYTHON_VERSION} && poetry install --with test,docs && poetry run pytest -v -s ./tests/${TEST_TYPE}/${TEST_NAME} --timeout\=540
+    ${result} =    Run Process  cd ${CODEFLARE-SDK_DIR} && git fetch origin && git checkout ${RELEASE_BRANCH} && git branch && poetry env use ${PYTHON_VERSION} && poetry install --with test,docs && poetry run pytest -v -s ./tests/${TEST_TYPE}/${TEST_NAME} --timeout\=900
     ...    env:RAY_IMAGE=${RAY_IMAGE}
     ...    env:AWS_DEFAULT_ENDPOINT=${AWS_DEFAULT_ENDPOINT}
     ...    env:AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
@@ -101,6 +118,18 @@ Cleanup Codeflare-SDK Setup
 
     Log To Console    "Log back as cluster admin"
     Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
+
+    # Cleanup Kueue RBAC resources
+    Teardown Kueue Batch User RoleBinding
+
+Create Test Namespace For Codeflare Test
+    [Documentation]    Create the test namespace as admin for codeflare tests
+    Log To Console    "Creating test namespace test-ns-rayupgrade as admin"
+    ${rc}=    Run And Return Rc    oc create namespace test-ns-rayupgrade
+
+    IF    ${rc} != 0
+        Log To Console    "Warning: Unable to create namespace test-ns-rayupgrade (may already exist)"
+    END
 
 Prepare Training Operator KFTO E2E Test Suite
     [Documentation]    Prepare Training Operator KFTO E2E Test Suite
@@ -207,6 +236,7 @@ Prepare DistributedWorkloads Integration Test Suite
     Log To Console    "Log back as cluster admin"
     Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
     RHOSi Setup
+    Setup Kueue Batch User RoleBinding
 
 Teardown DistributedWorkloads Integration Test Suite
     [Documentation]    Teardown DistributedWorkloads Integration Test Suite
@@ -215,6 +245,7 @@ Teardown DistributedWorkloads Integration Test Suite
     Log To Console    "Removing test binaries"
     Remove File        ${ODH_BINARY_NAME}
     RHOSi Teardown
+    Teardown Kueue Batch User RoleBinding
 
 Generate User Token
     [Documentation]    Authenticate as a user and return user token.
@@ -313,3 +344,61 @@ Disable appwrapper in Codeflare operator
     ...    shell=true
     ...    stderr=STDOUT
     Log To Console    ${result.stdout}
+
+Setup Kueue Batch User RoleBinding
+    [Documentation]    Apply the kueue-batch-user-role ClusterRole and kueue-batch-user-rolebinding ClusterRoleBinding as admin
+    Log To Console    "Logging in as cluster admin to setup RBAC permissions"
+    Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
+    Log To Console    "Applying kueue-batch-user-role ClusterRole"
+    ${result} =    Run Process    oc apply -f tests/Resources/Files/kueue-batch-user-role.yaml
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Unable to apply kueue-batch-user-role ClusterRole
+    END
+    Log To Console    "Applying kueue-batch-user-rolebinding ClusterRoleBinding"
+    ${result} =    Run Process    oc apply -f tests/Resources/Files/kueue-batch-user-rolebinding.yaml
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Unable to apply kueue-batch-user-rolebinding ClusterRoleBinding
+    END
+    Log To Console    "Applying kueue-batch-user-specific-rolebinding ClusterRoleBinding"
+    ${result} =    Run Process    oc apply -f tests/Resources/Files/kueue-batch-user-specific-rolebinding.yaml
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Unable to apply kueue-batch-user-specific-rolebinding ClusterRoleBinding
+    END
+
+Teardown Kueue Batch User RoleBinding
+    [Documentation]    Remove the kueue-batch-user-role ClusterRole and kueue-batch-user-rolebinding ClusterRoleBinding as admin
+    Log To Console    "Logging in as cluster admin to cleanup RBAC permissions"
+    Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
+    Log To Console    "Removing kueue-batch-user-rolebinding ClusterRoleBinding"
+    ${result} =    Run Process    oc delete -f tests/Resources/Files/kueue-batch-user-rolebinding.yaml
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        Log To Console    "Warning: Unable to delete kueue-batch-user-rolebinding ClusterRoleBinding (may not exist)"
+    END
+    Log To Console    "Removing kueue-batch-user-specific-rolebinding ClusterRoleBinding"
+    ${result} =    Run Process    oc delete -f tests/Resources/Files/kueue-batch-user-specific-rolebinding.yaml
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        Log To Console    "Warning: Unable to delete kueue-batch-user-specific-rolebinding ClusterRoleBinding (may not exist)"
+    END
+    Log To Console    "Removing kueue-batch-user-role ClusterRole"
+    ${result} =    Run Process    oc delete -f tests/Resources/Files/kueue-batch-user-role.yaml
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        Log To Console    "Warning: Unable to delete kueue-batch-user-role ClusterRole (may not exist)"
+    END

@@ -38,26 +38,26 @@ ${DC_NAME} =    elyra-s3
 
 *** Test Cases ***
 Verify Pipelines Integration With Elyra When Using Standard Data Science Image
-    [Documentation]    Verifies that a workbench using the Standard Data Science Image can be used to
+    [Documentation]    Verifies that a workbench using the Jupyter | Data Science | CPU | Python 3.11 Image can be used to
     ...    create and run a Data Science Pipeline
     [Tags]    Sanity    ODS-2197
     [Timeout]    10m
     Verify Pipelines Integration With Elyra Running Hello World Pipeline Test
-    ...    img=Standard Data Science
+    ...    img=Jupyter | Data Science | CPU | Python 3.11
     ...    runtime_image=Datascience with Python 3.11 (UBI9)
-    ...    experiment_name=standard data science pipeline
+    ...    experiment_name=standard-data-science-pipeline
 
 Verify Pipelines Integration With Elyra When Using Standard Data Science Based Images
-    [Documentation]    Verifies that a workbench using an image based on the Standard Data Science Image
+    [Documentation]    Verifies that a workbench using an image based on the Jupyter | Data Science | CPU | Python 3.11 Image
     ...    can be used to create and run a Data Science Pipeline
     ...    Note: this a templated test case
     ...    (more info at https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#test-templates)
     [Template]    Verify Pipelines Integration With Elyra Running Hello World Pipeline Test
     [Tags]        Tier1    ODS-2271
     [Timeout]     30m
-    PyTorch       Datascience with Python 3.11 (UBI9)    pytorch pipeline
-    TensorFlow    Datascience with Python 3.11 (UBI9)    tensorflow pipeline
-    TrustyAI      Datascience with Python 3.11 (UBI9)    trustyai pipeline
+    Jupyter | PyTorch | CUDA | Python 3.11       Datascience with Python 3.11 (UBI9)    pytorch-pipeline
+    Jupyter | TensorFlow | CUDA | Python 3.11    Datascience with Python 3.11 (UBI9)    tensorflow-pipeline
+    Jupyter | TrustyAI | CPU | Python 3.11       Datascience with Python 3.11 (UBI9)    trustyai-pipeline
 
 
 *** Keywords ***
@@ -81,7 +81,7 @@ Elyra Pipelines Suite Setup    # robocop: off=too-many-calls-in-keyword
     Sleep    15s    reason=Wait until pipeline server is detected by dashboard
     # Workaround for the: https://issues.redhat.com/browse/RHOAIENG-24545
     Create Workbench    workbench_title=workaround    workbench_description=workaround
-    ...                 prj_title=${PRJ_TITLE}    image_name=Minimal Python  deployment_size=Small
+    ...                 prj_title=${PRJ_TITLE}    image_name=Jupyter | Minimal | CPU | Python 3.11  deployment_size=Small
     ...                 storage=Persistent  pv_existent=${FALSE}
     ...                 pv_name=${PV_NAME}_workaround  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
     ...                 envs=${ENVS_LIST}
@@ -114,6 +114,9 @@ Verify Pipelines Integration With Elyra Running Hello World Pipeline Test     # 
     Wait Until Page Contains Element    xpath=//a[.="Run Details."]    timeout=30s
     ${pipeline_run_name} =    Get Pipeline Run Name
     Switch To Pipeline Execution Page
+    # We opened the Run Details page, now we validate the pipeline name is displayed
+    Wait Until Page Contains    ${pipeline_run_name}    timeout=20s
+    Log    Successfully validated Run Details link for pipeline: ${pipeline_run_name}
     # We need to navigate to the page because the project name hold a state
     # In a fresh cluster, if not state found, it will select the first one
     # In this case, the first could not be the project created

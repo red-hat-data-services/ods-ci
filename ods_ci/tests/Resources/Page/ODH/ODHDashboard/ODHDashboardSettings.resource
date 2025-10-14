@@ -209,7 +209,7 @@ Set Notebook Culler Timeout
     Input Text  //input[@id="minute-input"]  ${minutes}
     Sleep  0.5s
     ${changed_setting} =  Run Keyword And Return Status    Page Should Contain Element
-    ...    xpath://button[.="Save changes"][@aria-disabled="false"]
+    ...    xpath://button[@data-testid="submit-cluster-settings" and not(contains(@class, 'disabled'))]
     IF  ${changed_setting}==True
         Save Changes In Cluster Settings
     END
@@ -239,9 +239,9 @@ Open Dashboard Settings
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
     Sleep  1s
     ${settings_hidden} =  Run Keyword And Return Status  Page Should Contain Element
-    ...    xpath://section[@aria-labelledby="settings"][@hidden=""]
+    ...    xpath://button[string()="Settings"]/../section[@hidden]
     IF  ${settings_hidden}==True
-        Click Element  xpath://button[@id="settings"]
+        Click Element  xpath://button[string()="Settings"]
     END
     Click Element  xpath://a[.="${settings_page}"]
     IF    "${settings_page}" == "Workbench images"
@@ -308,24 +308,6 @@ Check IF Single Model Serving Is Enabled From DSC And Cluster Setting
     ${status}=   Get Checkbox State Of Single Model Serving Platforms
     Should Be Equal As Strings   ${status}   ${TRUE}
     Element Should Be Enabled    ${SINGLE_MODE_SERVING_CHECK_BOX}
-
-
-Check IF Multi Model Serving IS Disabled From DSC And Cluster Setting
-    [Documentation]    Check Multi model should be disabled from DSC and dashboard
-    Component Should Not Be Enabled  modelmeshserving
-    ${status}=   Get Checkbox State Of Multi Model Serving Platforms
-    Should Be Equal As Strings    ${status}   ${FALSE}
-    Element Should Be Disabled    ${MULTI_MODEL_SERVING_CHECK_BOX}
-
-
-Check IF Multi Model Serving IS Enabled From DSC And Cluster Setting
-    [Documentation]    Check Multi model should be enabled from DSC and dashboard
-    Component Should Be Enabled  modelmeshserving
-    ${status}=   Get Checkbox State Of Multi Model Serving Platforms
-    Should Be Equal    ${status}  ${TRUE}
-    Element Should Be Enabled    ${MULTI_MODEL_SERVING_CHECK_BOX}
-    Should Be Equal    ${status}  ${True}
-    Element Should Be Enabled     ${MULTI_MODEL_SERVING_CHECK_BOX}
 
 Set RHODS Admins Group Empty Group
     [Documentation]     Sets the "adminGroups" field in "odh-dashboard-config" ConfigMap

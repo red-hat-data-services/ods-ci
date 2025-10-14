@@ -13,6 +13,9 @@ Library             JupyterLibrary
 
 Test Tags           DuringUpgrade
 
+*** Variables ***
+${UPGRADE_TO_IIB}=    ${EMPTY}
+
 
 *** Test Cases ***
 Upgrade RHODS
@@ -20,16 +23,8 @@ Upgrade RHODS
     [Tags]      ODS-1766        Upgrade    Platform
     ${initial_version} =    Get RHODS Version
     ${initial_creation_date} =      Get Operator Pod Creation Date
-    # robocop:disable
-    ${return_code}    ${output} =       Run And Return Rc And Output
-    ...    oc patch installplan $(oc get installplans -n ${OPERATOR_NAMESPACE} | grep -v NAME | awk '{print $1}') -n ${OPERATOR_NAMESPACE} --type='json' -p '[{"op": "replace", "path": "/spec/approved", "value": true}]'
-    Should Be Equal As Integers
-    ...    ${return_code}
-    ...    0
-    ...    msg=Error while upgrading RHODS
-    Sleep
-    ...    30s
-    ...    reason=wait for thirty seconds until old CSV is removed and new one is ready
+    Set Suite Variable    ${UPDATE_CHANNEL}    ${UPGRADE_TO_UPDATE_CHANNEL}
+    Install RHODS   ${CLUSTER_TYPE}    ${UPGRADE_TO_IIB}    Manual    ${UPGRADE_TO_VERSION}    True
     RHODS Version Should Be Greater Than        ${initial_version}
     Operator Pod Creation Date Should Be Updated        ${initial_creation_date}
     OpenShiftLibrary.Wait For Pods Status       namespace=${OPERATOR_NAMESPACE}     timeout=300
@@ -79,7 +74,7 @@ Upgrade Test Teardown
     # robocop: off=too-many-calls-in-keyword
     [Documentation]     Upgrade Test Teardown
     End Web Test
-    Skip If RHODS Is Self-Managed
+    Skip If RHODS Is Self-Managed And New Observability Stack Is Disabled    # TODO Observability: We don't configure alerts yet with new observability stack, so may likely fail
     ${expression} =    Set Variable    rhods_aggregate_availability&step=1
     ${resp} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    ${expression}
     Log    rhods_aggregate_availability: ${resp.json()["data"]["result"][0]["value"][-1]}
@@ -109,9 +104,11 @@ RHODS Version Should Be Greater Than
     [Documentation]    Checks if the RHODS version is greater than the given initial version.
     ...    Fails if the version is not greater.
     [Arguments]    ${initial_version}
-    ${ver} =    Get RHODS Version
-    ${ver} =    Fetch From Left    ${ver}    -
-    Should Be True    '${ver}' > '${initial_version}'    msg=Version wasn't greater than initial one ${initial_version}
+    ${ver} =  Get RHODS Version    True
+    ${ver} =  Fetch From Left  ${ver}  -
+    Log    The initial RHODS operator version is: ${initial_version} the current version is: ${ver}    console=yes
+    ${version_gt} =  Gt     ${ver}     ${initial_version}
+    Should Be True    ${version_gt}    msg=Version ${ver} wasn't greater than initial one ${initial_version}
 
 Get Operator Pod Creation Date
     [Documentation]    Retrieves the creation date of the RHODS operator pod.
@@ -120,12 +117,15 @@ Get Operator Pod Creation Date
     ${return_code}    ${creation_date} =    Run And Return Rc And Output
     ...    oc get pod -n ${OPERATOR_NAMESPACE} -l name=rhods-operator --no-headers -o jsonpath='{.items[0].metadata.creationTimestamp}'     #robocop: disable:line-too-long
     Should Be Equal As Integers    ${return_code}    0    msg=Error while getting creation date of the operator pod
+    Log    Creation date of the RHODS operator pod is: ${creation_date}    console=yes
     RETURN    ${creation_date}
 
 Operator Pod Creation Date Should Be Updated
     [Documentation]    Checks if the operator pod creation date has been updated after the upgrade.
     ...    Fails if the updated creation date is not more recent than the initial creation date.
     [Arguments]    ${initial_creation_date}
+    Log    The initial Creation date of the RHODS operator pod is: ${initial_creation_date}    console=yes
     ${updated_creation_date} =    Get Operator Pod Creation Date
+    Log    The updated date is: ${updated_creation_date}    console=yes
     Should Be True    '${updated_creation_date}' > '${initial_creation_date}'
     ...    msg=Operator pod creation date was not updated after upgrade

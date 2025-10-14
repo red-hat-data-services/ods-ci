@@ -86,7 +86,8 @@ Verify That Prometheus Image Is A CPaaS Built Image
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-734
-    Skip If RHODS Is Self-Managed
+    Skip If RHODS Is Self-Managed    # TODO Observability: Test can be removed once we fully onboard on the new stack.
+                                     # Observability operator deploys Prometheus for us.
     Wait For Pods To Be Ready    label_selector=deployment=prometheus
     ...    namespace=${MONITORING_NAMESPACE}    timeout=60s
     ${pod} =    Find First Pod By Name    namespace=${MONITORING_NAMESPACE}    pod_regex=prometheus-
@@ -100,7 +101,7 @@ Verify That Blackbox-exporter Image Is A CPaaS Built Image
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-735
-    Skip If RHODS Is Self-Managed
+    Skip If RHODS Is Self-Managed    # TODO Observability: We don't deploy blackbox-exporter yet on self-managed
     Wait For Pods To Be Ready    label_selector=deployment=blackbox-exporter
     ...    namespace=${MONITORING_NAMESPACE}    timeout=60s
     ${pod} =    Find First Pod By Name    namespace=${MONITORING_NAMESPACE}    pod_regex=blackbox-exporter-
@@ -112,7 +113,8 @@ Verify That Alert Manager Image Is A CPaaS Built Image
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-733
-    Skip If RHODS Is Self-Managed
+    Skip If RHODS Is Self-Managed    # TODO Observability: Test can be removed once we fully onboard on the new stack.
+                                     # Observability operator deploys alertmanager for us.
     Wait For Pods To Be Ready    label_selector=deployment=prometheus
     ...    namespace=${MONITORING_NAMESPACE}    timeout=60s
     ${pod} =    Find First Pod By Name    namespace=${MONITORING_NAMESPACE}    pod_regex=prometheus-
@@ -152,7 +154,8 @@ Verify That Blackbox-exporter Is Protected With Auth-proxy
     ...     Tier1
     ...     ODS-1090
 
-    Skip If RHODS Is Self-Managed
+    Skip If RHODS Is Self-Managed    # TODO Observability: We don't deploy blackbox-exporter yet on self-managed
+                                     # Oauth Proxy won't be used in new monitoring stack, it will be kube-rbac-proxy
 
     Verify BlackboxExporter Includes Oauth Proxy
 
@@ -205,7 +208,8 @@ Verify Users Can Update Notification Email After Installing RHODS With The AddOn
     ...       Deployment-AddOnFlow
     ...       Monitoring
     ...       AutomationBug  # currently broken on fake addon installs
-    Skip If RHODS Is Self-Managed
+    Skip If RHODS Is Self-Managed    # TODO Observability: We don't reconfigure new stack alertmanager yet
+                                     # Only applicable to managed clusters
     ${email_to_change} =    Set Variable    dummyemail1@redhat.com
     ${cluster_name} =    Common.Get Cluster Name From Console URL
     ${current_email} =    Get Notification Email From Addon-Managed-Odh-Parameters Secret
@@ -240,7 +244,8 @@ Verify Monitoring Stack Is Reconciled Without Restarting The ODS Operator
     ...       ODS-699
     ...       Monitoring
     ...       Execution-Time-Over-15m
-    Skip If RHODS Is Self-Managed
+    Skip If RHODS Is Self-Managed    # TODO Observability: Likely needs to be revisited if it makes sense. Probably we
+                                     # can change MonitoringStack/Otel collector and see if it reconciles back
     Replace "Prometheus" With "Grafana" In Rhods-Monitor-Federation
     Wait Until Operator Reverts "Grafana" To "Prometheus" In Rhods-Monitor-Federation
 
@@ -300,6 +305,7 @@ Verify RHODS Notebooks Network Policies
     Should Be Equal As Strings    ${policy_oauth}    ${expected_policy_oauth}
     Log    ${policy_oauth}
     Log    ${expected_policy_oauth}
+    [Teardown]    Delete User Notebook CR    ${TEST_USER.USERNAME}
 
 Verify All The Pods Are Using Image Digest Instead Of Tags
     [Documentation]    Verifies that the all the rhods pods are using image digest
@@ -338,7 +344,7 @@ Verify No Alerts Are Firing After Installation Except For DeadManSnitch    # rob
     ...       RHOAIENG-13079
     #...       Monitoring - just for tracking purposes but commented to not run the same test many times
     ...       Operator
-    Skip If RHODS Is Self-Managed
+    Skip If RHODS Is Self-Managed And New Observability Stack Is Disabled    # TODO Observability: We don't configure alerts yet with new observability stack, so may likely fail
     # If these numbers change, add also alert-specific tests
     # Need to wait to stabilize alerts after installation
     Run Keyword And Continue On Failure
@@ -349,9 +355,6 @@ Verify No Alerts Are Firing After Installation Except For DeadManSnitch    # rob
     # deadmanssnitch-alerting.rules
     Verify Alert Is Firing And Continue On Failure
     ...    DeadManSnitch    DeadManSnitch
-    # codeflare-alerting.rules
-    Verify "CodeFlare Operator Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
-    Verify "Distributed Workloads CodeFlare" Alerts Are Not Firing And Continue On Failure
     # trainingoperator-alerting.rules
     Verify "KubeFlow Training Operator" Alerts Are Not Firing And Continue On Failure
     # rhods-dashboard-alerting.rules
@@ -361,8 +364,6 @@ Verify No Alerts Are Firing After Installation Except For DeadManSnitch    # rob
     Verify "Data Science Pipelines Application Route Error Burn Rate" Alerts Are Not Firing And Continue On Failure
     Verify "Data Science Pipelines Operator Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
     Verify "RHODS Data Science Pipelines" Alerts Are Not Firing And Continue On Failure
-    # model-mesh-alerting.rules
-    Verify "Modelmesh Controller Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
     # odh-model-controller-alerting.rules
     Verify "ODH Model Controller Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
     # kserve-alerting.rules
@@ -403,7 +404,7 @@ Verify DSC Contains Correct Component Versions  # robocop: disable:too-long-test
         ...     ${RHODS_OPERATOR_GIT_DIR}/prefetched-manifests/${c}/component_metadata.yaml
         ${file_exists} =  Run Keyword And Return Status    File Should Exist  ${component_metadata_file}
         IF  ${file_exists}
-            IF  $component_versions_json[$c]["managementState"] != "Managed"
+            IF  $component_versions_json[$c] == {} or $component_versions_json[$c]["managementState"] != "Managed"
                 Log  ${c} is not managed, skipping version check
                 CONTINUE
             END

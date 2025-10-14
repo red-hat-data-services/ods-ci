@@ -1,4 +1,4 @@
-apiVersion: datasciencecluster.opendatahub.io/v1
+apiVersion: datasciencecluster.opendatahub.io/v2
 kind: DataScienceCluster
 metadata:
   name: <dsc_name>
@@ -10,9 +10,6 @@ metadata:
       app.kubernetes.io/part-of: <operator_yaml_label>
 spec:
   components:
-    codeflare:
-      devFlags: <codeflare_devflags>
-      managementState: <codeflare_value>
     dashboard:
       devFlags: <dashboard_devflags>
       managementState: <dashboard_value>
@@ -21,14 +18,11 @@ spec:
       managementState: <datasciencepipelines_value>
     kserve:
       devFlags: <kserve_devflags>
-      defaultDeploymentMode: Serverless
+      defaultDeploymentMode: RawDeployment
       managementState: <kserve_value>
     kueue:
       devFlags: <kueue_devflags>
       managementState: <kueue_value>
-    modelmeshserving:
-      devFlags: <modelmeshserving_devflags>
-      managementState: <modelmeshserving_value>
     ray:
       devFlags: <ray_devflags>
       managementState: <ray_value>
@@ -49,4 +43,6 @@ spec:
     feastoperator:
       devFlags: <feastoperator_devflags>
       managementState: <feastoperator_value>
-
+    llamastackoperator:
+      devFlags: <llamastackoperator_devflags>
+      managementState: <llamastackoperator_value>

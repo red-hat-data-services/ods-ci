@@ -13,13 +13,11 @@ Test Tags           ExcludeOnODH
 
 *** Variables ***
 @{RECORD_GROUPS}    SLOs - Data Science Pipelines Operator    SLOs - Data Science Pipelines Application
-...    SLOs - Modelmesh Controller    SLOs - CodeFlare Operator    SLOs - MCAD Controller    Usage Metrics
 ...    SLOs - ODH Model Controller    SLOs - Kserve Controller Manager    SLOs - ODH Dashboard    Availability Metrics
 ...    SLOs - RHODS Operator v2    SLOs - TrustyAI Controller Manager    SLOs - Notebook Controller
 
 @{ALERT_GROUPS}    SLOs-haproxy_backend_http_responses_dsp    RHODS Data Science Pipelines    SLOs-probe_success_dsp
-...    SLOs-probe_success_modelmesh     SLOs-probe_success_dashboard    SLOs-probe_success_workbench
-...    DeadManSnitch     SLOs-probe_success_codeflare     Distributed Workloads CodeFlare     KubeFlow Training Operator
+...    DeadManSnitch     KubeFlow Training Operator
 ...    SLOs-haproxy_backend_http_responses_dashboard     SLOs-probe_success_model_controller     SLOs-probe_success_kserve
 ...    Distributed Workloads Kuberay     Distributed Workloads Kueue     RHODS-PVC-Usage     RHODS Notebook controllers
 ...    SLOs-probe_success_trustyai
@@ -32,7 +30,7 @@ Test Existence of Prometheus Alerting Rules
     ...       Tier1
     ...       ODS-509
     ...       Monitoring
-    Skip If RHODS Is Self-Managed
+    Skip If RHODS Is Self-Managed And New Observability Stack Is Disabled    # TODO Observability: We don't configure alerts yet with new observability stack, so may likely fail - true for the whole file
     Check Prometheus Alerting Rules
 
 Test Existence of Prometheus Recording Rules
@@ -41,7 +39,7 @@ Test Existence of Prometheus Recording Rules
     ...       Tier1
     ...       ODS-510
     ...       Monitoring
-    Skip If RHODS Is Self-Managed
+    Skip If RHODS Is Self-Managed And New Observability Stack Is Disabled
     Check Prometheus Recording Rules
 
 Test Metric "Notebook CPU Usage" On ODS Prometheus
@@ -50,7 +48,7 @@ Test Metric "Notebook CPU Usage" On ODS Prometheus
     ...       Tier1
     ...       ODS-178
     ...       Monitoring
-    Skip If RHODS Is Self-Managed
+    Skip If RHODS Is Self-Managed And New Observability Stack Is Disabled
     ${cpu_usage_before} =    Read Current CPU Usage
     Run Jupyter Notebook For 5 Minutes
     Wait Until Keyword Succeeds    10 times   30s
@@ -63,7 +61,7 @@ Test Metric "Rhods_Total_Users" On ODS Prometheus
     ...       Tier1
     ...       ODS-628
     ...       Monitoring
-    Skip If RHODS Is Self-Managed
+    Skip If RHODS Is Self-Managed And New Observability Stack Is Disabled
     # Note: the expression ends with "step=1" to obtain the value for current second
     ${expression} =    Set Variable    rhods_total_users&step=1
     ${rhods_total_users} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}
@@ -89,7 +87,7 @@ Test Metric Existence For "Rhods_Aggregate_Availability" On ODS Prometheus
     ...       Tier1
     ...       ODS-636
     ...       Monitoring
-    Skip If RHODS Is Self-Managed
+    Skip If RHODS Is Self-Managed And New Observability Stack Is Disabled
     ${expression} =    Set Variable    rhods_aggregate_availability&step=1
     ${resp} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    ${expression}
     Log    rhods_aggregate_availability: ${resp.json()["data"]["result"][0]["value"][-1]}
@@ -103,24 +101,21 @@ Test Targets Are Available And Up In RHOAI Prometheus
     ...       ODS-179
     ...       RHOAIENG-13066
     ...       Monitoring
-    Skip If RHODS Is Self-Managed
+    Skip If RHODS Is Self-Managed And New Observability Stack Is Disabled
     @{targets} =    Prometheus.Get Target Pools Which Have State Up
     ...    pm_url=${RHODS_PROMETHEUS_URL}
     ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
     ...    username=${OCP_ADMIN_USER.USERNAME}
     ...    password=${OCP_ADMIN_USER.PASSWORD}
-    List Should Contain Value    ${targets}    CodeFlare Operator
     List Should Contain Value    ${targets}    Data Science Pipelines Operator
     List Should Contain Value    ${targets}    Federate Prometheus
     List Should Contain Value    ${targets}    Kserve Controller Manager
     List Should Contain Value    ${targets}    KubeRay Operator
     List Should Contain Value    ${targets}    Kubeflow Notebook Controller Service Metrics
     List Should Contain Value    ${targets}    Kueue Operator
-    List Should Contain Value    ${targets}    Modelmesh Controller
     List Should Contain Value    ${targets}    ODH Model Controller
     List Should Contain Value    ${targets}    ODH Notebook Controller Service Metrics
     List Should Contain Value    ${targets}    TrustyAI Controller Manager
-    List Should Contain Value    ${targets}    user_facing_endpoints_status_codeflare
     List Should Contain Value    ${targets}    user_facing_endpoints_status_dsp
     List Should Contain Value    ${targets}    user_facing_endpoints_status_rhods_dashboard
     List Should Contain Value    ${targets}    user_facing_endpoints_status_workbenches
@@ -132,15 +127,15 @@ Test RHOAI Operator Metrics Are Defined
     ...       ODS-192
     ...       RHOAIENG-13081
     ...       Monitoring
-    Skip If RHODS Is Self-Managed
+    Skip If RHODS Is Self-Managed And New Observability Stack Is Disabled
     @{expected_metric_names} =    Create List  controller_runtime_active_workers
     ...                                     controller_runtime_max_concurrent_reconciles  controller_runtime_reconcile_errors_total
     ...                                     controller_runtime_reconcile_time_seconds_bucket  controller_runtime_reconcile_time_seconds_count
     ...                                     controller_runtime_reconcile_time_seconds_sum  controller_runtime_reconcile_total
 
-    @{expected_controller_names} =     Create List  auth  codeflare  dashboard
+    @{expected_controller_names} =     Create List  auth  dashboard
     ...                                    datasciencecluster  datasciencepipelines  dscinitialization  kserve  kueue
-    ...                                    modelcontroller  modelmeshserving  modelregistry  monitoring  ray
+    ...                                    modelcontroller  modelregistry  monitoring  ray
     ...                                    trainingoperator  trustyai  workbenches
 
     FOR   ${controller}    IN    @{expected_controller_names}
@@ -176,7 +171,7 @@ Test RHOAI Dashboard Metrics By Code Are Defined
     ...       ODS-195
     ...       RHOAIENG-13261
     ...       Monitoring
-    Skip If RHODS Is Self-Managed
+    Skip If RHODS Is Self-Managed And New Observability Stack Is Disabled
     ${response_by_code} =    Prometheus.Run Query
     ...    pm_url=${RHODS_PROMETHEUS_URL}
     ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
@@ -210,7 +205,7 @@ Test RHOAI Dashboard Metrics Are Defined
     ...       ODS-194
     ...       RHOAIENG-13260
     ...       Monitoring
-    Skip If RHODS Is Self-Managed
+    Skip If RHODS Is Self-Managed And New Observability Stack Is Disabled
     ${response} =    Prometheus.Run Query
     ...    pm_url=${RHODS_PROMETHEUS_URL}
     ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
@@ -236,7 +231,7 @@ Test RHOAI DSP Operator Recording Rules On Prometheus
     ...       ODS-2168
     ...       RHOAIENG-13263
     ...       Monitoring
-    Skip If RHODS Is Self-Managed
+    Skip If RHODS Is Self-Managed And New Observability Stack Is Disabled
     ${user_facing_endpoints_status_dsp_response} =    Prometheus.Run Query
     ...    pm_url=${RHODS_PROMETHEUS_URL}
     ...    pm_token=${RHODS_PROMETHEUS_TOKEN}

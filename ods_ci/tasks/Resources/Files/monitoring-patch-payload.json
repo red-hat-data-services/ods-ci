@@ -1,0 +1,32 @@
+{
+    "spec": {
+        "monitoring": {
+            "managementState": "Managed",
+            "alerting": {},
+            "metrics": {
+                "exporters": {},
+                "storage": {
+                    "size": "5Gi",
+                    "retention": "90d"
+                },
+                "resources": {
+                    "cpulimit": "500m",
+                    "memorylimit": "512Mi",
+                    "cpurequest": "100m",
+                    "memoryrequest": "256Mi"
+                }
+            },
+            "traces": {
+                "exporters": {},
+                "sampleRatio": "0.1",
+                "storage": {
+                    "backend": "pv",
+                    "size": "5Gi"
+                },
+                "tls": {
+                    "enabled": true
+                }
+            }
+        }
+    }
+}

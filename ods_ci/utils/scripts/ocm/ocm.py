@@ -32,6 +32,8 @@ class OpenshiftClusterManager:
         self.token = args.get("token")
         self.testing_platform = args.get("testing_platform")
         self.cluster_name = args.get("cluster_name")
+        self.team = args.get("team")
+        self.fips = args.get("fips")
         self.aws_region = args.get("aws_region")
         self.aws_instance_type = args.get("aws_instance_type")
         self.num_compute_nodes = args.get("num_compute_nodes")
@@ -139,11 +141,18 @@ class OpenshiftClusterManager:
 
     def osd_cluster_create(self):
         """Creates OSD cluster"""
-
+        values_to_hide = []
+        replace_vars = {}
+        replace_vars["CLUSTER_NAME"] = self.cluster_name
+        replace_vars["TEAM"] = self.team
+        replace_vars["FIPS"] = "true" if self.fips else "false"
+        replace_vars["REGION"] = self.region
+        replace_vars["COMPUTE_NODES"] = self.compute_nodes
+        replace_vars["COMPUTE_MACHINE_TYPE"] = self.compute_machine_type
+        replace_vars["CLOUD_PROVIDER"] = self.cloud_provider
         if (self.channel_group == "candidate") and (self.testing_platform == "prod"):
             log.error("Channel group 'candidate' is available only for stage environment.")
             sys.exit(1)
-
         version = ""
         if self.openshift_version != "":
             version_match = re.match(r"(\d+\.\d+)\-latest", self.openshift_version)
@@ -167,62 +176,48 @@ class OpenshiftClusterManager:
         else:
             log.info("Using the latest osd version available ...")
 
-        channel_grp = ""
-        if self.channel_group != "":
-            if self.channel_group in ("stable", "candidate"):
-                if version == "":
-                    log.error(
-                        "Please enter openshift version as argument. "
-                        "Channel group option is used along with openshift version."
-                    )
-                    sys.exit(1)
-                else:
-                    channel_grp = "--channel-group {} ".format(self.channel_group)
-            else:
-                log.error("Invalid channel group. Values can be 'stable' or 'candidate'.")
+        replace_vars["OCP_VERSION"] = self.openshift_version
+        replace_vars["CHANNEL_GROUP"] = self.channel_group
 
         if self.cloud_provider == "aws":
-            cmd = (
-                "ocm --v={} create cluster --provider {} --aws-account-id {} "
-                "--aws-access-key-id {} --aws-secret-access-key {} "
-                "--ccs --region {} --compute-nodes {} "
-                "--compute-machine-type {} {} {}"
-                "{}".format(
-                    self.ocm_verbose_level,
-                    self.cloud_provider,
-                    self.aws_account_id,
-                    self.aws_access_key_id,
-                    self.aws_secret_access_key,
-                    self.aws_region,
-                    self.num_compute_nodes,
-                    self.aws_instance_type,
-                    version,
-                    channel_grp,
-                    self.cluster_name,
-                )
-            )
+            aws_creds_replace_vars = {
+                "AWS_ACCESS_KEY_ID": self.aws_access_key_id,
+                "AWS_SECRET_ACCESS_KEY": self.aws_secret_access_key,
+                "AWS_ACCOUNT_ID": self.aws_account_id,
+            }
+            aws_replace_vars = {
+                "REGION": self.aws_region,  # TODO: move to generic region variable
+                "COMPUTE_MACHINE_TYPE": self.aws_instance_type,  # TODO: move to generic compute-machine-type variable
+                "COMPUTE_NODES": self.num_compute_nodes,  # TODO: move to generic compute-nodes variable
+            }
+            replace_vars.update(aws_creds_replace_vars)
+            replace_vars.update(aws_replace_vars)
+            values_to_hide.extend(aws_creds_replace_vars.values())
         elif self.cloud_provider == "gcp":
-            # Create service account file
-            self._create_service_account_file()
-            cmd = (
-                "ocm --v={} create cluster --provider {} --service-account-file {} "
-                "--ccs --region {} --compute-nodes {} "
-                "--compute-machine-type {} {} {}"
-                "{}".format(
-                    self.ocm_verbose_level,
-                    self.cloud_provider,
-                    self.service_account_file,
-                    self.region,
-                    self.compute_nodes,
-                    self.compute_machine_type,
-                    version,
-                    channel_grp,
-                    self.cluster_name,
-                )
-            )
+            gcp_replace_vars = {
+                "GCP_SA_PRIVATE_KEY_ID": self.gcp_sa_priv_key_id,
+                "GCP_SA_PRIVATE_KEY": self.gcp_sa_private_key,
+                "GCP_SA_CLIENT_ID": self.gcp_sa_client_id,
+                "GCP_SA_CLIENT_EMAIL": self.gcp_sa_client_email,
+                "GCP_SA_CLIENT_CERT_URL": self.gcp_sa_client_cert_url,
+                "GCP_AUTH_TYPE": self.gcp_auth_type,
+                "GCP_AUTH_URI": self.gcp_auth_uri,
+                "GCP_TOKEN_URI": self.gcp_token_uri,
+                "GCP_AUTH_CERT_URL": self.gcp_auth_cert_url,
+                "GCP_SA_PROJECT_ID": self.gcp_sa_project_id,
+            }
+            replace_vars.update(gcp_replace_vars)
+            values_to_hide.extend(gcp_replace_vars.values())
         else:
             raise ValueError(f"{self.cloud_provider=} is not supported.")
+
+        # execute
+        template_file = "create-cluster.jinja"
+        output_file = "create-cluster-{}.json".format(self.cluster_name)
+        self._render_template(template_file, output_file, replace_vars)
+        cmd = "ocm --v={} post /api/clusters_mgmt/v1/clusters --body={}".format(self.ocm_verbose_level, output_file)
         ret = execute_command(cmd)
+        self.hide_values_in_file(output_file, values_to_hide)
         if ret is None:
             log.error(f"Failed to create osd cluster {self.cluster_name}")
             sys.exit(1)
@@ -526,6 +521,14 @@ class OpenshiftClusterManager:
                 if p["id"] == field:
                     p["value"] = "##hidden##"
         return json.dumps(json_dict)
+
+    def hide_values_in_file(self, filepath=None, values=[]):
+        with open(filepath, "r") as f:
+            text = f.read()
+        for value in values:
+            text = text.replace(value, "##hidden##")
+        with open(filepath, "w") as f:
+            f.write(text)
 
     def install_addon(
         self,
@@ -882,38 +885,8 @@ class OpenshiftClusterManager:
         # up even after cluster is in ready state
         time.sleep(300)
 
-    def _create_service_account_file(self):
-        """
-        Creates GCP service account file
-        """
-
-        replace_vars = {
-            "PROJECT_ID": self.gcp_sa_project_id,
-            "PRIVATE_KEY_ID": self.gcp_sa_priv_key_id,
-            "PRIVATE_KEY": self.gcp_sa_private_key,
-            "CLIENT_EMAIL": self.gcp_sa_client_email,
-            "CLIENT_ID": self.gcp_sa_client_id,
-            "CLIENT_CERT_URL": self.gcp_sa_client_cert_url,
-        }
-        template_file = "create_gcp_sa_json.jinja"
-        self._render_template(template_file, self.service_account_file, replace_vars)
-
     def install_rhods_addon(self):
         if not self.is_addon_installed():
-            # Install dependency operators for rhoai deployment:
-            # Authorino
-            dependency_operator = "authorino-operator"
-            self.install_openshift_isv(dependency_operator, "tech-preview-v1", "redhat-operators")
-            self.wait_for_isv_installation_to_complete(dependency_operator, namespace="openshift-operators")
-            # ServiceMesh
-            dependency_operator = "servicemeshoperator"
-            self.install_openshift_isv(dependency_operator, "stable", "redhat-operators")
-            self.wait_for_isv_installation_to_complete(dependency_operator, namespace="openshift-operators")
-            # Serverless
-            dependency_operator = "serverless-operator"
-            self.install_openshift_isv(dependency_operator, "stable", "redhat-operators")
-            self.wait_for_isv_installation_to_complete(dependency_operator, namespace="openshift-operators")
-
             # Deploy rhoai
             self.install_rhods()
             self.wait_for_addon_installation_to_complete()
@@ -1423,6 +1396,16 @@ if __name__ == "__main__":
         default="qeaisrhods-xyz",
     )
 
+    optional_create_cluster_parser.add_argument(
+        "--team", help="Team name", action="store", dest="team", default="unknown-team", metavar=""
+    )
+
+    optional_create_cluster_parser.add_argument(
+        "--fips",
+        help="FIPS mode",
+        action="store_true",
+        dest="fips",
+    )
     aws_create_cluster_parser.add_argument(
         "--aws-account-id ",
         help="aws account id",
@@ -1614,6 +1597,38 @@ if __name__ == "__main__":
                 help="gcp service account client cert url",
                 action="store",
                 dest="gcp_sa_client_cert_url",
+                required=True,
+            )
+
+            required_create_cluster_parser.add_argument(
+                "--gcp-auth-type",
+                help="gcp auth type",
+                action="store",
+                dest="gcp_auth_type",
+                required=True,
+            )
+
+            required_create_cluster_parser.add_argument(
+                "--gcp-auth-uri",
+                help="gcp auth uri",
+                action="store",
+                dest="gcp_auth_uri",
+                required=True,
+            )
+
+            required_create_cluster_parser.add_argument(
+                "--gcp-token-uri",
+                help="gcp token uri",
+                action="store",
+                dest="gcp_token_uri",
+                required=True,
+            )
+
+            required_create_cluster_parser.add_argument(
+                "--gcp-auth-cert-url",
+                help="gcp auth cert url",
+                action="store",
+                dest="gcp_auth_cert_url",
                 required=True,
             )
 

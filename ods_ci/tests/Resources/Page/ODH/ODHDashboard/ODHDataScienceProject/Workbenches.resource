@@ -39,9 +39,12 @@ ${WORKBENCH_IMAGE_VER_DROPDOWN}=     //*[@id="workbench-image-version-selection"
 # Standard Data Science https://github.com/red-hat-data-services/notebooks/blob/main/manifests/base/jupyter-datascience-notebook-imagestream.yaml
 # vs
 # Jupyter Data Science https://github.com/opendatahub-io/notebooks/blob/main/manifests/base/jupyter-datascience-notebook-imagestream.yaml
-&{IMAGE_ID_MAPPING}=                 Minimal Python=minimal-notebook    CUDA=minimal-gpu   PyTorch=pytorch
-...                                  Standard Data Science=data-science-notebook    Jupyter Data Science=datascience-notebook
-...                                  TensorFlow=tensorflow
+&{IMAGE_ID_MAPPING}=                 Jupyter | Minimal | CPU | Python 3.11=minimal-notebook
+...                                  Jupyter | Minimal | CUDA | Python 3.11=minimal-gpu
+...                                  Jupyter | PyTorch | CUDA | Python 3.11=pytorch
+...                                  Jupyter | Data Science | CPU | Python 3.11=data-science-notebook
+...                                  Jupyter | Data Science | CPU | Python 3.11=datascience-notebook
+...                                  Jupyter | TensorFlow | CUDA | Python 3.11=tensorflow
 ${KEYVALUE_TYPE}=        Key / value
 ${UPLOAD_TYPE}=        Upload
 ${ENV_VARIABLES_SECTION_XP}=        xpath=//section[@aria-label="Environment variables"]
@@ -195,12 +198,6 @@ Select An Existent PV
 Select Workbench Image
     [Documentation]    Selects a Jupyter image in the workbench creation page
     [Arguments]     ${image_name}    ${version}=default
-    IF  "${PRODUCT}" == "ODH"
-        # The name of the Standard Data Science image in ODH is Jupyter Data Science
-        IF  "${image_name}" == "Standard Data Science"
-            ${image_name}=    Set Variable    Jupyter Data Science
-        END
-    END
     Click Element    //a[@href="#name-and-description"]
     Wait Until Page Contains Element    ${WORKBENCH_IMAGE_MENU_BTN_XP}
     Click Element    ${WORKBENCH_IMAGE_MENU_BTN_XP}
@@ -384,7 +381,26 @@ Open Workbench
     SeleniumLibrary.Wait Until Page Contains Element    ${open_workbench_link}    timeout=30s
     SeleniumLibrary.Click Link    ${open_workbench_link}
     ${previous_handle}=    SeleniumLibrary.Switch Window    NEW
+
+    # Wait and retry if workbench is not ready yet
+    Wait Until Keyword Succeeds    2 min    5s    Verify Workbench Is Available
+
     RETURN    ${previous_handle}
+
+Verify Workbench Is Available
+    [Documentation]    Verifies that the workbench is available and ready to use.
+    ...                If "Application is not available" is detected, reload the page to retry.
+    ${app_not_available}=    Run Keyword And Return Status
+    ...    SeleniumLibrary.Page Should Contain    Application is not available
+    IF    ${app_not_available}
+        Log    msg=Application is not available, reloading page to retry...    level=INFO
+        SeleniumLibrary.Reload Page
+        # Give the page a moment to load after reload
+        Sleep    2s
+        Fail    msg=Application is not available - page reloaded for retry
+    END
+    # If we reach here, the application is available
+    Log    msg=Workbench application is available and ready    level=INFO
 
 Does Workbench Have A Description
     [Documentation]    Checks if a Workbench has a description in the list view of the project
@@ -401,7 +417,7 @@ Stop Workbench
     ${is_starting}=      Run Keyword And Return Status   Workbench Status Should Be
     ...    workbench_title=${workbench_title}   status=${WORKBENCH_STATUS_STARTING}
     IF    ${is_started} == ${TRUE} or ${is_starting} == ${TRUE}
-        Click Button    xpath=//div[@data-testid="table-row-title"]//*[text()="${workbench_title}"]/ancestor::tr//button[@data-testid="notebook-stop-action"]
+        Click Button    xpath=//div[@data-testid="table-row-title"]//*[text()="${workbench_title}"]/ancestor::tr//button[@data-testid="state-action-toggle"]
         Wait Until Generic Modal Appears
         Handle Stop Workbench Confirmation Modal    workbench_title=${workbench_title}
         ...    press_cancel=${press_cancel}

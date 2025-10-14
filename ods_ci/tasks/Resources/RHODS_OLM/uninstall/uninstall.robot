@@ -11,10 +11,24 @@ ${OPENSHIFT_OPERATORS_NS}=    openshift-operators
 ${KNATIVE_SERVING_NS}=      knative-serving
 ${KNATIVE_EVENTING_NS}=       knative-eventing
 ${ISTIO_SYSTEM_NS}=       istio-system
+${KUEUE_NS}=    openshift-kueue-operator
+${CERT_MANAGER_NS}=    cert-manager-operator
 
 
 *** Keywords ***
 Uninstalling RHODS Operator
+  IF  "${cluster_type}" == "selfmanaged"
+      Set Global Variable    ${CATALOG_NAME}    rhoai-catalog-dev
+  ELSE IF  "${cluster_type}" == "managed"
+      Set Global Variable    ${CATALOG_NAME}     addon-managed-odh-catalog
+      #For managed cluster
+      IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
+           Set Global Variable    ${CATALOG_NAME}    rhoai-catalog-dev
+      END
+  ELSE
+      FAIL    Provided test environment and install type ${INSTALL_TYPE} ${UPDATE_CHANNEL} ${cluster_type} combination
+      ...     is not supported
+  END
   Run Keywords
   ...  Log  Uninstalling RHODS operator in ${cluster_type}  console=yes  AND
   ...  Uninstall RHODS
@@ -29,10 +43,12 @@ Uninstall RHODS
   END
 
 Uninstall RHODS In OSD
+  [Documentation]   UnInstall rhods on managed cluster using cli
   Clone OLM Install Repo
-  ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${OLM_DIR} && ./cleanup.sh -t addon   #robocop:disable
-  Should Be Equal As Integers  ${return_code}   0   msg=Error detected while un-installing RHODS
-  Log To Console   ${output}
+  ${return_code}    Run and Watch Command
+  ...    cd ${EXECDIR}/${OLM_DIR} && ./cleanup.sh -t addon -a "authorino serverless servicemesh clusterobservability tempo opentelemetry kueue certmanager cma"
+  ...    timeout=20 min
+  Should Be Equal As Integers  ${return_code}   0   msg=Error detected while un-installing ODH/RHOAI
 
 Uninstall RHODS In Self Managed Cluster
   [Documentation]  Uninstall rhods from self-managed cluster
@@ -49,12 +65,12 @@ RHODS Operator Should Be Uninstalled
   Log  RHODS has been uninstalled  console=yes
 
 Uninstall RHODS In Self Managed Cluster Using CLI
-  [Documentation]   UnInstall rhods on self-managedcluster using cli
+  [Documentation]   UnInstall rhods on self-managed cluster using cli
   Clone OLM Install Repo
   ${return_code}    Run and Watch Command
-  ...    cd ${EXECDIR}/${OLM_DIR} && ./cleanup.sh -t operator -a "authorino serverless servicemesh clusterobservability tempo opentelemetry kueue"
-  ...    timeout=10 min
-  Should Be Equal As Integers  ${return_code}   0   msg=Error detected while un-installing RHODS
+  ...    cd ${EXECDIR}/${OLM_DIR} && ./cleanup.sh -t operator -a "authorino serverless servicemesh clusterobservability tempo opentelemetry kueue certmanager cma"
+  ...    timeout=20 min
+  Should Be Equal As Integers  ${return_code}   0   msg=Error detected while un-installing ODH/RHOAI
 
 Uninstall RHODS In Self Managed Cluster For Operatorhub
   [Documentation]   Uninstall rhods on self-managed cluster for operatorhub installtion
@@ -67,71 +83,28 @@ Uninstall RHODS In Self Managed Cluster For Operatorhub
   Verify Project Does Not Exists  ${NOTEBOOKS_NAMESPACE}
   ${return_code}    ${output}    Run And Return Rc And Output   oc delete namespace ${OPERATOR_NAMESPACE}
 
-Uninstall Service Mesh Operator CLI
-    [Documentation]    Keyword to uninstall the Service Mesh Operator
-    Log To Console    message=Deleting ServiceMeshControlPlane CR From Cluster
-    ${return_code}    ${output}    Run And Return Rc And Output
-    ...    oc delete ServiceMeshControlPlane --all --ignore-not-found
-    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting ServiceMeshControlPlane CR
-    Wait Until Keyword Succeeds    2 min    0 sec
-    ...        Check Number Of Resource Instances Equals To      ServiceMeshControlPlane    ${ISTIO_SYSTEM_NS}    0
-    Log To Console    message=Deleting ServiceMeshMember CR From Cluster
-    ${return_code}    ${output}    Run And Return Rc And Output
-    ...    oc delete ServiceMeshMember --all --ignore-not-found
-    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting ServiceMeshMember CR
-    Wait Until Keyword Succeeds    2 min    0 sec
-    ...        Check Number Of Resource Instances Equals To      ServiceMeshMember     ${ISTIO_SYSTEM_NS}     0
-    Log To Console    message=Deleting ServiceMeshMemberRoll CR From Cluster
-    ${return_code}    ${output}    Run And Return Rc And Output
-    ...    oc delete ServiceMeshMemberRoll --all --ignore-not-found
-    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting ServiceMeshMemberRoll CR
-    Wait Until Keyword Succeeds    2 min    0 sec
-    ...        Check Number Of Resource Instances Equals To      ServiceMeshMemberRoll     ${KNATIVE_SERVING_NS}      0
-    Log To Console    message=Deleting Service Mesh Operator Subscription From Cluster
+Uninstall Kueue Operator CLI
+    [Documentation]    Keyword to uninstall the Kueue Operator
+    Log To Console    message=Deleting Kueue Operator Subscription From Cluster
     ${return_code}    ${csv_name}    Run And Return Rc And Output
-    ...    oc get subscription servicemeshoperator -n ${OPENSHIFT_OPERATORS_NS} -o json | jq '.status.currentCSV' | tr -d '"'
+    ...    oc get subscription kueue-operator -n ${KUEUE_NS} -o json | jq '.status.currentCSV' | tr -d '"'
     IF  "${return_code}" == "0" and "${csv_name}" != "${EMPTY}"
        ${return_code}    ${output}    Run And Return Rc And Output
-       ...    oc delete clusterserviceversion ${csv_name} -n ${OPENSHIFT_OPERATORS_NS}
-       Should Be Equal As Integers  ${return_code}   0   msg=Error deleting ServiceMesh CSV ${csv_name}
+       ...    oc delete clusterserviceversion ${csv_name} -n ${KUEUE_NS}
+       Should Be Equal As Integers  ${return_code}   0   msg=Error deleting Kueue CSV ${csv_name}
     END
     ${return_code}    ${output}    Run And Return Rc And Output
-    ...    oc delete subscription servicemeshoperator -n ${OPENSHIFT_OPERATORS_NS}
-
-Uninstall Serverless Operator CLI
-    [Documentation]    Keyword to uninstall the Serverless Operator
-    Log To Console    message=Deleting KnativeServing CR From Cluster
+    ...    oc delete subscription kueue-operator -n ${KUEUE_NS}
+    Log To Console    message=Deleting Kueue Operator Group From Cluster
     ${return_code}    ${output}    Run And Return Rc And Output
-    ...    oc delete KnativeServing --all --ignore-not-found
-    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting KnativeServing CR
-    Wait Until Keyword Succeeds    2 min    0 sec
-    ...        Check Number Of Resource Instances Equals To      KnativeServing     ${KNATIVE_SERVING_NS}      0
-    Log To Console    message=Deleting KnativeEventing CR From Cluster
+    ...    oc delete operatorgroup --all -n ${KUEUE_NS} --ignore-not-found
+    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting Kueue operator group
+    Log To Console    message=Deleting Kueue CR From Cluster
     ${return_code}    ${output}    Run And Return Rc And Output
-    ...    oc delete KnativeEventing --all --ignore-not-found
-    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting KnativeEventing CR
-    Wait Until Keyword Succeeds    2 min    0 sec
-    ...        Check Number Of Resource Instances Equals To      KnativeEventing     ${KNATIVE_EVENTING_NS}      0
-    Log To Console    message=Deleting KnativeKafka CR From Cluster
+    ...    oc patch kueues.kueue.openshift.io cluster --type=merge -p '{"metadata": {"finalizers":null}}'
     ${return_code}    ${output}    Run And Return Rc And Output
-    ...    oc delete KnativeKafka --all --ignore-not-found
-    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting KnativeKafka CR
-    Wait Until Keyword Succeeds    2 min    0 sec
-    ...        Check Number Of Resource Instances Equals To      KnativeKafka     ${KNATIVE_EVENTING_NS}      0
-    Log To Console    message=Deleting Serverless Operator Subscription From Cluster
-    ${return_code}    ${csv_name}    Run And Return Rc And Output
-    ...    oc get subscription serverless-operator -n ${SERVERLESS_NS} -o json | jq '.status.currentCSV' | tr -d '"'
-    IF  "${return_code}" == "0" and "${csv_name}" != "${EMPTY}"
-       ${return_code}    ${output}    Run And Return Rc And Output
-       ...    oc delete clusterserviceversion ${csv_name} -n ${SERVERLESS_NS}
-       Should Be Equal As Integers  ${return_code}   0   msg=Error deleting Serverless CSV ${csv_name}
-    END
-    ${return_code}    ${output}    Run And Return Rc And Output
-    ...    oc delete subscription serverless-operator -n openshift-serverless
-    Log To Console    message=Deleting Serverless Operator Group From Cluster
-    ${return_code}    ${output}    Run And Return Rc And Output
-    ...    oc delete operatorgroup --all -n ${SERVERLESS_NS} --ignore-not-found
-    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting Serverless operator group
+    ...    oc delete kueues.kueue.openshift.io --all --ignore-not-found
+    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting Kueue CR
 
 Check Number Of Resource Instances Equals To
     [Documentation]    Keyword to check if the amount of instances of a specific CRD in a given namespace

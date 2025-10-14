@@ -29,7 +29,6 @@ Can Install ODH Operator
 Check DW Components Are Enabled By Default
     [Documentation]    Check that DW Components are enabled by default, can be run for OCP and OSD
     [Tags]    ODS-2685    Operator    OSD
-    Component Should Be Enabled    codeflare
     Component Should Be Enabled    ray
     Component Should Be Enabled    kueue
     Component Should Be Enabled    trainingoperator

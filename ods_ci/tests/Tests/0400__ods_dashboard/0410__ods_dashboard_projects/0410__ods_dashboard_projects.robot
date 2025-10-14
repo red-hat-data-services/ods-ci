@@ -19,7 +19,7 @@ ${PRJ_TITLE}=   ODS-CI Common Prj
 ${PRJ_TITLE1}=    ODS-CI DS Project1
 ${PRJ_RESOURCE_NAME}=   ods-ci-common-ds-project
 ${PRJ_DESCRIPTION}=   ${PRJ_TITLE} is a test project for validating DS Projects feature and shared by multiple tests
-${NB_IMAGE}=        Minimal Python
+${NB_IMAGE}=        Jupyter | Minimal | CPU | Python 3.11
 ${WORKBENCH_TITLE}=   ODS-CI Workbench 1
 ${WORKBENCH_DESCRIPTION}=   ODS-CI Workbench 1 is a test workbench using ${NB_IMAGE} image to test DS Projects feature
 ${WORKBENCH_2_TITLE}=   ODS-CI Workbench 2
@@ -46,7 +46,11 @@ ${DC_S3_AWS_ACCESS_KEY}=    custom dummy access key id
 ${DC_S3_ENDPOINT}=    custom.endpoint.s3.com
 ${DC_S3_REGION}=    ods-ci-region
 ${DC_S3_TYPE}=    object storage
-@{IMAGE_LIST}    Minimal Python    CUDA   PyTorch    Standard Data Science    TensorFlow
+@{IMAGE_LIST}    Jupyter | Minimal | CPU | Python 3.11
+...              Jupyter | Minimal | CUDA | Python 3.11
+...              Jupyter | PyTorch | CUDA | Python 3.11
+...              Jupyter | Data Science | CPU | Python 3.11
+...              Jupyter | TensorFlow | CUDA | Python 3.11
 ${ENV_SECRET_FILEPATH}=    tests/Resources/Files/env_vars_secret.yaml
 ${ENV_CM_FILEPATH}=    tests/Resources/Files/env_vars_cm.yaml
 ${NEW_PRJ_DESCRIPTION}=   ${PRJ_TITLE} is a New edited test project for validating DS Projects feature

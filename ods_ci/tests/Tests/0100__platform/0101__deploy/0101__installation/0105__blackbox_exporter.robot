@@ -13,7 +13,7 @@ Verify Blackbox Exporter Is Shipped And Enabled Within ODS
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-235
-    Skip If RHODS Is Self-Managed
+    Skip If RHODS Is Self-Managed    # TODO Observability: We don't deploy blackbox exporter yet
     @{blackbox_exporter_pods_info} =    Fetch Blackbox Exporter Pods Info
     @{blackbox_exporter_deployment_info} =    Fetch Blackbox Exporter Deployments Info
     @{blackbox_exporter_services_info} =    Fetch Blackbox Exporter Services Info

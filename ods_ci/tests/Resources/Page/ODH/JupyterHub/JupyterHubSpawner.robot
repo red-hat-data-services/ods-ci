@@ -30,10 +30,10 @@ ${KFNBC_MODAL_CLOSE_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Close"]
 ${KFNBC_MODAL_X_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[@aria-label="Close"]
 ${KFNBC_CONTROL_PANEL_HEADER_XPATH} =    //h1[.="Notebook server control panel"]
 ${KFNBC_ENV_VAR_NAME_PRE} =    //span[.="Variable name"]/../../../div[@class="pf-v6-c-form__group-control"]
-${DEFAULT_PYTHON_VER} =    3.11
+${DEFAULT_PYTHON_VER} =    3.12
 ${PREVIOUS_PYTHON_VER} =    3.11
-${DEFAULT_NOTEBOOK_VER} =    2025.1
-${PREVIOUS_NOTEBOOK_VER} =    2024.2
+${DEFAULT_NOTEBOOK_VER} =    2025.2
+${PREVIOUS_NOTEBOOK_VER} =    2025.1
 
 
 *** Keywords ***
@@ -198,12 +198,6 @@ Spawn Notebook
     ...    If ${expect_autoscaling} is set to ${True} also expects a "TriggeredScaleUp" message in the
     ...    spawn modal.
     [Arguments]  ${spawner_timeout}=600 seconds  ${same_tab}=${True}  ${expect_autoscaling}=${False}
-    # TODO: Make sure server spawns in same tab in 1.17+
-    # Currently no way to know if option already selected or not
-    #${version-check}=   Is RHODS Version Greater Or Equal Than  1.17.0
-    #IF  ${version-check}==True
-    #    Click Element  xpath://input[@id="checkbox-notebook-browser-tab-preference"]
-    #END
     Click Button  Start workbench
     # Waiting for 60 seconds, since a long wait seems to redirect the user to the control panel
     # if the spawn was successful
@@ -270,6 +264,8 @@ Spawn Notebook
         Click Button    Open in new tab
         Switch Window    NEW
     END
+    # Wait and retry if workbench is not ready yet
+    Wait Until Keyword Succeeds    2 min    5s    Verify Workbench Is Available
 
 Has Spawn Failed
     [Documentation]    Checks if spawning the image has failed
@@ -354,7 +350,7 @@ Spawn Notebook With Arguments  # robocop: disable
                 END
             END
             Spawn Notebook    ${spawner_timeout}    ${same_tab}
-            Run Keyword And Warn On Failure    Wait Until Page Contains    Log in with OpenShift    timeout=15s
+            Run Keyword And Warn On Failure    Wait Until Page Contains    Log in with    timeout=15s
             ${oauth_prompt_visible} =    Is OpenShift OAuth Login Prompt Visible
             IF  ${oauth_prompt_visible}    Click Button     Log in with OpenShift
             Run Keyword And Warn On Failure   Login To Openshift  ${username}  ${password}  ${auth_type}

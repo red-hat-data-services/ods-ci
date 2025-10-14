@@ -1,0 +1,14 @@
+apiVersion: feast.dev/v1alpha1
+kind: FeatureStore
+metadata:
+  name: $FEAST_PROJECT_NAME
+  namespace: $NAMESPACE
+spec:
+  feastProject: my_project
+  services:
+    offlineStore:
+      server: {}
+    registry:
+      local:
+        server: {}
+    ui: {}

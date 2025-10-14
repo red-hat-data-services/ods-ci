@@ -246,13 +246,10 @@ if ${SET_RHODS_URLS}
         # ocp_console="https://$(oc get route console -n openshift-console -o jsonpath='{.spec.host}{"\n"}')"
         rhods_dashboard="https://$(oc get route rhods-dashboard -n redhat-ods-applications -o jsonpath='{.spec.host}{"\n"}')"
         api_server=$(oc whoami --show-server)
-        prom_server="https://$(oc get route prometheus -n redhat-ods-monitoring -o jsonpath='{.spec.host}{"\n"}')"
-        prom_token="$(oc create token prometheus -n redhat-ods-monitoring --duration 6h)"
-        TEST_VARIABLES="${TEST_VARIABLES} --variable OCP_CONSOLE_URL:${ocp_console} --variable ODH_DASHBOARD_URL:${rhods_dashboard} --variable RHODS_PROMETHEUS_URL:${prom_server} --variable RHODS_PROMETHEUS_TOKEN:${prom_token}"
+        TEST_VARIABLES="${TEST_VARIABLES} --variable OCP_CONSOLE_URL:${ocp_console} --variable ODH_DASHBOARD_URL:${rhods_dashboard}"
         echo "OCP Console URL set to: ${ocp_console}"
         echo "RHODS Dashboard URL set to: ${rhods_dashboard}"
         echo "RHODS API Server URL set to: ${api_server}"
-        echo "RHODS Prometheus URL set to: ${prom_server}"
 fi
 
 ## if we have yq installed

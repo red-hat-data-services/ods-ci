@@ -87,6 +87,14 @@ Can Spawn Notebook
 JupyterHub Testing Suite Setup
     Set Library Search Order  SeleniumLibrary
     RHOSi Setup
+    # Clean up any existing notebook CR for the test user to prevent conflicts
+    TRY
+        Delete User Notebook CR    ${TEST_USER.USERNAME}
+        Log    Warning: Deleted a Notebook CR for ${TEST_USER.USERNAME}: this may be a problem in a previous test cleanup!    level=WARN
+    EXCEPT    AS    ${error}
+        # This is expected if the CR doesn't exist, or if the workbench isn't running, so we can ignore it
+        No Operation
+    END
 
 Delete Last Pytorch Build
     [Documentation]     Searches for last build which contains pytorch and deletes it

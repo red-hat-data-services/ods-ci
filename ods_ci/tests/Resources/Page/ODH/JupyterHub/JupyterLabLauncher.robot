@@ -341,7 +341,7 @@ Maybe Close Popup
       # Check if a popup exists
       ${accept} =    Get WebElements    xpath://div[contains(concat(' ',normalize-space(@class),' '),' jp-Dialog-footer ')]
       # Click the right most button of the popup
-      IF    ${accept}    Click Element    xpath://div[contains(concat(' ',normalize-space(@class),' '),' jp-Dialog-footer ')]/button[last()]
+      IF    ${accept}    Click Element    xpath://div[contains(concat(' ',normalize-space(@class),' '),' jp-Dialog-footer ')]//button[last()]
       Capture Page Screenshot
     END
 
@@ -391,7 +391,7 @@ Add And Run JupyterLab Code Cell 6 In Active Notebook
     # rely on main area widgets all having ids
     ${nbid} =    JupyterLibrary.Get Element Attribute    ${nb}    id
     ${icon} =    Get WebElement Relative To    ${nb}
-    ...    xpath://*[@aria-label="notebook actions"]//*[contains(@class, "jp-CommandToolbarButton") and .//${add icon}]
+    ...    xpath://*[@aria-label="main area toolbar"]//*[contains(@class, "jp-CommandToolbarButton") and .//${add icon}]
     Click Element    ${icon}
     Sleep    0.1s
     ${cell} =    Get WebElement Relative To    ${nb}
@@ -421,7 +421,7 @@ Run Current JupyterLab Code Cell 6
     ${nb} =    Get WebElement    xpath://div${JLAB XP NB FRAG}\[${n}]
     # ${run btn} =    Get WebElement Relative To    ${nb}    xpath:div${JLAB XP NB TOOLBAR FRAG}//${run icon}
     ${run btn} =    Get WebElement Relative To    ${nb}
-    ...    xpath://*[@aria-label="notebook actions"]//*[contains(@class, "jp-CommandToolbarButton") and .//${run icon}]  # Edited
+    ...    xpath://*[@aria-label="main area toolbar"]//*[contains(@class, "jp-CommandToolbarButton") and .//${run icon}]  # Edited
     Click Element    ${run btn}
     Sleep    0.5s
 

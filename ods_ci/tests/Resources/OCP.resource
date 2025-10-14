@@ -9,7 +9,7 @@ Resource   Page/OCPDashboard/Pods/Pods.robot
 Get Ocp Cluster Version
     [Documentation]  Retrieves the OCP Cluster version, in a X.Y.Z format
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc get clusterversion -o jsonpath='{.items[].spec.desiredUpdate.version}'
+    ...    oc get clusterversion version -o jsonpath='{.status.desired.version}'
     IF    ${rc} != ${0}
         Fail    msg=Cannot retrieve OCP cluster version.
     END
@@ -68,7 +68,8 @@ Verify Notebook CR Is Running
     @{cr_obj} =  OpenShiftLibrary.Oc Get  kind=Notebook  name=${cr_name}
     &{cr_obj_dictionary} =  Set Variable  ${cr_obj}[0]
     Should Match  ${cr_obj_dictionary.metadata.name}  ${cr_name}
-    Should Be Equal  ${cr_obj_dictionary.status.conditions[0].type}  Running
+    Should Not Be Empty  ${cr_obj_dictionary.status.containerState.running.startedAt}
+    Should Be Equal  ${cr_obj_dictionary.status.readyReplicas}  ${1}
 
 Is RHODS Self-Managed
     [Documentation]     Returns ${FALSE} if RHODS Managed (i.e., Cloud version) is installed
@@ -121,15 +122,18 @@ Wait For Pods To Be Ready
     ...                This keyword can also check for the expected number of the pod replicas using `${exp_replicas}`
     ...                argument.
     [Arguments]    ${label_selector}    ${namespace}    ${timeout}=600s    ${exp_replicas}=${NONE}
-    Wait Until Keyword Succeeds    ${timeout}    3s
+    Wait Until Keyword Succeeds    ${timeout}    5s
     ...    Check If Pod Exists    namespace=${namespace}    label_selector=${label_selector}
     ...    status_only=${FALSE}
-    ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc wait --for=condition=ready=true pod -l ${label_selector} -n ${namespace} --timeout=${timeout}
-    IF    ${rc} != ${0}
-        ${events}    ${podlogs}=    Get Events And Pod Logs    ${namespace}    ${label_selector}
-
-        Fail    msg=Pod defined by selector "${label_selector}" in "${namespace}" namespace is not ready by timeout.
+    WHILE   True    limit=${timeout}
+        ${rc}    ${out}=    Run And Return Rc And Output
+        ...    oc wait --for=condition=ready=true pod -l ${label_selector} -n ${namespace} --timeout=${timeout}
+        IF    ${rc} == ${0}
+            BREAK
+        ELSE
+            Log To Console
+            ...    msg=Pod defined by selector "${label_selector}" in "${namespace}" namespace is not ready, retrying.
+        END
     END
     IF    "${exp_replicas}" != "${NONE}"
         @{replicas}=    Oc Get    kind=Pod    namespace=${namespace}
@@ -338,6 +342,68 @@ Get Resource Attribute
     END
     RETURN    ${value}
 
+#robocop: disable: line-too-long
+Wait Until Csv Is Ready
+  [Documentation]   Waits ${timeout} for Operators CSV '${display_name}' to have status phase 'Succeeded'
+  [Arguments]    ${display_name}    ${timeout}=10m    ${operators_namespace}=openshift-operators    ${check_interval}=5s
+  Log    Waiting ${timeout} for Operator CSV '${display_name}' in ${operators_namespace} to have status phase 'Succeeded'    console=yes
+  WHILE   True    limit=${timeout}
+  ...    on_limit_message=${timeout} Timeout exceeded waiting for CSV '${display_name}' to be created
+    Sleep  ${check_interval}
+    ${csv_created}=    Run Process    oc get csv --no-headers -n ${operators_namespace} | awk '/${display_name}/ {print \$1}'    shell=yes
+    IF    not $csv_created.stdout    CONTINUE
+    Log  The Result of csv_created Output is: ${csv_created.stdout} RC: ${csv_created.rc}    console=yes
+    #  In case of upgrade there are 2 operators, we need to wait until only one will be available
+    ${lines}=     Split String    ${csv_created.stdout}    \n
+    ${line_count}=    Get Length    ${lines}
+    IF  ${line_count} > 1    CONTINUE
+    ${csv_ready}=    Run Process
+    ...    oc wait --timeout\=${timeout} --for jsonpath\='{.status.phase}'\=Succeeded csv -n ${operators_namespace} ${csv_created.stdout}    shell=yes
+    Log    The Result of csv_ready Output is: ${csv_ready.stdout} RC: ${csv_ready.rc}    console=yes
+    IF    ${csv_ready.rc} == ${0}    BREAK
+  END
+
+Search Install Plan
+    [Documentation]    Search for an install plan by CSV name and namespace and waits for its information to be available in the sub CR     #robocop:disable
+    [Arguments]    ${csv_name}    ${sub_name}    ${namespace}
+    ${rc}  ${out}=    Run and Return Rc and Output      oc get installplan -n ${namespace} -ojson | jq '.items[].spec.clusterServiceVersionNames[] | select(. | contains("${csv_name}"))'
+    Log    Waiting for Search Install Plan : ${csv_name} in ${namespace}    console=yes
+    Should Not Be Empty    ${out}
+    ${rc}  ${out}=    Run and Return Rc and Output      oc get subscription ${sub_name} -n ${namespace} -o json | jq '.status.installplan.name'
+    Log    Waiting for Install Plan being available in the Subscription CR : ${sub_name} in ${namespace}    console=yes
+    Should Not Be Empty    ${out}
+    Should Not Be Equal  ${out}  null
+
+Wait For Installplan And Approve It
+    [Documentation]    In case of Manual installplan approval, wait for the operator's installplan to appear
+    ...    then approve it
+    [Arguments]    ${namespace}    ${operator_name}     ${subscription_name}    ${operator_version}=${EMPTY}
+    ${csv}=    Evaluate    '${operator_name}.${operator_version}' if '${operator_version}' else '${operator_name}'
+    Log    The csv is: ${csv}, operator_version: ${operator_version}, operator_name: ${operator_name}, subscription_name: ${subscription_name}    console=yes    #robocop:disable
+    Wait Until Keyword Succeeds    10m    5s    Search Install Plan    ${csv}    ${subscription_name}    ${namespace}
+    ${installplan_name}=    Run   oc get subscription ${subscription_name} -n ${namespace} -o json | jq '.status.installplan.name'    #robocop:disable
+    IF    "${operator_version}" != "${EMPTY}"
+        ${installplan_version_exist}=    Run And Return Rc   oc get installplan ${installplan_name} -n ${namespace} | grep "${operator_version}"    #robocop:disable
+        IF    ${installplan_version_exist} != 0
+            ${installplans}=    Run   oc get installplan -n ${namespace}
+            FAIL    The install plan ${installplan_name} used in sub ${subscription_name} does not match the version: ${operator_version}\nExisting installplans:\n${installplans}    #robocop:disable
+        ELSE
+            Log    The install plan ${installplan_name} used in sub ${subscription_name} matches the version: ${operator_version}    console=yes    #robocop:disable
+        END
+    END
+    ${installplan_approval}=     Get Resource Attribute      ${namespace}
+    ...      InstallPlan       ${installplan_name}        .spec.approval
+    Log    The installplan approval for: ${installplan_name} is ${installplan_approval}    console=yes
+    IF    "${installplan_approval}" == "Manual"
+        Log    Start approving the installplan: ${installplan_name}...    console=yes
+        ${patch_status}=    Run And Return Rc    oc patch installplan ${installplan_name} -n ${namespace} -p '{"spec":{"approved": true}}' --type=merge    #robocop:disable
+        IF    ${patch_status} == 0
+            Log    Approving the installplan ${installplan_name} successfully!!    console=yes
+        ELSE
+            FAIL    Failed to approving the installplan ${installplan_name}
+        END
+    END
+
 Wait For Namespace To Be Active
     [Documentation]    Waits for a given namespace to become active
     [Arguments]    ${namespace}    ${timeout}=30s
@@ -384,3 +450,10 @@ Get Access Token
     ${rc}    ${out}=    Run And Return Rc And Output    oc whoami -t
     Should Be Equal As Integers    ${rc}    ${0}    Command 'oc whoami -t' returned non-zero exit code: ${rc}
     RETURN    ${out}
+
+Get Default Storage Class Name
+    [Documentation]    Gets the default storage class name from the cluster
+    ${rc}    ${sc}=    Run And Return Rc And Output
+    ...    oc get storageclass -ojson | jq '.items[].metadata | select(.annotations."storageclass.kubernetes.io/is-default-class"=="true") | .name' | tr -d '"'
+    Should Be Equal As Integers    ${rc}    ${0}
+    RETURN    ${sc}

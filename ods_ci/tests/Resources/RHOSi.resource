@@ -58,7 +58,7 @@ RHOSi Setup
     Protect Sensitive Variables In Keywords
     Required Global Variables Should Exist
     Initialize Global Variables
-    Run Keyword If RHODS Is Managed
+    Run Keyword If RHODS Is Managed     # TODO Observability: Adapt test when only new monitoring stack is supported
     ...    Suite Availability Setup    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}
 
 RHOSi Teardown
@@ -66,7 +66,7 @@ RHOSi Teardown
     ...                stored at RHOSi setup
     ...                The suggested usage of this keyword is to call it inside all the Suite Teardown keywords.
     ...                Do Not extend this keyword for high-level setup, e.g., don't close browser
-    Run Keyword If RHODS Is Managed
+    Run Keyword If RHODS Is Managed     # TODO Observability: Adapt test when only new monitoring stack is supported
     ...    Suite Availability Teardown    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}
 
 Protect Sensitive Variables In Keywords
@@ -104,8 +104,6 @@ Fetch Cluster Type By Domain
 
 Assign Vars According To Product
     [Documentation]    Assign vars related to product
-    # Common vars
-    Set Suite Variable    ${AUTHORINO_CR_NS}    ${APPLICATIONS_NAMESPACE}-auth-provider
     # Product specific vars
     IF    "${PRODUCT}" == "RHODS"
         Set Suite Variable    ${OPERATOR_SUBSCRIPTION_LABEL}     operators.coreos.com/rhods-operator.${OPERATOR_NAMESPACE}
@@ -122,10 +120,14 @@ Assign Vars According To Product
         ELSE
             Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     rhoai-operator-dev
             Set Suite Variable    ${ADMIN_GROUPS}       rhods-admins', 'rhods-users
+            IF  "${INSTALL_TYPE}" == "OperatorHub"
+                Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     rhods-operator
+            END
         END
         Set Suite Variable  ${MODEL_REGISTRY_NAMESPACE}    rhoai-model-registries
         Set Suite Variable    ${IMAGE_PULL_PATH}        registry.redhat.io
         Set Suite Variable    ${KSERVE_IMAGE_PULL_PATH}        registry.redhat.io
+        Set Suite Variable    ${KUEUE_IMAGE_PULL_PATH}        registry.redhat.io
         ${CSV_NAME} =   Catenate    SEPARATOR=   ${OPERATOR_NAME}.     ${RHODS_VERSION}
         Set Suite Variable      ${CSV_NAME}
     ELSE IF    "${PRODUCT}" == "ODH"
@@ -134,13 +136,15 @@ Assign Vars According To Product
             Set Suite Variable    ${OPERATOR_SUBSCRIPTION_LABEL}     operators.coreos.com/rhods-operator.${OPERATOR_NAMESPACE}
             Set Suite Variable    ${IMAGE_PULL_PATH}        registry.redhat.io
             Set Suite Variable    ${KSERVE_IMAGE_PULL_PATH}        quay.io
+            Set Suite Variable    ${KUEUE_IMAGE_PULL_PATH}        registry.redhat.io
             ${CSV_NAME} =   Catenate    SEPARATOR=   opendatahub-operator.  ${RHODS_VERSION}
             Set Suite Variable      ${CSV_NAME}
             # ODH COMMUNITY
         ELSE IF     "${OPERATOR_NAME}" == "opendatahub-operator"
             Set Suite Variable    ${OPERATOR_SUBSCRIPTION_LABEL}     operators.coreos.com/opendatahub-operator.${OPERATOR_NAMESPACE}
-            Set Suite Variable    ${IMAGE_PULL_PATH}        registry.redhat.io
-            Set Suite Variable    ${KSERVE_IMAGE_PULL_PATH}        quay.io
+            Set Suite Variable    ${IMAGE_PULL_PATH}        quay.io
+            Set Suite Variable    ${KSERVE_IMAGE_PULL_PATH}        registry.k8s.io
+            Set Suite Variable    ${KUEUE_IMAGE_PULL_PATH}        registry.k8s.io
             ${CSV_NAME} =   Catenate    SEPARATOR=   ${OPERATOR_NAME}.v   ${RHODS_VERSION}
             Set Suite Variable      ${CSV_NAME}
 

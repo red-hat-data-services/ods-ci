@@ -1,7 +1,7 @@
 #!/bin/bash
 
-echo ">> Retrieving RHOAI subscription details"
-RHOAI_SUB=$(oc get sub --all-namespaces -ojson | jq '.items[] | select(.spec.name=="rhods-operator") | .metadata.name + ","+ .metadata.namespace' | tr -d '"')
+echo ">> Retrieving ODH/RHOAI subscription details"
+RHOAI_SUB=$(oc get sub --all-namespaces -ojson | jq '.items[] | select((.spec.name=="rhods-operator") or (.spec.name=="opendatahub-operator")) | .metadata.name + ","+ .metadata.namespace' | tr -d '"')
 IFS=',' read -ra RHOAI_SUB_DETAILS <<< "$RHOAI_SUB"
 echo "${RHOAI_SUB_DETAILS[@]}"
 RHOAI_VERSION=$(oc get sub -ojson ${RHOAI_SUB_DETAILS[0]} -n ${RHOAI_SUB_DETAILS[1]} | jq '.status.currentCSV' | tr -d '"')

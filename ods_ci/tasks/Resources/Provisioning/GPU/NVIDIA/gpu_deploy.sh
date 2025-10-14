@@ -20,6 +20,8 @@ oc wait --timeout=3m --for jsonpath='{.status.state}'=AtLatestKnown -n nvidia-gp
 
 oc wait --timeout=3m --for condition=Installed -n nvidia-gpu-operator installplan --all
 
+sleep 5
+
 oc rollout status --watch --timeout=3m -n nvidia-gpu-operator deploy gpu-operator
 
 oc wait --timeout=3m --for jsonpath='{.status.components.labelSelector.matchExpressions[].operator}'=Exists operator gpu-operator-certified.nvidia-gpu-operator

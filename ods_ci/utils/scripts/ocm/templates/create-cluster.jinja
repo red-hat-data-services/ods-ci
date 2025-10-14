@@ -1,0 +1,60 @@
+{
+    "name": "{{ CLUSTER_NAME }}",
+    "cloud_provider": {
+      "id": "{{ CLOUD_PROVIDER }}"
+    },
+    "version": {
+      "channel_group": "{{ CHANNEL_GROUP }}",
+      "id": "openshift-v{{ OCP_VERSION }}"
+    },
+    "fips": {{ FIPS }},
+    "region": {
+      "id": "{{ REGION }}"
+    },
+    "multi_az": false,
+    "product": {
+      "id": "osd"
+    },
+    "ccs": {
+      "enabled": true
+    },
+    "nodes": {
+      "compute": {{ COMPUTE_NODES }},
+      "compute_machine_type": {
+        "id": "{{ COMPUTE_MACHINE_TYPE }}"
+      }
+      {% if ARCHITECTURE == "arm64" %}
+        ,"multi_arch": {
+            "enabled": true
+        }
+        {% endif %}
+    },
+    {% if CLOUD_PROVIDER == "aws" %}
+    "aws": {
+      "access_key_id": "{{ AWS_ACCESS_KEY_ID }}",
+      "secret_access_key": "{{ AWS_SECRET_ACCESS_KEY }}",
+      "account_id": "{{ AWS_ACCOUNT_ID }}",
+      {% if ARCHITECTURE == "arm64" %}
+        "multi_arch": true,
+        {% endif %}
+      "tags": {
+          "team": "{{ TEAM }}"
+      }
+    }
+    {% endif %}
+    {% if CLOUD_PROVIDER == "gcp" %}
+    "gcp": {
+      "project_id": "{{ GCP_SA_PROJECT_ID }}",
+      "private_key_id": "{{ GCP_SA_PRIVATE_KEY_ID }}",
+      "private_key": "{{ GCP_SA_PRIVATE_KEY }}",
+      "client_id": "{{ GCP_SA_CLIENT_ID }}",
+      "client_email": "{{ GCP_SA_CLIENT_EMAIL }}",
+      "client_x509_cert_url": "{{ GCP_SA_CLIENT_CERT_URL }}",
+      "type": "{{ GCP_AUTH_TYPE}}",
+      "auth_uri": "{{ GCP_AUTH_URI }}",
+      "token_uri": "{{ GCP_TOKEN_URI }}",
+      "auth_provider_x509_cert_url": "{{ GCP_AUTH_CERT_URL }}"
+    }
+    {% endif %}
+}
+  

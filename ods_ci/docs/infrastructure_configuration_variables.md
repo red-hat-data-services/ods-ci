@@ -10,16 +10,18 @@ The infrastructure configuration variables are used to configure the infrastruct
 | `hive_claim_ns` | The namespace of the claim. | `rhods` | `all` |
 | `image_set` | The image set name to use for the cluster. | `rhods-openshift` | `all` |
 | `base_domain` | The base domain to use for the cluster. | `""` | `aws` |
-| `worker_node_instance_type` | The instance type to use for the worker nodes. | `m5.xlarge` | `all` |
+| `worker_node_instance_type` | The instance type to use for the worker nodes. | `m5.2xlarge` | `all` |
 | `worker_node_replicas` | The number of worker nodes to create. | `2` | `all` |
-| `master_node_instance_type` | The AWS instance type to use for the master nodes. | `m5.xlarge` | `all` |
+| `master_node_instance_type` | The AWS instance type to use for the master nodes. | `m5.2xlarge` | `all` |
 | `master_node_replicas` | The number of master nodes to create. | `3` | `all` |
 | `aws_region` | The AWS region to use for the cluster. | `us-east-1` | `aws` |
 | `pull_secret` | The pull secret to use for the cluster. | `""` | `all` |
 | `ssh_key` | The SSH key to use for the cluster. | `""` | `all` |
 | `AWS_ACCESS_KEY_ID` | The AWS access key ID. | `""` | `aws` |
 | `AWS_SECRET_ACCESS_KEY` | The AWS secret access key. | `""` | `aws` |
-| `release_image` | The OpenShift image to use for the cluster. | `"quay.io/openshift-release-dev/ocp-release:4.10.42-x86_64"` | `all` |
+| `aws_worker_architecture` | Architecture for AWS worker nodes | `amd64` | `aws` |
+| `aws_master_architecture` | Architecture for AWS master nodes | `amd64` | `aws` |
+| `release_image` | The OpenShift image to use for the cluster. | `"quay.io/openshift-release-dev/ocp-release:4.15.25-multi"` | `all` |
 | `gcp_region` | The GCP region to use for the cluster. | `us-central1` | `gcp` |
 | `gcp_project_id` | The GCP project ID to use for the cluster. | `""` | `gcp` |
 | `gcp_region` | The GCP region to use for the cluster. | `us-central1` | `gcp` |

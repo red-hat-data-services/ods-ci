@@ -65,6 +65,19 @@ Prepare Codeflare-SDK Test Setup
     # Perform oc login with Test User
     Login To OCP Using API    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}
 
+Prepare Codeflare-SDK Upgrade Test Setup
+    [Documentation]   Prepare codeflare-sdk upgrade tests with RBAC setup and namespace creation
+    Clone Git Repository    ${CODEFLARE-SDK_REPO_URL}    ${CODEFLARE-SDK-RELEASE-TAG}    ${CODEFLARE-SDK_DIR}
+
+    # Setup Kueue RBAC permissions as admin before switching to test user
+    Setup Kueue Batch User RoleBinding
+
+    # Create the test namespace as admin
+    Create Test Namespace For Codeflare Test
+
+    # Perform oc login with Test User
+    Login To OCP Using API    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}
+
 Run Codeflare-SDK Test
     [Documentation]   Run codeflare-sdk Test
     [Arguments]    ${TEST_TYPE}    ${TEST_NAME}    ${PYTHON_VERSION}    ${RAY_IMAGE}    ${RELEASE_BRANCH}
@@ -105,6 +118,18 @@ Cleanup Codeflare-SDK Setup
 
     Log To Console    "Log back as cluster admin"
     Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
+
+    # Cleanup Kueue RBAC resources
+    Teardown Kueue Batch User RoleBinding
+
+Create Test Namespace For Codeflare Test
+    [Documentation]    Create the test namespace as admin for codeflare tests
+    Log To Console    "Creating test namespace test-ns-rayupgrade as admin"
+    ${rc}=    Run And Return Rc    oc create namespace test-ns-rayupgrade
+    IF    ${rc} != 0
+        Log To Console    "Warning: Unable to create namespace test-ns-rayupgrade (may already exist)"
+    END
+
 
 Prepare Training Operator KFTO E2E Test Suite
     [Documentation]    Prepare Training Operator KFTO E2E Test Suite
@@ -321,7 +346,17 @@ Disable appwrapper in Codeflare operator
     Log To Console    ${result.stdout}
 
 Setup Kueue Batch User RoleBinding
-    [Documentation]    Apply the kueue-batch-user-rolebinding ClusterRoleBinding as admin
+    [Documentation]    Apply the kueue-batch-user-role ClusterRole and kueue-batch-user-rolebinding ClusterRoleBinding as admin
+    Log To Console    "Logging in as cluster admin to setup RBAC permissions"
+    Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
+    Log To Console    "Applying kueue-batch-user-role ClusterRole"
+    ${result} =    Run Process    oc apply -f tests/Resources/Files/kueue-batch-user-role.yaml
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Unable to apply kueue-batch-user-role ClusterRole
+    END
     Log To Console    "Applying kueue-batch-user-rolebinding ClusterRoleBinding"
     ${result} =    Run Process    oc apply -f tests/Resources/Files/kueue-batch-user-rolebinding.yaml
     ...    shell=true
@@ -330,9 +365,19 @@ Setup Kueue Batch User RoleBinding
     IF    ${result.rc} != 0
         FAIL    Unable to apply kueue-batch-user-rolebinding ClusterRoleBinding
     END
+    Log To Console    "Applying kueue-batch-user-specific-rolebinding ClusterRoleBinding"
+    ${result} =    Run Process    oc apply -f tests/Resources/Files/kueue-batch-user-specific-rolebinding.yaml
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Unable to apply kueue-batch-user-specific-rolebinding ClusterRoleBinding
+    END
 
 Teardown Kueue Batch User RoleBinding
-    [Documentation]    Remove the kueue-batch-user-rolebinding ClusterRoleBinding as admin
+    [Documentation]    Remove the kueue-batch-user-role ClusterRole and kueue-batch-user-rolebinding ClusterRoleBinding as admin
+    Log To Console    "Logging in as cluster admin to cleanup RBAC permissions"
+    Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
     Log To Console    "Removing kueue-batch-user-rolebinding ClusterRoleBinding"
     ${result} =    Run Process    oc delete -f tests/Resources/Files/kueue-batch-user-rolebinding.yaml
     ...    shell=true
@@ -340,4 +385,20 @@ Teardown Kueue Batch User RoleBinding
     Log To Console    ${result.stdout}
     IF    ${result.rc} != 0
         Log To Console    "Warning: Unable to delete kueue-batch-user-rolebinding ClusterRoleBinding (may not exist)"
+    END
+    Log To Console    "Removing kueue-batch-user-specific-rolebinding ClusterRoleBinding"
+    ${result} =    Run Process    oc delete -f tests/Resources/Files/kueue-batch-user-specific-rolebinding.yaml
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        Log To Console    "Warning: Unable to delete kueue-batch-user-specific-rolebinding ClusterRoleBinding (may not exist)"
+    END
+    Log To Console    "Removing kueue-batch-user-role ClusterRole"
+    ${result} =    Run Process    oc delete -f tests/Resources/Files/kueue-batch-user-role.yaml
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        Log To Console    "Warning: Unable to delete kueue-batch-user-role ClusterRole (may not exist)"
     END

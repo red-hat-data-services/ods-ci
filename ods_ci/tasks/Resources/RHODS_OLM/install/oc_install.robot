@@ -218,9 +218,9 @@ Verify RHODS Installation
   ${workbenches} =    Is Component Enabled    workbenches    ${DSC_NAME}
   IF    "${workbenches}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app=notebook-controller    timeout=400s
+    ...    label_selector=app=notebook-controller
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app=odh-notebook-controller    timeout=400s
+    ...    label_selector=app=odh-notebook-controller
     Oc Get  kind=Namespace  field_selector=metadata.name=${NOTEBOOKS_NAMESPACE}
     Log  Verified Notebooks NS: ${NOTEBOOKS_NAMESPACE}
   END
@@ -228,7 +228,7 @@ Verify RHODS Installation
   ${aipipelines} =    Is Component Enabled    aipipelines    ${DSC_NAME}
   IF    "${aipipelines}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/name=ai-pipelines-operator    timeout=400s
+    ...    label_selector=app.kubernetes.io/name=data-science-pipelines-operator
   END
 
   ${kserve} =    Is Component Enabled    kserve    ${DSC_NAME}
@@ -237,7 +237,7 @@ Verify RHODS Installation
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app=odh-model-controller    timeout=400s
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=control-plane=kserve-controller-manager    timeout=400s
+    ...    label_selector=control-plane=kserve-controller-manager
   END
 
   ${kueue} =     Is Component Enabled     kueue    ${DSC_NAME}
@@ -248,19 +248,19 @@ Verify RHODS Installation
     END
     Install Kueue Dependencies
     Wait For Deployment Replica To Be Ready    namespace=${KUEUE_NS}
-    ...    label_selector=app.kubernetes.io/name=kueue   timeout=400s
+    ...    label_selector=app.kubernetes.io/name=kueue
   END
 
   ${ray} =     Is Component Enabled     ray    ${DSC_NAME}
   IF    "${ray}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/part-of=ray   timeout=400s
+    ...    label_selector=app.kubernetes.io/part-of=ray
   END
 
   ${trustyai} =    Is Component Enabled    trustyai    ${DSC_NAME}
   IF    "${trustyai}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/part-of=trustyai    timeout=400s
+    ...    label_selector=app.kubernetes.io/part-of=trustyai
   END
 
   ${modelregistry} =    Is Component Enabled    modelregistry    ${DSC_NAME}
@@ -272,25 +272,25 @@ Verify RHODS Installation
   ${trainingoperator} =    Is Component Enabled    trainingoperator    ${DSC_NAME}
   IF    "${trainingoperator}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/part-of=trainingoperator   timeout=400s
+    ...    label_selector=app.kubernetes.io/part-of=trainingoperator
   END
 
   ${feastoperator} =    Is Component Enabled    feastoperator    ${DSC_NAME}
   IF    "${feastoperator}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/part-of=feastoperator   timeout=400s
+    ...    label_selector=app.kubernetes.io/part-of=feastoperator
   END
 
   ${llamastackoperator} =    Is Component Enabled    llamastackoperator    ${DSC_NAME}
   IF    "${llamastackoperator}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/part-of=llamastackoperator   timeout=400s
+    ...    label_selector=app.kubernetes.io/part-of=llamastackoperator
   END
 
   ${dashboard} =    Is Component Enabled    dashboard    ${DSC_NAME}
   IF    "${dashboard}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app=${DASHBOARD_APP_NAME}    timeout=1200s
+    ...    label_selector=app=${DASHBOARD_APP_NAME}
     IF  "${PRODUCT}" == "ODH"
         #This line of code is strictly used for the exploratory cluster to accommodate UI/UX team requests
         Add UI Admin Group To Dashboard Admin
@@ -299,7 +299,7 @@ Verify RHODS Installation
 
   IF    "${dashboard}" == "true" or "${workbenches}" == "true" or "${aipipelines}" == "true" or "${kserve}" == "true" or "${kueue}" == "true" or "${ray}" == "true" or "${trustyai}" == "true" or "${modelregistry}" == "true" or "${trainingoperator}" == "true"    # robocop: disable
       Log To Console    Waiting for pod status in ${APPLICATIONS_NAMESPACE}
-      Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=200
+      Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=600
       Log  Verified Applications NS: ${APPLICATIONS_NAMESPACE}  console=yes
   END
 
@@ -618,7 +618,6 @@ Catalog Is Ready
     ...    oc get catalogsources ${catalog_name} -n ${namespace} -o json | jq ."status.connectionState.lastObservedState"    # robocop: disable:line-too-long
     Should Be Equal As Integers   ${rc}  0  msg=Error detected while getting CatalogSource status state
     Should Be Equal As Strings    "READY"    ${output}
-
 
 Install Cert Manager Operator Via Cli
     [Documentation]    Install Cert Manager Operator Via CLI

@@ -90,11 +90,11 @@ Uninstall Kueue Operator CLI
     ...    oc get subscription kueue-operator -n ${KUEUE_NS} -o json | jq '.status.currentCSV' | tr -d '"'
     IF  "${return_code}" == "0" and "${csv_name}" != "${EMPTY}"
        ${return_code}    ${output}    Run And Return Rc And Output
-       ...    oc delete clusterserviceversion ${csv_name} -n ${KUEUE_NS}
+       ...    oc delete clusterserviceversion ${csv_name} -n ${KUEUE_NS} --ignore-not-found
        Should Be Equal As Integers  ${return_code}   0   msg=Error deleting Kueue CSV ${csv_name}
     END
     ${return_code}    ${output}    Run And Return Rc And Output
-    ...    oc delete subscription kueue-operator -n ${KUEUE_NS}
+    ...    oc delete subscription kueue-operator -n ${KUEUE_NS} --ignore-not-found
     Log To Console    message=Deleting Kueue Operator Group From Cluster
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete operatorgroup --all -n ${KUEUE_NS} --ignore-not-found

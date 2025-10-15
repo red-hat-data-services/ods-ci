@@ -125,15 +125,16 @@ Wait For Pods To Be Ready
     Wait Until Keyword Succeeds    ${timeout}    5s
     ...    Check If Pod Exists    namespace=${namespace}    label_selector=${label_selector}
     ...    status_only=${FALSE}
-    WHILE   True    limit=${timeout}
-        ${rc}    ${out}=    Run And Return Rc And Output
-        ...    oc wait --for=condition=ready=true pod -l ${label_selector} -n ${namespace} --timeout=${timeout}
-        IF    ${rc} == ${0}
-            BREAK
-        ELSE
-            Log To Console
-            ...    msg=Pod defined by selector "${label_selector}" in "${namespace}" namespace is not ready, retrying.
-        END
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc wait --for=condition=ready=true pod -l ${label_selector} -n ${namespace} --timeout=60s
+    IF    ${rc} != ${0}
+         Log To Console
+         ...    msg=Pod defined by selector "${label_selector}" in "${namespace}" namespace is not ready, trying a second time.
+    END
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc wait --for=condition=ready=true pod -l ${label_selector} -n ${namespace} --timeout=${timeout}
+    IF    ${rc} != ${0}
+         FAIL     msg=Pod defined by selector "${label_selector}" in "${namespace}" namespace is not ready.
     END
     IF    "${exp_replicas}" != "${NONE}"
         @{replicas}=    Oc Get    kind=Pod    namespace=${namespace}
@@ -143,7 +144,7 @@ Wait For Pods To Be Ready
 
 Wait For Deployment Replica To Be Ready
     [Documentation]   Wait for Deployment of ${label_selector} in ${namespace} to have the Replica-Set Ready
-    [Arguments]     ${label_selector}    ${namespace}     ${timeout}=600s    ${exp_replicas}=${NONE}
+    [Arguments]     ${label_selector}    ${namespace}     ${timeout}=1200s    ${exp_replicas}=${NONE}
     Log To Console
     ...    Waiting for Deployment with label "${label_selector}" in Namespace "${namespace}", to have desired Replica-Set ready  #robocop: disable:line-too-long
     IF    "${exp_replicas}" != "${NONE}"

@@ -17,6 +17,7 @@ ${MODELS_TAB}=  //button[@role="tab" and @aria-controls="model-server"]
 Verify Correct Value in DS Project after Enabling Both Model Serving Platforms
     [Documentation]    Verifies that correct values are present in the DS project after enabling
     ...    both model serving platforms
+    [Tags]    deprecatedTest
     Select CheckBox Multi Model Serving Platforms
     Select CheckBox Single Model Serving Platforms
     SeleniumLibrary.Capture Page Screenshot
@@ -29,6 +30,7 @@ Verify Correct Value in DS Project after Enabling Both Model Serving Platforms
 Verify Correct Value in DS Project after Enabling Multi Model Serving Platforms Only
     [Documentation]    Verifies that correct values are present in the DS project after enabling
     ...    Multi Model serving platforms only
+    [Tags]    deprecatedTest
     Select CheckBox Multi Model Serving Platforms
     SeleniumLibrary.Capture Page Screenshot
     Save Changes In Cluster Settings
@@ -41,6 +43,7 @@ Verify Correct Value in DS Project after Enabling Multi Model Serving Platforms 
 Verify Correct Value in DS Project after Enabling Single Model Serving Platforms Only
     [Documentation]    Verifies that correct values are present in the DS project after enabling
     ...    Single Model model serving platforms only
+    [Tags]    deprecatedTest
     Select CheckBox Single Model Serving Platforms
     SeleniumLibrary.Capture Page Screenshot
     Save Changes In Cluster Settings
@@ -53,6 +56,7 @@ Verify Correct Value in DS Project after Enabling Single Model Serving Platforms
 Verify Correct Value in DS Project after Disabling Both Model Serving Platforms
     [Documentation]    Verifies that correct values are present in the DS project after disabling
     ...    both model serving platforms
+    [Tags]    deprecatedTest
     Open Data Science Project Details Page      ${PROJECT_TITLE}    tab_id=model-server
     SeleniumLibrary.Click Button     xpath:${MODELS_TAB}
     SeleniumLibrary.Wait Until Page Contains Element    //*[contains(text(), "No model serving platform selected")]

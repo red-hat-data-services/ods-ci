@@ -39,12 +39,12 @@ ${WORKBENCH_IMAGE_VER_DROPDOWN}=     //*[@id="workbench-image-version-selection"
 # Standard Data Science https://github.com/red-hat-data-services/notebooks/blob/main/manifests/base/jupyter-datascience-notebook-imagestream.yaml
 # vs
 # Jupyter Data Science https://github.com/opendatahub-io/notebooks/blob/main/manifests/base/jupyter-datascience-notebook-imagestream.yaml
-&{IMAGE_ID_MAPPING}=                 Jupyter | Minimal | CPU | Python 3.11=minimal-notebook
-...                                  Jupyter | Minimal | CUDA | Python 3.11=minimal-gpu
-...                                  Jupyter | PyTorch | CUDA | Python 3.11=pytorch
-...                                  Jupyter | Data Science | CPU | Python 3.11=data-science-notebook
-...                                  Jupyter | Data Science | CPU | Python 3.11=datascience-notebook
-...                                  Jupyter | TensorFlow | CUDA | Python 3.11=tensorflow
+&{IMAGE_ID_MAPPING}=                 Jupyter | Minimal | CPU | Python 3.12=minimal-notebook
+...                                  Jupyter | Minimal | CUDA | Python 3.12=minimal-gpu
+...                                  Jupyter | PyTorch | CUDA | Python 3.12=pytorch
+...                                  Jupyter | Data Science | CPU | Python 3.12=data-science-notebook
+...                                  Jupyter | Data Science | CPU | Python 3.12=datascience-notebook
+...                                  Jupyter | TensorFlow | CUDA | Python 3.12=tensorflow
 ${KEYVALUE_TYPE}=        Key / value
 ${UPLOAD_TYPE}=        Upload
 ${ENV_VARIABLES_SECTION_XP}=        xpath=//section[@aria-label="Environment variables"]

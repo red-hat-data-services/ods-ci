@@ -70,7 +70,7 @@ GITHUB_USER:
 # Components to set as enabled in the operator v2.0 DSC CR
 COMPONENTS:
   dashboard: Managed
-  datasciencepipelines: Managed
+  aipipelines: Managed
   ray: Managed
   workbenches: Managed
   kserve: Managed

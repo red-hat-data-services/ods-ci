@@ -22,8 +22,8 @@ ${RAY_LABEL_SELECTOR}                                       app.kubernetes.io/na
 ${RAY_DEPLOYMENT_NAME}                                      kuberay-operator
 ${TRAINING_LABEL_SELECTOR}                                  app.kubernetes.io/name=training-operator
 ${TRAINING_DEPLOYMENT_NAME}                                 kubeflow-training-operator
-${DATASCIENCEPIPELINES_LABEL_SELECTOR}                      app.kubernetes.io/name=data-science-pipelines-operator
-${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}                     data-science-pipelines-operator-controller-manager
+${AIPIPELINES_LABEL_SELECTOR}                      app.kubernetes.io/name=ai-pipelines-operator
+${AIPIPELINES_DEPLOYMENT_NAME}                     ai-pipelines-operator-controller-manager
 ${ODH_MODEL_CONTROLLER_LABEL_SELECTOR}                      app=odh-model-controller
 ${ODH_MODEL_CONTROLLER_DEPLOYMENT_NAME}                     odh-model-controller
 ${MODELREGISTRY_CONTROLLER_LABEL_SELECTOR}                  control-plane=model-registry-operator
@@ -45,7 +45,7 @@ ${IS_NOT_PRESENT}                                           1
 ...                                                         KUEUE=${EMPTY}
 ...                                                         TRAINING=${EMPTY}
 ...                                                         DASHBOARD=${EMPTY}
-...                                                         DATASCIENCEPIPELINES=${EMPTY}
+...                                                         AIPIPELINES=${EMPTY}
 ...                                                         MODELREGISTRY=${EMPTY}
 ...                                                         KSERVE=${EMPTY}
 ...                                                         TRUSTYAI=${EMPTY}
@@ -222,38 +222,38 @@ Validate Dashboard Removed State
 
     [Teardown]      Restore DSC Component State     dashboard       ${DASHBOARD_DEPLOYMENT_NAME}        ${DASHBOARD_LABEL_SELECTOR}     ${SAVED_MANAGEMENT_STATES.DASHBOARD}
 
-Validate Datasciencepipelines Managed State
-    [Documentation]    Validate that the DSC Datasciencepipelines component Managed state creates the expected resources,
+Validate Aipipelines Managed State
+    [Documentation]    Validate that the DSC Aipipelines component Managed state creates the expected resources,
     ...    check that Datasciencepipelines deployment is created and pod is in Ready state
     [Tags]
     ...    Operator
     ...    Tier1
     ...    RHOAIENG-7298
-    ...    operator-datasciencepipelines-managed
+    ...    operator-aipipelines-managed
     ...    Integration
     Set DSC Component Managed State And Wait For Completion
     ...    datasciencepipelines
-    ...    ${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}
-    ...    ${DATASCIENCEPIPELINES_LABEL_SELECTOR}
-    Check That Image Pull Path Is Correct       ${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}     ${IMAGE_PULL_PATH}
+    ...    ${AIPIPELINES_DEPLOYMENT_NAME}
+    ...    ${AIPIPELINES_LABEL_SELECTOR}
+    Check That Image Pull Path Is Correct       ${AIPIPELINES_DEPLOYMENT_NAME}     ${IMAGE_PULL_PATH}
 
-    [Teardown]      Restore DSC Component State     datasciencepipelines        ${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}     ${DATASCIENCEPIPELINES_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.DATASCIENCEPIPELINES}
+    [Teardown]      Restore DSC Component State     aipipelines        ${AIPIPELINES_DEPLOYMENT_NAME}     ${AIPIPELINES_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.AIPIPELINES}
 
-Validate Datasciencepipelines Removed State
-    [Documentation]    Validate that Datasciencepipelines management state Removed does remove relevant resources.
+Validate Aipipelines Removed State
+    [Documentation]    Validate that Aipipelines management state Removed does remove relevant resources.
     [Tags]
     ...    Operator
     ...    Tier1
     ...    RHOAIENG-7298
-    ...    operator-datasciencepipelines-removed
+    ...    operator-aipipelines-removed
     ...    Integration
 
     Set DSC Component Removed State And Wait For Completion
-    ...    datasciencepipelines
-    ...    ${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}
-    ...    ${DATASCIENCEPIPELINES_LABEL_SELECTOR}
+    ...    aipipelines
+    ...    ${AIPIPELINES_DEPLOYMENT_NAME}
+    ...    ${AIPIPELINES_LABEL_SELECTOR}
 
-    [Teardown]      Restore DSC Component State     datasciencepipelines        ${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}     ${DATASCIENCEPIPELINES_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.DATASCIENCEPIPELINES}
+    [Teardown]      Restore DSC Component State     aipipelines        ${AIPIPELINES_DEPLOYMENT_NAME}     ${AIPIPELINES_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.AIPIPELINES}
 
 Validate TrustyAi Managed State
     [Documentation]    Validate that the DSC TrustyAi component Managed state creates the expected resources,

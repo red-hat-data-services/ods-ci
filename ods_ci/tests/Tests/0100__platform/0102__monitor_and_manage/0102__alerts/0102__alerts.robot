@@ -189,7 +189,7 @@ Verify That MT-SRE Are Not Paged For Alerts In Clusters Used For Development Or 
     END
     Verify Alertmanager Receiver For Critical Alerts    receiver=${receiver}
 
-Verify Data Science Pipelines Application Alerts
+Verify Ai Pipelines Application Alerts
     [Documentation]    Verifies that Data Science Pipelines Application alerts are fired when various parts are not running
     [Tags]    Tier3
     ...       ODS-2170

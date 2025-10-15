@@ -11,7 +11,7 @@ Resource   ../../../../tests/Resources/OCP.resource
 ${DSC_NAME} =    default-dsc
 ${DSCI_NAME} =    default-dsci
 @{COMPONENT_LIST} =    dashboard
-...    datasciencepipelines
+...    aipipelines
 ...    kserve
 ...    kueue
 ...    ray
@@ -229,10 +229,10 @@ Verify RHODS Installation
     Log  Verified Notebooks NS: ${NOTEBOOKS_NAMESPACE}
   END
 
-  ${datasciencepipelines} =    Is Component Enabled    datasciencepipelines    ${DSC_NAME}
-  IF    "${datasciencepipelines}" == "true"
+  ${aipipelines} =    Is Component Enabled    aipipelines    ${DSC_NAME}
+  IF    "${aipipelines}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/name=data-science-pipelines-operator    timeout=400s
+    ...    label_selector=app.kubernetes.io/name=ai-pipelines-operator    timeout=400s
   END
 
   ${kserve} =    Is Component Enabled    kserve    ${DSC_NAME}
@@ -301,7 +301,7 @@ Verify RHODS Installation
     END
   END
 
-  IF    "${dashboard}" == "true" or "${workbenches}" == "true" or "${datasciencepipelines}" == "true" or "${kserve}" == "true" or "${kueue}" == "true" or "${ray}" == "true" or "${trustyai}" == "true" or "${modelregistry}" == "true" or "${trainingoperator}" == "true"    # robocop: disable
+  IF    "${dashboard}" == "true" or "${workbenches}" == "true" or "${aipipelines}" == "true" or "${kserve}" == "true" or "${kueue}" == "true" or "${ray}" == "true" or "${trustyai}" == "true" or "${modelregistry}" == "true" or "${trainingoperator}" == "true"    # robocop: disable
       Log To Console    Waiting for pod status in ${APPLICATIONS_NAMESPACE}
       Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=200
       Log  Verified Applications NS: ${APPLICATIONS_NAMESPACE}  console=yes

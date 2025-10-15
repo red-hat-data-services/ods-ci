@@ -13,9 +13,9 @@ spec:
     dashboard:
       devFlags: <dashboard_devflags>
       managementState: <dashboard_value>
-    datasciencepipelines:
-      devFlags: <datasciencepipelines_devflags>
-      managementState: <datasciencepipelines_value>
+    aipipelines:
+      devFlags: <aipipelines_devflags>
+      managementState: <aipipelines_value>
     kserve:
       devFlags: <kserve_devflags>
       defaultDeploymentMode: RawDeployment

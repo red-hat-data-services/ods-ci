@@ -12,7 +12,7 @@ ${APPLICATIONS_NS}                              ${APPLICATIONS_NAMESPACE}
 ${KUEUE_LABEL_SELECTOR}                         app.kubernetes.io/name=kueue
 ${RAY_LABEL_SELECTOR}                           app.kubernetes.io/name=kuberay
 ${TRAINING_LABEL_SELECTOR}                      app.kubernetes.io/name=training-operator
-${DATASCIENCEPIPELINES_LABEL_SELECTOR}          app.kubernetes.io/name=data-science-pipelines-operator
+${DATASCIENCEPIPELINES_LABEL_SELECTOR}          app.kubernetes.io/name=ai-pipelines-operator
 ${ODH_MODEL_CONTROLLER_LABEL_SELECTOR}          app=odh-model-controller
 ${MODELREGISTRY_CONTROLLER_LABEL_SELECTOR}      control-plane=model-registry-operator
 ${KSERVE_CONTROLLER_MANAGER_LABEL_SELECTOR}     control-plane=kserve-controller-manager
@@ -33,7 +33,7 @@ Check For Correct Component Images
     workbenches             odh-notebook-controller-manager                         ${WORKBENCHES_LABEL_SELECTOR}                   odh_notebook_controller_image
     workbenches             notebook-controller-deployment                          ${WORKBENCHES_LABEL_SELECTOR}                   odh_kf_notebook_controller_image
     dashboard               ${DASHBOARD_DEPLOYMENT_NAME}                            ${DASHBOARD_LABEL_SELECTOR}                     odh_dashboard_image
-    datasciencepipelines    data-science-pipelines-operator-controller-manager      ${DATASCIENCEPIPELINES_LABEL_SELECTOR}          odh_data_science_pipelines_operator_controller_image
+    datasciencepipelines    ai-pipelines-operator-controller-manager      ${DATASCIENCEPIPELINES_LABEL_SELECTOR}          odh_data_science_pipelines_operator_controller_image
     trainingoperator        kubeflow-training-operator                              ${TRAINING_LABEL_SELECTOR}                      odh_training_operator_image
 
 

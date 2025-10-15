@@ -12,11 +12,11 @@ Test Tags           ExcludeOnODH
 
 
 *** Variables ***
-@{RECORD_GROUPS}    SLOs - Data Science Pipelines Operator    SLOs - Data Science Pipelines Application
+@{RECORD_GROUPS}    SLOs - Data Science Pipelines Operator    SLOs - AI Pipelines Application
 ...    SLOs - ODH Model Controller    SLOs - Kserve Controller Manager    SLOs - ODH Dashboard    Availability Metrics
 ...    SLOs - RHODS Operator v2    SLOs - TrustyAI Controller Manager    SLOs - Notebook Controller
 
-@{ALERT_GROUPS}    SLOs-haproxy_backend_http_responses_dsp    RHODS Data Science Pipelines    SLOs-probe_success_dsp
+@{ALERT_GROUPS}    SLOs-haproxy_backend_http_responses_dsp    RHODS AI Pipelines    SLOs-probe_success_dsp
 ...    DeadManSnitch     KubeFlow Training Operator
 ...    SLOs-haproxy_backend_http_responses_dashboard     SLOs-probe_success_model_controller     SLOs-probe_success_kserve
 ...    Distributed Workloads Kuberay     Distributed Workloads Kueue     RHODS-PVC-Usage     RHODS Notebook controllers
@@ -134,7 +134,7 @@ Test RHOAI Operator Metrics Are Defined
     ...                                     controller_runtime_reconcile_time_seconds_sum  controller_runtime_reconcile_total
 
     @{expected_controller_names} =     Create List  auth  dashboard
-    ...                                    datasciencecluster  datasciencepipelines  dscinitialization  kserve  kueue
+    ...                                    datasciencecluster  aipipelines  dscinitialization  kserve  kueue
     ...                                    modelcontroller  modelregistry  monitoring  ray
     ...                                    trainingoperator  trustyai  workbenches
 

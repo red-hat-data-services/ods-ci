@@ -26,10 +26,6 @@ ${SERVERLESS_SUB_NAME}=    serverless-operator
 ${SERVERLESS_NS}=    openshift-serverless
 ${SERVICEMESH_OP_NAME}=     servicemeshoperator
 ${SERVICEMESH_SUB_NAME}=    servicemeshoperator
-${LWS_OP_NAME}=    leader-worker-set
-${LWS_OP_NS}=    openshift-lws-operator
-${LWS_SUB_NAME}=    leader-worker-set
-${LWS_CHANNEL_NAME}=  stable-v1.0
 ${OPENSHIFT_OPERATORS_NS}=    openshift-operators
 ${COMMUNITY_OPERATORS_NS}=    openshift-marketplace
 ${COMMUNITY_OPERATORS_CS}=    community-operators
@@ -623,29 +619,6 @@ Catalog Is Ready
     Should Be Equal As Integers   ${rc}  0  msg=Error detected while getting CatalogSource status state
     Should Be Equal As Strings    "READY"    ${output}
 
-Install Leader Worker Set Operator Via Cli
-    [Documentation]    Install Leader Worker Set Operator Via CLI
-    ${is_installed} =   Check If Operator Is Installed Via CLI   ${LWS_OP_NAME}
-    IF    not ${is_installed}
-          ${rc}    ${out} =    Run And Return Rc And Output    oc create namespace ${LWS_OP_NS}
-          Install ISV Operator From OperatorHub Via CLI    operator_name=${LWS_OP_NAME}
-             ...    subscription_name=${LWS_SUB_NAME}
-             ...    namespace=${LWS_OP_NS}
-             ...    catalog_source_name=redhat-operators
-             ...    operator_group_name=openshift-lws-operator
-             ...    operator_group_ns=${LWS_OP_NS}
-             ...    operator_group_target_ns=${LWS_OP_NS}
-             ...    channel=${LWS_CHANNEL_NAME}
-          Wait Until Operator Subscription Last Condition Is
-             ...    type=CatalogSourcesUnhealthy    status=False
-             ...    reason=AllCatalogSourcesHealthy    subscription_name=${LWS_SUB_NAME}
-             ...    namespace=${LWS_OP_NS}
-             ...    retry=150
-          Wait For Pods To Be Ready    label_selector=name=openshift-lws-operator
-             ...    namespace=${LWS_OP_NS}
-    ELSE
-          Log To Console    message=Leader Worker Set Operator is already installed
-    END
 
 Install Cert Manager Operator Via Cli
     [Documentation]    Install Cert Manager Operator Via CLI
@@ -701,7 +674,6 @@ Install KServe Dependencies
     Set Suite Variable   ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
     Set Suite Variable   ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
     Install Cert Manager Operator Via Cli
-    Install Leader Worker Set Operator Via Cli
 
 Install Kueue Dependencies
     [Documentation]    Install Dependent Operators For Kueue

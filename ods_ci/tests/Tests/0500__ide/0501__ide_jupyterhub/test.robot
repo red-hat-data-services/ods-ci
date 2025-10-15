@@ -80,7 +80,7 @@ Can Spawn Notebook
     Maybe Close Popup
     ${is_launcher_selected} =  Run Keyword And Return Status  JupyterLab Launcher Tab Is Selected
     IF  not ${is_launcher_selected}  Open JupyterLab Launcher
-    Launch a new JupyterLab Document    kernel=Python 3.11
+    Launch a new JupyterLab Document    kernel=Python 3.12
     Close Other JupyterLab Tabs
 
 *** Keywords ***

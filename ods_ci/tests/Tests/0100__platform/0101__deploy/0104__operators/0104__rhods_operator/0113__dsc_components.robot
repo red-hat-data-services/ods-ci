@@ -22,8 +22,8 @@ ${RAY_LABEL_SELECTOR}                                       app.kubernetes.io/na
 ${RAY_DEPLOYMENT_NAME}                                      kuberay-operator
 ${TRAINING_LABEL_SELECTOR}                                  app.kubernetes.io/name=training-operator
 ${TRAINING_DEPLOYMENT_NAME}                                 kubeflow-training-operator
-${AIPIPELINES_LABEL_SELECTOR}                      app.kubernetes.io/name=ai-pipelines-operator
-${AIPIPELINES_DEPLOYMENT_NAME}                     ai-pipelines-operator-controller-manager
+${AIPIPELINES_LABEL_SELECTOR}                               app.kubernetes.io/name=data-science-pipelines-operator
+${AIPIPELINES_DEPLOYMENT_NAME}                              data-science-pipelines-operator-controller-manager
 ${ODH_MODEL_CONTROLLER_LABEL_SELECTOR}                      app=odh-model-controller
 ${ODH_MODEL_CONTROLLER_DEPLOYMENT_NAME}                     odh-model-controller
 ${MODELREGISTRY_CONTROLLER_LABEL_SELECTOR}                  control-plane=model-registry-operator
@@ -74,7 +74,7 @@ Validate Kueue Removed To Unmanaged State Transition
     ...    Tier1
     ...    kueue-unmanaged-from-removed
     ...    Integration
-
+    Uninstall Kueue Operator CLI
     Set DSC Component Removed State And Wait For Completion
     ...    kueue
     ...    ${KUEUE_DEPLOYMENT_NAME}

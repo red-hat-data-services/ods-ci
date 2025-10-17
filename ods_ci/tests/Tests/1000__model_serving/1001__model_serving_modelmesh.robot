@@ -101,7 +101,7 @@ Verify Secure Model Can Be Deployed In Same Project    # robocop: off=too-long-t
     [Documentation]    Verifies that a model can be deployed in a secured server (with token) using only the UI.
     ...    At the end of the process, verifies the correct resources have been deployed.
     [Tags]    Tier1
-    ...       ODS-1921    ProductBug    RHOAIENG-2759
+    ...       ODS-1921    ProductBug    RHOAIENG-2759    deprecatedTest
     Open Data Science Projects Home Page
     Create Data Science Project    title=${PRJ_TITLE}    description=${PRJ_DESCRIPTION}    existing_project=${TRUE}
     Recreate S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=model-serving-connection
@@ -152,7 +152,7 @@ Test Inference With Token Authentication    # robocop: off=too-long-test-case
 Verify Multiple Projects With Same Model
     [Documentation]    Test the deployment of multiple DS project with same openvino_ir model
     [Tags]    Tier1
-    ...       RHOAIENG-549    RHOAIENG-2724
+    ...       RHOAIENG-549    RHOAIENG-2724    deprecatedTest
     Create Openvino Models    server_name=${RUNTIME_NAME}    model_name=${MODEL_NAME}    project_name=${PRJ_TITLE}
     ...    num_projects=4
     [Teardown]   Run Keyword If Test Failed    Get Modelmesh Events And Logs
@@ -161,7 +161,7 @@ Verify Multiple Projects With Same Model
 Verify Editing Existing Model Deployment    # robocop: off=too-long-test-case,too-many-calls-in-test-case
     [Documentation]    Tries editing an existing model deployment to see if the underlying deployment is updated
     [Tags]    Tier1
-    ...       RHOAIENG-2869
+    ...       RHOAIENG-2869    deprecatedTest
     Open Data Science Projects Home Page
     ${namespace}=    Set Variable    ${PRJ_TITLE}-2869
     Create Data Science Project    title=${namespace}    description=${PRJ_DESCRIPTION}

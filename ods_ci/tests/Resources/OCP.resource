@@ -122,15 +122,13 @@ Wait For Pods To Be Ready
     ...                This keyword can also check for the expected number of the pod replicas using `${exp_replicas}`
     ...                argument.
     [Arguments]    ${label_selector}    ${namespace}    ${timeout}=600s    ${exp_replicas}=${NONE}
+    ${evaluating_kueue} =  Evaluate  "kueue" in "${label_selector}"
+    IF    ${evaluating_kueue}
+         Sleep    90s    reason=Waiting for the kueue pods to stabilize
+    END
     Wait Until Keyword Succeeds    ${timeout}    5s
     ...    Check If Pod Exists    namespace=${namespace}    label_selector=${label_selector}
     ...    status_only=${FALSE}
-    ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc wait --for=condition=ready=true pod -l ${label_selector} -n ${namespace} --timeout=60s
-    IF    ${rc} != ${0}
-         Log To Console
-         ...    msg=Pod defined by selector "${label_selector}" in "${namespace}" namespace is not ready, trying a second time.
-    END
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc wait --for=condition=ready=true pod -l ${label_selector} -n ${namespace} --timeout=${timeout}
     IF    ${rc} != ${0}

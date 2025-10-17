@@ -21,11 +21,10 @@ ${DSCI_NAME} =    default-dsci
 ...    modelregistry
 ...    feastoperator
 ...    llamastackoperator
-${SERVERLESS_OP_NAME}=     serverless-operator
-${SERVERLESS_SUB_NAME}=    serverless-operator
-${SERVERLESS_NS}=    openshift-serverless
-${SERVICEMESH_OP_NAME}=     servicemeshoperator
-${SERVICEMESH_SUB_NAME}=    servicemeshoperator
+${LWS_OP_NAME}=    leader-worker-set
+${LWS_OP_NS}=    openshift-lws-operator
+${LWS_SUB_NAME}=    leader-worker-set
+${LWS_CHANNEL_NAME}=  stable-v1.0
 ${OPENSHIFT_OPERATORS_NS}=    openshift-operators
 ${COMMUNITY_OPERATORS_NS}=    openshift-marketplace
 ${COMMUNITY_OPERATORS_CS}=    community-operators
@@ -83,7 +82,6 @@ Install RHODS
   Log    Start installing RHOAI with:\n\- cluster type: ${cluster_type}\n\- image_url: ${image_url}\n\- update_channel: ${UPDATE_CHANNEL}    console=yes    #robocop:disable
   Log    \- rhoai_version: ${rhoai_version}\n\- is_upgrade: ${is_upgrade}\n\- install_plan_approval: ${install_plan_approval}\n\- CATALOG_SOURCE: ${CATALOG_SOURCE}   console=yes    #robocop:disable
   Assign Vars According To Product
-  Install Rhoai Dependencies
   ${enable_new_observability_stack} =    Is New Observability Stack Enabled
   IF    ${enable_new_observability_stack}
           Install Observability Dependencies
@@ -681,58 +679,6 @@ Install Kueue Dependencies
     Set Suite Variable   ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
     Install Cert Manager Operator Via Cli
     Install Kueue Operator Via Cli
-
-Install Service Mesh Operator Via Cli
-    [Documentation]    Install Service Mesh Operator Via CLI
-    ${is_installed} =   Check If Operator Is Installed Via CLI   ${SERVICEMESH_OP_NAME}
-    IF    not ${is_installed}
-          Install ISV Operator From OperatorHub Via CLI    operator_name=${SERVICEMESH_OP_NAME}
-             ...    subscription_name=${SERVICEMESH_SUB_NAME}
-             ...    catalog_source_name=redhat-operators
-          Wait Until Operator Subscription Last Condition Is
-             ...    type=CatalogSourcesUnhealthy    status=False
-             ...    reason=AllCatalogSourcesHealthy    subscription_name=${SERVICEMESH_SUB_NAME}
-             ...    retry=150
-          Wait For Pods To Be Ready    label_selector=name=istio-operator
-             ...    namespace=${OPENSHIFT_OPERATORS_NS}
-    ELSE
-          Log To Console    message=Service Mesh Operator is already installed
-    END
-
-Install Serverless Operator Via Cli
-    [Documentation]    Install Serverless Operator Via CLI
-    ${is_installed} =   Check If Operator Is Installed Via CLI   ${SERVERLESS_OP_NAME}
-    IF    not ${is_installed}
-        ${rc}    ${out} =    Run And Return Rc And Output    oc create namespace ${SERVERLESS_NS}
-        Install ISV Operator From OperatorHub Via CLI    operator_name=${SERVERLESS_OP_NAME}
-             ...    namespace=${SERVERLESS_NS}
-             ...    subscription_name=${SERVERLESS_SUB_NAME}
-             ...    catalog_source_name=redhat-operators
-             ...    operator_group_name=serverless-operators
-             ...    operator_group_ns=${SERVERLESS_NS}
-             ...    operator_group_target_ns=${NONE}
-        Wait Until Operator Subscription Last Condition Is
-             ...    type=CatalogSourcesUnhealthy    status=False
-             ...    reason=AllCatalogSourcesHealthy    subscription_name=${SERVERLESS_SUB_NAME}
-             ...    namespace=${SERVERLESS_NS}
-             ...    retry=150
-        Wait For Pods To Be Ready    label_selector=name=knative-openshift
-             ...    namespace=${SERVERLESS_NS}
-        Wait For Pods To Be Ready    label_selector=name=knative-openshift-ingress
-             ...    namespace=${SERVERLESS_NS}
-        Wait For Pods To Be Ready    label_selector=name=knative-operator
-             ...    namespace=${SERVERLESS_NS}
-    ELSE
-        Log To Console    message=Serverless Operator is already installed
-    END
-
-Install Rhoai Dependencies
-    [Documentation]    Install Dependent Operators For Rhoai
-    Set Suite Variable   ${FILES_RESOURCES_DIRPATH}    tests/Resources/Files
-    Set Suite Variable   ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
-    Set Suite Variable   ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
-    Install Service Mesh Operator Via Cli
-    Install Serverless Operator Via Cli
 
 Install Cluster Observability Operator Via Cli
     [Documentation]    Install Cluster Observability Operator Via CLI

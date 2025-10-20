@@ -44,7 +44,7 @@ Verify Pipelines Integration With Elyra When Using Standard Data Science Image
     [Timeout]    10m
     Verify Pipelines Integration With Elyra Running Hello World Pipeline Test
     ...    img=Jupyter | Data Science | CPU | Python 3.12
-    ...    runtime_image=Datascience with Python 3.12 (UBI9)
+    ...    runtime_image=Runtime | Datascience | CPU | Python 3.12
     ...    experiment_name=standard-data-science-pipeline
 
 Verify Pipelines Integration With Elyra When Using Standard Data Science Based Images
@@ -55,9 +55,9 @@ Verify Pipelines Integration With Elyra When Using Standard Data Science Based I
     [Template]    Verify Pipelines Integration With Elyra Running Hello World Pipeline Test
     [Tags]        Tier1    ODS-2271
     [Timeout]     30m
-    Jupyter | PyTorch | CUDA | Python 3.12       Datascience with Python 3.12 (UBI9)    pytorch-pipeline
-    Jupyter | TensorFlow | CUDA | Python 3.12    Datascience with Python 3.12 (UBI9)    tensorflow-pipeline
-    Jupyter | TrustyAI | CPU | Python 3.12       Datascience with Python 3.12 (UBI9)    trustyai-pipeline
+    Jupyter | PyTorch | CUDA | Python 3.12       Runtime | Datascience | CPU | Python 3.12    pytorch-pipeline
+    Jupyter | TensorFlow | CUDA | Python 3.12    Runtime | Datascience | CPU | Python 3.12    tensorflow-pipeline
+    Jupyter | TrustyAI | CPU | Python 3.12       Runtime | Datascience | CPU | Python 3.12    trustyai-pipeline
 
 
 *** Keywords ***

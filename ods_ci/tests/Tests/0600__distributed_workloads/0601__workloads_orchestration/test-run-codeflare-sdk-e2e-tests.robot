@@ -10,6 +10,33 @@ Resource          ../../../../tests/Resources/Page/DistributedWorkloads/Distribu
 
 
 *** Test Cases ***
+Run TestRayJobRayVersionValidationOauth test with Python 3.11
+    [Documentation]    Run Python E2E test: TestRayJobRayVersionValidationOauth
+    [Tags]
+    ...     Smoke
+    ...     DistributedWorkloads
+    ...     WorkloadsOrchestration
+    ...     Codeflare-sdk
+    Run Codeflare-SDK Test    e2e/rayjob    ray_version_validation_oauth_test.py    3.11    ${RAY_CUDA_IMAGE_3.11}    ${CODEFLARE-SDK-RELEASE-TAG}
+
+Run TestRayJobExistingCluster test with Python 3.11
+    [Documentation]    Run Python E2E test: TestRayJobExistingCluster
+    [Tags]
+    ...     Tier1
+    ...     DistributedWorkloads
+    ...     WorkloadsOrchestration
+    ...     Codeflare-sdk
+    Run Codeflare-SDK Test    e2e/rayjob    rayjob_existing_cluster_test.py    3.11    ${RAY_CUDA_IMAGE_3.11}    ${CODEFLARE-SDK-RELEASE-TAG}
+
+Run TestRayJobLifecycledCluster test with Python 3.11
+    [Documentation]    Run Python E2E test: TestRayJobLifecycledCluster
+    [Tags]
+    ...     Tier1
+    ...     DistributedWorkloads
+    ...     WorkloadsOrchestration
+    ...     Codeflare-sdk
+    Run Codeflare-SDK Test    e2e/rayjob    rayjob_lifecycled_cluster_test.py    3.11    ${RAY_CUDA_IMAGE_3.11}    ${CODEFLARE-SDK-RELEASE-TAG}
+
 Run TestRayClusterSDKOauth test with Python 3.11
     [Documentation]    Run Python E2E test: TestRayClusterSDKOauth
     [Tags]

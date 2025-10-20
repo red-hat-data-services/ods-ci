@@ -38,7 +38,8 @@ Get User Groups From Auth Cr And Check Rolebinding Exists
     @{groups_list}=    Split String    ${groups_str}    ,
     FOR    ${user}    IN    @{groups_list}
         Log To Console    ${user}
-        ${rc}=    Run And Return Rc
+        ${rc}     ${out}=    Run And Return Rc And Output
         ...    oc get ${role_type} ${rolebinding_name} -n ${APPLICATIONS_NAMESPACE} -o jsonpath='{.subjects[?(@.name==${user})]}'   #robocop: disable:line-too-long
+        Log To Console    ${out}
         Should Be Equal As Integers    ${rc}    0
     END

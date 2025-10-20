@@ -340,8 +340,7 @@ Validate KServe Controller Manager Managed State
     ...    RHOAIENG-7217
     ...    kserve-controller-manager-managed
     ...    Integration
-    ...    ExcludeOnODH
-    ...    ExcludeOnRHOAI
+
     Set DSC Component Managed State And Wait For Completion
     ...    kserve
     ...    ${KSERVE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
@@ -417,6 +416,7 @@ Validate Feastoperator Managed State
     ...    feastoperator-managed
     ...    Integration
     ...    ExcludeOnODH
+
     Set DSC Component Managed State And Wait For Completion
     ...    feastoperator
     ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
@@ -451,6 +451,8 @@ Validate Llamastackoperator Managed State
     ...    Tier1
     ...    llamastackoperator-managed
     ...    Integration
+    ...    ExcludeOnODH
+
     Set DSC Component Managed State And Wait For Completion
     ...    llamastackoperator
     ...    ${LLAMASTACKOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
@@ -468,6 +470,7 @@ Validate Llamastackoperator Removed State
     ...    Tier1
     ...    llamastackoperator-removed
     ...    Integration
+    ...    ExcludeOnODH
 
     Set DSC Component Removed State And Wait For Completion
     ...    llamastackoperator
@@ -541,7 +544,7 @@ Suite Setup
     ${SAVED_MANAGEMENT_STATES.KUEUE}=     Get DSC Component State    ${DSC_NAME}    kueue    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.TRAINING}=     Get DSC Component State    ${DSC_NAME}    trainingoperator    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.DASHBOARD}=     Get DSC Component State    ${DSC_NAME}    dashboard    ${OPERATOR_NS}
-    ${SAVED_MANAGEMENT_STATES.AIPIPELINES}=     Get DSC Component State    ${DSC_NAME}    datasciencepipelines    ${OPERATOR_NS}
+    ${SAVED_MANAGEMENT_STATES.AIPIPELINES}=     Get DSC Component State    ${DSC_NAME}    aipipelines    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.MODELREGISTRY}=     Get DSC Component State    ${DSC_NAME}    modelregistry    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.KSERVE}=     Get DSC Component State    ${DSC_NAME}    kserve    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.TRUSTYAI}=     Get DSC Component State    ${DSC_NAME}    trustyai    ${OPERATOR_NS}
@@ -607,8 +610,9 @@ Check Controller Conditions Are Accomplished
 
 Patch Controller Deployment
     [Arguments]    ${controller}  ${patch_path}  ${patch_value}
-    ${rc}=    Run And Return Rc
+    ${rc}   ${out}=    Run And Return Rc And Output
     ...    oc patch Deployment ${controller} -n ${APPLICATIONS_NAMESPACE} --type=json -p="[{'op': 'replace', 'path': '${patch_path}', 'value': ${patch_value}}]"    # robocop: disable
+    Log To Console    ${out}
     Should Be Equal As Integers    ${rc}    ${0}
 
 Verify Deployment Patch Was Not Reverted

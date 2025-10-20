@@ -232,7 +232,7 @@ Validate Aipipelines Managed State
     ...    operator-aipipelines-managed
     ...    Integration
     Set DSC Component Managed State And Wait For Completion
-    ...    datasciencepipelines
+    ...    aipipelines
     ...    ${AIPIPELINES_DEPLOYMENT_NAME}
     ...    ${AIPIPELINES_LABEL_SELECTOR}
     Check That Image Pull Path Is Correct       ${AIPIPELINES_DEPLOYMENT_NAME}     ${IMAGE_PULL_PATH}

@@ -29,9 +29,34 @@ MACHINE_WAIT_TIMEOUT=10m
 # Check if existing machineset GPU already exists
 EXISTING_GPU_MACHINESET="$(oc get machinesets.machine.openshift.io -n openshift-machine-api -o jsonpath="{.items[?(@.metadata.annotations['machine\.openshift\.io/GPU']>'0')].metadata.name}")"
 if [[ -n "$EXISTING_GPU_MACHINESET" ]] ; then
-  echo "Machine-set for GPU already exists"
-  oc get machinesets -A --show-labels
-  exit 0
+  echo "Machine-set for GPU already exists: $EXISTING_GPU_MACHINESET"
+  
+  # Get current replica count
+  CURRENT_REPLICAS=$(oc get machineset $EXISTING_GPU_MACHINESET -n openshift-machine-api -o jsonpath='{.spec.replicas}')
+  echo "Current replicas: $CURRENT_REPLICAS, Desired replicas: $GPU_NODE_COUNT"
+  
+  # Scale if needed
+  if [[ "$CURRENT_REPLICAS" != "$GPU_NODE_COUNT" ]]; then
+    echo "Scaling MachineSet from $CURRENT_REPLICAS to $GPU_NODE_COUNT replicas"
+    oc scale machineset $EXISTING_GPU_MACHINESET --replicas=$GPU_NODE_COUNT -n openshift-machine-api
+    
+    # Set NEW_MACHINESET_NAME for the wait logic
+    NEW_MACHINESET_NAME=$EXISTING_GPU_MACHINESET
+    
+    # Skip to the waiting section
+    echo "Waiting for $GPU_NODE_COUNT GPU Node(s) to be Ready"
+    oc wait --timeout=$MACHINE_WAIT_TIMEOUT --for jsonpath='{.status.readyReplicas}'=$GPU_NODE_COUNT machinesets.machine.openshift.io $NEW_MACHINESET_NAME -n openshift-machine-api
+    if [ $? -ne 0 ]; then
+      echo "Machine Set $NEW_MACHINESET_NAME does not have its Machines in Running status after $MACHINE_WAIT_TIMEOUT timeout"
+      echo "Please check the cluster"
+      exit 1
+    fi
+    echo "GPU MachineSet scaled successfully to $GPU_NODE_COUNT replicas"
+    exit 0
+  else
+    echo "MachineSet already has the desired $GPU_NODE_COUNT replicas"
+    exit 0
+  fi
 fi
 
 # Select the first machineset as a template for the GPU machineset

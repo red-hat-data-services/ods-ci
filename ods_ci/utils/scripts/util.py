@@ -101,6 +101,52 @@ def oc_login(ocp_api_url, username, password, timeout=600):
         sys.exit(1)
 
 
+def oc_login_oidc(ocp_api_url, username, password, issuer_url, timeout=600):
+    """
+    Login to test cluster using oidc
+    """
+    setup_cmd = f"""
+        oc config set-credentials byoidc-admin \
+            --exec-api-version=client.authentication.k8s.io/v1 \
+            --exec-interactive-mode=Never \
+            --exec-command=kubelogin \
+            --exec-arg=get-token \
+            --exec-arg="--oidc-issuer-url={issuer_url}" \
+            --exec-arg="--oidc-client-id=oc-cli" \
+            --exec-arg="--username={username}" && \
+        oc config set-cluster test-cluster \
+            --server={ocp_api_url} \
+            --insecure-skip-tls-verify=true && \
+        oc config set-context main \
+            --cluster=test-cluster \
+            --user={username} && \
+        oc config use-context main
+    """
+    execute_command(setup_cmd)
+    cmd = f"""
+        kubelogin get-token \
+            --oidc-issuer-url={issuer_url} \
+            --oidc-client-id=oc-cli \
+            --grant-type password \
+            --username=byoidc-admin \
+            --password="{password}" && \
+        oc whoami
+    """
+    count = 0
+    chk_flag = 0
+    while count <= timeout:
+        out = execute_command(cmd)
+        if (out is not None) and (username in out):
+            print("Logged into cluster successfully")
+            chk_flag = 1
+            break
+        time.sleep(5)
+        count += 5
+    if not chk_flag:
+        print("Failed to login to cluster")
+        sys.exit(1)
+
+
 def render_template(search_path, template_file, output_file, replace_vars):
     """Helper module to render jinja template"""
 

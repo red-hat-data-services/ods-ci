@@ -82,19 +82,19 @@ Verify RHODS Accept Multiple Admin Groups And CRD Gets Updates
 
 Verify Custom Image Can Be Added
     [Documentation]    Create Custome notebook using Cli
-    [Tags]      Upgrade
+    [Tags]      Upgrade      deprecatedTest
     Oc Apply        kind=ImageStream        src=tests/Tests/0200__rhoai_upgrade/custome_image.yaml
 
 Verify User Can Disable The Runtime
     [Documentation]    Disable the Serving runtime using Cli
-    [Tags]      Upgrade
+    [Tags]      Upgrade      deprecatedTest
     Disable Model Serving Runtime Using CLI     namespace=redhat-ods-applications
 
 Verify Model Can Be Deployed For Upgrade
     # robocop: off=too-long-test-case
     # robocop: off=too-many-calls-in-test-case
     [Documentation]    Verify Model Can Be Deployed Via cli For Upgrade
-    [Tags]                  Upgrade    ModelServing    ModelServer
+    [Tags]                  Upgrade    ModelServing    ModelServer      deprecatedTest
     ${test_namespace}=         Set Variable    ovmsmodel-upgrade
     ${inference_input}=        Set Variable    @tests/Resources/Files/modelmesh-mnist-input.json
     ${exp_inference_output}=   Set Variable    {"model_name":"ovms-model","model_version":"1","outputs":[{"name":"Plus214_Output_0","datatype":"FP32","shape":[1,10],"data":[-8.233053,-7.7497034,-3.4236815,12.3630295,-12.079103,17.266596,-10.570976,0.7130762,3.321715,1.3621228]}]}    # robocop: off=line-too-long
@@ -138,7 +138,7 @@ Verify Model Can Be Deployed For Upgrade
 
 Verify User Can Deploy Custom Runtime For Upgrade
     [Documentation]     Verify User Can Deploy Custom Runtime For Upgrade
-    [Tags]      Upgrade
+    [Tags]      Upgrade      deprecatedTest
     Create Custom Serving Runtime Using Template By CLI
     ...    tests/Resources/Files/caikit_runtime_template.yaml
     Begin Web Test

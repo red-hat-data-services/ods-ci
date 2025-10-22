@@ -5,7 +5,7 @@ Library          Process
 
 
 *** Variables ***
-${CODEFLARE-SDK-RELEASE-TAG}             v0.23.1
+${CODEFLARE-SDK-RELEASE-TAG}             v0.23.1-post-cve-test-fix
 ${CODEFLARE-SDK-RELEASE-TAG-3.9}         adjustments-release-0.21.1
 ${CODEFLARE-SDK_DIR}                     codeflare-sdk
 ${CODEFLARE-SDK_REPO_URL}                %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}

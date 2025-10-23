@@ -31,14 +31,23 @@ EXISTING_GPU_MACHINESET="$(oc get machinesets.machine.openshift.io -n openshift-
 if [[ -n "$EXISTING_GPU_MACHINESET" ]] ; then
   echo "Machine-set for GPU already exists: $EXISTING_GPU_MACHINESET"
   
-  # Get current replica count
-  CURRENT_REPLICAS=$(oc get machineset $EXISTING_GPU_MACHINESET -n openshift-machine-api -o jsonpath='{.spec.replicas}')
-  echo "Current replicas: $CURRENT_REPLICAS, Desired replicas: $GPU_NODE_COUNT"
+  # Get current replica count with proper error handling
+  CURRENT_REPLICAS=$(oc get machineset.machine.openshift.io $EXISTING_GPU_MACHINESET -n openshift-machine-api -o jsonpath='{.spec.replicas}' 2>/dev/null)
   
-  # Scale if needed
-  if [[ "$CURRENT_REPLICAS" != "$GPU_NODE_COUNT" ]]; then
+  # Check if we could get the replica count
+  if [[ -z "$CURRENT_REPLICAS" ]]; then
+    echo "Error: Could not get replica count for MachineSet $EXISTING_GPU_MACHINESET"
+    echo "MachineSet might not exist or use different API version. Listing all GPU MachineSets:"
+    oc get machinesets -n openshift-machine-api | grep -i gpu || echo "No GPU MachineSets found"
+    echo "Proceeding to create new MachineSet..."
+  else
+    echo "Current replicas: $CURRENT_REPLICAS, Desired replicas: $GPU_NODE_COUNT"
+  fi
+  
+  # Scale if needed (only if we successfully got the current replica count)
+  if [[ -n "$CURRENT_REPLICAS" && "$CURRENT_REPLICAS" != "$GPU_NODE_COUNT" ]]; then
     echo "Scaling MachineSet from $CURRENT_REPLICAS to $GPU_NODE_COUNT replicas"
-    oc scale machineset $EXISTING_GPU_MACHINESET --replicas=$GPU_NODE_COUNT -n openshift-machine-api
+    oc scale machineset.machine.openshift.io $EXISTING_GPU_MACHINESET --replicas=$GPU_NODE_COUNT -n openshift-machine-api
     
     # Set NEW_MACHINESET_NAME for the wait logic
     NEW_MACHINESET_NAME=$EXISTING_GPU_MACHINESET
@@ -53,10 +62,11 @@ if [[ -n "$EXISTING_GPU_MACHINESET" ]] ; then
     fi
     echo "GPU MachineSet scaled successfully to $GPU_NODE_COUNT replicas"
     exit 0
-  else
+  elif [[ -n "$CURRENT_REPLICAS" ]]; then
     echo "MachineSet already has the desired $GPU_NODE_COUNT replicas"
     exit 0
   fi
+  # If CURRENT_REPLICAS is empty, continue to create new MachineSet
 fi
 
 # Select the first machineset as a template for the GPU machineset

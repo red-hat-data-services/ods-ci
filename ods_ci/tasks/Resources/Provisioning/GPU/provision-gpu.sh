@@ -78,12 +78,22 @@ OLD_MACHINESET_NAME=$(yq '.metadata.name' $MACHINESET_PATH )
 NEW_MACHINESET_NAME=${OLD_MACHINESET_NAME/worker/gpu}
 sed -i'' -e "s/$OLD_MACHINESET_NAME/$NEW_MACHINESET_NAME/g" $MACHINESET_PATH
 
-if [[ "$PROVIDER" == "GCP" && "$INSTANCE_TYPE" == *"nvidia-"*  ]] ; then
-  GPU_TYPE=$INSTANCE_TYPE
-  INSTANCE_TYPE="n1-standard-4"
-  PROVIDER_OVERLAY_DIR="$PROVIDER_OVERLAY_DIR/attach-gpu-to-n1"
-  sed -i'' -e "s/GPU_TYPE/$GPU_TYPE/g" $PROVIDER_OVERLAY_DIR/gpu.yaml
-  sed -i'' -e "s/GPU_COUNT/$GPU_COUNT/g" $PROVIDER_OVERLAY_DIR/gpu.yaml
+if [[ "$PROVIDER" == "GCP" ]] ; then
+  if [[ "$INSTANCE_TYPE" == *"nvidia-"* ]] ; then
+    # Direct GPU type specified (e.g., nvidia-tesla-t4)
+    GPU_TYPE=$INSTANCE_TYPE
+    INSTANCE_TYPE="n1-standard-4"
+    PROVIDER_OVERLAY_DIR="$PROVIDER_OVERLAY_DIR/attach-gpu-to-n1"
+    sed -i'' -e "s/GPU_TYPE/$GPU_TYPE/g" $PROVIDER_OVERLAY_DIR/gpu.yaml
+    sed -i'' -e "s/GPU_COUNT/$GPU_COUNT/g" $PROVIDER_OVERLAY_DIR/gpu.yaml
+  else
+    # Standard instance type (e.g., n1-standard-4) - attach default GPUs
+    echo "Configuring $GPU_COUNT GPU(s) for GCP instance $INSTANCE_TYPE"
+    # Use default GPU type (nvidia-tesla-t4) and configure GPU count
+    sed -i'' -e "s/GPU_COUNT/$GPU_COUNT/g" $PROVIDER_OVERLAY_DIR/gpu.yaml
+    # Set default GPU type if not specified
+    sed -i'' -e "s/GPU_TYPE/nvidia-tesla-t4/g" $PROVIDER_OVERLAY_DIR/gpu.yaml
+  fi
 fi
 # set the desired node flavor and node count in the kustomize overlay
 sed -i'' -e "s/INSTANCE_TYPE/$INSTANCE_TYPE/g" $PROVIDER_OVERLAY_DIR/gpu.yaml

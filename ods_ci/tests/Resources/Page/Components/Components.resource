@@ -86,6 +86,10 @@ Restore DSC Component State
             Set DSC Component Removed State And Wait For Completion    ${component}    ${deployment_name}    ${LABEL_SELECTOR}      ${namespace}
         ELSE IF    "${saved_state}" == "Unmanaged"
             Set DSC Component Unmanaged State And Wait For Completion    ${component}     ${deployment_name}    ${LABEL_SELECTOR}      ${namespace}
+        ELSE IF    "${saved_state}" == "${EMPTY}" or "${saved_state}" == ""
+            # If saved_state is empty, set component to Removed state as default
+            Log To Console    Component ${component} saved state was empty, setting to Removed state
+            Set DSC Component Removed State And Wait For Completion    ${component}    ${deployment_name}    ${LABEL_SELECTOR}      ${namespace}
         ELSE
             FAIL    Component ${component} state "${saved_state}" not supported at this time
         END

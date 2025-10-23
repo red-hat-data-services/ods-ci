@@ -400,6 +400,11 @@ Verify DSC Contains Correct Component Versions  # robocop: disable:too-long-test
     ${component_versions_json} =    Evaluate     json.loads("""${component_versions}""")    json
     ${components} =  List Directories In Directory    ${RHODS_OPERATOR_GIT_DIR}/prefetched-manifests
     FOR  ${c}  IN  @{components}
+        IF    "${c}" == "aipipelines"
+            # The name in the prefetched-manifests has been kept as datasciencepipelines, so need this workaround
+            # to make the test work
+            ${c} =  Set Variable     "datasciencepipelines"
+        END
         ${component_metadata_file} =  Set Variable
         ...     ${RHODS_OPERATOR_GIT_DIR}/prefetched-manifests/${c}/component_metadata.yaml
         ${file_exists} =  Run Keyword And Return Status    File Should Exist  ${component_metadata_file}

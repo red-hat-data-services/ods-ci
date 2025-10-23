@@ -28,18 +28,19 @@ Delete GPU Node In Self Managed AWS Cluster
 Create GPU Nodes
     [Documentation]    Create GPU nodes in both managed and self-managed clusters.
     ...    Parameters: cluster_type (managed/self-managed), instance_type (g4dn.xlarge),
-    ...    provider (AWS/GCP/AZURE/IBM), gpu_node_count (1), cluster_name (for managed).
+    ...    provider (AWS/GCP/AZURE/IBM), gpu_node_count (1), gpu_count (1), cluster_name (for managed).
     [Arguments]    ${cluster_type}=self-managed
     ...    ${instance_type}=g4dn.xlarge
     ...    ${provider}=AWS
     ...    ${gpu_node_count}=1
+    ...    ${gpu_count}=1
     ...    ${cluster_name}=${EMPTY}
     Set Log Level    Info
 
     IF    '${cluster_type}' == 'managed'
         Create GPU Nodes For Managed Cluster    ${cluster_name}    ${instance_type}    ${gpu_node_count}
     ELSE IF    '${cluster_type}' == 'self-managed'
-        Create GPU Nodes For Self Managed Cluster    ${instance_type}    ${provider}    ${gpu_node_count}
+        Create GPU Nodes For Self Managed Cluster    ${instance_type}    ${provider}    ${gpu_node_count}    ${gpu_count}
     ELSE
         Fail    Invalid cluster_type: ${cluster_type}. Must be 'managed' or 'self-managed'
     END
@@ -71,10 +72,9 @@ Create GPU Nodes For Managed Cluster
 
 Create GPU Nodes For Self Managed Cluster
     [Documentation]    Create GPU nodes for self-managed cluster using provision script
-    [Arguments]    ${instance_type}    ${provider}    ${gpu_node_count}
+    [Arguments]    ${instance_type}    ${provider}    ${gpu_node_count}    ${gpu_count}=1
 
-    # gpu_count is only relevant for GCP, defaults to 1 for other providers
-    ${gpu_count} =    Set Variable If    '${provider}' == 'GCP'    1    1
+    # For GCP, gpu_count controls GPUs per node; for others, it's ignored
     ${result} =    Run Process    sh    tasks/Resources/Provisioning/GPU/provision-gpu.sh
     ...    ${instance_type}
     ...    ${provider}

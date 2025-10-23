@@ -181,12 +181,18 @@ Verify RHODS Installation
        ELSE
             # If managed and RHOAI, we need to wait for the operator to create the DSCI and then patch it with
             # the monitoring info in case the new obs stack flag is enabled
-            Wait Until Keyword Succeeds    3 min    0 sec
+            Wait Until Keyword Succeeds    6 min    0 sec
             ...    Is Resource Present    DSCInitialization    ${DSCI_NAME}
             ...    ${OPERATOR_NAMESPACE}      ${IS_PRESENT}
-            Wait Until Keyword Succeeds    3 min    0 sec
+            Wait Until Keyword Succeeds    6 min    0 sec
             ...    Is Resource Present    Auth    auth
             ...    ${OPERATOR_NAMESPACE}      ${IS_PRESENT}
+            Wait Until Keyword Succeeds    6 min    0 sec
+            ...    Is Resource Present    GatewayConfig    default-gateway
+            ...    ${OPERATOR_NAMESPACE}      ${IS_PRESENT}
+            Wait Until Keyword Succeeds    6 min    0 sec
+            ...    Is Resource Present    HardwareProfile    default-profile
+            ...    ${APPLICATIONS_NAMESPACEE}      ${IS_PRESENT}
             ${enable_new_observability_stack} =    Is New Observability Stack Enabled
             IF    ${enable_new_observability_stack}
                     Patch DSCInitialization With Monitoring Info
@@ -200,12 +206,18 @@ Verify RHODS Installation
       IF  "${APPLICATIONS_NAMESPACE}" != "${DEFAULT_APPLICATIONS_NAMESPACE_RHOAI}" and "${APPLICATIONS_NAMESPACE}" != "${DEFAULT_APPLICATIONS_NAMESPACE_ODH}"
           Create DSCI With Custom Namespaces
       END
-      Wait Until Keyword Succeeds    3 min    0 sec
+      Wait Until Keyword Succeeds    6 min    0 sec
       ...    Is Resource Present    DSCInitialization    ${DSCI_NAME}
       ...    ${OPERATOR_NAMESPACE}      ${IS_PRESENT}
-      Wait Until Keyword Succeeds    3 min    0 sec
+      Wait Until Keyword Succeeds    6 min    0 sec
       ...    Is Resource Present    Auth    auth
       ...    ${OPERATOR_NAMESPACE}      ${IS_PRESENT}
+      Wait Until Keyword Succeeds    6 min    0 sec
+      ...    Is Resource Present    GatewayConfig    default-gateway
+      ...    ${OPERATOR_NAMESPACE}      ${IS_PRESENT}
+      Wait Until Keyword Succeeds    6 min    0 sec
+      ...    Is Resource Present    HardwareProfile    default-profile
+      ...    ${APPLICATIONS_NAMESPACE}      ${IS_PRESENT}
       ${enable_new_observability_stack} =    Is New Observability Stack Enabled
       IF    ${enable_new_observability_stack}
               Patch DSCInitialization With Monitoring Info

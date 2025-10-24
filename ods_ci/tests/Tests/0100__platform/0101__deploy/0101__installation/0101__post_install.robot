@@ -400,22 +400,26 @@ Verify DSC Contains Correct Component Versions  # robocop: disable:too-long-test
     ${component_versions_json} =    Evaluate     json.loads("""${component_versions}""")    json
     ${components} =  List Directories In Directory    ${RHODS_OPERATOR_GIT_DIR}/prefetched-manifests
     FOR  ${c}  IN  @{components}
-        IF    "${c}" == "aipipelines"
-            # The name in the prefetched-manifests has been kept as datasciencepipelines, so need this workaround
-            # to make the test work
-            ${c} =  Set Variable     "datasciencepipelines"
-        END
         ${component_metadata_file} =  Set Variable
         ...     ${RHODS_OPERATOR_GIT_DIR}/prefetched-manifests/${c}/component_metadata.yaml
         ${file_exists} =  Run Keyword And Return Status    File Should Exist  ${component_metadata_file}
         IF  ${file_exists}
-            IF  $component_versions_json[$c] == {} or $component_versions_json[$c]["managementState"] != "Managed"
-                Log  ${c} is not managed, skipping version check
+            IF    "${c}" == "datasciencepipelines"
+                ${cmp} =  Set Variable   aipipelines
+            ELSE
+                ${cmp} =  Set Variable   ${c}
+            END
+            IF  $cmp not in $component_versions_json
+                Log  ${cmp} present in the operator manifests, but not present in the DSC definition, hence skipping
+                CONTINUE
+            END
+            IF  $component_versions_json[$cmp] == {} or $component_versions_json[$cmp]["managementState"] != "Managed"
+                Log  ${cmp} is not managed, skipping version check
                 CONTINUE
             END
             ${component_metadata_content} =  Get File  ${component_metadata_file}
             ${component_metadata} =    Evaluate     yaml.safe_load("""${component_metadata_content}""")    yaml
-            Lists Should Be Equal    ${component_versions_json}[${c}][releases]   ${component_metadata}[releases]
+            Lists Should Be Equal    ${component_versions_json}[${cmp}][releases]   ${component_metadata}[releases]
             ...    msg=Component versions in DSC don't match component metadata in repo
         ELSE
             Log  ${c} does not provide component_metadata.yaml

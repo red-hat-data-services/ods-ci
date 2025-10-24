@@ -1,14 +1,14 @@
 - op: add
   path: /spec/template/spec/providerSpec/value/gpus
   value:
-   - count: GPU_COUNT
-     type: GPU_TYPE
+   - count: 2
+     type: nvidia-tesla-v100
 - op: add
   path: /spec/template/spec/providerSpec/value/onHostMaintenance
   value: Terminate
 - op: replace
   path: /spec/template/spec/providerSpec/value/machineType
-  value: INSTANCE_TYPE
+  value: n1-standard-4
 - op: replace
   path: /spec/replicas
-  value: GPU_NODE_COUNT
+  value: 2

@@ -89,9 +89,10 @@ if [[ "$PROVIDER" == "GCP" ]] ; then
   else
     # Standard instance type (e.g., n1-standard-4) - attach default GPUs
     echo "Configuring $GPU_COUNT GPU(s) for GCP instance $INSTANCE_TYPE"
-    # Use default GPU type (nvidia-tesla-t4) and configure GPU count
+    # Use the attach-gpu-to-n1 overlay for GPU configuration
+    PROVIDER_OVERLAY_DIR="$PROVIDER_OVERLAY_DIR/attach-gpu-to-n1"
+    # Set default GPU type (nvidia-tesla-t4) and configure GPU count
     sed -i'' -e "s/GPU_COUNT/$GPU_COUNT/g" $PROVIDER_OVERLAY_DIR/gpu.yaml
-    # Set default GPU type if not specified
     sed -i'' -e "s/GPU_TYPE/nvidia-tesla-t4/g" $PROVIDER_OVERLAY_DIR/gpu.yaml
   fi
 fi

@@ -17,7 +17,7 @@ Verify Auth Crd
     ...         RHOAIENG-18846
     Get User Groups From Auth Cr And Check Rolebinding Exists       adminGroups     rolebinding     admingroup-rolebinding
     Get User Groups From Auth Cr And Check Rolebinding Exists       adminGroups     clusterrolebinding     admingroupcluster-rolebinding
-    Get User Groups From Auth Cr And Check Rolebinding Exists       allowedGroups   rolebinding     allowedgroup-rolebinding
+    Get User Groups From Auth Cr And Check Rolebinding Exists       allowedGroups   clusterrolebinding     allowedgroupcluster-rolebinding
 
 
 *** Keywords ***

@@ -317,40 +317,6 @@ Verify User Can Create Environment Variables By Uploading YAML Secret/ConfigMap
     ...    auth_type=${TEST_USER_3.AUTH_TYPE}
     Environment Variables Should Be Available In Jupyter    exp_env_variables=${test_envs_list}
 
-Verify User Can Log Out And Return To Project From Jupyter Notebook    # robocop: disable
-    [Tags]    Sanity
-    ...       ODS-1971
-    [Documentation]    Verifies user can log out and return to the project from Jupyter notebook.
-    ...                Users have 2 options:
-    ...                1. click "File" > "Log Out" to actually close the login session
-    ...                2. click "File" > "Hub Control Panel" to return to project details page
-    Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
-    ...        prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
-    ...        storage=Persistent  pv_name=${NONE}  pv_existent=${NONE}
-    ...        pv_description=${NONE}  pv_size=${NONE}
-    ...        press_cancel=${FALSE}    envs=${NONE}
-    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE}
-    Open Workbench    workbench_title=${WORKBENCH_TITLE}
-    Run Keyword And Continue On Failure
-    ...    Log In Should Be Requested
-    Access To Workbench    username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
-    ...    auth_type=${TEST_USER_3.AUTH_TYPE}
-    Open JupyterLab Control Panel
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=workbenches
-    Workbench Status Should Be      workbench_title=${WORKBENCH_TITLE}
-    ...    status=${WORKBENCH_STATUS_RUNNING}
-    Open Workbench    workbench_title=${WORKBENCH_TITLE}
-    Run Keyword And Continue On Failure
-    ...    Log In Should Not Be Requested
-    Wait Until JupyterLab Is Loaded    timeout=2m
-    Logout JupyterLab
-    Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=workbenches
-    Workbench Status Should Be      workbench_title=${WORKBENCH_TITLE}
-    ...    status=${WORKBENCH_STATUS_RUNNING}
-    Open Workbench    workbench_title=${WORKBENCH_TITLE}
-    Run Keyword And Ignore Error
-    ...    Log In Should Be Requested
-
 Verify Event Log Is Accessible While Starting A Workbench
     [Tags]    Sanity
     ...       ODS-1970

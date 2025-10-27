@@ -95,7 +95,7 @@ Spawn Minimal Image
     [Documentation]    Spawn a minimal image
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
-    Spawn Notebook With Arguments  image=minimal-notebook  size=Small
+    Spawn Notebook With Arguments  image=minimal-notebook
 
 Get Notebook Culler Pod Name
     [Documentation]    Finds the current culler pod and returns the name

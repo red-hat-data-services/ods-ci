@@ -143,10 +143,10 @@ Verify That CUDA Build Chain Succeeds
     ...       Tier1
     ...       OpenDataHub
     ...       ODS-316    ODS-481
-    Verify Image Can Be Spawned    image=pytorch  size=Small
+    Verify Image Can Be Spawned    image=pytorch
     ...    username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
     ...    auth_type=${TEST_USER_3.AUTH_TYPE}
-    Verify Image Can Be Spawned    image=tensorflow  size=Small
+    Verify Image Can Be Spawned    image=tensorflow
     ...    username=${TEST_USER.USERNAME}    password=${TEST_USER.PASSWORD}
     ...    auth_type=${TEST_USER.AUTH_TYPE}
     [Teardown]    CUDA Teardown

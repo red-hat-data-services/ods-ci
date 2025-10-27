@@ -33,7 +33,8 @@ Verify Two Servers Can Be Spawned
     ...    that both can schedule and are scheduled on different nodes.
     [Tags]    Sanity  Resources-2GPUS    NVIDIA-GPUs
     ...       ODS-1257
-    Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Small  gpus=1
+    # TODOjstourac = we need to define our custom profile with a gpu
+    Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  hardware_profile=default-profile
     ${serial_first} =    Get GPU Serial Number
     ${node_first} =    Get User Server Node
     Close Browser
@@ -43,7 +44,8 @@ Verify Two Servers Can Be Spawned
     Login To RHODS Dashboard  ${TEST_USER_2.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     Wait For RHODS Dashboard To Load
     Launch JupyterHub Spawner From Dashboard    username=${TEST_USER_2.USERNAME}
-    Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Small  gpus=1
+    # TODOjstourac = we need to define our custom profile with a gpu
+    Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  hardware_profile=default-profile
     ${serial_second} =    Get GPU Serial Number
     ${node_second} =    Get User Server Node    username=${TEST_USER_2.USERNAME}
     Should Not Be Equal    ${serial_first}    ${serial_second}

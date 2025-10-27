@@ -55,7 +55,7 @@ Gather Notebook data
 
 Get the List of Plugins from RHODS notebook images
   FOR  ${image}  IN  @{notebook_images}
-      Spawn Notebook With Arguments  image=${image}   size=Small
+      Spawn Notebook With Arguments  image=${image}
       #${notebook_pod_name}         Get User Notebook Pod Name         ${TEST_USER.USERNAME}
       ${temp_data}      Get Install Plugin list from JupyterLab
       ${py_version}    Run   oc exec ${notebook_pod_name} -n ${NOTEBOOKS_NAMESPACE} -- python --version

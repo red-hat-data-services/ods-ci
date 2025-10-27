@@ -29,4 +29,4 @@ Verify VSCode Image Suite Setup
     [Documentation]    Suite Setup, spawns vscode image
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
-    Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Small
+    Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}

@@ -15,8 +15,8 @@ Library   OpenShiftLibrary
 
 *** Variables ***
 ${KFNBC_SPAWNER_HEADER_TITLE} =    Start a basic workbench
-${JUPYTERHUB_DROPDOWN_XPATH} =    //button[@aria-label="Options menu"]
-${KFNBC_CONTAINER_SIZE_TITLE} =    //div[.="Deployment size"]/..//span[.="Container Size"]
+${JUPYTERHUB_DROPDOWN_XPATH} =    //button[@data-testid="hardware-profile-select"]
+${KFNBC_HARDWARE_PROFILE_TITLE} =    //div[.="Deployment size"]/..//span[.="Hardware profile"]
 ${KFNBC_CONTAINER_SIZE_DROPDOWN_XPATH} =  //label[@for="modal-notebook-container-size"]/../..//button[@aria-label="Options menu"]
 ${KFNBC_ACCELERATOR_HEADER_XPATH} =    //span[text()='Accelerator']
 ${KFNBC_ACCELERATOR_DROPDOWN_XPATH} =    //label[@for='modal-notebook-accelerator']/ancestor::div[@class='pf-v6-c-form__group']/descendant::button
@@ -44,9 +44,8 @@ JupyterHub Spawner Is Visible
     RETURN  ${spawner_visible}
 
 Wait Until JupyterHub Spawner Is Ready
-    [Documentation]  Waits for the spawner page to be ready using the server size dropdown
-    Wait Until Page Contains Element    xpath:${KFNBC_CONTAINER_SIZE_TITLE}    timeout=15s
-    Wait Until Page Contains Element    xpath:${JUPYTERHUB_DROPDOWN_XPATH}\[1]    timeout=15s
+    [Documentation]  Waits for the spawner page to be ready using the hardware profile section present
+    Wait Until Page Contains Element    xpath:${KFNBC_HARDWARE_PROFILE_TITLE}    timeout=15s
 
 Select Notebook Image
     [Documentation]    Selects a notebook image based on a partial match of ${notebook_image} argument
@@ -95,14 +94,33 @@ Verify Version Dropdown Is Present
     Page Should Contain Element    xpath=${KFNBC_IMAGE_DROPDOWN}//label//div[contains(string(), "${PREVIOUS_NOTEBOOK_VER}")]
     Click Element    xpath=${KFNBC_IMAGE_ROW}/../..//button[.="Versions"]
 
-Select Container Size
-    [Documentation]  Selects the container size based on the ${container_size} argument
-    [Arguments]  ${container_size}
-    # Expand List
-    Wait Until Page Contains    Container Size    timeout=30
-    ...    error=Container size selector is not present in JupyterHub Spawner
-    Click Element  xpath:${JUPYTERHUB_DROPDOWN_XPATH}\[1]
-    Click Element  xpath://span[.="${container_size}"]/../..
+Select Hardware Profile
+    [Documentation]  Selects the workbench hardware profile based on the given argument
+    [Arguments]  ${hardware_profile}
+    # Wait for Hardware profile section to be present
+    Wait Until Page Contains    Hardware profile    timeout=30
+    ...    error=Hardware profile selector is not present in JupyterHub Spawner
+
+    # Wait for the hardware profile dropdown to be present
+    Wait Until Page Contains Element    xpath:${JUPYTERHUB_DROPDOWN_XPATH}    timeout=10
+
+    # Check if the dropdown is disabled (only one profile available)
+    ${is_disabled} =    Run Keyword And Return Status    Element Should Be Disabled    xpath:${JUPYTERHUB_DROPDOWN_XPATH}
+
+    # //button[@data-testid="hardware-profile-select"][.="default-profile"]
+    IF    ${is_disabled}
+        # If disabled, verify the current profile matches the expected one
+        ${current_profile} =    Get Text    xpath:${JUPYTERHUB_DROPDOWN_XPATH}
+        Should Be Equal    ${current_profile}    ${hardware_profile}
+        ...    msg=Expected hardware profile '${hardware_profile}' but found '${current_profile}'. The dropdown is disabled with only one profile available.
+        Log    Hardware profile dropdown is disabled. Current profile: ${current_profile}
+    ELSE
+        # If enabled, click dropdown and select the profile
+        Element Should Be Enabled    xpath:${JUPYTERHUB_DROPDOWN_XPATH}
+        Click Element    xpath:${JUPYTERHUB_DROPDOWN_XPATH}
+        Wait Until Page Contains Element    xpath://span[.="${hardware_profile}"]/../..    timeout=10
+        Click Element    xpath://span[.="${hardware_profile}"]/../..
+    END
 
 Wait Until Accelerator Dropdown Exists
     [Documentation]    Verifies that the dropdown to select the Accelerator exists
@@ -313,8 +331,8 @@ Spawn Notebook With Arguments  # robocop: disable
     ...              Environment variables can be passed in as kwargs by creating a dictionary beforehand
     ...              e.g. &{test-dict}  Create Dictionary  name=robot  password=secret
     ...              ${version} controls if the default or previous version is selected (default | previous)
-    [Arguments]  ${retries}=1  ${retries_delay}=0 seconds  ${image}=science-notebook  ${size}=Small
-    ...    ${spawner_timeout}=600 seconds  ${gpus}=0  ${refresh}=${False}  ${same_tab}=${True}
+    [Arguments]  ${retries}=1  ${retries_delay}=0 seconds  ${image}=science-notebook  ${hardware_profile}=default-profile
+    ...    ${spawner_timeout}=600 seconds  ${refresh}=${False}  ${same_tab}=${True}
     ...    ${username}=${TEST_USER.USERNAME}  ${password}=${TEST_USER.PASSWORD}  ${auth_type}=${TEST_USER.AUTH_TYPE}
     ...    ${version}=default    &{envs}
     ${spawn_fail} =  Set Variable  True
@@ -322,21 +340,7 @@ Spawn Notebook With Arguments  # robocop: disable
         ${spawner_ready} =    Run Keyword And Return Status    Wait Until JupyterHub Spawner Is Ready
         IF  ${spawner_ready}==True
             Select Notebook Image    ${image}    ${version}
-            Select Container Size  ${size}
-            ${gpu_visible} =    Run Keyword And Return Status    Wait Until Accelerator Dropdown Exists
-            IF  ${gpu_visible}==True and ${gpus}>0
-                Set GPU Accelerator
-                Set Number Of Required Accelerators  ${gpus}
-            ELSE IF  ${gpu_visible}==False and ${gpus}>0
-                IF    ${index} < ${retries}
-                    Sleep    30s    reason=Wait for GPU to free up
-                    Reload Page
-                    Wait Until JupyterHub Spawner Is Ready
-                    CONTINUE
-                ELSE
-                    Fail  GPUs required but not available
-                END
-            END
+            Select Hardware Profile    ${hardware_profile}
             IF   ${refresh}
                 Reload Page
                 Capture Page Screenshot    reload.png
@@ -516,11 +520,6 @@ User Is Not JupyterHub Admin
    Wait Until JupyterHub Spawner Is Ready
    Page Should Not Contain  Administration
 
-Logout Via Button
-   [Documentation]  Logs out from JupyterHub
-   Click Element  xpath://a[@id='logout']
-   Wait Until Page Contains  Successfully logged out.
-
 Login Via Button
    [Documentation]  This takes you back to the login page
    ...  And you will need to use the `Login To Jupyterhub`
@@ -538,7 +537,7 @@ Maybe Handle Server Not Running Page
 Get Container Size
    [Documentation]   This keyword capture the size from JH spawner page based on container size
    [Arguments]  ${container_size}
-   Wait Until Page Contains Element    ${KFNBC_CONTAINER_SIZE_TITLE}
+   Wait Until Page Contains Element    ${KFNBC_HARDWARE_PROFILE_TITLE}
    ...    timeout=30   error=Container size selector is not present in KFNBC Spawner
    Click Element    xpath:${KFNBC_CONTAINER_SIZE_DROPDOWN_XPATH}
    Wait Until Page Contains Element    xpath://button[@role="option"]/span[.="${container_size}"]  timeout=10
@@ -629,14 +628,14 @@ Handle Bad Gateway Page
 
 Verify Image Can Be Spawned
     [Documentation]    Verifies that an image with given arguments can be spawned
-    [Arguments]    ${retries}=1    ${retries_delay}=0 seconds    ${image}=science-notebook    ${size}=Small
-    ...    ${spawner_timeout}=600 seconds    ${gpus}=0    ${refresh}=${False}
+    [Arguments]    ${retries}=1    ${retries_delay}=0 seconds    ${image}=science-notebook    ${hardware_profile}=default-profile
+    ...    ${spawner_timeout}=600 seconds    ${refresh}=${False}
     ...    ${username}=${TEST_USER.USERNAME}    ${password}=${TEST_USER.PASSWORD}
     ...    ${auth_type}=${TEST_USER.AUTH_TYPE}    &{envs}
     Begin Web Test    username=${username}    password=${password}    auth_type=${auth_type}
     Launch JupyterHub Spawner From Dashboard
-    Spawn Notebook With Arguments    retries=${retries}   retries_delay=${retries_delay}    image=${image}    size=${size}
-    ...    spawner_timeout=${spawner_timeout}    gpus=${gpus}    refresh=${refresh}
+    Spawn Notebook With Arguments    retries=${retries}   retries_delay=${retries_delay}    image=${image}    hardware_profile=${hardware_profile}
+    ...    spawner_timeout=${spawner_timeout}    refresh=${refresh}
     ...    username=${username}    password=${password}
     ...    auth_type=${auth_type}  envs=&{envs}
     End Web Test    username=${username}

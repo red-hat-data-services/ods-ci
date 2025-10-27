@@ -244,7 +244,7 @@ if ${SET_RHODS_URLS}
         echo "INFO: getting RHODS URLs from the cluster as per --set-urls-variables"
         ocp_console=$(oc whoami --show-console)
         # ocp_console="https://$(oc get route console -n openshift-console -o jsonpath='{.spec.host}{"\n"}')"
-        rhods_dashboard="https://$(oc get route rhods-dashboard -n redhat-ods-applications -o jsonpath='{.spec.host}{"\n"}')"
+        rhods_dashboard="$(oc get consolelinks -l "platform.opendatahub.io/part-of=dashboard" -o yaml | yq '.items[0].spec.href')"
         api_server=$(oc whoami --show-server)
         TEST_VARIABLES="${TEST_VARIABLES} --variable OCP_CONSOLE_URL:${ocp_console} --variable ODH_DASHBOARD_URL:${rhods_dashboard}"
         echo "OCP Console URL set to: ${ocp_console}"

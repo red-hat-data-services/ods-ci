@@ -291,7 +291,7 @@ class OpenshiftClusterManager:
         cluster_info["OCP_API_URL"] = api_url
         odh_dashboard_url = console_url.replace(
             "console-openshift-console",
-            "rhods-dashboard-redhat-ods-applications",
+            "data-science-gateway",
         )
         cluster_info["ODH_DASHBOARD_URL"] = odh_dashboard_url
         # TODO: Avoid this hard coding and call

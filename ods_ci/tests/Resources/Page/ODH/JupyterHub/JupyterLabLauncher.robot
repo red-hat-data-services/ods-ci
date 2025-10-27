@@ -101,20 +101,12 @@ Scroll At The End Of The Notebook
 Select Empty JupyterLab Code Cell
   Click Element  //div[contains(@class,"jp-mod-noOutputs jp-Notebook-cell")]
 
-Start JupyterLab Notebook Server
-  Open JupyterHub Control Panel
-  Click Link  start
-
-Open JupyterLab Control Panel
-  Open With JupyterLab Menu  File  Hub Control Panel
-  Switch Window    NEW
-
 Stop JupyterLab Notebook Server
-  Open JupyterLab Control Panel
+  Go To  ${ODH_DASHBOARD_URL}
+  Wait For RHODS Dashboard To Load
+  Menu.Navigate To Page    Applications    Enabled
+  Launch Jupyter From RHODS Dashboard Link
   Handle Control Panel
-
-Logout JupyterLab
-  Open With JupyterLab Menu  File  Log Out
 
 Run Cell And Check For Errors
     [Arguments]    ${input}    ${timeout}=120seconds

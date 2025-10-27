@@ -23,6 +23,3 @@ Stop Notebook Server
    Click Element  stop
    Wait Until Element Is Not Visible   stop  3 minute
    Wait Until Page Contains  Start My Server  1 minute
-
-Click Logout
-   Click Button  Logout

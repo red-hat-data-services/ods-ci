@@ -40,7 +40,7 @@ Verify Tensorboard Is Accessible
     [Tags]  Tier1
     ...     ODS-1414
     Close Previous Server
-    Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Small
+    Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  hardware_profile=default-profile
     Run Keyword And Ignore Error  Clone Git Repository And Run  https://github.com/redhat-rhods-qe/ods-ci-notebooks-main
     ...    ods-ci-notebooks-main/notebooks/500__jupyterhub/tensorboard/pytorch/tensorboard_profiling_pytorch.ipynb  10m
     Wait Until Page Contains Element    xpath:${TENSORBOARD_FRAME_XPATH}    timeout=30s
@@ -57,7 +57,8 @@ Verify PyTorch Image Can Be Spawned With GPU
     Stop JupyterLab Notebook Server
     Fix Spawner Status
     Wait Until JupyterHub Spawner Is Ready
-    Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Small  gpus=1
+    # TODOjstourac = we need to define our custom profile with a gpu
+    Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  hardware_profile=default-profile
 
 Verify PyTorch Image Includes Expected CUDA Version
     [Documentation]    Checks CUDA version
@@ -86,7 +87,8 @@ Verify Previous PyTorch Notebook Image With GPU
     ...       Resources-GPU    NVIDIA-GPUs
     ...       ODS-2129
     [Setup]    N-1 PyTorch Setup
-    Spawn Notebook With Arguments    image=${NOTEBOOK_IMAGE}    size=Small    gpus=1    version=previous
+    # TODOjstourac = we need to define our custom profile with a gpu
+    Spawn Notebook With Arguments    image=${NOTEBOOK_IMAGE}    hardware_profile=default-profile    version=previous
     Verify Installed CUDA Version    ${EXPECTED_CUDA_VERSION_N_1}
     Verify PyTorch Can See GPU
     Run Repo And Clean    https://github.com/lugi0/notebook-benchmarks    notebook-benchmarks/pytorch/fgsm_tutorial.ipynb
@@ -102,7 +104,7 @@ Verify PyTorch Image Suite Setup
     END
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
-    Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Small
+    Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  hardware_profile=default-profile
 
 Close Previous Server
     [Documentation]  Closes previous server and goes back to Spawner

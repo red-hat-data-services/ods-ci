@@ -38,7 +38,7 @@ Launch Notebook And Go Back To Control Panel Window
     ...    back to the dashboard control panel
     ${handle} =    Switch Window    CURRENT
     Select Notebook Image    minimal-notebook
-    Select Container Size     Small
+    Select Hardware Profile    default-profile
     Spawn Notebook    same_tab=${False}
     Switch Window    ${handle}
 

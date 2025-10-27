@@ -45,7 +45,7 @@ Can Spawn Notebook
     Fix Spawner Status
     Select Notebook Image  science-notebook
     Select Notebook Image  minimal-notebook
-    Select Container Size  Small
+    Select Hardware Profile    default-profile
     Remove All Spawner Environment Variables
     # Cannot set number of required GPUs on clusters without GPUs anymore
     #Set Number of required GPUs  9
@@ -110,13 +110,14 @@ Start New Pytorch Build
 Verify Notebook Spawner Modal Does Not Get Stuck When Requesting Too Many Resources To Spawn Server
    [Documentation]    Try spawning a server size for which there's not enough resources
    ...    spawner modal should show an error instead of being stuck waiting for resources
-   Select Container Size    X Large
+   # TODO: we need to patch the odh_jh_global_profile_sh script to create appropriate custom Hardware profile for us
+   Select Hardware Profile    X Large
    Click Button    Start workbench
    # This could fail because of https://bugzilla.redhat.com/show_bug.cgi?id=2132043
    Wait Until Page Contains    Insufficient resources to start    timeout=1min
    ...    error=Modal did not fail within 1 minute
    Click Button    Cancel
-   Select Container Size    Small
+   Select Hardware Profile    default-profile
 
 Verify Unsupported Environment Variable Is Not Allowed
     [Documentation]    Test an unsupported environment variable name

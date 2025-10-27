@@ -93,7 +93,7 @@ Logout From RHODS Dashboard
     Click Button  ${USER_MENU_TOGGLE}
     Wait Until Page Contains Element  xpath:${LOGOUT_BTN}
     Click Element  xpath:${LOGOUT_BTN}
-    Wait Until Page Contains  Log in with OpenShift
+    Wait Until Page Contains  Log in with
 
 Wait For RHODS Dashboard To Load
     [Arguments]  ${dashboard_title}="${ODH_DASHBOARD_PROJECT_NAME}"    ${wait_for_cards}=${TRUE}

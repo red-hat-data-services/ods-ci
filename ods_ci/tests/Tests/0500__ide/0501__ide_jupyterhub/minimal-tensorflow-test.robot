@@ -41,7 +41,7 @@ Verify Tensorboard Is Accessible
     [Tags]  Tier1
     ...     ODS-1413
     Close Previous Server
-    Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Small
+    Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  hardware_profile=default-profile
     Run Keyword And Ignore Error  Clone Git Repository And Run  https://github.com/redhat-rhods-qe/ods-ci-notebooks-main
     ...    ods-ci-notebooks-main/notebooks/500__jupyterhub/tensorboard/tensorflow/tensorboard_profiling_tensorflow.ipynb  10m
     Wait Until Page Contains Element    xpath:${TENSORBOARD_FRAME_XPATH}    timeout=30s
@@ -55,7 +55,8 @@ Verify Tensorflow Image Can Be Spawned With GPU
     ...     Resources-GPU    NVIDIA-GPUs
     ...     ODS-1151
     Close Previous Server
-    Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Small  gpus=1
+    # TODOjstourac = we need to define our custom profile with a gpu
+    Spawn Notebook With Arguments    image=${NOTEBOOK_IMAGE}    hardware_profile=default-profile
 
 Verify Tensorflow Image Includes Expected CUDA Version
     [Documentation]    Checks CUDA version
@@ -84,7 +85,8 @@ Verify Previous Tensorflow Notebook Image With GPU
     ...       Resources-GPU    NVIDIA-GPUs
     ...       ODS-2130
     [Setup]    N-1 Tensorflow Setup
-    Spawn Notebook With Arguments    image=${NOTEBOOK_IMAGE}    size=Small    gpus=1    version=previous
+    # TODOjstourac = we need to define our custom profile with a gpu
+    Spawn Notebook With Arguments    image=${NOTEBOOK_IMAGE}    hardware_profile=default-profile    version=previous
     Verify Installed CUDA Version    ${EXPECTED_CUDA_VERSION_N_1}
     Verify Tensorflow Can See GPU
     Run Repo And Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/tensorflow/GPU-no-warnings.ipynb
@@ -100,7 +102,7 @@ Verify Tensorflow Image Suite Setup
     END
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
-    Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Small
+    Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  hardware_profile=default-profile
 
 Close Previous Server
     [Documentation]  Closes previous server and goes back to Spawner

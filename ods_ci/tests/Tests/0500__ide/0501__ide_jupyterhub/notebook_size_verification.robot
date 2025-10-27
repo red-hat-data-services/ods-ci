@@ -73,12 +73,12 @@ Dashboard Test Teardown
 
 Spawn Notebook And Verify Size
     [Documentation]    Capture and compare CPU/memory resource
-    ...    between JH and notebook pod
+    ...    between JH and notebook pod  TODOjstourac
     [Arguments]    ${size}=${DEFAULT_SIZE}    ${NOTEBOOK_SIZE}=${NOTEBOOK_SIZE}
     FOR    ${container_size}    IN    @{NOTEBOOK_SIZE}
         Reload Page
         ${jh_container_size}    Get Container Size    ${container_size}
-        Spawn Notebook With Arguments    image=minimal-gpu    size=${container_size}
+        Spawn Notebook With Arguments    image=minimal-gpu    hardware_profile=${container_size}
         ${notebook_pod_name}    Get User Notebook Pod Name    ${TEST_USER.USERNAME}
         ${status}    Run
         ...    oc get pods -n ${NAMESPACE} ${notebook_pod_name} -o jsonpath='{.spec.containers[0].resources}'

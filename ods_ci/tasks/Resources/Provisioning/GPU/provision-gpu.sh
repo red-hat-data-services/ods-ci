@@ -22,6 +22,9 @@ INSTANCE_TYPE=${1:-"g4dn.xlarge"}
 PROVIDER=${2:-"AWS"}
 GPU_COUNT=${3:-"1"}
 GPU_NODE_COUNT=${4:-"1"}
+
+# Save original values for validation
+ORIGINAL_INSTANCE_TYPE=$INSTANCE_TYPE
 KUSTOMIZE_PATH="$PWD/tasks/Resources/Provisioning/Hive/GPU"
 MACHINESET_PATH="$KUSTOMIZE_PATH/base/source-machineset.yaml"
 PROVIDER_OVERLAY_DIR=$KUSTOMIZE_PATH/overlays/$PROVIDER
@@ -64,13 +67,13 @@ if [[ -n "$EXISTING_GPU_MACHINESET" ]] ; then
       CURRENT_GPU_COUNT=$(oc get machineset.machine.openshift.io $EXISTING_GPU_MACHINESET -n openshift-machine-api -o json 2>/dev/null | jq -r '.spec.template.spec.providerSpec.value.gpus[0].count // "0"')
       CURRENT_GPU_TYPE=$(oc get machineset.machine.openshift.io $EXISTING_GPU_MACHINESET -n openshift-machine-api -o json 2>/dev/null | jq -r '.spec.template.spec.providerSpec.value.gpus[0].type // "none"')
       
-      # Determine expected GPU type based on input
-      if [[ "$INSTANCE_TYPE" == *"nvidia-"* ]]; then
-        EXPECTED_GPU_TYPE=$INSTANCE_TYPE
+      # Determine expected GPU type based on original input
+      if [[ "$ORIGINAL_INSTANCE_TYPE" == *"nvidia-"* ]]; then
+        EXPECTED_GPU_TYPE=$ORIGINAL_INSTANCE_TYPE
         EXPECTED_INSTANCE_TYPE="n1-standard-4"
       else
         EXPECTED_GPU_TYPE="nvidia-tesla-t4"
-        EXPECTED_INSTANCE_TYPE=$INSTANCE_TYPE
+        EXPECTED_INSTANCE_TYPE=$ORIGINAL_INSTANCE_TYPE
       fi
       
       echo "Current config: Instance=$CURRENT_INSTANCE_TYPE, GPU=$CURRENT_GPU_TYPE, GPU_Count=$CURRENT_GPU_COUNT"
@@ -86,8 +89,8 @@ if [[ -n "$EXISTING_GPU_MACHINESET" ]] ; then
       fi
     else
       # For non-GCP providers, check instance type
-      if [[ "$CURRENT_INSTANCE_TYPE" != "$INSTANCE_TYPE" ]]; then
-        echo "ERROR: Existing MachineSet has different instance type ($CURRENT_INSTANCE_TYPE vs $INSTANCE_TYPE)"
+      if [[ "$CURRENT_INSTANCE_TYPE" != "$ORIGINAL_INSTANCE_TYPE" ]]; then
+        echo "ERROR: Existing MachineSet has different instance type ($CURRENT_INSTANCE_TYPE vs $ORIGINAL_INSTANCE_TYPE)"
         NEEDS_RECREATION=true
       fi
     fi
@@ -168,13 +171,13 @@ if [[ "$PROVIDER" == "GCP" ]]; then
   
   echo "Created MachineSet config: Instance=$CREATED_INSTANCE_TYPE, GPU=$CREATED_GPU_TYPE, GPU_Count=$CREATED_GPU_COUNT, Replicas=$GPU_NODE_COUNT"
   
-  # Determine expected values
-  if [[ "$INSTANCE_TYPE" == *"nvidia-"* ]]; then
-    EXPECTED_GPU_TYPE=$INSTANCE_TYPE
+  # Determine expected values based on original input
+  if [[ "$ORIGINAL_INSTANCE_TYPE" == *"nvidia-"* ]]; then
+    EXPECTED_GPU_TYPE=$ORIGINAL_INSTANCE_TYPE
     EXPECTED_INSTANCE_TYPE="n1-standard-4"
   else
     EXPECTED_GPU_TYPE="nvidia-tesla-t4"
-    EXPECTED_INSTANCE_TYPE=$INSTANCE_TYPE
+    EXPECTED_INSTANCE_TYPE=$ORIGINAL_INSTANCE_TYPE
   fi
   
   # Validate configuration

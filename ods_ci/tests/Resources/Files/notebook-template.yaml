@@ -1,0 +1,62 @@
+apiVersion: kubeflow.org/v1
+kind: Notebook
+metadata:
+  name: ${NOTEBOOK_CR_NAME}
+  namespace: ${NOTEBOOKS_NAMESPACE}
+  labels:
+    app: ${NOTEBOOK_CR_NAME}
+    opendatahub.io/dashboard: 'true'
+    opendatahub.io/odh-managed: 'true'
+    opendatahub.io/user: ${SAFE_USERNAME}
+  annotations:
+    notebooks.opendatahub.io/inject-oauth: 'true'
+    opendatahub.io/username: ${TEST_USER.USERNAME}
+spec:
+  template:
+    spec:
+      containers:
+      - name: ${NOTEBOOK_CR_NAME}
+        image: image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/s2i-minimal-notebook:2025.1
+        ports:
+        - containerPort: 8888
+          name: notebook-port
+          protocol: TCP
+        env:
+        - name: JUPYTER_IMAGE
+          value: image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/s2i-minimal-notebook:2025.1
+        - name: NOTEBOOK_ARGS
+          value: "--ServerApp.port=8888 --ServerApp.token='' --ServerApp.password='' --ServerApp.base_url=/notebook/${NOTEBOOKS_NAMESPACE}/${NOTEBOOK_CR_NAME} --ServerApp.quit_button=False"
+        resources:
+          limits:
+            cpu: '1'
+            memory: 2Gi
+          requests:
+            cpu: '500m'
+            memory: 1Gi
+      - name: oauth-proxy
+        image: registry.redhat.io/openshift4/ose-oauth-proxy-rhel9@sha256:ca21e218e26c46e3c63d926241846f8f307fd4a586cc4b04147da49af6018ef5
+        ports:
+        - containerPort: 8443
+          name: oauth-proxy
+          protocol: TCP
+        args:
+        - '--provider=openshift'
+        - '--https-address=:8443'
+        - '--http-address='
+        - '--openshift-service-account=${NOTEBOOK_CR_NAME}'
+        - '--upstream=http://localhost:8888'
+        - '--upstream-ca=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt'
+        - '--email-domain=*'
+        - '--skip-provider-button'
+        - '--client-id=${NOTEBOOK_CR_NAME}-${NOTEBOOKS_NAMESPACE}-oauth-client'
+        - '--client-secret-file=/etc/oauth/client/secret'
+        - '--scope=user:info user:check-access'
+        resources:
+          limits:
+            cpu: 100m
+            memory: 64Mi
+          requests:
+            cpu: 100m
+            memory: 64Mi
+      serviceAccountName: ${NOTEBOOK_CR_NAME}
+      enableServiceLinks: false

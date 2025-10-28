@@ -306,23 +306,7 @@ Verify Notebooks Network Policies For All Platforms
     ${platform_type} =    Detect Platform Type
     Create Notebook Programmatically And Wait For Ready
     ${CR_name} =    Get User CR Notebook Name    username=${TEST_USER.USERNAME}
-    
-    # Always verify network policy existence (to confirm they exist or don't exist as expected)
-    Verify Network Policies Exist    ${CR_name}
-    
-    # Verify network policy configurations if any policies exist
-    # Note: Some RHOAI-Managed clusters may create network policies, others may not
-    ${ctrl_policy_exists} =    Run Keyword And Return Status    Run
-    ...    oc get networkpolicy ${CR_name}-ctrl-np -n ${NOTEBOOKS_NAMESPACE}
-    ${oauth_policy_exists} =    Run Keyword And Return Status    Run
-    ...    oc get networkpolicy ${CR_name}-kube-rbac-proxy-np -n ${NOTEBOOKS_NAMESPACE}
-    
-    IF    ${ctrl_policy_exists} or ${oauth_policy_exists}
-        Verify Network Policy Configurations    ${CR_name}
-        Verify Platform Specific Security    ${CR_name}    ${platform_type}
-    ELSE
-        Log    Skipping network policy configuration verification (no network policies created on this ${platform_type} cluster)
-    END
+    Verify Network Policy Existence And Configuration    ${CR_name}    ${platform_type}
     [Teardown]    Cleanup Notebook CR    ${TEST_USER.USERNAME}
 
 Verify All The Pods Are Using Image Digest Instead Of Tags
@@ -574,4 +558,3 @@ CUDA Teardown
     ...    during the cuda smoke verification
     Fix Spawner Status
     End Web Test
-

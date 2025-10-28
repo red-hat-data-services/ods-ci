@@ -242,3 +242,18 @@ Verify Security Policy Compliance
 
     Log    ✓ Policy compliance check passed - no overly permissive rules detected
     Log    Network policies verification and security validation completed successfully
+
+Verify Network Policy Existence And Configuration
+    [Documentation]    Verifies network policy existence and configuration based on platform type
+    [Arguments]    ${CR_name}    ${platform_type}
+    Verify Network Policies Exist    ${CR_name}
+    ${ctrl_policy_exists} =    Run Keyword And Return Status    Run
+    ...    oc get networkpolicy ${CR_name}-ctrl-np -n ${NOTEBOOKS_NAMESPACE}
+    ${oauth_policy_exists} =    Run Keyword And Return Status    Run
+    ...    oc get networkpolicy ${CR_name}-kube-rbac-proxy-np -n ${NOTEBOOKS_NAMESPACE}
+    IF    ${ctrl_policy_exists} or ${oauth_policy_exists}
+        Verify Network Policy Configurations    ${CR_name}
+        Verify Platform Specific Security    ${CR_name}    ${platform_type}
+    ELSE
+        Log    Skipping network policy configuration verification (no network policies created on this ${platform_type} cluster)
+    END

@@ -274,7 +274,6 @@ if command -v yq &> /dev/null
 
                 if [ -z "${SERVICE_ACCOUNT}" ]
                     then
-                        echo "Performing oc login using username and password"
                         oc_user=$(yq -er '.OCP_ADMIN_USER.USERNAME' "${TEST_VARIABLES_FILE}") || {
                             echo "Couldn't find '.OCP_ADMIN_USER.USERNAME' variable in provided '${TEST_VARIABLES_FILE}'."
                             echo "Please either provide it or use '--skip-oclogin true' (don't forget to login to the testing cluster manually then)."
@@ -285,8 +284,46 @@ if command -v yq &> /dev/null
                             echo "Please either provide it or use '--skip-oclogin true' (don't forget to login to the testing cluster manually then)."
                             exit 1
                         }
-                        oc login "${oc_host}" --username "${oc_user}" --password "${oc_pass}" --insecure-skip-tls-verify=true
-                        retVal=$?
+                        # might be null, in which case regular login is performed
+                        cluster_auth=$(yq -r '.CLUSTER_AUTH' "${TEST_VARIABLES_FILE}")
+                        if [ "$cluster_auth" = "oidc" ] ; then
+                          echo "Performing oc login using OIDC"
+                          command -v kubelogin || {
+                            echo "kubelogin not found, please install it from https://github.com/int128/kubelogin to log into OIDC cluster"
+                            exit 1
+                          }
+                          cluster_oidc_issuer=$(yq -er '.CLUSTER_OIDC_ISSUER' "${TEST_VARIABLES_FILE}") || {
+                              echo "Couldn't find '.CLUSTER_OIDC_ISSUER' variable in provided '${TEST_VARIABLES_FILE}'."
+                              echo "Please either provide it or use '--skip-oclogin true' (don't forget to login to the testing cluster manually then)."
+                              exit 1
+                          }
+                          oc config set-credentials "${oc_user}" \
+                              --exec-api-version=client.authentication.k8s.io/v1 \
+                              --exec-interactive-mode=Never \
+                              --exec-command=kubelogin \
+                              --exec-arg=get-token \
+                              --exec-arg="--oidc-issuer-url=${cluster_oidc_issuer}" \
+                              --exec-arg="--oidc-client-id=oc-cli" \
+                              --exec-arg="--username=${oc_user}"
+                          oc config set-cluster test-cluster \
+                              --server="${oc_host}" \
+                              --insecure-skip-tls-verify=true
+                          oc config set-context main \
+                              --cluster=test-cluster \
+                              --user="${oc_user}"
+                          oc config use-context main
+                          kubelogin get-token \
+                            --oidc-issuer-url="${cluster_oidc_issuer}" \
+                            --oidc-client-id=oc-cli \
+                            --grant-type=password \
+                            --username="${oc_user}" \
+                            --password="${oc_pass}"
+                          retVal=$?
+                        else
+                          echo "Performing oc login using username and password"
+                          oc login "${oc_host}" --username "${oc_user}" --password "${oc_pass}" --insecure-skip-tls-verify=true
+                          retVal=$?
+                        fi
                     else
                         echo "Performing oc login using service account"
                         sa_token=$(oc create token "${SERVICE_ACCOUNT}" -n "${SA_NAMESPACE}" --duration 6h)

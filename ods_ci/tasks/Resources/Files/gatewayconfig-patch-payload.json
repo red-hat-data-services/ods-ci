@@ -1,0 +1,12 @@
+{
+  "spec": {
+    "oidc": {
+      "issuerURL": "<issuerURL>",
+      "clientID": "odh-client",
+      "clientSecretRef": {
+        "name": "keycloak-client-secret",
+        "key": "clientSecret"
+      }
+    }
+  }
+}

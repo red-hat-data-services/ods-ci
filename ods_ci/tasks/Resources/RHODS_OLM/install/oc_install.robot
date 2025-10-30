@@ -764,9 +764,6 @@ Configure KServe
 
 Install Kueue Dependencies
     [Documentation]    Install Dependent Operators For Kueue
-    Set Suite Variable   ${FILES_RESOURCES_DIRPATH}    tests/Resources/Files
-    Set Suite Variable   ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
-    Set Suite Variable   ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
     Install Cert Manager Operator Via Cli
     Install Kueue Operator Via Cli
 
@@ -873,9 +870,6 @@ Install Custom Metrics Autoscaler Operator Via Cli
 
 Install RHOAI Dependencies
     [Documentation]    Install dependent operators required for RHOAI installation
-    Set Suite Variable   ${FILES_RESOURCES_DIRPATH}    tests/Resources/Files
-    Set Suite Variable   ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
-    Set Suite Variable   ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
     Install Kueue Operator Via Cli
     Install Cert Manager Operator Via Cli
     Install Leader Worker Set Operator Via Cli
@@ -883,9 +877,6 @@ Install RHOAI Dependencies
 
 Install Observability Dependencies
     [Documentation]    Install dependent operators related to Observability
-    Set Suite Variable   ${FILES_RESOURCES_DIRPATH}    tests/Resources/Files
-    Set Suite Variable   ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
-    Set Suite Variable   ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
     Install Cluster Observability Operator Via Cli
     Install Tempo Operator Via Cli
     Install OpenTelemetry Operator Via Cli

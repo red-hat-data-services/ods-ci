@@ -333,11 +333,16 @@ Verify Builds In Application Namespace
 
 Clone OLM Install Repo
   [Documentation]   Clone OLM git repo
+  Run    rm -rf ${EXECDIR}/${OLM_DIR}
   ${status} =   Run Keyword And Return Status    Directory Should Exist   ${EXECDIR}/${OLM_DIR}
+
+
+  
+
   IF    ${status}
       Log    "The directory ${EXECDIR}/${OLM_DIR} already exist, skipping clone of the repo."    console=yes
   ELSE
-      ${return_code}    ${output} =    Run And Return Rc And Output    git clone ${RHODS_OSD_INSTALL_REPO} ${EXECDIR}/${OLM_DIR}    #robocop:disable
+      ${return_code}    ${output} =    Run And Return Rc And Output    git clone https://gitlab.cee.redhat.com/jstetina/olminstall.git ${EXECDIR}/${OLM_DIR} -b operators-cleanup #robocop:disable
       Log    ${output}    console=yes
       Should Be Equal As Integers   ${return_code}   0
       ${return_code}    ${output} =    Run And Return Rc And Output    cd ${EXECDIR}/${OLM_DIR} && git checkout main    #robocop:disable

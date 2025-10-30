@@ -248,7 +248,7 @@ Verify RHODS Installation
 
   ${kserve} =    Is Component Enabled    kserve    ${DSC_NAME}
   IF    "${kserve}" == "true"
-    Install KServe Dependencies
+    Configure KServe
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app=odh-model-controller    timeout=400s
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
@@ -729,7 +729,7 @@ Install Kueue Operator Via Cli
              ...    namespace=${KUEUE_NS}
     END
 
-Install KServe Dependencies
+Configure KServe
     [Documentation]    Configure KServe-specific dependencies (operators are installed by Install RHOAI Dependencies)
     # Wait for operators to be ready before configuring Gateway
     Wait For Pods To Be Ready    label_selector=name=cert-manager-operator

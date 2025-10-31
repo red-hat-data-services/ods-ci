@@ -225,6 +225,10 @@ Verify RHODS Installation
       Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
   END
 
+  IF  "${CLUSTER_AUTH}" == "oidc"
+      Patch GatewayConfig With OIDC Info
+  END
+
   ${workbenches} =    Is Component Enabled    workbenches    ${DSC_NAME}
   IF    "${workbenches}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
@@ -319,6 +323,7 @@ Verify RHODS Installation
      Wait For Pods Status  namespace=${MONITORING_NAMESPACE}  timeout=600
      Log  Verified Monitoring NS: ${MONITORING_NAMESPACE}  console=yes
   END
+
 
 Verify Builds In Application Namespace
   Log  Verifying Builds  console=yes
@@ -416,6 +421,16 @@ Patch DSCInitialization With Monitoring Info
     ${file_path} =    Set Variable    tasks/Resources/Files/
     ${rc}   ${output}=    Run And Return Rc And Output
     ...         oc patch DSCInitialization/default-dsci -n ${OPERATOR_NAMESPACE} --patch-file="${file_path}monitoring-patch-payload.json" --type merge    #robocop:disable
+    Should Be Equal    "${rc}"    "0"   msg=${output}
+
+Patch GatewayConfig With OIDC Info
+    [Documentation]  Patches the GatewayConfig with values necessary for external OIDC
+    Log  Patching gatewayconfig for OIDC  console=yes
+    ${file_path} =    Set Variable    tasks/Resources/Files/
+    Copy File    source=${file_path}gatewayconfig-patch-payload.json    destination=${file_path}gatewayconfig-patch-payload-apply.json
+    Run    sed -i'' -e 's|<issuerURL>|${CLUSTER_OIDC_ISSUER}|' ${file_path}gatewayconfig-patch-payload-apply.json
+    ${rc}   ${output}=    Run And Return Rc And Output
+    ...         oc patch gatewayconfig/default-gateway --patch-file="${file_path}gatewayconfig-patch-payload-apply.json" --type merge    #robocop:disable
     Should Be Equal    "${rc}"    "0"   msg=${output}
 
 Wait For DSCInitialization CustomResource To Be Ready

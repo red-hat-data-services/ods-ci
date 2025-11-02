@@ -93,7 +93,16 @@ def oc_login(ocp_api_url, username, password, timeout=600):
     # Kubeconfig-driven login (only when EXTERNAL_KUBECONFIG is set)
     if external_kcfg:
         os.environ["KUBECONFIG"] = external_kcfg
-        print(f"Using EXTERNAL_KUBECONFIG={external_kcfg}, skipping username/password login")
+        log.info(f"Using EXTERNAL_KUBECONFIG={external_kcfg}, skipping username/password login")
+
+        if (not os.path.exists(external_kcfg)) or (os.path.getsize(external_kcfg) == 0):
+            log.error(f"kubeconfig '{external_kcfg}' does not exist or is empty")
+            sys.exit(1)
+
+        out = execute_command(f"oc config get-contexts --kubeconfig={external_kcfg}")
+        if out is None or not out.strip():
+            log.error(f"kubeconfig '{external_kcfg}' is invalid or missing contexts")
+            sys.exit(1)
 
         count = 0
         while count <= timeout:
@@ -104,7 +113,7 @@ def oc_login(ocp_api_url, username, password, timeout=600):
             time.sleep(5)
             count += 5
 
-        print("Failed to validate kubeconfig context via 'oc whoami'")
+        log.error("Failed to validate kubeconfig context via 'oc whoami'")
         sys.exit(1)
 
     cmd = f"oc login -u {username} -p {password} {ocp_api_url} --insecure-skip-tls-verify=true"
@@ -119,7 +128,7 @@ def oc_login(ocp_api_url, username, password, timeout=600):
         time.sleep(5)
         count += 5
     if not chk_flag:
-        print("Failed to login to cluster")
+        log.error("Failed to login to cluster")
         sys.exit(1)
 
 

@@ -125,7 +125,7 @@ Verify User Can Create And Start A Workbench With Existent PV Storage
     Create PersistentVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}    project_title=${PRJ_TITLE}
     ...                               size=${PV_SIZE}    connected_workbench=${NONE}   existing_storage=${TRUE}
     Create Workbench    workbench_title=${WORKBENCH_2_TITLE}  workbench_description=${WORKBENCH_2_DESCRIPTION}
-    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
+    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   hardware_profile=default-profile
     ...                 storage=Persistent  pv_existent=${TRUE}    pv_name=${pv_name}  pv_description=${NONE}  pv_size=${NONE}
     Workbench Should Be Listed      workbench_title=${WORKBENCH_2_TITLE}
     Workbench Status Should Be      workbench_title=${WORKBENCH_2_TITLE}      status=${WORKBENCH_STATUS_STARTING}
@@ -142,7 +142,7 @@ Verify User Can Create A PV Storage
     ${pv_name}=    Set Variable    ${PV_BASENAME}-A
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
-    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
+    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   hardware_profile=default-profile
     ...                 storage=Persistent  pv_existent=${NONE}
     ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}
     Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
@@ -169,7 +169,7 @@ Verify User Can Create And Start A Workbench Adding A New PV Storage
     ${pv_name}=    Set Variable    ${PV_BASENAME}-new
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Create Workbench    workbench_title=${WORKBENCH_3_TITLE}  workbench_description=${WORKBENCH_3_DESCRIPTION}
-    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
+    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   hardware_profile=default-profile
     ...                 storage=Persistent  pv_existent=${FALSE}
     ...                 pv_name=${pv_name}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
     Workbench Should Be Listed      workbench_title=${WORKBENCH_3_TITLE}
@@ -186,11 +186,11 @@ Verify User Can Create A S3 Data Connection And Connect It To Workbenches
     ...       ODS-1825    ODS-1972
     [Documentation]    Verifies users can add a Data connection to AWS S3
     Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
-    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
+    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   hardware_profile=default-profile
     ...                 storage=Persistent  pv_existent=${NONE}
     ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}
     Create Workbench    workbench_title=${WORKBENCH_2_TITLE}  workbench_description=${WORKBENCH_2_DESCRIPTION}
-    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
+    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   hardware_profile=default-profile
     ...                 storage=Persistent  pv_existent=${NONE}
     ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}
     Workbench Should Be Listed      workbench_title=${WORKBENCH_TITLE}
@@ -254,7 +254,7 @@ Verify user can create a workbench with an existing data connection
     ...                    aws_s3_endpoint=${DC_S3_ENDPOINT}
     ...                    aws_region=${DC_S3_REGION}
     Create Workbench  workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
-    ...                prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
+    ...                prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   hardware_profile=default-profile
     ...                storage=Persistent  pv_existent=${NONE}  pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}
     ...                data_connection=${data_connection_name}
     # The Workbench and the Data connection appear on the project details page.
@@ -276,7 +276,7 @@ Verify User Can Create A Workbench With Environment Variables
     ...    k8s_type=Config Map  input_type=${KEYVALUE_TYPE}
     ${envs_list}=    Create List   ${envs_var_secrets}     ${envs_var_cm}
     Create Workbench    workbench_title=${WORKBENCH_4_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
-    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
+    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   hardware_profile=default-profile
     ...                 storage=Persistent  pv_name=${NONE}  pv_existent=${NONE}
     ...                 pv_description=${NONE}  pv_size=${NONE}
     ...                 press_cancel=${FALSE}    envs=${envs_list}
@@ -298,7 +298,7 @@ Verify User Can Create Environment Variables By Uploading YAML Secret/ConfigMap
     ${envs_list}=    Create List   ${envs_var_secret}     ${envs_var_cm}
     # Delete Workbench    workbench_title=${WORKBENCH_4_TITLE}
     Create Workbench    workbench_title=${WORKBENCH_4_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
-    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
+    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   hardware_profile=default-profile
     ...                 storage=Persistent  pv_name=${WORKBENCH_4_TITLE}-PV  pv_existent=${FALSE}
     ...                 pv_description=${NONE}  pv_size=${2}
     ...                 press_cancel=${FALSE}    envs=${envs_list}
@@ -322,7 +322,7 @@ Verify Event Log Is Accessible While Starting A Workbench
     ...       ODS-1970
     [Documentation]    Verify user can access event log while starting a workbench
     Create Workbench    workbench_title=${WORKBENCH_6_TITLE}  workbench_description=${WORKBENCH_6_DESCRIPTION}
-    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
+    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   hardware_profile=default-profile
     ...                 storage=Persistent  pv_name=${NONE}  pv_existent=${NONE}
     ...                 pv_description=${NONE}  pv_size=${NONE}
     ...                 press_cancel=${FALSE}    envs=${NONE}
@@ -343,7 +343,7 @@ Verify User Can Cancel Workbench Start From Event Log
     ...       ODS-1975
     [Documentation]    Verify user can cancel workbench start from event log
     Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
-    ...        prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
+    ...        prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   hardware_profile=default-profile
     ...        storage=Persistent  pv_name=${NONE}  pv_existent=${NONE}
     ...        pv_description=${NONE}  pv_size=${NONE}
     ...        press_cancel=${FALSE}    envs=${NONE}
@@ -364,7 +364,7 @@ Verify Error Is Reported When Workbench Fails To Start    # robocop: disable
     ...                At the moment the test is considering only the scenario where
     ...                the workbench fails for Insufficient resources.
     Create Workbench    workbench_title=${WORKBENCH_5_TITLE}  workbench_description=${WORKBENCH_5_DESCRIPTION}
-    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=X Large
+    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   hardware_profile=default-profile
     ...                 storage=Persistent  pv_name=${NONE}  pv_existent=${NONE}
     ...                 pv_description=${NONE}  pv_size=${NONE}
     ...                 press_cancel=${FALSE}    envs=${NONE}
@@ -385,7 +385,7 @@ Verify Users Can Start, Stop, Launch And Delete A Workbench
     ...       ODS-1813    ODS-1815   ODS-1817
     [Documentation]    Verifies users can start, stop, launch and delete a running workbench from project details page
     Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
-    ...        prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
+    ...        prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   hardware_profile=default-profile
     ...        storage=Persistent  pv_name=${NONE}  pv_existent=${NONE}
     ...        pv_description=${NONE}  pv_size=${NONE}
     ...        press_cancel=${FALSE}    envs=${NONE}
@@ -413,7 +413,7 @@ Verify Users Can Start, Stop And Launch A Workbench From DS Projects Home Page
     ...        ODS-1818    ODS-1823
     [Documentation]    Verifies users can start, stop, launch and delete a running workbench from project details page
     Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=${WORKBENCH_DESCRIPTION}
-    ...        prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
+    ...        prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   hardware_profile=default-profile
     ...        storage=Persistent  pv_name=${NONE}  pv_existent=${NONE}
     ...        pv_description=${NONE}  pv_size=${NONE}
     ...        press_cancel=${FALSE}    envs=${NONE}

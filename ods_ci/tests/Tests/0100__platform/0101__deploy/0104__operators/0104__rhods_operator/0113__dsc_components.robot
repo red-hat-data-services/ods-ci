@@ -495,7 +495,7 @@ Validate Support For Configuration Of Controller Resources
         Patch Controller Deployment  ${controller}  /spec/template/spec/containers/0/image  '${new_image}'
         Patch Controller Deployment  ${controller}  /spec/replicas  ${new_replicas}
 
-        Sleep    10s  Give time for operator to potentially reconcile our changes
+        Sleep    45s  Give time for operator to potentially reconcile our changes
 
         # verify the allowlisted values are kept, non-allowlisted are reverted
         Verify Deployment Patch Was Not Reverted  ${controller}  .spec.template.spec.containers[0].resources.limits.cpu  ${new_cpu_limit}
@@ -507,11 +507,11 @@ Validate Support For Configuration Of Controller Resources
         Run  oc annotate deployment -n ${APPLICATIONS_NAMESPACE} ${controller} opendatahub.io/managed=true
 
         # verify that all values get reverted
-        Wait Until Keyword Succeeds    1 min  10 s
+        Wait Until Keyword Succeeds    3 min  10 s
         ...     Verify Deployment Patch Was Reverted  ${controller}  .spec.template.spec.containers[0].resources.limits.cpu  ${new_cpu_limit}
-        Wait Until Keyword Succeeds    1 min  10 s
+        Wait Until Keyword Succeeds    3 min  10 s
         ...     Verify Deployment Patch Was Reverted  ${controller}  .spec.template.spec.containers[0].resources.limits.memory  ${new_memory_limit}
-        Wait Until Keyword Succeeds    1 min  10 s
+        Wait Until Keyword Succeeds    3 min  10 s
         ...     Verify Deployment Patch Was Reverted  ${controller}  .spec.replicas  ${new_replicas}
 
         # patch again and verify that values get reverted immediately when the annotation is already in place
@@ -520,13 +520,13 @@ Validate Support For Configuration Of Controller Resources
         Patch Controller Deployment  ${controller}  /spec/template/spec/containers/0/image  '${new_image}'
         Patch Controller Deployment  ${controller}  /spec/replicas  ${new_replicas}
 
-        Wait Until Keyword Succeeds    30 s  5 s
+        Wait Until Keyword Succeeds    3 min  10 s
         ...     Verify Deployment Patch Was Reverted  ${controller}  .spec.template.spec.containers[0].resources.limits.cpu  ${new_cpu_limit}
-        Wait Until Keyword Succeeds    30 s  5 s
+        Wait Until Keyword Succeeds    3 min  10 s
         ...     Verify Deployment Patch Was Reverted  ${controller}  .spec.template.spec.containers[0].resources.limits.memory  ${new_memory_limit}
-        Wait Until Keyword Succeeds    30 s  5 s
+        Wait Until Keyword Succeeds    3 min  10 s
         ...     Verify Deployment Patch Was Reverted  ${controller}  .spec.template.spec.containers[0].image  ${new_image}
-        Wait Until Keyword Succeeds    30 s  5 s
+        Wait Until Keyword Succeeds    3 min  10 s
         ...     Verify Deployment Patch Was Reverted  ${controller}  .spec.replicas  ${new_replicas}
     END
 

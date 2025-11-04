@@ -9,8 +9,8 @@ Resource       Projects.resource
 ${STORAGE_SECTION_XP}=             xpath=//div[@data-testid="section-cluster-storages"]
 ${STORAGE_NAME_INPUT_XP}=          xpath=//input[@name="create-new-storage-name"]
 ${STORAGE_DESCR_INPUT_XP}=         xpath=//textarea[@name="create-new-storage-description"]
-${STORAGE_SIZE_INPUT_XP}=         xpath=//input[@type="number"]
-${STORAGE_SIZE_PLUS_BTN_XP}=         xpath=//div/button[@aria-label="Plus"]
+${STORAGE_SIZE_INPUT_XP}=         xpath=//*[@data-testid="create-new-storage-size"]//input[@type="number"]
+${STORAGE_SIZE_PLUS_BTN_XP}=         xpath=//*[@data-testid="create-new-storage-size"]//div/button[@aria-label="Plus"]
 ${STORAGE_MOUNT_DIR_INPUT_XP}=         xpath=//input[@data-testid="mount-path-folder-value"]
 ${STORAGE_WORKBENCH_SELECTOR_XP}=         xpath=//*[@data-testid="cluster-storage-workbench-select"]
 ${STORAGE_ADD_BTN_1_XP}=           ${STORAGE_SECTION_XP}//button[.="Add cluster storage"]
@@ -124,8 +124,11 @@ Fill In New PV Data
     Clear Element Text    ${STORAGE_NAME_INPUT_XP}
     Input Text   ${STORAGE_NAME_INPUT_XP}   ${name}
     Wait Until Page Contains Element    ${STORAGE_DESCR_INPUT_XP}
-    # IF   ${is_storage_modal}    Run Keyword And Continue On Failure     Element Should Be Enabled    ${STORAGE_SUBMIT_BTN_XP}
     IF   "${description}" != "${NONE}"    Input Text   ${STORAGE_DESCR_INPUT_XP}   ${description}
+    SeleniumLibrary.Wait Until Element Is Visible    ${STORAGE_SIZE_PLUS_BTN_XP}    timeout=10s
+    SeleniumLibrary.Wait Until Element Is Enabled    ${STORAGE_SIZE_PLUS_BTN_XP}    timeout=10s
+    SeleniumLibrary.Scroll Element Into View    ${STORAGE_SIZE_PLUS_BTN_XP}
+    Sleep    0.5s    reason=Allow DOM to stabilize after scroll
     Double Click Element    ${STORAGE_SIZE_INPUT_XP}
     Press Keys    ${STORAGE_SIZE_INPUT_XP}    DELETE
     IF    ${size} > 1
@@ -137,7 +140,7 @@ Fill In New PV Data
         Log    msg=Creating PV Storage '${name}' without a Workbench    console=True
         ${add_mount}=     Run Keyword And Return Status
         ...    Element Should Be Visible    ${STORAGE_MOUNT_DIR_INPUT_XP}
-        IF   ${add_mount} 
+        IF   ${add_mount}
             IF    "${mount_dir}" == "${NONE}"
                 ${mount_dir}=    Generate Mount Name    ${name}
             END

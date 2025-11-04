@@ -80,11 +80,6 @@ Create Workbench
     IF    "${data_connection}" != "${NONE}"
         Add Existing Data Connection In Workbench    data_connection=${data_connection}
     END
-    ${version_check}=  Is RHODS Version Greater Or Equal Than  1.20.0
-    IF  ${version_check}==True
-        Run Keyword And Continue On Failure    Page Should Not Contain Element
-        ...    xpath=//input[contains(@name,"ephemeral")]
-    END
     IF    "${storage}" == "Persistent"
         IF    ${pv_existent} == ${TRUE}
             # Use the `Jump to section` links in the page to scroll the section into view

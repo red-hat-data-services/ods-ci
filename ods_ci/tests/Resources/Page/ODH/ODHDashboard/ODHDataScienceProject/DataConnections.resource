@@ -53,7 +53,7 @@ Edit S3 Data Connection
 Data Connection Should Be Listed
     [Documentation]    Checks a Data Connection is listed in DS Project details page
     [Arguments]     ${name}   ${type}   ${connected_workbench}
-    Move To Tab    tab_title=Connections
+    Move To Tab    tab_id=connections
     ${connection}=    Set Variable    ${DC_SECTION}//tr[td[@data-label="Name"]//*[.="${name}"]]
     Run Keyword And Continue On Failure     Page Should Contain Element    ${connection}
     Run Keyword And Continue On Failure     Page Should Contain Element    ${connection}//*[contains(.,"${type}")]
@@ -71,7 +71,7 @@ Data Connection Should Be Listed
 Data Connection Should Not Be Listed
     [Documentation]    Checks a Data Connection is not listed in DS Project details page
     [Arguments]     ${name}
-    Move To Tab    tab_title=Connections
+    Move To Tab    tab_id=connections
     ${connection}=    Set Variable    ${DC_SECTION}//tr[td[@data-label="Name"]//*[.="${name}"]]
     Run Keyword And Continue On Failure     Wait Until Page Does Not Contain Element    ${connection}
 
@@ -111,7 +111,7 @@ Fill Data Connection Form
         Log    msg=you are not connecting any workbenchs to ${dc_name} DataConnection
     ELSE
         FOR    ${workbench_title}    IN    @{connected_workbench}
-            Move To Tab    tab_title=Workbenches
+            Move To Tab    tab_id=workbenches
             Click Action From Actions Menu    item_title=${workbench_title}    action=Edit
             Add Existing Data Connection In Workbench    data_connection=${dc_name}
             Click Element    ${GENERIC_SUBMIT_BTN_XP}

@@ -30,7 +30,7 @@ Verify User Can Make Their Owned DS Project Accessible To Other Users    # roboc
     [Tags]    Smoke
     ...       ODS-2194    ODS-2201
     Switch To User    ${USER_B}
-    Move To Tab    Permissions
+    Move To Tab    permissions
     Assign Contributor Permissions To User ${USER_C}
     Assign Admin Permissions To User ${USER_A}
     ${USER_C} Should Have Contributor Access To ${PRJ_USER_B_TITLE}
@@ -41,7 +41,7 @@ Verify User Can Modify And Revoke Access To DS Projects From Other Users    # ro
     [Tags]    Sanity
     ...       ODS-2202
     Switch To User    ${USER_B}
-    Move To Tab    Permissions
+    Move To Tab    permissions
     Assign Contributor Permissions To User ${USER_C}
     Assign Admin Permissions To User ${USER_A}
     Change ${USER_C} Permissions To Admin
@@ -50,7 +50,7 @@ Verify User Can Modify And Revoke Access To DS Projects From Other Users    # ro
     ${USER_C} Should Have Admin Access To ${PRJ_USER_B_TITLE}
     ${USER_A} Should Have Contributor Access To ${PRJ_USER_B_TITLE}
     Switch To User    ${USER_B}
-    Move To Tab    Permissions
+    Move To Tab    permissions
     Remove ${USER_C} Permissions
     ${USER_C} Should Not Have Access To ${PRJ_USER_B_TITLE}
 
@@ -188,7 +188,7 @@ Set User Groups For Testing
 
 Restore Permissions Of The Project
     Switch To User    ${USER_B}
-    Move To Tab    Permissions
+    Move To Tab    permissions
     ${present_a}=    Is ${USER_A} In The Permissions Table
     IF    ${present_a} == ${TRUE}    Remove ${USER_A} Permissions
     ${present_c}=    Is ${USER_C} In The Permissions Table

@@ -58,7 +58,7 @@ Create Workbench
     [Documentation]     Creates a new workbench in a Data Science project. It assumes
     ...                 the DS Project data. It allows to add new or existent PV storage,
     ...                 add Environment variables and select Jupyter image
-    [Arguments]     ${workbench_title}  ${workbench_description}  ${prj_title}   ${image_name}   ${deployment_size}
+    [Arguments]     ${workbench_title}  ${workbench_description}  ${prj_title}   ${image_name}   ${hardware_profile}
     ...             ${storage}  ${pv_existent}   ${pv_name}  ${pv_description}  ${pv_size}    ${gpus}=${NONE}
     ...             ${press_cancel}=${FALSE}  ${version}=default  ${envs}=${NONE}
     ...             ${data_connection}=${NONE}
@@ -71,7 +71,7 @@ Create Workbench
     Input Text    ${WORKBENCH_DESCR_TXT_XP}    ${workbench_description}
     Run Keyword And Continue On Failure     Element Should Be Disabled    ${WORKBENCH_CREATE_BTN_2_XP}
     Select Workbench Image    image_name=${image_name}    version=${version}
-    IF    "${deployment_size}" != "${NONE}"    Select Workbench Container Size    size_name=${deployment_size}
+    IF    "${hardware_profile}" != "${NONE}"    Select Workbench Container Size    hardware_profile=${hardware_profile}
     IF    "${gpus}" != "${NONE}"    Select Workbench Number Of GPUs    gpus=${gpus}
     IF    "${envs}" != "${NONE}"
         ${envs_copy}=    Copy List    ${envs}    deepcopy=${TRUE}
@@ -257,14 +257,10 @@ Select Workbench Image Version
 
 Select Workbench Container Size
     [Documentation]    Selects the container size in the workbench creation page
-    [Arguments]     ${size_name}=Small
+    [Arguments]     ${hardware_profile}=default-profile
     Wait Until Page Contains Element    ${WORKBENCH_SIZE_SIDE_MENU_BTN}
     Click Element    ${WORKBENCH_SIZE_SIDE_MENU_BTN}
-    Wait Until Page Contains Element    ${WORKBENCH_SIZE_MENU_BTN_XP}
-    Click Element    ${WORKBENCH_SIZE_MENU_BTN_XP}
-    ${workbench_size_button_click}=    Set Variable    xpath=//button[contains(.,"${size_name}")]
-    Wait Until Page Contains Element    ${workbench_size_button_click}
-    Click Element    ${workbench_size_button_click}
+    Select Hardware Profile    ${hardware_profile}
 
 Workbench Should Be Listed
     [Documentation]    Checks a workbench is listed in the DS Project details page

@@ -142,7 +142,7 @@ Create Route And Workbench
     ...    TRINO_HOSTNAME=${host}    k8s_type=Config Map  input_type=${KEYVALUE_TYPE}
     ${envs_list}=    Create List   ${envs_var_cm}
     Create Workbench    workbench_title=${DS_WORKBENCH_NAME}  workbench_description=${DS_WORKBENCH_NAME}
-    ...                 prj_title=${DS_PROJECT_NAME}    image_name=${NB_IMAGE}   deployment_size=Small
+    ...                 prj_title=${DS_PROJECT_NAME}    image_name=${NB_IMAGE}   hardware_profile=default-profile
     ...                 storage=Persistent  pv_existent=${NONE}
     ...                 pv_name=${NONE}  pv_description=${NONE}  pv_size=${NONE}
     ...                 envs=${envs_list}

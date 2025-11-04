@@ -73,12 +73,12 @@ Verify Pipeline Server Deployments    # robocop: disable
 
     @{pipeline_api_server}=  Oc Get    kind=Pod    namespace=${namespace}
     ...    label_selector=app=ds-pipeline-dspa
-    ${containerNames}=  Create List  oauth-proxy    ds-pipeline-api-server
+    ${containerNames}=  Create List  kube-rbac-proxy    ds-pipeline-api-server
     Verify Deployment    ${pipeline_api_server}  1  2  ${containerNames}
 
     @{pipeline_metadata_envoy}=  Oc Get    kind=Pod    namespace=${namespace}
     ...    label_selector=app=ds-pipeline-metadata-envoy-dspa
-    ${containerNames}=  Create List  container    oauth-proxy
+    ${containerNames}=  Create List  container    kube-rbac-proxy
     Verify Deployment    ${pipeline_metadata_envoy}  1  2  ${containerNames}
 
     @{pipeline_metadata_grpc}=  Oc Get    kind=Pod    namespace=${namespace}

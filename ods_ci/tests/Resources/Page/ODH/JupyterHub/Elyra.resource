@@ -65,7 +65,7 @@ Save Pipeline Changes
 
 Run Pipeline
     [Documentation]    Submits the pipeline for a run
-    [Arguments]    ${runtime_config}=Data Science Pipeline    ${pipeline_name}=hello-generic-world
+    [Arguments]    ${runtime_config}=Pipeline    ${pipeline_name}=hello-generic-world
     Click Run Button
     Set Pipeline Name    ${pipeline_name}
     Select Runtime Config    ${runtime_config}

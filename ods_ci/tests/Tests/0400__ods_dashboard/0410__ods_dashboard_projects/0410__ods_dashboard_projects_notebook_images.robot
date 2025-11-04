@@ -29,7 +29,7 @@ Verify User Can Create A Workbench Using Intel AiKit Image
     Create Tabname Instance For Installed Operator        ${INTEL_AIKIT_OPERATOR_NAME}
     ...    AIKitContainer    ${APPLICATIONS_NAMESPACE}
     Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=workbench for testing
-    ...        prj_title=${PRJ_TITLE}    image_name=${IMG_NAME}  version=${NONE}    deployment_size=Small
+    ...        prj_title=${PRJ_TITLE}    image_name=${IMG_NAME}  version=${NONE}    hardware_profile=default-profile
     ...        storage=Persistent  pv_name=aikitpv  pv_existent=${FALSE}
     ...        pv_description=${PV_DESCRIPTION}  pv_size=1
     ...        press_cancel=${FALSE}    envs=${NONE}
@@ -48,7 +48,7 @@ Verify User Can Create A Workbench Using Code Server Image
     Set Test Variable   ${PV_NAME}    codeServerPv
     Set Test Variable   ${PV_DESCRIPTION}    PV for codeServer
     Create Workbench    workbench_title=${WORKBENCH_TITLE}  workbench_description=workbench for testing
-    ...        prj_title=${PRJ_TITLE}    image_name=${IMG_NAME}  version=${NONE}    deployment_size=Small
+    ...        prj_title=${PRJ_TITLE}    image_name=${IMG_NAME}  version=${NONE}    hardware_profile=default-profile
     ...        storage=Persistent  pv_name=${PV_NAME}  pv_existent=${FALSE}
     ...        pv_description=${PV_DESCRIPTION}  pv_size=1
     ...        press_cancel=${FALSE}    envs=${NONE}

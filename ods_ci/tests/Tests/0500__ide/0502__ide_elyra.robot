@@ -81,7 +81,8 @@ Elyra Pipelines Suite Setup    # robocop: off=too-many-calls-in-keyword
     Sleep    15s    reason=Wait until pipeline server is detected by dashboard
     # Workaround for the: https://issues.redhat.com/browse/RHOAIENG-24545
     Create Workbench    workbench_title=workaround    workbench_description=workaround
-    ...                 prj_title=${PRJ_TITLE}    image_name=Jupyter | Minimal | CPU | Python 3.12  deployment_size=Small
+    ...                 prj_title=${PRJ_TITLE}    image_name=Jupyter | Minimal | CPU | Python 3.12
+    ...                 hardware_profile=default-profile
     ...                 storage=Persistent  pv_existent=${FALSE}
     ...                 pv_name=${PV_NAME}_workaround  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
     ...                 envs=${ENVS_LIST}
@@ -100,7 +101,7 @@ Verify Pipelines Integration With Elyra Running Hello World Pipeline Test     # 
     ...    runs successfully
     [Arguments]    ${img}    ${runtime_image}    ${experiment_name}
     Create Workbench    workbench_title=elyra_${img}    workbench_description=Elyra test
-    ...                 prj_title=${PRJ_TITLE}    image_name=${img}  deployment_size=Small
+    ...                 prj_title=${PRJ_TITLE}    image_name=${img}    hardware_profile=default-profile
     ...                 storage=Persistent  pv_existent=${FALSE}
     ...                 pv_name=${PV_NAME}_${img}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
     ...                 envs=${ENVS_LIST}

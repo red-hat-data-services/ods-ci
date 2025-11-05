@@ -235,8 +235,12 @@ def generate_test_config_file(
     data["OCP_ADMIN_USER"]["AUTH_TYPE"] = config_data["TEST_CLUSTERS"][test_cluster]["OCP_ADMIN_USER"]["AUTH_TYPE"]
     data["OCP_ADMIN_USER"]["USERNAME"] = config_data["TEST_CLUSTERS"][test_cluster]["OCP_ADMIN_USER"]["USERNAME"]
     data["OCP_ADMIN_USER"]["PASSWORD"] = config_data["TEST_CLUSTERS"][test_cluster]["OCP_ADMIN_USER"]["PASSWORD"]
-    data["CLUSTER_AUTH"] = config_data["TEST_CLUSTERS"][test_cluster]["CLUSTER_AUTH"]
-    data["CLUSTER_OIDC_ISSUER"] = config_data["TEST_CLUSTERS"][test_cluster]["CLUSTER_OIDC_ISSUER"]
+    data["CLUSTER_AUTH"] = "internal"
+    data["CLUSTER_OIDC_ISSUER"] = ""
+    if config_data["TEST_CLUSTERS"][test_cluster].get("CLUSTER_AUTH"):
+        data["CLUSTER_AUTH"] = config_data["TEST_CLUSTERS"][test_cluster]["CLUSTER_AUTH"]
+    if config_data["TEST_CLUSTERS"][test_cluster].get("CLUSTER_OIDC_ISSUER"):
+        data["CLUSTER_OIDC_ISSUER"] = config_data["TEST_CLUSTERS"][test_cluster]["CLUSTER_OIDC_ISSUER"]
     data["SSO"]["USERNAME"] = config_data["SSO"]["USERNAME"]
     data["SSO"]["PASSWORD"] = config_data["SSO"]["PASSWORD"]
     data["RHODS_BUILD"]["PULL_SECRET"] = config_data["RHODS_BUILD"]["PULL_SECRET"]

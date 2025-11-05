@@ -256,7 +256,6 @@ Verify RHODS Installation
 
   ${kserve} =    Is Component Enabled    kserve    ${DSC_NAME}
   IF    "${kserve}" == "true"
-    Configure KServe
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app=odh-model-controller    timeout=400s
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
@@ -730,6 +729,7 @@ Install Kueue Operator Via Cli
     END
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 Install JobSet Operator Via Cli
     [Documentation]    Install JobSet Operator Via CLI
     ${is_installed} =   Check If Operator Is Installed Via CLI   ${JOBSET_OP_NAME}
@@ -753,17 +753,6 @@ Install JobSet Operator Via Cli
         Wait For Pods To Be Ready    label_selector=name=jobset-operator
              ...    namespace=${JOBSET_NS}
     END
-
-Configure KServe
-    [Documentation]    Configure KServe-specific dependencies (operators are installed by Install RHOAI Dependencies)
-    # Wait for operators to be ready before configuring Gateway
-    Wait For Pods To Be Ready    label_selector=name=cert-manager-operator
-         ...    namespace=${CERT_MANAGER_NS}
-    Wait For Pods To Be Ready    label_selector=name=openshift-lws-operator
-         ...    namespace=${LWS_OP_NS}
-    Wait For Pods To Be Ready    label_selector=app=kuadrant
-         ...    namespace=${CONNECTIVITY_LINK_NS}
-    Configure Gateway For KServe
 
 Install Kueue Dependencies
     [Documentation]    Install Dependent Operators For Kueue

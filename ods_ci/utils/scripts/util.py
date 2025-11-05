@@ -93,15 +93,15 @@ def oc_login(ocp_api_url, username, password, timeout=600):
     # Kubeconfig-driven login (only when EXTERNAL_KUBECONFIG is set)
     if external_kcfg:
         os.environ["KUBECONFIG"] = external_kcfg
-        log.info(f"Using EXTERNAL_KUBECONFIG={external_kcfg}, skipping username/password login")
+        log.info(f"Using EXTERNAL_KUBECONFIG, skipping username/password login")
 
         if (not os.path.exists(external_kcfg)) or (os.path.getsize(external_kcfg) == 0):
-            log.error(f"kubeconfig '{external_kcfg}' does not exist or is empty")
+            log.error(f"kubeconfig does not exist or is empty")
             sys.exit(1)
 
         out = execute_command(f"oc config get-contexts --kubeconfig={external_kcfg}")
         if out is None or not out.strip():
-            log.error(f"kubeconfig '{external_kcfg}' is invalid or missing contexts")
+            log.error(f"kubeconfig is invalid or missing contexts")
             sys.exit(1)
 
         count = 0

@@ -7,70 +7,36 @@ set -e
 # a new MachineSet with the specified configuration.
 #
 # Parameters:
-#   For GCP nvidia-* flavors (3 parameters with comma-separated GPU config):
-#     $1 GPU_FLAVOR     - nvidia-* GPU flavor (e.g., nvidia-tesla-v100)
-#     $2 PROVIDER       - Must be "GCP"
-#     $3 GPU_CONFIG     - "gpu_count,node_count" (e.g., "2,3" or "2, 3" = 2 GPUs per node, 3 nodes)
+#   $1 INSTANCE_TYPE  - Instance type or GPU flavor (default: g4dn.xlarge)
+#   $2 PROVIDER       - Cloud provider (AWS/GCP/AZURE/IBM) (default: AWS)
+#   $3 GPU_COUNT      - GPUs per node (for GCP nvidia-* only) OR node count (default: 1)
+#   $4 GPU_NODE_COUNT - Number of nodes (for GCP nvidia-* only) (default: 1)
 #
-#   For all other cases (3 parameters):
-#     $1 INSTANCE_TYPE  - Instance type (e.g., g4dn.xlarge, n1-standard-4)
-#     $2 PROVIDER       - Cloud provider (AWS/GCP/AZURE/IBM)
-#     $3 GPU_NODE_COUNT - Number of GPU nodes to create
+# Parameter Logic:
+#   For GCP nvidia-* flavors: $3=GPU_COUNT, $4=GPU_NODE_COUNT
+#   For all other cases: GPU_COUNT=1, GPU_NODE_COUNT=$3
 #
 # Examples:
 #   ./provision-gpu.sh g4dn.xlarge AWS 2             # 2 g4dn.xlarge nodes on AWS
 #   ./provision-gpu.sh n1-standard-4 GCP 3          # 3 n1-standard-4 nodes on GCP
-#   ./provision-gpu.sh nvidia-tesla-v100 GCP 1,2    # 2 nodes with 1 V100 each on GCP
-#   ./provision-gpu.sh nvidia-tesla-t4 GCP 2,3      # 3 nodes with 2 T4s each on GCP
-#   ./provision-gpu.sh nvidia-tesla-v100 GCP 2, 3   # Same as above (space after comma)
-#   ./provision-gpu.sh nvidia-tesla-t4 GCP "2, 3"   # Same as above (quoted for clarity)
+#   ./provision-gpu.sh nvidia-tesla-v100 GCP 1 2    # 2 nodes with 1 V100 each on GCP
+#   ./provision-gpu.sh nvidia-tesla-t4 GCP 2 3      # 3 nodes with 2 T4s each on GCP
+#   ./provision-gpu.sh g2-standard-4 GCP 3          # 3 g2-standard-4 nodes on GCP
 
-# Parse parameters based on usage pattern
-if [[ $# -eq 0 ]]; then
-    # No parameters - use defaults
-    INSTANCE_TYPE="g4dn.xlarge"
-    PROVIDER="AWS"
-    GPU_COUNT="1"
-    GPU_NODE_COUNT="1"
-elif [[ "$2" == "GCP" && ("$1" == *"nvidia-"* || "$1" == *"g2-"* || "$1" == *"a2-"* || "$1" == *"g4-"*) ]]; then
-    # GCP GPU flavors: nvidia-* attachments or GPU instance types (g2-, a2-, g4-)
-    INSTANCE_TYPE="$1"
-    PROVIDER="$2"
-    
-    # Parse comma-separated GPU config (gpu_count,node_count) or separate parameters
-    if [[ "$3" == *","* ]]; then
-        # New format: comma-separated (e.g., "2,3" or "2, 3")
-        GPU_COUNT="${3%,*}"      # Extract part before comma
-        GPU_NODE_COUNT="${3#*,}" # Extract part after comma
-        # Trim whitespace from both values
-        GPU_COUNT=$(echo "$GPU_COUNT" | tr -d ' ')
-        GPU_NODE_COUNT=$(echo "$GPU_NODE_COUNT" | tr -d ' ')
-        
-        # Handle case where comma is at the end and node count is in $4
-        if [[ -z "$GPU_NODE_COUNT" && -n "$4" ]]; then
-            GPU_NODE_COUNT="$4"
-        fi
-        
-        # Validate that we have valid numbers
-        if [[ -z "$GPU_COUNT" || -z "$GPU_NODE_COUNT" ]]; then
-            echo "ERROR: Invalid GPU config format. Use: gpu_count,node_count (e.g., '2,3' or \"2, 3\")"
-            exit 1
-        fi
-    elif [[ -n "$4" ]]; then
-        # Old format: separate parameters (e.g., "2" "3")
-        GPU_COUNT="$3"
-        GPU_NODE_COUNT="$4"
-    else
-        # Fallback: treat as node count only, default GPU count to 1
-        GPU_COUNT="1"
-        GPU_NODE_COUNT="${3:-1}"
-    fi
+# Parse parameters with simplified logic
+INSTANCE_TYPE=${1:-"g4dn.xlarge"}
+PROVIDER=${2:-"AWS"}
+
+# Special case for GCP with nvidia-* flavors: $3=GPU_COUNT, $4=GPU_NODE_COUNT
+# For all other cases: GPU_COUNT=1, GPU_NODE_COUNT=$3
+if [[ "$PROVIDER" == "GCP" && "$INSTANCE_TYPE" == *"nvidia-"* ]]; then
+    # GCP nvidia-* flavor: $3=GPU_COUNT, $4=GPU_NODE_COUNT
+    GPU_COUNT=${3:-"1"}
+    GPU_NODE_COUNT=${4:-"1"}
 else
-    # All other cases: 3 parameters expected
-    INSTANCE_TYPE="$1"
-    PROVIDER="${2:-AWS}"
-    GPU_COUNT="1"  # Not used, but set for consistency
-    GPU_NODE_COUNT="${3:-1}"
+    # All other cases: GPU_COUNT=1, GPU_NODE_COUNT=$3
+    GPU_COUNT="1"
+    GPU_NODE_COUNT=${3:-"1"}
 fi
 
 # Display parameters for clarity
@@ -79,19 +45,6 @@ echo "Instance Type/GPU Flavor: $INSTANCE_TYPE"
 echo "Provider: $PROVIDER"
 echo "GPU Node Count: $GPU_NODE_COUNT"
 
-# Show parameter format used
-if [[ "$PROVIDER" == "GCP" && "$INSTANCE_TYPE" == *"nvidia-"* ]]; then
-  echo "GPU Count per Node: $GPU_COUNT"
-  echo "Total GPUs: $((GPU_COUNT * GPU_NODE_COUNT))"
-  echo "Parameter format: <gpu-flavor> GCP <gpu-count>,<node-count>"
-  echo "Configuration: $GPU_NODE_COUNT nodes × $GPU_COUNT GPUs each"
-else
-  echo "GPU Count per Node: Determined by instance type"
-  echo "Parameter format: <instance-type> <provider> <node-count>"
-  if [[ "$PROVIDER" == "GCP" ]]; then
-    echo "Note: For custom GPU count, use: nvidia-tesla-* GCP <gpu-count>,<node-count>"
-  fi
-fi
 echo "========================================"
 
 # Save original values for validation
@@ -302,3 +255,16 @@ oc wait --timeout=$MACHINE_WAIT_TIMEOUT --for jsonpath='{.status.readyReplicas}'
    echo "Please check the cluster"
    exit 1
 fi
+
+# Success message with configuration summary
+echo "========================================="
+echo "✅ GPU Node Provisioning Completed Successfully!"
+echo "MachineSet: $NEW_MACHINESET_NAME"
+echo "Instance Type: $INSTANCE_TYPE"
+echo "Provider: $PROVIDER"
+if [[ "$PROVIDER" == "GCP" && "$INSTANCE_TYPE" == *"nvidia-"* ]]; then
+  echo "Configuration: $GPU_NODE_COUNT nodes × $GPU_COUNT GPUs each = $((GPU_COUNT * GPU_NODE_COUNT)) total GPUs"
+else
+  echo "Configuration: $GPU_NODE_COUNT nodes with instance-determined GPU count"
+fi
+echo "========================================="

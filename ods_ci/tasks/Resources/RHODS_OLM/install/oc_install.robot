@@ -457,7 +457,6 @@ Apply DataScienceCluster CustomResource
         Generate CustomManifest In DSC YAML
         ...    dsc_name=${dsc_name}
         ...    dsc_template=${dsc_template}
-        Rename DevFlags in DataScienceCluster CustomResource
         ${yml} =    Get File    ${file_path}dsc_apply.yml
         Log To Console    Applying DSC yaml
         Log To Console    ${yml}
@@ -477,7 +476,6 @@ Apply DataScienceCluster CustomResource
         END
         Log to Console    message=Creating DataScience Cluster using yml template
         Create DataScienceCluster CustomResource Using Test Variables
-        Apply Custom Manifest in DataScienceCluster CustomResource Using Test Variables
         ${yml} =    Get File    ${file_path}dsc_apply.yml
         Log To Console    Applying DSC yaml
         Log To Console    ${yml}
@@ -550,28 +548,6 @@ Generate CustomManifest In DSC YAML
             IF    '${cmp}' == 'workbenches'
                 Run    sed -i'' -e 's/<workbenches_namespace>/${NOTEBOOKS_NAMESPACE}/' ${file_path}dsc_apply.yml
             END
-    END
-
-Apply Custom Manifest in DataScienceCluster CustomResource Using Test Variables
-    [Documentation]    Apply custom manifests to a DSC file
-    Log To Console    Applying Custom Manifests
-    ${file_path} =    Set Variable    tasks/Resources/Files/
-    FOR    ${cmp}    IN    @{COMPONENT_LIST}
-         IF    $cmp in $CUSTOM_MANIFESTS
-              ${manifest_string}=    Convert To String    ${CUSTOM_MANIFESTS}[${cmp}]
-              # Use sed to replace the placeholder with the YAML string
-              Run    sed -i'' -e "s|<${cmp}_devflags>|${manifest_string}|g" ${file_path}dsc_apply.yml
-         ELSE
-              Run    sed -i'' -e "s|<${cmp}_devflags>||g" ${file_path}dsc_apply.yml
-         END
-    END
-
-Rename DevFlags in DataScienceCluster CustomResource
-    [Documentation]     Filling devFlags fields for every component in DSC
-    Log To Console    Filling devFlags fields for every component in DSC
-    ${file_path} =    Set Variable    tasks/Resources/Files/
-    FOR    ${cmp}    IN    @{COMPONENT_LIST}
-        Run     sed -i'' -e "s|<${cmp}_devflags>||g" ${file_path}dsc_apply.yml
     END
 
 Wait For DataScienceCluster CustomResource To Be Ready

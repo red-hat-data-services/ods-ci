@@ -1,6 +1,5 @@
 *** Settings ***
 Library           OperatingSystem
-Library           DateTime
 
 *** Keywords ***
 Create GPU Node In Self Managed AWS Cluster
@@ -72,9 +71,11 @@ Create GPU Nodes For Managed Cluster
 
 Create GPU Nodes For Self Managed Cluster
     [Documentation]    Create GPU nodes for self-managed cluster using provision script
+    ...                For GCP nvidia-* flavors: supports comma format (flavor, GCP, "gpu_count,node_count")
+    ...                For all others: 3 params (instance_type, provider, node_count)
     [Arguments]    ${instance_type}    ${provider}    ${gpu_node_count}    ${gpu_count}=1
 
-    # For GCP, gpu_count controls GPUs per node; for others, it's ignored
+    # Script supports both comma-separated format and separate parameters for backward compatibility
     ${result} =    Run Process    sh    tasks/Resources/Provisioning/GPU/provision-gpu.sh
     ...    ${instance_type}
     ...    ${provider}

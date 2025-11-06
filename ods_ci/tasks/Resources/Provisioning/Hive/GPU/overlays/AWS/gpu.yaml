@@ -1,6 +1,6 @@
 - op: replace
   path: /spec/template/spec/providerSpec/value/instanceType
-  value: INSTANCE_TYPE
+  value: g4dn.xlarge
 - op: replace
   path: /spec/replicas
-  value: GPU_NODE_COUNT
+  value: 1

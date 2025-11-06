@@ -32,8 +32,8 @@ if [[ $# -eq 0 ]]; then
     PROVIDER="AWS"
     GPU_COUNT="1"
     GPU_NODE_COUNT="1"
-elif [[ "$2" == "GCP" && "$1" == *"nvidia-"* ]]; then
-    # GCP nvidia-* flavor: comma-separated GPU config or separate parameters
+elif [[ "$2" == "GCP" && ("$1" == *"nvidia-"* || "$1" == *"g2-"* || "$1" == *"a2-"* || "$1" == *"g4-"*) ]]; then
+    # GCP GPU flavors: nvidia-* attachments or GPU instance types (g2-, a2-, g4-)
     INSTANCE_TYPE="$1"
     PROVIDER="$2"
     
@@ -215,12 +215,19 @@ OLD_MACHINESET_NAME=$(yq '.metadata.name' $MACHINESET_PATH )
 NEW_MACHINESET_NAME=${OLD_MACHINESET_NAME/worker/gpu}
 sed -i'' -e "s/$OLD_MACHINESET_NAME/$NEW_MACHINESET_NAME/g" $MACHINESET_PATH
 
-if [[ "$PROVIDER" == "GCP" && "$INSTANCE_TYPE" == *"nvidia-"*  ]] ; then
-  GPU_TYPE=$INSTANCE_TYPE
-  INSTANCE_TYPE="n1-standard-4"
-  PROVIDER_OVERLAY_DIR="$PROVIDER_OVERLAY_DIR/attach-gpu-to-n1"
-  sed -i'' -e "s/GPU_TYPE/$GPU_TYPE/g" $PROVIDER_OVERLAY_DIR/gpu.yaml
-  sed -i'' -e "s/GPU_COUNT/$GPU_COUNT/g" $PROVIDER_OVERLAY_DIR/gpu.yaml
+if [[ "$PROVIDER" == "GCP" ]] ; then
+  if [[ "$INSTANCE_TYPE" == *"nvidia-"* ]] ; then
+    # nvidia-* GPU attachment to standard instance
+    GPU_TYPE=$INSTANCE_TYPE
+    INSTANCE_TYPE="n1-standard-4"
+    PROVIDER_OVERLAY_DIR="$PROVIDER_OVERLAY_DIR/attach-gpu-to-n1"
+    sed -i'' -e "s/GPU_TYPE/$GPU_TYPE/g" $PROVIDER_OVERLAY_DIR/gpu.yaml
+    sed -i'' -e "s/GPU_COUNT/$GPU_COUNT/g" $PROVIDER_OVERLAY_DIR/gpu.yaml
+  elif [[ "$INSTANCE_TYPE" == *"g2-"* || "$INSTANCE_TYPE" == *"a2-"* || "$INSTANCE_TYPE" == *"g4-"* ]] ; then
+    # GPU instance types (g2-standard-4, a2-highgpu-*, etc.) - use standard overlay
+    # These instances have built-in GPUs, no need for attach-gpu overlay
+    echo "Using GCP GPU instance type: $INSTANCE_TYPE with $GPU_COUNT GPU(s) per node"
+  fi
 fi
 # set the desired node flavor and replica count in the kustomize overlay
 sed -i'' -e "s/INSTANCE_TYPE/$INSTANCE_TYPE/g" $PROVIDER_OVERLAY_DIR/gpu.yaml
@@ -235,27 +242,55 @@ oc patch machinesets.machine.openshift.io -n openshift-machine-api "$NEW_MACHINE
 # Validate the created MachineSet has correct configuration
 echo "Validating created MachineSet configuration..."
 if [[ "$PROVIDER" == "GCP" ]]; then
-  CREATED_GPU_COUNT=$(oc get machineset.machine.openshift.io $NEW_MACHINESET_NAME -n openshift-machine-api -o json | jq -r '.spec.template.spec.providerSpec.value.gpus[0].count // "0"')
-  CREATED_GPU_TYPE=$(oc get machineset.machine.openshift.io $NEW_MACHINESET_NAME -n openshift-machine-api -o json | jq -r '.spec.template.spec.providerSpec.value.gpus[0].type // "none"')
   CREATED_INSTANCE_TYPE=$(oc get machineset.machine.openshift.io $NEW_MACHINESET_NAME -n openshift-machine-api -o jsonpath='{.spec.template.spec.providerSpec.value.machineType}')
   
-  echo "Created MachineSet config: Instance=$CREATED_INSTANCE_TYPE, GPU=$CREATED_GPU_TYPE, GPU_Count=$CREATED_GPU_COUNT, Replicas=$GPU_NODE_COUNT"
-  
-  # Determine expected values based on original input
-  if [[ "$ORIGINAL_INSTANCE_TYPE" == *"nvidia-"* ]]; then
-    EXPECTED_GPU_TYPE=$ORIGINAL_INSTANCE_TYPE
-    EXPECTED_INSTANCE_TYPE="n1-standard-4"
+  # Only validate GPU configuration for GPU flavors (nvidia-* or g2-*/a2-*/g4-*)
+  if [[ "$ORIGINAL_INSTANCE_TYPE" == *"nvidia-"* || "$ORIGINAL_INSTANCE_TYPE" == *"g2-"* || "$ORIGINAL_INSTANCE_TYPE" == *"a2-"* || "$ORIGINAL_INSTANCE_TYPE" == *"g4-"* ]]; then
+    CREATED_GPU_COUNT=$(oc get machineset.machine.openshift.io $NEW_MACHINESET_NAME -n openshift-machine-api -o json | jq -r '.spec.template.spec.providerSpec.value.gpus[0].count // "0"')
+    CREATED_GPU_TYPE=$(oc get machineset.machine.openshift.io $NEW_MACHINESET_NAME -n openshift-machine-api -o json | jq -r '.spec.template.spec.providerSpec.value.gpus[0].type // "none"')
+    
+    echo "Created MachineSet config: Instance=$CREATED_INSTANCE_TYPE, GPU=$CREATED_GPU_TYPE, GPU_Count=$CREATED_GPU_COUNT, Replicas=$GPU_NODE_COUNT"
+    
+    # Determine expected values based on GPU flavor type
+    if [[ "$ORIGINAL_INSTANCE_TYPE" == *"nvidia-"* ]]; then
+      # nvidia-* GPU attachment to standard instance
+      EXPECTED_GPU_TYPE=$ORIGINAL_INSTANCE_TYPE
+      EXPECTED_INSTANCE_TYPE="n1-standard-4"
+    else
+      # g2-*/a2-*/g4-* GPU instance types - no GPU attachment, instance has built-in GPUs
+      EXPECTED_GPU_TYPE="none"  # No separate GPU attachment for built-in GPU instances
+      EXPECTED_INSTANCE_TYPE=$ORIGINAL_INSTANCE_TYPE
+    fi
+    
+    # Validate configuration
+    if [[ "$ORIGINAL_INSTANCE_TYPE" == *"nvidia-"* ]]; then
+      # For nvidia-* attachments, validate GPU type, count, and instance type
+      if [[ "$CREATED_GPU_TYPE" != "$EXPECTED_GPU_TYPE" ]] || [[ "$CREATED_GPU_COUNT" != "$GPU_COUNT" ]] || [[ "$CREATED_INSTANCE_TYPE" != "$EXPECTED_INSTANCE_TYPE" ]]; then
+        echo "ERROR: Created MachineSet configuration does not match requested!"
+        echo "Expected: Instance=$EXPECTED_INSTANCE_TYPE, GPU=$EXPECTED_GPU_TYPE, GPU_Count=$GPU_COUNT"
+        echo "Actual: Instance=$CREATED_INSTANCE_TYPE, GPU=$CREATED_GPU_TYPE, GPU_Count=$CREATED_GPU_COUNT"
+        exit 1
+      fi
+    else
+      # For g2-*/a2-*/g4-* instances, only validate instance type (GPUs are built-in)
+      if [[ "$CREATED_INSTANCE_TYPE" != "$EXPECTED_INSTANCE_TYPE" ]]; then
+        echo "ERROR: Created MachineSet instance type does not match requested!"
+        echo "Expected: Instance=$EXPECTED_INSTANCE_TYPE"
+        echo "Actual: Instance=$CREATED_INSTANCE_TYPE"
+        exit 1
+      fi
+      echo "GPU configuration: Built-in GPUs for $CREATED_INSTANCE_TYPE (GPU_COUNT parameter: $GPU_COUNT)"
+    fi
   else
-    EXPECTED_GPU_TYPE="nvidia-tesla-t4"
-    EXPECTED_INSTANCE_TYPE=$ORIGINAL_INSTANCE_TYPE
-  fi
-  
-  # Validate configuration
-  if [[ "$CREATED_GPU_TYPE" != "$EXPECTED_GPU_TYPE" ]] || [[ "$CREATED_GPU_COUNT" != "$GPU_COUNT" ]] || [[ "$CREATED_INSTANCE_TYPE" != "$EXPECTED_INSTANCE_TYPE" ]]; then
-    echo "ERROR: Created MachineSet configuration does not match requested!"
-    echo "Expected: Instance=$EXPECTED_INSTANCE_TYPE, GPU=$EXPECTED_GPU_TYPE, GPU_Count=$GPU_COUNT"
-    echo "Actual: Instance=$CREATED_INSTANCE_TYPE, GPU=$CREATED_GPU_TYPE, GPU_Count=$CREATED_GPU_COUNT"
-    exit 1
+    # For standard GCP instances, only validate instance type (no GPU validation)
+    echo "Created MachineSet config: Instance=$CREATED_INSTANCE_TYPE, Replicas=$GPU_NODE_COUNT (standard instance, no GPU validation)"
+    
+    if [[ "$CREATED_INSTANCE_TYPE" != "$ORIGINAL_INSTANCE_TYPE" ]]; then
+      echo "ERROR: Created MachineSet instance type does not match requested!"
+      echo "Expected: Instance=$ORIGINAL_INSTANCE_TYPE"
+      echo "Actual: Instance=$CREATED_INSTANCE_TYPE"
+      exit 1
+    fi
   fi
 fi
 

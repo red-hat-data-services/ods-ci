@@ -16,7 +16,7 @@ Get Must-Gather Logs
     Should Be Equal As Integers	  ${output.rc}	 0
     Should Not Contain    ${output.stdout}    FAIL
     ${must_gather_dir}=  Run     ls -d must-gather.local.*
-    ${namespaces_log_dir}=      Run     ls -d ${must_gather_dir}/quay-io-modh-must-gather-sha256-*/namespaces
+    ${namespaces_log_dir}=      Run     ls -d ${must_gather_dir}/quay-io-rhoai-odh-must-gather-rhel9-sha256-*/namespaces
     Set Suite Variable      ${must_gather_dir}
     Set Suite Variable      ${namespaces_log_dir}
     Directory Should Exist    ${must_gather_dir}

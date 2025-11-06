@@ -9,6 +9,9 @@
                     "size": "5Gi",
                     "retention": "90d"
                 },
+                "tls": {
+                    "enabled": true
+                },
                 "resources": {
                     "cpulimit": "500m",
                     "memorylimit": "512Mi",

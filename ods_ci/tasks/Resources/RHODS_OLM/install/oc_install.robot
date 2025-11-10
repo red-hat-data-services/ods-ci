@@ -268,7 +268,6 @@ Verify RHODS Installation
     IF    "${kueue_state}" == "Managed"
         Fail    msg=Kueue Managed mode is not supported on ODH/RHOAI 3.0+
     END
-    Install Kueue Dependencies
     Wait For Deployment Replica To Be Ready    namespace=${KUEUE_NS}
     ...    label_selector=app.kubernetes.io/name=kueue
   END

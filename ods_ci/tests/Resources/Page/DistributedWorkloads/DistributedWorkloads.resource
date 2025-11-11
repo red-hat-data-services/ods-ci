@@ -6,7 +6,7 @@ Resource          ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 
 
 *** Variables ***
-${CODEFLARE-SDK-RELEASE-TAG}             v0.32.0-rhoai-3.0-test-fix
+${CODEFLARE-SDK-RELEASE-TAG}             v0.32.1-rbac-fix
 ${CODEFLARE-SDK_DIR}                     codeflare-sdk
 ${CODEFLARE-SDK_REPO_URL}                %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
 ${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}  https://github.com/opendatahub-io/distributed-workloads/releases/latest/download
@@ -58,24 +58,15 @@ Clone Git Repository
     END
 
 Prepare Codeflare-SDK Test Setup
-    [Documentation]   Prepare codeflare-sdk tests by cloning codeflare-sdk repo and python virtual environmnet
+    [Documentation]   Prepare codeflare-sdk tests by cloning codeflare-sdk repo and python virtual environment
 
-    Clone Git Repository    ${CODEFLARE-SDK_REPO_URL}    ${CODEFLARE-SDK-RELEASE-TAG}    ${CODEFLARE-SDK_DIR}
-
-    # Perform oc login with Test User
-    Login To OCP Using API    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}
-
-Prepare Codeflare-SDK Upgrade Test Setup
-    [Documentation]   Prepare codeflare-sdk upgrade tests with RBAC setup and namespace creation
     Clone Git Repository    ${CODEFLARE-SDK_REPO_URL}    ${CODEFLARE-SDK-RELEASE-TAG}    ${CODEFLARE-SDK_DIR}
 
     # Setup Kueue RBAC permissions as admin before switching to test user
     Setup Kueue Batch User RoleBinding
 
-    # Create the test namespace as admin
-    Create Test Namespace For Codeflare Test
-
     # Perform oc login with Test User
+    Log To Console    "Log in with test user"
     Login To OCP Using API    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}
 
 Run Codeflare-SDK Test
@@ -96,6 +87,7 @@ Run Codeflare-SDK Test
     ...    env:TOLERATION_KEY=node-role.kubernetes.io/master
     ...    shell=true
     ...    stderr=STDOUT
+    ...    timeout=20 min
     Log To Console    ${result.stdout}
     IF    ${result.rc} != 0
         FAIL    Running test ${TEST_NAME} failed
@@ -331,6 +323,14 @@ Setup Kueue Batch User RoleBinding
     IF    ${result.rc} != 0
         FAIL    Unable to apply kueue-batch-user-specific-rolebinding ClusterRoleBinding
     END
+    Log To Console    "Applying codeflare-sdk-rbac-permissions"
+    ${result} =    Run Process    oc apply -f tests/Resources/Files/codeflare-sdk-rbac-permissions.yaml
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Unable to apply codeflare-sdk-rbac-permissions
+    END
 
 Teardown Kueue Batch User RoleBinding
     [Documentation]    Remove the kueue-batch-user-role ClusterRole and kueue-batch-user-rolebinding ClusterRoleBinding as admin
@@ -359,4 +359,12 @@ Teardown Kueue Batch User RoleBinding
     Log To Console    ${result.stdout}
     IF    ${result.rc} != 0
         Log To Console    "Warning: Unable to delete kueue-batch-user-role ClusterRole (may not exist)"
+    END
+    Log To Console    "Removing codeflare-sdk-rbac-permissions"
+    ${result} =    Run Process    oc delete -f tests/Resources/Files/codeflare-sdk-rbac-permissions.yaml
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        Log To Console    "Warning: Unable to delete codeflare-sdk-rbac-permissions (may not exist)"
     END

@@ -58,22 +58,20 @@ Clone Git Repository
     END
 
 Prepare Codeflare-SDK Test Setup
-    [Documentation]   Prepare codeflare-sdk tests by cloning codeflare-sdk repo and python virtual environmnet
+    [Documentation]   Prepare codeflare-sdk tests by cloning codeflare-sdk repo and python virtual environment
 
     Clone Git Repository    ${CODEFLARE-SDK_REPO_URL}    ${CODEFLARE-SDK-RELEASE-TAG}    ${CODEFLARE-SDK_DIR}
 
-    # Perform oc login with Test User
-    Login To OCP Using API    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}
-
-Prepare Codeflare-SDK Upgrade Test Setup
-    [Documentation]   Prepare codeflare-sdk upgrade tests with RBAC setup and namespace creation
-    Clone Git Repository    ${CODEFLARE-SDK_REPO_URL}    ${CODEFLARE-SDK-RELEASE-TAG}    ${CODEFLARE-SDK_DIR}
+    Log To Console    "Log in as cluster admin"
+    Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
 
     # Setup Kueue RBAC permissions as admin before switching to test user
-    Setup Kueue Batch User RoleBinding
+    Setup RBAC for codeflare-sdk
 
-    # Create the test namespace as admin
-    Create Test Namespace For Codeflare Test
+    # Set Kueue component to Unmanaged state as admin
+    Log To Console    "Setting Kueue component to Unmanaged state"
+    Set Component State    kueue    Unmanaged
+    Wait For DataScienceCluster CustomResource To Be Ready    timeout=600
 
     # Perform oc login with Test User
     Login To OCP Using API    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}
@@ -96,6 +94,7 @@ Run Codeflare-SDK Test
     ...    env:TOLERATION_KEY=node-role.kubernetes.io/master
     ...    shell=true
     ...    stderr=STDOUT
+    ...    timeout=20 min
     Log To Console    ${result.stdout}
     IF    ${result.rc} != 0
         FAIL    Running test ${TEST_NAME} failed
@@ -119,8 +118,13 @@ Cleanup Codeflare-SDK Setup
     Log To Console    "Log back as cluster admin"
     Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
 
+    # Set Kueue component back to Removed state
+    Log To Console    "Setting Kueue component to Removed state"
+    Set Component State    kueue    Removed
+    Wait For DataScienceCluster CustomResource To Be Ready    timeout=600
+
     # Cleanup Kueue RBAC resources
-    Teardown Kueue Batch User RoleBinding
+    Teardown RBAC for codeflare-sdk
 
 Create Test Namespace For Codeflare Test
     [Documentation]    Create the test namespace as admin for codeflare tests
@@ -236,7 +240,7 @@ Prepare DistributedWorkloads Integration Test Suite
     Log To Console    "Log back as cluster admin"
     Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
     RHOSi Setup
-    Setup Kueue Batch User RoleBinding
+    Setup RBAC for codeflare-sdk
 
 Teardown DistributedWorkloads Integration Test Suite
     [Documentation]    Teardown DistributedWorkloads Integration Test Suite
@@ -245,7 +249,7 @@ Teardown DistributedWorkloads Integration Test Suite
     Log To Console    "Removing test binaries"
     Remove File        ${ODH_BINARY_NAME}
     RHOSi Teardown
-    Teardown Kueue Batch User RoleBinding
+    Teardown RBAC for codeflare-sdk
 
 Generate User Token
     [Documentation]    Authenticate as a user and return user token.
@@ -303,10 +307,8 @@ Verify container images
     ...     ${registry_name}/rhoai/${expected_image}
     Log To Console    ${pod_name}'s container image is verified
 
-Setup Kueue Batch User RoleBinding
+Setup RBAC for codeflare-sdk
     [Documentation]    Apply the kueue-batch-user-role ClusterRole and kueue-batch-user-rolebinding ClusterRoleBinding as admin
-    Log To Console    "Logging in as cluster admin to setup RBAC permissions"
-    Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
     Log To Console    "Applying kueue-batch-user-role ClusterRole"
     ${result} =    Run Process    oc apply -f tests/Resources/Files/kueue-batch-user-role.yaml
     ...    shell=true
@@ -331,8 +333,16 @@ Setup Kueue Batch User RoleBinding
     IF    ${result.rc} != 0
         FAIL    Unable to apply kueue-batch-user-specific-rolebinding ClusterRoleBinding
     END
+    Log To Console    "Applying codeflare-sdk-rbac-permissions"
+    ${result} =    Run Process    oc apply -f tests/Resources/Files/codeflare-sdk-rbac-permissions.yaml
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Unable to apply codeflare-sdk-rbac-permissions
+    END
 
-Teardown Kueue Batch User RoleBinding
+Teardown RBAC for codeflare-sdk
     [Documentation]    Remove the kueue-batch-user-role ClusterRole and kueue-batch-user-rolebinding ClusterRoleBinding as admin
     Log To Console    "Logging in as cluster admin to cleanup RBAC permissions"
     Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
@@ -359,4 +369,12 @@ Teardown Kueue Batch User RoleBinding
     Log To Console    ${result.stdout}
     IF    ${result.rc} != 0
         Log To Console    "Warning: Unable to delete kueue-batch-user-role ClusterRole (may not exist)"
+    END
+    Log To Console    "Removing codeflare-sdk-rbac-permissions"
+    ${result} =    Run Process    oc delete -f tests/Resources/Files/codeflare-sdk-rbac-permissions.yaml
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        Log To Console    "Warning: Unable to delete codeflare-sdk-rbac-permissions (may not exist)"
     END

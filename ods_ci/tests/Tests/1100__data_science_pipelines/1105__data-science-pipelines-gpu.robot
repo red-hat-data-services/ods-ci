@@ -72,7 +72,6 @@ Dsp Gpu Suite Setup
     ...    object_storage_endpoint=${S3.BUCKET_2.ENDPOINT}
     ...    object_storage_region=${S3.BUCKET_2.REGION}
     ...    object_storage_bucket_name=${S3.BUCKET_2.NAME}
-    ...    dsp_version=v2
     DataSciencePipelinesBackend.Wait Until Pipeline Server Is Deployed    namespace=${PROJECT}
 
 Dsp Gpu Suite Teardown

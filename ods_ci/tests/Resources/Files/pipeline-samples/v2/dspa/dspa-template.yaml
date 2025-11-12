@@ -3,12 +3,11 @@ apiVersion: template.openshift.io/v1
 metadata:
     name: dspa-template
 objects:
-    -   apiVersion: datasciencepipelinesapplications.opendatahub.io/v1alpha1
+    -   apiVersion: datasciencepipelinesapplications.opendatahub.io/v1
         kind: DataSciencePipelinesApplication
         metadata:
             name: dspa
         spec:
-            dspVersion:  ${DSP_VERSION}
             objectStorage:
                 disableHealthCheck: false
                 enableExternalRoute: false
@@ -25,9 +24,6 @@ objects:
                     scheme: https
             podToPodTLS: true
 parameters:
-- description: Kubeflow Pipelines Version
-  value: "v2"
-  name: DSP_VERSION
 - description: Object Storage Bucket Name
   value: "test-bucket"
   name: OBJECT_STORAGE_BUCKET

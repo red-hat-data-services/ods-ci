@@ -56,6 +56,10 @@ jobs:
           python-version: "${{ env.python_version }}"
           cache: "poetry"
 
+      - name: Remove existing poetry virtual environment
+        run: |
+          poetry env remove --all || true
+
       - name: Configure poetry
         run: |
           poetry env use "${{ steps.setup-python.outputs.python-path }}"

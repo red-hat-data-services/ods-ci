@@ -46,9 +46,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install poetry
-        run: pipx install poetry==${{ env.poetry_version }}
-
       - name: Set up Python
         id: setup-python
         uses: actions/setup-python@v5
@@ -56,13 +53,20 @@ jobs:
           python-version: "${{ env.python_version }}"
           cache: "poetry"
 
-      - name: Remove existing poetry virtual environment
+      - name: Install poetry
+        run: pipx install poetry==${{ env.poetry_version }}
+
+      - name: Remove any existing poetry virtualenvs
         run: |
+          # remove any venvs created with a different Python so we can recreate/use the correct one
           poetry env remove --all || true
 
-      - name: Configure poetry
+      - name: Configure poetry to use the setup Python
         run: |
           poetry env use "${{ steps.setup-python.outputs.python-path }}"
+          # optional verification
+          poetry env info --path || true
+          poetry env list --full-path || true
 
       - run: poetry check --lock
 

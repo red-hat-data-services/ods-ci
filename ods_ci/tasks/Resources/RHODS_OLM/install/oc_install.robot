@@ -675,6 +675,18 @@ Install Leader Worker Set Operator Via Cli
              ...    retry=150
         Wait For Pods To Be Ready    label_selector=name=openshift-lws-operator
              ...    namespace=${LWS_OP_NS}
+        Configure Leader Worker Set Operator
+    END
+
+Configure Leader Worker Set Operator
+    [Documentation]    Configure LeaderWorkerSetOperator custom resource after operator installation
+    Log To Console    Configuring LeaderWorkerSetOperator resource
+    ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/configure_lws_operator.sh
+    Log    ${output}    console=yes
+    Run Keyword And Continue On Failure    Should Be Equal As Numbers    ${rc}    ${0}
+    IF    ${rc} != ${0}
+        Log    Unable to configure LeaderWorkerSetOperator resource.\nCheck the cluster please    console=yes
+        ...    level=ERROR
     END
 
 Install Connectivity Link Operator Via Cli
@@ -698,6 +710,30 @@ Install Connectivity Link Operator Via Cli
              ...    retry=150
         Wait For Pods To Be Ready    label_selector=app=kuadrant
              ...    namespace=${CONNECTIVITY_LINK_NS}
+        Configure Connectivity Link Operator
+    END
+
+Configure Connectivity Link Operator
+    [Documentation]    Configure Kuadrant custom resource after operator installation
+    Log To Console    Configuring Kuadrant resource
+    ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/configure_connectivity_link_operator.sh
+    Log    ${output}    console=yes
+    Run Keyword And Continue On Failure    Should Be Equal As Numbers    ${rc}    ${0}
+    IF    ${rc} != ${0}
+        Log    Unable to configure Kuadrant resource.\nCheck the cluster please    console=yes
+        ...    level=ERROR
+    END
+    Configure Authorino
+
+Configure Authorino
+    [Documentation]    Configure Authorino with SSL after Kuadrant is configured
+    Log To Console    Configuring Authorino with SSL
+    ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/configure_authorino.sh
+    Log    ${output}    console=yes
+    Run Keyword And Continue On Failure    Should Be Equal As Numbers    ${rc}    ${0}
+    IF    ${rc} != ${0}
+        Log    Unable to configure Authorino.\nCheck the cluster please    console=yes
+        ...    level=ERROR
     END
 
 Install Kueue Operator Via Cli
@@ -862,6 +898,7 @@ Install RHOAI Dependencies
     Install Cert Manager Operator Via Cli
     Install Leader Worker Set Operator Via Cli
     Install Connectivity Link Operator Via Cli
+    
 
 Install Observability Dependencies
     [Documentation]    Install dependent operators related to Observability
@@ -1064,3 +1101,4 @@ Configure Gateway For KServe
     ...    bash tasks/Resources/Gateway/configure_gateway.sh
     Log To Console    ${output}
     Should Be Equal As Integers    ${rc}    0    msg=Error configuring Gateway for KServe
+

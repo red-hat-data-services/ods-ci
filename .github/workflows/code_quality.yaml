@@ -3,9 +3,9 @@ on: [push, pull_request]
 
 jobs:
   run_shellcheck:
-     name: shellcheck linter
-     runs-on: ubuntu-latest
-     steps:
+    name: shellcheck linter
+    runs-on: ubuntu-latest
+    steps:
       - uses: actions/checkout@v4
       - name: shellcheck_
         uses: reviewdog/action-shellcheck@v1
@@ -17,29 +17,30 @@ jobs:
           exclude: "./.git/*"
           check_all_files_with_shebangs: "false"
   robocop:
-     name: robocop
-     runs-on: ubuntu-latest
+    name: robocop
+    runs-on:
+      ubuntu-latest
       # continue even if Robocop returns issues and fails step
-     continue-on-error: true
-     steps:
-      -   name: Checkout repository
-          uses: actions/checkout@v4
-      -   name: Install dependencies
-          #  robocop 6.X includes a new cli format and its not compatible with --reports
-          run: pipx install robotframework-robocop~=5.0.0
-      -   name: Run robocop
-          run: robocop --verbose --reports sarif . || true
-      -   name: Upload SARIF file
-          uses: github/codeql-action/upload-sarif@v3
-          with:
-            sarif_file: .sarif.json
-            category: robocop
+    continue-on-error: true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        #  robocop 6.X includes a new cli format and its not compatible with --reports
+        run: pipx install robotframework-robocop~=5.0.0
+      - name: Run robocop
+        run: robocop --verbose --reports sarif . || true
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: .sarif.json
+          category: robocop
   python_linters:
     name: python linters
     runs-on: ubuntu-latest
     env:
-      python_version: '3.11'
-      poetry_version: '2.1.1'
+      python_version: "3.11.7"
+      poetry_version: "2.1.1"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -52,8 +53,8 @@ jobs:
         id: setup-python
         uses: actions/setup-python@v5
         with:
-          python-version: '${{ env.python_version }}'
-          cache: 'poetry'
+          python-version: "${{ env.python_version }}"
+          cache: "poetry"
 
       - name: Configure poetry
         run: |
@@ -78,8 +79,8 @@ jobs:
     name: selftests
     runs-on: ubuntu-latest
     env:
-      python_version: '3.11'
-      poetry_version: '2.1.1'
+      python_version: "3.11.7"
+      poetry_version: "2.1.1"
     steps:
       - uses: actions/checkout@v4
 
@@ -90,8 +91,8 @@ jobs:
         id: setup-python
         uses: actions/setup-python@v5
         with:
-          python-version: '${{ env.python_version }}'
-          cache: 'poetry'
+          python-version: "${{ env.python_version }}"
+          cache: "poetry"
 
       - name: Configure poetry
         run: poetry env use "${{ steps.setup-python.outputs.python-path }}"

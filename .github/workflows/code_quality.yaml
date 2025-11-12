@@ -27,9 +27,11 @@ jobs:
         uses: actions/checkout@v4
       - name: Install dependencies
         #  robocop 6.X includes a new cli format and its not compatible with --reports
-        run: pipx install robotframework-robocop~=5.0.0
+        run: |
+          python -m pip install --user pipx --break-system-packages
+          python -m pipx install robotframework-robocop~=5.0.0
       - name: Run robocop
-        run: robocop --verbose --reports sarif . || true
+        run: $HOME/.local/bin/robocop --verbose --reports sarif . || true
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v3
         with:
@@ -53,18 +55,20 @@ jobs:
           python-version: "${{ env.python_version }}"
           cache: "poetry"
 
-      - name: Install pipx
+      - name: Install pipx and Poetry
         run: |
           python -m pip install --upgrade pip
           python -m pip install --user pipx
+          python -m pipx ensurepath
           echo "$HOME/.local/bin" >> $GITHUB_PATH
+          echo "PATH=$HOME/.local/bin:$PATH" >> $GITHUB_ENV
 
       - name: Install poetry via pipx
         run: python -m pipx install poetry==${{ env.poetry_version }}
 
       - name: Verify poetry availability
         run: |
-          which poetry
+          which poetry || true
           poetry --version
 
       - name: Remove any existing poetry virtualenvs
@@ -110,18 +114,20 @@ jobs:
           python-version: "${{ env.python_version }}"
           cache: "poetry"
 
-      - name: Install pipx
+      - name: Install pipx and Poetry
         run: |
           python -m pip install --upgrade pip
           python -m pip install --user pipx
+          python -m pipx ensurepath
           echo "$HOME/.local/bin" >> $GITHUB_PATH
+          echo "PATH=$HOME/.local/bin:$PATH" >> $GITHUB_ENV
 
       - name: Install poetry via pipx
         run: python -m pipx install poetry==${{ env.poetry_version }}
 
       - name: Verify poetry availability
         run: |
-          which poetry
+          which poetry || true
           poetry --version
 
       - name: Configure poetry

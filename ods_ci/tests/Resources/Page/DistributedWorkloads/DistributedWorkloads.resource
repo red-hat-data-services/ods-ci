@@ -6,7 +6,7 @@ Resource          ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 
 
 *** Variables ***
-${CODEFLARE-SDK-RELEASE-TAG}             v0.32.0-rhoai-3.0-test-fix
+${CODEFLARE-SDK-RELEASE-TAG}             v0.32.1-rbac-fix
 ${CODEFLARE-SDK_DIR}                     codeflare-sdk
 ${CODEFLARE-SDK_REPO_URL}                %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
 ${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}  https://github.com/opendatahub-io/distributed-workloads/releases/latest/download
@@ -74,6 +74,7 @@ Prepare Codeflare-SDK Test Setup
     Wait For DataScienceCluster CustomResource To Be Ready    timeout=600
 
     # Perform oc login with Test User
+    Log To Console    "Log in with test user"
     Login To OCP Using API    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}
 
 Run Codeflare-SDK Test

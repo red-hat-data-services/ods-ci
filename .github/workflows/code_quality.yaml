@@ -60,7 +60,7 @@ jobs:
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Install poetry via pipx
-        run: pipx install poetry==${{ env.poetry_version }}
+        run: python -m pipx install poetry==${{ env.poetry_version }}
 
       - name: Verify poetry availability
         run: |
@@ -117,7 +117,7 @@ jobs:
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Install poetry via pipx
-        run: pipx install poetry==${{ env.poetry_version }}
+        run: python -m pipx install poetry==${{ env.poetry_version }}
 
       - name: Verify poetry availability
         run: |

@@ -288,23 +288,11 @@ if command -v yq &> /dev/null
                         cluster_auth=$(yq -r '.CLUSTER_AUTH' "${TEST_VARIABLES_FILE}")
                         if [ "$cluster_auth" = "oidc" ] ; then
                           echo "Performing oc login using OIDC"
-                          command -v kubelogin || {
-                            echo "kubelogin not found, please install it from https://github.com/int128/kubelogin to log into OIDC cluster"
-                            exit 1
-                          }
                           cluster_oidc_issuer=$(yq -er '.CLUSTER_OIDC_ISSUER' "${TEST_VARIABLES_FILE}") || {
                               echo "Couldn't find '.CLUSTER_OIDC_ISSUER' variable in provided '${TEST_VARIABLES_FILE}'."
                               echo "Please either provide it or use '--skip-oclogin true' (don't forget to login to the testing cluster manually then)."
                               exit 1
                           }
-                          oc config set-credentials "${oc_user}" \
-                              --exec-api-version=client.authentication.k8s.io/v1 \
-                              --exec-interactive-mode=Never \
-                              --exec-command=kubelogin \
-                              --exec-arg=get-token \
-                              --exec-arg="--oidc-issuer-url=${cluster_oidc_issuer}" \
-                              --exec-arg="--oidc-client-id=oc-cli" \
-                              --exec-arg="--username=${oc_user}"
                           oc config set-cluster test-cluster \
                               --server="${oc_host}" \
                               --insecure-skip-tls-verify=true
@@ -312,12 +300,17 @@ if command -v yq &> /dev/null
                               --cluster=test-cluster \
                               --user="${oc_user}"
                           oc config use-context main
-                          kubelogin get-token \
-                            --oidc-issuer-url="${cluster_oidc_issuer}" \
-                            --oidc-client-id=oc-cli \
-                            --grant-type=password \
-                            --username="${oc_user}" \
-                            --password="${oc_pass}"
+                          tokens="$(curl -s -L -X POST "${cluster_oidc_issuer}/protocol/openid-connect/token" \
+                              -H "Content-Type: application/x-www-form-urlencoded" -d "username=${oc_user}" \
+                              -d "password=${oc_pass}" -d "grant_type=password" -d "client_id=oc-cli" -d "scope=openid")"
+                          oc config set-credentials "$oc_user"  \
+                                  --auth-provider=oidc  \
+                                  --auth-provider-arg=idp-issuer-url="${cluster_oidc_issuer}"/realms/openshift \
+                                  --auth-provider-arg=client-id=oc-cli  \
+                                  --auth-provider-arg=client-secret=""  \
+                                  --auth-provider-arg=refresh-token="$(echo "$tokens" | jq -r .refresh_token)" \
+                                  --auth-provider-arg=id-token="$(echo "$tokens" | jq -r .id_token)"
+                          oc auth whoami
                           retVal=$?
                         else
                           echo "Performing oc login using username and password"

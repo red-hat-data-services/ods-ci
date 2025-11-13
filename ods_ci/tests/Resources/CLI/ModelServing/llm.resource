@@ -1,7 +1,6 @@
 *** Settings ***
 Documentation     Collection of keywords to interact with Model Serving feature for LLM (Kserve) via CLI
 Resource          ../../../Resources/OCP.resource
-Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
 Resource          ../../../Resources/Page/ODH/ODHDashboard/ODHDashboardAPI.resource
 Library           ../../../../libs/Helpers.py
 
@@ -21,7 +20,6 @@ ${BUCKET_SA_FILEPATH}=    ${LLM_RESOURCES_DIRPATH}/bucket_sa.yaml
 ${ROLE_BINDING_FILEPATH}=   ${LLM_RESOURCES_DIRPATH}/rolebinding_view.yaml
 ${USE_BUCKET_HTTPS}=    "1"
 ${MODELS_BUCKET}=    ${S3.BUCKET_3}
-${SERVICEMESH_CR_NS}=    istio-system
 &{RUNTIME_FLIEPATHS}=    caikit-tgis-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/caikit_tgis_servingruntime_{{protocol}}.yaml
 ...                      tgis-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/tgis_servingruntime_{{protocol}}.yaml
 ...                      vllm-runtime=${LLM_RESOURCES_DIRPATH}/serving_runtimes/vllm_servingruntime_{{protocol}}.yaml
@@ -36,7 +34,7 @@ ${MATCHING_RATIO}=    ${60}
 
 *** Keywords ***
 Set Up Test OpenShift Project
-    [Documentation]    Creates a test namespace and track it under ServiceMesh
+    [Documentation]    Creates a test namespace
     [Arguments]    ${test_ns}
     ${rc}    ${out}=    Run And Return Rc And Output    oc get project ${test_ns}
     IF    "${rc}" == "${0}"
@@ -751,8 +749,7 @@ Generate Client TLS Certificates
     Should Be Equal As Integers  ${rc}   ${0}   msg=Error detected while generating client certificates
 
 Clean Up Test Project
-    [Documentation]    Deletes the given InferenceServices, check the NS gets removed from ServiceMeshMemberRoll
-    ...                and deletes the DS Project
+    [Documentation]    Deletes the given InferenceServices and deletes the DS Project
     [Arguments]    ${test_ns}    ${isvc_names}    ${isvc_delete}=${TRUE}    ${wait_prj_deletion}=${TRUE}
     ...            ${kserve_mode}=${NONE}
     IF    ${isvc_delete} == ${TRUE}
@@ -762,14 +759,6 @@ Clean Up Test Project
         END
     ELSE
         Log To Console     InferenceService Delete option not provided by user
-    END
-    IF    $kserve_mode is None
-        ${kserve_mode}=    Get KServe Default Deployment Mode From DSC
-        Log    message=Using defaultDeploymentMode set in the DSC: ${kserve_mode}
-    END
-    IF    "${kserve_mode}"=="Serverless"
-           Wait Until Keyword Succeeds    10    1s    Namespace Should Be Removed From ServiceMeshMemberRoll
-           ...    namespace=${test_ns}
     END
     ${rc}    ${out}=    Run And Return Rc And Output    oc delete project ${test_ns}
     Should Be Equal As Integers    ${rc}    ${0}
@@ -860,17 +849,6 @@ Start Port-forwarding
     ...    alias=${process_alias}    stderr=STDOUT    shell=yes
     Process Should Be Running    ${process}
     sleep  7s
-
-Create Role Binding For Authorino
-    [Arguments]    ${name}    ${namespace}
-    Set Test Variable    ${name}
-    Set Test Variable    ${namespace}
-    Set Test Variable    ${nameview}    ${name}-view
-    Set Test Variable    ${namesa}    ${name}-sa
-    Create File From Template    ${ROLE_BINDING_FILEPATH}   ${LLM_RESOURCES_DIRPATH}/rb.filled.yaml
-    ${rc}    ${out}=    Run And Return Rc And Output
-    ...     oc apply -f ${LLM_RESOURCES_DIRPATH}/rb.filled.yaml
-    Should Be Equal As Integers    ${rc}    ${0}
 
 Create Inference Access Token
     [Arguments]  ${test_namespace}  ${bucket_sa_name}

@@ -182,21 +182,6 @@ Get RHODS Version
     Log    Product:${PRODUCT} Version:${RHODS_VERSION}    console=yes
     RETURN  ${RHODS_VERSION}
 
-#robocop: disable: line-too-long
-Get CodeFlare Version
-    [Documentation]    Return RHODS CodeFlare operator version number.
-    ...    Will fetch version only if $CODEFLARE_VERSION was not already set, or $force_fetch is True.
-    [Arguments]    ${force_fetch}=False
-    IF  "${CODEFLARE_VERSION}" == "${None}" or "${force_fetch}" == "True"
-        IF  "${PRODUCT}" == "${None}" or "${PRODUCT}" == "RHODS"
-            ${CODEFLARE_VERSION}=  Run  oc get csv -n openshift-operators | grep "rhods-codeflare-operator" | awk '{print $1}' | sed 's/rhods-codeflare-operator.//'
-        ELSE
-            ${CODEFLARE_VERSION}=  Run  oc get csv -n openshift-operators | grep "codeflare-operator" | awk -F ' {2,}' '{print $3}'
-        END
-    END
-    Log  Product:${PRODUCT} CodeFlare Version:${CODEFLARE_VERSION}
-    RETURN  ${CODEFLARE_VERSION}
-
 Get Cluster ID
     [Documentation]     Retrieves the ID of the currently connected cluster
     ${cluster_id}=   Run    oc get clusterversion -o json | jq .items[].spec.clusterID
@@ -361,7 +346,7 @@ Run Keyword If RHODS Is Self-Managed
 Get Sub Domain Of Current URL
     [Documentation]    Gets the sub-domain of the current URL (i.e. everything before the first dot in the URL)
     ...    e.g. https://console-openshift-console.apps.<cluster>.rhods.ccitredhat.com -> https://console-openshift-console
-    ...    e.g. https://rhods-dashboard-redhat-ods-applications.apps.<cluster>.rhods.ccitredhat.com/ -> https://rhods-dashboard-redhat-ods-applications
+    ...    e.g. https://data-science-gateway.apps.<cluster>.rhods.ccitredhat.com/ -> https://data-science-gateway
     ${current_url} =    Get Location
     ${domain} =    Fetch From Left    string=${current_url}    marker=.
     RETURN    ${domain}

@@ -1,9 +1,8 @@
-apiVersion: datasciencepipelinesapplications.opendatahub.io/v1alpha1
+apiVersion: datasciencepipelinesapplications.opendatahub.io/v1
 kind: DataSciencePipelinesApplication
 metadata:
   name: dspa
 spec:
-  dspVersion: v2
   objectStorage:
     externalStorage:
       bucket: rhods-dsp-dev
@@ -13,7 +12,3 @@ spec:
         secretKey: k8ssecretkey
         secretName: aws-bucket-creds
       scheme: https
-  # Optional
-  mlpipelineUI:
-    # Image field is required
-    image: 'quay.io/opendatahub/odh-ml-pipelines-frontend-container:beta-ui'

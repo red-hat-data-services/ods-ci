@@ -11,6 +11,7 @@ from ods_ci.utils.scripts.util import (
     clone_config_repo,
     execute_command,
     oc_login,
+    oc_login_oidc,
     read_yaml,
 )
 
@@ -179,12 +180,9 @@ def get_dashboard_url():
     """
     Get dashboard url for the open data science.
     """
-    cmd = (
-        "(oc get route -n opendatahub -o json  | jq '.items[].spec.host' | grep odh-dashboard) || "
-        "(oc get route -n redhat-ods-applications -o json  | jq '.items[].spec.host' | grep rhods-dashboard)"
-    )
+    cmd = "(oc get consolelinks -l 'platform.opendatahub.io/part-of=dashboard' -o yaml | yq '.items[0].spec.href')"
     dashboard_url = execute_command(cmd)
-    return "https://" + dashboard_url.strip('"').strip("\n")
+    return dashboard_url.strip('"').strip("\n")
 
 
 def generate_test_config_file(
@@ -237,6 +235,12 @@ def generate_test_config_file(
     data["OCP_ADMIN_USER"]["AUTH_TYPE"] = config_data["TEST_CLUSTERS"][test_cluster]["OCP_ADMIN_USER"]["AUTH_TYPE"]
     data["OCP_ADMIN_USER"]["USERNAME"] = config_data["TEST_CLUSTERS"][test_cluster]["OCP_ADMIN_USER"]["USERNAME"]
     data["OCP_ADMIN_USER"]["PASSWORD"] = config_data["TEST_CLUSTERS"][test_cluster]["OCP_ADMIN_USER"]["PASSWORD"]
+    data["CLUSTER_AUTH"] = "internal"
+    data["CLUSTER_OIDC_ISSUER"] = ""
+    if config_data["TEST_CLUSTERS"][test_cluster].get("CLUSTER_AUTH"):
+        data["CLUSTER_AUTH"] = config_data["TEST_CLUSTERS"][test_cluster]["CLUSTER_AUTH"]
+    if config_data["TEST_CLUSTERS"][test_cluster].get("CLUSTER_OIDC_ISSUER"):
+        data["CLUSTER_OIDC_ISSUER"] = config_data["TEST_CLUSTERS"][test_cluster]["CLUSTER_OIDC_ISSUER"]
     data["SSO"]["USERNAME"] = config_data["SSO"]["USERNAME"]
     data["SSO"]["PASSWORD"] = config_data["SSO"]["PASSWORD"]
     data["RHODS_BUILD"]["PULL_SECRET"] = config_data["RHODS_BUILD"]["PULL_SECRET"]
@@ -324,12 +328,19 @@ def generate_test_config_file(
         data["CUSTOM_MANIFESTS"] = initialize_custom_manifest(custom_manifests)
 
     # Login to test cluster using oc command
-    oc_login(
-        data["OCP_API_URL"],
-        data["OCP_ADMIN_USER"]["USERNAME"],
-        data["OCP_ADMIN_USER"]["PASSWORD"],
-    )
-    print("After oc login")
+    if data["CLUSTER_AUTH"] == "oidc":
+        oc_login_oidc(
+            data["OCP_API_URL"],
+            data["OCP_ADMIN_USER"]["USERNAME"],
+            data["OCP_ADMIN_USER"]["PASSWORD"],
+            data["CLUSTER_OIDC_ISSUER"],
+        )
+    else:
+        oc_login(
+            data["OCP_API_URL"],
+            data["OCP_ADMIN_USER"]["USERNAME"],
+            data["OCP_ADMIN_USER"]["PASSWORD"],
+        )
 
     if bool(set_prometheus_config):
         # Get prometheus token for test cluster

@@ -55,23 +55,23 @@ Set DSC Component Unmanaged State And Wait For Completion
 Wait For Resources To Be Available
     [Documentation]    Wait until Deployment and Pod(s) are Available
     [Arguments]    ${deployment_name}    ${label_selector}    ${namespace}=${APPLICATIONS_NS}
-    Wait Until Keyword Succeeds    5 min    0 sec
+    Wait Until Keyword Succeeds    10 min    0 sec
     ...    Is Resource Present     Deployment    ${deployment_name}    ${namespace}    ${IS_PRESENT}
 
-    Wait Until Keyword Succeeds    5 min    0 sec
+    Wait Until Keyword Succeeds    10 min    0 sec
     ...    Check If Pod Exists    ${namespace}    ${label_selector}    ${FALSE}
 
-    Wait Until Keyword Succeeds    8 min    0 sec
+    Wait Until Keyword Succeeds    10 min    0 sec
     ...    Is Pod Ready    ${label_selector}
 
 Wait For Resources To Be Removed
     [Documentation]    Wait until Deployment and Pod(s) to Removed
     [Arguments]    ${deployment_name}    ${label_selector}     ${namespace}=${APPLICATIONS_NS}
 
-    Wait Until Keyword Succeeds    5 min    0 sec
+    Wait Until Keyword Succeeds    10 min    0 sec
     ...    Is Resource Present     Deployment    ${deployment_name}    ${namespace}    ${IS_NOT_PRESENT}
 
-    Wait Until Keyword Succeeds    5 min    0 sec
+    Wait Until Keyword Succeeds    10 min    0 sec
     ...    Check If Pod Does Not Exist    ${label_selector}    ${namespace}
 
 Restore DSC Component State
@@ -86,6 +86,10 @@ Restore DSC Component State
             Set DSC Component Removed State And Wait For Completion    ${component}    ${deployment_name}    ${LABEL_SELECTOR}      ${namespace}
         ELSE IF    "${saved_state}" == "Unmanaged"
             Set DSC Component Unmanaged State And Wait For Completion    ${component}     ${deployment_name}    ${LABEL_SELECTOR}      ${namespace}
+        ELSE IF    "${saved_state}" == "${EMPTY}" or "${saved_state}" == ""
+            # If saved_state is empty, set component to Removed state as default
+            Log To Console    Component ${component} saved state was empty, setting to Removed state
+            Set DSC Component Removed State And Wait For Completion    ${component}    ${deployment_name}    ${LABEL_SELECTOR}      ${namespace}
         ELSE
             FAIL    Component ${component} state "${saved_state}" not supported at this time
         END

@@ -101,6 +101,74 @@ def oc_login(ocp_api_url, username, password, timeout=600):
         sys.exit(1)
 
 
+def oc_login_oidc(ocp_api_url, username, password, issuer_url, timeout=600):
+    """
+    Login to test cluster using oidc
+    """
+    setup_cmd = f"""
+        oc config set-cluster test-cluster \
+            --server={ocp_api_url} \
+            --insecure-skip-tls-verify=true && \
+        oc config set-context main \
+            --cluster=test-cluster \
+            --user={username} && \
+        oc config use-context main
+    """
+    execute_command(setup_cmd)
+    tokens = get_oidc_tokens(username, password, issuer_url)
+    count = 0
+    chk_flag = 0
+    while count <= timeout:
+        cmd = f"""
+            oc config set-credentials "{username}"  \
+                    --auth-provider=oidc  \
+                    --auth-provider-arg=idp-issuer-url={issuer_url} \
+                    --auth-provider-arg=client-id=oc-cli  \
+                    --auth-provider-arg=client-secret=""  \
+                    --auth-provider-arg=refresh-token={tokens["refresh_token"]} \
+                    --auth-provider-arg=id-token={tokens["id_token"]}
+            oc auth whoami
+        """
+        out = execute_command(cmd)
+        if (out is not None) and (username in out):
+            print("Logged into cluster successfully")
+            chk_flag = 1
+            break
+        time.sleep(5)
+        count += 5
+    if not chk_flag:
+        print("Failed to login to cluster")
+        sys.exit(1)
+
+def get_oidc_tokens(username, password, issuer_url, timeout=60):
+    """
+    Get id and refresh token from OIDC issuer
+    """
+    cmd = f"""
+        curl -s -L -X POST "{issuer_url}/protocol/openid-connect/token" \
+            -H "Content-Type: application/x-www-form-urlencoded" -d "username={username}" \
+            -d "password={password}" -d "grant_type=password" -d "client_id=oc-cli" -d "scope=openid"
+    """
+    count = 0
+    chk_flag = 0
+    while count <= timeout:
+        out = execute_command(cmd)
+        try:
+            tokens = json.loads(out)
+            if "refresh_token" in tokens and "id_token" in tokens:
+                print("Logged into OIDC issuer correctly")
+                chk_flag = 1
+                return tokens
+        except Exception:
+            print("Failed to parse tokens, retrying")
+        time.sleep(5)
+        count += 5
+    if not chk_flag:
+        print("Failed to obtain OIDC tokens")
+        sys.exit(1)
+
+
+
 def render_template(search_path, template_file, output_file, replace_vars):
     """Helper module to render jinja template"""
 

@@ -56,7 +56,7 @@ Verify Custom Image Can Be Added
     #Should Match  ${spawner_software}  ${IMG_SOFTWARE}
     #Should Match  ${spawner_packages}  ${IMG_PACKAGES}
 
-    Spawn Notebook With Arguments  image=${IMAGESTREAM_NAME}  size=Small
+    Spawn Notebook With Arguments  image=${IMAGESTREAM_NAME}  hardware_profile=default-profile
     ${CLEANUP}=  Set Variable  True
     [Teardown]  Custom Image Teardown  cleanup=${CLEANUP}
 
@@ -108,7 +108,7 @@ Test Image From Local registry
     Verify Custom Image Is Listed    ${IMG_NAME}
     Verify Custom Image Provider  ${IMG_NAME}  ${TEST_USER.USERNAME}
     Launch JupyterHub Spawner From Dashboard
-    Spawn Notebook With Arguments  image=${IMAGESTREAM_NAME}  size=Small
+    Spawn Notebook With Arguments  image=${IMAGESTREAM_NAME}  hardware_profile=default-profile
     ${CLEANUP}=  Set Variable  True
     [Teardown]  Custom Image Teardown  cleanup=${CLEANUP}
 

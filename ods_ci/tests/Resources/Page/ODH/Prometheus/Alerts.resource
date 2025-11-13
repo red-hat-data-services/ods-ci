@@ -37,23 +37,6 @@ Verify Number Of Alerting Rules
     ...    msg=Number of alerting rules doesn't match, actual '${actual_count}', expected '${expected_count}'
 
 # Grouped checks per rule group
-Verify "CodeFlare Operator Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
-    [Documentation]    Verifies that alert "CodeFlare Operator Probe Success Burn Rate" is not firing
-    ...     for all alert durations
-    Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-probe_success_codeflare    CodeFlare Operator Probe Success 5m and 1h Burn Rate high    alert-duration=120
-    Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-probe_success_codeflare    CodeFlare Operator Probe Success 30m and 6h Burn Rate high    alert-duration=900
-    Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-probe_success_codeflare    CodeFlare Operator Probe Success 2h and 1d Burn Rate high    alert-duration=3600
-
-Verify "Distributed Workloads CodeFlare" Alerts Are Not Firing And Continue On Failure
-    [Documentation]    Verifies that alert "Distributed Workloads CodeFlare" is not firing
-    Verify Alert Is Not Firing And Continue On Failure
-    ...    Distributed Workloads CodeFlare    CodeFlare Operator is not running
-    Verify Alert Is Not Firing And Continue On Failure
-    ...    Distributed Workloads CodeFlare    CodeFlare Operator taking too long to be up
-
 Verify "KubeFlow Training Operator" Alerts Are Not Firing And Continue On Failure
     [Documentation]    Verifies that alert "KubeFlow Training Operator" is not firing
     Verify Alert Is Not Firing And Continue On Failure
@@ -115,16 +98,6 @@ Verify "RHODS Data Science Pipelines" Alerts Are Not Firing And Continue On Fail
     ...    RHODS Data Science Pipelines    Data Science Pipeline PersistenceAgent Unavailable    alert-duration=120
     Verify Alert Is Not Firing And Continue On Failure
     ...    RHODS Data Science Pipelines    Data Science Pipeline ScheduledWorkflows Unavailable    alert-duration=120
-
-Verify "Modelmesh Controller Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
-    [Documentation]    Verifies that alert "Modelmesh Controller Probe Success Burn Rate" is not firing
-    ...     for all alert durations
-    Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-probe_success_modelmesh    Modelmesh Controller Probe Success 5m and 1h Burn Rate high    alert-duration=120
-    Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-probe_success_modelmesh    Modelmesh Controller Probe Success 30m and 6h Burn Rate high    alert-duration=900
-    Verify Alert Is Not Firing And Continue On Failure
-    ...    SLOs-probe_success_modelmesh    Modelmesh Controller Probe Success 2h and 1d Burn Rate high    alert-duration=3600
 
 Verify "ODH Model Controller Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
     [Documentation]    Verifies that alert "ODH Model Controller Probe Success Burn Rate" is not firing

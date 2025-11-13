@@ -189,7 +189,7 @@ Verify That MT-SRE Are Not Paged For Alerts In Clusters Used For Development Or 
     END
     Verify Alertmanager Receiver For Critical Alerts    receiver=${receiver}
 
-Verify Data Science Pipelines Application Alerts
+Verify Ai Pipelines Application Alerts
     [Documentation]    Verifies that Data Science Pipelines Application alerts are fired when various parts are not running
     [Tags]    Tier3
     ...       ODS-2170
@@ -206,7 +206,6 @@ Verify Data Science Pipelines Application Alerts
     ...    object_storage_endpoint=${S3.BUCKET_2.ENDPOINT}
     ...    object_storage_region=${S3.BUCKET_2.REGION}
     ...    object_storage_bucket_name=${S3.BUCKET_2.NAME}
-    ...    dsp_version=v2
     DataSciencePipelinesBackend.Wait Until Pipeline Server Is Deployed    namespace=${PROJECT}
 
     Log To Console    "Verifying metrics"
@@ -475,15 +474,6 @@ Verify "ODH Model Controller Probe Success Burn Rate" Alerts Severity And Contin
     Verify Alert Has A Given Severity And Continue On Failure
     ...    SLOs-probe_success_workbench    ODH Model Controller Probe Success 2h and 1d Burn Rate high    warning    alert-duration=3600
 
-Verify "Modelmesh Controller Probe Success Burn Rate" Alerts Severity And Continue On Failure
-    [Documentation]    Verifies that alert "Modelmesh Controller Probe Success Burn Rate" severity
-    Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success_workbench    Modelmesh Controller Probe Success 5m and 1h Burn Rate high    critical    alert-duration=120
-    Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success_workbench    Modelmesh Controller Probe Success 30m and 6h Burn Rate high    critical    alert-duration=900
-    Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success_workbench    Modelmesh Controller Probe Success 2h and 1d Burn Rate high    warning    alert-duration=3600
-
 Verify "KServe Controller Probe Success Burn Rate" Alerts Severity And Continue On Failure
     [Documentation]    Verifies that alert "KServe Controller Probe Success Burn Rate" severity
     Verify Alert Has A Given Severity And Continue On Failure
@@ -501,15 +491,6 @@ Verify "Data Science Pipelines Operator Probe Success Burn Rate" Alerts Severity
     ...    SLOs-probe_success_workbench    Data Science Pipelines Operator Probe Success 30m and 6h Burn Rate high    info    alert-duration=900
     Verify Alert Has A Given Severity And Continue On Failure
     ...    SLOs-probe_success_workbench    Data Science Pipelines Operator Probe Success 2h and 1d Burn Rate high    info    alert-duration=3600
-
-Verify "CodeFlare Operator Probe Success Burn Rate" Alerts Severity And Continue On Failure
-    [Documentation]    Verifies that alert "CodeFlare Operator Probe Success Burn Rate" severity
-    Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success_workbench    CodeFlare Operator Probe Success 5m and 1h Burn Rate high    critical    alert-duration=120
-    Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success_workbench    CodeFlare Operator Probe Success 30m and 6h Burn Rate high    critical    alert-duration=900
-    Verify Alert Has A Given Severity And Continue On Failure
-    ...    SLOs-probe_success_workbench    CodeFlare Operator Probe Success 2h and 1d Burn Rate high    warning    alert-duration=3600
 
 Verify "RHODS Dashboard Route Error Burn Rate" Alerts Severity And Continue On Failure
     [Documentation]    Verifies that alert "RHODS Dashboard Route Error Burn Rate" severity

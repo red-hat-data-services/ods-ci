@@ -61,7 +61,8 @@ Verify Previous CUDA Notebook Image With GPU
     ...       Resources-GPU    NVIDIA-GPUs
     ...       ODS-2128
     [Setup]    N-1 CUDA Setup
-    Spawn Notebook With Arguments    image=${NOTEBOOK_IMAGE}    size=Small    gpus=1    version=previous
+    # TODOjstourac = we need to define our custom profile with a gpu
+    Spawn Notebook With Arguments    image=${NOTEBOOK_IMAGE}    hardware_profile=default-profile    version=previous
     Verify Installed CUDA Version    ${EXPECTED_CUDA_VERSION_N_1}
     Verify PyTorch Can See GPU    install=True
     Verify Tensorflow Can See GPU    install=True
@@ -79,7 +80,8 @@ Verify CUDA Image Suite Setup
     Close All Browsers
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
-    Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  size=Small  gpus=1
+    # TODOjstourac = we need to define our custom profile with a gpu
+    Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  hardware_profile=default-profile
     # Verifies that now there are no GPUs available for selection
     @{old_browser} =  Get Browser Ids
     Sleep  30s  msg=Give time to spawner to update GPU count

@@ -12,14 +12,12 @@ Test Tags           ExcludeOnODH
 
 
 *** Variables ***
-@{RECORD_GROUPS}    SLOs - Data Science Pipelines Operator    SLOs - Data Science Pipelines Application
-...    SLOs - Modelmesh Controller    SLOs - CodeFlare Operator    SLOs - MCAD Controller    Usage Metrics
+@{RECORD_GROUPS}    SLOs - Data Science Pipelines Operator    SLOs - AI Pipelines Application
 ...    SLOs - ODH Model Controller    SLOs - Kserve Controller Manager    SLOs - ODH Dashboard    Availability Metrics
 ...    SLOs - RHODS Operator v2    SLOs - TrustyAI Controller Manager    SLOs - Notebook Controller
 
-@{ALERT_GROUPS}    SLOs-haproxy_backend_http_responses_dsp    RHODS Data Science Pipelines    SLOs-probe_success_dsp
-...    SLOs-probe_success_modelmesh     SLOs-probe_success_dashboard    SLOs-probe_success_workbench
-...    DeadManSnitch     SLOs-probe_success_codeflare     Distributed Workloads CodeFlare     KubeFlow Training Operator
+@{ALERT_GROUPS}    SLOs-haproxy_backend_http_responses_dsp    RHODS AI Pipelines    SLOs-probe_success_dsp
+...    DeadManSnitch     KubeFlow Training Operator
 ...    SLOs-haproxy_backend_http_responses_dashboard     SLOs-probe_success_model_controller     SLOs-probe_success_kserve
 ...    Distributed Workloads Kuberay     Distributed Workloads Kueue     RHODS-PVC-Usage     RHODS Notebook controllers
 ...    SLOs-probe_success_trustyai
@@ -109,18 +107,15 @@ Test Targets Are Available And Up In RHOAI Prometheus
     ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
     ...    username=${OCP_ADMIN_USER.USERNAME}
     ...    password=${OCP_ADMIN_USER.PASSWORD}
-    List Should Contain Value    ${targets}    CodeFlare Operator
     List Should Contain Value    ${targets}    Data Science Pipelines Operator
     List Should Contain Value    ${targets}    Federate Prometheus
     List Should Contain Value    ${targets}    Kserve Controller Manager
     List Should Contain Value    ${targets}    KubeRay Operator
     List Should Contain Value    ${targets}    Kubeflow Notebook Controller Service Metrics
     List Should Contain Value    ${targets}    Kueue Operator
-    List Should Contain Value    ${targets}    Modelmesh Controller
     List Should Contain Value    ${targets}    ODH Model Controller
     List Should Contain Value    ${targets}    ODH Notebook Controller Service Metrics
     List Should Contain Value    ${targets}    TrustyAI Controller Manager
-    List Should Contain Value    ${targets}    user_facing_endpoints_status_codeflare
     List Should Contain Value    ${targets}    user_facing_endpoints_status_dsp
     List Should Contain Value    ${targets}    user_facing_endpoints_status_rhods_dashboard
     List Should Contain Value    ${targets}    user_facing_endpoints_status_workbenches
@@ -138,9 +133,9 @@ Test RHOAI Operator Metrics Are Defined
     ...                                     controller_runtime_reconcile_time_seconds_bucket  controller_runtime_reconcile_time_seconds_count
     ...                                     controller_runtime_reconcile_time_seconds_sum  controller_runtime_reconcile_total
 
-    @{expected_controller_names} =     Create List  auth  codeflare  dashboard
-    ...                                    datasciencecluster  datasciencepipelines  dscinitialization  kserve  kueue
-    ...                                    modelcontroller  modelmeshserving  modelregistry  monitoring  ray
+    @{expected_controller_names} =     Create List  auth  dashboard
+    ...                                    datasciencecluster  aipipelines  dscinitialization  kserve  kueue
+    ...                                    modelcontroller  modelregistry  monitoring  ray
     ...                                    trainingoperator  trustyai  workbenches
 
     FOR   ${controller}    IN    @{expected_controller_names}

@@ -58,7 +58,7 @@ Spawn Notebook And Trigger Autoscale
     [Documentation]    Wrapper keyword to spawn a notebook and trigger the autoscaling
     ...    of the GPU node.
     Select Notebook Image    ${NOTEBOOK_IMAGE}
-    Select Container Size    Small
+    Select Hardware Profile    default-profile
     Set GPU Accelerator
     Set Number Of Required Accelerators    1
     Spawn Notebook    spawner_timeout=20 minutes  expect_autoscaling=${True}

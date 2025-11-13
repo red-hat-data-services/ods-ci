@@ -243,8 +243,7 @@ if ${SET_RHODS_URLS}
     then
         echo "INFO: getting RHODS URLs from the cluster as per --set-urls-variables"
         ocp_console=$(oc whoami --show-console)
-        # ocp_console="https://$(oc get route console -n openshift-console -o jsonpath='{.spec.host}{"\n"}')"
-        rhods_dashboard="https://$(oc get route rhods-dashboard -n redhat-ods-applications -o jsonpath='{.spec.host}{"\n"}')"
+        rhods_dashboard="$(oc get consolelinks -l "platform.opendatahub.io/part-of=dashboard" -o yaml | yq '.items[0].spec.href')"
         api_server=$(oc whoami --show-server)
         TEST_VARIABLES="${TEST_VARIABLES} --variable OCP_CONSOLE_URL:${ocp_console} --variable ODH_DASHBOARD_URL:${rhods_dashboard}"
         echo "OCP Console URL set to: ${ocp_console}"
@@ -275,7 +274,6 @@ if command -v yq &> /dev/null
 
                 if [ -z "${SERVICE_ACCOUNT}" ]
                     then
-                        echo "Performing oc login using username and password"
                         oc_user=$(yq -er '.OCP_ADMIN_USER.USERNAME' "${TEST_VARIABLES_FILE}") || {
                             echo "Couldn't find '.OCP_ADMIN_USER.USERNAME' variable in provided '${TEST_VARIABLES_FILE}'."
                             echo "Please either provide it or use '--skip-oclogin true' (don't forget to login to the testing cluster manually then)."
@@ -286,8 +284,39 @@ if command -v yq &> /dev/null
                             echo "Please either provide it or use '--skip-oclogin true' (don't forget to login to the testing cluster manually then)."
                             exit 1
                         }
-                        oc login "${oc_host}" --username "${oc_user}" --password "${oc_pass}" --insecure-skip-tls-verify=true
-                        retVal=$?
+                        # might be null, in which case regular login is performed
+                        cluster_auth=$(yq -r '.CLUSTER_AUTH' "${TEST_VARIABLES_FILE}")
+                        if [ "$cluster_auth" = "oidc" ] ; then
+                          echo "Performing oc login using OIDC"
+                          cluster_oidc_issuer=$(yq -er '.CLUSTER_OIDC_ISSUER' "${TEST_VARIABLES_FILE}") || {
+                              echo "Couldn't find '.CLUSTER_OIDC_ISSUER' variable in provided '${TEST_VARIABLES_FILE}'."
+                              echo "Please either provide it or use '--skip-oclogin true' (don't forget to login to the testing cluster manually then)."
+                              exit 1
+                          }
+                          oc config set-cluster test-cluster \
+                              --server="${oc_host}" \
+                              --insecure-skip-tls-verify=true
+                          oc config set-context main \
+                              --cluster=test-cluster \
+                              --user="${oc_user}"
+                          oc config use-context main
+                          tokens="$(curl -s -L -X POST "${cluster_oidc_issuer}/protocol/openid-connect/token" \
+                              -H "Content-Type: application/x-www-form-urlencoded" -d "username=${oc_user}" \
+                              -d "password=${oc_pass}" -d "grant_type=password" -d "client_id=oc-cli" -d "scope=openid")"
+                          oc config set-credentials "$oc_user"  \
+                                  --auth-provider=oidc  \
+                                  --auth-provider-arg=idp-issuer-url="${cluster_oidc_issuer}"/realms/openshift \
+                                  --auth-provider-arg=client-id=oc-cli  \
+                                  --auth-provider-arg=client-secret=""  \
+                                  --auth-provider-arg=refresh-token="$(echo "$tokens" | jq -r .refresh_token)" \
+                                  --auth-provider-arg=id-token="$(echo "$tokens" | jq -r .id_token)"
+                          oc auth whoami
+                          retVal=$?
+                        else
+                          echo "Performing oc login using username and password"
+                          oc login "${oc_host}" --username "${oc_user}" --password "${oc_pass}" --insecure-skip-tls-verify=true
+                          retVal=$?
+                        fi
                     else
                         echo "Performing oc login using service account"
                         sa_token=$(oc create token "${SERVICE_ACCOUNT}" -n "${SA_NAMESPACE}" --duration 6h)

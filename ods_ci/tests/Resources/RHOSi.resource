@@ -55,6 +55,7 @@ RHOSi Setup
     [Documentation]    Applies RHOSi Settings and stores availability metrics
     ...                The suggested usage of this keyword is to call it inside all the Suite Setup keywords.
     ...                Do Not extend this keyword for high-level setup, e.g., don't open browser
+    Log Framework Version
     Protect Sensitive Variables In Keywords
     Required Global Variables Should Exist
     Initialize Global Variables
@@ -104,8 +105,6 @@ Fetch Cluster Type By Domain
 
 Assign Vars According To Product
     [Documentation]    Assign vars related to product
-    # Common vars
-    Set Suite Variable    ${AUTHORINO_CR_NS}    ${APPLICATIONS_NAMESPACE}-auth-provider
     # Product specific vars
     IF    "${PRODUCT}" == "RHODS"
         Set Suite Variable    ${OPERATOR_SUBSCRIPTION_LABEL}     operators.coreos.com/rhods-operator.${OPERATOR_NAMESPACE}
@@ -197,3 +196,8 @@ Set Expected Value For Release Name
     END
 
     Set Suite Variable    ${expected_release_name}
+
+Log Framework Version
+    [Documentation]    Logs the Robot Framework version
+    ${rf_version}=    Run    robot --version
+    Log    Robot Framework Version: ${rf_version}

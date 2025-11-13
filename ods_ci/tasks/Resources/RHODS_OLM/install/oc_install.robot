@@ -10,12 +10,10 @@ Resource   ../../../../tests/Resources/OCP.resource
 *** Variables ***
 ${DSC_NAME} =    default-dsc
 ${DSCI_NAME} =    default-dsci
-@{COMPONENT_LIST} =    codeflare
-...    dashboard
-...    datasciencepipelines
+@{COMPONENT_LIST} =    dashboard
+...    aipipelines
 ...    kserve
 ...    kueue
-...    modelmeshserving
 ...    ray
 ...    trainingoperator
 ...    trustyai
@@ -23,17 +21,13 @@ ${DSCI_NAME} =    default-dsci
 ...    modelregistry
 ...    feastoperator
 ...    llamastackoperator
-${SERVERLESS_OP_NAME}=     serverless-operator
-${SERVERLESS_SUB_NAME}=    serverless-operator
-${SERVERLESS_NS}=    openshift-serverless
+${LWS_OP_NAME}=    leader-worker-set
+${LWS_OP_NS}=    openshift-lws-operator
+${LWS_SUB_NAME}=    leader-worker-set
+${LWS_CHANNEL_NAME}=  stable-v1.0
 ${OPENSHIFT_OPERATORS_NS}=    openshift-operators
 ${COMMUNITY_OPERATORS_NS}=    openshift-marketplace
 ${COMMUNITY_OPERATORS_CS}=    community-operators
-${SERVICEMESH_OP_NAME}=     servicemeshoperator
-${SERVICEMESH_SUB_NAME}=    servicemeshoperator
-${AUTHORINO_OP_NAME}=     authorino-operator
-${AUTHORINO_SUB_NAME}=    authorino-operator
-${AUTHORINO_CHANNEL_NAME}=  stable
 ${CLUSTER_OBS_OP_NAME}=  cluster-observability-operator
 ${CLUSTER_OBS_SUB_NAME}=  cluster-observability-operator
 ${CLUSTER_OBS_CHANNEL_NAME}=  stable
@@ -52,7 +46,7 @@ ${TELEMETRY_CHANNEL_NAME}=  stable
 ${TELEMETRY_NS}=  openshift-opentelemetry-operator
 ${KUEUE_OP_NAME}=  kueue-operator
 ${KUEUE_SUB_NAME}=  kueue-operator
-${KUEUE_CHANNEL_NAME}=  stable-v1.0
+${KUEUE_CHANNEL_NAME}=  stable-v1.1
 ${KUEUE_NS}=  openshift-kueue-operator
 ${CERT_MANAGER_OP_NAME}=  openshift-cert-manager-operator
 ${CERT_MANAGER_SUB_NAME}=  openshift-cert-manager-operator
@@ -69,10 +63,7 @@ ${DEFAULT_WORKBENCHES_NAMESPACE_ODH}=    opendatahub
 ${CUSTOM_MANIFESTS}=    ${EMPTY}
 ${IS_NOT_PRESENT}=      1
 ${DSC_TEMPLATE}=    dsc_template.yml
-${DSC_TEMPLATE_RAW}=    dsc_template_raw.yml
 ${DSCI_TEMPLATE}=    dsci_template.yml
-${DSCI_TEMPLATE_RAW}=    dsci_template_raw.yml
-@{RHOAI_DEPENDENCIES}=    Create List
 ${CONFIG_ENV}=    ${EMPTY}
 ${NFS_OP_NAME}=    nfs-provisioner-operator
 ${NFS_OP_NS}=    openshift-operators
@@ -91,20 +82,6 @@ Install RHODS
   Log    Start installing RHOAI with:\n\- cluster type: ${cluster_type}\n\- image_url: ${image_url}\n\- update_channel: ${UPDATE_CHANNEL}    console=yes    #robocop:disable
   Log    \- rhoai_version: ${rhoai_version}\n\- is_upgrade: ${is_upgrade}\n\- install_plan_approval: ${install_plan_approval}\n\- CATALOG_SOURCE: ${CATALOG_SOURCE}   console=yes    #robocop:disable
   Assign Vars According To Product
-  ${install_authorino_dependency} =    Get Variable Value    ${INSTALL_AUTHORINO_DEPENDENCY}    true
-  IF    "${install_authorino_dependency}" == "true"
-      Append To List     ${RHOAI_DEPENDENCIES}     authorino
-  END
-  ${kserve_raw_deployment} =    Get Variable Value    ${KSERVE_RAW_DEPLOYMENT}    false
-  IF    "${kserve_raw_deployment}" == "true"
-      Set Suite Variable    ${CONFIG_ENV}    -e DISABLE_DSC_CONFIG    # robocop: disable
-      Set Suite Variable    ${DSC_TEMPLATE}    ${DSC_TEMPLATE_RAW}    # robocop: disable
-      Set Suite Variable    ${DSCI_TEMPLATE}    ${DSCI_TEMPLATE_RAW}    # robocop: disable
-  ELSE
-      Append To List     ${RHOAI_DEPENDENCIES}     servicemesh
-      Append To List     ${RHOAI_DEPENDENCIES}     serverless
-  END
-  Install Rhoai Dependencies
   ${enable_new_observability_stack} =    Is New Observability Stack Enabled
   IF    ${enable_new_observability_stack}
           Install Observability Dependencies
@@ -204,12 +181,18 @@ Verify RHODS Installation
        ELSE
             # If managed and RHOAI, we need to wait for the operator to create the DSCI and then patch it with
             # the monitoring info in case the new obs stack flag is enabled
-            Wait Until Keyword Succeeds    3 min    0 sec
+            Wait Until Keyword Succeeds    6 min    0 sec
             ...    Is Resource Present    DSCInitialization    ${DSCI_NAME}
             ...    ${OPERATOR_NAMESPACE}      ${IS_PRESENT}
-            Wait Until Keyword Succeeds    3 min    0 sec
+            Wait Until Keyword Succeeds    6 min    0 sec
             ...    Is Resource Present    Auth    auth
             ...    ${OPERATOR_NAMESPACE}      ${IS_PRESENT}
+            Wait Until Keyword Succeeds    6 min    0 sec
+            ...    Is Resource Present    GatewayConfig    default-gateway
+            ...    ${OPERATOR_NAMESPACE}      ${IS_PRESENT}
+            Wait Until Keyword Succeeds    6 min    0 sec
+            ...    Is Resource Present    HardwareProfile    default-profile
+            ...    ${APPLICATIONS_NAMESPACEE}      ${IS_PRESENT}
             ${enable_new_observability_stack} =    Is New Observability Stack Enabled
             IF    ${enable_new_observability_stack}
                     Patch DSCInitialization With Monitoring Info
@@ -223,12 +206,18 @@ Verify RHODS Installation
       IF  "${APPLICATIONS_NAMESPACE}" != "${DEFAULT_APPLICATIONS_NAMESPACE_RHOAI}" and "${APPLICATIONS_NAMESPACE}" != "${DEFAULT_APPLICATIONS_NAMESPACE_ODH}"
           Create DSCI With Custom Namespaces
       END
-      Wait Until Keyword Succeeds    3 min    0 sec
+      Wait Until Keyword Succeeds    6 min    0 sec
       ...    Is Resource Present    DSCInitialization    ${DSCI_NAME}
       ...    ${OPERATOR_NAMESPACE}      ${IS_PRESENT}
-      Wait Until Keyword Succeeds    3 min    0 sec
+      Wait Until Keyword Succeeds    6 min    0 sec
       ...    Is Resource Present    Auth    auth
       ...    ${OPERATOR_NAMESPACE}      ${IS_PRESENT}
+      Wait Until Keyword Succeeds    6 min    0 sec
+      ...    Is Resource Present    GatewayConfig    default-gateway
+      ...    ${OPERATOR_NAMESPACE}      ${IS_PRESENT}
+      Wait Until Keyword Succeeds    6 min    0 sec
+      ...    Is Resource Present    HardwareProfile    default-profile
+      ...    ${APPLICATIONS_NAMESPACE}      ${IS_PRESENT}
       ${enable_new_observability_stack} =    Is New Observability Stack Enabled
       IF    ${enable_new_observability_stack}
               Patch DSCInitialization With Monitoring Info
@@ -236,69 +225,56 @@ Verify RHODS Installation
       Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
   END
 
+  IF  "${CLUSTER_AUTH}" == "oidc"
+      Patch GatewayConfig With OIDC Info
+  END
+
   ${workbenches} =    Is Component Enabled    workbenches    ${DSC_NAME}
   IF    "${workbenches}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app=notebook-controller    timeout=400s
+    ...    label_selector=app=notebook-controller
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app=odh-notebook-controller    timeout=400s
+    ...    label_selector=app=odh-notebook-controller
     Oc Get  kind=Namespace  field_selector=metadata.name=${NOTEBOOKS_NAMESPACE}
     Log  Verified Notebooks NS: ${NOTEBOOKS_NAMESPACE}
   END
 
-  ${modelmeshserving} =    Is Component Enabled    modelmeshserving    ${DSC_NAME}
-  IF    "${modelmeshserving}" == "true"
+  ${aipipelines} =    Is Component Enabled    aipipelines    ${DSC_NAME}
+  IF    "${aipipelines}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app=odh-model-controller    timeout=400s
-    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=component=model-mesh-etcd    timeout=400s
-    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/name=modelmesh-controller    timeout=400s
-  END
-
-  ${datasciencepipelines} =    Is Component Enabled    datasciencepipelines    ${DSC_NAME}
-  IF    "${datasciencepipelines}" == "true"
-    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/name=data-science-pipelines-operator    timeout=400s
+    ...    label_selector=app.kubernetes.io/name=data-science-pipelines-operator
   END
 
   ${kserve} =    Is Component Enabled    kserve    ${DSC_NAME}
   IF    "${kserve}" == "true"
+    Install KServe Dependencies
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app=odh-model-controller    timeout=400s
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=control-plane=kserve-controller-manager    timeout=400s
+    ...    label_selector=control-plane=kserve-controller-manager
   END
 
   ${kueue} =     Is Component Enabled     kueue    ${DSC_NAME}
   IF    "${kueue}" == "true"
-      ${kueue_state}=    Get DSC Component State    ${DSC_NAME}    kueue    ${OPERATOR_NAMESPACE}
-      IF    "${kueue_state}" == "Unmanaged"
-             Install Kueue Dependencies
-             Wait For Deployment Replica To Be Ready    namespace=${KUEUE_NS}
-      ...    label_selector=app.kubernetes.io/name=kueue   timeout=400s
-      ELSE
-             Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-      ...    label_selector=app.kubernetes.io/part-of=kueue   timeout=400s
-      END
-  END
-
-  ${codeflare} =     Is Component Enabled     codeflare    ${DSC_NAME}
-  IF    "${codeflare}" == "true"
-    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/part-of=codeflare   timeout=400s
+    ${kueue_state}=    Get DSC Component State    ${DSC_NAME}    kueue    ${OPERATOR_NAMESPACE}
+    IF    "${kueue_state}" == "Managed"
+        Fail    msg=Kueue Managed mode is not supported on ODH/RHOAI 3.0+
+    END
+    Install Kueue Dependencies
+    Wait For Deployment Replica To Be Ready    namespace=${KUEUE_NS}
+    ...    label_selector=app.kubernetes.io/name=kueue
   END
 
   ${ray} =     Is Component Enabled     ray    ${DSC_NAME}
   IF    "${ray}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/part-of=ray   timeout=400s
+    ...    label_selector=app.kubernetes.io/part-of=ray
   END
 
   ${trustyai} =    Is Component Enabled    trustyai    ${DSC_NAME}
   IF    "${trustyai}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/part-of=trustyai    timeout=400s
+    ...    label_selector=app.kubernetes.io/part-of=trustyai
   END
 
   ${modelregistry} =    Is Component Enabled    modelregistry    ${DSC_NAME}
@@ -310,34 +286,34 @@ Verify RHODS Installation
   ${trainingoperator} =    Is Component Enabled    trainingoperator    ${DSC_NAME}
   IF    "${trainingoperator}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/part-of=trainingoperator   timeout=400s
+    ...    label_selector=app.kubernetes.io/part-of=trainingoperator
   END
 
   ${feastoperator} =    Is Component Enabled    feastoperator    ${DSC_NAME}
   IF    "${feastoperator}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/part-of=feastoperator   timeout=400s
+    ...    label_selector=app.kubernetes.io/part-of=feastoperator
   END
 
   ${llamastackoperator} =    Is Component Enabled    llamastackoperator    ${DSC_NAME}
   IF    "${llamastackoperator}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/part-of=llamastackoperator   timeout=400s
+    ...    label_selector=app.kubernetes.io/part-of=llamastackoperator
   END
 
   ${dashboard} =    Is Component Enabled    dashboard    ${DSC_NAME}
   IF    "${dashboard}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app=${DASHBOARD_APP_NAME}    timeout=1200s
+    ...    label_selector=app=${DASHBOARD_APP_NAME}
     IF  "${PRODUCT}" == "ODH"
         #This line of code is strictly used for the exploratory cluster to accommodate UI/UX team requests
         Add UI Admin Group To Dashboard Admin
     END
   END
 
-  IF    "${dashboard}" == "true" or "${workbenches}" == "true" or "${modelmeshserving}" == "true" or "${datasciencepipelines}" == "true" or "${kserve}" == "true" or "${kueue}" == "true" or "${codeflare}" == "true" or "${ray}" == "true" or "${trustyai}" == "true" or "${modelregistry}" == "true" or "${trainingoperator}" == "true"    # robocop: disable
+  IF    "${dashboard}" == "true" or "${workbenches}" == "true" or "${aipipelines}" == "true" or "${kserve}" == "true" or "${kueue}" == "true" or "${ray}" == "true" or "${trustyai}" == "true" or "${modelregistry}" == "true" or "${trainingoperator}" == "true"    # robocop: disable
       Log To Console    Waiting for pod status in ${APPLICATIONS_NAMESPACE}
-      Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=200
+      Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=600
       Log  Verified Applications NS: ${APPLICATIONS_NAMESPACE}  console=yes
   END
 
@@ -347,6 +323,7 @@ Verify RHODS Installation
      Wait For Pods Status  namespace=${MONITORING_NAMESPACE}  timeout=600
      Log  Verified Monitoring NS: ${MONITORING_NAMESPACE}  console=yes
   END
+
 
 Verify Builds In Application Namespace
   Log  Verifying Builds  console=yes
@@ -446,6 +423,17 @@ Patch DSCInitialization With Monitoring Info
     ...         oc patch DSCInitialization/default-dsci -n ${OPERATOR_NAMESPACE} --patch-file="${file_path}monitoring-patch-payload.json" --type merge    #robocop:disable
     Should Be Equal    "${rc}"    "0"   msg=${output}
 
+Patch GatewayConfig With OIDC Info
+    [Documentation]  Patches the GatewayConfig with values necessary for external OIDC
+    Log  Patching gatewayconfig for OIDC  console=yes
+    ${file_path} =    Set Variable    tasks/Resources/Files/
+    ${gw_config_file} =  Set Variable  ${file_path}/gatewayconfig-patch-payload-apply.json
+    Copy File    source=${file_path}gatewayconfig-patch-payload.json    destination=${gw_config_file}
+    Run    sed -i'' -e 's|<issuerURL>|${CLUSTER_OIDC_ISSUER}|' ${gw_config_file}
+    ${rc}   ${output}=    Run And Return Rc And Output
+    ...         oc patch gatewayconfig/default-gateway --patch-file="${gw_config_file}" --type merge    #robocop:disable
+    Should Be Equal    "${rc}"    "0"   msg=${output}
+
 Wait For DSCInitialization CustomResource To Be Ready
     [Documentation]   Wait ${timeout} seconds for DSCInitialization CustomResource To Be Ready
     [Arguments]     ${timeout}=600
@@ -469,7 +457,6 @@ Apply DataScienceCluster CustomResource
         Generate CustomManifest In DSC YAML
         ...    dsc_name=${dsc_name}
         ...    dsc_template=${dsc_template}
-        Rename DevFlags in DataScienceCluster CustomResource
         ${yml} =    Get File    ${file_path}dsc_apply.yml
         Log To Console    Applying DSC yaml
         Log To Console    ${yml}
@@ -489,7 +476,6 @@ Apply DataScienceCluster CustomResource
         END
         Log to Console    message=Creating DataScience Cluster using yml template
         Create DataScienceCluster CustomResource Using Test Variables
-        Apply Custom Manifest in DataScienceCluster CustomResource Using Test Variables
         ${yml} =    Get File    ${file_path}dsc_apply.yml
         Log To Console    Applying DSC yaml
         Log To Console    ${yml}
@@ -564,28 +550,6 @@ Generate CustomManifest In DSC YAML
             END
     END
 
-Apply Custom Manifest in DataScienceCluster CustomResource Using Test Variables
-    [Documentation]    Apply custom manifests to a DSC file
-    Log To Console    Applying Custom Manifests
-    ${file_path} =    Set Variable    tasks/Resources/Files/
-    FOR    ${cmp}    IN    @{COMPONENT_LIST}
-         IF    $cmp in $CUSTOM_MANIFESTS
-              ${manifest_string}=    Convert To String    ${CUSTOM_MANIFESTS}[${cmp}]
-              # Use sed to replace the placeholder with the YAML string
-              Run    sed -i'' -e "s|<${cmp}_devflags>|${manifest_string}|g" ${file_path}dsc_apply.yml
-         ELSE
-              Run    sed -i'' -e "s|<${cmp}_devflags>||g" ${file_path}dsc_apply.yml
-         END
-    END
-
-Rename DevFlags in DataScienceCluster CustomResource
-    [Documentation]     Filling devFlags fields for every component in DSC
-    Log To Console    Filling devFlags fields for every component in DSC
-    ${file_path} =    Set Variable    tasks/Resources/Files/
-    FOR    ${cmp}    IN    @{COMPONENT_LIST}
-        Run     sed -i'' -e "s|<${cmp}_devflags>||g" ${file_path}dsc_apply.yml
-    END
-
 Wait For DataScienceCluster CustomResource To Be Ready
   [Documentation]   Wait for DataScienceCluster CustomResource To Be Ready
   [Arguments]     ${timeout}
@@ -657,90 +621,6 @@ Catalog Is Ready
     Should Be Equal As Integers   ${rc}  0  msg=Error detected while getting CatalogSource status state
     Should Be Equal As Strings    "READY"    ${output}
 
-Install Authorino Operator Via Cli
-    [Documentation]    Install Authorino Operator Via CLI
-    ${is_installed} =   Check If Operator Is Installed Via CLI   ${AUTHORINO_OP_NAME}
-    IF    not ${is_installed}
-          Install ISV Operator From OperatorHub Via CLI    operator_name=${AUTHORINO_OP_NAME}
-             ...    subscription_name=${AUTHORINO_SUB_NAME}
-             ...    channel=${AUTHORINO_CHANNEL_NAME}
-             ...    catalog_source_name=redhat-operators
-          Wait Until Operator Subscription Last Condition Is
-             ...    type=CatalogSourcesUnhealthy    status=False
-             ...    reason=AllCatalogSourcesHealthy    subcription_name=${AUTHORINO_SUB_NAME}
-             ...    retry=150
-          Wait For Pods To Be Ready    label_selector=control-plane=authorino-operator
-             ...    namespace=${OPENSHIFT_OPERATORS_NS}
-    ELSE
-          Log To Console    message=Authorino Operator is already installed
-    END
-
-Install Service Mesh Operator Via Cli
-    [Documentation]    Install Service Mesh Operator Via CLI
-    ${is_installed} =   Check If Operator Is Installed Via CLI   ${SERVICEMESH_OP_NAME}
-    IF    not ${is_installed}
-          Install ISV Operator From OperatorHub Via CLI    operator_name=${SERVICEMESH_OP_NAME}
-             ...    subscription_name=${SERVICEMESH_SUB_NAME}
-             ...    catalog_source_name=redhat-operators
-          Wait Until Operator Subscription Last Condition Is
-             ...    type=CatalogSourcesUnhealthy    status=False
-             ...    reason=AllCatalogSourcesHealthy    subcription_name=${SERVICEMESH_SUB_NAME}
-             ...    retry=150
-          Wait For Pods To Be Ready    label_selector=name=istio-operator
-             ...    namespace=${OPENSHIFT_OPERATORS_NS}
-    ELSE
-          Log To Console    message=Service Mesh Operator is already installed
-    END
-
-Install Serverless Operator Via Cli
-    [Documentation]    Install Serverless Operator Via CLI
-    ${is_installed} =   Check If Operator Is Installed Via CLI   ${SERVERLESS_OP_NAME}
-    IF    not ${is_installed}
-        ${rc}    ${out} =    Run And Return Rc And Output    oc create namespace ${SERVERLESS_NS}
-        Install ISV Operator From OperatorHub Via CLI    operator_name=${SERVERLESS_OP_NAME}
-             ...    namespace=${SERVERLESS_NS}
-             ...    subscription_name=${SERVERLESS_SUB_NAME}
-             ...    catalog_source_name=redhat-operators
-             ...    operator_group_name=serverless-operators
-             ...    operator_group_ns=${SERVERLESS_NS}
-             ...    operator_group_target_ns=${NONE}
-        Wait Until Operator Subscription Last Condition Is
-             ...    type=CatalogSourcesUnhealthy    status=False
-             ...    reason=AllCatalogSourcesHealthy    subcription_name=${SERVERLESS_SUB_NAME}
-             ...    namespace=${SERVERLESS_NS}
-             ...    retry=150
-        Wait For Pods To Be Ready    label_selector=name=knative-openshift
-             ...    namespace=${SERVERLESS_NS}
-        Wait For Pods To Be Ready    label_selector=name=knative-openshift-ingress
-             ...    namespace=${SERVERLESS_NS}
-        Wait For Pods To Be Ready    label_selector=name=knative-operator
-             ...    namespace=${SERVERLESS_NS}
-    ELSE
-        Log To Console    message=Serverless Operator is already installed
-    END
-
-Install Rhoai Dependencies
-    [Documentation]    Install Dependent Operators For Rhoai
-    [Arguments]    ${dependencies}=${RHOAI_DEPENDENCIES}
-    Set Suite Variable   ${FILES_RESOURCES_DIRPATH}    tests/Resources/Files
-    Set Suite Variable   ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
-    Set Suite Variable   ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
-    IF    "authorino" in ${dependencies}
-        Install Authorino Operator Via Cli
-    ELSE
-        Log To Console    message=Authorino Operator is skipped (not included in rhoai dependencies)
-    END
-    IF    "servicemesh" in ${dependencies}
-        Install Service Mesh Operator Via Cli
-    ELSE
-        Log To Console    message=ServiceMesh Operator is skipped (not included in rhoai dependencies)
-    END
-    IF    "serverless" in ${dependencies}
-        Install Serverless Operator Via Cli
-    ELSE
-        Log To Console    message=Serverless Operator is skipped (not included in rhoai dependencies)
-    END
-
 Install Cert Manager Operator Via Cli
     [Documentation]    Install Cert Manager Operator Via CLI
     ${is_installed} =   Check If Operator Is Installed Via CLI   ${CERT_MANAGER_OP_NAME}
@@ -758,7 +638,7 @@ Install Cert Manager Operator Via Cli
              ...    channel=${CERT_MANAGER_CHANNEL_NAME}
         Wait Until Operator Subscription Last Condition Is
              ...    type=CatalogSourcesUnhealthy    status=False
-             ...    reason=AllCatalogSourcesHealthy    subcription_name=${CERT_MANAGER_SUB_NAME}
+             ...    reason=AllCatalogSourcesHealthy    subscription_name=${CERT_MANAGER_SUB_NAME}
              ...    namespace=${CERT_MANAGER_NS}
              ...    retry=150
         Wait For Pods To Be Ready    label_selector=name=cert-manager-operator
@@ -768,13 +648,8 @@ Install Cert Manager Operator Via Cli
 Install Kueue Operator Via Cli
     [Documentation]    Install Kueue Operator Via CLI
     ${is_installed} =   Check If Operator Is Installed Via CLI   ${KUEUE_OP_NAME}
-    ${ocp_version}=     Get Ocp Cluster Version
-    ${install_kueue_by_ocp_version}=    GTE    ${ocp_version}    4.18.0
-    # Kueue operator will be available just in OCP 4.18 and next versions
     IF    ${is_installed}
         Log To Console    message=Kueue Operator is already installed
-    ELSE IF   not ${install_kueue_by_ocp_version}
-        Log To Console    message=Kueue Operator is not available in OCP ${ocp_version}
     ELSE
         ${rc}    ${out} =    Run And Return Rc And Output    oc create namespace ${KUEUE_NS}
         Install ISV Operator From OperatorHub Via CLI    operator_name=${KUEUE_OP_NAME}
@@ -787,12 +662,19 @@ Install Kueue Operator Via Cli
              ...    channel=${KUEUE_CHANNEL_NAME}
         Wait Until Operator Subscription Last Condition Is
              ...    type=CatalogSourcesUnhealthy    status=False
-             ...    reason=AllCatalogSourcesHealthy    subcription_name=${KUEUE_SUB_NAME}
+             ...    reason=AllCatalogSourcesHealthy    subscription_name=${KUEUE_SUB_NAME}
              ...    namespace=${KUEUE_NS}
              ...    retry=150
         Wait For Pods To Be Ready    label_selector=name=openshift-kueue-operator
              ...    namespace=${KUEUE_NS}
     END
+
+Install KServe Dependencies
+    [Documentation]    Install Dependent Operators For KServe
+    Set Suite Variable   ${FILES_RESOURCES_DIRPATH}    tests/Resources/Files
+    Set Suite Variable   ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
+    Set Suite Variable   ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
+    Install Cert Manager Operator Via Cli
 
 Install Kueue Dependencies
     [Documentation]    Install Dependent Operators For Kueue
@@ -816,7 +698,7 @@ Install Cluster Observability Operator Via Cli
              ...    operator_group_target_ns=${NONE}
           Wait Until Operator Subscription Last Condition Is
              ...    type=CatalogSourcesUnhealthy    status=False
-             ...    reason=AllCatalogSourcesHealthy    subcription_name=${CLUSTER_OBS_SUB_NAME}
+             ...    reason=AllCatalogSourcesHealthy    subscription_name=${CLUSTER_OBS_SUB_NAME}
              ...    namespace=${CLUSTER_OBS_NS}
              ...    retry=150
           Wait For Pods To Be Ready    label_selector=app.kubernetes.io/part-of=observability-operator
@@ -839,7 +721,7 @@ Install Tempo Operator Via Cli
              ...    operator_group_target_ns=${NONE}
           Wait Until Operator Subscription Last Condition Is
              ...    type=CatalogSourcesUnhealthy    status=False
-             ...    reason=AllCatalogSourcesHealthy    subcription_name=${TEMPO_SUB_NAME}
+             ...    reason=AllCatalogSourcesHealthy    subscription_name=${TEMPO_SUB_NAME}
              ...    namespace=${TEMPO_NS}
              ...    retry=150
           Wait For Pods To Be Ready    label_selector=app.kubernetes.io/part-of=tempo-operator
@@ -862,7 +744,7 @@ Install OpenTelemetry Operator Via Cli
              ...    operator_group_target_ns=${NONE}
           Wait Until Operator Subscription Last Condition Is
              ...    type=CatalogSourcesUnhealthy    status=False
-             ...    reason=AllCatalogSourcesHealthy    subcription_name=${TELEMETRY_SUB_NAME}
+             ...    reason=AllCatalogSourcesHealthy    subscription_name=${TELEMETRY_SUB_NAME}
              ...    namespace=${TELEMETRY_NS}
              ...    retry=150
           Wait For Pods To Be Ready    label_selector=app.kubernetes.io/name=opentelemetry-operator
@@ -886,7 +768,7 @@ Install Custom Metrics Autoscaler Operator Via Cli
             ...    channel=${CMA_CHANNEL_NAME}
         Wait Until Operator Subscription Last Condition Is
             ...    type=CatalogSourcesUnhealthy    status=False
-            ...    reason=AllCatalogSourcesHealthy    subcription_name=${CMA_SUB_NAME}
+            ...    reason=AllCatalogSourcesHealthy    subscription_name=${CMA_SUB_NAME}
             ...    namespace=${CMA_NS}
             ...    retry=150
         Wait For Pods To Be Ready    label_selector=name=custom-metrics-autoscaler-operator
@@ -1070,7 +952,7 @@ Install NFS Operator Via Cli
              ...    namespace=${NFS_OP_NS}
           Wait Until Operator Subscription Last Condition Is
              ...    type=CatalogSourcesUnhealthy    status=False
-             ...    reason=AllCatalogSourcesHealthy    subcription_name=${NFS_SUB_NAME}
+             ...    reason=AllCatalogSourcesHealthy    subscription_name=${NFS_SUB_NAME}
              ...    retry=150
              ...    namespace=${NFS_OP_NS}
     ELSE

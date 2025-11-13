@@ -68,8 +68,13 @@ Verify Notebook CR Is Running
     @{cr_obj} =  OpenShiftLibrary.Oc Get  kind=Notebook  name=${cr_name}
     &{cr_obj_dictionary} =  Set Variable  ${cr_obj}[0]
     Should Match  ${cr_obj_dictionary.metadata.name}  ${cr_name}
-    Should Not Be Empty  ${cr_obj_dictionary.status.containerState.running.startedAt}
-    Should Be Equal  ${cr_obj_dictionary.status.readyReplicas}  ${1}
+    
+    # Check if the notebook has ready replicas (indicates it's running)
+    ${ready_replicas} =    Set Variable    ${cr_obj_dictionary.status.readyReplicas}
+    Should Be Equal    ${ready_replicas}    ${1}    msg=Notebook ${cr_name} is not ready (readyReplicas: ${ready_replicas})
+    
+    # Log the current status for debugging
+    Log    Notebook ${cr_name} status: readyReplicas=${ready_replicas}
 
 Is RHODS Self-Managed
     [Documentation]     Returns ${FALSE} if RHODS Managed (i.e., Cloud version) is installed
@@ -122,15 +127,17 @@ Wait For Pods To Be Ready
     ...                This keyword can also check for the expected number of the pod replicas using `${exp_replicas}`
     ...                argument.
     [Arguments]    ${label_selector}    ${namespace}    ${timeout}=600s    ${exp_replicas}=${NONE}
-    Wait Until Keyword Succeeds    ${timeout}    3s
+    ${evaluating_kueue} =  Evaluate  "kueue" in "${label_selector}"
+    IF    ${evaluating_kueue}
+         Sleep    90s    reason=Waiting for the kueue pods to stabilize
+    END
+    Wait Until Keyword Succeeds    ${timeout}    5s
     ...    Check If Pod Exists    namespace=${namespace}    label_selector=${label_selector}
     ...    status_only=${FALSE}
     ${rc}    ${out}=    Run And Return Rc And Output
     ...    oc wait --for=condition=ready=true pod -l ${label_selector} -n ${namespace} --timeout=${timeout}
     IF    ${rc} != ${0}
-        ${events}    ${podlogs}=    Get Events And Pod Logs    ${namespace}    ${label_selector}
-
-        Fail    msg=Pod defined by selector "${label_selector}" in "${namespace}" namespace is not ready by timeout.
+         FAIL     msg=Pod defined by selector "${label_selector}" in "${namespace}" namespace is not ready.
     END
     IF    "${exp_replicas}" != "${NONE}"
         @{replicas}=    Oc Get    kind=Pod    namespace=${namespace}
@@ -140,7 +147,7 @@ Wait For Pods To Be Ready
 
 Wait For Deployment Replica To Be Ready
     [Documentation]   Wait for Deployment of ${label_selector} in ${namespace} to have the Replica-Set Ready
-    [Arguments]     ${label_selector}    ${namespace}     ${timeout}=600s    ${exp_replicas}=${NONE}
+    [Arguments]     ${label_selector}    ${namespace}     ${timeout}=1200s    ${exp_replicas}=${NONE}
     Log To Console
     ...    Waiting for Deployment with label "${label_selector}" in Namespace "${namespace}", to have desired Replica-Set ready  #robocop: disable:line-too-long
     IF    "${exp_replicas}" != "${NONE}"

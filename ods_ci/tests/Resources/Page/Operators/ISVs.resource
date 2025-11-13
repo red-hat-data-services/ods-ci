@@ -35,7 +35,8 @@ Install ISV Operator From OperatorHub Via CLI    # robocop: disable
     ${rc}    ${out}=    Run And Return Rc And Output    sed -i'' -e "s/<OPERATOR_NAME>/${operator_name}/g" ${operator_sub_filepath}    # robocop: disable
     ${rc}    ${out}=    Run And Return Rc And Output    sed -i'' -e "s/<CATALOG_SOURCE>/${catalog_source_name}/g" ${operator_sub_filepath}    # robocop: disable
     ${rc}    ${out}=    Run And Return Rc And Output    sed -i'' -e "s/<CS_NAMESPACE>/${cs_namespace}/g" ${operator_sub_filepath}    # robocop: disable
-    Oc Apply    kind=Subscription    src=${operator_sub_filepath}
+    ${return_code}    ${output} =    Run And Return Rc And Output    oc apply -f ${operator_sub_filepath}
+    Log To Console    ${output}
     # TODO: Remove this once the operator_name will be tempo-operator
     IF  "${operator_name}" == "tempo-product"
         ${operator_name}=    Set Variable    tempo-operator
@@ -79,21 +80,21 @@ Create Operator Group
 Operator Subscription Last Condition Should Be
     [Documentation]    Checks the subscription status matches the expected status
     [Arguments]    ${type}    ${status}    ${reason}
-    ...    ${subcription_name}    ${namespace}=openshift-operators
+    ...    ${subscription_name}    ${namespace}=openshift-operators
     ${rc}    ${out}=    Run And Return Rc And Output
-    ...    oc get subscription ${subcription_name} -n ${namespace} -ojson | jq '.status.conditions[] | select(.type=="${type}" and .status=="${status}" and .reason=="${reason}")'    # robocop: disable
+    ...    oc get subscription ${subscription_name} -n ${namespace} -ojson | jq '.status.conditions[] | select(.type=="${type}" and .status=="${status}" and .reason=="${reason}")'    # robocop: disable
     Should Be Equal As Integers    ${rc}     ${0}
     Should Not Be Empty    ${out}
 
 Wait Until Operator Subscription Last Condition Is    # robocop: disable
     [Documentation]    Keeps checking until the subscription status matches the expected status
     [Arguments]    ${type}    ${status}    ${reason}
-    ...    ${subcription_name}    ${namespace}=openshift-operators
+    ...    ${subscription_name}    ${namespace}=openshift-operators
     ...    ${retry}=60
     ...    ${retry_interval}=5s
     Wait Until Keyword Succeeds    ${retry} times    ${retry_interval}    Operator Subscription Last Condition Should Be    # robocop: disable
     ...    type=${type}     status=${status}
-    ...    reason=${reason}    subcription_name=${subcription_name}
+    ...    reason=${reason}    subscription_name=${subscription_name}
     ...    namespace=${namespace}
 
 Deploy Custom Resource

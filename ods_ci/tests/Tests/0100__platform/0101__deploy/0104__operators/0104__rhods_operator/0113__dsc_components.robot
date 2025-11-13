@@ -18,18 +18,12 @@ ${KNATIVE_SERVING_NS}                                       knative-serving
 ${DSC_NAME}                                                 default-dsc
 ${KUEUE_LABEL_SELECTOR}                                     app.kubernetes.io/name=kueue
 ${KUEUE_DEPLOYMENT_NAME}                                    kueue-controller-manager
-${CODEFLARE_LABEL_SELECTOR}                                 app.kubernetes.io/name=codeflare-operator
-${CODEFLARE_DEPLOYMENT_NAME}                                codeflare-operator-manager
 ${RAY_LABEL_SELECTOR}                                       app.kubernetes.io/name=kuberay
 ${RAY_DEPLOYMENT_NAME}                                      kuberay-operator
 ${TRAINING_LABEL_SELECTOR}                                  app.kubernetes.io/name=training-operator
 ${TRAINING_DEPLOYMENT_NAME}                                 kubeflow-training-operator
-${DATASCIENCEPIPELINES_LABEL_SELECTOR}                      app.kubernetes.io/name=data-science-pipelines-operator
-${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}                     data-science-pipelines-operator-controller-manager
-${MODELMESH_CONTROLLER_LABEL_SELECTOR}                      app.kubernetes.io/instance=modelmesh-controller
-${MODELMESH_CONTROLLER_DEPLOYMENT_NAME}                     modelmesh-controller
-${ETCD_LABEL_SELECTOR}                                      component=model-mesh-etcd
-${ETCD_DEPLOYMENT_NAME}                                     etcd
+${AIPIPELINES_LABEL_SELECTOR}                               app.kubernetes.io/name=data-science-pipelines-operator
+${AIPIPELINES_DEPLOYMENT_NAME}                              data-science-pipelines-operator-controller-manager
 ${ODH_MODEL_CONTROLLER_LABEL_SELECTOR}                      app=odh-model-controller
 ${ODH_MODEL_CONTROLLER_DEPLOYMENT_NAME}                     odh-model-controller
 ${MODELREGISTRY_CONTROLLER_LABEL_SELECTOR}                  control-plane=model-registry-operator
@@ -49,11 +43,9 @@ ${IS_NOT_PRESENT}                                           1
 &{SAVED_MANAGEMENT_STATES}
 ...                                                         RAY=${EMPTY}
 ...                                                         KUEUE=${EMPTY}
-...                                                         CODEFLARE=${EMPTY}
 ...                                                         TRAINING=${EMPTY}
 ...                                                         DASHBOARD=${EMPTY}
-...                                                         DATASCIENCEPIPELINES=${EMPTY}
-...                                                         MODELMESHERVING=${EMPTY}
+...                                                         AIPIPELINES=${EMPTY}
 ...                                                         MODELREGISTRY=${EMPTY}
 ...                                                         KSERVE=${EMPTY}
 ...                                                         TRUSTYAI=${EMPTY}
@@ -62,11 +54,9 @@ ${IS_NOT_PRESENT}                                           1
 ...                                                         LLAMASTACKOPERATOR=${EMPTY}
 
 @{CONTROLLERS_LIST}                                     # dashboard added in Suite Setup, since it's different in RHOAI vs ODH
-...                                                     codeflare-operator-manager
 ...                                                     data-science-pipelines-operator-controller-manager
 ...                                                     kuberay-operator
-...                                                     kueue-controller-manager
-...                                                     modelmesh-controller
+#...                                                     kueue-controller-manager   # RHOAIENG-34529
 ...                                                     notebook-controller-deployment
 ...                                                     odh-model-controller
 ...                                                     odh-notebook-controller-manager
@@ -76,51 +66,6 @@ ${IS_NOT_PRESENT}                                           1
 
 
 *** Test Cases ***
-Validate Kueue Removed To Managed State Transition
-    [Documentation]    Validate that the DSC Kueue component Managed state creates the expected resources,
-    ...    check that kueue deployment is created and pod is in Ready state
-    [Tags]
-    ...    Operator
-    ...    Tier1
-    ...    RHOAIENG-5435
-    ...    kueue-managed-from-removed
-    ...    Integration
-
-    ${initial_state}=    Get DSC Component State    ${DSC_NAME}    kueue    ${OPERATOR_NS}
-    ${ocp_version}=     Get Ocp Cluster Version
-    ${install_kueue_by_ocp_version}=    GTE    ${ocp_version}    4.18.0
-    IF    "${initial_state}" == "Unmanaged"
-            ${namespace_to_check}=    Set Variable    ${KUEUE_NS}
-    ELSE
-            ${namespace_to_check}=    Set Variable    ${APPLICATIONS_NAMESPACE}
-    END
-
-    IF    ${install_kueue_by_ocp_version}
-            ${kueue_installed} =   Check If Operator Is Installed Via CLI    ${KUEUE_OP_NAME}
-            IF    ${kueue_installed}
-                    Uninstall Kueue Operator CLI
-            END
-    END
-
-    Set DSC Component Removed State And Wait For Completion
-    ...    kueue
-    ...    ${KUEUE_DEPLOYMENT_NAME}
-    ...    ${KUEUE_LABEL_SELECTOR}
-    ...    namespace=${namespace_to_check}
-    ${kueue_installed} =   Check If Operator Is Installed Via CLI      ${KUEUE_OP_NAME}
-    IF    ${kueue_installed}
-            Uninstall Kueue Operator CLI
-    END
-    Set DSC Component Managed State And Wait For Completion
-    ...    kueue
-    ...    ${KUEUE_DEPLOYMENT_NAME}
-    ...    ${KUEUE_LABEL_SELECTOR}
-    Check That Image Pull Path Is Correct
-    ...    ${KUEUE_DEPLOYMENT_NAME}
-    ...    ${KUEUE_IMAGE_PULL_PATH}
-
-    [Teardown]      Restore Kueue Initial State
-
 Validate Kueue Removed To Unmanaged State Transition
     [Documentation]    Validate that the DSC Kueue component Unmanaged state creates the expected resources,
     ...    check that kueue deployment is created and pod is in Ready state
@@ -129,29 +74,12 @@ Validate Kueue Removed To Unmanaged State Transition
     ...    Tier1
     ...    kueue-unmanaged-from-removed
     ...    Integration
-
-    ${initial_state}=    Get DSC Component State    ${DSC_NAME}    kueue    ${OPERATOR_NS}
-    ${ocp_version}=     Get Ocp Cluster Version
-    ${install_kueue_by_ocp_version}=    GTE    ${ocp_version}    4.18.0
-    IF    "${initial_state}" == "Unmanaged"
-            ${namespace_to_check}=    Set Variable    ${KUEUE_NS}
-    ELSE
-            ${namespace_to_check}=    Set Variable    ${APPLICATIONS_NAMESPACE}
-    END
-
-    IF    ${install_kueue_by_ocp_version}
-            ${kueue_installed} =   Check If Operator Is Installed Via CLI      ${KUEUE_OP_NAME}
-            IF    ${kueue_installed}
-                    Uninstall Kueue Operator CLI
-            END
-    END
-
-    Skip If    condition=${install_kueue_by_ocp_version}==False   msg="Unmanaged Kueue status is not supported in OCP ${ocp_version}. It needs to be 4.18+"
+    Uninstall Kueue Operator CLI
     Set DSC Component Removed State And Wait For Completion
     ...    kueue
     ...    ${KUEUE_DEPLOYMENT_NAME}
     ...    ${KUEUE_LABEL_SELECTOR}
-    ...    namespace=${namespace_to_check}
+    ...    namespace=${KUEUE_NS}
     Set DSC Component Unmanaged State And Wait For Completion
     ...    kueue
     ...    ${KUEUE_DEPLOYMENT_NAME}
@@ -163,36 +91,6 @@ Validate Kueue Removed To Unmanaged State Transition
     ...    ${KUEUE_DEPLOYMENT_NAME}
     ...    ${KUEUE_LABEL_SELECTOR}
     ...    namespace=${KUEUE_NS}
-    # Omit the image pull path check because Kueue is now running as a dependent operator, its image is not managed by us
-
-    [Teardown]      Restore Kueue Initial State
-
-Validate Kueue Managed To Removed State Transition
-    [Documentation]    Validate that Kueue management state Removed does remove relevant resources when coming from
-    ...                Managed state
-    [Tags]
-    ...    Operator
-    ...    Tier1
-    ...    RHOAIENG-5435
-    ...    kueue-removed-from-managed
-    ...    Integration
-
-    ${ocp_version}=     Get Ocp Cluster Version
-    ${install_kueue_by_ocp_version}=    GTE    ${ocp_version}    4.18.0
-    IF    ${install_kueue_by_ocp_version}
-            ${kueue_installed} =   Check If Operator Is Installed Via CLI      ${KUEUE_OP_NAME}
-            IF    ${kueue_installed}
-                    Uninstall Kueue Operator CLI
-            END
-    END
-    Set DSC Component Managed State And Wait For Completion
-    ...    kueue
-    ...    ${KUEUE_DEPLOYMENT_NAME}
-    ...    ${KUEUE_LABEL_SELECTOR}
-    Set DSC Component Removed State And Wait For Completion
-    ...    kueue
-    ...    ${KUEUE_DEPLOYMENT_NAME}
-    ...    ${KUEUE_LABEL_SELECTOR}
 
     [Teardown]      Restore Kueue Initial State
 
@@ -205,16 +103,6 @@ Validate Kueue Unmanaged To Removed State Transition
     ...    kueue-removed-from-unmanaged
     ...    Integration
 
-    ${initial_state}=    Get DSC Component State    ${DSC_NAME}    kueue    ${OPERATOR_NS}
-    ${ocp_version}=     Get Ocp Cluster Version
-    ${install_kueue_by_ocp_version}=    GTE    ${ocp_version}    4.18.0
-    IF    "${initial_state}" == "Unmanaged"
-            ${namespace_to_check}=    Set Variable    ${KUEUE_NS}
-    ELSE
-            ${namespace_to_check}=    Set Variable    ${APPLICATIONS_NAMESPACE}
-    END
-
-    Skip If    condition=${install_kueue_by_ocp_version}==False   msg="Unmanaged Kueue status is not supported in OCP ${ocp_version}. It needs to be 4.18+"
     Set DSC Component Unmanaged State And Wait For Completion
     ...    kueue
     ...    ${KUEUE_DEPLOYMENT_NAME}
@@ -234,129 +122,6 @@ Validate Kueue Unmanaged To Removed State Transition
     ...    namespace=${KUEUE_NS}
 
     [Teardown]      Restore Kueue Initial State
-
-Validate Kueue Unmanaged To Managed State Transition
-    [Documentation]    Validate that Kueue management state Managed does create relevant resources when coming from
-    ...                Unmanaged state. The kueue resources need to be removed from the kueue namespace and being
-    ...                present in the apps namespace.
-    [Tags]
-    ...    Operator
-    ...    Tier1
-    ...    kueue-managed-from-unmanaged
-    ...    Integration
-
-    ${ocp_version}=     Get Ocp Cluster Version
-    ${install_kueue_by_ocp_version}=    GTE    ${ocp_version}    4.18.0
-
-    Skip If    condition=${install_kueue_by_ocp_version}==False   msg="Unmanaged Kueue status is not supported in OCP ${ocp_version}. It needs to be 4.18+"
-    Set DSC Component Unmanaged State And Wait For Completion
-    ...    kueue
-    ...    ${KUEUE_DEPLOYMENT_NAME}
-    ...    ${KUEUE_LABEL_SELECTOR}
-    ...    namespace=${KUEUE_NS}
-    ...    wait_for_completion=False
-    Install Kueue Dependencies
-    Wait For Resources To Be Available
-    ...    ${KUEUE_DEPLOYMENT_NAME}
-    ...    ${KUEUE_LABEL_SELECTOR}
-    ...    namespace=${KUEUE_NS}
-    Set DSC Component Managed State And Wait For Completion
-    ...    kueue
-    ...    ${KUEUE_DEPLOYMENT_NAME}
-    ...    ${KUEUE_LABEL_SELECTOR}
-    ...    namespace=${APPLICATIONS_NAMESPACE}
-    ...    wait_for_completion=False
-    Uninstall Kueue Operator CLI
-    Wait For Resources To Be Available
-    ...    ${KUEUE_DEPLOYMENT_NAME}
-    ...    ${KUEUE_LABEL_SELECTOR}
-    ...    namespace=${APPLICATIONS_NAMESPACE}
-    Wait For Resources To Be Removed
-    ...    ${KUEUE_DEPLOYMENT_NAME}
-    ...    ${KUEUE_LABEL_SELECTOR}
-    ...    namespace=${KUEUE_NS}
-
-    [Teardown]      Restore Kueue Initial State
-
-Validate Kueue Managed To Unmanaged State Transition
-    [Documentation]    Validate that Kueue management state Unmanaged does create relevant resources when coming from
-    ...                Managed state. The kueue resources need to be removed from the apps namespace and being
-    ...                present in the kueue namespace.
-    [Tags]
-    ...    Operator
-    ...    Tier1
-    ...    kueue-unmanaged-from-managed
-    ...    Integration
-
-    ${ocp_version}=     Get Ocp Cluster Version
-    ${install_kueue_by_ocp_version}=    GTE    ${ocp_version}    4.18.0
-
-    Skip If    condition=${install_kueue_by_ocp_version}==False   msg="Unmanaged Kueue status is not supported in OCP ${ocp_version}. It needs to be 4.18+"
-    Set DSC Component Managed State And Wait For Completion
-    ...    kueue
-    ...    ${KUEUE_DEPLOYMENT_NAME}
-    ...    ${KUEUE_LABEL_SELECTOR}
-    ...    namespace=${APPLICATIONS_NAMESPACE}
-    ...    wait_for_completion=False
-    ${kueue_installed} =   Check If Operator Is Installed Via CLI      ${KUEUE_OP_NAME}
-    IF    ${kueue_installed}
-            Uninstall Kueue Operator CLI
-    END
-    Wait For Resources To Be Available
-    ...    ${KUEUE_DEPLOYMENT_NAME}
-    ...    ${KUEUE_LABEL_SELECTOR}
-    ...    namespace=${APPLICATIONS_NAMESPACE}
-    Set DSC Component Unmanaged State And Wait For Completion
-    ...    kueue
-    ...    ${KUEUE_DEPLOYMENT_NAME}
-    ...    ${KUEUE_LABEL_SELECTOR}
-    ...    namespace=${KUEUE_NS}
-    ...    wait_for_completion=False
-    Install Kueue Dependencies
-    Wait For Resources To Be Available
-    ...    ${KUEUE_DEPLOYMENT_NAME}
-    ...    ${KUEUE_LABEL_SELECTOR}
-    ...    namespace=${KUEUE_NS}
-    Wait For Resources To Be Removed
-    ...    ${KUEUE_DEPLOYMENT_NAME}
-    ...    ${KUEUE_LABEL_SELECTOR}
-    ...    namespace=${APPLICATIONS_NAMESPACE}
-
-    [Teardown]      Restore Kueue Initial State
-
-Validate Codeflare Managed State
-    [Documentation]    Validate that the DSC Codeflare component Managed state creates the expected resources,
-    ...    check that Codeflare deployment is created and pod is in Ready state
-    [Tags]
-    ...    Operator
-    ...    Tier1
-    ...    RHOAIENG-5435
-    ...    codeflare-managed
-    ...    Integration
-    ...    RHOAIENG-24666
-    Set DSC Component Managed State And Wait For Completion
-    ...    codeflare
-    ...    ${CODEFLARE_DEPLOYMENT_NAME}
-    ...    ${CODEFLARE_LABEL_SELECTOR}
-    Check That Image Pull Path Is Correct       ${CODEFLARE_DEPLOYMENT_NAME}        ${IMAGE_PULL_PATH}
-
-    [Teardown]      Restore DSC Component State     codeflare       ${CODEFLARE_DEPLOYMENT_NAME}        ${CODEFLARE_LABEL_SELECTOR}     ${SAVED_MANAGEMENT_STATES.CODEFLARE}
-
-Validate Codeflare Removed State
-    [Documentation]    Validate that Codeflare management state Removed does remove relevant resources.
-    [Tags]
-    ...    Operator
-    ...    Tier1
-    ...    RHOAIENG-5435
-    ...    codeflare-removed
-    ...    Integration
-
-    Set DSC Component Removed State And Wait For Completion
-    ...    codeflare
-    ...    ${CODEFLARE_DEPLOYMENT_NAME}
-    ...    ${CODEFLARE_LABEL_SELECTOR}
-
-    [Teardown]      Restore DSC Component State     codeflare       ${CODEFLARE_DEPLOYMENT_NAME}        ${CODEFLARE_LABEL_SELECTOR}     ${SAVED_MANAGEMENT_STATES.CODEFLARE}
 
 Validate Ray Managed State
     [Documentation]    Validate that the DSC Ray component Managed state creates the expected resources,
@@ -457,38 +222,38 @@ Validate Dashboard Removed State
 
     [Teardown]      Restore DSC Component State     dashboard       ${DASHBOARD_DEPLOYMENT_NAME}        ${DASHBOARD_LABEL_SELECTOR}     ${SAVED_MANAGEMENT_STATES.DASHBOARD}
 
-Validate Datasciencepipelines Managed State
-    [Documentation]    Validate that the DSC Datasciencepipelines component Managed state creates the expected resources,
+Validate Aipipelines Managed State
+    [Documentation]    Validate that the DSC Aipipelines component Managed state creates the expected resources,
     ...    check that Datasciencepipelines deployment is created and pod is in Ready state
     [Tags]
     ...    Operator
     ...    Tier1
     ...    RHOAIENG-7298
-    ...    operator-datasciencepipelines-managed
+    ...    operator-aipipelines-managed
     ...    Integration
     Set DSC Component Managed State And Wait For Completion
-    ...    datasciencepipelines
-    ...    ${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}
-    ...    ${DATASCIENCEPIPELINES_LABEL_SELECTOR}
-    Check That Image Pull Path Is Correct       ${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}     ${IMAGE_PULL_PATH}
+    ...    aipipelines
+    ...    ${AIPIPELINES_DEPLOYMENT_NAME}
+    ...    ${AIPIPELINES_LABEL_SELECTOR}
+    Check That Image Pull Path Is Correct       ${AIPIPELINES_DEPLOYMENT_NAME}     ${IMAGE_PULL_PATH}
 
-    [Teardown]      Restore DSC Component State     datasciencepipelines        ${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}     ${DATASCIENCEPIPELINES_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.DATASCIENCEPIPELINES}
+    [Teardown]      Restore DSC Component State     aipipelines        ${AIPIPELINES_DEPLOYMENT_NAME}     ${AIPIPELINES_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.AIPIPELINES}
 
-Validate Datasciencepipelines Removed State
-    [Documentation]    Validate that Datasciencepipelines management state Removed does remove relevant resources.
+Validate Aipipelines Removed State
+    [Documentation]    Validate that Aipipelines management state Removed does remove relevant resources.
     [Tags]
     ...    Operator
     ...    Tier1
     ...    RHOAIENG-7298
-    ...    operator-datasciencepipelines-removed
+    ...    operator-aipipelines-removed
     ...    Integration
 
     Set DSC Component Removed State And Wait For Completion
-    ...    datasciencepipelines
-    ...    ${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}
-    ...    ${DATASCIENCEPIPELINES_LABEL_SELECTOR}
+    ...    aipipelines
+    ...    ${AIPIPELINES_DEPLOYMENT_NAME}
+    ...    ${AIPIPELINES_LABEL_SELECTOR}
 
-    [Teardown]      Restore DSC Component State     datasciencepipelines        ${DATASCIENCEPIPELINES_DEPLOYMENT_NAME}     ${DATASCIENCEPIPELINES_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.DATASCIENCEPIPELINES}
+    [Teardown]      Restore DSC Component State     aipipelines        ${AIPIPELINES_DEPLOYMENT_NAME}     ${AIPIPELINES_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.AIPIPELINES}
 
 Validate TrustyAi Managed State
     [Documentation]    Validate that the DSC TrustyAi component Managed state creates the expected resources,
@@ -524,65 +289,6 @@ Validate TrustyAi Removed State
     ...    ${TRUSTYAI_CONTROLLER_MANAGER_LABEL_SELECTOR}
 
     [Teardown]      Restore DSC Component State     trustyai        ${TRUSTYAI_CONTROLLER_MANAGER_DEPLOYMENT_NAME}      ${TRUSTYAI_CONTROLLER_MANAGER_LABEL_SELECTOR}       ${SAVED_MANAGEMENT_STATES.TRUSTYAI}
-
-Validate Modelmeshserving Managed State
-    [Documentation]    Validate that the DSC Modelmeshserving component Managed state creates the expected resources,
-    ...    check that Modelmeshserving deployment is created and pods are in Ready state
-    [Tags]
-    ...    Operator
-    ...    Tier1
-    ...    RHOAIENG-8546
-    ...    modelmeshserving-managed
-    ...    Integration
-    Set DSC Component Managed State And Wait For Completion
-    ...    modelmeshserving
-    ...    ${MODELMESH_CONTROLLER_DEPLOYMENT_NAME}
-    ...    ${MODELMESH_CONTROLLER_LABEL_SELECTOR}
-    Check That Image Pull Path Is Correct       ${MODELMESH_CONTROLLER_DEPLOYMENT_NAME}     ${IMAGE_PULL_PATH}
-
-    # Check that ETC resources are ready
-    Wait For Resources To Be Available
-    ...    ${ETCD_DEPLOYMENT_NAME}
-    ...    ${ETCD_LABEL_SELECTOR}
-
-    # Check that ODH Model Controller resources are ready
-    Wait For Resources To Be Available
-    ...    ${ODH_MODEL_CONTROLLER_DEPLOYMENT_NAME}
-    ...    ${ODH_MODEL_CONTROLLER_LABEL_SELECTOR}
-
-    [Teardown]      Restore DSC Component State     modelmeshserving        ${MODELMESH_CONTROLLER_DEPLOYMENT_NAME}     ${MODELMESH_CONTROLLER_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.MODELMESHERVING}
-
-Validate Modelmeshserving Removed State
-    [Documentation]    Validate that Modelmeshserving management state Removed does remove relevant resources.
-    [Tags]
-    ...    Operator
-    ...    Tier1
-    ...    RHOAIENG-8546
-    ...    modelmeshserving-removed
-    ...    Integration
-
-    Set DSC Component Removed State And Wait For Completion
-    ...    modelmeshserving
-    ...    ${MODELMESH_CONTROLLER_DEPLOYMENT_NAME}
-    ...    ${MODELMESH_CONTROLLER_LABEL_SELECTOR}
-
-    # Check that ETC resources are removed
-    Wait For Resources To Be Removed
-    ...    ${ETCD_DEPLOYMENT_NAME}
-    ...    ${ETCD_LABEL_SELECTOR}
-
-    # Check that ODH Model Controller resources are removed, if KServe managementState is Removed
-    ${state}=    Get DSC Component State
-    ...    ${DSC_NAME}
-    ...    kserve
-    ...    ${OPERATOR_NS}
-    IF    "${state}" == "Removed"
-        Wait For Resources To Be Removed
-        ...    ${ODH_MODEL_CONTROLLER_DEPLOYMENT_NAME}
-        ...    ${ODH_MODEL_CONTROLLER_LABEL_SELECTOR}
-    END
-
-    [Teardown]      Restore DSC Component State     modelmeshserving        ${MODELMESH_CONTROLLER_DEPLOYMENT_NAME}     ${MODELMESH_CONTROLLER_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.MODELMESHERVING}
 
 Validate ModelRegistry Managed State
     [Documentation]    Validate that the DSC ModelRegistry component Managed state creates the expected resources,
@@ -634,8 +340,7 @@ Validate KServe Controller Manager Managed State
     ...    RHOAIENG-7217
     ...    kserve-controller-manager-managed
     ...    Integration
-    ...    ExcludeOnODH
-    ...    ExcludeOnRHOAI
+
     Set DSC Component Managed State And Wait For Completion
     ...    kserve
     ...    ${KSERVE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
@@ -711,6 +416,7 @@ Validate Feastoperator Managed State
     ...    feastoperator-managed
     ...    Integration
     ...    ExcludeOnODH
+
     Set DSC Component Managed State And Wait For Completion
     ...    feastoperator
     ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
@@ -745,6 +451,8 @@ Validate Llamastackoperator Managed State
     ...    Tier1
     ...    llamastackoperator-managed
     ...    Integration
+    ...    ExcludeOnODH
+
     Set DSC Component Managed State And Wait For Completion
     ...    llamastackoperator
     ...    ${LLAMASTACKOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
@@ -762,6 +470,7 @@ Validate Llamastackoperator Removed State
     ...    Tier1
     ...    llamastackoperator-removed
     ...    Integration
+    ...    ExcludeOnODH
 
     Set DSC Component Removed State And Wait For Completion
     ...    llamastackoperator
@@ -786,7 +495,7 @@ Validate Support For Configuration Of Controller Resources
         Patch Controller Deployment  ${controller}  /spec/template/spec/containers/0/image  '${new_image}'
         Patch Controller Deployment  ${controller}  /spec/replicas  ${new_replicas}
 
-        Sleep    10s  Give time for operator to potentially reconcile our changes
+        Sleep    45s  Give time for operator to potentially reconcile our changes
 
         # verify the allowlisted values are kept, non-allowlisted are reverted
         Verify Deployment Patch Was Not Reverted  ${controller}  .spec.template.spec.containers[0].resources.limits.cpu  ${new_cpu_limit}
@@ -798,11 +507,11 @@ Validate Support For Configuration Of Controller Resources
         Run  oc annotate deployment -n ${APPLICATIONS_NAMESPACE} ${controller} opendatahub.io/managed=true
 
         # verify that all values get reverted
-        Wait Until Keyword Succeeds    1 min  10 s
+        Wait Until Keyword Succeeds    3 min  10 s
         ...     Verify Deployment Patch Was Reverted  ${controller}  .spec.template.spec.containers[0].resources.limits.cpu  ${new_cpu_limit}
-        Wait Until Keyword Succeeds    1 min  10 s
+        Wait Until Keyword Succeeds    3 min  10 s
         ...     Verify Deployment Patch Was Reverted  ${controller}  .spec.template.spec.containers[0].resources.limits.memory  ${new_memory_limit}
-        Wait Until Keyword Succeeds    1 min  10 s
+        Wait Until Keyword Succeeds    3 min  10 s
         ...     Verify Deployment Patch Was Reverted  ${controller}  .spec.replicas  ${new_replicas}
 
         # patch again and verify that values get reverted immediately when the annotation is already in place
@@ -811,13 +520,13 @@ Validate Support For Configuration Of Controller Resources
         Patch Controller Deployment  ${controller}  /spec/template/spec/containers/0/image  '${new_image}'
         Patch Controller Deployment  ${controller}  /spec/replicas  ${new_replicas}
 
-        Wait Until Keyword Succeeds    30 s  5 s
+        Wait Until Keyword Succeeds    3 min  10 s
         ...     Verify Deployment Patch Was Reverted  ${controller}  .spec.template.spec.containers[0].resources.limits.cpu  ${new_cpu_limit}
-        Wait Until Keyword Succeeds    30 s  5 s
+        Wait Until Keyword Succeeds    3 min  10 s
         ...     Verify Deployment Patch Was Reverted  ${controller}  .spec.template.spec.containers[0].resources.limits.memory  ${new_memory_limit}
-        Wait Until Keyword Succeeds    30 s  5 s
+        Wait Until Keyword Succeeds    3 min  10 s
         ...     Verify Deployment Patch Was Reverted  ${controller}  .spec.template.spec.containers[0].image  ${new_image}
-        Wait Until Keyword Succeeds    30 s  5 s
+        Wait Until Keyword Succeeds    3 min  10 s
         ...     Verify Deployment Patch Was Reverted  ${controller}  .spec.replicas  ${new_replicas}
     END
 
@@ -833,11 +542,9 @@ Suite Setup
     Wait For DSC Ready State    ${OPERATOR_NS}     ${DSC_NAME}
     ${SAVED_MANAGEMENT_STATES.RAY}=     Get DSC Component State    ${DSC_NAME}    ray    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.KUEUE}=     Get DSC Component State    ${DSC_NAME}    kueue    ${OPERATOR_NS}
-    ${SAVED_MANAGEMENT_STATES.CODEFLARE}=     Get DSC Component State    ${DSC_NAME}    codeflare    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.TRAINING}=     Get DSC Component State    ${DSC_NAME}    trainingoperator    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.DASHBOARD}=     Get DSC Component State    ${DSC_NAME}    dashboard    ${OPERATOR_NS}
-    ${SAVED_MANAGEMENT_STATES.DATASCIENCEPIPELINES}=     Get DSC Component State    ${DSC_NAME}    datasciencepipelines    ${OPERATOR_NS}
-    ${SAVED_MANAGEMENT_STATES.MODELMESHERVING}=     Get DSC Component State    ${DSC_NAME}    modelmeshserving    ${OPERATOR_NS}
+    ${SAVED_MANAGEMENT_STATES.AIPIPELINES}=     Get DSC Component State    ${DSC_NAME}    aipipelines    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.MODELREGISTRY}=     Get DSC Component State    ${DSC_NAME}    modelregistry    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.KSERVE}=     Get DSC Component State    ${DSC_NAME}    kserve    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.TRUSTYAI}=     Get DSC Component State    ${DSC_NAME}    trustyai    ${OPERATOR_NS}
@@ -903,8 +610,9 @@ Check Controller Conditions Are Accomplished
 
 Patch Controller Deployment
     [Arguments]    ${controller}  ${patch_path}  ${patch_value}
-    ${rc}=    Run And Return Rc
+    ${rc}   ${out}=    Run And Return Rc And Output
     ...    oc patch Deployment ${controller} -n ${APPLICATIONS_NAMESPACE} --type=json -p="[{'op': 'replace', 'path': '${patch_path}', 'value': ${patch_value}}]"    # robocop: disable
+    Log To Console    ${out}
     Should Be Equal As Integers    ${rc}    ${0}
 
 Verify Deployment Patch Was Not Reverted

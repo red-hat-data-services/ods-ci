@@ -26,7 +26,6 @@ Create Pipeline Server
 #    ...    ${database_host}=${EMPTY}    ${database_port}=3306
 #    ...    ${database_username}=${EMPTY}    ${database_password}=${EMPTY}
 #    ...    ${database_db_name}=${EMPTY}
-    ...    ${dsp_version}=v2
     ...    ${configure_pip_index}=${TRUE}
 
     Create Secret With Pipelines Object Storage Information    namespace=${namespace}
@@ -38,7 +37,7 @@ Create Pipeline Server
     ${object_storage_endpoint}=    Strip String     ${object_storage_endpoint}    characters=/
 
     # Process DSPA Template to create pipeline server
-    ${template_parameters}=    Catenate    -p DSP_VERSION=${dsp_version}
+    ${template_parameters}=    Catenate
     ...    -p OBJECT_STORAGE_HOST=${object_storage_endpoint}
     ...    -p OBJECT_STORAGE_REGION=${object_storage_region}
     ...    -p OBJECT_STORAGE_BUCKET=${object_storage_bucket_name}
@@ -46,12 +45,6 @@ Create Pipeline Server
     Run And Verify Command    oc process -f ${DSPA_PATH}/dspa-template.yaml ${template_parameters} | oc apply -n ${namespace} -f -    # robocop: off=line-too-long
 
     IF  ${configure_pip_index}   Create Pipelines ConfigMap With Custom Pip Index Url And Trusted Host  ${namespace}
-
-Get DSP Version
-    [Documentation]    Returns dspVersion of the DSPA deployed in ${namespace}
-    [Arguments]     ${namespace}
-    ${dsp_version}=    Run And Verify Command    oc get datasciencepipelinesapplications -n ${namespace} -o json | jq -r '.items[0].spec.dspVersion'    # robocop: off=line-too-long
-    RETURN    ${dsp_version}
 
 # robocop: disable:line-too-long
 Create PipelineServer Using Custom DSPA
@@ -113,51 +106,13 @@ Verify Pipeline Server Deployments    # robocop: disable
     ${containerNames}=  Create List  mariadb
     Verify Deployment    ${mariadb}  1  1  ${containerNames}
 
-Verify DSPv1 Pipeline Server Deployments
-    [Documentation]    Verifies the correct deployment of a DSPv1 DataSciencePipelineApplication
-    [Arguments]    ${namespace}
-
-    @{all_pods}=  Oc Get    kind=Pod    namespace=${namespace}
-    ...    label_selector=component=data-science-pipelines
-
-    ${pods_count}=   Get Length    ${all_pods}
-    IF    ${pods_count} < 4
-         Fail    DSPA requires at least 4 pods running in the namespace
-    END
-
-    @{pipeline_api_server}=  Oc Get    kind=Pod    namespace=${namespace}
-    ...    label_selector=app=ds-pipeline-dspa
-    ${containerNames}=  Create List  oauth-proxy    ds-pipeline-api-server
-    Verify Deployment    ${pipeline_api_server}  1  2  ${containerNames}
-
-    @{pipeline_persistenceagent}=  Oc Get    kind=Pod    namespace=${namespace}
-    ...    label_selector=app=ds-pipeline-persistenceagent-dspa
-    ${containerNames}=  Create List  ds-pipeline-persistenceagent
-    Verify Deployment    ${pipeline_persistenceagent}  1  1  ${containerNames}
-
-    @{pipeline_scheduledworkflow}=  Oc Get    kind=Pod    namespace=${namespace}
-    ...    label_selector=app=ds-pipeline-scheduledworkflow-dspa
-    ${containerNames}=  Create List  ds-pipeline-scheduledworkflow
-    Verify Deployment    ${pipeline_scheduledworkflow}  1  1  ${containerNames}
-
-    @{mariadb}=  Oc Get    kind=Pod    namespace=${namespace}
-    ...    label_selector=app=mariadb-dspa
-    ${containerNames}=  Create List  mariadb
-    Verify Deployment    ${mariadb}  1  1  ${containerNames}
-
 Wait Until Pipeline Server Is Deployed
     [Documentation]    Waits until all the expected pods of the pipeline server
     ...                are running
     [Arguments]    ${namespace}
 
-    ${dspVersion}=    Get DSP Version    ${namespace}
-    IF    "${dspVersion}" == "v2"
-            Wait Until Keyword Succeeds    15 times    10s
-            ...    Verify Pipeline Server Deployments    namespace=${namespace}
-    ELSE
-             Wait Until Keyword Succeeds    15 times    10s
-            ...    Verify DSPv1 Pipeline Server Deployments    namespace=${namespace}
-    END
+    Wait Until Keyword Succeeds    15 times    10s
+    ...    Verify Pipeline Server Deployments    namespace=${namespace}
 
 Wait Until Pipeline Server Is Deleted
     [Documentation]    Waits until all pipeline server pods are deleted

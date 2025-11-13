@@ -6,11 +6,10 @@ Resource            ../../Resources/RHOSi.resource
 Resource            ../../Resources/ODS.robot
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboardResources.resource
-Resource            ../../Resources/Page/ODH/ODHDashboard/ODHModelServing.resource
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Resource            ../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
+Resource            ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
-Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/ModelServer.resource
 Resource            ../../Resources/Page/ODH/AiApps/Anaconda.resource
 Resource            ../../Resources/Page/LoginPage.robot
 Resource            ../../Resources/Page/OCPLogin/OCPLogin.robot
@@ -18,11 +17,9 @@ Resource            ../../Resources/Common.robot
 Resource            ../../Resources/Page/OCPDashboard/Pods/Pods.robot
 Resource            ../../Resources/Page/OCPDashboard/Builds/Builds.robot
 Resource            ../../Resources/Page/HybridCloudConsole/OCM.robot
-Resource            ../../Resources/CLI/ModelServing/modelmesh.resource
 Resource            ../../Resources/CLI/DataSciencePipelines/DataSciencePipelinesUpgradeTesting.resource
 Resource            ../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 Resource            ../../Resources/Page/DistributedWorkloads/WorkloadMetricsUI.resource
-Resource            ../../Resources/Page/ModelRegistry/ModelRegistry.resource
 Resource            ../../Resources/Page/FeatureStore/FeatureStore.resource
 
 Suite Setup         Upgrade Suite Setup
@@ -92,68 +89,6 @@ Verify Custom Image Can Be Added
     [Tags]      Upgrade    IDE
     Oc Apply        kind=ImageStream        src=tests/Tests/0200__rhoai_upgrade/custome_image.yaml
 
-Verify User Can Disable The Runtime
-    [Documentation]    Disable the Serving runtime using Cli
-    [Tags]      Upgrade    ModelServing         deprecatedTest
-    Disable Model Serving Runtime Using CLI     namespace=redhat-ods-applications
-
-Verify Model Can Be Deployed For Upgrade
-    # robocop: off=too-long-test-case
-    # robocop: off=too-many-calls-in-test-case
-    [Documentation]    Verify Model Can Be Deployed Via cli For Upgrade
-    [Tags]                  Upgrade    ModelServing    ModelServer      deprecatedTest
-    ${test_namespace}=         Set Variable    ovmsmodel-upgrade
-    ${inference_input}=        Set Variable    @tests/Resources/Files/modelmesh-mnist-input.json
-    ${exp_inference_output}=   Set Variable    {"model_name":"ovms-model","model_version":"1","outputs":[{"name":"Plus214_Output_0","datatype":"FP32","shape":[1,10],"data":[-8.233053,-7.7497034,-3.4236815,12.3630295,-12.079103,17.266596,-10.570976,0.7130762,3.321715,1.3621228]}]}    # robocop: off=line-too-long
-    ${model_name}=             Set Variable    ovms-model
-    ${MODEL_FORMAT}=           Set Variable    onnx
-    ${PROTOCOL}=               Set Variable    http
-    ${models_names}=           Create List     ${model_name}
-    ${OVMS_S3_DIR}             Set Variable    test-dir
-    ${OVMS_STORAGE_URI} =      Set Variable    s3://${S3.BUCKET_1.NAME}/${OVMS_S3_DIR}/
-    ${OVMS_RUNTIME_NAME}=      Set Variable    ovms-runtime
-    ${INFERENCESERVICE_FILLED_FILEPATH}=   Set Variable        ${INFERENCESERVICE_FILEPATH_NEW}/isvc_filled.yaml
-    ${DEFAULT_BUCKET_SA_NAME}=   Set Variable    models-bucket-sa
-    ${KSERVE_MODE}=             Set Variable     Serverless
-
-
-    Set Project And Runtime    runtime=${OVMS_RUNTIME_NAME}     protocol=${PROTOCOL}     namespace=${test_namespace}
-    Compile Inference Service YAML    isvc_name=${model_name}
-    ...    sa_name=${DEFAULT_BUCKET_SA_NAME}
-    ...    model_storage_uri=${OVMS_STORAGE_URI}
-    ...    model_format=${MODEL_FORMAT}    serving_runtime=${OVMS_RUNTIME_NAME}
-    ...    kserve_mode=${KSERVE_MODE}
-
-    Deploy Model Via CLI    isvc_filepath=${INFERENCESERVICE_FILLED_FILEPATH}
-    ...    namespace=${test_namespace}
-
-    Wait For Pods To Be Ready    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ...    namespace=${test_namespace}
-    ${pod_name}=  Get Pod Name    namespace=${test_namespace}
-    ...    label_selector=serving.kserve.io/inferenceservice=${model_name}
-    ${service_port}=    Extract Service Port    service_name=${model_name}-predictor    protocol=TCP
-    ...    namespace=${test_namespace}
-    IF   "${KSERVE_MODE}"=="RawDeployment"
-        Start Port-forwarding    namespace=${test_namespace}    pod_name=${pod_name}  local_port=${service_port}
-        ...    remote_port=${service_port}    process_alias=ovms-process
-    END
-    Verify Model Inference With Retries   model_name=${model_name}    inference_input=${inference_input}
-    ...    expected_inference_output=${exp_inference_output}   project_title=${test_namespace}
-    ...    deployment_mode=Cli  kserve_mode=${KSERVE_MODE}    service_port=${service_port}
-    ...    end_point=/v2/models/${model_name}/infer  retries=10
-
-
-Verify User Can Deploy Custom Runtime For Upgrade
-    [Documentation]     Verify User Can Deploy Custom Runtime For Upgrade
-    [Tags]      Upgrade    ModelServing         deprecatedTest
-    Create Custom Serving Runtime Using Template By CLI
-    ...    tests/Resources/Files/caikit_runtime_template.yaml
-    Begin Web Test
-    Menu.Navigate To Page       Settings        Serving runtimes
-    Wait Until Page Contains        Add serving runtime     timeout=15s
-    Page Should Contain Element     //tr[@id='caikit-runtime']
-    [Teardown]      Dashboard Test Teardown
-
 Verify Distributed Workload Metrics Resources By Creating Ray Cluster Workload
     # robocop: off=too-long-test-case
     # robocop: off=too-many-calls-in-test-case
@@ -210,19 +145,7 @@ Verify Distributed Workload Metrics Resources By Creating Ray Cluster Workload
     [Teardown]      Run Keywords        Cleanup Codeflare-SDK Setup     AND
     ...     Run Keyword If Test Failed      Codeflare Upgrade Tests Teardown        ${PRJ_UPGRADE}      ${DW_PROJECT_CREATED}       # robocop: disable:line-too-long
 
-Run Training Operator KFTO Setup PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_5_1)
-    [Documentation]    Run Training Operator KFTO Setup PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_5_1)
-    [Tags]      Upgrade    TrainingKubeflow    deprecatedTest
-    [Setup]     Prepare Training Operator KFTO E2E Test Suite
-    Run Training Operator KFTO Test    TestSetupPytorchjob
-    [Teardown]    Teardown Training Operator KFTO E2E Test Suite
 
-Run Training Operator KFTO Setup Sleep PyTorchJob Test Use Case with NVIDIA CUDA image (PyTorch 2_5_1)
-    [Documentation]    Setup PyTorchJob which is kept running for 24 hours with NVIDIA CUDA image (PyTorch 2_5_1)
-    [Tags]      Upgrade    TrainingKubeflow    deprecatedTest
-    [Setup]     Prepare Training Operator KFTO E2E Test Suite
-    Run Training Operator KFTO Test    TestSetupSleepPytorchjob
-    [Teardown]    Teardown Training Operator KFTO E2E Test Suite
 
 Data Science Pipelines Pre Upgrade Configuration
     [Documentation]    Creates project dsp-test-upgrade and configures the pipeline resources testing upgrade
@@ -263,6 +186,7 @@ Launch Notebook
     ...    ${username}=${TEST_USER2.USERNAME}
     ...    ${password}=${TEST_USER2.PASSWORD}
     ...    ${auth_type}=${TEST_USER2.AUTH_TYPE}
+    Clean All Standalone Notebooks
     Begin Web Test    username=${username}    password=${password}    auth_type=${auth_type}
     Launch Jupyter From RHODS Dashboard Link
     Spawn Notebook With Arguments

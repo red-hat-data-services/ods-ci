@@ -1,7 +1,7 @@
 *** Settings ***
 Documentation       Post install test cases that mainly verify OCP resources and objects
-Library             String
 Library             OperatingSystem
+Library             String
 Library             OpenShiftLibrary
 Library             yaml
 Library             ../../../../../libs/Helpers.py
@@ -15,8 +15,12 @@ Resource            ../../../../Resources/ODS.robot
 Resource            ../../../../Resources/Page/ODH/Grafana/Grafana.resource
 Resource            ../../../../Resources/Page/HybridCloudConsole/HCCLogin.robot
 Resource            ../../../../Resources/Common.robot
+Resource            ../../../../Resources/Page/NetworkPolicies/NetworkPolicies.resource
+Resource            ../../../../Resources/Page/Notebooks/Notebooks.resource
+Resource            ../../../../Resources/Page/Platforms/Platforms.resource
 Suite Setup         RHOSi Setup
 Suite Teardown      RHOSi Teardown
+
 
 *** Variables ***
 ${RHODS_OPERATOR_GIT_REPO}       %{RHODS_OPERATOR_GIT_REPO=https://github.com/red-hat-data-services/rhods-operator}
@@ -25,10 +29,10 @@ ${RHODS_OPERATOR_GIT_DIR}        ${OUTPUT DIR}/rhods-operator
 
 *** Test Cases ***
 Verify Dashbord has no message with NO Component Found
-    [Tags]  Tier3
-    ...     ODS-1493
     [Documentation]   Verify "NO Component Found" message dosen't display
     ...     on Rhods Dashbord page with bad subscription present in openshift
+    [Tags]  Tier3
+    ...     ODS-1493
     [Setup]   Test Setup For Rhods Dashboard
     Oc Apply  kind=Subscription  src=tests/Tests/0100__platform/0101__deploy/0101__installation/bad_subscription.yaml
     Delete Dashboard Pods And Wait Them To Be Back
@@ -87,7 +91,7 @@ Verify That Prometheus Image Is A CPaaS Built Image
     ...       Tier1
     ...       ODS-734
     Skip If RHODS Is Self-Managed    # TODO Observability: Test can be removed once we fully onboard on the new stack.
-                                     # Observability operator deploys Prometheus for us.
+    # Observability operator deploys Prometheus for us.
     Wait For Pods To Be Ready    label_selector=deployment=prometheus
     ...    namespace=${MONITORING_NAMESPACE}    timeout=60s
     ${pod} =    Find First Pod By Name    namespace=${MONITORING_NAMESPACE}    pod_regex=prometheus-
@@ -114,7 +118,7 @@ Verify That Alert Manager Image Is A CPaaS Built Image
     ...       Tier1
     ...       ODS-733
     Skip If RHODS Is Self-Managed    # TODO Observability: Test can be removed once we fully onboard on the new stack.
-                                     # Observability operator deploys alertmanager for us.
+    # Observability operator deploys alertmanager for us.
     Wait For Pods To Be Ready    label_selector=deployment=prometheus
     ...    namespace=${MONITORING_NAMESPACE}    timeout=60s
     ${pod} =    Find First Pod By Name    namespace=${MONITORING_NAMESPACE}    pod_regex=prometheus-
@@ -139,10 +143,10 @@ Verify That CUDA Build Chain Succeeds
     ...       Tier1
     ...       OpenDataHub
     ...       ODS-316    ODS-481
-    Verify Image Can Be Spawned    image=pytorch  size=Small
+    Verify Image Can Be Spawned    image=pytorch
     ...    username=${TEST_USER_3.USERNAME}    password=${TEST_USER_3.PASSWORD}
     ...    auth_type=${TEST_USER_3.AUTH_TYPE}
-    Verify Image Can Be Spawned    image=tensorflow  size=Small
+    Verify Image Can Be Spawned    image=tensorflow
     ...    username=${TEST_USER.USERNAME}    password=${TEST_USER.PASSWORD}
     ...    auth_type=${TEST_USER.AUTH_TYPE}
     [Teardown]    CUDA Teardown
@@ -155,7 +159,7 @@ Verify That Blackbox-exporter Is Protected With Auth-proxy
     ...     ODS-1090
 
     Skip If RHODS Is Self-Managed    # TODO Observability: We don't deploy blackbox-exporter yet on self-managed
-                                     # Oauth Proxy won't be used in new monitoring stack, it will be kube-rbac-proxy
+    # Oauth Proxy won't be used in new monitoring stack, it will be kube-rbac-proxy
 
     Verify BlackboxExporter Includes Oauth Proxy
 
@@ -175,7 +179,7 @@ Verify That "Usage Data Collection" Is Enabled By Default
     ...       ODS-1234
 
     ${version_check} =    Is RHODS Version Greater Or Equal Than    1.8.0
-    IF    ${version_check}==True
+    IF    ${version_check}
         ODS.Usage Data Collection Should Be Enabled
         ...    msg="Usage Data Collection" should be enabled by default after installing ODS
     ELSE
@@ -209,7 +213,7 @@ Verify Users Can Update Notification Email After Installing RHODS With The AddOn
     ...       Monitoring
     ...       AutomationBug  # currently broken on fake addon installs
     Skip If RHODS Is Self-Managed    # TODO Observability: We don't reconfigure new stack alertmanager yet
-                                     # Only applicable to managed clusters
+    # Only applicable to managed clusters
     ${email_to_change} =    Set Variable    dummyemail1@redhat.com
     ${cluster_name} =    Common.Get Cluster Name From Console URL
     ${current_email} =    Get Notification Email From Addon-Managed-Odh-Parameters Secret
@@ -245,19 +249,19 @@ Verify Monitoring Stack Is Reconciled Without Restarting The ODS Operator
     ...       Monitoring
     ...       Execution-Time-Over-15m
     Skip If RHODS Is Self-Managed    # TODO Observability: Likely needs to be revisited if it makes sense. Probably we
-                                     # can change MonitoringStack/Otel collector and see if it reconciles back
+    # can change MonitoringStack/Otel collector and see if it reconciles back
     Replace "Prometheus" With "Grafana" In Rhods-Monitor-Federation
     Wait Until Operator Reverts "Grafana" To "Prometheus" In Rhods-Monitor-Federation
 
 Verify RHODS Dashboard Explore And Enabled Page Has No Message With No Component Found
-    [Tags]  Tier3
-    ...     ODS-1556
     [Documentation]   Verify "NO Component Found" message dosen't display
     ...     on Rhods Dashbord page with data value empty for odh-enabled-applications-config
     ...     configmap in openshift
     ...     ProductBug:RHODS-4308
+    [Tags]  Tier3
+    ...     ODS-1556
     [Setup]   Test Setup For Rhods Dashboard
-    Oc Patch    kind=ConfigMap      namespace=${APPLICATIONS_NAMESPACE}    name=odh-enabled-applications-config    src={"data":null}   #robocop: disable
+    Oc Patch    kind=ConfigMap      namespace=${APPLICATIONS_NAMESPACE}    name=odh-enabled-applications-config    src={"data":null}   # robocop: disable
     Delete Dashboard Pods And Wait Them To Be Back
     Reload Page
     Menu.Navigate To Page    Applications   Enabled
@@ -285,27 +289,25 @@ Verify RHODS Display Name and Version
     Should Be Equal       ${csv_version_t[1].replace('v','')}   ${csv_version}
     ...    msg='${csv_name}' name and '${csv_version}' vesrion are not consistent
 
-Verify RHODS Notebooks Network Policies
-    [Documentation]    Verifies that the network policies for RHODS Notebooks are present on the cluster
+Verify Notebooks Network Policies For All Platforms
+    [Documentation]    Creates a notebook programmatically using oc commands and verifies that the correct network policies are automatically created by the DSCInitialization controller. This test validates that:
+    ...    - A notebook CR can be created without UI interaction
+    ...    - The DSCInitialization controller automatically creates network policies via ReconcileDefaultNetworkPolicy()
+    ...    - Network policies are properly configured for security isolation across all platforms
+    ...    - Platform-specific network policy configurations are correctly applied
+    ...    - Namespace labeling follows platform-specific patterns
+    ...    - Policy compliance with OpenDataHub security requirements
     [Tags]    Smoke
     ...       Tier1
+    ...       JupyterHub
     ...       ODS-2045
-    Launch Notebook And Stop It
+    ...       Operator
+
+    ${platform_type} =    Detect Platform Type
+    Create Notebook Programmatically And Wait For Ready
     ${CR_name} =    Get User CR Notebook Name    username=${TEST_USER.USERNAME}
-    ${policy_ctrl} =    Run
-    ...    oc get networkpolicy ${CR_name}-ctrl-np -n ${NOTEBOOKS_NAMESPACE} -o json | jq '.spec.ingress[0]'
-    ${rc}    ${expected_policy_ctrl} =    Run And Return Rc And Output
-    ...    sed "s#SELECTOR_LABEL_VALUE#${APPLICATIONS_NAMESPACE}#" tests/Resources/Files/expected_ctrl_np_template.txt  # robocop: disable:line-too-long
-    Should Be Equal As Strings    ${policy_ctrl}    ${expected_policy_ctrl}
-    Log    ${policy_ctrl}
-    Log    ${expected_policy_ctrl}
-    ${policy_oauth} =    Run
-    ...    oc get networkpolicy ${CR_name}-oauth-np -n ${NOTEBOOKS_NAMESPACE} -o json | jq '.spec.ingress[0]'
-    ${expected_policy_oauth} =    Get File    tests/Resources/Files/expected_oauth_np.txt
-    Should Be Equal As Strings    ${policy_oauth}    ${expected_policy_oauth}
-    Log    ${policy_oauth}
-    Log    ${expected_policy_oauth}
-    [Teardown]    Delete User Notebook CR    ${TEST_USER.USERNAME}
+    Verify Network Policy Existence And Configuration    ${CR_name}    ${platform_type}
+    [Teardown]    Cleanup Notebook CR    ${TEST_USER.USERNAME}
 
 Verify All The Pods Are Using Image Digest Instead Of Tags
     [Documentation]    Verifies that the all the rhods pods are using image digest
@@ -315,7 +317,7 @@ Verify All The Pods Are Using Image Digest Instead Of Tags
     ...       Operator
     ...       ExcludeOnODH
     ${return_code}    ${output} =    Run And Return Rc And Output    oc get ns -l opendatahub.io/generated-namespace -o jsonpath='{.items[*].metadata.name}' ; echo ; oc get ns -l opendatahub.io/dashboard -o jsonpath='{.items[*].metadata.name}'  # robocop: disable
-    Should Be Equal As Integers	 ${return_code}	 0  msg=Error getting the namespace using label
+    Should Be Equal As Integers     ${return_code}     0  msg=Error getting the namespace using label
     ${projects_list} =    Split String    ${output}
     Append To List    ${projects_list}     ${OPERATOR_NAMESPACE}
     Container Image Url Should Use Image Digest Instead Of Tags Based On Project Name  @{projects_list}
@@ -326,23 +328,22 @@ Verify No Application Pods Run With Anyuid SCC Or As Root
     ...       RHOAIENG-15892
     ...       Operator
     ${return_code}    ${output} =    Run And Return Rc And Output    oc get pod -n ${APPLICATIONS_NAMESPACE} -o custom-columns="NAMESPACE:metadata.namespace,NAME:metadata.name,SCC:.metadata.annotations.openshift\\.io/scc,CONTAINER_NAME:.spec.containers[*].name,RUNASUSER_CONTAINERS:.spec.containers[*].securityContext.runAsUser,RUNASUSER:.spec.securityContext.runAsUser"  # robocop: disable
-    Should Be Equal As Integers	 ${return_code}	 0  msg=Error getting SCC of pods
+    Should Be Equal As Integers     ${return_code}     0  msg=Error getting SCC of pods
     Log    Pods and their SCC are: ${output}
     ${status} =    Run Keyword And Return Status    Should Not Contain Any    ${output}    anyuid
     IF    not ${status}    Fail      msg=Some pods are running with anyuid SCC
 
     ${return_code}    ${output} =    Run And Return Rc And Output    oc get pod -n ${APPLICATIONS_NAMESPACE} -o json | jq '.items[] | select(any(.spec.containers[].securityContext.runAsUser; . == 0 ) or .spec.securityContext.runAsUser == 0) | .metadata.namespace + "/" + .metadata.name'
-    Should Be Equal As Integers	 ${return_code}	 0  msg=Error getting runAsUser of pods
+    Should Be Equal As Integers     ${return_code}     0  msg=Error getting runAsUser of pods
     ${status} =    Run Keyword And Return Status    Should Be Empty    ${output}
     IF    not ${status}    Fail      msg=Some pods are running as root (UID=0)
-
 
 Verify No Alerts Are Firing After Installation Except For DeadManSnitch    # robocop: disable:too-long-test-case
     [Documentation]    Verifies that, after installation, only the DeadManSnitch alert is firing
     [Tags]    Smoke
     ...       ODS-540
     ...       RHOAIENG-13079
-    #...       Monitoring - just for tracking purposes but commented to not run the same test many times
+    # ...       Monitoring - just for tracking purposes but commented to not run the same test many times
     ...       Operator
     Skip If RHODS Is Self-Managed And New Observability Stack Is Disabled    # TODO Observability: We don't configure alerts yet with new observability stack, so may likely fail
     # If these numbers change, add also alert-specific tests
@@ -355,9 +356,6 @@ Verify No Alerts Are Firing After Installation Except For DeadManSnitch    # rob
     # deadmanssnitch-alerting.rules
     Verify Alert Is Firing And Continue On Failure
     ...    DeadManSnitch    DeadManSnitch
-    # codeflare-alerting.rules
-    Verify "CodeFlare Operator Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
-    Verify "Distributed Workloads CodeFlare" Alerts Are Not Firing And Continue On Failure
     # trainingoperator-alerting.rules
     Verify "KubeFlow Training Operator" Alerts Are Not Firing And Continue On Failure
     # rhods-dashboard-alerting.rules
@@ -367,8 +365,6 @@ Verify No Alerts Are Firing After Installation Except For DeadManSnitch    # rob
     Verify "Data Science Pipelines Application Route Error Burn Rate" Alerts Are Not Firing And Continue On Failure
     Verify "Data Science Pipelines Operator Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
     Verify "RHODS Data Science Pipelines" Alerts Are Not Firing And Continue On Failure
-    # model-mesh-alerting.rules
-    Verify "Modelmesh Controller Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
     # odh-model-controller-alerting.rules
     Verify "ODH Model Controller Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
     # kserve-alerting.rules
@@ -392,11 +388,11 @@ Verify No Alerts Are Firing After Installation Except For DeadManSnitch    # rob
     # Verify "Model Registry Operator Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
 
 Verify DSC Contains Correct Component Versions  # robocop: disable:too-long-test-case
+    [Documentation]   Verify that component versions are present in DSC status and match the release repo
     [Tags]    Smoke
     ...       Operator
     ...       RHOAIENG-12693
     ...       ExcludeOnODH
-    [Documentation]   Verify that component versions are present in DSC status and match the release repo
     Gather Release Attributes From DSC And DSCI
     ${rhods_operator_branch} =  Remove String Using Regexp  ${DSC_RELEASE_VERSION}  \\.[0-9]+\$
     Common.Clone Git Repository  ${RHODS_OPERATOR_GIT_REPO}  rhoai-${rhods_operator_branch}  ${RHODS_OPERATOR_GIT_DIR}
@@ -409,13 +405,22 @@ Verify DSC Contains Correct Component Versions  # robocop: disable:too-long-test
         ...     ${RHODS_OPERATOR_GIT_DIR}/prefetched-manifests/${c}/component_metadata.yaml
         ${file_exists} =  Run Keyword And Return Status    File Should Exist  ${component_metadata_file}
         IF  ${file_exists}
-            IF  $component_versions_json[$c] == {} or $component_versions_json[$c]["managementState"] != "Managed"
-                Log  ${c} is not managed, skipping version check
+            IF    "${c}" == "datasciencepipelines"
+                ${cmp} =  Set Variable   aipipelines
+            ELSE
+                ${cmp} =  Set Variable   ${c}
+            END
+            IF  $cmp not in $component_versions_json
+                Log  ${cmp} present in the operator manifests, but not present in the DSC definition, hence skipping
+                CONTINUE
+            END
+            IF  $component_versions_json[$cmp] == {} or $component_versions_json[$cmp]["managementState"] != "Managed"
+                Log  ${cmp} is not managed, skipping version check
                 CONTINUE
             END
             ${component_metadata_content} =  Get File  ${component_metadata_file}
             ${component_metadata} =    Evaluate     yaml.safe_load("""${component_metadata_content}""")    yaml
-            Lists Should Be Equal    ${component_versions_json}[${c}][releases]   ${component_metadata}[releases]
+            Lists Should Be Equal    ${component_versions_json}[${cmp}][releases]   ${component_metadata}[releases]
             ...    msg=Component versions in DSC don't match component metadata in repo
         ELSE
             Log  ${c} does not provide component_metadata.yaml
@@ -441,7 +446,7 @@ Test Setup For Rhods Dashboard
 
 Test Teardown For Configmap Changed On RHODS Dashboard
     [Documentation]    Test Teardown for Configmap changes on Rhods Dashboard
-    Oc Patch    kind=ConfigMap      namespace=${APPLICATIONS_NAMESPACE}    name=odh-enabled-applications-config    src={"data": {"jupyterhub": "true"}}   #robocop: disable
+    Oc Patch    kind=ConfigMap      namespace=${APPLICATIONS_NAMESPACE}    name=odh-enabled-applications-config    src={"data": {"jupyterhub": "true"}}   # robocop: disable
     Delete Dashboard Pods And Wait Them To Be Back
     Close All Browsers
 
@@ -512,7 +517,7 @@ Verify CPU And Memory Requests And Limits Are Defined For All Containers In All 
     ...    Returns:
     ...        None
     [Arguments]    ${project}
-    ${project_pods_info}=    Fetch Project Pods Info    ${project}
+    ${project_pods_info} =    Fetch Project Pods Info    ${project}
     FOR    ${pod_info}    IN    @{project_pods_info}
         Verify CPU And Memory Requests And Limits Are Defined For Pod    ${pod_info}
         IF    "${project}" == "${APPLICATIONS_NAMESPACE}"
@@ -533,7 +538,7 @@ Verify In Rhods-Monitor-Federation App Is
     [Documentation]     Verifies in rhods-monitor-federation, app is showing ${expected_app_name}
     [Arguments]         ${expected_app_name}
     ${data} =    OpenShiftLibrary.Oc Get    kind=ServiceMonitor   namespace=${MONITORING_NAMESPACE}    field_selector=metadata.name==rhods-monitor-federation
-    ${app_name}    Set Variable    ${data[0]['spec']['selector']['matchLabels']['app']}
+    ${app_name} =    Set Variable    ${data[0]['spec']['selector']['matchLabels']['app']}
     Should Be Equal    ${expected_app_name}    ${app_name}
 
 Replace "Prometheus" With "Grafana" In Rhods-Monitor-Federation
@@ -552,18 +557,4 @@ CUDA Teardown
     [Documentation]    Ensures spawner is cleaned up if spawn fails
     ...    during the cuda smoke verification
     Fix Spawner Status
-    End Web Test
-
-Launch Notebook And Stop It    # robocop: disable
-    [Documentation]    Opens a Notebook, forcing the creation of the NetworkPolicies
-    Set Library Search Order    SeleniumLibrary
-    Open Browser    ${ODH_DASHBOARD_URL}    browser=${BROWSER.NAME}    options=${BROWSER.OPTIONS}
-    Login To RHODS Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
-    Wait For RHODS Dashboard To Load
-    Launch Jupyter From RHODS Dashboard Link
-    Login To Jupyterhub    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
-    Verify Service Account Authorization Not Required
-    Wait Until Page Contains    Start a basic workbench
-    Fix Spawner Status
-    Spawn Notebook With Arguments    image=minimal-notebook
     End Web Test

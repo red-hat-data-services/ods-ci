@@ -1,0 +1,14 @@
+apiVersion: nfd.openshift.io/v1alpha1
+kind: NodeFeatureRule
+metadata:
+  name: nvidia-gpu-vendor-label
+  namespace: openshift-nfd
+spec:
+  rules:
+    - name: "nvidia.pci.vendor"
+      labels:
+        "feature.node.kubernetes.io/pci-10de.present": "true"
+      matchFeatures:
+        - feature: pci.device
+          matchExpressions:
+            vendor: {op: In, value: ["10de"]}

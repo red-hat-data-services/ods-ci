@@ -83,8 +83,39 @@ def execute_command(cmd: str, print_stdout: bool = True) -> str | None:
 
 def oc_login(ocp_api_url, username, password, timeout=600):
     """
-    Login to test cluster using oc cli command
+    Login to test cluster using oc cli command:
+    - If EXTERNAL_KUBECONFIG is set (path to a kubeconfig file), do NOT use username/password.
+      Instead, rely on that kubeconfig and just validate access with `oc whoami`.
+    - Otherwise, login with expected username/password credentials.
     """
+    external_kcfg = os.environ.get("EXTERNAL_KUBECONFIG", "").strip()
+
+    # Kubeconfig-driven login (only when EXTERNAL_KUBECONFIG is set)
+    if external_kcfg:
+        os.environ["KUBECONFIG"] = external_kcfg
+        log.info("Using EXTERNAL_KUBECONFIG, skipping username/password login")
+
+        if (not os.path.exists(external_kcfg)) or (os.path.getsize(external_kcfg) == 0):
+            log.error("kubeconfig does not exist or is empty")
+            sys.exit(1)
+
+        out = execute_command(f"oc config get-contexts --kubeconfig={external_kcfg}")
+        if out is None or not out.strip():
+            log.error("kubeconfig is invalid or missing contexts")
+            sys.exit(1)
+
+        count = 0
+        while count <= timeout:
+            out = execute_command("oc whoami")
+            if out is not None and out.strip():
+                print(f"Kubeconfig context valid, current user={out.strip()}")
+                return
+            time.sleep(5)
+            count += 5
+
+        log.error("Failed to validate kubeconfig context via 'oc whoami'")
+        sys.exit(1)
+
     cmd = f"oc login -u {username} -p {password} {ocp_api_url} --insecure-skip-tls-verify=true"
     count = 0
     chk_flag = 0
@@ -97,7 +128,7 @@ def oc_login(ocp_api_url, username, password, timeout=600):
         time.sleep(5)
         count += 5
     if not chk_flag:
-        print("Failed to login to cluster")
+        log.error("Failed to login to cluster")
         sys.exit(1)
 
 

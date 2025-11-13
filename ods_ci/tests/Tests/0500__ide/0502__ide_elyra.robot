@@ -39,7 +39,7 @@ ${DC_NAME} =    elyra-s3
 *** Test Cases ***
 Verify Pipelines Integration With Elyra When Using Standard Data Science Image
     [Documentation]    Verifies that a workbench using the Jupyter | Data Science | CPU | Python 3.12 Image can be used to
-    ...    create and run a Data Science Pipeline
+    ...    create and run a Pipeline
     [Tags]    Sanity    ODS-2197
     [Timeout]    10m
     Verify Pipelines Integration With Elyra Running Hello World Pipeline Test
@@ -49,7 +49,7 @@ Verify Pipelines Integration With Elyra When Using Standard Data Science Image
 
 Verify Pipelines Integration With Elyra When Using Standard Data Science Based Images
     [Documentation]    Verifies that a workbench using an image based on the Jupyter | Data Science | CPU | Python 3.12 Image
-    ...    can be used to create and run a Data Science Pipeline
+    ...    can be used to create and run a Pipeline
     ...    Note: this a templated test case
     ...    (more info at https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#test-templates)
     [Template]    Verify Pipelines Integration With Elyra Running Hello World Pipeline Test
@@ -81,7 +81,8 @@ Elyra Pipelines Suite Setup    # robocop: off=too-many-calls-in-keyword
     Sleep    15s    reason=Wait until pipeline server is detected by dashboard
     # Workaround for the: https://issues.redhat.com/browse/RHOAIENG-24545
     Create Workbench    workbench_title=workaround    workbench_description=workaround
-    ...                 prj_title=${PRJ_TITLE}    image_name=Jupyter | Minimal | CPU | Python 3.12  deployment_size=Small
+    ...                 prj_title=${PRJ_TITLE}    image_name=Jupyter | Minimal | CPU | Python 3.12
+    ...                 hardware_profile=default-profile
     ...                 storage=Persistent  pv_existent=${FALSE}
     ...                 pv_name=${PV_NAME}_workaround  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
     ...                 envs=${ENVS_LIST}
@@ -100,7 +101,7 @@ Verify Pipelines Integration With Elyra Running Hello World Pipeline Test     # 
     ...    runs successfully
     [Arguments]    ${img}    ${runtime_image}    ${experiment_name}
     Create Workbench    workbench_title=elyra_${img}    workbench_description=Elyra test
-    ...                 prj_title=${PRJ_TITLE}    image_name=${img}  deployment_size=Small
+    ...                 prj_title=${PRJ_TITLE}    image_name=${img}    hardware_profile=default-profile
     ...                 storage=Persistent  pv_existent=${FALSE}
     ...                 pv_name=${PV_NAME}_${img}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
     ...                 envs=${ENVS_LIST}
@@ -120,7 +121,7 @@ Verify Pipelines Integration With Elyra Running Hello World Pipeline Test     # 
     # We need to navigate to the page because the project name hold a state
     # In a fresh cluster, if not state found, it will select the first one
     # In this case, the first could not be the project created
-    Menu.Navigate To Page    Data science pipelines    Pipelines
+    Menu.Navigate To Page    Develop & train    Pipelines    Pipeline definitions
     Select Pipeline Project By Name    ${PRJ_TITLE}
     Log    ${pipeline_run_name}
     Verify Pipeline Run Is Completed    ${pipeline_run_name}    timeout=5m    experiment_name=${experiment_name}

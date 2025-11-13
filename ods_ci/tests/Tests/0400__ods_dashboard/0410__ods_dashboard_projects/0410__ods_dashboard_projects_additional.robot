@@ -48,7 +48,7 @@ Verify Notebook Tolerations Are Applied To Workbenches
     ...       ProductBug
     Create Workbench    workbench_title=${WORKBENCH_TITLE_TOL_1}
     ...                 workbench_description=${WORKBENCH_DESCRIPTION}
-    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
+    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   hardware_profile=default-profile
     ...                 storage=Persistent  pv_existent=${FALSE}    pv_name=${PV_NAME_TOL_1}
     ...                 pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
     Run Keyword And Continue On Failure
@@ -56,7 +56,7 @@ Verify Notebook Tolerations Are Applied To Workbenches
     Open Settings And Set Tolerations To    ${TOLERATIONS}
     Sleep   40s    reason=Wait enough time for letting Dashboard to fetch the latest toleration settings
     Create Workbench    workbench_title=${WORKBENCH_TITLE_TOL_2}  workbench_description=${WORKBENCH_DESCRIPTION}
-    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   deployment_size=Small
+    ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   hardware_profile=default-profile
     ...                 storage=Persistent  pv_existent=${FALSE}    pv_name=${PV_NAME_TOL_2}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
     Verify Workbench Has The Expected Tolerations    workbench_title=${WORKBENCH_TITLE_TOL_2}
     ...    toleration=${TOLERATIONS}
@@ -87,7 +87,7 @@ Verify User Can Add GPUs To Workbench
     ...       ODS-2013    Resources-GPU    NVIDIA-GPUs
     Launch Data Science Project Main Page
     Create Workbench    workbench_title=${WORKBENCH_TITLE_GPU}  workbench_description=${EMPTY}
-    ...    prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE_GPU}   deployment_size=Small
+    ...    prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE_GPU}   hardware_profile=default-profile
     ...    storage=Persistent  pv_existent=${FALSE}    pv_name=${PV_NAME_GPU}
     ...    pv_description=${EMPTY}  pv_size=${PV_SIZE}
     Run Keyword And Continue On Failure
@@ -111,7 +111,7 @@ Verify User Can Remove GPUs From Workbench
     ...       ODS-2014    Resources-GPU    NVIDIA-GPUs
     Launch Data Science Project Main Page
     Create Workbench    workbench_title=${WORKBENCH_TITLE_GPU}  workbench_description=${EMPTY}
-    ...    prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE_GPU}   deployment_size=Small
+    ...    prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE_GPU}   hardware_profile=default-profile
     ...    storage=Persistent  pv_existent=${FALSE}    pv_name=${PV_NAME_GPU}
     ...    pv_description=${EMPTY}  pv_size=${PV_SIZE}    gpus=1
     Run Keyword And Continue On Failure    Wait Until Workbench Is Started     workbench_title=${WORKBENCH_TITLE_GPU}

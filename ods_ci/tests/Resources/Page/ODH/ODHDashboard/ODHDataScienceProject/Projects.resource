@@ -1,11 +1,11 @@
 *** Settings ***
-Documentation    Collection of keywords to interact with Data Science Projects
+Documentation    Collection of keywords to interact with Projects page
 Resource       ../../../../Common.robot
 Resource       ./Workbenches.resource
 
 
 *** Variables ***
-${DS_PROJECT_TITLE}=    Data science projects
+${DS_PROJECT_TITLE}=    Projects
 ${TITLE_INPUT_XP}=    xpath=//input[@id="manage-project-modal-name"]
 ${DESCR_INPUT_XP}=    xpath=//textarea[@id="manage-project-modal-description"]
 ${RESOURCE_EDIT_BTN_XP}=    xpath=//button[.="Edit resource name"]
@@ -29,20 +29,20 @@ ${PROJECT_SEARCH_INPUT}=    ${PROJECT_SEARCH_BAR} [data-testid="filter-toolbar-t
 
 *** Keywords ***
 Open Data Science Projects Home Page
-    [Documentation]    Open "Data Science Projects" page from the sidebar
+    [Documentation]    Open "Projects" page from the sidebar
     Wait Until Page Contains    ${DS_PROJECT_TITLE}
     Click Link      ${DS_PROJECT_TITLE}
     Wait For RHODS Dashboard To Load    wait_for_cards=${FALSE}    expected_page=${DS_PROJECT_TITLE}
     Maybe Wait For Dashboard Loading Spinner Page
 
 Is Data Science Projects Page Open
-    [Documentation]    Checks if Data Science Projects home page is open. Returns TRUE or FALSE
+    [Documentation]    Checks if Projects home page is open. Returns TRUE or FALSE
     Close Generic Modal If Present
     ${page_open}=   Run Keyword And Return Status    Wait For Dashboard Page Title    ${DS_PROJECT_TITLE}
     RETURN    ${page_open}
 
 Open Data Science Project Details Page
-    [Documentation]    Open project ${project_title} in the "Data Science Projects" page, and an optional Tab by ID:
+    [Documentation]    Open project ${project_title} in the "Projects" page, and an optional Tab by ID:
     ...    overview | workbenches | cluster-storages | connections | pipelines-projects | model-server | permissions    # robocop: disable
     [Arguments]     ${project_title}    ${tab_id}=${NONE}
     ${is_project_open}=    Is Data Science Project Details Page Open    project_title=${project_title}
@@ -55,11 +55,7 @@ Open Data Science Project Details Page
         Wait Until Project Is Open    project_title=${project_title}
     END
     IF  "${tab_id}" != "${NONE}"
-        Log    ${tab_id}
-        Wait Until Element Is Visible    //button[@data-testid="${tab_id}-tab"]
-        Click Button    //button[@data-testid="${tab_id}-tab"]
-        Wait Until Element Is Visible   //button[@data-testid="${tab_id}-tab" and @aria-selected="true"]
-        Sleep    1s    reason=The tab page needs to load content according to user permissions
+        Move To Tab    tab_id=${tab_id}
     END
 
 Delete Data Science Project
@@ -394,7 +390,7 @@ Number Of Displayed Projects Should Be
     Run Keyword And Continue On Failure    Should Be Equal As Integers    ${n_listed}    ${expected_number}
 
 Go To Next Page Of Data Science Projects
-    [Documentation]    Navigate to next page when more than 10 Data Science Projects Appear
+    [Documentation]    Navigate to next page when more than 10 Projects Appear
     Click Button    xpath=//button[@data-action="next"]
 
 Launch Data Science Project Main Page
@@ -407,7 +403,7 @@ Launch Data Science Project Main Page
     Open Data Science Projects Home Page
 
 Remove Current Page Projects From All Projects
-    [Documentation]    Remove list of currently displayed Data Science projects from list of all projects
+    [Documentation]    Remove list of currently displayed projects from list of all projects
     [Arguments]        ${all_projects}    ${curr_page_projects}
     FOR    ${project}    IN    @{curr_page_projects}
         Remove Values From List    ${all_projects}    ${project}
@@ -466,10 +462,7 @@ Update Data Science Project Description
 
 Permissions Tab Should Be Accessible
     [Documentation]    Verify user can access the "Permissions" tab of a DS project
-    Run Keyword And Continue On Failure
-    ...    Page Should Contain Element
-    ...    xpath://span[text()="Permissions"]
-    Move To Tab    tab_title=Permissions
+    Move To Tab    tab_id=permissions
     Wait Until Permissions Tab Is Open
 
 Permissions Tab Should Not Be Accessible
@@ -492,17 +485,21 @@ Wait Until Overview Tab Is Open
 
 Overview Tab Should Be Accessible
     [Documentation]    Verify user can access the "Overview" tab of a DS project
-    Run Keyword And Continue On Failure
-    ...    Page Should Contain Element
-    ...    xpath://span[text()="Overview"]
-    Move To Tab    tab_title=Overview
+    Move To Tab    tab_id=overview
     Wait Until Overview Tab Is Open
 
 Move To Tab
     [Documentation]    Open one of the tabs in a DS Project details page (e.g., Permissions)
-    [Arguments]    ${tab_title}
-    Wait Until Element Is Visible    xpath://span[text()="${tab_title}"]    timeout=10s
-    Click Element    xpath://span[text()="${tab_title}"]
+    ...                Valid tab IDs are: overview, workbenches, cluster-storages, connections,
+    ...                pipelines-projects, model-server, permissions.
+    [Arguments]    ${tab_id}
+    Log    Moving to tab: ${tab_id}
+    ${tab_xpath}=    Set Variable   xpath://button[@data-testid="${tab_id}-tab"]
+    ${tab_xpath_selected}=    Set Variable   xpath://button[@data-testid="${tab_id}-tab" and @aria-selected="true"]
+
+    Wait Until Element Is Visible    ${tab_xpath}    timeout=10s
+    Click Button    ${tab_xpath}
+    Wait Until Element Is Visible    ${tab_xpath_selected}    timeout=10s
     Sleep    1s    reason=The tab page needs to load content according to user permissions
     Maybe Wait For Dashboard Loading Spinner Page
 

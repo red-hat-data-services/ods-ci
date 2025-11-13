@@ -26,7 +26,7 @@ Create Pipeline Server    # robocop: off=too-many-calls-in-keyword
     [Arguments]    ${dc_name}    ${project_title}
     # Every 2 mins the frontend updates its cache and the client polls every 30seconds.
     # So the longest you’d have to wait is 2.5 mins. Set 3 min just to make sure
-    Projects.Move To Tab    Pipelines
+    Projects.Move To Tab    pipelines-projects
     Wait Until Page Contains Element    ${PIPELINES_SERVER_BTN_XP}    timeout=180s
     Element Should Be Enabled    ${PIPELINES_SERVER_BTN_XP}
     Click Button    ${PIPELINES_SERVER_BTN_XP}
@@ -60,7 +60,7 @@ Import Pipeline
     [Documentation]    Import a pipeline definition from DS Project details page.
     ...                It expects to receive the relative path starting from ods_ci/
     [Arguments]    ${name}    ${filepath}    ${project_title}    ${description}=${NONE}    ${press_cancel}=${FALSE}
-    Projects.Move To Tab    Pipelines
+    Projects.Move To Tab    pipelines-projects
     Click Button    ${PIPELINES_IMPORT_BTN_XP}
     Wait Until Generic Modal Appears
     Run Keyword And Continue On Failure    Element Should Be Disabled    ${PIPELINES_IMPORT_BTN_FORM_XP}
@@ -84,7 +84,7 @@ Create Pipeline Run
     [Arguments]    ${name}    ${pipeline_name}=${NONE}    ${run_type}=Immediate
     ...            ${start_date}=${NONE}    ${start_time}=${NONE}    ${end_date}=${NONE}
     ...            ${end_time}=${NONE}    ${cron_expr}=${NONE}    ${press_cancel}=${FALSE}    &{model_param}
-    Projects.Move To Tab    Pipelines
+    Projects.Move To Tab    pipelines-projects
     Pipelines.Click Action From Pipeline Actions Menu    pipeline_name=${pipeline_name}    action=Create run
     Fill In Run Creation Form    name=${name}    pipeline_name=${pipeline_name}
     ...    run_type=${run_type}    trigger_type=Periodic    start_date=${start_date}
@@ -194,7 +194,7 @@ Pipeline Should Be Listed
     [Documentation]    Verifies a pipeline is listed in Data Science Project > Pipelines
     [Arguments]     ${pipeline_name}    ${pipeline_description}=${EMPTY}
 
-    Projects.Move To Tab    Pipelines
+    Projects.Move To Tab    pipelines-projects
     ${pipeline_title_xp}=    Set Variable      //*[@data-testid="table-row-title"]//span[text()="${pipeline_name}"]
     Run Keyword And Continue On Failure    Wait Until Page Contains Element    ${pipeline_title_xp}
 
@@ -207,7 +207,7 @@ Pipeline Should Be Listed
 Pipeline Should Not Be Listed
     [Documentation]    Verifies a pipeline not listed in Data Science Project > Pipelines
     [Arguments]     ${pipeline_name}
-    Projects.Move To Tab    Pipelines
+    Projects.Move To Tab    pipelines-projects
     ${pipeline_title_xp}=    Set Variable      (//*[@data-testid="table-row-title" and text()="${pipeline_name}"])[1]
     Run Keyword And Continue On Failure    Wait Until Page Does Not Contain Element    ${pipeline_title_xp}
 

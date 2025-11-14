@@ -12,6 +12,7 @@ ${KNATIVE_SERVING_NS}=      knative-serving
 ${KNATIVE_EVENTING_NS}=       knative-eventing
 ${ISTIO_SYSTEM_NS}=       istio-system
 ${KUEUE_NS}=    openshift-kueue-operator
+${JOBSET_NS}=    openshift-jobset-operator
 ${CERT_MANAGER_NS}=    cert-manager-operator
 
 
@@ -46,7 +47,7 @@ Uninstall RHODS In OSD
   [Documentation]   UnInstall rhods on managed cluster using cli
   Clone OLM Install Repo
   ${return_code}    Run and Watch Command
-  ...    cd ${EXECDIR}/${OLM_DIR} && ./cleanup.sh -t addon -a "authorino serverless servicemesh clusterobservability tempo opentelemetry kueue certmanager cma"
+  ...    cd ${EXECDIR}/${OLM_DIR} && ./cleanup.sh -t addon -a "authorino serverless servicemesh clusterobservability tempo opentelemetry kueue certmanager cma jobset"
   ...    timeout=20 min
   Should Be Equal As Integers  ${return_code}   0   msg=Error detected while un-installing ODH/RHOAI
 
@@ -105,6 +106,23 @@ Uninstall Kueue Operator CLI
     ${return_code}    ${output}    Run And Return Rc And Output
     ...    oc delete kueues.kueue.openshift.io --all --ignore-not-found
     Should Be Equal As Integers  ${return_code}   0   msg=Error deleting Kueue CR
+
+Uninstall JobSet Operator CLI
+    [Documentation]    Keyword to uninstall the JobSet Operator
+    Log To Console    message=Deleting JobSet Operator Subscription From Cluster
+    ${return_code}    ${csv_name}    Run And Return Rc And Output
+    ...    oc get subscription ${JOBSET_SUB_NAME} -n ${JOBSET_NS} -o json | jq '.status.currentCSV' | tr -d '"'
+    IF  "${return_code}" == "0" and "${csv_name}" != "${EMPTY}"
+       ${return_code}    ${output}    Run And Return Rc And Output
+       ...    oc delete clusterserviceversion ${csv_name} -n ${JOBSET_NS} --ignore-not-found
+       Should Be Equal As Integers  ${return_code}   0   msg=Error deleting JobSet CSV ${csv_name}
+    END
+    ${return_code}    ${output}    Run And Return Rc And Output
+    ...    oc delete subscription ${JOBSET_SUB_NAME} -n ${JOBSET_NS} --ignore-not-found
+    Log To Console    message=Deleting JobSet Operator Group From Cluster
+    ${return_code}    ${output}    Run And Return Rc And Output
+    ...    oc delete operatorgroup --all -n ${JOBSET_NS} --ignore-not-found
+    Should Be Equal As Integers  ${return_code}   0   msg=Error deleting JobSet operator group
 
 Check Number Of Resource Instances Equals To
     [Documentation]    Keyword to check if the amount of instances of a specific CRD in a given namespace

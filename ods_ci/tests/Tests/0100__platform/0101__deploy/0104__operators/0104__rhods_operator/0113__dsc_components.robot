@@ -74,7 +74,6 @@ Validate Kueue Removed To Unmanaged State Transition
     ...    Tier1
     ...    kueue-unmanaged-from-removed
     ...    Integration
-    Uninstall Kueue Operator CLI
     Set DSC Component Removed State And Wait For Completion
     ...    kueue
     ...    ${KUEUE_DEPLOYMENT_NAME}
@@ -86,7 +85,6 @@ Validate Kueue Removed To Unmanaged State Transition
     ...    ${KUEUE_LABEL_SELECTOR}
     ...    namespace=${KUEUE_NS}
     ...    wait_for_completion=False
-    Install Kueue Dependencies
     Wait For Resources To Be Available
     ...    ${KUEUE_DEPLOYMENT_NAME}
     ...    ${KUEUE_LABEL_SELECTOR}
@@ -109,12 +107,10 @@ Validate Kueue Unmanaged To Removed State Transition
     ...    ${KUEUE_LABEL_SELECTOR}
     ...    namespace=${KUEUE_NS}
     ...    wait_for_completion=False
-    Install Kueue Dependencies
     Wait For Resources To Be Available
     ...    ${KUEUE_DEPLOYMENT_NAME}
     ...    ${KUEUE_LABEL_SELECTOR}
     ...    namespace=${KUEUE_NS}
-    Uninstall Kueue Operator CLI
     Set DSC Component Removed State And Wait For Completion
     ...    kueue
     ...    ${KUEUE_DEPLOYMENT_NAME}
@@ -561,37 +557,11 @@ Suite Teardown
 Restore Kueue Initial State
     [Documentation]    Keyword to restore the initial state of the Kueue component. If the restored state is Unmanaged
     ...                we need to ensure the Kueue Operator is installed, if not, we need to make sure is not installed.
-    ${current_state}=    Get DSC Component State    ${DSC_NAME}    kueue    ${OPERATOR_NS}
-    ${ocp_version}=     Get Ocp Cluster Version
-    ${install_kueue_by_ocp_version}=    GTE    ${ocp_version}    4.18.0
     ${kueue_installed} =   Check If Operator Is Installed Via CLI      ${KUEUE_OP_NAME}
-    IF    "${SAVED_MANAGEMENT_STATES.KUEUE}" == "Managed"
-            IF    ${install_kueue_by_ocp_version}
-                    IF    ${kueue_installed}
-                            Uninstall Kueue Operator CLI
-                    END
-            END
-            ${namespace}=    Set Variable    ${APPLICATIONS_NAMESPACE}
-    ELSE IF    "${SAVED_MANAGEMENT_STATES.KUEUE}" == "Unmanaged"
-            IF    not ${kueue_installed}
-                    Install Kueue Dependencies
-            END
-            ${namespace}=    Set Variable    ${KUEUE_NS}
-    ELSE
-            IF    ${install_kueue_by_ocp_version}
-                    IF    ${kueue_installed}
-                            Uninstall Kueue Operator CLI
-                    END
-            END
-            IF       "${current_state}" == "Managed"
-                      ${namespace}=    Set Variable    ${APPLICATIONS_NAMESPACE}
-            ELSE IF        "${current_state}" == "Unmanaged"
-                      ${namespace}=    Set Variable    ${KUEUE_NS}
-            ELSE
-                      ${namespace}=    Set Variable    ${APPLICATIONS_NAMESPACE}
-            END
+    IF    not ${kueue_installed}
+          Install Kueue Dependencies
     END
-    Restore DSC Component State     kueue       ${KUEUE_DEPLOYMENT_NAME}        ${KUEUE_LABEL_SELECTOR}     ${SAVED_MANAGEMENT_STATES.KUEUE}     ${namespace}
+    Restore DSC Component State     kueue      ${KUEUE_DEPLOYMENT_NAME}        ${KUEUE_LABEL_SELECTOR}     ${SAVED_MANAGEMENT_STATES.KUEUE}     ${KUEUE_NS}
 
 Check Controller Conditions Are Accomplished
     [Documentation]    Wait for the conditions related to a specific controller are accomplished

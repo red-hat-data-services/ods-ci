@@ -14,7 +14,6 @@ ${ISTIO_SYSTEM_NS}=       istio-system
 ${KUEUE_NS}=    openshift-kueue-operator
 ${CERT_MANAGER_NS}=    cert-manager-operator
 
-
 *** Keywords ***
 Uninstalling RHODS Operator
   IF  "${cluster_type}" == "selfmanaged"
@@ -46,7 +45,7 @@ Uninstall RHODS In OSD
   [Documentation]   UnInstall rhods on managed cluster using cli
   Clone OLM Install Repo
   ${return_code}    Run and Watch Command
-  ...    cd ${EXECDIR}/${OLM_DIR} && ./cleanup.sh -t addon -a "authorino serverless servicemesh clusterobservability tempo opentelemetry kueue certmanager cma"
+  ...    cd ${EXECDIR}/${OLM_DIR} && ./cleanup.sh -t addon -a "authorino serverless servicemesh servicemesh3 clusterobservability tempo opentelemetry kueue certmanager cma connectivitylink leaderworkerset"
   ...    timeout=20 min
   Should Be Equal As Integers  ${return_code}   0   msg=Error detected while un-installing ODH/RHOAI
 
@@ -68,7 +67,7 @@ Uninstall RHODS In Self Managed Cluster Using CLI
   [Documentation]   UnInstall rhods on self-managed cluster using cli
   Clone OLM Install Repo
   ${return_code}    Run and Watch Command
-  ...    cd ${EXECDIR}/${OLM_DIR} && ./cleanup.sh -t operator -a "authorino serverless servicemesh clusterobservability tempo opentelemetry kueue certmanager cma"
+  ...    cd ${EXECDIR}/${OLM_DIR} && ./cleanup.sh -t operator -a "authorino serverless servicemesh servicemesh3 clusterobservability tempo opentelemetry kueue certmanager cma connectivitylink leaderworkerset"
   ...    timeout=20 min
   Should Be Equal As Integers  ${return_code}   0   msg=Error detected while un-installing ODH/RHOAI
 

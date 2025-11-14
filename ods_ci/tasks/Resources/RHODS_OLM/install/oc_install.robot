@@ -52,6 +52,10 @@ ${CERT_MANAGER_OP_NAME}=  openshift-cert-manager-operator
 ${CERT_MANAGER_SUB_NAME}=  openshift-cert-manager-operator
 ${CERT_MANAGER_CHANNEL_NAME}=  stable-v1
 ${CERT_MANAGER_NS}=  cert-manager-operator
+${CONNECTIVITY_LINK_OP_NAME}=  rhcl-operator
+${CONNECTIVITY_LINK_SUB_NAME}=  rhcl-operator
+${CONNECTIVITY_LINK_CHANNEL_NAME}=  stable
+${CONNECTIVITY_LINK_NS}=  openshift-operators
 ${RHODS_CSV_DISPLAY}=    Red Hat OpenShift AI
 ${ODH_CSV_DISPLAY}=    Open Data Hub Operator
 ${DEFAULT_OPERATOR_NAMESPACE_RHOAI}=    redhat-ods-operator
@@ -82,6 +86,7 @@ Install RHODS
   Log    Start installing RHOAI with:\n\- cluster type: ${cluster_type}\n\- image_url: ${image_url}\n\- update_channel: ${UPDATE_CHANNEL}    console=yes    #robocop:disable
   Log    \- rhoai_version: ${rhoai_version}\n\- is_upgrade: ${is_upgrade}\n\- install_plan_approval: ${install_plan_approval}\n\- CATALOG_SOURCE: ${CATALOG_SOURCE}   console=yes    #robocop:disable
   Assign Vars According To Product
+  Install RHOAI Dependencies
   ${enable_new_observability_stack} =    Is New Observability Stack Enabled
   IF    ${enable_new_observability_stack}
           Install Observability Dependencies
@@ -247,7 +252,7 @@ Verify RHODS Installation
 
   ${kserve} =    Is Component Enabled    kserve    ${DSC_NAME}
   IF    "${kserve}" == "true"
-    Install KServe Dependencies
+    Configure Gateway For KServe
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app=odh-model-controller    timeout=400s
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
@@ -260,7 +265,6 @@ Verify RHODS Installation
     IF    "${kueue_state}" == "Managed"
         Fail    msg=Kueue Managed mode is not supported on ODH/RHOAI 3.0+
     END
-    Install Kueue Dependencies
     Wait For Deployment Replica To Be Ready    namespace=${KUEUE_NS}
     ...    label_selector=app.kubernetes.io/name=kueue
   END
@@ -645,6 +649,89 @@ Install Cert Manager Operator Via Cli
              ...    namespace=${CERT_MANAGER_NS}
     END
 
+Install Leader Worker Set Operator Via Cli
+    [Documentation]    Install Leader Worker Set Operator Via CLI
+    ${is_installed} =   Check If Operator Is Installed Via CLI   ${LWS_OP_NAME}
+    IF    ${is_installed}
+        Log To Console    message=Leader Worker Set Operator is already installed
+    ELSE
+        ${rc}    ${out} =    Run And Return Rc And Output    oc create namespace ${LWS_OP_NS}
+        Install ISV Operator From OperatorHub Via CLI    operator_name=${LWS_OP_NAME}
+             ...    namespace=${LWS_OP_NS}
+             ...    subscription_name=${LWS_SUB_NAME}
+             ...    catalog_source_name=redhat-operators
+             ...    operator_group_name=${LWS_OP_NS}
+             ...    operator_group_ns=${LWS_OP_NS}
+             ...    operator_group_target_ns=${LWS_OP_NS}
+             ...    channel=${LWS_CHANNEL_NAME}
+        Wait Until Operator Subscription Last Condition Is
+             ...    type=CatalogSourcesUnhealthy    status=False
+             ...    reason=AllCatalogSourcesHealthy    subscription_name=${LWS_SUB_NAME}
+             ...    namespace=${LWS_OP_NS}
+             ...    retry=150
+        Wait For Pods To Be Ready    label_selector=name=openshift-lws-operator
+             ...    namespace=${LWS_OP_NS}
+        Configure Leader Worker Set Operator
+    END
+
+Configure Leader Worker Set Operator
+    [Documentation]    Configure LeaderWorkerSetOperator custom resource after operator installation
+    Log To Console    Configuring LeaderWorkerSetOperator resource
+    ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/configure_lws_operator.sh
+    Log    ${output}    console=yes
+    Run Keyword And Continue On Failure    Should Be Equal As Numbers    ${rc}    ${0}
+    IF    ${rc} != ${0}
+        Log    Unable to configure LeaderWorkerSetOperator resource.\nCheck the cluster please    console=yes
+        ...    level=ERROR
+    END
+
+Install Connectivity Link Operator Via Cli
+    [Documentation]    Install Red Hat Connectivity Link Operator Via CLI
+    ${is_installed} =   Check If Operator Is Installed Via CLI   ${CONNECTIVITY_LINK_OP_NAME}
+    IF    ${is_installed}
+        Log To Console    message=Red Hat Connectivity Link Operator is already installed
+    ELSE
+        Install ISV Operator From OperatorHub Via CLI    operator_name=${CONNECTIVITY_LINK_OP_NAME}
+             ...    namespace=${CONNECTIVITY_LINK_NS}
+             ...    subscription_name=${CONNECTIVITY_LINK_SUB_NAME}
+             ...    catalog_source_name=redhat-operators
+             ...    channel=${CONNECTIVITY_LINK_CHANNEL_NAME}
+             ...    operator_group_name=${NONE}
+             ...    operator_group_ns=${NONE}
+             ...    operator_group_target_ns=${NONE}
+        Wait Until Operator Subscription Last Condition Is
+             ...    type=CatalogSourcesUnhealthy    status=False
+             ...    reason=AllCatalogSourcesHealthy    subscription_name=${CONNECTIVITY_LINK_SUB_NAME}
+             ...    namespace=${CONNECTIVITY_LINK_NS}
+             ...    retry=150
+        Wait For Pods To Be Ready    label_selector=app=kuadrant
+             ...    namespace=${CONNECTIVITY_LINK_NS}
+        Configure Connectivity Link Operator
+    END
+
+Configure Connectivity Link Operator
+    [Documentation]    Configure Kuadrant custom resource after operator installation
+    Log To Console    Configuring Kuadrant resource
+    ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/configure_connectivity_link_operator.sh
+    Log    ${output}    console=yes
+    Run Keyword And Continue On Failure    Should Be Equal As Numbers    ${rc}    ${0}
+    IF    ${rc} != ${0}
+        Log    Unable to configure Kuadrant resource.\nCheck the cluster please    console=yes
+        ...    level=ERROR
+    END
+    Configure Authorino
+
+Configure Authorino
+    [Documentation]    Configure Authorino with SSL after Kuadrant is configured
+    Log To Console    Configuring Authorino with SSL
+    ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/configure_authorino.sh
+    Log    ${output}    console=yes
+    Run Keyword And Continue On Failure    Should Be Equal As Numbers    ${rc}    ${0}
+    IF    ${rc} != ${0}
+        Log    Unable to configure Authorino.\nCheck the cluster please    console=yes
+        ...    level=ERROR
+    END
+
 Install Kueue Operator Via Cli
     [Documentation]    Install Kueue Operator Via CLI
     ${is_installed} =   Check If Operator Is Installed Via CLI   ${KUEUE_OP_NAME}
@@ -669,18 +756,8 @@ Install Kueue Operator Via Cli
              ...    namespace=${KUEUE_NS}
     END
 
-Install KServe Dependencies
-    [Documentation]    Install Dependent Operators For KServe
-    Set Suite Variable   ${FILES_RESOURCES_DIRPATH}    tests/Resources/Files
-    Set Suite Variable   ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
-    Set Suite Variable   ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
-    Install Cert Manager Operator Via Cli
-
 Install Kueue Dependencies
     [Documentation]    Install Dependent Operators For Kueue
-    Set Suite Variable   ${FILES_RESOURCES_DIRPATH}    tests/Resources/Files
-    Set Suite Variable   ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
-    Set Suite Variable   ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
     Install Cert Manager Operator Via Cli
     Install Kueue Operator Via Cli
 
@@ -777,11 +854,16 @@ Install Custom Metrics Autoscaler Operator Via Cli
         Log To Console    message=Custom Metrics Autoscaler Operator (KEDA) is already installed
     END
 
+Install RHOAI Dependencies
+    [Documentation]    Install dependent operators required for RHOAI installation
+    Install Kueue Operator Via Cli
+    Install Cert Manager Operator Via Cli
+    Install Leader Worker Set Operator Via Cli
+    Install Connectivity Link Operator Via Cli
+    
+
 Install Observability Dependencies
     [Documentation]    Install dependent operators related to Observability
-    Set Suite Variable   ${FILES_RESOURCES_DIRPATH}    tests/Resources/Files
-    Set Suite Variable   ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
-    Set Suite Variable   ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
     Install Cluster Observability Operator Via Cli
     Install Tempo Operator Via Cli
     Install OpenTelemetry Operator Via Cli
@@ -973,3 +1055,12 @@ Deploy NFS Provisioner
     Log    ${output}    console=yes
     Wait For Pods To Be Ready    label_selector=nfsprovisioner_cr=${nfs_provisioner_name}
     ...    namespace=${NFS_OP_NS}
+
+Configure Gateway For KServe
+    [Documentation]    Configure Gateway API for KServe inference traffic routing
+    Log To Console    Configuring Gateway API for KServe
+    ${rc}    ${output} =    Run And Return Rc And Output
+    ...    bash tasks/Resources/Gateway/configure_gateway.sh
+    Log To Console    ${output}
+    Should Be Equal As Integers    ${rc}    0    msg=Error configuring Gateway for KServe
+

@@ -14,8 +14,6 @@ ${ISTIO_SYSTEM_NS}=       istio-system
 ${KUEUE_NS}=    openshift-kueue-operator
 ${JOBSET_NS}=    openshift-jobset-operator
 ${CERT_MANAGER_NS}=    cert-manager-operator
-${CONNECTIVITY_LINK_NS}=    openshift-operators
-
 
 *** Keywords ***
 Uninstalling RHODS Operator

@@ -1,0 +1,35 @@
+---
+apiVersion: tekton.dev/v1alpha1
+kind: StepAction
+metadata:
+  name: eaas-get-latest-openshift-version-by-prefix
+spec:
+  description: >-
+    This StepAction queries an OpenShift CI API to get the latest version for a release stream.
+  image: quay.io/konflux-ci/appstudio-utils@sha256:ae8cf015eee19adef1ae5b7a6b346fb1a74acd59bfff55e57744527f283cf1f0
+  params:
+    - name: prefix
+      type: string
+      description: The leading part of the OpenShift version. E.g. `4.` or `4.15.`
+    - name: releaseStream
+      type: string
+      default: 4-stable-multi
+      description: The name of the OpenShift release stream. E.g. `4-stable-multi`
+    - name: host
+      type: string
+      default: multi.ocp.releases.ci.openshift.org
+      description: The name of the API host. E.g. `multi.ocp.releases.ci.openshift.org`
+  results:
+    - name: version
+      description: The latest matching version.
+  env:
+    - name: URL
+      value: https://$(params.host)/api/v1/releasestream/$(params.releaseStream)/latest?prefix=$(params.prefix)
+  script: |
+    #!/bin/bash
+    set -eo pipefail
+
+    echo "GET $URL"
+    RESULT=$(curl -f -s -L -H "Accepts: application/json" $URL)
+    echo "$RESULT"
+    jq -j '.name' <<< "$RESULT" > $(step.results.version.path)

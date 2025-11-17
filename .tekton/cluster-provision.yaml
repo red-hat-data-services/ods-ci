@@ -1,5 +1,5 @@
 apiVersion: tekton.dev/v1
-kind: PipelineRun
+kind: Task
 metadata:
   name: test-get-latest-ocp-version
   labels:

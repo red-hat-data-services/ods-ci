@@ -3,8 +3,8 @@ kind: PipelineRun
 metadata:
   name: test-get-latest-ocp-version
   labels:
-    appstudio.openshift.io/application: <your-application-name>
-    appstudio.openshift.io/component: <your-component-name>
+    appstudio.openshift.io/application: testops-playpen
+    appstudio.openshift.io/component: rhoai-health
   annotations:
     pipelines.appstudio.openshift.io/type: test
     test.appstudio.openshift.io/scenario: "Get latest OpenShift version"

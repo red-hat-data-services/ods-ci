@@ -1,49 +1,99 @@
-apiVersion: appstudio.redhat.com/v1beta2
-kind: IntegrationTestScenario
+---
+apiVersion: tekton.dev/v1
+kind: Pipeline
 metadata:
-  name: rhoai-cluster-provision-test
-  namespace: rhoai-tenant
-  labels:
-    appstudio.openshift.io/application: testops-playpen
-    appstudio.openshift.io/component: rhoai-health
-    test.appstudio.openshift.io/type: integration
-  annotations:
-    test.appstudio.openshift.io/kind: cluster-provision
-    test.appstudio.openshift.io/description: "Provision Hypershift cluster on AWS and run RHOAI integration tests"
+  name: opendatahub-operator-e2e-test
 spec:
-  application: testops-playpen
-  contexts:
-    - name: application
-      description: RHOAI integration testing with cluster provisioning
+  description: |
+    An integration test which provisions an ephemeral Hypershift cluster, deploys opendatahub-operator 
+    from a Konflux snapshot and runs the e2e tests against it.
   params:
-    # Cluster provisioning parameters
-    - name: CLUSTER_NAME
-      value: "rhoai-test-$(date +%s)"
-    - name: HYPERSHIFT_AWS_REGION
-      value: "us-east-1"
-    - name: HYPERSHIFT_NODE_COUNT
-      value: "3"
-    - name: HYPERSHIFT_INSTANCE_TYPE
-      value: "m5.xlarge"
-    - name: OPENSHIFT_VERSION
-      value: "4.17"
-    
-    # Test execution parameters
-    - name: SNAPSHOT
-      value: "{{SNAPSHOT}}"
-    - name: TEST_IMAGE
-      value: "{{SNAPSHOT_IMAGE}}"
-  
-  resolverRef:
-    resolver: git
-    params:
-      - name: url
-        value: https://github.com/konflux-ci/build-definitions
-      - name: revision
-        value: main
-      - name: pathInRepo
-        value: pipelines/integration-test-with-hypershift.yaml
-  
-  environment:
-    name: staging
-    type: POC
+    - description: Snapshot of the application
+      name: SNAPSHOT
+      default: '{"components": [{"name":"odh-operator", "containerImage": "quay.io/opendatahub/opendatahub-operator:latest"}]}'
+      type: string
+    - name: NAMESPACE
+      type: string
+      default: opendatahub-operator-system
+  tasks:
+    - name: parse-metadata
+      taskRef:
+        resolver: git
+        params:
+          - name: url
+            value: https://github.com/konflux-ci/integration-examples
+          - name: revision
+            value: main
+          - name: pathInRepo
+            value: tasks/test_metadata.yaml
+      params:
+        - name: SNAPSHOT
+          value: $(params.SNAPSHOT)
+    - name: provision-eaas-space
+      runAfter:
+        - parse-metadata
+      taskRef:
+        resolver: git
+        params:
+          - name: url
+            value: https://github.com/konflux-ci/build-definitions.git
+          - name: revision
+            value: main
+          - name: pathInRepo
+            value: task/eaas-provision-space/0.1/eaas-provision-space.yaml
+      params:
+        - name: ownerName
+          value: $(context.pipelineRun.name)
+        - name: ownerUid
+          value: $(context.pipelineRun.uid)
+    - name: provision-cluster
+      runAfter:
+        - provision-eaas-space
+      taskSpec:
+        results:
+          - name: clusterName
+            value: "$(steps.create-cluster.results.clusterName)"
+        steps:
+          - name: get-supported-versions
+            ref:
+              resolver: git
+              params:
+                - name: url
+                  value: https://github.com/konflux-ci/build-definitions.git
+                - name: revision
+                  value: main
+                - name: pathInRepo
+                  value: stepactions/eaas-get-supported-ephemeral-cluster-versions/0.1/eaas-get-supported-ephemeral-cluster-versions.yaml
+            params:
+              - name: eaasSpaceSecretRef
+                value: $(tasks.provision-eaas-space.results.secretRef)
+          - name: pick-version
+            ref:
+              resolver: git
+              params:
+                - name: url
+                  value: https://github.com/konflux-ci/build-definitions.git
+                - name: revision
+                  value: main
+                - name: pathInRepo
+                  value: stepactions/eaas-get-latest-openshift-version-by-prefix/0.1/eaas-get-latest-openshift-version-by-prefix.yaml
+            params:
+              - name: prefix
+                value: "$(steps.get-supported-versions.results.versions[0])."
+          - name: create-cluster
+            ref:
+              resolver: git
+              params:
+                - name: url
+                  value: https://github.com/konflux-ci/build-definitions.git
+                - name: revision
+                  value: main
+                - name: pathInRepo
+                  value: stepactions/eaas-create-ephemeral-cluster-hypershift-aws/0.1/eaas-create-ephemeral-cluster-hypershift-aws.yaml
+            params:
+              - name: eaasSpaceSecretRef
+                value: $(tasks.provision-eaas-space.results.secretRef)
+              - name: version
+                value: "$(steps.pick-version.results.version)"
+              - name: instanceType
+                value: m5.2xlarge

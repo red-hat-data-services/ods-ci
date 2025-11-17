@@ -1,0 +1,96 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: odh-tests
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cluster-health-sa
+  namespace: odh-tests
+---
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: run-cluster-health
+  namespace: odh-tests
+spec:
+  workspaces:
+    - name: shared-workspace
+  steps:
+    - name: run-tests
+      image: registry.access.redhat.com/ubi9/python-39
+      workingDir: /workspace/shared-workspace
+      script: |
+        set -euxo pipefail
+
+        echo "Installing OS tools..."
+        microdnf install -y unzip curl git && microdnf clean all
+
+        echo "Creating local pip directory..."
+        mkdir -p /workspace/venv
+        export PIP_TARGET=/workspace/venv
+        export PYTHONPATH=/workspace/venv
+
+        echo "Upgrading pip..."
+        python3 -m pip install --upgrade pip setuptools wheel --target=/workspace/venv
+
+        echo "Downloading tests repo..."
+        curl -L -o repo.zip https://github.com/opendatahub-io/opendatahub-tests/archive/refs/heads/main.zip
+        unzip repo.zip
+        mv opendatahub-tests-main testsrepo
+        cd testsrepo
+
+        echo "Installing all requirements*.txt..."
+        REQS=$(find . -type f -iname "requirements*.txt")
+        for f in $REQS; do
+          python3 -m pip install --target=/workspace/venv -r "$f" || true
+        done
+
+        echo "Installing missing packages manually..."
+        python3 -m pip install --target=/workspace/venv \
+          pytest \
+          pytest-xdist \
+          pytest-testconfig \
+          shortuuid \
+          sqlalchemy \
+          portforward \
+          openshift-python-wrapper || true
+
+        echo "Preparing results directory..."
+        mkdir -p /workspace/shared-workspace/results
+
+        echo "Running cluster_health tests..."
+        cd /workspace/shared-workspace/testsrepo
+        python3 -m pytest -m cluster_health tests/cluster_health -svv \
+          --junit-xml=/workspace/shared-workspace/results/cluster_health_xunit.xml
+---
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: cluster-health-pipeline
+  namespace: odh-tests
+spec:
+  workspaces:
+    - name: shared-workspace
+  tasks:
+    - name: run-tests
+      taskRef:
+        name: run-cluster-health
+      workspaces:
+        - name: shared-workspace
+          workspace: shared-workspace
+---
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: cluster-health-pipelinerun
+  namespace: odh-tests
+spec:
+  serviceAccountName: cluster-health-sa
+  pipelineRef:
+    name: cluster-health-pipeline
+  workspaces:
+    - name: shared-workspace
+      emptyDir: {}
+

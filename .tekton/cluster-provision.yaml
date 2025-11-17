@@ -3,10 +3,9 @@ kind: PipelineRun
 metadata:
   name: test-get-latest-ocp-version
   labels:
-    appstudio.openshift.io/application: testops-playpen
-    appstudio.openshift.io/component: rhoai-health
+    appstudio.openshift.io/application: <your-application-name>
+    appstudio.openshift.io/component: <your-component-name>
   annotations:
-    # Tell Konflux this is a TEST pipeline
     pipelines.appstudio.openshift.io/type: test
     test.appstudio.openshift.io/scenario: "Get latest OpenShift version"
 spec:
@@ -36,26 +35,35 @@ spec:
             value: $(params.releaseStream)
           - name: host
             value: $(params.host)
-        steps:
-          # StepAction call – this is using the Konflux-provided StepAction
-          - name: get-latest-from-ci
-            ref:
-              name: eaas-get-latest-openshift-version-by-prefix
-            params:
-              - name: prefix
-                value: $(params.prefix)
-              - name: releaseStream
-                value: $(params.releaseStream)
-              - name: host
-                value: $(params.host)
+        taskSpec:
+          params:
+            - name: prefix
+              type: string
+            - name: releaseStream
+              type: string
+            - name: host
+              type: string
+          steps:
+            - name: get-latest-from-ci
+              ref:
+                name: eaas-get-latest-openshift-version-by-prefix
+              params:
+                - name: prefix
+                  value: $(params.prefix)
+                - name: releaseStream
+                  value: $(params.releaseStream)
+                - name: host
+                  value: $(params.host)
 
-          # Just log the result so you can see it in the logs
-          - name: print-version
-            image: registry.access.redhat.com/ubi9/ubi-minimal
-            script: |
-              #!/usr/bin/env bash
-              set -euo pipefail
+            - name: print-version
+              image: registry.access.redhat.com/ubi9/ubi-minimal
+              script: |
+                #!/usr/bin/env bash
+                set -euo pipefail
 
-              echo "Latest OCP version for prefix $(params.prefix) / stream $(params.releaseStream):"
-              cat "$(steps.get-latest-from-ci.results.version)"
+                echo "Latest OCP version for prefix $(params.prefix) / stream $(params.releaseStream):"
+
+                # 'steps.get-latest-from-ci.results.version' expands to the result file path
+                echo -n "Version: "
+                cat "$(steps.get-latest-from-ci.results.version)"
 

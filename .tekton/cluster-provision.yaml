@@ -1,69 +1,212 @@
-apiVersion: tekton.dev/v1
-kind: Task
+apiVersion: appstudio.redhat.com/v1beta2
+kind: IntegrationTestScenario
 metadata:
-  name: test-get-latest-ocp-version
+  name: rhoai-cluster-provision-test
+  namespace: rhoai-tenant
   labels:
     appstudio.openshift.io/application: testops-playpen
     appstudio.openshift.io/component: rhoai-health
+    test.appstudio.openshift.io/type: integration
   annotations:
-    pipelines.appstudio.openshift.io/type: test
-    test.appstudio.openshift.io/scenario: "Get latest OpenShift version"
+    test.appstudio.openshift.io/kind: cluster-provision
+    test.appstudio.openshift.io/description: "Provision Hypershift cluster on AWS and run RHOAI integration tests"
 spec:
+  application: testops-playpen
+  contexts:
+    - name: application
+      description: RHOAI integration testing with cluster provisioning
   params:
-    - name: prefix
-      value: "4.17."
-    - name: releaseStream
-      value: "4-stable-multi"
-    - name: host
-      value: "multi.ocp.releases.ci.openshift.org"
-
+    # Cluster provisioning parameters
+    - name: CLUSTER_NAME
+      value: "rhoai-test-$(date +%s)"
+    - name: HYPERSHIFT_AWS_REGION
+      value: "us-east-1"
+    - name: HYPERSHIFT_NODE_COUNT
+      value: "3"
+    - name: HYPERSHIFT_INSTANCE_TYPE
+      value: "m5.xlarge"
+    - name: OPENSHIFT_VERSION
+      value: "4.17"
+    
+    # Test execution parameters
+    - name: SNAPSHOT
+      value: "{{SNAPSHOT}}"
+    - name: TEST_IMAGE
+      value: "{{SNAPSHOT_IMAGE}}"
+  
+  resolverRef:
+    resolver: git
+    params:
+      - name: url
+        value: https://github.com/konflux-ci/build-definitions
+      - name: revision
+        value: main
+      - name: pathInRepo
+        value: pipelines/integration-test-with-hypershift.yaml
+  
+  environment:
+    name: staging
+    type: POC
+---
+# Alternative: Inline Pipeline Specification
+# Use this if you want to define your own custom test pipeline
+apiVersion: appstudio.redhat.com/v1beta2
+kind: IntegrationTestScenario
+metadata:
+  name: rhoai-custom-cluster-test
+  namespace: rhoai-tenant
+  labels:
+    appstudio.openshift.io/application: testops-playpen
+    appstudio.openshift.io/component: rhoai-health
+    test.appstudio.openshift.io/type: integration
+spec:
+  application: testops-playpen
+  params:
+    - name: SNAPSHOT
+      value: "{{SNAPSHOT}}"
   pipelineSpec:
     params:
-      - name: prefix
+      - name: SNAPSHOT
+        description: The snapshot to test
         type: string
-      - name: releaseStream
-        type: string
-      - name: host
-        type: string
-
+    
     tasks:
-      - name: get-latest-ocp-version
+      # Task 1: Provision Hypershift cluster
+      - name: provision-cluster
         params:
-          - name: prefix
-            value: $(params.prefix)
-          - name: releaseStream
-            value: $(params.releaseStream)
-          - name: host
-            value: $(params.host)
+          - name: cluster-name
+            value: "rhoai-test-$(context.pipelineRun.name)"
+          - name: aws-region
+            value: "us-east-1"
+          - name: ocp-version
+            value: "4.17"
+          - name: instance-type
+            value: "m5.xlarge"
+          - name: node-count
+            value: "3"
+        taskRef:
+          resolver: bundles
+          params:
+            - name: bundle
+              value: quay.io/konflux-ci/tekton-catalog/task-hypershift-provision:0.1
+            - name: name
+              value: hypershift-provision
+            - name: kind
+              value: task
+      
+      # Task 2: Setup RHOAI prerequisites
+      - name: setup-rhoai
+        runAfter:
+          - provision-cluster
+        params:
+          - name: kubeconfig
+            value: $(tasks.provision-cluster.results.kubeconfig)
         taskSpec:
           params:
-            - name: prefix
-              type: string
-            - name: releaseStream
-              type: string
-            - name: host
+            - name: kubeconfig
               type: string
           steps:
-            - name: get-latest-from-ci
-              ref:
-                name: eaas-get-latest-openshift-version-by-prefix
-              params:
-                - name: prefix
-                  value: $(params.prefix)
-                - name: releaseStream
-                  value: $(params.releaseStream)
-                - name: host
-                  value: $(params.host)
-
-            - name: print-version
-              image: registry.access.redhat.com/ubi9/ubi-minimal
+            - name: install-operators
+              image: quay.io/openshift/origin-cli:latest
+              env:
+                - name: KUBECONFIG
+                  value: /tmp/kubeconfig
               script: |
-                #!/usr/bin/env bash
+                #!/bin/bash
                 set -euo pipefail
-
-                echo "Latest OCP version for prefix $(params.prefix) / stream $(params.releaseStream):"
-
-                # 'steps.get-latest-from-ci.results.version' expands to the result file path
-                echo -n "Version: "
-                cat "$(steps.get-latest-from-ci.results.version)"
+                
+                echo "$(params.kubeconfig)" > /tmp/kubeconfig
+                
+                echo "Installing required operators..."
+                oc apply -f - <<EOF
+                apiVersion: v1
+                kind: Namespace
+                metadata:
+                  name: redhat-ods-operator
+                ---
+                apiVersion: operators.coreos.com/v1alpha1
+                kind: Subscription
+                metadata:
+                  name: rhods-operator
+                  namespace: openshift-operators
+                spec:
+                  channel: stable
+                  name: rhods-operator
+                  source: redhat-operators
+                  sourceNamespace: openshift-marketplace
+                EOF
+                
+                echo "Waiting for operator to be ready..."
+                oc wait --for=condition=Ready pod -l name=rhods-operator -n openshift-operators --timeout=300s
+      
+      # Task 3: Run integration tests
+      - name: run-integration-tests
+        runAfter:
+          - setup-rhoai
+        params:
+          - name: kubeconfig
+            value: $(tasks.provision-cluster.results.kubeconfig)
+          - name: test-image
+            value: $(params.SNAPSHOT)
+        taskSpec:
+          params:
+            - name: kubeconfig
+              type: string
+            - name: test-image
+              type: string
+          steps:
+            - name: run-tests
+              image: $(params.test-image)
+              env:
+                - name: KUBECONFIG
+                  value: /tmp/kubeconfig
+              script: |
+                #!/bin/bash
+                set -euo pipefail
+                
+                echo "$(params.kubeconfig)" > /tmp/kubeconfig
+                
+                echo "Running RHOAI integration tests..."
+                cd /workspace/ods-ci
+                
+                # Run your robot tests or pytest tests here
+                python3 -m pytest tests/ -v --junit-xml=/tmp/results.xml || true
+                
+                echo "Tests completed"
+          results:
+            - name: test-results
+              description: Test execution results
+      
+      # Task 4: Cleanup - Deprovision cluster
+      - name: cleanup-cluster
+        runAfter:
+          - run-integration-tests
+        params:
+          - name: cluster-name
+            value: "rhoai-test-$(context.pipelineRun.name)"
+        taskRef:
+          resolver: bundles
+          params:
+            - name: bundle
+              value: quay.io/konflux-ci/tekton-catalog/task-hypershift-deprovision:0.1
+            - name: name
+              value: hypershift-deprovision
+            - name: kind
+              value: task
+    
+    finally:
+      # Always cleanup even if tests fail
+      - name: ensure-cleanup
+        params:
+          - name: cluster-name
+            value: "rhoai-test-$(context.pipelineRun.name)"
+        taskRef:
+          resolver: bundles
+          params:
+            - name: bundle
+              value: quay.io/konflux-ci/tekton-catalog/task-hypershift-deprovision:0.1
+            - name: name
+              value: hypershift-deprovision
+            - name: kind
+              value: task
 

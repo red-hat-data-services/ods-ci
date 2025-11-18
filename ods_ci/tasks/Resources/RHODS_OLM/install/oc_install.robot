@@ -59,7 +59,7 @@ ${CERT_MANAGER_NS}=  cert-manager-operator
 ${CONNECTIVITY_LINK_OP_NAME}=  rhcl-operator
 ${CONNECTIVITY_LINK_SUB_NAME}=  rhcl-operator
 ${CONNECTIVITY_LINK_CHANNEL_NAME}=  stable
-${CONNECTIVITY_LINK_NS}=  openshift-operators
+${CONNECTIVITY_LINK_NS}=  kuadrant-system
 ${RHODS_CSV_DISPLAY}=    Red Hat OpenShift AI
 ${ODH_CSV_DISPLAY}=    Open Data Hub Operator
 ${DEFAULT_OPERATOR_NAMESPACE_RHOAI}=    redhat-ods-operator
@@ -201,7 +201,7 @@ Verify RHODS Installation
             ...    ${OPERATOR_NAMESPACE}      ${IS_PRESENT}
             Wait Until Keyword Succeeds    6 min    0 sec
             ...    Is Resource Present    HardwareProfile    default-profile
-            ...    ${APPLICATIONS_NAMESPACEE}      ${IS_PRESENT}
+            ...    ${APPLICATIONS_NAMESPACE}      ${IS_PRESENT}
             ${enable_new_observability_stack} =    Is New Observability Stack Enabled
             IF    ${enable_new_observability_stack}
                     Patch DSCInitialization With Monitoring Info
@@ -256,7 +256,7 @@ Verify RHODS Installation
 
   ${kserve} =    Is Component Enabled    kserve    ${DSC_NAME}
   IF    "${kserve}" == "true"
-    Configure Gateway For KServe
+    Configure Gateway API
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app=odh-model-controller    timeout=400s
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
@@ -692,17 +692,23 @@ Configure Leader Worker Set Operator
 
 Install Connectivity Link Operator Via Cli
     [Documentation]    Install Red Hat Connectivity Link Operator Via CLI
+    ...                Installing in kuadrant-system namespace with operator group
+    ...                ensures all resources are created in kuadrant-system.
     ${is_installed} =   Check If Operator Is Installed Via CLI   ${CONNECTIVITY_LINK_OP_NAME}
     IF    ${is_installed}
         Log To Console    message=Red Hat Connectivity Link Operator is already installed
     ELSE
+        Configure Gateway API
+        ${rc}    ${out} =    Run And Return Rc And Output    oc create namespace ${CONNECTIVITY_LINK_NS} --dry-run=client -o yaml | oc apply -f -
+        Should Be Equal As Integers    ${rc}    ${0}    msg=Failed to create namespace ${CONNECTIVITY_LINK_NS}: ${out}
+        ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/configure_connectivity_link_operator.sh
         Install ISV Operator From OperatorHub Via CLI    operator_name=${CONNECTIVITY_LINK_OP_NAME}
              ...    namespace=${CONNECTIVITY_LINK_NS}
              ...    subscription_name=${CONNECTIVITY_LINK_SUB_NAME}
              ...    catalog_source_name=redhat-operators
              ...    channel=${CONNECTIVITY_LINK_CHANNEL_NAME}
-             ...    operator_group_name=${NONE}
-             ...    operator_group_ns=${NONE}
+             ...    operator_group_name=kuadrant
+             ...    operator_group_ns=${CONNECTIVITY_LINK_NS}
              ...    operator_group_target_ns=${NONE}
         Wait Until Operator Subscription Last Condition Is
              ...    type=CatalogSourcesUnhealthy    status=False
@@ -711,31 +717,35 @@ Install Connectivity Link Operator Via Cli
              ...    retry=150
         Wait For Pods To Be Ready    label_selector=app=kuadrant
              ...    namespace=${CONNECTIVITY_LINK_NS}
-        Configure Connectivity Link Operator
+        Configure Authorino
     END
-
-Configure Connectivity Link Operator
-    [Documentation]    Configure Kuadrant custom resource after operator installation
-    Log To Console    Configuring Kuadrant resource
-    ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/configure_connectivity_link_operator.sh
-    Log    ${output}    console=yes
-    Run Keyword And Continue On Failure    Should Be Equal As Numbers    ${rc}    ${0}
-    IF    ${rc} != ${0}
-        Log    Unable to configure Kuadrant resource.\nCheck the cluster please    console=yes
-        ...    level=ERROR
-    END
-    Configure Authorino
 
 Configure Authorino
-    [Documentation]    Configure Authorino with SSL after Kuadrant is configured
+    [Documentation]    Configure Authorino with SSL after Kuadrant is configured.
+
     Log To Console    Configuring Authorino with SSL
     ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/configure_authorino.sh
     Log    ${output}    console=yes
     Run Keyword And Continue On Failure    Should Be Equal As Numbers    ${rc}    ${0}
     IF    ${rc} != ${0}
-        Log    Unable to configure Authorino.\nCheck the cluster please    console=yes
+        Log    Unable to configure Authorino namespace.\nCheck the cluster please    console=yes
         ...    level=ERROR
+        RETURN
     END
+    
+    Log To Console    Updating Authorino to enable SSL...
+    ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/update_authorino_ssl.sh
+    Log    ${output}    console=yes
+    Run Keyword And Continue On Failure    Should Be Equal As Numbers    ${rc}    ${0}
+    IF    ${rc} != ${0}
+        Log    Unable to update Authorino with SSL configuration.\nCheck the cluster please    console=yes
+        ...    level=ERROR
+        RETURN
+    END
+    
+    Log To Console    Waiting for Authorino to be ready with SSL...
+    Wait For Pods To Be Ready    label_selector=authorino-resource=authorino
+    ...    namespace=kuadrant-system    timeout=150s
 
 Install Kueue Operator Via Cli
     [Documentation]    Install Kueue Operator Via CLI
@@ -1095,7 +1105,7 @@ Deploy NFS Provisioner
     Wait For Pods To Be Ready    label_selector=nfsprovisioner_cr=${nfs_provisioner_name}
     ...    namespace=${NFS_OP_NS}
 
-Configure Gateway For KServe
+Configure Gateway API
     [Documentation]    Configure Gateway API for KServe inference traffic routing
     Log To Console    Configuring Gateway API for KServe
     ${rc}    ${output} =    Run And Return Rc And Output

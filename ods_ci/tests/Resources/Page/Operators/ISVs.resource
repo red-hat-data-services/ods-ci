@@ -53,6 +53,10 @@ Install ISV Operator From OperatorHub Via CLI    # robocop: disable
     IF  "${operator_name}" == "openshift-cert-manager-operator"
         ${operator_name}=    Set Variable    cert-manager-operator
     END
+    # TODO: Remove this once the operator_name will be jobset-operator
+    IF  "${operator_name}" == "job-set"
+        ${operator_name}=    Set Variable    jobset-operator
+    END
     Wait For Installplan And Approve It    ${namespace}    ${operator_name}    ${subscription_name}
     Wait Until Keyword Succeeds    1 min    0 sec
     ...    Is Resource Present    Subscription    ${subscription_name}     ${namespace}    ${IS_PRESENT}

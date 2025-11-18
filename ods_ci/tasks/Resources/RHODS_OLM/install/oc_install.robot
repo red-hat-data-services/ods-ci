@@ -48,6 +48,10 @@ ${KUEUE_OP_NAME}=  kueue-operator
 ${KUEUE_SUB_NAME}=  kueue-operator
 ${KUEUE_CHANNEL_NAME}=  stable-v1.1
 ${KUEUE_NS}=  openshift-kueue-operator
+${JOBSET_OP_NAME}=  job-set
+${JOBSET_SUB_NAME}=  job-set
+${JOBSET_CHANNEL_NAME}=  tech-preview-v0.1
+${JOBSET_NS}=  openshift-jobset-operator
 ${CERT_MANAGER_OP_NAME}=  openshift-cert-manager-operator
 ${CERT_MANAGER_SUB_NAME}=  openshift-cert-manager-operator
 ${CERT_MANAGER_CHANNEL_NAME}=  stable-v1
@@ -285,6 +289,7 @@ Verify RHODS Installation
 
   ${trainingoperator} =    Is Component Enabled    trainingoperator    ${DSC_NAME}
   IF    "${trainingoperator}" == "true"
+    Install JobSet Dependencies
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app.kubernetes.io/part-of=trainingoperator
   END
@@ -669,6 +674,30 @@ Install Kueue Operator Via Cli
              ...    namespace=${KUEUE_NS}
     END
 
+Install JobSet Operator Via Cli
+    [Documentation]    Install JobSet Operator Via CLI
+    ${is_installed} =   Check If Operator Is Installed Via CLI   ${JOBSET_OP_NAME}
+    IF    ${is_installed}
+        Log To Console    message=JobSet Operator is already installed
+    ELSE
+        ${rc}    ${out} =    Run And Return Rc And Output    oc create namespace ${JOBSET_NS}
+        Install ISV Operator From OperatorHub Via CLI    operator_name=${JOBSET_OP_NAME}
+             ...    namespace=${JOBSET_NS}
+             ...    subscription_name=${JOBSET_SUB_NAME}
+             ...    catalog_source_name=redhat-operators
+             ...    operator_group_name=jobset-operators
+             ...    operator_group_ns=${JOBSET_NS}
+             ...    operator_group_target_ns=${JOBSET_NS}
+             ...    channel=${JOBSET_CHANNEL_NAME}
+        Wait Until Operator Subscription Last Condition Is
+             ...    type=CatalogSourcesUnhealthy    status=False
+             ...    reason=AllCatalogSourcesHealthy    subscription_name=${JOBSET_SUB_NAME}
+             ...    namespace=${JOBSET_NS}
+             ...    retry=150
+        Wait For Pods To Be Ready    label_selector=name=jobset-operator
+             ...    namespace=${JOBSET_NS}
+    END
+
 Install KServe Dependencies
     [Documentation]    Install Dependent Operators For KServe
     Set Suite Variable   ${FILES_RESOURCES_DIRPATH}    tests/Resources/Files
@@ -683,6 +712,14 @@ Install Kueue Dependencies
     Set Suite Variable   ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
     Install Cert Manager Operator Via Cli
     Install Kueue Operator Via Cli
+
+Install JobSet Dependencies
+    [Documentation]    Install Dependent Operators For JobSet
+    Set Suite Variable   ${FILES_RESOURCES_DIRPATH}    tests/Resources/Files
+    Set Suite Variable   ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
+    Set Suite Variable   ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
+    Install Cert Manager Operator Via Cli
+    Install JobSet Operator Via Cli
 
 Install Cluster Observability Operator Via Cli
     [Documentation]    Install Cluster Observability Operator Via CLI

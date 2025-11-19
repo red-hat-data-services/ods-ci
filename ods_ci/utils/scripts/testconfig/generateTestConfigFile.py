@@ -339,11 +339,13 @@ def generate_test_config_file(
             data["OCP_ADMIN_USER"]["PASSWORD"],
             data["CLUSTER_OIDC_ISSUER"],
         )
+    elif data.get("EXTERNAL_AUTH", {}).get("METHOD") == "kubeconfig":
+        oc_login(kubeconfig_path=os.environ["EXTERNAL_KUBECONFIG"])
     else:
         oc_login(
-            data["OCP_API_URL"],
-            data["OCP_ADMIN_USER"]["USERNAME"],
-            data["OCP_ADMIN_USER"]["PASSWORD"],
+            ocp_api_url=data["OCP_API_URL"],
+            username=data["OCP_ADMIN_USER"]["USERNAME"],
+            password=data["OCP_ADMIN_USER"]["PASSWORD"],
         )
 
     if bool(set_prometheus_config):

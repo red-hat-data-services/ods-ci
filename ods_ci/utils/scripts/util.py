@@ -81,21 +81,18 @@ def execute_command(cmd: str, print_stdout: bool = True) -> str | None:
     return None
 
 
-def oc_login(ocp_api_url, username, password, timeout=600):
+def oc_login(ocp_api_url="", username="", password="", kubeconfig_path="", timeout=600):
     """
     Login to test cluster using oc cli command:
-    - If EXTERNAL_KUBECONFIG is set (path to a kubeconfig file), do NOT use username/password.
+    - If kubeconfig_path is set (path to a kubeconfig file), do NOT use username/password.
       Instead, rely on that kubeconfig and just validate access with `oc whoami`.
     - Otherwise, login with expected username/password credentials.
     """
-    external_kcfg = os.environ.get("EXTERNAL_KUBECONFIG", "").strip()
+    if kubeconfig_path:
+        os.environ["KUBECONFIG"] = kubeconfig_path
+        log.info("Using KUBECONFIG, skipping username/password login")
 
-    # Kubeconfig-driven login (only when EXTERNAL_KUBECONFIG is set)
-    if external_kcfg:
-        os.environ["KUBECONFIG"] = external_kcfg
-        log.info("Using EXTERNAL_KUBECONFIG, skipping username/password login")
-
-        if (not os.path.exists(external_kcfg)) or (os.path.getsize(external_kcfg) == 0):
+        if (not os.path.exists(kubeconfig_path)) or (os.path.getsize(kubeconfig_path) == 0):
             log.error("kubeconfig does not exist or is empty")
             sys.exit(1)
 
@@ -114,6 +111,10 @@ def oc_login(ocp_api_url, username, password, timeout=600):
             count += 5
 
         log.error("Failed to validate kubeconfig context via 'oc whoami'")
+        sys.exit(1)
+
+    if not ocp_api_url or not username or not password:
+        log.error("Missing API URL / IDP credentials for cluster login")
         sys.exit(1)
 
     cmd = f"oc login -u {username} -p {password} {ocp_api_url} --insecure-skip-tls-verify=true"

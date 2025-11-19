@@ -172,6 +172,7 @@ def oc_login_oidc(ocp_api_url, username, password, issuer_url, timeout=600):
         print("Failed to login to cluster")
         sys.exit(1)
 
+
 def get_oidc_tokens(username, password, issuer_url, timeout=60):
     """
     Get id and refresh token from OIDC issuer
@@ -198,7 +199,6 @@ def get_oidc_tokens(username, password, issuer_url, timeout=60):
     if not chk_flag:
         print("Failed to obtain OIDC tokens")
         sys.exit(1)
-
 
 
 def render_template(search_path, template_file, output_file, replace_vars):

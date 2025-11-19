@@ -328,12 +328,14 @@ def generate_test_config_file(
         data["CUSTOM_MANIFESTS"] = initialize_custom_manifest(custom_manifests)
 
     # Login to test cluster using oc command
-    oc_login(
-        data["OCP_API_URL"],
-        data["OCP_ADMIN_USER"]["USERNAME"],
-        data["OCP_ADMIN_USER"]["PASSWORD"],
-    )
-    print("After oc login")
+    if data.get("EXTERNAL_AUTH", {}).get("METHOD") == "kubeconfig":
+        oc_login(kubeconfig_path=os.environ["EXTERNAL_KUBECONFIG"])
+    else:
+        oc_login(
+            ocp_api_url=data["OCP_API_URL"],
+            username=data["OCP_ADMIN_USER"]["USERNAME"],
+            password=data["OCP_ADMIN_USER"]["PASSWORD"],
+        )
 
     if bool(set_prometheus_config):
         # Get prometheus token for test cluster

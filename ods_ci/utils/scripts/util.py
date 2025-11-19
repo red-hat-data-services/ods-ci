@@ -104,7 +104,7 @@ def oc_login(ocp_api_url="", username="", password="", kubeconfig_path="", timeo
         count = 0
         while count <= timeout:
             out = execute_command("oc whoami")
-            if out is not None and out.strip():
+            if out and out.strip() and "Missing or incomplete configuration info" not in out:
                 print(f"Kubeconfig context valid, current user={out.strip()}")
                 return
             time.sleep(5)

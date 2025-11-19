@@ -342,7 +342,7 @@ def generate_test_config_file(
     elif data.get("EXTERNAL_AUTH", {}).get("METHOD") == "kubeconfig":
         kubeconfig_path = os.getenv("EXTERNAL_KUBECONFIG")
         if not kubeconfig_path:
-            log.error("Using external kubeconfig auth but EXTERNAL_KUBECONFIG is not set.")
+            print("Using external kubeconfig auth but EXTERNAL_KUBECONFIG is not set.")
             sys.exit(1)
 
         oc_login(kubeconfig_path=kubeconfig_path)

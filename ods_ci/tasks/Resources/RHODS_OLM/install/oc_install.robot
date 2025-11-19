@@ -701,7 +701,6 @@ Install Connectivity Link Operator Via Cli
         Configure Gateway API
         ${rc}    ${out} =    Run And Return Rc And Output    oc create namespace ${CONNECTIVITY_LINK_NS} --dry-run=client -o yaml | oc apply -f -
         Should Be Equal As Integers    ${rc}    ${0}    msg=Failed to create namespace ${CONNECTIVITY_LINK_NS}: ${out}
-        ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/configure_connectivity_link_operator.sh
         Install ISV Operator From OperatorHub Via CLI    operator_name=${CONNECTIVITY_LINK_OP_NAME}
              ...    namespace=${CONNECTIVITY_LINK_NS}
              ...    subscription_name=${CONNECTIVITY_LINK_SUB_NAME}
@@ -717,6 +716,7 @@ Install Connectivity Link Operator Via Cli
              ...    retry=150
         Wait For Pods To Be Ready    label_selector=app=kuadrant
              ...    namespace=${CONNECTIVITY_LINK_NS}
+        ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/configure_connectivity_link_operator.sh
         Configure Authorino
     END
 

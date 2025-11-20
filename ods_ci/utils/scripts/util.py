@@ -54,9 +54,22 @@ def read_yaml(filename):
         return None
 
 
-def execute_command(cmd: str, print_stdout: bool = True) -> str | None:
+def execute_command(
+    cmd: str,
+    print_stdout: bool = True,
+    return_rc: bool = False,
+):
     """
-    Executes command in the local node, and print real-time output
+    Executes command on the local node and streams output.
+
+    Args:
+        cmd: command to run
+        print_stdout: whether to print output lines
+        return_rc: if True, return (rc, output). Otherwise return output only.
+
+    Returns:
+        - output (str)                   when return_rc=False  (default)
+        - (rc:int, output:str)          when return_rc=True
     """
     log.info(f"CMD: {cmd}")
     try:
@@ -75,10 +88,19 @@ def execute_command(cmd: str, print_stdout: bool = True) -> str | None:
                 if print_stdout:
                     print(">:", line.expandtabs(tabsize=8), end="")
                     sys.stdout.flush()
+
+            rc = p.wait()
+
+        if return_rc:
+            return rc, "".join(output)
+        else:
             return "".join(output)
+
     except Exception as e:
-        log.exception(f"Starting the subprocess '{cmd}' failed", exc_info=e)
-    return None
+        log.exception(f"Starting subprocess '{cmd}' failed", exc_info=e)
+        if return_rc:
+            return None, None
+        return None
 
 
 def oc_login(ocp_api_url="", username="", password="", kubeconfig_path="", timeout=600):
@@ -96,19 +118,15 @@ def oc_login(ocp_api_url="", username="", password="", kubeconfig_path="", timeo
             log.error("kubeconfig does not exist or is empty")
             sys.exit(1)
 
-        out = execute_command(f"oc config get-contexts --kubeconfig={kubeconfig_path}")
-        if out is None or not out.strip():
+        rc, out = execute_command(f"oc config get-contexts --kubeconfig={kubeconfig_path}", return_rc=True)
+        if rc is None or rc != 0 or out is None or not out.strip():
             log.error("kubeconfig is invalid or missing contexts")
             sys.exit(1)
 
-        count = 0
-        while count <= timeout:
-            out = execute_command("oc whoami")
-            if out and out.strip() and "Missing or incomplete configuration info" not in out:
-                print(f"Kubeconfig context valid, current user={out.strip()}")
-                return
-            time.sleep(5)
-            count += 5
+        rc, out = execute_command("oc whoami", return_rc=True)
+        if rc == 0 and out and out.strip():
+            print(f"Kubeconfig context valid, current user={out.strip()}")
+            return
 
         log.error("Failed to validate kubeconfig context via 'oc whoami'")
         sys.exit(1)

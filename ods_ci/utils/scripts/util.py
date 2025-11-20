@@ -5,13 +5,12 @@ import shutil
 import subprocess
 import sys
 import time
+from typing import Literal, overload
 
 import jinja2
 import yaml
 
 from ods_ci.utils.scripts.logger import log
-
-from typing import Optional, Tuple, Union
 
 
 def clone_config_repo(**kwargs):
@@ -56,11 +55,35 @@ def read_yaml(filename):
         return None
 
 
+@overload
 def execute_command(
     cmd: str,
     print_stdout: bool = True,
+    *,
+    return_rc: Literal[False] = False,
+    timeout: int = 50,
+) -> str | None:
+    ...
+
+
+@overload
+def execute_command(
+    cmd: str,
+    print_stdout: bool = True,
+    *,
+    return_rc: Literal[True],
+    timeout: int = 50,
+) -> tuple[int | None, str | None]:
+    ...
+
+
+def execute_command(
+    cmd: str,
+    print_stdout: bool = True,
+    *,
     return_rc: bool = False,
-) -> Union[str, Tuple[Optional[int], Optional[str]], None]:
+    timeout: int = 50,
+) -> str | tuple[int | None, str | None] | None:
     """
     Executes command on the local node and streams output.
 
@@ -68,10 +91,11 @@ def execute_command(
         cmd: command to run
         print_stdout: whether to print output lines
         return_rc: if True, return (rc, output). Otherwise return output only.
+        timeout: max seconds to wait for process when return_rc=True.
 
     Returns:
-        - output (str)                   when return_rc=False  (default)
-        - (rc:int, output:str)          when return_rc=True
+        - output (str)                      when return_rc=False  (default)
+        - rc (int|None), output (str|None)  when return_rc=True
     """
     log.info(f"CMD: {cmd}")
     try:
@@ -91,12 +115,16 @@ def execute_command(
                     print(">:", line.expandtabs(tabsize=8), end="")
                     sys.stdout.flush()
 
-            rc = p.wait(timeout=15)
+            if return_rc:
+                try:
+                    rc = p.wait(timeout=timeout)
+                except subprocess.TimeoutExpired:
+                    log.error(f"Command timed out after {timeout} seconds, killing process")
+                    p.kill()
+                    return None, "".join(output)
+                return rc, "".join(output)
 
-        if return_rc:
-            return rc, "".join(output)
-        else:
-            return "".join(output)
+        return "".join(output)
 
     except Exception as e:
         log.exception(f"Starting subprocess '{cmd}' failed", exc_info=e)

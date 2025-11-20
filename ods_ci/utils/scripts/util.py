@@ -62,8 +62,7 @@ def execute_command(
     *,
     return_rc: Literal[False] = False,
     timeout: int = 50,
-) -> str | None:
-    ...
+) -> str | None: ...
 
 
 @overload
@@ -73,8 +72,7 @@ def execute_command(
     *,
     return_rc: Literal[True],
     timeout: int = 50,
-) -> tuple[int | None, str | None]:
-    ...
+) -> tuple[int | None, str | None]: ...
 
 
 def execute_command(

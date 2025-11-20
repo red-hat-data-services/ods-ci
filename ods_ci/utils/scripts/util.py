@@ -11,6 +11,8 @@ import yaml
 
 from ods_ci.utils.scripts.logger import log
 
+from typing import Optional, Tuple, Union
+
 
 def clone_config_repo(**kwargs):
     """
@@ -58,7 +60,7 @@ def execute_command(
     cmd: str,
     print_stdout: bool = True,
     return_rc: bool = False,
-):
+) -> Union[str, Tuple[Optional[int], Optional[str]], None]:
     """
     Executes command on the local node and streams output.
 
@@ -89,7 +91,7 @@ def execute_command(
                     print(">:", line.expandtabs(tabsize=8), end="")
                     sys.stdout.flush()
 
-            rc = p.wait()
+            rc = p.wait(timeout=15)
 
         if return_rc:
             return rc, "".join(output)
@@ -216,6 +218,8 @@ def get_oidc_tokens(username, password, issuer_url, timeout=60):
     if not chk_flag:
         print("Failed to obtain OIDC tokens")
         sys.exit(1)
+
+    return None
 
 
 

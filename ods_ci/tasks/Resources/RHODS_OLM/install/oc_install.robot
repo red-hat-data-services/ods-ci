@@ -771,8 +771,6 @@ Install Kueue Operator Via Cli
              ...    namespace=${KUEUE_NS}
     END
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 Install JobSet Operator Via Cli
     [Documentation]    Install JobSet Operator Via CLI
     ${is_installed} =   Check If Operator Is Installed Via CLI   ${JOBSET_OP_NAME}

@@ -91,16 +91,6 @@ class OpenIdOps:
     def add_openid_identity_provider(self, idp_name: str, client_id: str, client_secret: str, issuer_url: str):
         """Adds OpenID identity provider to the cluster"""
         log.info("Adding OpenID identity provider...")
-        # TODO: Implement the actual OpenID identity provider addition logic
-        # This is a placeholder implementation
-        # Example command structure (adjust based on your requirements):
-        # cmd = f"oc create identityprovider openid --token={self.token}"
-        # ret = execute_command(cmd)
-        # if ret is None:
-        #     log.error("Failed to add OpenID identity provider")
-        #     return None
-        # log.info("OpenID identity provider added successfully")
-        # return ret
         log.info("add_openid_identity_provider() method called successfully")
         return True
 

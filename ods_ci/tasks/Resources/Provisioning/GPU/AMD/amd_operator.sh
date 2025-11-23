@@ -146,34 +146,87 @@ function wait_until_driver_image_is_built() {
   fi
 }
 
-function create_acceleratorprofile() {
-  echo "Creating AMD Accelerator Profile"
-  rhoai_ns=$(oc get namespace redhat-ods-applications --ignore-not-found  -oname)
-  if [ -z $rhoai_ns ];
-    then
-      echo "redhat-ods-applications namespace not found. Is RHOAI Installed? NVIDIA Accelerator Profile creation SKIPPED."
-      return 0
-  fi
-  echo "Creating an Accelerator Profile for Dashboard"
-  oc apply -f - <<EOF
-  apiVersion: dashboard.opendatahub.io/v1
-  kind: AcceleratorProfile
-  metadata:
-    name: ods-ci-amd-gpu
-    namespace: redhat-ods-applications
-  spec:
-    displayName: AMD GPU
-    enabled: true
-    identifier: amd.com/gpu
-    tolerations:
-      - effect: NoSchedule
-        key: amd.com/gpu
-        operator: Exists
+function create_gpu_profile() {
+  echo "Creating AMD GPU Profile for OpenDataHub/RHOAI"
+  
+  # Check if HardwareProfile CRD exists (modern OpenDataHub)
+  if oc get crd hardwareprofiles.infrastructure.opendatahub.io &>/dev/null; then
+    echo "Found HardwareProfile CRD - using modern OpenDataHub approach"
+    
+    # Create HardwareProfile
+    oc apply -f - <<EOF
+apiVersion: infrastructure.opendatahub.io/v1
+kind: HardwareProfile
+metadata:
+  name: amd-gpu-profile
+  namespace: redhat-ods-applications
+spec:
+  displayName: AMD GPU
+  description: AMD GPU hardware profile for workloads
+  enabled: true
+  identifiers:
+    - identifier: "cpu"
+      displayName: "CPU"
+      defaultCount: 2
+      minCount: 1
+      maxCount: 4
+      resourceType: "CPU"
+    - identifier: "memory"
+      displayName: "Memory"
+      defaultCount: "4Gi"
+      minCount: "2Gi"
+      maxCount: "8Gi"
+      resourceType: "Memory"
+  tolerations:
+    - effect: NoSchedule
+      key: amd.com/gpu
+      operator: Exists
 EOF
-  if [ $? -eq 0 ]; then
-    echo "Verifying that an AcceleratorProfiles resource was created in redhat-ods-applications"
-    oc describe AcceleratorProfiles -n redhat-ods-applications
-  fi 
+    
+    if [ $? -eq 0 ]; then
+      echo "✅ Successfully created HardwareProfile"
+      oc get hardwareprofile amd-gpu-profile -n redhat-ods-applications
+    else
+      echo "❌ Failed to create HardwareProfile"
+    fi
+    
+  # Check if AcceleratorProfile CRD exists (legacy OpenDataHub)
+  elif oc get crd acceleratorprofiles.dashboard.opendatahub.io &>/dev/null; then
+    echo "Found AcceleratorProfile CRD - using legacy OpenDataHub approach"
+    
+    # Create AcceleratorProfile
+    oc apply -f - <<EOF
+apiVersion: dashboard.opendatahub.io/v1
+kind: AcceleratorProfile
+metadata:
+  name: ods-ci-amd-gpu
+  namespace: redhat-ods-applications
+spec:
+  displayName: AMD GPU
+  enabled: true
+  identifier: amd.com/gpu
+  tolerations:
+    - effect: NoSchedule
+      key: amd.com/gpu
+      operator: Exists
+EOF
+    
+    if [[ $? -eq 0 ]]; then
+      echo "✅ Successfully created AcceleratorProfile"
+      oc get acceleratorprofile ods-ci-amd-gpu -n redhat-ods-applications
+    else
+      echo "❌ Failed to create AcceleratorProfile"
+    fi
+    
+  else
+    echo "❌ Neither HardwareProfile nor AcceleratorProfile CRD found"
+    echo "This could indicate:"
+    echo "  - RHOAI/OpenDataHub 1.x (no profile support)"
+    echo "  - Incomplete installation"
+    echo "  - Custom deployment"
+  
+    echo "Profile creation SKIPPED - AMD GPU functionality is not affected"
+  fi
 }
 
 function applyWorkaroundForUncertifiedOCPVersions () {
@@ -238,4 +291,4 @@ echo "Configuration of AMD GPU node and Operators completed"
 # the message appears in the logs, but the pod may get delete before our code next iteration checks the logs once again,
 # hence it'd fails to reach the pod. It happened to me
 # wait_while 1200 monitor_logs "$name" $AMD_DC_NS docker-build "Successfully pushed image-registry.openshift-image-registry.svc:5000/$AMD_DC_NS"
-create_acceleratorprofile
+create_gpu_profile

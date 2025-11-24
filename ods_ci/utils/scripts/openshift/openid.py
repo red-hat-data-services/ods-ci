@@ -1,12 +1,11 @@
 import click
-
+import base64
 from ods_ci.utils.scripts.logger import log
 import json
 import requests
 from string import Template
+from ods_ci.utils.scripts.util import execute_command
 
-
-import sys
 
 REGISTRATION_BODY_TEMPLATE = Template("""
     {
@@ -21,6 +20,8 @@ REGISTRATION_BODY_TEMPLATE = Template("""
     }
 """)
 
+OCP_DEFAULT_SECRET_NAME = "openid-idp-client-secret"
+
 class OpenIdOps:
     """Class for OpenID identity provider operations"""
 
@@ -34,6 +35,7 @@ class OpenIdOps:
         self.client_name = ""
         self.client_secret = ""
         self.registration_endpoint = ""
+        self.ocp_secret_name = ""
 
     def _write_jenkins_properties(self):
         """Write TOKEN to a properties file for Jenkins to read"""
@@ -48,6 +50,35 @@ class OpenIdOps:
             except Exception as e:
                 log.error(f"Failed to write registration token to properties file: {e}")
                 return 1
+        return
+    
+    def _apply_openid_identity_provider(self):
+        with open("ods_ci/configs/templates/openid.json", "r") as f:
+            openid_template = Template(f.read())
+        openid_json = openid_template.substitute(
+            idp_name=self.idp_name,
+            client_id=self.client_id,
+            client_secret_name=self.ocp_secret_name,
+            issuer_url=self.issuer_url,
+        )
+        patch_value = json.loads(openid_json)
+        patch_array = [
+            {
+                "op": "add",
+                "path": "/spec/identityProviders/-",
+                "value": patch_value
+            }
+        ]
+        patch_json = json.dumps(patch_array)
+        cmd = f"oc patch oauth cluster --type json -p '{patch_json}'"
+        return_rc, _ = execute_command(
+            cmd,
+            return_rc=True,
+        )
+        if return_rc != 0:
+            log.error(f"Failed to apply OpenID identity provider: {return_rc}")
+            return 1
+        log.info(f"OpenID identity provider applied successfully: {return_rc}")
         return
 
     def dynamic_client_registration(self, registration_endpoint: str, token: str, redirect_uris: list[str], client_name: str, contact_emails: list[str], jenkins_props_file: str):
@@ -88,10 +119,50 @@ class OpenIdOps:
         log.info(f"Client {client_name} deleted successfully: {request.status_code}")
         return
 
-    def add_openid_identity_provider(self, idp_name: str, client_id: str, client_secret: str, issuer_url: str):
+    def add_openid_identity_provider(self, idp_name: str, client_id: str, client_secret: str, issuer_url: str, ocp_secret_name: str = OCP_DEFAULT_SECRET_NAME):
         """Adds OpenID identity provider to the cluster"""
         log.info("Adding OpenID identity provider...")
-        log.info("add_openid_identity_provider() method called successfully")
+        self.idp_name = idp_name
+        self.client_id = client_id
+        self.client_secret = client_secret
+        self.issuer_url = issuer_url
+        self.ocp_secret_name = ocp_secret_name
+        cmd=f"oc create secret generic {ocp_secret_name} --from-literal=client-secret={client_secret} -n openshift-config"
+        return_rc, _ = execute_command(
+            cmd,
+            return_rc=True,
+        )
+        if return_rc != 0:
+            log.error(f"Failed to create client secret: {return_rc}")
+            return 1
+
+        self._apply_openid_identity_provider()
+        return
+
+    def update_openid_identity_provider(self, idp_name: str, client_id: str, client_secret: str, issuer_url: str, ocp_secret_name: str = OCP_DEFAULT_SECRET_NAME):
+        """Updates OpenID identity provider to the cluster"""
+        log.info("Updating OpenID identity provider...")
+        self.idp_name = idp_name
+        self.client_id = client_id
+        self.client_secret = client_secret
+        self.issuer_url = issuer_url
+        self.ocp_secret_name = ocp_secret_name
+        client_secret_encoded = base64.b64encode(client_secret.encode("ascii")).decode('ascii')
+        secret_data = f"""{{
+            "data": {{
+                "client-secret": "{client_secret_encoded}"
+            }}
+        }}"""
+        cmd = f"""oc patch secret {ocp_secret_name} -p '{secret_data}' -n openshift-config"""
+        return_rc, _ = execute_command(
+            cmd,
+            return_rc=True,
+        )
+        if return_rc != 0:
+            log.error(f"Failed to update client secret: {return_rc}")
+            return 1
+        self._apply_openid_identity_provider()
+        log.info(f"OpenID identity provider updated successfully: {return_rc}")
         return
 
 
@@ -99,7 +170,6 @@ class OpenIdOps:
 def cli():
     """CLI for OpenID identity provider operations"""
     pass
-
 
 @cli.command("register-client")
 @click.option(
@@ -145,7 +215,6 @@ def register_client(token, registration_endpoint, redirect_uri, client_name, con
         contact_emails=list(contact_email),
         jenkins_props_file=jenkins_props_file,
     ))
-
 
 @cli.command("delete-client")
 @click.option(
@@ -194,7 +263,13 @@ def delete_client(registration_token, deletion_endpoint, client_name):
     required=True,
     help="Issuer URL required for adding OpenID identity provider",
 )
-def add_openid_idp(idp_name: str, client_id: str, client_secret: str, registration_endpoint: str):
+@click.option(
+    "--ocp-secret-name",
+    default=OCP_DEFAULT_SECRET_NAME,
+    required=False,
+    help="OpenShift secret name required for adding OpenID identity provider",
+)
+def add_openid_idp(idp_name: str, client_id: str, client_secret: str, issuer_url: str, ocp_secret_name: str):
     """Add OpenID identity provider to the cluster"""
     openid_ops = OpenIdOps()
 
@@ -202,7 +277,8 @@ def add_openid_idp(idp_name: str, client_id: str, client_secret: str, registrati
         idp_name=idp_name,
         client_id=client_id,
         client_secret=client_secret,
-        registration_endpoint=registration_endpoint,
+        issuer_url=issuer_url,
+        ocp_secret_name=ocp_secret_name,
     ))
 
 if __name__ == "__main__":

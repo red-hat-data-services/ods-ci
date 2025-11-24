@@ -172,8 +172,9 @@ Open Pipeline Detail
 Open Pipeline Run
     [Documentation]    Open the Pipeline Run detail.
     [Arguments]    ${pipeline_run_name}    ${experiment_name}=Default
-    Navigate To Page    Experiments    Experiments and runs
+    Navigate To Page    Develop & train    Experiments
     ODHDashboard.Maybe Wait For Dashboard Loading Spinner Page    timeout=30s
+    Wait Until Page Contains    ${experiment_name}
     Click Element    ${PIPELINE_EXPERIMENT_TABLE_XP}//*[@data-testid="table-row-title"]//*[text()="${experiment_name}"]
     ODHDashboard.Maybe Wait For Dashboard Loading Spinner Page     timeout=30s
     Wait Until Page Contains Element    xpath=//*[@data-testid="active-runs-tab"]      timeout=30s

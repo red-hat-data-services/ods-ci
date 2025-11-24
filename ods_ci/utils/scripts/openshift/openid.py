@@ -1,23 +1,25 @@
 import click
 
 from ods_ci.utils.scripts.logger import log
-from ods_ci.utils.scripts.util import execute_command
 import json
 import requests
+from string import Template
 
 
-REGISTRATION_BODY_TEMPLATE = """
+import sys
+
+REGISTRATION_BODY_TEMPLATE = Template("""
     {
         "application_type": "web",
         "redirect_uris": [
-            {redirect_uris}
+           "${redirect_uris}"
         ],
-        "client_name": {client_name},
+        "client_name": "${client_name}",
         "contacts": [
-            {contact_emails}
+            "${contact_emails}"
         ]
     }
-"""
+""")
 
 class OpenIdOps:
     """Class for OpenID identity provider operations"""
@@ -29,6 +31,7 @@ class OpenIdOps:
         self.client_registration_token = ""
         self.idp_name = ""
         self.client_id = ""
+        self.client_name = ""
         self.client_secret = ""
         self.registration_endpoint = ""
 
@@ -37,62 +40,57 @@ class OpenIdOps:
         if self.jenkins_props_file:
             try:
                 with open(self.jenkins_props_file, "w") as f:
-                    f.write(f"CLIENT_REGISTRATION_TOKEN={self.client_registration_token}\n")
+                    f.write(f"CLIENT_NAME={self.client_name}\n")
                     f.write(f"CLIENT_ID={self.client_id}\n")
                     f.write(f"CLIENT_SECRET={self.client_secret}\n")
-                log.info(f"Registration token written to Jenkins properties file: {self.jenkins_props_file}")
-                return True
+                    f.write(f"CLIENT_REGISTRATION_TOKEN={self.client_registration_token}\n")
+                log.info(f"Client details written to Jenkins properties file: {self.jenkins_props_file}")
             except Exception as e:
                 log.error(f"Failed to write registration token to properties file: {e}")
-                return False
-        return False
+                return 1
+        return
 
     def dynamic_client_registration(self, registration_endpoint: str, token: str, redirect_uris: list[str], client_name: str, contact_emails: list[str], jenkins_props_file: str):
         self.token = token
         self.jenkins_props_file = jenkins_props_file
         self.registration_endpoint = registration_endpoint
-        registration_body = REGISTRATION_BODY_TEMPLATE.format(
-            redirect_uris=redirect_uris.join(","),
+        registration_body = REGISTRATION_BODY_TEMPLATE.substitute(
+            redirect_uris=redirect_uris,
             client_name=client_name,
-            contact_emails=contact_emails.join(","),
+            contact_emails=contact_emails,
         )
         log.info(f"Registration body: {registration_body}")
         headers = {
             "Authorization": f"Bearer {self.token}",
         }
         request = requests.post(f"{self.registration_endpoint}", json=json.loads(registration_body), headers=headers)
-        if request.status_code != 200:
-            log.error(f"Failed to register client: {request.status_code} {request.text}")
+        if request.status_code != 201:
+            log.error(f"Failed to register client: {request.status_code} {request.json()['error']} - {request.json()['error_description']}")
             return 1
-        log.info(f"Client registered successfully: {request.json()}")
+        log.info(f"Client registered successfully: {request.status_code}")
+        self.client_name = request.json()["client_name"]
         self.client_id = request.json()["client_id"]
         self.client_secret = request.json()["client_secret"]
         self.client_registration_token = request.json()["registration_access_token"]
         self._write_jenkins_properties()
-        return 0
+        return
     
     def delete_dynamic_client(self, registration_token: str, deletion_endpoint: str, client_name: str):
-        #deletion_body = REGISTRATION_BODY_TEMPLATE.format(
-            # redirect_uris=redirect_uris.join(","),
-            # client_name=client_name,
-            # contact_emails=contact_emails.join(","),
-        #)
-        #log.info(f"Deletion body: {deletion_body}")
         headers = {
             "Authorization": f"Bearer {registration_token}",
         }
         request = requests.delete(f"{deletion_endpoint}", headers=headers)
-        if request.status_code != 200:
+        if request.status_code != 204:
             log.error(f"Failed to delete client {client_name}: {request.status_code} {request.text}")
             return 1
-        log.info(f"Client {client_name} deleted successfully: {request.json()}")
-        return 0
+        log.info(f"Client {client_name} deleted successfully: {request.status_code}")
+        return
 
     def add_openid_identity_provider(self, idp_name: str, client_id: str, client_secret: str, issuer_url: str):
         """Adds OpenID identity provider to the cluster"""
         log.info("Adding OpenID identity provider...")
         log.info("add_openid_identity_provider() method called successfully")
-        return True
+        return
 
 
 @click.group()
@@ -108,7 +106,12 @@ def cli():
     help="Token required for client registration",
 )
 @click.option(
-    "--redirect-uris",
+    "--registration-endpoint",
+    required=True,
+    help="Registration endpoint required for client registration",
+)
+@click.option(
+    "--redirect-uri",
     required=True,
     multiple=True,
     help="Redirect URIs for the client (can be specified multiple times)",
@@ -119,7 +122,7 @@ def cli():
     help="Name of the client to register",
 )
 @click.option(
-    "--contact-emails",
+    "--contact-email",
     required=True,
     multiple=True,
     help="Contact emails for the client (can be specified multiple times)",
@@ -129,27 +132,17 @@ def cli():
     default=None,
     help="Path to properties file for Jenkins to read TOKEN (e.g., env.properties)",
 )
-def register_client(token, redirect_uris, client_name, contact_emails, jenkins_props_file, output_token):
+def register_client(token, registration_endpoint, redirect_uri, client_name, contact_email, jenkins_props_file):
     """Register an OpenID client dynamically"""
     openid_ops = OpenIdOps()
-
-    result = openid_ops.dynamic_client_registration(
+    exit(openid_ops.dynamic_client_registration(
         token=token,
-        redirect_uris=list(redirect_uris),
+        registration_endpoint=registration_endpoint,
+        redirect_uris=",".join(list(redirect_uri)),
         client_name=client_name,
-        contact_emails=list(contact_emails),
+        contact_emails=",".join(list(contact_email)),
         jenkins_props_file=jenkins_props_file,
-    )
-
-    if result is None:
-        click.echo("Failed to register OpenID client", err=True)
-        exit(1)
-
-    # Output token for Jenkins if requested
-    if output_token:
-        click.echo(f"TOKEN={token}")
-
-    click.echo("OpenID client registered successfully")
+    ))
 
 
 @cli.command("delete-client")
@@ -163,20 +156,20 @@ def register_client(token, redirect_uris, client_name, contact_emails, jenkins_p
     required=True,
     help="Deletion endpoint required for deleting OpenID client",
 )
-def delete_client(registration_token, deletion_endpoint):
+@click.option(
+    "--client-name",
+    required=True,
+    help="Name of the client to delete",
+)
+def delete_client(registration_token, deletion_endpoint, client_name):
     """Delete an OpenID client dynamically"""
     openid_ops = OpenIdOps()
 
-    result = openid_ops.delete_dynamic_client(
+    exit(openid_ops.delete_dynamic_client(
         registration_token=registration_token,
         deletion_endpoint=deletion_endpoint,
-    )
-
-    if result is None:
-        click.echo("Failed to delete OpenID client", err=True)
-        exit(1)
-
-    click.echo("OpenID client deleted successfully")
+        client_name=client_name,
+    ))
 
 @cli.command("add-openid-idp")
 @click.option(
@@ -203,21 +196,12 @@ def add_openid_idp(idp_name: str, client_id: str, client_secret: str, registrati
     """Add OpenID identity provider to the cluster"""
     openid_ops = OpenIdOps()
 
-    result = openid_ops.add_openid_identity_provider(
+    exit(openid_ops.add_openid_identity_provider(
         idp_name=idp_name,
         client_id=client_id,
         client_secret=client_secret,
         registration_endpoint=registration_endpoint,
-    )
-
-    if result is None:
-        click.echo("Failed to add OpenID identity provider", err=True)
-        exit(1)
-
-
-    click.echo("OpenID identity provider added successfully")
-
+    ))
 
 if __name__ == "__main__":
     cli()
-

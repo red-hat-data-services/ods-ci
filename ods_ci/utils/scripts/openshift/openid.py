@@ -81,7 +81,7 @@ class OpenIdOps:
         log.info(f"OpenID identity provider applied successfully: {return_rc}")
         return
 
-    def dynamic_client_registration(self, registration_endpoint: str, token: str, redirect_uris: list[str], client_name: str, contact_emails: list[str], jenkins_props_file: str):
+    def register_client(self, registration_endpoint: str, token: str, redirect_uris: list[str], client_name: str, contact_emails: list[str], jenkins_props_file: str):
         self.token = token
         self.jenkins_props_file = jenkins_props_file
         self.registration_endpoint = registration_endpoint
@@ -207,7 +207,7 @@ def cli():
 def register_client(token, registration_endpoint, redirect_uri, client_name, contact_email, jenkins_props_file):
     """Register an OpenID client dynamically"""
     openid_ops = OpenIdOps()
-    exit(openid_ops.dynamic_client_registration(
+    exit(openid_ops.register_client(
         token=token,
         registration_endpoint=registration_endpoint,
         redirect_uris=list(redirect_uri),

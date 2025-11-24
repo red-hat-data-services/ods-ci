@@ -124,7 +124,10 @@ def oc_login(ocp_api_url="", username="", password="", kubeconfig_path="", timeo
             log.error("kubeconfig does not exist or is empty")
             sys.exit(1)
 
-        rc, out = execute_command(f"oc config get-contexts --kubeconfig={kubeconfig_path}", return_rc=True) or (None, None)
+        rc, out = execute_command(f"oc config get-contexts --kubeconfig={kubeconfig_path}", return_rc=True) or (
+            None,
+            None,
+        )
         if rc is None or rc != 0 or out is None or not out.strip():
             log.error("kubeconfig is invalid or missing contexts")
             sys.exit(1)

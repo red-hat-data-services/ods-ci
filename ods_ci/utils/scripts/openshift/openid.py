@@ -12,11 +12,11 @@ REGISTRATION_BODY_TEMPLATE = Template("""
     {
         "application_type": "web",
         "redirect_uris": [
-           "${redirect_uris}"
+           ${redirect_uris}
         ],
         "client_name": "${client_name}",
         "contacts": [
-            "${contact_emails}"
+            ${contact_emails}
         ]
     }
 """)
@@ -54,6 +54,8 @@ class OpenIdOps:
         self.token = token
         self.jenkins_props_file = jenkins_props_file
         self.registration_endpoint = registration_endpoint
+        redirect_uris = ", ".join([f'"{uri}"' for uri in redirect_uris])
+        contact_emails = ", ".join([f'"{email}"' for email in contact_emails])
         registration_body = REGISTRATION_BODY_TEMPLATE.substitute(
             redirect_uris=redirect_uris,
             client_name=client_name,
@@ -138,9 +140,9 @@ def register_client(token, registration_endpoint, redirect_uri, client_name, con
     exit(openid_ops.dynamic_client_registration(
         token=token,
         registration_endpoint=registration_endpoint,
-        redirect_uris=",".join(list(redirect_uri)),
+        redirect_uris=list(redirect_uri),
         client_name=client_name,
-        contact_emails=",".join(list(contact_email)),
+        contact_emails=list(contact_email),
         jenkins_props_file=jenkins_props_file,
     ))
 

@@ -59,8 +59,19 @@ def execute_command(
     print_stdout: bool = True,
     return_rc: bool = False,
     timeout: int = 50,
-):
+) -> str | tuple[int | None, str | None]:
     """
+    Executes command on the local node and streams output.
+
+    Args:
+        cmd: command to run
+        print_stdout: whether to print output lines
+        return_rc: if True, return (rc, output). Otherwise return output only.
+        timeout: max seconds to wait for process when return_rc=True.
+
+    Returns:
+        - output (str)                      when return_rc=False  (default)
+        - rc (int|None), output (str|None)  when return_rc=True
     Executes command on the local node and streams output.
 
     Args:
@@ -102,7 +113,23 @@ def execute_command(
 
         return "".join(output)
 
+
+            if return_rc:
+                try:
+                    rc = p.wait(timeout=timeout)
+                except subprocess.TimeoutExpired:
+                    log.error(f"Command timed out after {timeout} seconds, killing process")
+                    p.kill()
+                    return None, "".join(output)
+                return rc, "".join(output)
+
+        return "".join(output)
+
     except Exception as e:
+        log.exception(f"Starting subprocess '{cmd}' failed", exc_info=e)
+        if return_rc:
+            return None, None
+        return None
         log.exception(f"Starting subprocess '{cmd}' failed", exc_info=e)
         if return_rc:
             return None, None

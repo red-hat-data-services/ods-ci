@@ -35,7 +35,7 @@ class OpenIdOps:
         self.client_name = ""
         self.client_secret = ""
         self.registration_endpoint = ""
-        self.ocp_secret_name = ""
+        self.ocp_secret_name = OCP_DEFAULT_SECRET_NAME
 
     def _write_jenkins_properties(self):
         """Write TOKEN to a properties file for Jenkins to read"""
@@ -119,15 +119,16 @@ class OpenIdOps:
         log.info(f"Client {client_name} deleted successfully: {request.status_code}")
         return
 
-    def add_openid_identity_provider(self, idp_name: str, client_id: str, client_secret: str, issuer_url: str, ocp_secret_name: str = OCP_DEFAULT_SECRET_NAME):
+    def add_openid_identity_provider(self, idp_name: str, client_id: str, client_secret: str, issuer_url: str, ocp_secret_name: str):
         """Adds OpenID identity provider to the cluster"""
         log.info("Adding OpenID identity provider...")
         self.idp_name = idp_name
         self.client_id = client_id
         self.client_secret = client_secret
         self.issuer_url = issuer_url
-        self.ocp_secret_name = ocp_secret_name
-        cmd=f"oc create secret generic {ocp_secret_name} --from-literal=client-secret={client_secret} -n openshift-config"
+        if ocp_secret_name:
+            self.ocp_secret_name = ocp_secret_name
+        cmd=f"oc create secret generic {ocp_secret_name} --from-literal=clientSecret={client_secret} -n openshift-config"
         return_rc, _ = execute_command(
             cmd,
             return_rc=True,
@@ -139,14 +140,15 @@ class OpenIdOps:
         self._apply_openid_identity_provider()
         return
 
-    def update_openid_identity_provider(self, idp_name: str, client_id: str, client_secret: str, issuer_url: str, ocp_secret_name: str = OCP_DEFAULT_SECRET_NAME):
+    def update_openid_identity_provider(self, idp_name: str, client_id: str, client_secret: str, issuer_url: str, ocp_secret_name: str):
         """Updates OpenID identity provider to the cluster"""
         log.info("Updating OpenID identity provider...")
         self.idp_name = idp_name
         self.client_id = client_id
         self.client_secret = client_secret
         self.issuer_url = issuer_url
-        self.ocp_secret_name = ocp_secret_name
+        if ocp_secret_name:
+            self.ocp_secret_name = ocp_secret_name
         client_secret_encoded = base64.b64encode(client_secret.encode("ascii")).decode('ascii')
         secret_data = f"""{{
             "data": {{
@@ -164,6 +166,51 @@ class OpenIdOps:
         self._apply_openid_identity_provider()
         log.info(f"OpenID identity provider updated successfully: {return_rc}")
         return
+    
+    def remove_openid_identity_provider(self, idp_name: str):
+        
+        ocp_secret_name_cmd = "oc get oauth cluster -ojsonpath='{{.spec.identityProviders[?(@.name==\"{}\")].openID.clientSecret.name}}'".format(idp_name)
+        return_rc, ocp_secret_name = execute_command(
+            ocp_secret_name_cmd,
+            return_rc=True,
+        )
+        if return_rc != 0 or not ocp_secret_name:
+            log.error(f"Failed to get OCP secret name or secret name is empty: {return_rc}")
+            return 1
+        ocp_secret_name = ocp_secret_name.strip()
+        
+        delete_secret_cmd = f"oc delete secret {ocp_secret_name} -n openshift-config --ignore-not-found"
+        return_rc, _ = execute_command(
+            delete_secret_cmd,
+            return_rc=True,
+        )
+        if return_rc != 0:
+            log.error(f"Failed to delete OCP secret: {return_rc}")
+            return 1
+        log.info(f"OCP secret deleted successfully: {return_rc}")
+        idp_idx_cmd = f"oc get oauth cluster -o json | jq '.spec.identityProviders | map(.name == \"{idp_name}\") | index(true)'"
+        return_rc, idp_idx = execute_command(
+            idp_idx_cmd,
+            return_rc=True,
+        )
+        if return_rc != 0:
+            log.error(f"Failed to get OpenID identity provider index: {return_rc}")
+            return 1
+        idp_removal_array = [
+            {"op": "remove","path": f"/spec/identityProviders/{idp_idx.strip()}"}
+        ]
+        idp_removal_json = json.dumps(idp_removal_array)
+        cmd = f"oc patch oauth cluster --type json -p '{idp_removal_json}'"
+        return_rc, _ = execute_command(
+            cmd,
+            return_rc=True,
+        )
+        if return_rc != 0:
+            log.error(f"Failed to delete OpenID identity provider: {return_rc}")
+            return 1
+        log.info(f"OpenID identity provider applied successfully: {return_rc}")
+        return
+
 
 
 @click.group()
@@ -280,6 +327,17 @@ def add_openid_idp(idp_name: str, client_id: str, client_secret: str, issuer_url
         issuer_url=issuer_url,
         ocp_secret_name=ocp_secret_name,
     ))
+
+@cli.command("delete-openid-idp")
+@click.option(
+    "--idp-name",
+    required=True,
+    help="Name of the OpenID identity provider to delete",
+)
+def delete_openid_idp(idp_name: str):
+    """Delete OpenID identity provider from the cluster"""
+    openid_ops = OpenIdOps()
+    exit(openid_ops.remove_openid_identity_provider(idp_name=idp_name))
 
 if __name__ == "__main__":
     cli()

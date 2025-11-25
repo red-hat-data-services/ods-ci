@@ -1,3 +1,4 @@
+from typing import Literal
 import click
 import base64
 from ods_ci.utils.scripts.logger import log
@@ -21,6 +22,7 @@ REGISTRATION_BODY_TEMPLATE = Template("""
 """)
 
 OCP_DEFAULT_SECRET_NAME = "openid-idp-client-secret"
+CLIENT_PROPERTIES_FILE_DEFAULT = "client.properties"
 
 class OpenIdOps:
     """Class for OpenID identity provider operations"""
@@ -108,6 +110,41 @@ class OpenIdOps:
         self._write_jenkins_properties()
         return
     
+    def update_redirect_uris(self, operation: Literal["add", "remove"], registration_token: str, update_endpoint: str, client_name: str, redirect_uris: list[str], jenkins_props_file: str):
+        headers = {
+            "Authorization": f"Bearer {registration_token}",
+        }
+        request = requests.get(f"{update_endpoint}", headers=headers)
+        if request.status_code != 200:
+            log.error(f"Failed to add redirect URIs to client {client_name}: {request.status_code} {request.text}")
+            return 1
+        log.info(f"Redirect URIs added successfully to client {client_name}: {request.status_code}")
+        current_uris = request.json()["redirect_uris"]
+        print(f"Current URIs: {current_uris}")
+        print(type(current_uris))
+        
+        if operation == "add":
+            new_uris = current_uris + redirect_uris
+        elif operation == "remove":
+            new_uris = list(set(current_uris) - set(redirect_uris))
+        else:
+            log.error(f"Invalid operation: {operation}")
+            return 1
+        updated_req = request.json()
+        updated_req["redirect_uris"] = new_uris
+        update_request = requests.put(f"{update_endpoint}", headers=headers, json=updated_req)
+        if update_request.status_code != 200:
+            log.error(f"Failed to {operation} redirect URIs to client {client_name}: {update_request.status_code} {update_request.text}")
+            return 1
+        log.info(f"{operation.capitalize()} Redirect URIs perfomed successfully on client {client_name}: {update_request.status_code}")
+        self.client_name = update_request.json()["client_name"]
+        self.client_id = update_request.json()["client_id"]
+        self.client_secret = update_request.json()["client_secret"]
+        self.client_registration_token = update_request.json()["registration_access_token"]
+        self._write_jenkins_properties()
+        return
+
+
     def delete_dynamic_client(self, registration_token: str, deletion_endpoint: str, client_name: str):
         headers = {
             "Authorization": f"Bearer {registration_token}",
@@ -248,8 +285,8 @@ def cli():
 )
 @click.option(
     "--jenkins-props-file",
-    default=None,
-    help="Path to properties file for Jenkins to read TOKEN (e.g., env.properties)",
+    default=CLIENT_PROPERTIES_FILE_DEFAULT,
+    help="Path to properties file for Jenkins or other tools to read CLIENT_NAME, CLIENT_ID, CLIENT_SECRET, CLIENT_REGISTRATION_TOKEN (e.g., client.properties)",
 )
 def register_client(token, registration_endpoint, redirect_uri, client_name, contact_email, jenkins_props_file):
     """Register an OpenID client dynamically"""
@@ -260,6 +297,50 @@ def register_client(token, registration_endpoint, redirect_uri, client_name, con
         redirect_uris=list(redirect_uri),
         client_name=client_name,
         contact_emails=list(contact_email),
+        jenkins_props_file=jenkins_props_file,
+    ))
+
+@cli.command("update-redirect-uris")
+@click.option(
+    "--operation",
+    required=True,
+    help="Operation to perform on the redirect URIs",
+)
+@click.option(
+    "--registration-token",
+    required=True,
+    help="Registration token required for updating redirect URIs",
+)
+@click.option(
+    "--update-endpoint",
+    required=True,
+    help="Update endpoint required for updating redirect URIs",
+)
+@click.option(
+    "--client-name",
+    required=True,
+    help="Name of the client to update redirect URIs",
+)
+@click.option(
+    "--redirect-uri",
+    required=True,
+    multiple=True,
+    help="Redirect URIs to update (can be specified multiple times)",
+)
+@click.option(
+    "--jenkins-props-file",
+    default=CLIENT_PROPERTIES_FILE_DEFAULT,
+    help="Path to properties file for Jenkins or other tools to read CLIENT_NAME, CLIENT_ID, CLIENT_SECRET, CLIENT_REGISTRATION_TOKEN (e.g., client.properties)",
+)
+def update_redirect_uris(operation, registration_token, update_endpoint, client_name, redirect_uri, jenkins_props_file):
+    """Update redirect URIs for an OpenID client"""
+    openid_ops = OpenIdOps()
+    exit(openid_ops.update_redirect_uris(
+        operation=operation,
+        registration_token=registration_token,
+        update_endpoint=update_endpoint,
+        client_name=client_name,
+        redirect_uris=list(redirect_uri),
         jenkins_props_file=jenkins_props_file,
     ))
 

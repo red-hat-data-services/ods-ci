@@ -22,6 +22,8 @@ ${RAY_LABEL_SELECTOR}                                       app.kubernetes.io/na
 ${RAY_DEPLOYMENT_NAME}                                      kuberay-operator
 ${TRAINING_LABEL_SELECTOR}                                  app.kubernetes.io/name=training-operator
 ${TRAINING_DEPLOYMENT_NAME}                                 kubeflow-training-operator
+${TRAINER_LABEL_SELECTOR}                                   app.kubernetes.io/name=trainer
+${TRAINER_DEPLOYMENT_NAME}                                  kubeflow-trainer-controller-manager
 ${AIPIPELINES_LABEL_SELECTOR}                               app.kubernetes.io/name=data-science-pipelines-operator
 ${AIPIPELINES_DEPLOYMENT_NAME}                              data-science-pipelines-operator-controller-manager
 ${ODH_MODEL_CONTROLLER_LABEL_SELECTOR}                      app=odh-model-controller
@@ -44,6 +46,7 @@ ${IS_NOT_PRESENT}                                           1
 ...                                                         RAY=${EMPTY}
 ...                                                         KUEUE=${EMPTY}
 ...                                                         TRAINING=${EMPTY}
+...                                                         TRAINER=${EMPTY}
 ...                                                         DASHBOARD=${EMPTY}
 ...                                                         AIPIPELINES=${EMPTY}
 ...                                                         MODELREGISTRY=${EMPTY}
@@ -176,6 +179,40 @@ Validate Training Operator Removed State
     ...    ${TRAINING_LABEL_SELECTOR}
 
     [Teardown]      Restore DSC Component State     trainingoperator        ${TRAINING_DEPLOYMENT_NAME}     ${TRAINING_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.TRAINING}
+
+Validate Trainer Managed State
+    [Documentation]    Validate that the DSC Trainer component Managed state creates the expected resources,
+    ...    check that Training deployment is created and pod is in Ready state
+    [Tags]
+    ...    Operator
+    ...    Tier1
+    ...    trainer-managed
+    ...    Integration
+    ...    ExcludeOnODH
+
+    Set DSC Component Managed State And Wait For Completion
+    ...    trainer
+    ...    ${TRAINER_DEPLOYMENT_NAME}
+    ...    ${TRAINER_LABEL_SELECTOR}
+    Check That Image Pull Path Is Correct       ${TRAINER_DEPLOYMENT_NAME}     ${IMAGE_PULL_PATH}
+
+    [Teardown]      Restore DSC Component State     trainer        ${TRAINER_DEPLOYMENT_NAME}     ${TRAINER_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.TRAINER}
+
+Validate Trainer Removed State
+    [Documentation]    Validate that Trainer management state Removed does remove relevant resources.
+    [Tags]
+    ...    Operator
+    ...    Tier1
+    ...    trainer-removed
+    ...    Integration
+    ...    ExcludeOnODH
+
+    Set DSC Component Removed State And Wait For Completion
+    ...    trainer
+    ...    ${TRAINER_DEPLOYMENT_NAME}
+    ...    ${TRAINER_LABEL_SELECTOR}
+
+    [Teardown]      Restore DSC Component State     trainer      ${TRAINER_DEPLOYMENT_NAME}     ${TRAINER_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.TRAINER}
 
 Validate Dashboard Managed State
     [Documentation]    Validate that the DSC Dashboard component Managed state creates the expected resources,
@@ -531,6 +568,7 @@ Suite Setup
     ${SAVED_MANAGEMENT_STATES.RAY}=     Get DSC Component State    ${DSC_NAME}    ray    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.KUEUE}=     Get DSC Component State    ${DSC_NAME}    kueue    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.TRAINING}=     Get DSC Component State    ${DSC_NAME}    trainingoperator    ${OPERATOR_NS}
+    ${SAVED_MANAGEMENT_STATES.TRAINER}=     Get DSC Component State     ${DSC_NAME}     trainer    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.DASHBOARD}=     Get DSC Component State    ${DSC_NAME}    dashboard    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.AIPIPELINES}=     Get DSC Component State    ${DSC_NAME}    aipipelines    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.MODELREGISTRY}=     Get DSC Component State    ${DSC_NAME}    modelregistry    ${OPERATOR_NS}

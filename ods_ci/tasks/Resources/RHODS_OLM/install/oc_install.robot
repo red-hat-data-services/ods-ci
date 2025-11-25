@@ -16,6 +16,7 @@ ${DSCI_NAME} =    default-dsci
 ...    kueue
 ...    ray
 ...    trainingoperator
+...    trainer
 ...    trustyai
 ...    workbenches
 ...    modelregistry
@@ -295,6 +296,12 @@ Verify RHODS Installation
   IF    "${trainingoperator}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app.kubernetes.io/part-of=trainingoperator
+  END
+
+  ${trainer} =     Is Component Enabled    trainer    ${DSC_NAME}
+  IF     "${trainer}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/name=trainer
   END
 
   ${feastoperator} =    Is Component Enabled    feastoperator    ${DSC_NAME}

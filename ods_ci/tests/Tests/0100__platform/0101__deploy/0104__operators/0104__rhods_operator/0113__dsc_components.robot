@@ -79,13 +79,9 @@ Validate Kueue Removed To Unmanaged State Transition
     ...    ${KUEUE_DEPLOYMENT_NAME}
     ...    ${KUEUE_LABEL_SELECTOR}
     ...    namespace=${KUEUE_NS}
+    ...    wait_for_completion=False
     Set DSC Component Unmanaged State And Wait For Completion
     ...    kueue
-    ...    ${KUEUE_DEPLOYMENT_NAME}
-    ...    ${KUEUE_LABEL_SELECTOR}
-    ...    namespace=${KUEUE_NS}
-    ...    wait_for_completion=False
-    Wait For Resources To Be Available
     ...    ${KUEUE_DEPLOYMENT_NAME}
     ...    ${KUEUE_LABEL_SELECTOR}
     ...    namespace=${KUEUE_NS}
@@ -106,16 +102,12 @@ Validate Kueue Unmanaged To Removed State Transition
     ...    ${KUEUE_DEPLOYMENT_NAME}
     ...    ${KUEUE_LABEL_SELECTOR}
     ...    namespace=${KUEUE_NS}
-    ...    wait_for_completion=False
-    Wait For Resources To Be Available
-    ...    ${KUEUE_DEPLOYMENT_NAME}
-    ...    ${KUEUE_LABEL_SELECTOR}
-    ...    namespace=${KUEUE_NS}
     Set DSC Component Removed State And Wait For Completion
     ...    kueue
     ...    ${KUEUE_DEPLOYMENT_NAME}
     ...    ${KUEUE_LABEL_SELECTOR}
     ...    namespace=${KUEUE_NS}
+    ...    wait_for_completion=False
 
     [Teardown]      Restore Kueue Initial State
 
@@ -561,7 +553,7 @@ Restore Kueue Initial State
     IF    not ${kueue_installed}
           Install Kueue Dependencies
     END
-    Restore DSC Component State     kueue      ${KUEUE_DEPLOYMENT_NAME}        ${KUEUE_LABEL_SELECTOR}     ${SAVED_MANAGEMENT_STATES.KUEUE}     ${KUEUE_NS}
+    Set Component State    kueue    ${SAVED_MANAGEMENT_STATES.KUEUE}
 
 Check Controller Conditions Are Accomplished
     [Documentation]    Wait for the conditions related to a specific controller are accomplished

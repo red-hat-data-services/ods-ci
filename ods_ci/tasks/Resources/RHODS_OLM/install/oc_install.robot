@@ -293,7 +293,6 @@ Verify RHODS Installation
 
   ${trainingoperator} =    Is Component Enabled    trainingoperator    ${DSC_NAME}
   IF    "${trainingoperator}" == "true"
-    Install JobSet Dependencies
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app.kubernetes.io/part-of=trainingoperator
   END
@@ -641,7 +640,7 @@ Install Cert Manager Operator Via Cli
              ...    namespace=${CERT_MANAGER_NS}
              ...    subscription_name=${CERT_MANAGER_SUB_NAME}
              ...    catalog_source_name=redhat-operators
-             ...    operator_group_name=cert-manager-operator
+             ...    operator_group_name=${CERT_MANAGER_OP_NAME}
              ...    operator_group_ns=${CERT_MANAGER_NS}
              ...    operator_group_target_ns=${NONE}
              ...    channel=${CERT_MANAGER_CHANNEL_NAME}
@@ -665,7 +664,7 @@ Install Leader Worker Set Operator Via Cli
              ...    namespace=${LWS_OP_NS}
              ...    subscription_name=${LWS_SUB_NAME}
              ...    catalog_source_name=redhat-operators
-             ...    operator_group_name=${LWS_OP_NS}
+             ...    operator_group_name=${LWS_OP_NAME}
              ...    operator_group_ns=${LWS_OP_NS}
              ...    operator_group_target_ns=${LWS_OP_NS}
              ...    channel=${LWS_CHANNEL_NAME}
@@ -706,7 +705,7 @@ Install Connectivity Link Operator Via Cli
              ...    subscription_name=${CONNECTIVITY_LINK_SUB_NAME}
              ...    catalog_source_name=redhat-operators
              ...    channel=${CONNECTIVITY_LINK_CHANNEL_NAME}
-             ...    operator_group_name=kuadrant
+             ...    operator_group_name=${CONNECTIVITY_LINK_OP_NAME}
              ...    operator_group_ns=${CONNECTIVITY_LINK_NS}
              ...    operator_group_target_ns=${NONE}
         Wait Until Operator Subscription Last Condition Is
@@ -732,7 +731,7 @@ Configure Authorino
         ...    level=ERROR
         RETURN
     END
-    
+
     Log To Console    Updating Authorino to enable SSL...
     ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/update_authorino_ssl.sh
     Log    ${output}    console=yes
@@ -742,7 +741,7 @@ Configure Authorino
         ...    level=ERROR
         RETURN
     END
-    
+
     Log To Console    Waiting for Authorino to be ready with SSL...
     Wait For Pods To Be Ready    label_selector=authorino-resource=authorino
     ...    namespace=kuadrant-system    timeout=150s
@@ -758,7 +757,7 @@ Install Kueue Operator Via Cli
              ...    namespace=${KUEUE_NS}
              ...    subscription_name=${KUEUE_SUB_NAME}
              ...    catalog_source_name=redhat-operators
-             ...    operator_group_name=kueue-operators
+             ...    operator_group_name=${KUEUE_OP_NAME}
              ...    operator_group_ns=${KUEUE_NS}
              ...    operator_group_target_ns=${NONE}
              ...    channel=${KUEUE_CHANNEL_NAME}
@@ -782,7 +781,7 @@ Install JobSet Operator Via Cli
              ...    namespace=${JOBSET_NS}
              ...    subscription_name=${JOBSET_SUB_NAME}
              ...    catalog_source_name=redhat-operators
-             ...    operator_group_name=jobset-operators
+             ...    operator_group_name=${JOBSET_OP_NAME}
              ...    operator_group_ns=${JOBSET_NS}
              ...    operator_group_target_ns=${JOBSET_NS}
              ...    channel=${JOBSET_CHANNEL_NAME}
@@ -817,7 +816,7 @@ Install Cluster Observability Operator Via Cli
              ...    subscription_name=${CLUSTER_OBS_SUB_NAME}
              ...    namespace=${CLUSTER_OBS_NS}
              ...    catalog_source_name=redhat-operators
-             ...    operator_group_name=openshift-cluster-observability-operator
+             ...    operator_group_name=${CLUSTER_OBS_OP_NAME}
              ...    operator_group_ns=${CLUSTER_OBS_NS}
              ...    operator_group_target_ns=${NONE}
           Wait Until Operator Subscription Last Condition Is
@@ -840,7 +839,7 @@ Install Tempo Operator Via Cli
              ...    subscription_name=${TEMPO_SUB_NAME}
              ...    namespace=${TEMPO_NS}
              ...    catalog_source_name=redhat-operators
-             ...    operator_group_name=openshift-tempo-operator
+             ...    operator_group_name=${TEMPO_OP_NAME}
              ...    operator_group_ns=${TEMPO_NS}
              ...    operator_group_target_ns=${NONE}
           Wait Until Operator Subscription Last Condition Is
@@ -863,7 +862,7 @@ Install OpenTelemetry Operator Via Cli
              ...    subscription_name=${TELEMETRY_SUB_NAME}
              ...    namespace=${TELEMETRY_NS}
              ...    catalog_source_name=redhat-operators
-             ...    operator_group_name=openshift-opentelemetry-operator
+             ...    operator_group_name=${TELEMETRY_OP_NAME}
              ...    operator_group_ns=${TELEMETRY_NS}
              ...    operator_group_target_ns=${NONE}
           Wait Until Operator Subscription Last Condition Is
@@ -886,7 +885,7 @@ Install Custom Metrics Autoscaler Operator Via Cli
             ...    namespace=${CMA_NS}
             ...    subscription_name=${CMA_SUB_NAME}
             ...    catalog_source_name=redhat-operators
-            ...    operator_group_name=openshift-keda-operator
+            ...    operator_group_name=${CMA_OP_NAME}
             ...    operator_group_ns=${CMA_NS}
             ...    operator_group_target_ns=${NONE}
             ...    channel=${CMA_CHANNEL_NAME}
@@ -903,11 +902,11 @@ Install Custom Metrics Autoscaler Operator Via Cli
 
 Install RHOAI Dependencies
     [Documentation]    Install dependent operators required for RHOAI installation
-    Install Kueue Operator Via Cli
     Install Cert Manager Operator Via Cli
+    Install Kueue Operator Via Cli
     Install Leader Worker Set Operator Via Cli
     Install Connectivity Link Operator Via Cli
-    
+    Install JobSet Operator Via Cli
 
 Install Observability Dependencies
     [Documentation]    Install dependent operators related to Observability

@@ -192,7 +192,7 @@ Verify RHODS Installation
             ...    ${OPERATOR_NAMESPACE}      ${IS_PRESENT}
             Wait Until Keyword Succeeds    6 min    0 sec
             ...    Is Resource Present    HardwareProfile    default-profile
-            ...    ${APPLICATIONS_NAMESPACEE}      ${IS_PRESENT}
+            ...    ${APPLICATIONS_NAMESPACE}      ${IS_PRESENT}
             ${enable_new_observability_stack} =    Is New Observability Stack Enabled
             IF    ${enable_new_observability_stack}
                     Patch DSCInitialization With Monitoring Info
@@ -247,7 +247,7 @@ Verify RHODS Installation
 
   ${kserve} =    Is Component Enabled    kserve    ${DSC_NAME}
   IF    "${kserve}" == "true"
-    Install KServe Dependencies
+    Configure Gateway API
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app=odh-model-controller    timeout=400s
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
@@ -632,7 +632,7 @@ Install Cert Manager Operator Via Cli
              ...    namespace=${CERT_MANAGER_NS}
              ...    subscription_name=${CERT_MANAGER_SUB_NAME}
              ...    catalog_source_name=redhat-operators
-             ...    operator_group_name=cert-manager-operator
+             ...    operator_group_name=${CERT_MANAGER_OP_NAME}
              ...    operator_group_ns=${CERT_MANAGER_NS}
              ...    operator_group_target_ns=${NONE}
              ...    channel=${CERT_MANAGER_CHANNEL_NAME}
@@ -645,6 +645,74 @@ Install Cert Manager Operator Via Cli
              ...    namespace=${CERT_MANAGER_NS}
     END
 
+Configure Leader Worker Set Operator
+    [Documentation]    Configure LeaderWorkerSetOperator custom resource after operator installation
+    Log To Console    Configuring LeaderWorkerSetOperator resource
+    ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/configure_lws_operator.sh
+    Log    ${output}    console=yes
+    Run Keyword And Continue On Failure    Should Be Equal As Numbers    ${rc}    ${0}
+    IF    ${rc} != ${0}
+        Log    Unable to configure LeaderWorkerSetOperator resource.\nCheck the cluster please    console=yes
+        ...    level=ERROR
+    END
+
+Install Connectivity Link Operator Via Cli
+    [Documentation]    Install Red Hat Connectivity Link Operator Via CLI
+    ...                Installing in kuadrant-system namespace with operator group
+    ...                ensures all resources are created in kuadrant-system.
+    ${is_installed} =   Check If Operator Is Installed Via CLI   ${CONNECTIVITY_LINK_OP_NAME}
+    IF    ${is_installed}
+        Log To Console    message=Red Hat Connectivity Link Operator is already installed
+    ELSE
+        Configure Gateway API
+        ${rc}    ${out} =    Run And Return Rc And Output    oc create namespace ${CONNECTIVITY_LINK_NS} --dry-run=client -o yaml | oc apply -f -
+        Should Be Equal As Integers    ${rc}    ${0}    msg=Failed to create namespace ${CONNECTIVITY_LINK_NS}: ${out}
+        Install ISV Operator From OperatorHub Via CLI    operator_name=${CONNECTIVITY_LINK_OP_NAME}
+             ...    namespace=${CONNECTIVITY_LINK_NS}
+             ...    subscription_name=${CONNECTIVITY_LINK_SUB_NAME}
+             ...    catalog_source_name=redhat-operators
+             ...    channel=${CONNECTIVITY_LINK_CHANNEL_NAME}
+             ...    operator_group_name=${CONNECTIVITY_LINK_OP_NAME}
+             ...    operator_group_ns=${CONNECTIVITY_LINK_NS}
+             ...    operator_group_target_ns=${NONE}
+        Wait Until Operator Subscription Last Condition Is
+             ...    type=CatalogSourcesUnhealthy    status=False
+             ...    reason=AllCatalogSourcesHealthy    subscription_name=${CONNECTIVITY_LINK_SUB_NAME}
+             ...    namespace=${CONNECTIVITY_LINK_NS}
+             ...    retry=150
+        Wait For Pods To Be Ready    label_selector=app=kuadrant
+             ...    namespace=${CONNECTIVITY_LINK_NS}
+        ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/configure_connectivity_link_operator.sh
+        Configure Authorino
+    END
+
+Configure Authorino
+    [Documentation]    Configure Authorino with SSL after Kuadrant is configured.
+
+    Log To Console    Configuring Authorino with SSL
+    ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/configure_authorino.sh
+    Log    ${output}    console=yes
+    Run Keyword And Continue On Failure    Should Be Equal As Numbers    ${rc}    ${0}
+    IF    ${rc} != ${0}
+        Log    Unable to configure Authorino namespace.\nCheck the cluster please    console=yes
+        ...    level=ERROR
+        RETURN
+    END
+
+    Log To Console    Updating Authorino to enable SSL...
+    ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/update_authorino_ssl.sh
+    Log    ${output}    console=yes
+    Run Keyword And Continue On Failure    Should Be Equal As Numbers    ${rc}    ${0}
+    IF    ${rc} != ${0}
+        Log    Unable to update Authorino with SSL configuration.\nCheck the cluster please    console=yes
+        ...    level=ERROR
+        RETURN
+    END
+
+    Log To Console    Waiting for Authorino to be ready with SSL...
+    Wait For Pods To Be Ready    label_selector=authorino-resource=authorino
+    ...    namespace=kuadrant-system    timeout=150s
+
 Install Kueue Operator Via Cli
     [Documentation]    Install Kueue Operator Via CLI
     ${is_installed} =   Check If Operator Is Installed Via CLI   ${KUEUE_OP_NAME}
@@ -656,7 +724,7 @@ Install Kueue Operator Via Cli
              ...    namespace=${KUEUE_NS}
              ...    subscription_name=${KUEUE_SUB_NAME}
              ...    catalog_source_name=redhat-operators
-             ...    operator_group_name=kueue-operators
+             ...    operator_group_name=${KUEUE_OP_NAME}
              ...    operator_group_ns=${KUEUE_NS}
              ...    operator_group_target_ns=${NONE}
              ...    channel=${KUEUE_CHANNEL_NAME}
@@ -693,7 +761,7 @@ Install Cluster Observability Operator Via Cli
              ...    subscription_name=${CLUSTER_OBS_SUB_NAME}
              ...    namespace=${CLUSTER_OBS_NS}
              ...    catalog_source_name=redhat-operators
-             ...    operator_group_name=openshift-cluster-observability-operator
+             ...    operator_group_name=${CLUSTER_OBS_OP_NAME}
              ...    operator_group_ns=${CLUSTER_OBS_NS}
              ...    operator_group_target_ns=${NONE}
           Wait Until Operator Subscription Last Condition Is
@@ -716,7 +784,7 @@ Install Tempo Operator Via Cli
              ...    subscription_name=${TEMPO_SUB_NAME}
              ...    namespace=${TEMPO_NS}
              ...    catalog_source_name=redhat-operators
-             ...    operator_group_name=openshift-tempo-operator
+             ...    operator_group_name=${TEMPO_OP_NAME}
              ...    operator_group_ns=${TEMPO_NS}
              ...    operator_group_target_ns=${NONE}
           Wait Until Operator Subscription Last Condition Is
@@ -739,7 +807,7 @@ Install OpenTelemetry Operator Via Cli
              ...    subscription_name=${TELEMETRY_SUB_NAME}
              ...    namespace=${TELEMETRY_NS}
              ...    catalog_source_name=redhat-operators
-             ...    operator_group_name=openshift-opentelemetry-operator
+             ...    operator_group_name=${TELEMETRY_OP_NAME}
              ...    operator_group_ns=${TELEMETRY_NS}
              ...    operator_group_target_ns=${NONE}
           Wait Until Operator Subscription Last Condition Is
@@ -762,7 +830,7 @@ Install Custom Metrics Autoscaler Operator Via Cli
             ...    namespace=${CMA_NS}
             ...    subscription_name=${CMA_SUB_NAME}
             ...    catalog_source_name=redhat-operators
-            ...    operator_group_name=openshift-keda-operator
+            ...    operator_group_name=${CMA_OP_NAME}
             ...    operator_group_ns=${CMA_NS}
             ...    operator_group_target_ns=${NONE}
             ...    channel=${CMA_CHANNEL_NAME}

@@ -341,6 +341,7 @@ def generate_test_config_file(
             username=data["OCP_ADMIN_USER"]["USERNAME"],
             password=data["OCP_ADMIN_USER"]["PASSWORD"],
         )
+    print("After oc login")
 
     if bool(set_prometheus_config):
         # Get prometheus token for test cluster

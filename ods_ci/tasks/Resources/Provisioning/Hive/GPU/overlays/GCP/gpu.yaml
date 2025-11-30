@@ -1,9 +1,9 @@
 - op: replace
   path: /spec/template/spec/providerSpec/value/machineType
-  value: INSTANCE_TYPE
+  value: g2-standard-4
 - op: add
   path: /spec/template/spec/providerSpec/value/onHostMaintenance
   value: Terminate
 - op: replace
   path: /spec/replicas
-  value: 1
+  value: 2

@@ -81,7 +81,7 @@ ${RESOURCES_DIRPATH}=    tasks/Resources/Files
 ${RHODS_OSD_INSTALL_REPO}=      ${EMPTY}
 ${OLM_DIR}=                     rhodsolm
 @{SUPPORTED_TEST_ENV}=          AWS   AWS_DIS   GCP   GCP_DIS   PSI   PSI_DIS   ROSA   IBM_CLOUD   CRC    AZURE	ROSA_HCP
-${install_plan_approval}=       Manual
+${install_plan_approval}=       Automatic
 
 *** Keywords ***
 Install RHODS

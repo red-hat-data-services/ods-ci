@@ -30,7 +30,7 @@ class OpenIdOps:
     def __init__(self):
         """Initialize OpenIdOps"""
         self.token = ""
-        self.jenkins_props_file = ""
+        self.jenkins_props_file = CLIENT_PROPERTIES_FILE_DEFAULT
         self.client_registration_token = ""
         self.idp_name = ""
         self.client_id = ""
@@ -111,6 +111,7 @@ class OpenIdOps:
         return
     
     def update_redirect_uris(self, operation: Literal["add", "remove"], registration_token: str, update_endpoint: str, client_name: str, redirect_uris: list[str], jenkins_props_file: str):
+        self.jenkins_props_file = jenkins_props_file
         headers = {
             "Authorization": f"Bearer {registration_token}",
         }
@@ -119,9 +120,11 @@ class OpenIdOps:
             log.error(f"Failed to add redirect URIs to client {client_name}: {request.status_code} {request.text}")
             return 1
         log.info(f"Redirect URIs added successfully to client {client_name}: {request.status_code}")
-        current_uris = request.json()["redirect_uris"]
-        print(f"Current URIs: {current_uris}")
-        print(type(current_uris))
+        current_client_info = request.json()
+        current_uris = current_client_info["redirect_uris"]
+        if client_name != current_client_info["client_name"]:
+            log.error(f"Client name mismatch: {client_name} is not expected for the given client ID.")
+            return 1
         
         if operation == "add":
             new_uris = current_uris + redirect_uris
@@ -130,17 +133,18 @@ class OpenIdOps:
         else:
             log.error(f"Invalid operation: {operation}")
             return 1
-        updated_req = request.json()
-        updated_req["redirect_uris"] = new_uris
-        update_request = requests.put(f"{update_endpoint}", headers=headers, json=updated_req)
+        updated_client_info = current_client_info
+        updated_client_info["redirect_uris"] = new_uris
+        update_request = requests.put(f"{update_endpoint}", headers=headers, json=updated_client_info)
         if update_request.status_code != 200:
             log.error(f"Failed to {operation} redirect URIs to client {client_name}: {update_request.status_code} {update_request.text}")
             return 1
         log.info(f"{operation.capitalize()} Redirect URIs perfomed successfully on client {client_name}: {update_request.status_code}")
-        self.client_name = update_request.json()["client_name"]
-        self.client_id = update_request.json()["client_id"]
-        self.client_secret = update_request.json()["client_secret"]
-        self.client_registration_token = update_request.json()["registration_access_token"]
+        updated_client_info = update_request.json()
+        self.client_name = updated_client_info["client_name"]
+        self.client_id = updated_client_info["client_id"]
+        self.client_secret = updated_client_info["client_secret"]
+        self.client_registration_token = updated_client_info["registration_access_token"]
         self._write_jenkins_properties()
         return
 
@@ -268,7 +272,7 @@ def cli():
 )
 @click.option(
     "--redirect-uri",
-    required=True,
+    required=False,
     multiple=True,
     help="Redirect URIs for the client (can be specified multiple times)",
 )

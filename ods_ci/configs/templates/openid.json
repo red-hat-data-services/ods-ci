@@ -1,0 +1,24 @@
+{
+  "mappingMethod": "claim",
+  "name": "${idp_name}",
+  "openID": {
+    "claims": {
+      "email": [
+        "email"
+      ],
+      "name": [
+        "name"
+      ],
+      "preferredUsername": [
+        "preferred_username"
+      ]
+    },
+    "clientID": "${client_id}",
+    "clientSecret": {
+      "name": "${client_secret_name}"
+    },
+    "extraScopes": [],
+    "issuer": "${issuer_url}"
+  },
+  "type": "OpenID"
+}

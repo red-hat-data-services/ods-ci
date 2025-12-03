@@ -55,7 +55,7 @@ class OpenIdOps:
         return
     
     def _apply_openid_identity_provider(self):
-        template_path = os.path.join(os.getcwd(), "ods_ci/configs/templates/openid.json")
+        template_path = os.path.abspath(os.path.dirname(__file__)) + "/../../../configs/templates/openid.json"
         with open(template_path, "r") as f:
             openid_template = Template(f.read())
         openid_json = openid_template.substitute(

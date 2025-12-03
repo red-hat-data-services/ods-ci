@@ -12,6 +12,7 @@ items:
       name: {{ image_set|default("rhods-openshift") }}
     platform:
       gcp:
+        discardLocalSsdOnHibernate: true
         region: {{ gcp_region|default("us-central1") }}
         credentialsSecretRef:
           name: gcp-creds

@@ -54,9 +54,24 @@ def read_yaml(filename):
         return None
 
 
-def execute_command(cmd: str, print_stdout: bool = True) -> str | None:
+def execute_command(
+    cmd: str,
+    print_stdout: bool = True,
+    return_rc: bool = False,
+    timeout: int = 50,
+):
     """
-    Executes command in the local node, and print real-time output
+    Executes command on the local node and streams output.
+
+    Args:
+        cmd: command to run
+        print_stdout: whether to print output lines
+        return_rc: if True, return (rc, output). Otherwise return output only.
+        timeout: max seconds to wait for process when return_rc=True.
+
+    Returns:
+        - output (str)                      when return_rc=False  (default)
+        - rc (int|None), output (str|None)  when return_rc=True
     """
     log.info(f"CMD: {cmd}")
     try:
@@ -75,16 +90,60 @@ def execute_command(cmd: str, print_stdout: bool = True) -> str | None:
                 if print_stdout:
                     print(">:", line.expandtabs(tabsize=8), end="")
                     sys.stdout.flush()
-            return "".join(output)
+
+            if return_rc:
+                try:
+                    rc = p.wait(timeout=timeout)
+                except subprocess.TimeoutExpired:
+                    log.error(f"Command timed out after {timeout} seconds, killing process")
+                    p.kill()
+                    return None, "".join(output)
+                return rc, "".join(output)
+
+        return "".join(output)
+
     except Exception as e:
-        log.exception(f"Starting the subprocess '{cmd}' failed", exc_info=e)
-    return None
+        log.exception(f"Starting subprocess '{cmd}' failed", exc_info=e)
+        if return_rc:
+            return None, None
+        return None
 
 
-def oc_login(ocp_api_url, username, password, timeout=600):
+def oc_login(ocp_api_url="", username="", password="", kubeconfig_path="", timeout=600):
     """
-    Login to test cluster using oc cli command
+    Login to test cluster using oc cli command:
+    - If kubeconfig_path is set (path to a kubeconfig file), do NOT use username/password.
+      Instead, rely on that kubeconfig and just validate access with `oc whoami`.
+    - Otherwise, login with expected username/password credentials.
     """
+    if kubeconfig_path:
+        os.environ["KUBECONFIG"] = kubeconfig_path
+        log.info("Using KUBECONFIG, skipping username/password login")
+
+        if (not os.path.exists(kubeconfig_path)) or (os.path.getsize(kubeconfig_path) == 0):
+            log.error("kubeconfig does not exist or is empty")
+            sys.exit(1)
+
+        rc, out = execute_command(f"oc config get-contexts --kubeconfig={kubeconfig_path}", return_rc=True) or (
+            None,
+            None,
+        )
+        if rc is None or rc != 0 or out is None or not out.strip():
+            log.error("kubeconfig is invalid or missing contexts")
+            sys.exit(1)
+
+        rc, out = execute_command("oc whoami", return_rc=True) or (None, None)
+        if rc == 0 and out and out.strip():
+            print(f"Kubeconfig context valid, current user={out.strip()}")
+            return
+
+        log.error("Failed to validate kubeconfig context via 'oc whoami'")
+        sys.exit(1)
+
+    if not ocp_api_url or not username or not password:
+        log.error("Missing API URL / IDP credentials for cluster login")
+        sys.exit(1)
+
     cmd = f"oc login -u {username} -p {password} {ocp_api_url} --insecure-skip-tls-verify=true"
     count = 0
     chk_flag = 0
@@ -97,7 +156,7 @@ def oc_login(ocp_api_url, username, password, timeout=600):
         time.sleep(5)
         count += 5
     if not chk_flag:
-        print("Failed to login to cluster")
+        log.error("Failed to login to cluster")
         sys.exit(1)
 
 

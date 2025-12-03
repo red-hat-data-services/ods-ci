@@ -313,6 +313,10 @@ def generate_test_config_file(
     if config_data.get("MARIADB_CA_BUNDLE"):
         data["MARIADB_CA_BUNDLE"] = config_data["MARIADB_CA_BUNDLE"]
 
+    # External cluster auth (optional)
+    if config_data["TEST_CLUSTERS"][test_cluster].get("EXTERNAL_AUTH"):
+        data["EXTERNAL_AUTH"] = config_data["TEST_CLUSTERS"][test_cluster]["EXTERNAL_AUTH"]
+
     if components:
         print("Setting components")
         print(components)
@@ -324,11 +328,19 @@ def generate_test_config_file(
         data["CUSTOM_MANIFESTS"] = initialize_custom_manifest(custom_manifests)
 
     # Login to test cluster using oc command
-    oc_login(
-        data["OCP_API_URL"],
-        data["OCP_ADMIN_USER"]["USERNAME"],
-        data["OCP_ADMIN_USER"]["PASSWORD"],
-    )
+    if data.get("EXTERNAL_AUTH", {}).get("METHOD") == "kubeconfig":
+        kubeconfig_path = os.getenv("EXTERNAL_KUBECONFIG")
+        if not kubeconfig_path:
+            print("Using external kubeconfig auth but EXTERNAL_KUBECONFIG is not set.")
+            sys.exit(1)
+
+        oc_login(kubeconfig_path=kubeconfig_path)
+    else:
+        oc_login(
+            ocp_api_url=data["OCP_API_URL"],
+            username=data["OCP_ADMIN_USER"]["USERNAME"],
+            password=data["OCP_ADMIN_USER"]["PASSWORD"],
+        )
     print("After oc login")
 
     if bool(set_prometheus_config):

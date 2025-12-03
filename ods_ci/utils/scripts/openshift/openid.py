@@ -126,16 +126,24 @@ class OpenIdOps:
         if client_name != current_client_info["client_name"]:
             log.error(f"Client name mismatch: {client_name} is not expected for the given client ID.")
             return 1
-        
         if operation == "add":
-            new_uris = current_uris + redirect_uris
+            updated_uris = list(set(current_uris) + set(redirect_uris))
         elif operation == "remove":
-            new_uris = list(set(current_uris) - set(redirect_uris))
+            updated_uris = list(set(current_uris) - set(redirect_uris))
         else:
             log.error(f"Invalid operation: {operation}")
             return 1
+        if len(set(updated_uris)) == len(set(current_uris)):
+            log.info(f"No changes in redirect URIs to apply. Skip the update")
+            self.client_name = current_client_info["client_name"]
+            self.client_id = current_client_info["client_id"]
+            self.client_secret = current_client_info["client_secret"]
+            self.client_registration_token = current_client_info["registration_access_token"]
+            self._write_jenkins_properties()
+            return
+
         updated_client_info = current_client_info
-        updated_client_info["redirect_uris"] = new_uris
+        updated_client_info["redirect_uris"] = updated_uris
         update_request = requests.put(f"{update_endpoint}", headers=headers, json=updated_client_info)
         if update_request.status_code != 200:
             log.error(f"Failed to {operation} redirect URIs to client {client_name}: {update_request.status_code} {update_request.text}")

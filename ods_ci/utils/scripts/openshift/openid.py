@@ -120,14 +120,13 @@ class OpenIdOps:
         if request.status_code != 200:
             log.error(f"Failed to add redirect URIs to client {client_name}: {request.status_code} {request.text}")
             return 1
-        log.info(f"Redirect URIs added successfully to client {client_name}: {request.status_code}")
         current_client_info = request.json()
         current_uris = current_client_info["redirect_uris"]
         if client_name != current_client_info["client_name"]:
             log.error(f"Client name mismatch: {client_name} is not expected for the given client ID.")
             return 1
         if operation == "add":
-            updated_uris = list(set(current_uris) + set(redirect_uris))
+            updated_uris = list(set(current_uris) | set(redirect_uris))
         elif operation == "remove":
             updated_uris = list(set(current_uris) - set(redirect_uris))
         else:
@@ -141,7 +140,6 @@ class OpenIdOps:
             self.client_registration_token = current_client_info["registration_access_token"]
             self._write_jenkins_properties()
             return
-
         updated_client_info = current_client_info
         updated_client_info["redirect_uris"] = updated_uris
         update_request = requests.put(f"{update_endpoint}", headers=headers, json=updated_client_info)
@@ -220,6 +218,7 @@ class OpenIdOps:
     def remove_openid_identity_provider(self, idp_name: str, ocp_secret_name: str):
         """Removes OpenID identity provider from the cluster"""
         log.info("Removing OpenID identity provider...")
+        log.info(">> Deleting OCP secret...")
         if not ocp_secret_name:
             ocp_secret_name_cmd = "oc get oauth cluster -ojsonpath='{{.spec.identityProviders[?(@.name==\"{}\")].openID.clientSecret.name}}'".format(idp_name)
             return_rc, ocp_secret_name = execute_command(
@@ -239,6 +238,7 @@ class OpenIdOps:
             log.error(f"Failed to delete OCP secret: {return_rc}")
             return 1
         log.info(f"OCP secret deleted successfully: {return_rc}")
+        log.info(">> Deleting OpenID identity provider...")
         idp_idx_cmd = f"oc get oauth cluster -o json | jq '.spec.identityProviders | map(.name == \"{idp_name}\") | index(true)'"
         return_rc, idp_idx = execute_command(
             idp_idx_cmd,
@@ -262,10 +262,18 @@ class OpenIdOps:
         if return_rc != 0:
             log.error(f"Failed to delete OpenID identity provider: {return_rc}")
             return 1
-        log.info(f"OpenID identity provider applied successfully: {return_rc}")
+        log.info(f">> {idp_name} openID identity provider deleted successfully: {return_rc}")
+        log.info(">> Deleting user identities...")
+        delete_identities = f"oc get identity -oname | grep 'identity.user.openshift.io/{idp_name}:' | xargs oc delete"
+        return_rc, _ = execute_command(
+            delete_identities,
+            return_rc=True,
+        )
+        if return_rc != 0:
+            log.error(f"Failed to delete user identities: {return_rc}")
+            return 1
+        log.info(f">> {idp_name} users identities deleted successfully: {return_rc}")
         return
-
-
 
 @click.group()
 def cli():

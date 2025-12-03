@@ -239,6 +239,9 @@ class OpenIdOps:
         if return_rc != 0:
             log.error(f"Failed to get OpenID identity provider index: {return_rc}")
             return 1
+        if idp_idx_cmd == "null":
+            log.error(f"OpenID identity provider {idp_name} not found")
+            return 1
         idp_removal_array = [
             {"op": "remove","path": f"/spec/identityProviders/{idp_idx.strip()}"}
         ]

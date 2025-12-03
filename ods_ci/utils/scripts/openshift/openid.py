@@ -423,14 +423,13 @@ def add_openid_idp(idp_name: str, client_id: str, client_secret: str, issuer_url
 )
 @click.option(
     "--ocp-secret-name",
-    default=OCP_DEFAULT_SECRET_NAME,
     required=False,
     help="OpenShift secret name required for deleting OpenID identity provider",
 )
 def delete_openid_idp(idp_name: str, ocp_secret_name: str):
     """Delete OpenID identity provider from the cluster"""
     openid_ops = OpenIdOps()
-    exit(openid_ops.remove_openid_identity_provider(idp_name=idp_name))
+    exit(openid_ops.remove_openid_identity_provider(idp_name=idp_name, ocp_secret_name=ocp_secret_name))
 
 if __name__ == "__main__":
     cli()

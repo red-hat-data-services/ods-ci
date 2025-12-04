@@ -94,14 +94,15 @@ Install RHODS
   Log    Start installing RHOAI with:\n\- cluster type: ${cluster_type}\n\- image_url: ${image_url}\n\- update_channel: ${UPDATE_CHANNEL}    console=yes    #robocop:disable
   Log    \- rhoai_version: ${rhoai_version}\n\- is_upgrade: ${is_upgrade}\n\- install_plan_approval: ${install_plan_approval}\n\- CATALOG_SOURCE: ${CATALOG_SOURCE}   console=yes    #robocop:disable
   Assign Vars According To Product
+  ${enable_new_observability_stack} =    Is New Observability Stack Enabled
   IF  "${INSTALL_DEPENDENCIES_TYPE}" == "GitOps"
-    Install RHOAI Dependencies With GitOps Repo    ${GITOPS_REPO_BRANCH}
+    Install RHOAI Dependencies With GitOps Repo    ${GITOPS_REPO_BRANCH}    ${enable_new_observability_stack}
+    Configure Authorino
   ELSE
     Install RHOAI Dependencies With CLI
-  END
-  ${enable_new_observability_stack} =    Is New Observability Stack Enabled
-  IF    ${enable_new_observability_stack}
-          Install Observability Dependencies
+    IF    ${enable_new_observability_stack}
+            Install Observability Dependencies
+    END
   END
   Clone OLM Install Repo
   Configure Custom Namespaces
@@ -927,9 +928,11 @@ Install Custom Metrics Autoscaler Operator Via Cli
 Install RHOAI Dependencies With GitOps Repo
     [Documentation]    Install dependent operators required for RHOAI installation using GitOps
     [Arguments]     ${gitops_repo_branch}=${GITOPS_DEFAULT_REPO_BRANCH}
+    ...             ${enable_new_observability_stack}
     Clone OLM Install Repo
+    ${m_flag}=    Set Variable If    not ${enable_new_observability_stack}    -M    ${EMPTY}
     ${return_code} =    Run And Watch Command
-    ...    cd ${EXECDIR}/${OLM_DIR} && ./setup.sh -t gitops-cli-dependencies -b ${gitops_repo_branch}
+    ...    cd ${EXECDIR}/${OLM_DIR} && ./setup-dependencies.sh -b ${gitops_repo_branch} ${m_flag}
     ...    timeout=20 min
     Should Be Equal As Integers   ${return_code}   0   msg=Error detected installing RHOAI dependencies using GitOps
 

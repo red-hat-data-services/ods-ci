@@ -36,7 +36,7 @@ dependencies = [
     # find ods_ci/tests/Resources/Files/pipeline-samples/v2 \
     #  -path "ods_ci/tests/Resources/Files/pipeline-samples/v2/kfp-sdk-previous" -prune -o \
     #  -type f -name "*.py" -print0 | xargs -0 -I {} python {}
-    "kfp==2.13.0",
+    "kfp==2.15.2",
     "kfp-kubernetes==1.5.0",
     "pyyaml>=6.0.1,<7.0.0",
     "junitparser==3.1.2",

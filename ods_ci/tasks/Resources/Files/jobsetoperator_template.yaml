@@ -1,0 +1,8 @@
+apiVersion: operator.openshift.io/v1
+kind: JobSetOperator
+metadata:
+    name: <jobsetoperator_name>
+    namespace: <jobsetoperator_namespace>
+spec:
+    logLevel: Normal
+    operatorLogLevel: Normal

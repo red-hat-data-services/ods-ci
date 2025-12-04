@@ -216,6 +216,10 @@ Verify RHODS Installation
   ELSE
       IF  "${APPLICATIONS_NAMESPACE}" != "${DEFAULT_APPLICATIONS_NAMESPACE_RHOAI}" and "${APPLICATIONS_NAMESPACE}" != "${DEFAULT_APPLICATIONS_NAMESPACE_ODH}"
           Create DSCI With Custom Namespaces
+      ELSE IF   "${UPDATE_CHANNEL}" != "odh-nightlies" and "${PRODUCT}" == "ODH"
+            # this case is to handle ODH community, which needs to create the DSCI
+            Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
+            Wait For DSCInitialization CustomResource To Be Ready
       END
       Wait Until Keyword Succeeds    6 min    0 sec
       ...    Is Resource Present    DSCInitialization    ${DSCI_NAME}

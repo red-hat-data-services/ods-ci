@@ -40,7 +40,7 @@ class OpenIdOps:
         self.ocp_secret_name = OCP_DEFAULT_SECRET_NAME
 
     def _write_jenkins_properties(self):
-        """Write TOKEN to a properties file for Jenkins to read"""
+        """Write client details to a properties file for Jenkins to read"""
         if self.jenkins_props_file:
             try:
                 with open(self.jenkins_props_file, "w") as f:
@@ -55,6 +55,7 @@ class OpenIdOps:
         return
     
     def _apply_openid_identity_provider(self):
+        """Patches OAuth CR with the new identity provider"""
         template_path = os.path.abspath(os.path.dirname(__file__)) + "/../../../configs/templates/openid.json"
         with open(template_path, "r") as f:
             openid_template = Template(f.read())
@@ -85,6 +86,7 @@ class OpenIdOps:
         return
 
     def register_dynamic_client(self, registration_endpoint: str, token: str, redirect_uris: list[str], client_name: str, contact_emails: list[str], jenkins_props_file: str):
+        """Registers a new dynamic OpenIDclient"""
         self.token = token
         self.jenkins_props_file = jenkins_props_file
         self.registration_endpoint = registration_endpoint
@@ -112,13 +114,14 @@ class OpenIdOps:
         return
     
     def update_redirect_uris(self, operation: Literal["add", "remove"], registration_token: str, update_endpoint: str, client_name: str, redirect_uris: list[str], jenkins_props_file: str):
+        """Updates (add/remove) redirect URIs on a existing dynamic OpenID client"""
         self.jenkins_props_file = jenkins_props_file
         headers = {
             "Authorization": f"Bearer {registration_token}",
         }
         request = requests.get(f"{update_endpoint}", headers=headers)
         if request.status_code != 200:
-            log.error(f"Failed to add redirect URIs to client {client_name}: {request.status_code} {request.text}")
+            log.error(f"Failed to GET current client info for {client_name}: {request.status_code} {request.text}")
             return 1
         current_client_info = request.json()
         current_uris = current_client_info["redirect_uris"]
@@ -157,6 +160,7 @@ class OpenIdOps:
 
 
     def delete_dynamic_client(self, registration_token: str, deletion_endpoint: str, client_name: str):
+        """Deletes a dynamic OpenID client"""
         headers = {
             "Authorization": f"Bearer {registration_token}",
         }
@@ -168,7 +172,7 @@ class OpenIdOps:
         return
 
     def add_openid_identity_provider(self, idp_name: str, client_id: str, client_secret: str, issuer_url: str, ocp_secret_name: str):
-        """Adds OpenID identity provider to the cluster"""
+        """Configure the OpenID identity provider in the cluster"""
         log.info("Adding OpenID identity provider...")
         self.idp_name = idp_name
         self.client_id = client_id
@@ -189,7 +193,7 @@ class OpenIdOps:
         return
 
     def update_openid_identity_provider(self, idp_name: str, client_id: str, client_secret: str, issuer_url: str, ocp_secret_name: str):
-        """Updates OpenID identity provider to the cluster"""
+        """Updates the OpenID identity provider in the cluster, e.g., update the secret if the value has changed"""
         log.info("Updating OpenID identity provider...")
         self.idp_name = idp_name
         self.client_id = client_id

@@ -53,6 +53,7 @@ ${JOBSET_OP_NAME}=  job-set
 ${JOBSET_SUB_NAME}=  job-set
 ${JOBSET_CHANNEL_NAME}=  tech-preview-v0.1
 ${JOBSET_NS}=  openshift-jobset-operator
+${JOBSETOPERATOR_NAME}=  cluster
 ${CERT_MANAGER_OP_NAME}=  openshift-cert-manager-operator
 ${CERT_MANAGER_SUB_NAME}=  openshift-cert-manager-operator
 ${CERT_MANAGER_CHANNEL_NAME}=  stable-v1
@@ -781,6 +782,16 @@ Install Kueue Operator Via Cli
              ...    namespace=${KUEUE_NS}
     END
 
+Create JobSetOperator CR
+    [Documentation]      Deploys JobSetOperator cluster CR for trainer component
+    ${file_path} =    Set Variable    tasks/Resources/Files/
+    Copy File    source=${file_path}jobsetoperator_template.yaml   destination=${file_path}jobsetoperator_apply.yml
+    Run    sed -i'' -e 's/<jobsetoperator_name>/${JOBSETOPERATOR_NAME}/' ${file_path}jobsetoperator_apply.yml
+    Run    sed -i'' -e 's/<jobsetoperator_namespace>/${JOBSET_NS}/' ${file_path}jobsetoperator_apply.yml
+    ${return_code}    ${output} =    Run And Return Rc And Output    oc apply -f ${file_path}jobsetoperator_apply.yml
+    Log To Console    ${output}
+    Should Be Equal As Integers  ${return_code}  0  msg=Error detected while creating JobSetOperator CR
+
 Install JobSet Operator Via Cli
     [Documentation]    Install JobSet Operator Via CLI
     ${is_installed} =   Check If Operator Is Installed Via CLI   ${JOBSET_OP_NAME}
@@ -811,12 +822,8 @@ Install Kueue Dependencies
     Install Kueue Operator Via Cli
 
 Install JobSet Dependencies
-    [Documentation]    Install Dependent Operators For JobSet
-    Set Suite Variable   ${FILES_RESOURCES_DIRPATH}    tests/Resources/Files
-    Set Suite Variable   ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
-    Set Suite Variable   ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
-    Install Cert Manager Operator Via Cli
     Install JobSet Operator Via Cli
+    Create JobSetOperator CR
 
 Install Cluster Observability Operator Via Cli
     [Documentation]    Install Cluster Observability Operator Via CLI
@@ -913,11 +920,10 @@ Install Custom Metrics Autoscaler Operator Via Cli
 
 Install RHOAI Dependencies
     [Documentation]    Install dependent operators required for RHOAI installation
-    Install Cert Manager Operator Via Cli
-    Install Kueue Operator Via Cli
+    Install Kueue Dependencies
     Install Leader Worker Set Operator Via Cli
     Install Connectivity Link Operator Via Cli
-    Install JobSet Operator Via Cli
+    Install JobSet Dependencies
 
 Install Observability Dependencies
     [Documentation]    Install dependent operators related to Observability

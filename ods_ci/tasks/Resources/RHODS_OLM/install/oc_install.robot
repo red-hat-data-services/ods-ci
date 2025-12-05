@@ -97,7 +97,6 @@ Install RHODS
   ${enable_new_observability_stack} =    Is New Observability Stack Enabled
   IF  "${INSTALL_DEPENDENCIES_TYPE}" == "GitOps"
     Install RHOAI Dependencies With GitOps Repo    ${enable_new_observability_stack}    ${GITOPS_REPO_BRANCH}
-    Configure Authorino
   ELSE
     Install RHOAI Dependencies With CLI
     IF    ${enable_new_observability_stack}

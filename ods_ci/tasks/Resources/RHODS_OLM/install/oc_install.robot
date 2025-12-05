@@ -754,6 +754,11 @@ Configure Authorino
         RETURN
     END
 
+    Log To Console    Waiting for Authorino deployment rollout to complete...
+    ${rc}    ${out} =    Run And Return Rc And Output
+    ...    oc rollout status deployment/authorino -n kuadrant-system --timeout=120s
+    Log    ${out}    console=yes
+
     Log To Console    Waiting for Authorino to be ready with SSL...
     Wait For Pods To Be Ready    label_selector=authorino-resource=authorino
     ...    namespace=kuadrant-system    timeout=150s

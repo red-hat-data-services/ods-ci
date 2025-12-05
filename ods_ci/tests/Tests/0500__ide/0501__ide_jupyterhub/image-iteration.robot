@@ -25,7 +25,7 @@ Open RHODS Dashboard
   Wait For RHODS Dashboard To Load
 
 Iterative Testing Classifiers
-  [Tags]  POLARION-ID-Classifiers    Tier1
+  [Tags]  Tier1
   ...     Execution-Time-Over-15m
   &{DICTIONARY} =  Evaluate  ${python_dict}
   FOR  ${sublist}  IN  @{DICTIONARY}[classifiers]
@@ -33,7 +33,7 @@ Iterative Testing Classifiers
   END
 
 Iterative Testing Clustering
-  [Tags]  Tier2  POLARION-ID-Clustering
+  [Tags]  Tier2
   ...     ODS-923  ODS-924
   ...     Execution-Time-Over-15m
   &{DICTIONARY} =  Evaluate  ${python_dict}

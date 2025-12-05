@@ -645,6 +645,30 @@ Install Cert Manager Operator Via Cli
              ...    namespace=${CERT_MANAGER_NS}
     END
 
+Install Kueue Operator Via Cli
+    [Documentation]    Install Kueue Operator Via CLI
+    ${is_installed} =   Check If Operator Is Installed Via CLI   ${KUEUE_OP_NAME}
+    IF    ${is_installed}
+        Log To Console    message=Kueue Operator is already installed
+    ELSE
+        ${rc}    ${out} =    Run And Return Rc And Output    oc create namespace ${KUEUE_NS}
+        Install ISV Operator From OperatorHub Via CLI    operator_name=${KUEUE_OP_NAME}
+             ...    namespace=${KUEUE_NS}
+             ...    subscription_name=${KUEUE_SUB_NAME}
+             ...    catalog_source_name=redhat-operators
+             ...    operator_group_name=${KUEUE_OP_NAME}
+             ...    operator_group_ns=${KUEUE_NS}
+             ...    operator_group_target_ns=${NONE}
+             ...    channel=${KUEUE_CHANNEL_NAME}
+        Wait Until Operator Subscription Last Condition Is
+             ...    type=CatalogSourcesUnhealthy    status=False
+             ...    reason=AllCatalogSourcesHealthy    subscription_name=${KUEUE_SUB_NAME}
+             ...    namespace=${KUEUE_NS}
+             ...    retry=150
+        Wait For Pods To Be Ready    label_selector=name=openshift-kueue-operator
+             ...    namespace=${KUEUE_NS}
+    END
+
 Install KServe Dependencies
     [Documentation]    Install Dependent Operators For KServe
     Set Suite Variable   ${FILES_RESOURCES_DIRPATH}    tests/Resources/Files

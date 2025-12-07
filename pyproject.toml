@@ -19,7 +19,7 @@ dependencies = [
     "selenium==4.13.0",
     "robotframework-jupyterlibrary>=0.5.0,<0.6.0",
     "robotframework-openshift @ git+https://git@github.com/red-hat-data-services/robotframework-openshift.git",
-    "pytest>=7.2.1,<8.0.0",
+    "pytest>=9.0.2,<9.1.0",
     "pytest-logger>=0.5.1,<0.6.0",
     "Pygments>=2.14.0,<3.0.0",
     "requests>=2.28.2,<3.0.0",

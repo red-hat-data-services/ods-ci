@@ -15,6 +15,9 @@ Example of usage
 
 5. Update OpenID identity provider (it assumes you are already logged in to the cluster)
 #python3 ods_ci/utils/scripts/openshift/openid.py update-openid-idp --idp-name openid --client-id <id> --client-secret <secret> --issuer-url https://myAuthServer.com --ocp-secret-name openid-secret
+
+6. Update redirect URIs for a dynamic client
+#python3 ods_ci/utils/scripts/openshift/openid.py update-redirect-uris --operation <add/remove> --registration-token <client-registration-token> --update-endpoint https://myAuthServer.com/updateEndpoint --client-name <client-name> --redirect-uri <redirect-uri1> --redirect-uri <redirect-uri2> --jenkins-props-file <jenkins-props-file>
 """
 
 from typing import Literal

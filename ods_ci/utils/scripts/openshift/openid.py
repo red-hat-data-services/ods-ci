@@ -1,3 +1,22 @@
+
+"""
+Example of usage
+1. Register a new dynamic client
+#python3 ods_ci/utils/scripts/openshift/openid.py register-client --token <IAT> --registration-endpoint https://myAuthServer.com/registrationEndpoint --redirect-uri <redirect-uri1> --redirect-uri <redirect-uri2> --client-name <client-name> --contact-email <contact-email1> --contact-email <contact-email2> --jenkins-props-file <jenkins-props-file>
+
+2. Delete a dynamic client
+#python3 ods_ci/utils/scripts/openshift/openid.py delete-client --registration-token <client-registration-token> --deletion-endpoint https://myAuthServer.com/deletionEndpoint --client-name <client-name>
+
+3. Add OpenID identity provider (it assumes you are already logged in to the cluster)
+#python3 ods_ci/utils/scripts/openshift/openid.py add-openid-idp --idp-name openid --client-id <id> --client-secret <secret> --issuer-url https://myAuthServer.com --ocp-secret-name openid-secret
+
+4. Delete OpenID identity provider (it assumes you are already logged in to the cluster)
+#python3 ods_ci/utils/scripts/openshift/openid.py delete-openid-idp --idp-name openid
+
+5. Update OpenID identity provider (it assumes you are already logged in to the cluster)
+#python3 ods_ci/utils/scripts/openshift/openid.py update-openid-idp --idp-name openid --client-id <id> --client-secret <secret> --issuer-url https://myAuthServer.com --ocp-secret-name openid-secret
+"""
+
 from typing import Literal
 import click
 import base64
@@ -456,20 +475,3 @@ def delete_openid_idp(idp_name: str, ocp_secret_name: str):
 
 if __name__ == "__main__":
     cli()
-
-### Example of usage
-
-# register a new dynamic client
-#python3 ods_ci/utils/scripts/openshift/openid.py register-client --token <IAT> --registration-endpoint https://myAuthServer.com/registrationEndpoint --redirect-uri <redirect-uri1> --redirect-uri <redirect-uri2> --client-name <client-name> --contact-email <contact-email1> --contact-email <contact-email2> --jenkins-props-file <jenkins-props-file>
-
-# delete a dynamic client
-#python3 ods_ci/utils/scripts/openshift/openid.py delete-client --registration-token <client-registration-token> --deletion-endpoint https://myAuthServer.com/deletionEndpoint --client-name <client-name>
-
-# Add OpenID identity provider (it assumes you are already logged in to the cluster)
-#python3 ods_ci/utils/scripts/openshift/openid.py add-openid-idp --idp-name openid --client-id <id> --client-secret <secret> --issuer-url https://myAuthServer.com --ocp-secret-name openid-secret
-
-# delete OpenID identity provider (it assumes you are already logged in to the cluster)
-#python3 ods_ci/utils/scripts/openshift/openid.py delete-openid-idp --idp-name openid
-
-# update OpenID identity provider (it assumes you are already logged in to the cluster)
-#python3 ods_ci/utils/scripts/openshift/openid.py update-openid-idp --idp-name openid --client-id <id> --client-secret <secret> --issuer-url https://myAuthServer.com --ocp-secret-name openid-secret

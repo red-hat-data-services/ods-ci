@@ -108,6 +108,7 @@ def execute_command(
             return None, None
         return None
 
+
 def oc_login(ocp_api_url="", username="", password="", kubeconfig_path="", timeout=600):
     """
     Login to test cluster using oc cli command:

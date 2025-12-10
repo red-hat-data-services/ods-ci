@@ -185,7 +185,7 @@ function applyWorkaroundForUncertifiedOCPVersions () {
   IFS='.' read -ra ocpVersionSplit <<< "$ocpVersion"
   if [[ "${ocpVersionSplit[1]}" -lt 16 ||  "${ocpVersionSplit[1]}" -gt 20 ]]; then
     echo "OCP Version: $ocpVersion"
-    echo "AMD Operator is not available for versions < 4.16 or > 4.18, hence creating custom catalog source as workaround"
+    echo "AMD Operator is not available for versions < 4.16 or > 4.20, hence creating custom catalog source as workaround"
     oc apply -f - <<EOF
 apiVersion: operators.coreos.com/v1alpha1
 kind: CatalogSource

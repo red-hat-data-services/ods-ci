@@ -98,7 +98,8 @@ Install RHODS
   Assign Vars According To Product
   ${enable_new_observability_stack} =    Is New Observability Stack Enabled
   IF  "${INSTALL_DEPENDENCIES_TYPE}" == "GitOps"
-    Install RHOAI Dependencies With GitOps Repo    ${enable_new_observability_stack}    ${GITOPS_REPO_BRANCH}    ${GITOPS_REPO_URL}
+    Install RHOAI Dependencies With GitOps Repo    ${enable_new_observability_stack}
+    ...    ${GITOPS_REPO_BRANCH}    ${GITOPS_REPO_URL}
   ELSE
     Install RHOAI Dependencies With CLI
     IF    ${enable_new_observability_stack}
@@ -935,7 +936,8 @@ Install Custom Metrics Autoscaler Operator Via Cli
 
 Install RHOAI Dependencies With GitOps Repo
     [Documentation]    Install dependent operators required for RHOAI installation using GitOps
-    [Arguments]     ${enable_new_observability_stack}    ${gitops_repo_branch}=${GITOPS_DEFAULT_REPO_BRANCH}
+    [Arguments]     ${enable_new_observability_stack}
+    ...    ${gitops_repo_branch}=${GITOPS_DEFAULT_REPO_BRANCH}
     ...    ${gitops_repo}=${GITOPS_DEFAULT_REPO}
     Clone OLM Install Repo
     ${m_flag} =    Set Variable If    not ${enable_new_observability_stack}    -M    ${EMPTY}

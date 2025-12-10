@@ -86,6 +86,7 @@ ${OLM_DIR}=                     rhodsolm
 ${install_plan_approval}=       Manual
 ${INSTALL_DEPENDENCIES_TYPE}=    Cli
 ${GITOPS_DEFAULT_REPO_BRANCH}=    main
+${GITOPS_DEFAULT_REPO}=    ${EMPTY}
 ${RHODS_OSD_INSTALL_FORK_REPO}=    https://gitlab.cee.redhat.com/dbianchi/olminstall
 
 *** Keywords ***
@@ -97,7 +98,7 @@ Install RHODS
   Assign Vars According To Product
   ${enable_new_observability_stack} =    Is New Observability Stack Enabled
   IF  "${INSTALL_DEPENDENCIES_TYPE}" == "GitOps"
-    Install RHOAI Dependencies With GitOps Repo    ${enable_new_observability_stack}    ${GITOPS_REPO_BRANCH}
+    Install RHOAI Dependencies With GitOps Repo    ${enable_new_observability_stack}    ${GITOPS_REPO_BRANCH}    ${GITOPS_REPO_URL}
   ELSE
     Install RHOAI Dependencies With CLI
     IF    ${enable_new_observability_stack}
@@ -935,10 +936,12 @@ Install Custom Metrics Autoscaler Operator Via Cli
 Install RHOAI Dependencies With GitOps Repo
     [Documentation]    Install dependent operators required for RHOAI installation using GitOps
     [Arguments]     ${enable_new_observability_stack}    ${gitops_repo_branch}=${GITOPS_DEFAULT_REPO_BRANCH}
+    ...    ${gitops_repo}=${GITOPS_DEFAULT_REPO}
     Clone OLM Install Repo
     ${m_flag} =    Set Variable If    not ${enable_new_observability_stack}    -M    ${EMPTY}
+    ${r_flag} =    Set Variable If    "${gitops_repo}" != "${EMPTY}"    -r ${gitops_repo}    ${EMPTY}
     ${return_code} =    Run And Watch Command
-    ...    cd ${EXECDIR}/${OLM_DIR} && ./setup-dependencies.sh -b ${gitops_repo_branch} ${m_flag}
+    ...    cd ${EXECDIR}/${OLM_DIR} && ./setup-dependencies.sh -b ${gitops_repo_branch} ${m_flag} ${r_flag}
     ...    timeout=20 min
     Should Be Equal As Integers   ${return_code}   0   msg=Error detected installing RHOAI dependencies using GitOps
 

@@ -177,7 +177,7 @@ EOF
 }
 
 function applyWorkaroundForUncertifiedOCPVersions () {
-  # workaround for OCP versions less than 4.16 and greater than 4.18
+  # workaround for OCP versions less than 4.16 and greater than 4.20
   # AMD certified operator is published starting from OCP v4.16
   # certification can be checked here
   # https://github.com/redhat-openshift-ecosystem/certified-operators/blob/main/operators/amd-gpu-operator/v1.2.1/metadata/annotations.yaml
@@ -190,17 +190,17 @@ function applyWorkaroundForUncertifiedOCPVersions () {
 apiVersion: operators.coreos.com/v1alpha1
 kind: CatalogSource
 metadata:
-  name: certified-operators-416-amd
+  name: certified-operators-419-amd
   namespace: openshift-marketplace
 spec:
-  displayName: Certfied operator
-  image: 'registry.redhat.io/redhat/certified-operator-index:v4.16'
+  displayName: ODS-CI Certfied Operators
+  image: 'registry.redhat.io/redhat/certified-operator-index:v4.19'
   publisher: RHOAI QE
   sourceType: grpc
 EOF
     sleep 15s
-    oc wait --timeout="150s" --for=condition=ready=true pod -n openshift-marketplace -l olm.catalogSource=certified-operators-416-amd
-    sed -i'' -e "s/certified-operators/certified-operators-416-amd/g" "$GPU_INSTALL_DIR/amd_gpu_install.yaml"
+    oc wait --timeout="150s" --for=condition=ready=true pod -n openshift-marketplace -l olm.catalogSource=certified-operators-419-amd
+    sed -i'' -e "s/certified-operators/certified-operators-419-amd/g" "$GPU_INSTALL_DIR/amd_gpu_install.yaml"
   fi
 }
 

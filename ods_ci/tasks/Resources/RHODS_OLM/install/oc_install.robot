@@ -84,6 +84,8 @@ ${RHODS_OSD_INSTALL_REPO}=      ${EMPTY}
 ${OLM_DIR}=                     rhodsolm
 @{SUPPORTED_TEST_ENV}=          AWS   AWS_DIS   GCP   GCP_DIS   PSI   PSI_DIS   ROSA   IBM_CLOUD   CRC    AZURE	ROSA_HCP
 ${install_plan_approval}=       Manual
+${INSTALL_DEPENDENCIES_TYPE}=    Cli
+${GITOPS_DEFAULT_REPO_BRANCH}=    main
 
 *** Keywords ***
 Install RHODS
@@ -92,10 +94,14 @@ Install RHODS
   Log    Start installing RHOAI with:\n\- cluster type: ${cluster_type}\n\- image_url: ${image_url}\n\- update_channel: ${UPDATE_CHANNEL}    console=yes    #robocop:disable
   Log    \- rhoai_version: ${rhoai_version}\n\- is_upgrade: ${is_upgrade}\n\- install_plan_approval: ${install_plan_approval}\n\- CATALOG_SOURCE: ${CATALOG_SOURCE}   console=yes    #robocop:disable
   Assign Vars According To Product
-  Install RHOAI Dependencies
   ${enable_new_observability_stack} =    Is New Observability Stack Enabled
-  IF    ${enable_new_observability_stack}
-          Install Observability Dependencies
+  IF  "${INSTALL_DEPENDENCIES_TYPE}" == "GitOps"
+    Install RHOAI Dependencies With GitOps Repo    ${enable_new_observability_stack}    ${GITOPS_REPO_BRANCH}
+  ELSE
+    Install RHOAI Dependencies With CLI
+    IF    ${enable_new_observability_stack}
+            Install Observability Dependencies
+    END
   END
   Clone OLM Install Repo
   Configure Custom Namespaces
@@ -925,8 +931,18 @@ Install Custom Metrics Autoscaler Operator Via Cli
         Log To Console    message=Custom Metrics Autoscaler Operator (KEDA) is already installed
     END
 
-Install RHOAI Dependencies
-    [Documentation]    Install dependent operators required for RHOAI installation
+Install RHOAI Dependencies With GitOps Repo
+    [Documentation]    Install dependent operators required for RHOAI installation using GitOps
+    [Arguments]     ${enable_new_observability_stack}    ${gitops_repo_branch}=${GITOPS_DEFAULT_REPO_BRANCH}
+    Clone OLM Install Repo
+    ${m_flag} =    Set Variable If    not ${enable_new_observability_stack}    -M    ${EMPTY}
+    ${return_code} =    Run And Watch Command
+    ...    cd ${EXECDIR}/${OLM_DIR} && ./setup-dependencies.sh -b ${gitops_repo_branch} ${m_flag}
+    ...    timeout=20 min
+    Should Be Equal As Integers   ${return_code}   0   msg=Error detected installing RHOAI dependencies using GitOps
+
+Install RHOAI Dependencies With CLI
+    [Documentation]    Install dependent operators required for RHOAI installation using CLI
     Install Kueue Dependencies
     Install Leader Worker Set Operator Via Cli
     Install Connectivity Link Operator Via Cli

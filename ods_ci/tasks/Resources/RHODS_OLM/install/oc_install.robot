@@ -86,6 +86,7 @@ ${OLM_DIR}=                     rhodsolm
 ${install_plan_approval}=       Manual
 ${INSTALL_DEPENDENCIES_TYPE}=    Cli
 ${GITOPS_DEFAULT_REPO_BRANCH}=    main
+${RHODS_OSD_INSTALL_FORK_REPO}=    https://gitlab.cee.redhat.com/dbianchi/olminstall
 
 *** Keywords ***
 Install RHODS
@@ -363,10 +364,10 @@ Clone OLM Install Repo
   IF    ${status}
       Log    "The directory ${EXECDIR}/${OLM_DIR} already exist, skipping clone of the repo."    console=yes
   ELSE
-      ${return_code}    ${output} =    Run And Return Rc And Output    git clone ${RHODS_OSD_INSTALL_REPO} ${EXECDIR}/${OLM_DIR}    #robocop:disable
+      ${return_code}    ${output} =    Run And Return Rc And Output    git clone ${RHODS_OSD_INSTALL_FORK_REPO} ${EXECDIR}/${OLM_DIR}    #robocop:disable
       Log    ${output}    console=yes
       Should Be Equal As Integers   ${return_code}   0
-      ${return_code}    ${output} =    Run And Return Rc And Output    cd ${EXECDIR}/${OLM_DIR} && git checkout main    #robocop:disable
+      ${return_code}    ${output} =    Run And Return Rc And Output    cd ${EXECDIR}/${OLM_DIR} && git checkout feat/add-setup-dependencies-script    #robocop:disable
       Log    ${output}    console=yes
       Should Be Equal As Integers   ${return_code}   0
   END

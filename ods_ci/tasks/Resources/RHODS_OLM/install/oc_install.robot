@@ -760,6 +760,8 @@ Configure Authorino
     Log    ${out}    console=yes
 
     Log To Console    Waiting for Authorino to be ready with SSL...
+    # workaround for https://github.com/kubernetes/kubectl/issues/1120 (old authorino pod is still terminating when we run oc wait)
+    Sleep  15s
     Wait For Pods To Be Ready    label_selector=authorino-resource=authorino
     ...    namespace=kuadrant-system    timeout=150s
 

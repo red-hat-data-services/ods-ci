@@ -9,7 +9,7 @@ memory_shared_quota=$6
 
 echo "Applying Cluster Queue"
 
-cat <<EOF | kubectl apply --server-side -f -
+cat <<EOF | kubectl apply --server-side --force-conflicts -f -
     apiVersion: kueue.x-k8s.io/v1beta1
     kind: ClusterQueue
     metadata:
@@ -31,7 +31,7 @@ EOF
 echo "Cluster Queue $name applied!"
 
 echo "Applying Resource flavor"
-cat <<EOF | kubectl apply --server-side -f -
+cat <<EOF | kubectl apply --server-side --force-conflicts -f -
     apiVersion: kueue.x-k8s.io/v1beta1
     kind: ResourceFlavor
     metadata:
@@ -41,7 +41,7 @@ echo "Resource flavor $flavor applied!"
 
 echo "Applying local queue"
 
-cat <<EOF | kubectl apply --server-side -f -
+cat <<EOF | kubectl apply --server-side --force-conflicts -f -
     apiVersion: kueue.x-k8s.io/v1beta1
     kind: LocalQueue
     metadata:

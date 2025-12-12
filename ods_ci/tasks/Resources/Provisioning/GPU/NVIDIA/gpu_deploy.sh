@@ -29,7 +29,7 @@ oc wait --timeout=3m --for jsonpath='{.status.components.labelSelector.matchExpr
 function wait_until_pod_ready_status() {
   local pod_label=$1
   local namespace=nvidia-gpu-operator
-  local timeout=${2:-360}
+  local timeout=${2:-600}
   start_time=$(date +%s)
   while [ $(($(date +%s) - start_time)) -lt $timeout ]; do
      pod_status="$(oc get pod -l app="$pod_label" -n "$namespace" --no-headers=true 2>/dev/null)"
@@ -50,6 +50,71 @@ function wait_until_pod_ready_status() {
   done
 }
 
+function create_gpu_profile() {
+  echo "Creating NVIDIA GPU Profile for OpenDataHub/RHOAI"
+
+  # Check if RHOAI namespace exists
+  if ! oc get namespace redhat-ods-applications &>/dev/null; then
+    echo "redhat-ods-applications namespace not found. Is RHOAI installed? Profile creation SKIPPED."
+    return 0
+  fi
+
+  # Check for RHOAI 3.0 (HardwareProfile CRD exists)
+  if oc get crd hardwareprofiles.infrastructure.opendatahub.io &>/dev/null; then
+    echo "RHOAI 3.0 detected - Creating NVIDIA HardwareProfile"
+
+    # Create HardwareProfile
+    oc apply -f - <<EOF
+apiVersion: infrastructure.opendatahub.io/v1
+kind: HardwareProfile
+metadata:
+  name: nvidia-gpu-profile
+  namespace: redhat-ods-applications
+spec:
+  displayName: NVIDIA GPU
+  description: NVIDIA GPU hardware profile for AI/ML workloads
+  enabled: true
+  identifiers:
+    - identifier: "cpu"
+      displayName: "CPU"
+      defaultCount: 2
+      minCount: 1
+      maxCount: 4
+      resourceType: "CPU"
+    - identifier: "memory"
+      displayName: "Memory"
+      defaultCount: "4Gi"
+      minCount: "2Gi"
+      maxCount: "8Gi"
+      resourceType: "Memory"
+  tolerations:
+    - effect: NoSchedule
+      key: nvidia.com/gpu
+      operator: Exists
+EOF
+
+    if [[ $? -eq 0 ]]; then
+      echo "✅ Successfully created NVIDIA HardwareProfile"
+      oc get hardwareprofile nvidia-gpu-profile -n redhat-ods-applications
+    else
+      echo "❌ Failed to create NVIDIA HardwareProfile"
+    fi
+
+  # RHOAI 2.x - Use migration approach
+  elif oc get crd acceleratorprofiles.dashboard.opendatahub.io &>/dev/null; then
+    echo "RHOAI 2.x detected - Running accelerator migration process"
+    rerun_accelerator_migration
+
+  else
+    echo "❌ Neither HardwareProfile nor AcceleratorProfile CRD found"
+    echo "This could indicate:"
+    echo "  - RHOAI/OpenDataHub 1.x (no profile support)"
+    echo "  - Incomplete installation"
+    echo "  - Custom deployment"
+    echo "Profile creation SKIPPED - NVIDIA GPU functionality is not affected"
+  fi
+}
+
 function rerun_accelerator_migration() {
   # As we are adding the GPUs after installing the RHODS operator, those GPUs are not discovered automatically.
   # In order to rerun the migration we need to
@@ -60,7 +125,7 @@ function rerun_accelerator_migration() {
   configmap=$(oc get configmap migration-gpu-status --ignore-not-found -n redhat-ods-applications -oname)
   if [ -z $configmap ];
     then
-      echo "migration-gpu-status not found. Is RHOAI Installed? NVIDIA Accelerator Profile creation SKIPPED."
+      echo "migration-gpu-status not found. Is RHOAI 2.x Installed? NVIDIA Accelerator Profile creation SKIPPED."
       return 0
   fi
   echo "Deleting configmap migration-gpu-status"
@@ -117,4 +182,4 @@ wait_until_pod_ready_status "nvidia-container-toolkit-daemonset"
 wait_until_pod_ready_status "nvidia-dcgm-exporter"
 wait_until_pod_ready_status "gpu-feature-discovery"
 wait_until_pod_ready_status "nvidia-operator-validator"
-rerun_accelerator_migration
+create_gpu_profile

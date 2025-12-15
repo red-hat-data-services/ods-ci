@@ -220,33 +220,6 @@ class OpenIdOps:
 
         self._apply_openid_identity_provider()
         return
-
-    def update_openid_identity_provider(self, idp_name: str, client_id: str, client_secret: str, issuer_url: str, ocp_secret_name: str):
-        """Updates the OpenID identity provider in the cluster, e.g., update the secret if the value has changed"""
-        log.info("Updating OpenID identity provider...")
-        self.idp_name = idp_name
-        self.client_id = client_id
-        self.client_secret = client_secret
-        self.issuer_url = issuer_url
-        if ocp_secret_name:
-            self.ocp_secret_name = ocp_secret_name
-        client_secret_encoded = base64.b64encode(client_secret.encode("ascii")).decode('ascii')
-        secret_data = f"""{{
-            "data": {{
-                "client-secret": "{client_secret_encoded}"
-            }}
-        }}"""
-        cmd = f"""oc patch secret {ocp_secret_name} -p '{secret_data}' -n openshift-config"""
-        return_rc, _ = execute_command(
-            cmd,
-            return_rc=True,
-        )
-        if return_rc != 0:
-            log.error(f"Failed to update client secret: {return_rc}")
-            return 1
-        self._apply_openid_identity_provider()
-        log.info(f"OpenID identity provider updated successfully: {return_rc}")
-        return
     
     def remove_openid_identity_provider(self, idp_name: str, ocp_secret_name: str):
         """Removes OpenID identity provider from the cluster"""

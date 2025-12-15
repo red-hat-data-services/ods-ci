@@ -17,12 +17,7 @@ export CLIENT_SECRET=<CLIENT_SECRET>
 4. Delete OpenID identity provider (it assumes you are already logged in to the cluster)
 #python3 ods_ci/utils/scripts/openshift/openid.py delete-openid-idp --idp-name openid
 
-5. Update OpenID identity provider (it assumes you are already logged in to the cluster)
-export CLIENT_ID=<CLIENT_ID>
-export CLIENT_SECRET=<CLIENT_SECRET>
-#python3 ods_ci/utils/scripts/openshift/openid.py update-openid-idp --idp-name openid --issuer-url https://myAuthServer.com --ocp-secret-name openid-secret
-
-6. Update redirect URIs for a dynamic client
+5. Update redirect URIs for a dynamic client
 export CLIENT_REGISTRATION_TOKEN=<CLIENT_REGISTRATION_TOKEN>
 #python3 ods_ci/utils/scripts/openshift/openid.py update-redirect-uris --operation <add/remove> --update-endpoint https://myAuthServer.com/updateEndpoint --client-name <client-name> --redirect-uri <redirect-uri1> --redirect-uri <redirect-uri2> --jenkins-props-file <jenkins-props-file>
 """
@@ -85,7 +80,7 @@ class OpenIdOps:
     
     def _apply_openid_identity_provider(self):
         """Patches OAuth CR with the new identity provider"""
-        template_path = os.path.abspath(os.path.dirname(__file__)) + "/../../../configs/templates/openid.json"
+        template_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../configs/templates/openid.json"))
         with open(template_path, "r") as f:
             openid_template = Template(f.read())
         openid_json = openid_template.substitute(

@@ -177,6 +177,12 @@ spec:
       minCount: "2Gi"
       maxCount: "8Gi"
       resourceType: "Memory"
+    - identifier: amd.com/gpu
+      displayName: AMD GPU
+      resourceType: Accelerator
+      defaultCount: 1
+      minCount: 1
+      maxCount: 8
   tolerations:
     - effect: NoSchedule
       key: amd.com/gpu

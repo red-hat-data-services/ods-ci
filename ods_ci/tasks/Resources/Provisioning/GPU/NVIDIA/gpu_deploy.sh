@@ -87,6 +87,12 @@ spec:
       minCount: "2Gi"
       maxCount: "8Gi"
       resourceType: "Memory"
+    - identifier: nvidia.com/gpu
+      displayName: NVIDIA GPU
+      resourceType: Accelerator
+      defaultCount: 1
+      minCount: 1
+      maxCount: 8
   tolerations:
     - effect: NoSchedule
       key: nvidia.com/gpu

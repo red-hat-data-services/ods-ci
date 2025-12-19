@@ -333,6 +333,14 @@ Setup RBAC for codeflare-sdk
     IF    ${result.rc} != 0
         FAIL    Unable to apply kueue-batch-user-specific-rolebinding ClusterRoleBinding
     END
+    Log To Console    "Applying kueue-batch-notebook-user-specific-rolebinding ClusterRoleBinding"
+    ${result} =    Run Process    oc apply -f tests/Resources/Files/kueue-batch-notebook-user-specific-rolebinding.yaml
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Unable to apply kueue-batch-notebook-user-specific-rolebinding ClusterRoleBinding
+    END
     Log To Console    "Applying codeflare-sdk-rbac-permissions"
     ${result} =    Run Process    oc apply -f tests/Resources/Files/codeflare-sdk-rbac-permissions.yaml
     ...    shell=true
@@ -361,6 +369,14 @@ Teardown RBAC for codeflare-sdk
     Log To Console    ${result.stdout}
     IF    ${result.rc} != 0
         Log To Console    "Warning: Unable to delete kueue-batch-user-specific-rolebinding ClusterRoleBinding (may not exist)"
+    END
+    Log To Console    "Removing kueue-batch-notebook-user-specific-rolebinding ClusterRoleBinding"
+    ${result} =    Run Process    oc delete -f tests/Resources/Files/kueue-batch-notebook-user-specific-rolebinding.yaml
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        Log To Console    "Warning: Unable to delete kueue-batch-notebook-user-specific-rolebinding ClusterRoleBinding (may not exist)"
     END
     Log To Console    "Removing kueue-batch-user-role ClusterRole"
     ${result} =    Run Process    oc delete -f tests/Resources/Files/kueue-batch-user-role.yaml

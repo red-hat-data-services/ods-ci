@@ -7,6 +7,7 @@ spec:
   instance: "" # instance is empty by default
   topologyupdater: false # False by default
   operand:
+    image: <imageUrl>
     imagePullPolicy: Always
   workerConfig:
     configData: |

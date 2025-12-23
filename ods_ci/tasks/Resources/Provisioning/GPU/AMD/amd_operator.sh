@@ -177,30 +177,30 @@ EOF
 }
 
 function applyWorkaroundForUncertifiedOCPVersions () {
-  # workaround for OCP versions less than 4.16 and greater than 4.18
+  # workaround for OCP versions less than 4.16 and greater than 4.20
   # AMD certified operator is published starting from OCP v4.16
   # certification can be checked here
   # https://github.com/redhat-openshift-ecosystem/certified-operators/blob/main/operators/amd-gpu-operator/v1.2.1/metadata/annotations.yaml
   ocpVersion=$(oc version --output json | jq '.openshiftVersion' | tr -d '"')
   IFS='.' read -ra ocpVersionSplit <<< "$ocpVersion"
-  if [[ "${ocpVersionSplit[1]}" -lt 16 ||  "${ocpVersionSplit[1]}" -gt 18 ]]; then
+  if [[ "${ocpVersionSplit[1]}" -lt 16 ||  "${ocpVersionSplit[1]}" -gt 20 ]]; then
     echo "OCP Version: $ocpVersion"
-    echo "AMD Operator is not available for versions < 4.16 or > 4.18, hence creating custom catalog source as workaround"
+    echo "AMD Operator is not available for versions < 4.16 or > 4.20, hence creating custom catalog source as workaround"
     oc apply -f - <<EOF
 apiVersion: operators.coreos.com/v1alpha1
 kind: CatalogSource
 metadata:
-  name: certified-operators-416-amd
+  name: certified-operators-419-amd
   namespace: openshift-marketplace
 spec:
-  displayName: Certfied operator
-  image: 'registry.redhat.io/redhat/certified-operator-index:v4.16'
+  displayName: ODS-CI Certfied Operators
+  image: 'registry.redhat.io/redhat/certified-operator-index:v4.19'
   publisher: RHOAI QE
   sourceType: grpc
 EOF
-    sleep 10s
-    oc wait --timeout="120s" --for=condition=ready=true pod -n openshift-marketplace -l olm.catalogSource=certified-operators-416-amd
-    sed -i'' -e "s/certified-operators/certified-operators-416-amd/g" "$GPU_INSTALL_DIR/amd_gpu_install.yaml"
+    sleep 15s
+    oc wait --timeout="150s" --for=condition=ready=true pod -n openshift-marketplace -l olm.catalogSource=certified-operators-419-amd
+    sed -i'' -e "s/certified-operators/certified-operators-419-amd/g" "$GPU_INSTALL_DIR/amd_gpu_install.yaml"
   fi
 }
 

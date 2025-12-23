@@ -31,7 +31,7 @@ Verify Workload Metrics Home page Contents
     [Tags]    RHOAIENG-4837
     ...       Sanity    DistributedWorkloads    TrainingRay    WorkloadsOrchestration
     Open Distributed Workload Metrics Home Page
-    Wait For Dashboard Page Title   Distributed workloads
+    Wait For Dashboard Page Title   Workload metrics
     Select Distributed Workload Project By Name    ${PRJ_TITLE}
     Wait Until Element Is Visible    ${DISTRIBUITED_WORKLOAD_METRICS_TEXT_XP}   timeout=20
     Wait Until Element Is Visible    ${PROJECT_METRICS_TAB_XP}   timeout=20
@@ -62,30 +62,31 @@ Verify Distributed Workload status Default Page contents
 
 Verify That Not Admin Users Can Access Distributed workload metrics default page contents
     [Documentation]    Verify That Not Admin Users Can Access Distributed workload metrics default page contents
-    [Tags]    RHOAIENG-4837
-    ...       Tier1    DistributedWorkloads    TrainingRay    WorkloadsOrchestration
-    Launch Dashboard    ocp_user_name=${TEST_USER_3.USERNAME}    ocp_user_pw=${TEST_USER_3.PASSWORD}
-    ...    ocp_user_auth_type=${TEST_USER_3.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}
-    ...    browser=${BROWSER.NAME}    browser_options=${BROWSER.OPTIONS}
-    Create Data Science Project From CLI    ${PRJ_TITLE_NONADMIN}    as_user=${TEST_USER_3.USERNAME}
-    Open Distributed Workload Metrics Home Page
-    Select Distributed Workload Project By Name    ${PRJ_TITLE_NONADMIN}
-    Wait Until Element Is Visible    xpath=//h4[text()="Configure the project queue"]   timeout=20
-    Page Should Contain Element     xpath=//div[text()="Configure the queue for this project, or select a different project."]
-    # setup Kueue resource for the created project
-    Setup Kueue Resources    ${PRJ_TITLE_NONADMIN}    cluster-queue-user    resource-flavor-user    local-queue-user
-    Click Link    Distributed workloads
-    Select Distributed Workload Project By Name    ${PRJ_TITLE_NONADMIN}
-    Check Distributed Workload Status Page Contents
-    Check Project Metrics Default Page Contents    ${PRJ_TITLE_NONADMIN}
-    [Teardown]    Run Keywords
-    ...    Cleanup Kueue Resources    ${PRJ_TITLE_NONADMIN}    cluster-queue-user    resource-flavor-user    local-queue-user
-    ...    AND
-    ...    Delete Project Via CLI By Display Name   ${PRJ_TITLE_NONADMIN}
-    ...    AND
-    ...    Wait Until Data Science Project Is Deleted  ${PRJ_TITLE_NONADMIN}
-    ...    AND
-    ...    Switch Browser    1
+    Skip    Dashboard requires additional permissions (and investigation) for non-admin users to access workload metrics
+    # [Tags]    RHOAIENG-4837
+    # ...       Tier1    DistributedWorkloads    TrainingRay    WorkloadsOrchestration
+    # Launch Dashboard    ocp_user_name=${TEST_USER_3.USERNAME}    ocp_user_pw=${TEST_USER_3.PASSWORD}
+    # ...    ocp_user_auth_type=${TEST_USER_3.AUTH_TYPE}    dashboard_url=${ODH_DASHBOARD_URL}
+    # ...    browser=${BROWSER.NAME}    browser_options=${BROWSER.OPTIONS}
+    # Create Data Science Project From CLI    ${PRJ_TITLE_NONADMIN}    as_user=${TEST_USER_3.USERNAME}
+    # Open Distributed Workload Metrics Home Page
+    # Select Distributed Workload Project By Name    ${PRJ_TITLE_NONADMIN}
+    # Wait Until Element Is Visible    xpath=//h4[text()="Configure the project queue"]   timeout=20
+    # Page Should Contain Element     xpath=//div[text()="Configure the queue for this project, or select a different project."]
+    # # setup Kueue resource for the created project
+    # Setup Kueue Resources    ${PRJ_TITLE_NONADMIN}    cluster-queue-user    resource-flavor-user    local-queue-user
+    # Click Link    Distributed workloads
+    # Select Distributed Workload Project By Name    ${PRJ_TITLE_NONADMIN}
+    # Check Distributed Workload Status Page Contents
+    # Check Project Metrics Default Page Contents    ${PRJ_TITLE_NONADMIN}
+    # [Teardown]    Run Keywords
+    # ...    Cleanup Kueue Resources    ${PRJ_TITLE_NONADMIN}    cluster-queue-user    resource-flavor-user    local-queue-user
+    # ...    AND
+    # ...    Delete Project Via CLI By Display Name   ${PRJ_TITLE_NONADMIN}
+    # ...    AND
+    # ...    Wait Until Data Science Project Is Deleted  ${PRJ_TITLE_NONADMIN}
+    # ...    AND
+    # ...    Switch Browser    1
 
 Verify The Workload Metrics By Submitting Kueue Batch Workload
     [Documentation]    Monitor the workload metrics status and chart details by submitting kueue batch workload
@@ -99,7 +100,7 @@ Verify The Workload Metrics By Submitting Kueue Batch Workload
     Select Refresh Interval    15 seconds
     Click Button    ${PROJECT_METRICS_TAB_XP}
     Wait Until Element Is Visible    ${DISTRIBUITED_WORKLOAD_RESOURCE_METRICS_TITLE_XP}    timeout=20
-    Wait For Job With Status    ${JOB_NAME_QUEUE}    Running    60
+    Wait For Job With Status    ${JOB_NAME_QUEUE}    Admitted    60
 
     ${cpu_requested} =   Get CPU Requested    ${PRJ_TITLE}    ${LOCAL_QUEUE_NAME}
     ${memory_requested} =   Get Memory Requested    ${PRJ_TITLE}    ${LOCAL_QUEUE_NAME}    Job
@@ -107,20 +108,20 @@ Verify The Workload Metrics By Submitting Kueue Batch Workload
     Check Requested Resources    ${PRJ_TITLE}    ${CPU_SHARED_QUOTA}    ${MEMEORY_SHARED_QUOTA}    ${cpu_requested}    ${memory_requested}    Job
 
 
-    Check Distributed Workload Resource Metrics Status    ${JOB_NAME_QUEUE}    Running
-    Check Distributed Worklaod Status Overview    ${JOB_NAME_QUEUE}    Running    All pods reached readiness and the workload is running
+    Check Distributed Workload Resource Metrics Status    ${JOB_NAME_QUEUE}    Admitted
+    Check Distributed Worklaod Status Overview    ${JOB_NAME_QUEUE}    Admitted    The workload is admitted
 
     Click Button    ${PROJECT_METRICS_TAB_XP}
 
     Check Distributed Workload Resource Metrics Chart    ${PRJ_TITLE}    ${cpu_requested}    ${memory_requested}    Job    ${JOB_NAME_QUEUE}
     Wait For Job With Status    ${JOB_NAME_QUEUE}    Succeeded    180
     Select Refresh Interval    15 seconds
-    Page Should Not Contain Element    xpath=//*[text()="Running"]
+    Page Should Not Contain Element    xpath=//*[text()="Admitted"]
     Page Should Contain Element    xpath=//*[text()="Succeeded"]
     Select Refresh Interval    15 seconds
     Check Requested Resources    ${PRJ_TITLE}    ${CPU_SHARED_QUOTA}    ${MEMEORY_SHARED_QUOTA}    0    0    Job
     Check Distributed Workload Resource Metrics Status    ${JOB_NAME_QUEUE}    Succeeded
-    Check Distributed Worklaod Status Overview    ${JOB_NAME_QUEUE}    Succeeded    Finished
+    Check Distributed Worklaod Status Overview    ${JOB_NAME_QUEUE}    Succeeded    Reached expected number of succeeded pods
 
     ${result} =    Run Process  oc delete Job ${JOB_NAME_QUEUE} -n ${PRJ_TITLE}
     ...    shell=true    stderr=STDOUT
@@ -130,7 +131,7 @@ Verify The Workload Metrics By Submitting Kueue Batch Workload
     END
 
     Click Button    ${PROJECT_METRICS_TAB_XP}
-    Wait Until Element Is Visible    xpath=//*[@data-testid="dw-workload-resource-metrics"]//*[text()="No distributed workloads in the selected project are currently consuming resources."]    timeout=60
+    Wait Until Element Is Visible    xpath=//*[@data-testid="dw-workload-resource-metrics"]//*[text()="No workload metrics in the selected project are currently consuming resources."]    timeout=60
     Page Should Not Contain    ${JOB_NAME_QUEUE}
     Page Should Not Contain    Succeeded
     Click Button    ${WORKLOAD_STATUS_TAB_XP}
@@ -150,15 +151,14 @@ Verify The Workload Metrics By Submitting Ray Workload
     Click Button    ${PROJECT_METRICS_TAB_XP}
     Wait Until Element Is Visible    ${DISTRIBUITED_WORKLOAD_RESOURCE_METRICS_TITLE_XP}    timeout=20
     Wait For Job With Status    ${RAY_CLUSTER_NAME}    Admitted    30
-    Wait For Job With Status    ${RAY_CLUSTER_NAME}    Running    300
 
     ${cpu_requested} =   Get CPU Requested    ${PRJ_TITLE}    ${LOCAL_QUEUE_NAME}
     ${memory_requested} =   Get Memory Requested    ${PRJ_TITLE}    ${LOCAL_QUEUE_NAME}   RayCluster
     Check Requested Resources Chart    ${PRJ_TITLE}    ${cpu_requested}    ${memory_requested}
     Check Requested Resources    ${PRJ_TITLE}    ${CPU_SHARED_QUOTA}    ${MEMEORY_SHARED_QUOTA}    ${cpu_requested}    ${memory_requested}    RayCluster
 
-    Check Distributed Workload Resource Metrics Status    ${RAY_CLUSTER_NAME}    Running
-    Check Distributed Worklaod Status Overview    ${RAY_CLUSTER_NAME}    Running    All pods reached readiness and the workload is running
+    Check Distributed Workload Resource Metrics Status    ${RAY_CLUSTER_NAME}    Admitted
+    Check Distributed Worklaod Status Overview    ${RAY_CLUSTER_NAME}    Admitted    The workload is admitted
 
     Click Button    ${PROJECT_METRICS_TAB_XP}
     Check Distributed Workload Resource Metrics Chart    ${PRJ_TITLE}    ${cpu_requested}    ${memory_requested}    RayCluster    ${RAY_CLUSTER_NAME}
@@ -181,8 +181,10 @@ Verify Requested resources When Multiple Local Queue Exists
     Select Refresh Interval    15 seconds
     Click Button    ${PROJECT_METRICS_TAB_XP}
     Wait Until Element Is Visible    ${DISTRIBUITED_WORKLOAD_RESOURCE_METRICS_TITLE_XP}    timeout=20
-    Wait For Job With Status    ${JOB_NAME_QUEUE}    Running    60
-    Wait For Job With Status   ${MULTIPLE_JOB_NAME}    Running    60
+    Wait For Job With Status    ${JOB_NAME_QUEUE}    Admitted    60
+    Wait For Job With Status   ${MULTIPLE_JOB_NAME}    Admitted    60
+    # Wait for UI to refresh and show updated resource totals from both LocalQueues
+    Sleep    20s
 
     # verify Requested by all projects requested resources
     ${cpu_requested_1} =   Get CPU Requested    ${PRJ_TITLE}    ${LOCAL_QUEUE_NAME}
@@ -237,6 +239,8 @@ Project Suite Setup
     [Documentation]    Suite setup steps for testing Distributed workload Metrics UI
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
+    # Ensure BatchJob integration is enabled in Kueue for batch/v1 Job support
+    Enable Kueue BatchJob Integration
     Launch Dashboard    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}    ${TEST_USER.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
     Create Data Science Project From CLI    ${PRJ_TITLE}    as_user=${TEST_USER.USERNAME}

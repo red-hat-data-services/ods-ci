@@ -6,20 +6,20 @@ Resource          ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 
 
 *** Variables ***
-${CODEFLARE-SDK-RELEASE-TAG}             v0.32.2
+${CODEFLARE-SDK-RELEASE-TAG}             v0.33.0
 ${CODEFLARE-SDK_DIR}                     codeflare-sdk
 ${CODEFLARE-SDK_REPO_URL}                %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
 ${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}  https://github.com/opendatahub-io/distributed-workloads/releases/latest/download
-# Corresponds to quay.io/modh/ray:2.47.1-py312-cu128
-${RAY_CUDA_IMAGE_3.12}                   quay.io/modh/ray@sha256:fb6f207de63e442c67bb48955cf0584f3704281faf17b90419cfa274fdec63c5
-# Corresponds to quay.io/modh/ray:2.47.1-py311-cu121
-${RAY_CUDA_IMAGE_3.11}                   quay.io/modh/ray@sha256:6d076aeb38ab3c34a6a2ef0f58dc667089aa15826fa08a73273c629333e12f1e
+# Corresponds to quay.io/modh/ray:2.52.1-py312-cu128
+${RAY_CUDA_IMAGE_3.12}                   quay.io/modh/ray@sha256:6b135421b6e756593a58b4df6664f82fc4b55237ca81475f2867518f15fe6d84
+# Corresponds to quay.io/modh/ray:2.52.1-py311-cu121
+${RAY_CUDA_IMAGE_3.11}                   quay.io/modh/ray@sha256:595b3acd10244e33fca1ed5469dccb08df66f470df55ae196f80e56edf35ad5a
 # Corresponds to quay.io/rhoai/ray:2.35.0-py311-cu121-torch24-fa26
 ${RAY_TORCH_CUDA_IMAGE_3.11}             quay.io/rhoai/ray@sha256:5077f9bb230dfa88f34089fecdfcdaa8abc6964716a8a8325c7f9dcdf11bbbb3
-# Corresponds to quay.io/modh/ray:2.47.1-py312-rocm62
-${RAY_ROCM_IMAGE_3.12}                   quay.io/modh/ray@sha256:f374130bf615a44d048fabbc75f4e6fb687446981383e3e815bda1dcda608964
-# Corresponds to quay.io/modh/ray:2.47.1-py311-rocm62
-${RAY_ROCM_IMAGE_3.11}                   quay.io/modh/ray@sha256:6091617d45d5681058abecda57e0ee33f57b8855618e2509f1a354a20cc3403c
+# Corresponds to quay.io/modh/ray:2.52.1-py312-rocm62
+${RAY_ROCM_IMAGE_3.12}                   quay.io/modh/ray@sha256:900c35ec2fe4279b958e044c781a179c8cfe0c584e8af16e253814dba01816e6
+# Corresponds to quay.io/modh/ray:2.52.1-py311-rocm61
+${RAY_ROCM_IMAGE_3.11}                   quay.io/modh/ray@sha256:28a8745be454b0e881ce6c200599ddfcb3366b707a5b53cfa73087d599555158
 # Corresponds to quay.io/rhoai/ray:2.35.0-py311-rocm61-torch24-fa26
 ${RAY_TORCH_ROCM_IMAGE_3.11}             quay.io/rhoai/ray@sha256:b0e129cd2f4cdea7ad7a7859031357ffd9915410551f94fbcb942af2198cdf78
 # Corresponds to quay.io/modh/training:py311-cuda121-torch241
@@ -333,6 +333,14 @@ Setup RBAC for codeflare-sdk
     IF    ${result.rc} != 0
         FAIL    Unable to apply kueue-batch-user-specific-rolebinding ClusterRoleBinding
     END
+    Log To Console    "Applying kueue-batch-notebook-user-specific-rolebinding ClusterRoleBinding"
+    ${result} =    Run Process    oc apply -f tests/Resources/Files/kueue-batch-notebook-user-specific-rolebinding.yaml
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Unable to apply kueue-batch-notebook-user-specific-rolebinding ClusterRoleBinding
+    END
     Log To Console    "Applying codeflare-sdk-rbac-permissions"
     ${result} =    Run Process    oc apply -f tests/Resources/Files/codeflare-sdk-rbac-permissions.yaml
     ...    shell=true
@@ -361,6 +369,14 @@ Teardown RBAC for codeflare-sdk
     Log To Console    ${result.stdout}
     IF    ${result.rc} != 0
         Log To Console    "Warning: Unable to delete kueue-batch-user-specific-rolebinding ClusterRoleBinding (may not exist)"
+    END
+    Log To Console    "Removing kueue-batch-notebook-user-specific-rolebinding ClusterRoleBinding"
+    ${result} =    Run Process    oc delete -f tests/Resources/Files/kueue-batch-notebook-user-specific-rolebinding.yaml
+    ...    shell=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        Log To Console    "Warning: Unable to delete kueue-batch-notebook-user-specific-rolebinding ClusterRoleBinding (may not exist)"
     END
     Log To Console    "Removing kueue-batch-user-role ClusterRole"
     ${result} =    Run Process    oc delete -f tests/Resources/Files/kueue-batch-user-role.yaml

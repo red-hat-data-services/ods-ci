@@ -16,6 +16,7 @@ ${DSCI_NAME} =    default-dsci
 ...    kueue
 ...    ray
 ...    trainingoperator
+...    trainer
 ...    trustyai
 ...    workbenches
 ...    modelregistry
@@ -46,12 +47,13 @@ ${TELEMETRY_CHANNEL_NAME}=  stable
 ${TELEMETRY_NS}=  openshift-opentelemetry-operator
 ${KUEUE_OP_NAME}=  kueue-operator
 ${KUEUE_SUB_NAME}=  kueue-operator
-${KUEUE_CHANNEL_NAME}=  stable-v1.1
+${KUEUE_CHANNEL_NAME}=  stable-v1.2
 ${KUEUE_NS}=  openshift-kueue-operator
 ${JOBSET_OP_NAME}=  job-set
 ${JOBSET_SUB_NAME}=  job-set
 ${JOBSET_CHANNEL_NAME}=  tech-preview-v0.1
 ${JOBSET_NS}=  openshift-jobset-operator
+${JOBSETOPERATOR_NAME}=  cluster
 ${CERT_MANAGER_OP_NAME}=  openshift-cert-manager-operator
 ${CERT_MANAGER_SUB_NAME}=  openshift-cert-manager-operator
 ${CERT_MANAGER_CHANNEL_NAME}=  stable-v1
@@ -82,6 +84,9 @@ ${RHODS_OSD_INSTALL_REPO}=      ${EMPTY}
 ${OLM_DIR}=                     rhodsolm
 @{SUPPORTED_TEST_ENV}=          AWS   AWS_DIS   GCP   GCP_DIS   PSI   PSI_DIS   ROSA   IBM_CLOUD   CRC    AZURE	ROSA_HCP
 ${install_plan_approval}=       Manual
+${INSTALL_DEPENDENCIES_TYPE}=    Cli
+${GITOPS_DEFAULT_REPO_BRANCH}=    main
+${GITOPS_DEFAULT_REPO}=    ${EMPTY}
 
 *** Keywords ***
 Install RHODS
@@ -90,10 +95,15 @@ Install RHODS
   Log    Start installing RHOAI with:\n\- cluster type: ${cluster_type}\n\- image_url: ${image_url}\n\- update_channel: ${UPDATE_CHANNEL}    console=yes    #robocop:disable
   Log    \- rhoai_version: ${rhoai_version}\n\- is_upgrade: ${is_upgrade}\n\- install_plan_approval: ${install_plan_approval}\n\- CATALOG_SOURCE: ${CATALOG_SOURCE}   console=yes    #robocop:disable
   Assign Vars According To Product
-  Install RHOAI Dependencies
   ${enable_new_observability_stack} =    Is New Observability Stack Enabled
-  IF    ${enable_new_observability_stack}
-          Install Observability Dependencies
+  IF  "${INSTALL_DEPENDENCIES_TYPE}" == "GitOps"
+    Install RHOAI Dependencies With GitOps Repo    ${enable_new_observability_stack}
+    ...    ${GITOPS_REPO_BRANCH}    ${GITOPS_REPO_URL}
+  ELSE
+    Install RHOAI Dependencies With CLI
+    IF    ${enable_new_observability_stack}
+            Install Observability Dependencies
+    END
   END
   Clone OLM Install Repo
   Configure Custom Namespaces
@@ -214,6 +224,10 @@ Verify RHODS Installation
   ELSE
       IF  "${APPLICATIONS_NAMESPACE}" != "${DEFAULT_APPLICATIONS_NAMESPACE_RHOAI}" and "${APPLICATIONS_NAMESPACE}" != "${DEFAULT_APPLICATIONS_NAMESPACE_ODH}"
           Create DSCI With Custom Namespaces
+      ELSE IF   "${UPDATE_CHANNEL}" != "odh-nightlies" and "${PRODUCT}" == "ODH"
+            # this case is to handle ODH community, which needs to create the DSCI
+            Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
+            Wait For DSCInitialization CustomResource To Be Ready
       END
       Wait Until Keyword Succeeds    6 min    0 sec
       ...    Is Resource Present    DSCInitialization    ${DSCI_NAME}
@@ -295,6 +309,12 @@ Verify RHODS Installation
   IF    "${trainingoperator}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app.kubernetes.io/part-of=trainingoperator
+  END
+
+  ${trainer} =     Is Component Enabled    trainer    ${DSC_NAME}
+  IF     "${trainer}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/name=trainer
   END
 
   ${feastoperator} =    Is Component Enabled    feastoperator    ${DSC_NAME}
@@ -742,7 +762,14 @@ Configure Authorino
         RETURN
     END
 
+    Log To Console    Waiting for Authorino deployment rollout to complete...
+    ${rc}    ${out} =    Run And Return Rc And Output
+    ...    oc rollout status deployment/authorino -n kuadrant-system --timeout=120s
+    Log    ${out}    console=yes
+
     Log To Console    Waiting for Authorino to be ready with SSL...
+    # workaround for https://github.com/kubernetes/kubectl/issues/1120 (old authorino pod is still terminating when we run oc wait)
+    Sleep  15s
     Wait For Pods To Be Ready    label_selector=authorino-resource=authorino
     ...    namespace=kuadrant-system    timeout=150s
 
@@ -769,6 +796,16 @@ Install Kueue Operator Via Cli
         Wait For Pods To Be Ready    label_selector=name=openshift-kueue-operator
              ...    namespace=${KUEUE_NS}
     END
+
+Create JobSetOperator CR
+    [Documentation]      Deploys JobSetOperator cluster CR for trainer component
+    ${file_path} =    Set Variable    tasks/Resources/Files/
+    Copy File    source=${file_path}jobsetoperator_template.yaml   destination=${file_path}jobsetoperator_apply.yml
+    Run    sed -i'' -e 's/<jobsetoperator_name>/${JOBSETOPERATOR_NAME}/' ${file_path}jobsetoperator_apply.yml
+    Run    sed -i'' -e 's/<jobsetoperator_namespace>/${JOBSET_NS}/' ${file_path}jobsetoperator_apply.yml
+    ${return_code}    ${output} =    Run And Return Rc And Output    oc apply -f ${file_path}jobsetoperator_apply.yml
+    Log To Console    ${output}
+    Should Be Equal As Integers  ${return_code}  0  msg=Error detected while creating JobSetOperator CR
 
 Install JobSet Operator Via Cli
     [Documentation]    Install JobSet Operator Via CLI
@@ -800,12 +837,8 @@ Install Kueue Dependencies
     Install Kueue Operator Via Cli
 
 Install JobSet Dependencies
-    [Documentation]    Install Dependent Operators For JobSet
-    Set Suite Variable   ${FILES_RESOURCES_DIRPATH}    tests/Resources/Files
-    Set Suite Variable   ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
-    Set Suite Variable   ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
-    Install Cert Manager Operator Via Cli
     Install JobSet Operator Via Cli
+    Create JobSetOperator CR
 
 Install Cluster Observability Operator Via Cli
     [Documentation]    Install Cluster Observability Operator Via CLI
@@ -900,13 +933,25 @@ Install Custom Metrics Autoscaler Operator Via Cli
         Log To Console    message=Custom Metrics Autoscaler Operator (KEDA) is already installed
     END
 
-Install RHOAI Dependencies
-    [Documentation]    Install dependent operators required for RHOAI installation
-    Install Cert Manager Operator Via Cli
-    Install Kueue Operator Via Cli
+Install RHOAI Dependencies With GitOps Repo
+    [Documentation]    Install dependent operators required for RHOAI installation using GitOps
+    [Arguments]     ${enable_new_observability_stack}
+    ...    ${gitops_repo_branch}=${GITOPS_DEFAULT_REPO_BRANCH}
+    ...    ${gitops_repo}=${GITOPS_DEFAULT_REPO}
+    Clone OLM Install Repo
+    ${m_flag} =    Set Variable If    not ${enable_new_observability_stack}    -M    ${EMPTY}
+    ${r_flag} =    Set Variable If    "${gitops_repo}" != "${EMPTY}"    -r ${gitops_repo}    ${EMPTY}
+    ${return_code} =    Run And Watch Command
+    ...    cd ${EXECDIR}/${OLM_DIR} && ./setup-dependencies.sh -b ${gitops_repo_branch} ${m_flag} ${r_flag}
+    ...    timeout=20 min
+    Should Be Equal As Integers   ${return_code}   0   msg=Error detected installing RHOAI dependencies using GitOps
+
+Install RHOAI Dependencies With CLI
+    [Documentation]    Install dependent operators required for RHOAI installation using CLI
+    Install Kueue Dependencies
     Install Leader Worker Set Operator Via Cli
     Install Connectivity Link Operator Via Cli
-    Install JobSet Operator Via Cli
+    Install JobSet Dependencies
 
 Install Observability Dependencies
     [Documentation]    Install dependent operators related to Observability

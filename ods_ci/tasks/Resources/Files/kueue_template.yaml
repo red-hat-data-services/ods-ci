@@ -7,11 +7,9 @@ spec:
     config:
         integrations:
             frameworks:
-                - RayCluster
-                - Deployment
                 - Pod
+                - PyTorchJob
+                - RayCluster
+                - RayJob
                 - StatefulSet
                 - TrainJob
-
-
-

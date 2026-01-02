@@ -54,6 +54,7 @@ ${JOBSET_SUB_NAME}=  job-set
 ${JOBSET_CHANNEL_NAME}=  tech-preview-v0.1
 ${JOBSET_NS}=  openshift-jobset-operator
 ${JOBSETOPERATOR_NAME}=  cluster
+${KUEUE_CR_NAME}=  cluster
 ${CERT_MANAGER_OP_NAME}=  openshift-cert-manager-operator
 ${CERT_MANAGER_SUB_NAME}=  openshift-cert-manager-operator
 ${CERT_MANAGER_CHANNEL_NAME}=  stable-v1
@@ -807,6 +808,17 @@ Create JobSetOperator CR
     Log To Console    ${output}
     Should Be Equal As Integers  ${return_code}  0  msg=Error detected while creating JobSetOperator CR
 
+Create Kueue CR
+    [Documentation]      Deploys Kueue cluster CR for distributed workloads
+    ${file_path} =    Set Variable    tasks/Resources/Files/
+    Copy File    source=${file_path}kueue_template.yaml   destination=${file_path}kueue_apply.yml
+    Run    sed -i'' -e 's/<kueue_name>/${KUEUE_CR_NAME}/' ${file_path}kueue_apply.yml
+    Run    sed -i'' -e 's/<kueue_namespace>/${KUEUE_NS}/' ${file_path}kueue_apply.yml
+    ${return_code}    ${output} =    Run And Return Rc And Output    oc apply -f ${file_path}kueue_apply.yml
+    Log To Console    ${output}
+    Should Be Equal As Integers  ${return_code}  0  msg=Error detected while creating Kueue CR
+    Remove File    ${file_path}kueue_apply.yml
+
 Install JobSet Operator Via Cli
     [Documentation]    Install JobSet Operator Via CLI
     ${is_installed} =   Check If Operator Is Installed Via CLI   ${JOBSET_OP_NAME}
@@ -835,6 +847,7 @@ Install Kueue Dependencies
     [Documentation]    Install Dependent Operators For Kueue
     Install Cert Manager Operator Via Cli
     Install Kueue Operator Via Cli
+    Create Kueue CR
 
 Install JobSet Dependencies
     Install JobSet Operator Via Cli

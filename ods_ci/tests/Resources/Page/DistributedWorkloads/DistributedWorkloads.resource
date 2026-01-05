@@ -241,6 +241,10 @@ Prepare DistributedWorkloads Integration Test Suite
     Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
     RHOSi Setup
     Setup RBAC for codeflare-sdk
+    # Set Kueue component to Unmanaged state as admin
+    Log To Console    "Setting Kueue component to Unmanaged state"
+    Set Component State    kueue    Unmanaged
+    Wait For DataScienceCluster CustomResource To Be Ready    timeout=600
 
 Teardown DistributedWorkloads Integration Test Suite
     [Documentation]    Teardown DistributedWorkloads Integration Test Suite
@@ -249,6 +253,10 @@ Teardown DistributedWorkloads Integration Test Suite
     Log To Console    "Removing test binaries"
     Remove File        ${ODH_BINARY_NAME}
     RHOSi Teardown
+    # Set Kueue component back to Removed state
+    Log To Console    "Setting Kueue component to Removed state"
+    Set Component State    kueue    Removed
+    Wait For DataScienceCluster CustomResource To Be Ready    timeout=600
     Teardown RBAC for codeflare-sdk
 
 Generate User Token

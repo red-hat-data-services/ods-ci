@@ -1,0 +1,115 @@
+---
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: testops-e2e-test
+spec:
+  description: |
+    An integration test which provisions an ephemeral Hypershift cluster, deploys rhoai 
+    from a Konflux snapshot and runs the e2e tests against it.
+  params:
+    - description: Snapshot of the application
+      name: SNAPSHOT
+      default: '{"components": [{"name":"test-operator", "containerImage": "quay.io/rhoai/rhoai-fbc-fragment:rhoai-3.3"}]}'
+      type: string
+  tasks:
+    - name: parse-metadata
+      taskRef:
+        resolver: git
+        params:
+          - name: url
+            value: https://github.com/konflux-ci/integration-examples
+          - name: revision
+            value: main
+          - name: pathInRepo
+            value: tasks/test_metadata.yaml
+      params:
+        - name: SNAPSHOT
+          value: $(params.SNAPSHOT)        
+    - name: test-task
+      runAfter:
+        - parse-metadata
+      params:
+        - name: fbc-image
+          value: "$(tasks.parse-metadata.results.component-container-image)"
+      taskSpec:
+        params:
+          - name: fbc-image
+            type: string
+        steps:
+          - name: run-script
+            image: quay.io/openshift/origin-cli:latest
+            script: |
+              echo -e "$(params.fbc-image)"
+    - name: provision-ephemeral-cluster
+      taskRef:
+        resolver: git
+        params:
+          - name: url
+            value: https://github.com/openshift/konflux-tasks
+          - name: revision
+            value: main
+          - name: pathInRepo
+            value: tasks/provision-ephemeral-cluster/0.1/provision-ephemeral-cluster.yaml
+      params:
+        - name: ownerName
+          value: $(context.pipelineRun.name)
+        - name: ownerUid
+          value: $(context.pipelineRun.uid)
+        - name: workflow
+          value: ipi-aws
+        - name: clusterProfile
+          value: my-cluster-profile
+        - name: releases
+          value: '{"initial":{"integration":{"name":"4.20","namespace":"ocp"}},"latest":{"integration":{"name":"4.20","namespace":"ocp"}}}'
+        - name: prEventPayload
+          value: '{"clusterClaim":{"cloud":"aws","owner":"test-rhoai","version":"4.20"}}'
+        - name: prEventHeaders
+          value: ""
+    - name: run-test
+      runAfter:
+        - provision-ephemeral-cluster
+      params:
+        - name: kubeconfigSecretRef
+          value: $(tasks.provision-ephemeral-cluster.results.secretRef)
+      taskSpec:
+        params:
+          - name: kubeconfigSecretRef
+            type: string
+            description: "The secret that holds the Ephemeral Cluster kubeconfig"
+        steps:
+          - name: run-test
+            image: registry.redhat.io/openshift4/ose-cli:4.13@sha256:73df37794ffff7de1101016c23dc623e4990810390ebdabcbbfa065214352c7c
+            env:
+              - name: KUBECONFIG_VALUE
+                valueFrom:
+                  secretKeyRef:
+                    name: $(params.kubeconfigSecretRef)
+                    key: kubeconfig
+            script: |
+              #!/usr/bin/env bash
+              set -eo pipefail
+
+              KUBECONFIG="$(mktemp kubeconfig.XXXXX)"
+              trap 'rm -f "$KUBECONFIG"' EXIT
+
+              echo "$KUBECONFIG_VALUE" >"$KUBECONFIG"
+              export KUBECONFIG
+
+              oc whoami
+  finally:
+    - name: deprovision-ephemeral-cluster
+      taskRef:
+        resolver: git
+        params:
+          - name: url
+            value: https://github.com/openshift/konflux-tasks
+          - name: revision
+            value: main
+          - name: pathInRepo
+            value: tasks/deprovision-ephemeral-cluster/0.1/deprovision-ephemeral-cluster.yaml
+      params:
+        - name: testPlatformClusterClaimName
+          value: $(tasks.provision-ephemeral-cluster.results.testPlatformClusterClaimName)
+        - name: testPlatformClusterClaimNamespace
+          value: $(tasks.provision-ephemeral-cluster.results.testPlatformClusterClaimNamespace)

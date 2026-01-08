@@ -79,16 +79,6 @@ Elyra Pipelines Suite Setup    # robocop: off=too-many-calls-in-keyword
     ...    project_title=${PRJ_TITLE}
     DataSciencePipelinesBackend.Wait Until Pipeline Server Is Deployed    namespace=${PRJ_TITLE}
     Sleep    15s    reason=Wait until pipeline server is detected by dashboard
-    # Workaround for the: https://issues.redhat.com/browse/RHOAIENG-24545
-    Create Workbench    workbench_title=workaround    workbench_description=workaround
-    ...                 prj_title=${PRJ_TITLE}    image_name=Jupyter | Minimal | CPU | Python 3.12
-    ...                 hardware_profile=default-profile
-    ...                 storage=Persistent  pv_existent=${FALSE}
-    ...                 pv_name=${PV_NAME}_workaround  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
-    ...                 envs=${ENVS_LIST}
-    Start Workbench     workbench_title=workaround    timeout=300s
-    Delete Workbench    workbench_title=workaround
-    # End of the workaround
 
 Elyra Pipelines Suite Teardown
     [Documentation]    Closes the browser and performs RHOSi Teardown

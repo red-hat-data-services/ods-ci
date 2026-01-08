@@ -1,0 +1,28 @@
+---
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: testops-e2e-test
+spec:
+  description: |
+    An integration test which provisions an ephemeral Hypershift cluster, deploys rhoai 
+    from a Konflux snapshot and runs the e2e tests against it.
+  params:
+    - description: Snapshot of the application
+      name: SNAPSHOT
+      default: '{"components": [{"name":"odh-operator", "containerImage": "quay.io/opendatahub/opendatahub-operator:latest"}]}'
+      type: string
+    - name: NAMESPACE
+      type: string
+      default: opendatahub-operator-system
+  tasks:
+    - name: parse-metadata
+      taskRef:
+        resolver: git
+        params:
+          - name: url
+            value: https://github.com/konflux-ci/integration-examples
+          - name: revision
+            value: main
+          - name: pathInRepo
+            value: tasks/test_metadata.yaml

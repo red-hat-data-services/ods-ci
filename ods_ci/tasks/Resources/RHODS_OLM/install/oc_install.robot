@@ -579,7 +579,7 @@ Install Authorino Operator Via Cli
           Install ISV Operator From OperatorHub Via CLI    operator_name=${AUTHORINO_OP_NAME}
              ...    subscription_name=${AUTHORINO_SUB_NAME}
              ...    channel=${AUTHORINO_CHANNEL_NAME}
-             ...    catalog_source_name=redhat-operators
+             ...    catalog_source_name=${CATALOG_SOURCE}
           Wait Until Operator Subscription Last Condition Is
              ...    type=CatalogSourcesUnhealthy    status=False
              ...    reason=AllCatalogSourcesHealthy    subcription_name=${AUTHORINO_SUB_NAME}
@@ -596,7 +596,7 @@ Install Service Mesh Operator Via Cli
     IF    not ${is_installed}
           Install ISV Operator From OperatorHub Via CLI    operator_name=${SERVICEMESH_OP_NAME}
              ...    subscription_name=${SERVICEMESH_SUB_NAME}
-             ...    catalog_source_name=redhat-operators
+             ...    catalog_source_name=${CATALOG_SOURCE}
           Wait Until Operator Subscription Last Condition Is
              ...    type=CatalogSourcesUnhealthy    status=False
              ...    reason=AllCatalogSourcesHealthy    subcription_name=${SERVICEMESH_SUB_NAME}
@@ -615,7 +615,7 @@ Install Serverless Operator Via Cli
         Install ISV Operator From OperatorHub Via CLI    operator_name=${SERVERLESS_OP_NAME}
              ...    namespace=${SERVERLESS_NS}
              ...    subscription_name=${SERVERLESS_SUB_NAME}
-             ...    catalog_source_name=redhat-operators
+             ...    catalog_source_name=${CATALOG_SOURCE}
              ...    operator_group_name=serverless-operators
              ...    operator_group_ns=${SERVERLESS_NS}
              ...    operator_group_target_ns=${NONE}
@@ -664,7 +664,7 @@ Install Cluster Observability Operator Via Cli
           Install ISV Operator From OperatorHub Via CLI    operator_name=${CLUSTER_OBS_OP_NAME}
              ...    subscription_name=${CLUSTER_OBS_SUB_NAME}
              ...    namespace=${CLUSTER_OBS_NS}
-             ...    catalog_source_name=redhat-operators
+             ...    catalog_source_name=${CATALOG_SOURCE}
              ...    operator_group_name=openshift-cluster-observability-operator
              ...    operator_group_ns=${CLUSTER_OBS_NS}
              ...    operator_group_target_ns=${NONE}
@@ -687,7 +687,7 @@ Install Tempo Operator Via Cli
           Install ISV Operator From OperatorHub Via CLI    operator_name=${TEMPO_OP_NAME}
              ...    subscription_name=${TEMPO_SUB_NAME}
              ...    namespace=${TEMPO_NS}
-             ...    catalog_source_name=redhat-operators
+             ...    catalog_source_name=${CATALOG_SOURCE}
              ...    operator_group_name=openshift-tempo-operator
              ...    operator_group_ns=${TEMPO_NS}
              ...    operator_group_target_ns=${NONE}
@@ -710,7 +710,7 @@ Install OpenTelemetry Operator Via Cli
           Install ISV Operator From OperatorHub Via CLI    operator_name=${TELEMETRY_OP_NAME}
              ...    subscription_name=${TELEMETRY_SUB_NAME}
              ...    namespace=${TELEMETRY_NS}
-             ...    catalog_source_name=redhat-operators
+             ...    catalog_source_name=${CATALOG_SOURCE}
              ...    operator_group_name=openshift-opentelemetry-operator
              ...    operator_group_ns=${TELEMETRY_NS}
              ...    operator_group_target_ns=${NONE}
@@ -733,7 +733,7 @@ Install Custom Metrics Autoscaler Operator Via Cli
         Install ISV Operator From OperatorHub Via CLI    operator_name=${CMA_OP_NAME}
             ...    namespace=${CMA_NS}
             ...    subscription_name=${CMA_SUB_NAME}
-            ...    catalog_source_name=redhat-operators
+            ...    catalog_source_name=${CATALOG_SOURCE}
             ...    operator_group_name=openshift-keda-operator
             ...    operator_group_ns=${CMA_NS}
             ...    operator_group_target_ns=${NONE}

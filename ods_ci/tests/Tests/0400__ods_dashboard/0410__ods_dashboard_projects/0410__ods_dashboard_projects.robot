@@ -124,6 +124,7 @@ Verify User Can Create And Start A Workbench With Existent PV Storage
     ${pv_name}=    Set Variable    ${PV_BASENAME}-existent
     Create PersistentVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}    project_title=${PRJ_TITLE}
     ...                               size=${PV_SIZE}    connected_workbench=${NONE}   existing_storage=${TRUE}
+    ...                               storage_class=standard-csi
     Create Workbench    workbench_title=${WORKBENCH_2_TITLE}  workbench_description=${WORKBENCH_2_DESCRIPTION}
     ...                 prj_title=${PRJ_TITLE}    image_name=${NB_IMAGE}   hardware_profile=default-profile
     ...                 storage=Persistent  pv_existent=${TRUE}    pv_name=${pv_name}  pv_description=${NONE}  pv_size=${NONE}
@@ -150,10 +151,12 @@ Verify User Can Create A PV Storage
     ${workbenches}=    Create List    ${WORKBENCH_TITLE}
     # Create Storage from UI, but press Cancel at the end (without submitting)
     Create PersistentVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}    project_title=${PRJ_TITLE}
-    ...                               size=${PV_SIZE}    connected_workbench=${NONE}    press_cancel=${TRUE}
+    ...                                size=${PV_SIZE}    connected_workbench=${NONE}    press_cancel=${TRUE}
+    ...                                storage_class=standard-csi
     # Create Storage from UI, and submit this time
     Create PersistentVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}    project_title=${PRJ_TITLE}
-    ...                               size=${PV_SIZE}    connected_workbench=${workbenches}   existing_storage=${TRUE}
+    ...                                size=${PV_SIZE}    connected_workbench=${workbenches}   existing_storage=${TRUE}
+    ...                                storage_class=standard-csi
     Storage Should Be Listed    name=${pv_name}    description=${PV_DESCRIPTION}
     ...                         type=Persistent storage    connected_workbench=${workbenches}
     Check Corresponding PersistentVolumeClaim Exists    storage_name=${pv_name}    namespace=${ns_name}
@@ -223,6 +226,7 @@ Verify User Can Delete A Persistent Storage
     ${ns_name}=    Get Openshift Namespace From Data Science Project   project_title=${PRJ_TITLE}
     Create PersistentVolume Storage    name=${pv_name}    description=${PV_DESCRIPTION}
     ...                               size=${PV_SIZE}    connected_workbench=${NONE}   project_title=${PRJ_TITLE}
+    ...                               storage_class=standard-csi
     Delete Storage    name=${pv_name}    press_cancel=${TRUE}
     Delete Storage    name=${pv_name}    press_cancel=${FALSE}
     Storage Should Not Be Listed    name=${pv_name}

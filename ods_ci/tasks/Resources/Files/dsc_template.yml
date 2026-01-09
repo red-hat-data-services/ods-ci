@@ -36,3 +36,5 @@ spec:
       managementState: <feastoperator_value>
     llamastackoperator:
       managementState: <llamastackoperator_value>
+    mlflowoperator:
+      managementState: <mlflowoperator_value>

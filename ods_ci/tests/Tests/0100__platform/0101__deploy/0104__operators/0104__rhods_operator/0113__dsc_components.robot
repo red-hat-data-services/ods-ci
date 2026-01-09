@@ -38,6 +38,8 @@ ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}          app.kubernetes.io/pa
 ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}         feast-operator-controller-manager
 ${LLAMASTACKOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}     app.kubernetes.io/part-of=llamastackoperator
 ${LLAMASTACKOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    llama-stack-k8s-operator-controller-manager
+${MLFLOWOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}         app.kubernetes.io/name=mlflow-operator
+${MLFLOWOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}        mlflow-operator-controller-manager
 ${NOTEBOOK_CONTROLLER_DEPLOYMENT_LABEL_SELECTOR}            component.opendatahub.io/name=kf-notebook-controller
 ${NOTEBOOK_CONTROLLER_MANAGER_LABEL_SELECTOR}               component.opendatahub.io/name=odh-notebook-controller
 ${NOTEBOOK_DEPLOYMENT_NAME}                                 notebook-controller-deployment
@@ -55,6 +57,7 @@ ${IS_NOT_PRESENT}                                           1
 ...                                                         WORKBENCHES=${EMPTY}
 ...                                                         FEASTOPERATOR=${EMPTY}
 ...                                                         LLAMASTACKOPERATOR=${EMPTY}
+...                                                         MLFLOWOPERATOR=${EMPTY}
 
 @{CONTROLLERS_LIST}                                     # dashboard added in Suite Setup, since it's different in RHOAI vs ODH
 ...                                                     data-science-pipelines-operator-controller-manager
@@ -504,6 +507,42 @@ Validate Llamastackoperator Removed State
 
     [Teardown]      Restore DSC Component State     llamastackoperator       ${LLAMASTACKOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}     ${LLAMASTACKOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.LLAMASTACKOPERATOR}
 
+Validate Mlflowoperator Managed State
+    [Documentation]    Validate that the DSC Mlflowoperator component Managed state creates the expected resources,
+    ...    check that MlflowOperator deployment is created and pod is in Ready state
+    [Tags]
+    ...    Operator
+    ...    Tier1
+    ...    mlflowoperator-managed
+    ...    Integration
+    ...    ExcludeOnODH
+
+    Set DSC Component Managed State And Wait For Completion
+    ...    mlflowoperator
+    ...    ${MLFLOWOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${MLFLOWOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
+    Check That Image Pull Path Is Correct
+    ...    ${MLFLOWOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${IMAGE_PULL_PATH}
+
+    [Teardown]      Restore DSC Component State     mlflowoperator       ${MLFLOWOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}     ${MLFLOWOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.MLFLOWOPERATOR}
+
+Validate Mlflowoperator Removed State
+    [Documentation]    Validate that MlflowOperator management state Removed does remove relevant resources.
+    [Tags]
+    ...    Operator
+    ...    Tier1
+    ...    mlflowoperator-removed
+    ...    Integration
+    ...    ExcludeOnODH
+
+    Set DSC Component Removed State And Wait For Completion
+    ...    mlflowoperator
+    ...    ${MLFLOWOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${MLFLOWOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
+
+    [Teardown]      Restore DSC Component State     mlflowoperator       ${MLFLOWOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}     ${MLFLOWOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.MLFLOWOPERATOR}
+
 
 Validate Support For Configuration Of Controller Resources
     [Documentation]    Validate support for configuration of controller resources in component deployments
@@ -577,6 +616,7 @@ Suite Setup
     ${SAVED_MANAGEMENT_STATES.WORKBENCHES}=    Get DSC Component State    ${DSC_NAME}    workbenches    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.FEASTOPERATOR}=    Get DSC Component State    ${DSC_NAME}    feastoperator    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.LLAMASTACKOPERATOR}=    Get DSC Component State    ${DSC_NAME}    llamastackoperator    ${OPERATOR_NS}
+    ${SAVED_MANAGEMENT_STATES.MLFLOWOPERATOR}=    Get DSC Component State    ${DSC_NAME}    mlflowoperator    ${OPERATOR_NS}
     Set Suite Variable    ${SAVED_MANAGEMENT_STATES}
     Append To List  ${CONTROLLERS_LIST}    ${DASHBOARD_DEPLOYMENT_NAME}
 

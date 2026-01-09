@@ -22,7 +22,8 @@ Is OpenShift OAuth Login Prompt Visible
 
 Is OpenShift Login Visible
    [Arguments]  ${timeout}=15s
-   IF  "${CLUSTER_AUTH}" == "oidc"
+   ${cluster_auth_value}=    Get Variable Value    ${CLUSTER_AUTH}    ${EMPTY}
+   IF  "${cluster_auth_value}" == "oidc"
        # this will work with keycloak, need a different way once we start with entra
        ${login_prompt_visible} =  Run Keyword And Return Status
        ...    Wait Until Page Contains    Sign in to your account  timeout=${timeout}

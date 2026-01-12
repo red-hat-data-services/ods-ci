@@ -22,6 +22,7 @@ ${DSCI_NAME} =    default-dsci
 ...    modelregistry
 ...    feastoperator
 ...    llamastackoperator
+...    mlflowoperator
 ${LWS_OP_NAME}=    leader-worker-set
 ${LWS_OP_NS}=    openshift-lws-operator
 ${LWS_SUB_NAME}=    leader-worker-set
@@ -327,6 +328,12 @@ Verify RHODS Installation
   IF    "${llamastackoperator}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app.kubernetes.io/part-of=llamastackoperator
+  END
+
+  ${mlflowoperator} =    Is Component Enabled    mlflowoperator    ${DSC_NAME}
+  IF    "${mlflowoperator}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/part-of=mlflowoperator
   END
 
   ${dashboard} =    Is Component Enabled    dashboard    ${DSC_NAME}

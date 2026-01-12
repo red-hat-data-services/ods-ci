@@ -22,15 +22,17 @@ export CLIENT_REGISTRATION_TOKEN=<CLIENT_REGISTRATION_TOKEN>
 #python3 ods_ci/utils/scripts/openshift/openid.py update-redirect-uris --operation <add/remove> --update-endpoint https://myAuthServer.com/updateEndpoint --client-name <client-name> --redirect-uri <redirect-uri1> --redirect-uri <redirect-uri2> --jenkins-props-file <jenkins-props-file>
 """
 
-from typing import Literal
-import click
-import base64
-from ods_ci.utils.scripts.logger import log
 import json
-import requests
-from string import Template
-from ods_ci.utils.scripts.util import execute_command
 import os
+import sys
+from string import Template
+from typing import Literal
+
+import click
+import requests
+
+from ods_ci.utils.scripts.logger import log
+from ods_ci.utils.scripts.util import execute_command
 
 REGISTRATION_BODY_TEMPLATE = Template("""
     {
@@ -47,6 +49,7 @@ REGISTRATION_BODY_TEMPLATE = Template("""
 
 OCP_DEFAULT_SECRET_NAME = "openid-idp-client-secret"
 CLIENT_PROPERTIES_FILE_DEFAULT = "client.properties"
+
 
 class OpenIdOps:
     """Class for OpenID identity provider operations"""
@@ -76,8 +79,20 @@ class OpenIdOps:
             except Exception as e:
                 log.error(f"Failed to write registration token to properties file: {e}")
                 return 1
-        return
-    
+        return None
+
+    def _execute_command_with_check(self, cmd: str, error_msg: str) -> tuple[int | None, str | None] | None:
+        """Execute a command and return the result, or None if execution failed"""
+        result = execute_command(cmd, return_rc=True)
+        if result is None:
+            log.error(f"{error_msg}: execute_command returned None")
+            return None
+        return_rc, _ = result
+        if return_rc != 0:
+            log.error(f"{error_msg}: {return_rc}")
+            return None
+        return result
+
     def _apply_openid_identity_provider(self):
         """Patches OAuth CR with the new identity provider"""
         template_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../configs/templates/openid.json"))
@@ -99,15 +114,19 @@ class OpenIdOps:
         ]
         patch_json = json.dumps(patch_array)
         cmd = f"oc patch oauth cluster --type json -p '{patch_json}'"
-        return_rc, _ = execute_command(
+        result = execute_command(
             cmd,
             return_rc=True,
         )
+        if result is None:
+            log.error("Failed to execute command: execute_command returned None")
+            return 1
+        return_rc, _ = result
         if return_rc != 0:
             log.error(f"Failed to apply OpenID identity provider: {return_rc}")
             return 1
         log.info(f"OpenID identity provider applied successfully: {return_rc}")
-        return
+        return None
 
     def register_dynamic_client(self, registration_endpoint: str, token: str, redirect_uris: list[str], client_name: str, contact_emails: list[str], jenkins_props_file: str):
         """Registers a new dynamic OpenIDclient"""
@@ -135,8 +154,8 @@ class OpenIdOps:
         self.client_secret = request.json()["client_secret"]
         self.client_registration_token = request.json()["registration_access_token"]
         self._write_jenkins_properties()
-        return
-    
+        return None
+
     def update_redirect_uris(self, operation: Literal["add", "remove"], registration_token: str, update_endpoint: str, client_name: str, redirect_uris: list[str], jenkins_props_file: str):
         """Updates (add/remove) redirect URIs on a existing dynamic OpenID client"""
         self.jenkins_props_file = jenkins_props_file
@@ -160,13 +179,13 @@ class OpenIdOps:
             log.error(f"Invalid operation: {operation}")
             return 1
         if len(set(updated_uris)) == len(set(current_uris)):
-            log.info(f"No changes in redirect URIs to apply. Skip the update")
+            log.info("No changes in redirect URIs to apply. Skip the update")
             self.client_name = current_client_info["client_name"]
             self.client_id = current_client_info["client_id"]
             self.client_secret = current_client_info["client_secret"]
             self.client_registration_token = current_client_info["registration_access_token"]
             self._write_jenkins_properties()
-            return
+            return None
         updated_client_info = current_client_info
         updated_client_info["redirect_uris"] = updated_uris
         update_request = requests.put(f"{update_endpoint}", headers=headers, json=updated_client_info)
@@ -180,8 +199,7 @@ class OpenIdOps:
         self.client_secret = updated_client_info["client_secret"]
         self.client_registration_token = updated_client_info["registration_access_token"]
         self._write_jenkins_properties()
-        return
-
+        return None
 
     def delete_dynamic_client(self, registration_token: str, deletion_endpoint: str, client_name: str):
         """Deletes a dynamic OpenID client"""
@@ -193,7 +211,7 @@ class OpenIdOps:
             log.error(f"Failed to delete client {client_name}: {request.status_code} {request.text}")
             return 1
         log.info(f"Client {client_name} deleted successfully: {request.status_code}")
-        return
+        return None
 
     def add_openid_identity_provider(self, idp_name: str, client_id: str, client_secret: str, issuer_url: str, ocp_secret_name: str):
         """Configure the OpenID identity provider in the cluster"""
@@ -204,85 +222,95 @@ class OpenIdOps:
         self.issuer_url = issuer_url
         if ocp_secret_name:
             self.ocp_secret_name = ocp_secret_name
-        cmd=f"oc create secret generic {ocp_secret_name} --from-literal=clientSecret={client_secret} -n openshift-config"
-        return_rc, _ = execute_command(
+        cmd = f"oc create secret generic {ocp_secret_name} --from-literal=clientSecret={client_secret} -n openshift-config"
+        result = execute_command(
             cmd,
             return_rc=True,
         )
+        if result is None:
+            log.error("Failed to execute command: execute_command returned None")
+            return 1
+        return_rc, _ = result
         if return_rc != 0:
             log.error(f"Failed to create client secret: {return_rc}")
             return 1
 
         self._apply_openid_identity_provider()
-        return
-    
+        return None
+
     def remove_openid_identity_provider(self, idp_name: str, ocp_secret_name: str):
         """Removes OpenID identity provider from the cluster"""
         log.info("Removing OpenID identity provider...")
         log.info(">> Deleting OCP secret...")
+
+        status = None
+
+        # Get OCP secret name if not provided
         if not ocp_secret_name:
             ocp_secret_name_cmd = "oc get oauth cluster -ojsonpath='{{.spec.identityProviders[?(@.name==\"{}\")].openID.clientSecret.name}}'".format(idp_name)
-            return_rc, ocp_secret_name = execute_command(
-                ocp_secret_name_cmd,
-                return_rc=True,
-            )
-            if return_rc != 0 or not ocp_secret_name:
-                log.error(f"Failed to get OCP secret name or secret name is empty: {return_rc}")
-                return 1
-        ocp_secret_name = ocp_secret_name.strip()
-        delete_secret_cmd = f"oc delete secret {ocp_secret_name} -n openshift-config --ignore-not-found"
-        return_rc, _ = execute_command(
-            delete_secret_cmd,
-            return_rc=True,
-        )
-        if return_rc != 0:
-            log.error(f"Failed to delete OCP secret: {return_rc}")
-            return 1
-        log.info(f"OCP secret deleted successfully: {return_rc}")
-        log.info(">> Deleting OpenID identity provider...")
-        idp_idx_cmd = f"oc get oauth cluster -o json | jq '.spec.identityProviders | map(.name == \"{idp_name}\") | index(true)'"
-        return_rc, idp_idx = execute_command(
-            idp_idx_cmd,
-            return_rc=True,
-        )
-        if return_rc != 0:
-            log.error(f"Failed to get OpenID identity provider index: {return_rc}")
-            return 1
-        if idp_idx == "null":
-            log.error(f"OpenID identity provider {idp_name} not found")
-            return 1
-        idp_removal_array = [
-            {"op": "remove","path": f"/spec/identityProviders/{idp_idx.strip()}"}
-        ]
-        idp_removal_json = json.dumps(idp_removal_array)
-        cmd = f"oc patch oauth cluster --type json -p '{idp_removal_json}'"
-        return_rc, _ = execute_command(
-            cmd,
-            return_rc=True,
-        )
-        if return_rc != 0:
-            log.error(f"Failed to delete OpenID identity provider: {return_rc}")
-            return 1
-        log.info(f">> {idp_name} openID identity provider deleted successfully: {return_rc}")
-        log.info(">> Deleting user identities...")
-        delete_identities = f"oc get identity -oname | grep 'identity.user.openshift.io/{idp_name}:' | xargs oc delete"
-        return_rc, _ = execute_command(
-            delete_identities,
-            return_rc=True,
-        )
-        if return_rc != 0:
-            log.error(f"Failed to delete user identities: {return_rc}")
-            return 1
-        log.info(f">> {idp_name} users identities deleted successfully: {return_rc}")
-        return
+            result = execute_command(ocp_secret_name_cmd, return_rc=True)
+            if result is None:
+                log.error("Failed to execute command: execute_command returned None")
+                status = 1
+            elif result[0] != 0 or not result[1]:
+                log.error(f"Failed to get OCP secret name or secret name is empty: {result[0]}")
+                status = 1
+            else:
+                ocp_secret_name = result[1]
+
+        # Delete OCP secret
+        if status is None:
+            ocp_secret_name = ocp_secret_name.strip()
+            delete_secret_cmd = f"oc delete secret {ocp_secret_name} -n openshift-config --ignore-not-found"
+            result = self._execute_command_with_check(delete_secret_cmd, "Failed to delete OCP secret")
+            if result is None:
+                status = 1
+            else:
+                return_rc, _ = result
+                log.info(f"OCP secret deleted successfully: {return_rc}")
+
+        # Get IDP index and delete IDP
+        if status is None:
+            log.info(">> Deleting OpenID identity provider...")
+            idp_idx_cmd = f"oc get oauth cluster -o json | jq '.spec.identityProviders | map(.name == \"{idp_name}\") | index(true)'"
+            result = self._execute_command_with_check(idp_idx_cmd, "Failed to get OpenID identity provider index")
+            if result is None:
+                status = 1
+            elif result[1] == "null":
+                log.error(f"OpenID identity provider {idp_name} not found")
+                status = 1
+            else:
+                return_rc, idp_idx = result
+                idp_removal_array = [{"op": "remove", "path": f"/spec/identityProviders/{idp_idx.strip()}"}]
+                idp_removal_json = json.dumps(idp_removal_array)
+                cmd = f"oc patch oauth cluster --type json -p '{idp_removal_json}'"
+                result = self._execute_command_with_check(cmd, "Failed to delete OpenID identity provider")
+                if result is None:
+                    status = 1
+                else:
+                    return_rc, _ = result
+                    log.info(f">> {idp_name} openID identity provider deleted successfully: {return_rc}")
+
+        # Delete user identities
+        if status is None:
+            log.info(">> Deleting user identities...")
+            delete_identities = f"oc get identity -oname | grep 'identity.user.openshift.io/{idp_name}:' | xargs oc delete"
+            result = self._execute_command_with_check(delete_identities, "Failed to delete user identities")
+            if result is None:
+                status = 1
+            else:
+                return_rc, _ = result
+                log.info(f">> {idp_name} users identities deleted successfully: {return_rc}")
+
+        return status
+
 
 @click.group()
 def cli():
     """CLI for OpenID identity provider operations"""
-    pass
+
 
 @cli.command("register-client")
-
 @click.option(
     "--registration-endpoint",
     required=True,
@@ -317,7 +345,7 @@ def register_client(registration_endpoint, redirect_uri, client_name, contact_em
     if not token:
         log.error("IAT_TOKEN environment variable is not set")
         return 1
-    exit(openid_ops.register_dynamic_client(
+    sys.exit(openid_ops.register_dynamic_client(
         token=token.strip(),
         registration_endpoint=registration_endpoint,
         redirect_uris=list(redirect_uri),
@@ -325,6 +353,7 @@ def register_client(registration_endpoint, redirect_uri, client_name, contact_em
         contact_emails=list(contact_email),
         jenkins_props_file=jenkins_props_file,
     ))
+
 
 @cli.command("update-redirect-uris")
 @click.option(
@@ -360,7 +389,7 @@ def update_redirect_uris(operation, update_endpoint, client_name, redirect_uri, 
     if not registration_token:
         log.error("CLIENT_REGISTRATION_TOKEN environment variable is not set")
         return 1
-    exit(openid_ops.update_redirect_uris(
+    sys.exit(openid_ops.update_redirect_uris(
         operation=operation,
         registration_token=registration_token.strip(),
         update_endpoint=update_endpoint,
@@ -368,6 +397,7 @@ def update_redirect_uris(operation, update_endpoint, client_name, redirect_uri, 
         redirect_uris=list(redirect_uri),
         jenkins_props_file=jenkins_props_file,
     ))
+
 
 @cli.command("delete-client")
 @click.option(
@@ -387,11 +417,12 @@ def delete_client(deletion_endpoint, client_name):
     if not registration_token:
         log.error("CLIENT_REGISTRATION_TOKEN environment variable is not set")
         return 1
-    exit(openid_ops.delete_dynamic_client(
+    sys.exit(openid_ops.delete_dynamic_client(
         registration_token=registration_token.strip(),
         deletion_endpoint=deletion_endpoint,
         client_name=client_name,
     ))
+
 
 @cli.command("add-openid-idp")
 @click.option(
@@ -420,13 +451,14 @@ def add_openid_idp(idp_name: str, issuer_url: str, ocp_secret_name: str):
         log.error("CLIENT_ID and CLIENT_SECRET environment variables are not set")
         return 1
 
-    exit(openid_ops.add_openid_identity_provider(
+    sys.exit(openid_ops.add_openid_identity_provider(
         idp_name=idp_name,
         client_id=client_id.strip(),
         client_secret=client_secret.strip(),
         issuer_url=issuer_url.strip(),
         ocp_secret_name=ocp_secret_name.strip(),
     ))
+
 
 @cli.command("delete-openid-idp")
 @click.option(
@@ -442,7 +474,8 @@ def add_openid_idp(idp_name: str, issuer_url: str, ocp_secret_name: str):
 def delete_openid_idp(idp_name: str, ocp_secret_name: str):
     """Delete OpenID identity provider from the cluster"""
     openid_ops = OpenIdOps()
-    exit(openid_ops.remove_openid_identity_provider(idp_name=idp_name, ocp_secret_name=ocp_secret_name))
+    sys.exit(openid_ops.remove_openid_identity_provider(idp_name=idp_name, ocp_secret_name=ocp_secret_name))
+
 
 if __name__ == "__main__":
     cli()

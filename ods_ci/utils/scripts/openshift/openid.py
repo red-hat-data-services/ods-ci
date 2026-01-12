@@ -1,4 +1,3 @@
-
 """
 Example of usage
 1. Register a new dynamic client
@@ -95,7 +94,9 @@ class OpenIdOps:
 
     def _apply_openid_identity_provider(self):
         """Patches OAuth CR with the new identity provider"""
-        template_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../configs/templates/openid.json"))
+        template_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "../../../configs/templates/openid.json")
+        )
         with open(template_path, "r") as f:
             openid_template = Template(f.read())
         openid_json = openid_template.substitute(
@@ -105,13 +106,7 @@ class OpenIdOps:
             issuer_url=self.issuer_url,
         )
         patch_value = json.loads(openid_json)
-        patch_array = [
-            {
-                "op": "add",
-                "path": "/spec/identityProviders/-",
-                "value": patch_value
-            }
-        ]
+        patch_array = [{"op": "add", "path": "/spec/identityProviders/-", "value": patch_value}]
         patch_json = json.dumps(patch_array)
         cmd = f"oc patch oauth cluster --type json -p '{patch_json}'"
         result = execute_command(
@@ -128,7 +123,15 @@ class OpenIdOps:
         log.info(f"OpenID identity provider applied successfully: {return_rc}")
         return None
 
-    def register_dynamic_client(self, registration_endpoint: str, token: str, redirect_uris: list[str], client_name: str, contact_emails: list[str], jenkins_props_file: str):
+    def register_dynamic_client(
+        self,
+        registration_endpoint: str,
+        token: str,
+        redirect_uris: list[str],
+        client_name: str,
+        contact_emails: list[str],
+        jenkins_props_file: str,
+    ):
         """Registers a new dynamic OpenIDclient"""
         self.token = token
         self.jenkins_props_file = jenkins_props_file
@@ -146,7 +149,9 @@ class OpenIdOps:
         }
         request = requests.post(f"{self.registration_endpoint}", json=json.loads(registration_body), headers=headers)
         if request.status_code != 201:
-            log.error(f"Failed to register client: {request.status_code} {request.json()['error']} - {request.json()['error_description']}")
+            log.error(
+                f"Failed to register client: {request.status_code} {request.json()['error']} - {request.json()['error_description']}"
+            )
             return 1
         log.info(f"Client registered successfully: {request.status_code}")
         self.client_name = request.json()["client_name"]
@@ -156,7 +161,15 @@ class OpenIdOps:
         self._write_jenkins_properties()
         return None
 
-    def update_redirect_uris(self, operation: Literal["add", "remove"], registration_token: str, update_endpoint: str, client_name: str, redirect_uris: list[str], jenkins_props_file: str):
+    def update_redirect_uris(
+        self,
+        operation: Literal["add", "remove"],
+        registration_token: str,
+        update_endpoint: str,
+        client_name: str,
+        redirect_uris: list[str],
+        jenkins_props_file: str,
+    ):
         """Updates (add/remove) redirect URIs on a existing dynamic OpenID client"""
         self.jenkins_props_file = jenkins_props_file
         headers = {
@@ -190,9 +203,13 @@ class OpenIdOps:
         updated_client_info["redirect_uris"] = updated_uris
         update_request = requests.put(f"{update_endpoint}", headers=headers, json=updated_client_info)
         if update_request.status_code != 200:
-            log.error(f"Failed to {operation} redirect URIs to client {client_name}: {update_request.status_code} {update_request.text}")
+            log.error(
+                f"Failed to {operation} redirect URIs to client {client_name}: {update_request.status_code} {update_request.text}"
+            )
             return 1
-        log.info(f"{operation.capitalize()} Redirect URIs performed successfully on client {client_name}: {update_request.status_code}")
+        log.info(
+            f"{operation.capitalize()} Redirect URIs performed successfully on client {client_name}: {update_request.status_code}"
+        )
         updated_client_info = update_request.json()
         self.client_name = updated_client_info["client_name"]
         self.client_id = updated_client_info["client_id"]
@@ -213,7 +230,9 @@ class OpenIdOps:
         log.info(f"Client {client_name} deleted successfully: {request.status_code}")
         return None
 
-    def add_openid_identity_provider(self, idp_name: str, client_id: str, client_secret: str, issuer_url: str, ocp_secret_name: str):
+    def add_openid_identity_provider(
+        self, idp_name: str, client_id: str, client_secret: str, issuer_url: str, ocp_secret_name: str
+    ):
         """Configure the OpenID identity provider in the cluster"""
         log.info("Adding OpenID identity provider...")
         self.idp_name = idp_name
@@ -247,7 +266,9 @@ class OpenIdOps:
 
         # Get OCP secret name if not provided
         if not ocp_secret_name:
-            ocp_secret_name_cmd = "oc get oauth cluster -ojsonpath='{{.spec.identityProviders[?(@.name==\"{}\")].openID.clientSecret.name}}'".format(idp_name)
+            ocp_secret_name_cmd = "oc get oauth cluster -ojsonpath='{{.spec.identityProviders[?(@.name==\"{}\")].openID.clientSecret.name}}'".format(
+                idp_name
+            )
             result = execute_command(ocp_secret_name_cmd, return_rc=True)
             if result is None:
                 log.error("Failed to execute command: execute_command returned None")
@@ -294,7 +315,9 @@ class OpenIdOps:
         # Delete user identities
         if status is None:
             log.info(">> Deleting user identities...")
-            delete_identities = f"oc get identity -oname | grep 'identity.user.openshift.io/{idp_name}:' | xargs oc delete"
+            delete_identities = (
+                f"oc get identity -oname | grep 'identity.user.openshift.io/{idp_name}:' | xargs oc delete"
+            )
             result = self._execute_command_with_check(delete_identities, "Failed to delete user identities")
             if result is None:
                 status = 1
@@ -345,14 +368,16 @@ def register_client(registration_endpoint, redirect_uri, client_name, contact_em
     if not token:
         log.error("IAT_TOKEN environment variable is not set")
         return 1
-    sys.exit(openid_ops.register_dynamic_client(
-        token=token.strip(),
-        registration_endpoint=registration_endpoint,
-        redirect_uris=list(redirect_uri),
-        client_name=client_name,
-        contact_emails=list(contact_email),
-        jenkins_props_file=jenkins_props_file,
-    ))
+    sys.exit(
+        openid_ops.register_dynamic_client(
+            token=token.strip(),
+            registration_endpoint=registration_endpoint,
+            redirect_uris=list(redirect_uri),
+            client_name=client_name,
+            contact_emails=list(contact_email),
+            jenkins_props_file=jenkins_props_file,
+        )
+    )
 
 
 @cli.command("update-redirect-uris")
@@ -389,14 +414,16 @@ def update_redirect_uris(operation, update_endpoint, client_name, redirect_uri, 
     if not registration_token:
         log.error("CLIENT_REGISTRATION_TOKEN environment variable is not set")
         return 1
-    sys.exit(openid_ops.update_redirect_uris(
-        operation=operation,
-        registration_token=registration_token.strip(),
-        update_endpoint=update_endpoint,
-        client_name=client_name,
-        redirect_uris=list(redirect_uri),
-        jenkins_props_file=jenkins_props_file,
-    ))
+    sys.exit(
+        openid_ops.update_redirect_uris(
+            operation=operation,
+            registration_token=registration_token.strip(),
+            update_endpoint=update_endpoint,
+            client_name=client_name,
+            redirect_uris=list(redirect_uri),
+            jenkins_props_file=jenkins_props_file,
+        )
+    )
 
 
 @cli.command("delete-client")
@@ -417,11 +444,13 @@ def delete_client(deletion_endpoint, client_name):
     if not registration_token:
         log.error("CLIENT_REGISTRATION_TOKEN environment variable is not set")
         return 1
-    sys.exit(openid_ops.delete_dynamic_client(
-        registration_token=registration_token.strip(),
-        deletion_endpoint=deletion_endpoint,
-        client_name=client_name,
-    ))
+    sys.exit(
+        openid_ops.delete_dynamic_client(
+            registration_token=registration_token.strip(),
+            deletion_endpoint=deletion_endpoint,
+            client_name=client_name,
+        )
+    )
 
 
 @cli.command("add-openid-idp")
@@ -451,13 +480,15 @@ def add_openid_idp(idp_name: str, issuer_url: str, ocp_secret_name: str):
         log.error("CLIENT_ID and CLIENT_SECRET environment variables are not set")
         return 1
 
-    sys.exit(openid_ops.add_openid_identity_provider(
-        idp_name=idp_name,
-        client_id=client_id.strip(),
-        client_secret=client_secret.strip(),
-        issuer_url=issuer_url.strip(),
-        ocp_secret_name=ocp_secret_name.strip(),
-    ))
+    sys.exit(
+        openid_ops.add_openid_identity_provider(
+            idp_name=idp_name,
+            client_id=client_id.strip(),
+            client_secret=client_secret.strip(),
+            issuer_url=issuer_url.strip(),
+            ocp_secret_name=ocp_secret_name.strip(),
+        )
+    )
 
 
 @cli.command("delete-openid-idp")

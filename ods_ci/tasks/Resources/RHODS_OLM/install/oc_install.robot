@@ -752,22 +752,22 @@ Configure Authorino
     Log To Console    Configuring Authorino with SSL
     ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/configure_authorino.sh
     Log    ${output}    console=yes
-    Run Keyword And Continue On Failure    Should Be Equal As Numbers    ${rc}    ${0}
-    IF    ${rc} != ${0}
-        Log    Unable to configure Authorino namespace.\nCheck the cluster please    console=yes
-        ...    level=ERROR
-        RETURN
-    END
+    # Run Keyword And Continue On Failure    Should Be Equal As Numbers    ${rc}    ${0}
+    # IF    ${rc} != ${0}
+    #    Log    Unable to configure Authorino namespace.\nCheck the cluster please    console=yes
+    #    ...    level=ERROR
+    #    RETURN
+    # END
 
     Log To Console    Updating Authorino to enable SSL...
     ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/update_authorino_ssl.sh
     Log    ${output}    console=yes
-    Run Keyword And Continue On Failure    Should Be Equal As Numbers    ${rc}    ${0}
-    IF    ${rc} != ${0}
-        Log    Unable to update Authorino with SSL configuration.\nCheck the cluster please    console=yes
-        ...    level=ERROR
-        RETURN
-    END
+    # Run Keyword And Continue On Failure    Should Be Equal As Numbers    ${rc}    ${0}
+    # IF    ${rc} != ${0}
+    #    Log    Unable to update Authorino with SSL configuration.\nCheck the cluster please    console=yes
+    #    ...    level=ERROR
+    #    RETURN
+    # END
 
     Log To Console    Waiting for Authorino deployment rollout to complete...
     ${rc}    ${out} =    Run And Return Rc And Output

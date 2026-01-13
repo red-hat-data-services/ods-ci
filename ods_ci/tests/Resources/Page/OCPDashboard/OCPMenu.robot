@@ -49,33 +49,47 @@ Switch To Developer Perspective
 Disable Guided Tour Via CLI
     [Documentation]    Disables the OpenShift Console guided tour for the current user using oc commands.
     ...                This is more reliable than UI-based modal detection and clicking.
-    ...                Only updates existing user settings configmap, does not create new ones.
+    ...                Creates the user settings configmap if it doesn't exist, or patches it if it does.
+    ...                Returns ${TRUE} if the configmap was successfully created/patched, ${FALSE} otherwise.
     [Arguments]    ${username}
 
     # Get the current user's UID
     ${rc}    ${user_uid}=    Run And Return Rc And Output    oc get user ${username} -o jsonpath='{.metadata.uid}'
     IF    ${rc} != 0
         Log    Failed to get user UID for ${username}, guided tour may still appear: ${user_uid}    level=WARN
-        RETURN
+        RETURN    ${FALSE}
     END
 
     Log    Found user UID for ${username}: ${user_uid}
+
+    # The guided tour data to set (marks both admin and developer perspectives as completed)
+    ${guided_tour_data}=    Set Variable    {"admin":{"completed":true},"developer":{"completed":true}}
 
     # Check if the user settings configmap exists
     ${rc}    ${output}=    Run And Return Rc And Output    oc get cm user-settings-${user_uid} -n openshift-console-user-settings -o name
 
     IF    ${rc} != 0
-        Log    User settings configmap does not exist yet, skipping CLI method    level=INFO
-        RETURN
+        Log    User settings configmap does not exist, creating it...
+        # Create the configmap with guided tour disabled
+        # Using heredoc-style input to handle the JSON data properly
+        ${rc}    ${output}=    Run And Return Rc And Output
+        ...    oc create configmap user-settings-${user_uid} -n openshift-console-user-settings --from-literal=console.guidedTour='${guided_tour_data}'
+        IF    ${rc} != 0
+            Log    Failed to create user settings configmap: ${output}    level=WARN
+            RETURN    ${FALSE}
+        END
+        Log    Successfully created user settings configmap with guided tour disabled
+        RETURN    ${TRUE}
     ELSE
         Log    User settings configmap exists, updating guided tour settings...
         # Patch the existing configmap to disable guided tour
         ${rc}    ${output}=    Run And Return Rc And Output    oc patch configmap user-settings-${user_uid} -n openshift-console-user-settings --patch='{"data":{"console.guidedTour":"{\\"admin\\":{\\"completed\\":true},\\"developer\\":{\\"completed\\":true}}"}}'
         IF    ${rc} != 0
             Log    Failed to patch user settings configmap: ${output}    level=WARN
-            RETURN
+            RETURN    ${FALSE}
         END
         Log    Successfully updated user settings configmap to disable guided tour
+        RETURN    ${TRUE}
     END
 
 Maybe Skip Tour
@@ -92,20 +106,31 @@ Maybe Skip Tour
     # Try to disable the tour via CLI first (more reliable) if username is provided
     IF    "${username}" != "${EMPTY}"
         Log    Attempting to disable guided tour via CLI for user: ${username}
-        Disable Guided Tour Via CLI    ${username}
-        # Give the console a moment to pick up the configuration change and reload page
-        Sleep    3s
-        Reload Page
-        Wait Until OpenShift Console Is Loaded
+        ${cli_patched} =    Disable Guided Tour Via CLI    ${username}
+        # Only reload the page if the CLI method actually patched the configmap
+        IF    ${cli_patched}
+            # Give the console a moment to pick up the configuration change and reload page
+            Sleep    5s
+            Reload Page
+            # Wait for console to be fully loaded - if this fails, continue to UI fallback
+            TRY
+                Wait Until OpenShift Console Is Loaded
+                RETURN
+            EXCEPT
+                Log    Console did not load after CLI configmap update, falling back to UI modal check    level=WARN
+            END
+        ELSE
+            Log    CLI method did not patch configmap, skipping page reload
+        END
     ELSE
         Log    No username provided, skipping CLI method and using UI fallback only
     END
 
-    # Fallback: still check for modal in case CLI approach didn't work or username not provided
+    # Fallback: check for modal in case CLI approach didn't work or username not provided
     ${MODAL_GUIDED_TOUR_XPATH} =  Set Variable  xpath=//div[@id='guided-tour-modal']
     ${tour_modal} =  Run Keyword And Return Status  Wait Until Page Contains Element  ${MODAL_GUIDED_TOUR_XPATH}  timeout=5s
     IF  ${tour_modal}
-        Log    Guided tour modal still appeared, attempting to close via UI
+        Log    Guided tour modal appeared, attempting to close via UI
         # This xpath is for OCP 4.18 and older
         ${MODAL_BUTTON_OLDER_XPATH} =  Set Variable  ${MODAL_GUIDED_TOUR_XPATH}/button
         # This xpath is for OCP 4.19+

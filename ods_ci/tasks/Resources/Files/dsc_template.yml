@@ -16,6 +16,8 @@ spec:
       managementState: <aipipelines_value>
     kserve:
       managementState: <kserve_value>
+      modelsAsService:
+        managementState: <modelsasservice_value>
     kueue:
       managementState: <kueue_value>
     ray:

@@ -23,6 +23,7 @@ ${DSCI_NAME} =    default-dsci
 ...    feastoperator
 ...    llamastackoperator
 ...    mlflowoperator
+...    modelsasservice
 ${LWS_OP_NAME}=    leader-worker-set
 ${LWS_OP_NS}=    openshift-lws-operator
 ${LWS_SUB_NAME}=    leader-worker-set
@@ -336,6 +337,12 @@ Verify RHODS Installation
     ...    label_selector=app.kubernetes.io/part-of=mlflowoperator
   END
 
+  ${modelsasservice} =    Is Nested Component Enabled    kserve    modelsAsService    ${DSC_NAME}
+  IF    "${modelsasservice}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/part-of=models-as-a-service
+  END
+
   ${dashboard} =    Is Component Enabled    dashboard    ${DSC_NAME}
   IF    "${dashboard}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
@@ -625,6 +632,25 @@ Is Component Enabled
     ${return_code}    ${output} =    Run And Return Rc And Output    oc get datasciencecluster ${dsc_name} -o json | jq '.spec.components.${component}.managementState // "Removed"'  #robocop:disable
     Log    ${output}
     Should Be Equal As Integers  ${return_code}  0  msg=Error detected while getting component status
+    ${n_output} =    Evaluate    '${output}' == ''
+    IF  ${n_output}
+          RETURN    false
+    ELSE
+         IF    ${output} == "Removed"
+               RETURN    false
+         ELSE IF    ${output} == "Managed"
+              RETURN    true
+         ELSE IF    ${output} == "Unmanaged"
+              RETURN    true
+         END
+    END
+
+Is Nested Component Enabled
+    [Documentation]    Returns the enabled status of a nested component (true/false)
+    [Arguments]    ${parent_component}    ${nested_component}    ${dsc_name}=${DSC_NAME}
+    ${return_code}    ${output} =    Run And Return Rc And Output    oc get datasciencecluster ${dsc_name} -o json | jq '.spec.components.${parent_component}.${nested_component}.managementState // "Removed"'  #robocop:disable
+    Log    ${output}
+    Should Be Equal As Integers  ${return_code}  0  msg=Error detected while getting nested component status
     ${n_output} =    Evaluate    '${output}' == ''
     IF  ${n_output}
           RETURN    false
@@ -1064,6 +1090,22 @@ Set Component State
     END
     Log To Console    Component ${component} state was set to ${state}
 
+Set Nested Component State
+    [Documentation]    Set nested component state in Data Science Cluster (e.g., kserve.modelsAsService)
+    [Arguments]    ${parent_component}    ${nested_component}    ${state}
+    ${result} =    Run Process    oc get datascienceclusters.datasciencecluster.opendatahub.io -o name
+    ...    shell=true    stderr=STDOUT
+    IF    $result.stdout == ""
+        FAIL    Can not find datasciencecluster
+    END
+    ${cluster_name} =    Set Variable    ${result.stdout}
+    ${result} =    Run Process    oc patch ${cluster_name} --type 'json' -p '[{"op" : "replace" ,"path" : "/spec/components/${parent_component}/${nested_component}/managementState" ,"value" : "${state}"}]'
+    ...    shell=true    stderr=STDOUT
+    IF    $result.rc != 0
+        FAIL    Can not set ${parent_component}.${nested_component} to ${state}: ${result.stdout}
+    END
+    Log To Console    Nested component ${parent_component}.${nested_component} state was set to ${state}
+
 Get DSC Component State
     [Documentation]    Get component management state
     [Arguments]    ${dsc}    ${component}    ${namespace}
@@ -1072,6 +1114,17 @@ Get DSC Component State
     ...    oc get DataScienceCluster/${dsc} -n ${namespace} -o 'jsonpath={.spec.components.${component}.managementState}'
     Should Be Equal    "${rc}"    "0"    msg=${state}
     Log To Console    Component ${component} state ${state}
+
+    RETURN    ${state}
+
+Get DSC Nested Component State
+    [Documentation]    Get nested component management state (e.g., kserve.modelsAsService)
+    [Arguments]    ${dsc}    ${parent_component}    ${nested_component}    ${namespace}
+
+    ${rc}   ${state}=    Run And Return Rc And Output
+    ...    oc get DataScienceCluster/${dsc} -n ${namespace} -o 'jsonpath={.spec.components.${parent_component}.${nested_component}.managementState}'
+    Should Be Equal    "${rc}"    "0"    msg=${state}
+    Log To Console    Nested component ${parent_component}.${nested_component} state ${state}
 
     RETURN    ${state}
 

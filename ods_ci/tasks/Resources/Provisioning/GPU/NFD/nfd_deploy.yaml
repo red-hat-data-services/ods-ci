@@ -7,7 +7,6 @@ spec:
   instance: "" # instance is empty by default
   topologyupdater: false # False by default
   operand:
-    # Image URL example: registry.redhat.io/openshift4/ose-node-feature-discovery:v4.11
     image: <imageUrl>
     imagePullPolicy: Always
   workerConfig:

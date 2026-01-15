@@ -15,9 +15,9 @@ Verify Auth Crd
     [Tags]      Smoke
     ...         Operator
     ...         RHOAIENG-18846
-    Get User Groups From Auth Cr And Check Rolebinding Exists       adminGroups     rolebinding     admingroup-rolebinding
-    Get User Groups From Auth Cr And Check Rolebinding Exists       adminGroups     clusterrolebinding     admingroupcluster-rolebinding
-    Get User Groups From Auth Cr And Check Rolebinding Exists       allowedGroups   clusterrolebinding     allowedgroupcluster-rolebinding
+    Get User Groups From Auth Cr And Check Rolebinding Exists       adminGroups     rolebinding     data-science-admingroup-rolebinding
+    Get User Groups From Auth Cr And Check Rolebinding Exists       adminGroups     clusterrolebinding     data-science-admingroupcluster-rolebinding
+    Get User Groups From Auth Cr And Check Rolebinding Exists       allowedGroups   clusterrolebinding     data-science-allowedgroupcluster-rolebinding
 
 
 *** Keywords ***

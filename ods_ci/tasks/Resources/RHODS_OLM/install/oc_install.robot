@@ -339,6 +339,7 @@ Verify RHODS Installation
 
   ${modelsasservice} =    Is Nested Component Enabled    kserve    modelsAsService    ${DSC_NAME}
   IF    "${modelsasservice}" == "true"
+    Configure MaaS Gateway API
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app.kubernetes.io/part-of=models-as-a-service
   END
@@ -1215,3 +1216,10 @@ Configure Gateway API
     Log To Console    ${output}
     Should Be Equal As Integers    ${rc}    0    msg=Error configuring Gateway for KServe
 
+Configure MaaS Gateway API
+    [Documentation]    Configure Gateway API for MaaS traffic routing
+    Log To Console    Configuring Gateway API for MaaS
+    ${rc}    ${output} =    Run And Return Rc And Output
+    ...    bash tasks/Resources/Gateway/configure_maas_gateway.sh
+    Log To Console    ${output}
+    Should Be Equal As Integers    ${rc}    0    msg=Error configuring Gateway for MaaS

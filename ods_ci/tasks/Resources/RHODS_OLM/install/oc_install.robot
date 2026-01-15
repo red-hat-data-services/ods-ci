@@ -339,7 +339,6 @@ Verify RHODS Installation
 
   ${modelsasservice} =    Is Nested Component Enabled    kserve    modelsAsService    ${DSC_NAME}
   IF    "${modelsasservice}" == "true"
-    Configure MaaS Gateway API
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app.kubernetes.io/part-of=models-as-a-service
   END
@@ -986,6 +985,7 @@ Install RHOAI Dependencies With CLI
     Install Leader Worker Set Operator Via Cli
     Install Connectivity Link Operator Via Cli
     Install JobSet Dependencies
+    Configure MaaS Gateway API
 
 Install Observability Dependencies
     [Documentation]    Install dependent operators related to Observability

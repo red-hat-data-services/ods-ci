@@ -9,11 +9,12 @@ for dir in must-gather.local*; do
     fi
 done
 
-oc adm must-gather --image=quay.io/rhoai/odh-must-gather-rhel9:rhoai-3.0 -- "export OPERATOR_NAMESPACE=${OPERATOR_NAMESPACE};export APPLICATIONS_NAMESPACE=${APPLICATIONS_NAMESPACE}; /usr/bin/gather" &> must-gather-results.txt
+oc adm must-gather --image=quay.io/rhoai/odh-must-gather-rhel9:rhoai-3.0  --volume-percentage=90 -- "export OPERATOR_NAMESPACE=${OPERATOR_NAMESPACE};export APPLICATIONS_NAMESPACE=${APPLICATIONS_NAMESPACE}; /usr/bin/gather" &> must-gather-results.txt
 
 if [ $? -eq 0 ]
 then
     echo "SUCCESS: must-gather logs can be found in repo must-gather-local.*"
 else
     echo "FAIL : Unable to get must-gather logs"
+    exit 1
 fi

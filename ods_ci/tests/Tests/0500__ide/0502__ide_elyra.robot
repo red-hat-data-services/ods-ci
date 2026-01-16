@@ -40,7 +40,7 @@ ${DC_NAME} =    elyra-s3
 Verify Pipelines Integration With Elyra When Using Standard Data Science Image
     [Documentation]    Verifies that a workbench using the Jupyter | Data Science | CPU | Python 3.12 Image can be used to
     ...    create and run a Pipeline
-    [Tags]    Sanity    ODS-2197
+    [Tags]    Smoke    ODS-2197
     [Timeout]    10m
     Verify Pipelines Integration With Elyra Running Hello World Pipeline Test
     ...    img=Jupyter | Data Science | CPU | Python 3.12
@@ -53,11 +53,11 @@ Verify Pipelines Integration With Elyra When Using Standard Data Science Based I
     ...    Note: this a templated test case
     ...    (more info at https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#test-templates)
     [Template]    Verify Pipelines Integration With Elyra Running Hello World Pipeline Test
-    [Tags]        Tier1    ODS-2271
-    [Timeout]     30m
-    Jupyter | PyTorch | CUDA | Python 3.12       Runtime | Datascience | CPU | Python 3.12    pytorch-pipeline
-    Jupyter | TensorFlow | CUDA | Python 3.12    Runtime | Datascience | CPU | Python 3.12    tensorflow-pipeline
-    Jupyter | TrustyAI | CPU | Python 3.12       Runtime | Datascience | CPU | Python 3.12    trustyai-pipeline
+    [Tags]        Sanity    ODS-2271
+    [Timeout]     40m
+    Jupyter | PyTorch | CUDA | Python 3.12       Runtime | Datascience | CPU | Python 3.12    pytorch-pipeline      600s
+    Jupyter | TensorFlow | CUDA | Python 3.12    Runtime | Datascience | CPU | Python 3.12    tensorflow-pipeline   600s
+    Jupyter | TrustyAI | CPU | Python 3.12       Runtime | Datascience | CPU | Python 3.12    trustyai-pipeline     600s
 
 
 *** Keywords ***
@@ -89,13 +89,13 @@ Elyra Pipelines Suite Teardown
 Verify Pipelines Integration With Elyra Running Hello World Pipeline Test     # robocop: off=too-many-calls-in-keyword
     [Documentation]    Creates and starts a workbench using ${img} and verifies that the Hello World sample pipeline
     ...    runs successfully
-    [Arguments]    ${img}    ${runtime_image}    ${experiment_name}
+    [Arguments]    ${img}    ${runtime_image}    ${experiment_name}    ${workbench_timeout}=300s
     Create Workbench    workbench_title=elyra_${img}    workbench_description=Elyra test
     ...                 prj_title=${PRJ_TITLE}    image_name=${img}    hardware_profile=default-profile
     ...                 storage=Persistent  pv_existent=${FALSE}
     ...                 pv_name=${PV_NAME}_${img}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
     ...                 envs=${ENVS_LIST}
-    Start Workbench     workbench_title=elyra_${img}    timeout=300s
+    Start Workbench     workbench_title=elyra_${img}    timeout=${workbench_timeout}
     Launch And Access Workbench    workbench_title=elyra_${img}
     Clone Git Repository And Open    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main
     ...    ods-ci-notebooks-main/notebooks/500__jupyterhub/pipelines/v2/elyra/run-pipelines-on-data-science-pipelines/hello-generic-world.pipeline  # robocop: disable

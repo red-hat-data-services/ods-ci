@@ -93,6 +93,7 @@ Create Workbench
             Click Element    //a[@href="#cluster-storage"]
             Click Element   //*[@data-testid="create-storage-button"]
             Fill In New PV Data    name=${pv_name}    size=${pv_size}    description=${pv_description}
+            ...    storage_class=standard-csi
             Click Button    ${STORAGE_SUBMIT_BTN_XP}
         ELSE
             Log    msg="pv_existent" argument not set, using default PV settings   level=WARN

@@ -614,7 +614,21 @@ def cmd_upload(args, client: ReportPortalClient):
     if not os.path.exists(file_path):
         err(f"File not found: {file_path}")
 
-    _upload_xunit(client, file_path, args.name, args.description, args.attributes)
+    # Read description from file if provided, otherwise use direct value
+    description = args.description
+    if args.description_file:
+        if not os.path.exists(args.description_file):
+            err(f"Description file not found: {args.description_file}")
+        description = Path(args.description_file).read_text().strip()
+
+    # Read attributes from file if provided, otherwise use direct value
+    attributes = args.attributes
+    if args.attribute_file:
+        if not os.path.exists(args.attribute_file):
+            err(f"Attribute file not found: {args.attribute_file}")
+        attributes = Path(args.attribute_file).read_text().strip()
+
+    _upload_xunit(client, file_path, args.name, description, attributes)
 
 
 def _upload_xunit(  # noqa: PLR0914
@@ -791,8 +805,12 @@ def main():
     upload_parser = subparsers.add_parser("upload", help="Upload xUnit test results")
     upload_parser.add_argument("file", help="Path to xUnit XML file")
     upload_parser.add_argument("--name", "-n", help="Launch name (default: filename)")
-    upload_parser.add_argument("--description", "--desc", "-d", help="Launch description")
-    upload_parser.add_argument("--attributes", "--attrs", "-a", help="Launch attributes (key1:val1,key2:val2)")
+    upload_parser.add_argument("--description", "-d", help="Launch description")
+    upload_parser.add_argument("--description-file", "-df", help="Path to file containing launch description")
+    upload_parser.add_argument("--attributes", "-a", help="Launch attributes (key1:val1,key2:val2)")
+    upload_parser.add_argument(
+        "--attribute-file", "-af", help="Path to file containing launch attributes (key1:val1,key2:val2)"
+    )
 
     args = parser.parse_args()
 

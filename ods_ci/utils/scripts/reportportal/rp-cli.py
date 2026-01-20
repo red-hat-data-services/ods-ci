@@ -41,7 +41,6 @@ Exit Codes:
   15  API error
 """
 
-import argparse
 import json
 import os
 import re
@@ -53,10 +52,24 @@ from pathlib import Path
 from urllib.parse import quote
 
 try:
+    import click
+except ImportError:
+    print("Error: 'click' module required. Install with: pip install click")
+    sys.exit(1)
+
+try:
     import requests
 except ImportError:
     print("Error: 'requests' module required. Install with: pip install requests")
     sys.exit(1)
+
+
+class Namespace:
+    """Simple namespace object to replace Namespace."""
+
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
 
 # Configuration via env vars or CLI flags (no defaults - must be provided)
@@ -73,7 +86,19 @@ EXIT_NOT_FOUND = 13  # Resource not found
 EXIT_DUPLICATE = 14  # Resource already exists
 EXIT_API_ERROR = 15  # Other API errors
 
+
+def usage_err(message: str, exit_code: int = EXIT_USAGE) -> None:
+    """Print usage info and error message, then exit."""
+    ctx = click.get_current_context(silent=True)
+    if ctx:
+        click.echo(ctx.get_usage(), err=True)
+        click.echo(f"Try '{ctx.info_name} --help' for help.\n", err=True)
+    err(message, exit_code)
+
+
 # ReportPortal API error code mapping
+
+
 RP_ERROR_MAP = {
     4091: EXIT_DUPLICATE,  # Resource already exists
     4042: EXIT_NOT_FOUND,  # Resource not found
@@ -97,29 +122,21 @@ def get_exit_code(resp: dict) -> int:
     return EXIT_ERROR
 
 
-# Colors for terminal output
-class Colors:
-    RED = "\033[0;31m"
-    GREEN = "\033[0;32m"
-    YELLOW = "\033[1;33m"
-    BLUE = "\033[0;34m"
-    NC = "\033[0m"  # No Color
-
-
+# Terminal output helpers (using click for colors)
 def info(msg):
-    print(f"{Colors.BLUE}{msg}{Colors.NC}")
+    click.echo(click.style(msg, fg="blue"))
 
 
 def ok(msg):
-    print(f"{Colors.GREEN}{msg}{Colors.NC}")
+    click.echo(click.style(msg, fg="green"))
 
 
 def warn(msg):
-    print(f"{Colors.YELLOW}{msg}{Colors.NC}")
+    click.echo(click.style(msg, fg="yellow"))
 
 
 def err(msg, code: int = EXIT_ERROR):
-    print(f"{Colors.RED}Error ({code}): {msg}{Colors.NC}", file=sys.stderr)
+    click.echo(click.style(f"Error ({code}): {msg}", fg="red"), err=True)
     sys.exit(code)
 
 
@@ -277,6 +294,15 @@ def load_json_file(file_path: str) -> dict:
         return json.load(f)
 
 
+def read_file_or_value(file_path: str | None, direct_value: str | None, description: str = "File") -> str | None:
+    """Read content from file if path provided, otherwise return direct value."""
+    if file_path:
+        if not os.path.exists(file_path):
+            err(f"{description} not found: {file_path}", EXIT_FILE_NOT_FOUND)
+        return Path(file_path).read_text().strip()
+    return direct_value
+
+
 def save_json_file(file_path: str, data: dict) -> None:
     """Save data to JSON file"""
     with open(file_path, "w") as f:
@@ -423,73 +449,6 @@ def check_resource_not_exists(client: ReportPortalClient, resource_type: str, na
 
     if existing:
         err(f"{resource_type.capitalize()} '{name}' already exists (ID: {existing['id']})", EXIT_DUPLICATE)
-
-
-def resolve_source(
-    source: str,
-    resource_id: int | None,
-    client: ReportPortalClient | None,
-    token: str | None,
-    action: str,
-    parser: argparse.ArgumentParser | None = None,
-) -> tuple[str, int, ReportPortalClient]:
-    """
-    Resolve source (URL or type+id) to resource_type, resource_id, and client.
-    Returns (resource_type, resource_id, client).
-    If parser is provided, uses parser.error() for argument validation errors.
-    """
-
-    def arg_err(msg: str):
-        if parser:
-            parser.error(msg)
-        else:
-            err(msg, EXIT_USAGE)
-
-    if source.startswith("http"):
-        parsed = parse_rp_url(source)
-        if not parsed:
-            arg_err("invalid ReportPortal URL format. Expected: https://server/ui/#project/resource_type/id")
-
-        info("Parsed URL:")
-        print(f"  Server: {parsed['server']}")
-        print(f"  Project: {parsed['project']}")
-        print(f"  Type: {parsed['resource_type']}")
-        print(f"  ID: {parsed['resource_id']}")
-        print()
-
-        client = ReportPortalClient(parsed["server"], parsed["project"], token)
-        if not client.validate_token():
-            err("Invalid token or cannot connect to ReportPortal.", EXIT_AUTH_ERROR)
-
-        return parsed["resource_type"], parsed["resource_id"], client
-
-    # Source is a type (dashboard/filter)
-    if source not in ["dashboard", "filter"]:
-        arg_err(f"invalid source '{source}'. Use 'dashboard', 'filter', or a full URL")
-    if not resource_id:
-        arg_err(f"resource ID required when {action} by type")
-
-    return source, resource_id, client
-
-
-def cmd_export(args, client: ReportPortalClient | None, token: str | None = None, parser=None):
-    """Export dashboard or filter. Supports both type+id and URL formats."""
-    resource_type, resource_id, client = resolve_source(args.source, args.id, client, token, "exporting", parser)
-
-    # Create export args
-    export_args = argparse.Namespace(
-        id=resource_id,
-        output=args.output,
-        filters=getattr(args, "filters", None),
-        rename=getattr(args, "rename", None),
-    )
-
-    if resource_type == "dashboard":
-        cmd_export_dashboard(export_args, client)
-    elif resource_type == "filter":
-        cmd_export_filter(export_args, client)
-    else:
-        err(f"Unsupported resource type: {resource_type}. Supported: dashboard, filter", EXIT_USAGE)
 
 
 def cmd_export_filter(args, client: ReportPortalClient):
@@ -740,79 +699,13 @@ def cmd_import_dashboard(args, client: ReportPortalClient, data: dict | None = N
                 ok("✓")
                 added += 1
             else:
-                print(f"{Colors.RED}✗{Colors.NC} {resp.get('message', resp)}")
+                click.echo(click.style("✗", fg="red") + f" {resp.get('message', resp)}")
         else:
-            print(f"{Colors.RED}✗{Colors.NC} {widget_resp.get('message', widget_resp)}")
+            click.echo(click.style("✗", fg="red") + f" {widget_resp.get('message', widget_resp)}")
 
     print()
     ok(f"Done! {added}/{total} widgets created")
     print(f"URL: {client.url}/ui/#{client.project}/dashboard/{dashboard_id}")
-
-
-# ============================================================================
-# COPY Command
-# ============================================================================
-def cmd_copy(args, client: ReportPortalClient | None, token: str | None = None, parser=None):
-    """Copy dashboard or filter. Supports both type+id and URL formats."""
-    resource_type, resource_id, client = resolve_source(args.source, args.id, client, token, "copying", parser)
-
-    # Determine target title early to check for duplicates before export
-    if args.title:
-        # Explicit title provided - check immediately
-        title = args.title
-    else:
-        # Get original name and apply rename if specified
-        if resource_type == "dashboard":
-            original = client.get_dashboard(resource_id)
-        else:
-            original = client.get_filter(resource_id)
-
-        if "id" not in original:
-            err(f"{resource_type.capitalize()} not found", EXIT_NOT_FOUND)
-
-        title = original.get("name", f"{resource_type.capitalize()} {resource_id}")
-
-        # Apply rename pattern to title if specified
-        if args.rename:
-            pattern, replacement = args.rename
-            title = re.sub(pattern, replacement, title)
-
-    # Check if target already exists BEFORE exporting
-    check_resource_not_exists(client, resource_type, title)
-
-    # Create temp file for export
-    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
-        temp_file = f.name
-
-    try:
-        # Export to temp file
-        export_args = argparse.Namespace(
-            id=resource_id,
-            output=temp_file,
-            filters=getattr(args, "filters", None),
-            rename=getattr(args, "rename", None),
-        )
-
-        if resource_type == "dashboard":
-            cmd_export_dashboard(export_args, client)
-        elif resource_type == "filter":
-            cmd_export_filter(export_args, client)
-        else:
-            err(f"Unsupported resource type: {resource_type}. Supported: dashboard, filter", EXIT_USAGE)
-
-        print()
-
-        # Import with determined title (skip existence check - already done above)
-        import_args = argparse.Namespace(
-            file=temp_file,
-            title=title,
-            rename=None,  # Already applied during export
-            _skip_exists_check=True,
-        )
-        cmd_import(import_args, client)
-    finally:
-        if os.path.exists(temp_file):
-            os.remove(temp_file)
 
 
 # ============================================================================
@@ -824,19 +717,8 @@ def cmd_upload(args, client: ReportPortalClient):
     if not os.path.exists(file_path):
         err(f"File not found: {file_path}", EXIT_FILE_NOT_FOUND)
 
-    # Read description from file if provided, otherwise use direct value
-    description = args.description
-    if args.description_file:
-        if not os.path.exists(args.description_file):
-            err(f"Description file not found: {args.description_file}", EXIT_FILE_NOT_FOUND)
-        description = Path(args.description_file).read_text().strip()
-
-    # Read attributes from file if provided, otherwise use direct value
-    attributes = args.attributes
-    if args.attribute_file:
-        if not os.path.exists(args.attribute_file):
-            err(f"Attribute file not found: {args.attribute_file}", EXIT_FILE_NOT_FOUND)
-        attributes = Path(args.attribute_file).read_text().strip()
+    description = read_file_or_value(args.description_file, args.description, "Description file")
+    attributes = read_file_or_value(args.attribute_file, args.attributes, "Attribute file")
 
     _upload_xunit(client, file_path, args.name, description, attributes)
 
@@ -933,10 +815,9 @@ def _upload_xunit(  # noqa: PLR0914
         sys.exit(1)
 
 
-def get_test_status(testcase):
-    if testcase.find("failure") is not None:
-        return "FAILED"
-    if testcase.find("error") is not None:
+def get_test_status(testcase) -> str:
+    """Get test status from xUnit testcase element."""
+    if testcase.find("failure") is not None or testcase.find("error") is not None:
         return "FAILED"
     if testcase.find("skipped") is not None:
         return "SKIPPED"
@@ -993,131 +874,224 @@ def parse_rp_url(url: str) -> dict:
 
 
 # ============================================================================
-# MAIN
+# CLI with Click
 # ============================================================================
-def main():
-    parser = argparse.ArgumentParser(
-        description="ReportPortal CLI Tool", formatter_class=argparse.RawDescriptionHelpFormatter, epilog=__doc__
-    )
+class Config:
+    """Shared configuration passed between commands."""
 
-    # Global options (all require env var or CLI flag)
-    parser.add_argument(
-        "--server", default=os.environ.get("RP_SERVER"), help="ReportPortal server URL (or set RP_SERVER env var)"
-    )
-    parser.add_argument(
-        "--project", default=os.environ.get("RP_PROJECT"), help="ReportPortal project name (or set RP_PROJECT env var)"
-    )
-    parser.add_argument(
-        "--token", default=os.environ.get("RP_API_TOKEN"), help="API token (or set RP_API_TOKEN env var)"
-    )
-    parser.add_argument("--token-file", help="Path to file containing API token")
+    def __init__(self):
+        self.server = None
+        self.project = None
+        self.token = None
+        self.client = None
 
-    subparsers = parser.add_subparsers(dest="command", help="Commands")
 
-    # List command
-    list_parser = subparsers.add_parser("list", help="List dashboards or filters")
-    list_parser.add_argument("type", nargs="?", default="dashboards", help="What to list: dashboards or filters")
+pass_config = click.make_pass_decorator(Config, ensure=True)
 
-    # Export command
-    export_parser = subparsers.add_parser("export", help="Export dashboard or filter (by type+id or URL)")
-    export_parser.add_argument("source", help="Resource type (dashboard/filter) or full ReportPortal URL")
-    export_parser.add_argument("id", nargs="?", type=int, help="Resource ID (required if source is type)")
-    export_parser.add_argument("-o", "--output", help="Output file (default: auto-generated)")
-    export_parser.add_argument("--title", "-t", help="Override resource name/title in exported JSON")
-    export_parser.add_argument("--filters", help="Filter IDs to include (comma-separated)")
-    export_parser.add_argument("--rename", nargs=2, metavar=("OLD", "NEW"), help="Rename pattern (regex supported)")
 
-    # Import command
-    import_parser = subparsers.add_parser("import", help="Import dashboard or filter")
-    import_parser.add_argument("file", help="JSON file to import")
-    import_parser.add_argument("--title", "-t", help="Override resource name/title")
-    import_parser.add_argument("--rename", nargs=2, metavar=("OLD", "NEW"), help="Rename pattern (regex supported)")
+def get_token(token: str | None, token_file: str | None) -> str | None:
+    """Resolve token from arg, file, or default location."""
+    if token:
+        return token
+    if token_file:
+        return Path(token_file).read_text().strip()
+    # Try default token file
+    script_dir = Path(__file__).parent
+    default_file = script_dir / "secrets" / "rp-api-token"
+    if default_file.exists():
+        return default_file.read_text().strip()
+    return None
 
-    # Copy command
-    copy_parser = subparsers.add_parser("copy", help="Copy/duplicate dashboard or filter (by type+id or URL)")
-    copy_parser.add_argument("source", help="Resource type (dashboard/filter) or full ReportPortal URL")
-    copy_parser.add_argument("id", nargs="?", type=int, help="Resource ID (required if source is type)")
-    copy_parser.add_argument(
-        "--title", "-t", help="New title for the copy (default: original name with --rename applied)"
-    )
-    copy_parser.add_argument("--filters", help="Filter IDs to include (comma-separated, dashboards only)")
-    copy_parser.add_argument(
-        "--rename", nargs=2, metavar=("OLD", "NEW"), help="Rename pattern applied to title and content"
-    )
 
-    # Upload command
-    upload_parser = subparsers.add_parser("upload", help="Upload xUnit test results")
-    upload_parser.add_argument("file", help="Path to xUnit XML file")
-    upload_parser.add_argument("--name", "-n", help="Launch name (default: filename)")
-    upload_parser.add_argument("--description", "-d", help="Launch description")
-    upload_parser.add_argument("--description-file", "-df", help="Path to file containing launch description")
-    upload_parser.add_argument("--attributes", "-a", help="Launch attributes (key1:val1,key2:val2)")
-    upload_parser.add_argument(
-        "--attribute-file", "-af", help="Path to file containing launch attributes (key1:val1,key2:val2)"
-    )
-
-    args = parser.parse_args()
-
-    if not args.command:
-        parser.print_help()
-        sys.exit(EXIT_SUCCESS)
-
-    # Get token
-    token = args.token
-    if not token and args.token_file:
-        token = Path(args.token_file).read_text().strip()
-    if not token:
-        # Try default token file
-        script_dir = Path(__file__).parent
-        token_file = script_dir / "secrets" / "rp-api-token"
-        if token_file.exists():
-            token = token_file.read_text().strip()
-
-    if not token:
-        err("API token required. Set RP_API_TOKEN, use --token, or --token-file", EXIT_AUTH_ERROR)
-
-    # Handle "export" and "copy" with URL (server/project extracted from URL)
-    if args.command == "export" and args.source.startswith("http"):
-        cmd_export(args, None, token, export_parser)
-        return
-    if args.command == "copy" and args.source.startswith("http"):
-        cmd_copy(args, None, token, copy_parser)
-        return
-
-    # Check if import was given a URL instead of a file
-    if args.command == "import" and args.file.startswith("http"):
-        import_parser.error("import expects a JSON file, not a URL. Use 'copy' to duplicate from a URL.")
-
-    # All other commands require server and project
-    if not args.server:
+def require_client(config: Config) -> ReportPortalClient:
+    """Ensure client is initialized, or error."""
+    if config.client:
+        return config.client
+    if not config.server:
         err("ReportPortal server URL required. Set RP_SERVER or use --server")
-
-    if not args.project:
+    if not config.project:
         err("Project name required. Set RP_PROJECT or use --project")
-
-    # Create client
-    client = ReportPortalClient(args.server, args.project, token)
-
-    # Validate token
+    if not config.token:
+        err("API token required. Set RP_API_TOKEN, use --token, or --token-file", EXIT_AUTH_ERROR)
+    client = ReportPortalClient(config.server, config.project, config.token)
     if not client.validate_token():
         err("Invalid token or cannot connect to ReportPortal. Run --help for auth instructions.", EXIT_AUTH_ERROR)
+    config.client = client
+    return client
 
-    # Execute command
-    if args.command == "list":
-        cmd_list(args, client)
-    elif args.command == "export":
-        cmd_export(args, client, token, export_parser)
-    elif args.command == "import":
-        cmd_import(args, client)
-    elif args.command == "copy":
-        cmd_copy(args, client, token, copy_parser)
-    elif args.command == "upload":
-        cmd_upload(args, client)
+
+def require_client_for_source(
+    config: Config, source: str, resource_id: int | None
+) -> tuple[ReportPortalClient, str, int]:
+    """
+    Get client and resolve source to resource_type and resource_id.
+    If source is a URL, extracts server/project from it and creates client.
+    Otherwise uses config's server/project.
+    Returns (client, resource_type, resource_id).
+    """
+    if not config.token:
+        err("API token required. Set RP_API_TOKEN, use --token, or --token-file", EXIT_AUTH_ERROR)
+
+    if source.startswith("http"):
+        parsed = parse_rp_url(source)
+        if not parsed:
+            usage_err("Invalid ReportPortal URL format. Expected: https://server/ui/#project/resource_type/id")
+
+        info("Parsed URL:")
+        print(f"  Server: {parsed['server']}")
+        print(f"  Project: {parsed['project']}")
+        print(f"  Type: {parsed['resource_type']}")
+        print(f"  ID: {parsed['resource_id']}")
+        print()
+
+        client = ReportPortalClient(parsed["server"], parsed["project"], config.token)
+        if not client.validate_token():
+            err("Invalid token or cannot connect to ReportPortal.", EXIT_AUTH_ERROR)
+
+        return client, parsed["resource_type"], parsed["resource_id"]
+
+    # Source is a type (dashboard/filter)
+    if source not in ["dashboard", "filter"]:
+        usage_err(f"Invalid source '{source}'. Use 'dashboard', 'filter', or a full URL")
+    if not resource_id:
+        usage_err("Resource ID required when source is type (not URL)")
+
+    client = require_client(config)
+    return client, source, resource_id
+
+
+@click.group(epilog=__doc__)
+@click.option("--server", envvar="RP_SERVER", help="ReportPortal server URL (or set RP_SERVER)")
+@click.option("--project", envvar="RP_PROJECT", help="ReportPortal project name (or set RP_PROJECT)")
+@click.option("--token", envvar="RP_API_TOKEN", help="API token (or set RP_API_TOKEN)")
+@click.option("--token-file", help="Path to file containing API token")
+@pass_config
+def cli(config: Config, server: str, project: str, token: str, token_file: str):
+    """ReportPortal CLI Tool - Manage dashboards, filters, and upload test results."""
+    config.server = server
+    config.project = project
+    config.token = get_token(token, token_file)
+
+
+@cli.command("list")
+@click.argument("resource_type", default="dashboards", required=False)
+@pass_config
+def cli_list(config: Config, resource_type: str):
+    """List dashboards or filters."""
+    client = require_client(config)
+    args = Namespace(type=resource_type)
+    cmd_list(args, client)
+
+
+@cli.command("export")
+@click.argument("source")
+@click.argument("id", required=False, type=int)
+@click.option("-o", "--output", help="Output file (default: auto-generated)")
+@click.option("-t", "--title", help="Override resource name/title in exported JSON")
+@click.option("--filters", help="Filter IDs to include (comma-separated)")
+@click.option("--rename", nargs=2, help="Rename pattern: OLD NEW (regex supported)")
+@pass_config
+def cli_export(config: Config, source: str, id: int, output: str, title: str, filters: str, rename: tuple):
+    """Export dashboard or filter (by type+id or URL)."""
+    client, resource_type, resource_id = require_client_for_source(config, source, id)
+    args = Namespace(id=resource_id, output=output, title=title, filters=filters, rename=rename)
+
+    if resource_type == "dashboard":
+        cmd_export_dashboard(args, client)
     else:
-        parser.print_help()
+        cmd_export_filter(args, client)
 
-    sys.exit(EXIT_SUCCESS)
+
+@cli.command("import")
+@click.argument("file")
+@click.option("-t", "--title", help="Override resource name/title")
+@click.option("--rename", nargs=2, help="Rename pattern: OLD NEW (regex supported)")
+@pass_config
+def cli_import(config: Config, file: str, title: str, rename: tuple):
+    """Import dashboard or filter from JSON file."""
+    if file.startswith("http"):
+        usage_err("import expects a JSON file, not a URL. Use 'copy' to duplicate from a URL.")
+
+    client = require_client(config)
+    args = Namespace(file=file, title=title, rename=rename)
+    cmd_import(args, client)
+
+
+@cli.command("copy")
+@click.argument("source")
+@click.argument("id", required=False, type=int)
+@click.option("-t", "--title", help="New title for the copy")
+@click.option("--filters", help="Filter IDs to include (comma-separated, dashboards only)")
+@click.option("--rename", nargs=2, help="Rename pattern: OLD NEW (regex supported)")
+@pass_config
+def cli_copy(config: Config, source: str, id: int, title: str, filters: str, rename: tuple):
+    """Copy/duplicate dashboard or filter (by type+id or URL)."""
+    client, resource_type, resource_id = require_client_for_source(config, source, id)
+
+    # Determine target title (explicit --title or apply --rename to original name)
+    if title:
+        target_title = title
+    else:
+        if resource_type == "dashboard":
+            original = client.get_dashboard(resource_id)
+        else:
+            original = client.get_filter(resource_id)
+
+        if "id" not in original:
+            err(f"{resource_type.capitalize()} not found", EXIT_NOT_FOUND)
+
+        target_title = original.get("name", f"{resource_type.capitalize()} {resource_id}")
+        if rename:
+            target_title = re.sub(rename[0], rename[1], target_title)
+
+    # Check if target already exists
+    check_resource_not_exists(client, resource_type, target_title)
+
+    # Export to temp file
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+        temp_file = f.name
+
+    try:
+        export_args = Namespace(id=resource_id, output=temp_file, filters=filters, rename=rename, title=None)
+
+        if resource_type == "dashboard":
+            cmd_export_dashboard(export_args, client)
+        else:
+            cmd_export_filter(export_args, client)
+
+        print()
+
+        # Import with title (skip existence check - already done)
+        import_args = Namespace(file=temp_file, title=target_title, rename=None, _skip_exists_check=True)
+        cmd_import(import_args, client)
+    finally:
+        if os.path.exists(temp_file):
+            os.remove(temp_file)
+
+
+@cli.command("upload")
+@click.argument("file")
+@click.option("-n", "--name", help="Launch name (default: filename)")
+@click.option("-d", "--description", help="Launch description")
+@click.option("-df", "--description-file", help="Path to file containing launch description")
+@click.option("-a", "--attributes", help="Launch attributes (key1:val1,key2:val2)")
+@click.option("-af", "--attribute-file", help="Path to file containing launch attributes")
+@pass_config
+def cli_upload(
+    config: Config, file: str, name: str, description: str, description_file: str, attributes: str, attribute_file: str
+):
+    """Upload xUnit test results."""
+    client = require_client(config)
+    args = Namespace(
+        file=file,
+        name=name,
+        description=description,
+        description_file=description_file,
+        attributes=attributes,
+        attribute_file=attribute_file,
+    )
+    cmd_upload(args, client)
 
 
 if __name__ == "__main__":
-    main()
+    cli()

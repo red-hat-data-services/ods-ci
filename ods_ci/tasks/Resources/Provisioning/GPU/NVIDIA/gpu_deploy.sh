@@ -16,15 +16,15 @@ oc apply -f "$GPU_INSTALL_DIR/gpu_install.yaml"
 
 echo "Wait for Nvidia GPU Operator Subscription, InstallPlan and Deployment to complete"
 
-oc wait --timeout=3m --for jsonpath='{.status.state}'=AtLatestKnown -n nvidia-gpu-operator sub gpu-operator-certified
+oc wait --timeout=8m --for jsonpath='{.status.state}'=AtLatestKnown -n nvidia-gpu-operator sub gpu-operator-certified
 
-oc wait --timeout=3m --for condition=Installed -n nvidia-gpu-operator installplan --all
+oc wait --timeout=8m --for condition=Installed -n nvidia-gpu-operator installplan --all
 
 sleep 5
 
 oc rollout status --watch --timeout=3m -n nvidia-gpu-operator deploy gpu-operator
 
-oc wait --timeout=3m --for jsonpath='{.status.components.labelSelector.matchExpressions[].operator}'=Exists operator gpu-operator-certified.nvidia-gpu-operator
+oc wait --timeout=5m --for jsonpath='{.status.components.labelSelector.matchExpressions[].operator}'=Exists operator gpu-operator-certified.nvidia-gpu-operator
 
 function wait_until_pod_ready_status() {
   local pod_label=$1

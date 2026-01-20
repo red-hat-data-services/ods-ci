@@ -17,11 +17,11 @@ Examples:
   rp-cli.py list filters
   rp-cli.py export dashboard 123 -o dashboard.json
   rp-cli.py export dashboard 123 -o 3.3.json --rename "3.2" "3.3"
-  rp-cli.py export dashboard 123 --rename '3\\.\\d' '3.3'   # regex: match 3.1, 3.2, etc.
+  rp-cli.py export dashboard 123 --title "RHOAI 3.3"        # explicit title in exported JSON
   rp-cli.py export filter 321 -o filter.json
   rp-cli.py export "https://server/ui/#project/dashboard/123" -o dashboard.json
-  rp-cli.py import dashboard.json "New Dashboard"
-  rp-cli.py import filter.json "New Filter"
+  rp-cli.py import dashboard.json --title "New Dashboard"
+  rp-cli.py import filter.json -t "New Filter"
   rp-cli.py copy dashboard 123 --rename "3.2" "3.3"              # title becomes renamed original
   rp-cli.py copy dashboard 123 --title "RHOAI 3.3"              # explicit title
   rp-cli.py copy filter 321 --title "New Filter Name"
@@ -81,6 +81,13 @@ RP_ERROR_MAP = {
     40010: EXIT_API_ERROR,  # Bad request
 }
 
+# ReportPortal issue types (for failed test items)
+ISSUE_TO_INVESTIGATE = "TI001"  # To Investigate (default for new failures)
+ISSUE_PRODUCT_BUG = "PB001"  # Product Bug
+ISSUE_AUTOMATION_BUG = "AB001"  # Automation Bug
+ISSUE_SYSTEM_ISSUE = "SI001"  # System Issue
+ISSUE_NO_DEFECT = "ND001"  # No Defect (false failure)
+
 
 def get_exit_code(resp: dict) -> int:
     """Map ReportPortal API error code to exit code"""
@@ -134,20 +141,32 @@ class ReportPortalClient:
         self.headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
 
     # Core HTTP methods
+    def _handle_request(self, method: str, url: str, **kwargs) -> requests.Response:
+        """Execute HTTP request with connection error handling."""
+        try:
+            return getattr(requests, method)(url, headers=self.headers, **kwargs)
+        except requests.exceptions.ConnectionError:
+            err(f"Connection error: cannot reach {self.url}", EXIT_CONNECTION_ERROR)
+        except requests.exceptions.Timeout:
+            err(f"Connection timeout: {self.url}", EXIT_CONNECTION_ERROR)
+        except requests.exceptions.RequestException as e:
+            err(f"Request error: {e}", EXIT_CONNECTION_ERROR)
+
     def get(self, endpoint: str) -> dict:
         url = f"{self.base_url}/{endpoint}" if not endpoint.startswith("http") else endpoint
-        return requests.get(url, headers=self.headers).json()
+        return self._handle_request("get", url).json()
 
     def post(self, endpoint: str, data: dict) -> dict:
-        return requests.post(f"{self.base_url}/{endpoint}", headers=self.headers, json=data).json()
+        return self._handle_request("post", f"{self.base_url}/{endpoint}", json=data).json()
 
     def put(self, endpoint: str, data: dict) -> dict:
-        resp = requests.put(f"{self.base_url}/{endpoint}", headers=self.headers, json=data)
+        resp = self._handle_request("put", f"{self.base_url}/{endpoint}", json=data)
         return resp.json() if resp.text else {}
 
     def validate_token(self) -> bool:
         try:
-            return requests.get(f"{self.base_url}/dashboard", headers=self.headers).status_code == 200
+            result = self.get("dashboard")
+            return "content" in result
         except Exception:
             return False
 
@@ -239,7 +258,7 @@ class ReportPortalClient:
     def finish_item(self, item_uuid: str, launch_uuid: str, status: str, has_issue: bool = False) -> None:
         data = {"endTime": self._timestamp(), "status": status, "launchUuid": launch_uuid}
         if has_issue and status == "FAILED":
-            data["issue"] = {"issueType": "TI001"}
+            data["issue"] = {"issueType": ISSUE_TO_INVESTIGATE}
         self.put(f"item/{item_uuid}", data)
 
     @staticmethod
@@ -264,25 +283,19 @@ def save_json_file(file_path: str, data: dict) -> None:
         json.dump(data, f, indent=2)
 
 
+def build_filter_import(filter_data: dict) -> dict:
+    """Build filter data for import action"""
+    return {
+        "name": filter_data["name"],
+        "type": filter_data["type"],
+        "conditions": filter_data["conditions"],
+        "orders": filter_data.get("orders", []),
+    }
+
+
 def build_filter_export(filter_data: dict) -> dict:
-    """Build standardized filter export structure"""
-    return {
-        "sourceFilterId": filter_data["id"],
-        "name": filter_data["name"],
-        "type": filter_data["type"],
-        "conditions": filter_data["conditions"],
-        "orders": filter_data.get("orders", []),
-    }
-
-
-def build_filter_payload(filter_data: dict) -> dict:
-    """Build filter creation payload"""
-    return {
-        "name": filter_data["name"],
-        "type": filter_data["type"],
-        "conditions": filter_data["conditions"],
-        "orders": filter_data.get("orders", []),
-    }
+    """Build filter data for export action (includes sourceFilterId)"""
+    return {"sourceFilterId": filter_data["id"], **build_filter_import(filter_data)}
 
 
 def build_widget_payload(widget: dict, filter_ids: list) -> dict:
@@ -312,6 +325,19 @@ def build_export_metadata(export_type: str, project: str, source_id: int) -> dic
         "project": project,
         "sourceId": source_id,
     }
+
+
+def apply_rename_and_title(args, data: dict) -> dict:
+    """Apply --rename and --title to export data."""
+    if getattr(args, "rename", None):
+        pattern, replacement = args.rename
+        info(f"Renaming: '{pattern}' -> '{replacement}'")
+        data = apply_rename(data, pattern, replacement)
+
+    if getattr(args, "title", None):
+        data["name"] = args.title
+
+    return data
 
 
 def apply_rename(data: dict, pattern: str, replacement: str) -> dict:
@@ -400,19 +426,29 @@ def check_resource_not_exists(client: ReportPortalClient, resource_type: str, na
 
 
 def resolve_source(
-    source: str, resource_id: int | None, client: ReportPortalClient | None, token: str | None, action: str
+    source: str,
+    resource_id: int | None,
+    client: ReportPortalClient | None,
+    token: str | None,
+    action: str,
+    parser: argparse.ArgumentParser | None = None,
 ) -> tuple[str, int, ReportPortalClient]:
     """
     Resolve source (URL or type+id) to resource_type, resource_id, and client.
     Returns (resource_type, resource_id, client).
+    If parser is provided, uses parser.error() for argument validation errors.
     """
+
+    def arg_err(msg: str):
+        if parser:
+            parser.error(msg)
+        else:
+            err(msg, EXIT_USAGE)
+
     if source.startswith("http"):
         parsed = parse_rp_url(source)
         if not parsed:
-            err(
-                "Invalid ReportPortal URL format. Expected: https://server/ui/#project/resource_type/id",
-                EXIT_USAGE,
-            )
+            arg_err("invalid ReportPortal URL format. Expected: https://server/ui/#project/resource_type/id")
 
         info("Parsed URL:")
         print(f"  Server: {parsed['server']}")
@@ -429,16 +465,16 @@ def resolve_source(
 
     # Source is a type (dashboard/filter)
     if source not in ["dashboard", "filter"]:
-        err(f"Invalid source: {source}. Use 'dashboard', 'filter', or a full URL", EXIT_USAGE)
+        arg_err(f"invalid source '{source}'. Use 'dashboard', 'filter', or a full URL")
     if not resource_id:
-        err(f"Resource ID required when {action} by type", EXIT_USAGE)
+        arg_err(f"resource ID required when {action} by type")
 
     return source, resource_id, client
 
 
-def cmd_export(args, client: ReportPortalClient | None, token: str | None = None):
+def cmd_export(args, client: ReportPortalClient | None, token: str | None = None, parser=None):
     """Export dashboard or filter. Supports both type+id and URL formats."""
-    resource_type, resource_id, client = resolve_source(args.source, args.id, client, token, "exporting")
+    resource_type, resource_id, client = resolve_source(args.source, args.id, client, token, "exporting", parser)
 
     # Create export args
     export_args = argparse.Namespace(
@@ -473,10 +509,12 @@ def cmd_export_filter(args, client: ReportPortalClient):
     # Remove sourceFilterId from top level (it's in metadata)
     export_data.pop("sourceFilterId", None)
 
+    export_data = apply_rename_and_title(args, export_data)
+
     save_json_file(output_file, export_data)
 
     ok(f"✓ Exported: {output_file}")
-    print(f"  Name: {data['name']}")
+    print(f"  Name: {export_data['name']}")
     print(f"  Type: {data['type']}")
     print(f"  Conditions: {len(data['conditions'])}")
 
@@ -579,11 +617,7 @@ def cmd_export_dashboard(args, client: ReportPortalClient):  # noqa: PLR0914
             else:
                 print("not found, skipping")
 
-    # Apply rename if specified
-    if args.rename:
-        pattern, replacement = args.rename
-        info(f"Renaming: '{pattern}' -> '{replacement}'")
-        export_data = apply_rename(export_data, pattern, replacement)
+    export_data = apply_rename_and_title(args, export_data)
 
     save_json_file(output_file, export_data)
 
@@ -613,7 +647,7 @@ def cmd_import_filter(args, client: ReportPortalClient, data: dict | None = None
     if data is None:
         data = load_json_file(args.file)
 
-    name = args.name or data.get("name")
+    name = getattr(args, "title", None) or data.get("name")
 
     # Check if filter already exists (skip if already checked by caller)
     if not getattr(args, "_skip_exists_check", False):
@@ -621,7 +655,7 @@ def cmd_import_filter(args, client: ReportPortalClient, data: dict | None = None
 
     info(f"Importing filter: {name}")
 
-    payload = build_filter_payload({**data, "name": name})
+    payload = build_filter_import({**data, "name": name})
     resp = client.create_filter(payload)
 
     if resp.get("id"):
@@ -634,13 +668,9 @@ def cmd_import_dashboard(args, client: ReportPortalClient, data: dict | None = N
     if data is None:
         data = load_json_file(args.file)
 
-    # Apply rename if specified
-    if args.rename:
-        pattern, replacement = args.rename
-        info(f"Renaming: '{pattern}' -> '{replacement}'")
-        data = apply_rename(data, pattern, replacement)
+    data = apply_rename_and_title(args, data)
 
-    name = args.name or data.get("name")
+    name = data.get("name")
     description = data.get("description", "")
 
     # Check if dashboard already exists (skip if already checked by caller)
@@ -658,7 +688,7 @@ def cmd_import_dashboard(args, client: ReportPortalClient, data: dict | None = N
             source_id = f.get("sourceFilterId")
             print(f"  {filter_name}... ", end="")
 
-            new_id, created = client.create_or_find_filter(build_filter_payload(f))
+            new_id, created = client.create_or_find_filter(build_filter_import(f))
 
             if new_id:
                 ok(f"{'created' if created else 'found'} (ID: {new_id})")
@@ -722,9 +752,9 @@ def cmd_import_dashboard(args, client: ReportPortalClient, data: dict | None = N
 # ============================================================================
 # COPY Command
 # ============================================================================
-def cmd_copy(args, client: ReportPortalClient | None, token: str | None = None):
+def cmd_copy(args, client: ReportPortalClient | None, token: str | None = None, parser=None):
     """Copy dashboard or filter. Supports both type+id and URL formats."""
-    resource_type, resource_id, client = resolve_source(args.source, args.id, client, token, "copying")
+    resource_type, resource_id, client = resolve_source(args.source, args.id, client, token, "copying", parser)
 
     # Determine target title early to check for duplicates before export
     if args.title:
@@ -775,7 +805,7 @@ def cmd_copy(args, client: ReportPortalClient | None, token: str | None = None):
         # Import with determined title (skip existence check - already done above)
         import_args = argparse.Namespace(
             file=temp_file,
-            name=title,
+            title=title,
             rename=None,  # Already applied during export
             _skip_exists_check=True,
         )
@@ -993,13 +1023,14 @@ def main():
     export_parser.add_argument("source", help="Resource type (dashboard/filter) or full ReportPortal URL")
     export_parser.add_argument("id", nargs="?", type=int, help="Resource ID (required if source is type)")
     export_parser.add_argument("-o", "--output", help="Output file (default: auto-generated)")
+    export_parser.add_argument("--title", "-t", help="Override resource name/title in exported JSON")
     export_parser.add_argument("--filters", help="Filter IDs to include (comma-separated)")
     export_parser.add_argument("--rename", nargs=2, metavar=("OLD", "NEW"), help="Rename pattern (regex supported)")
 
     # Import command
     import_parser = subparsers.add_parser("import", help="Import dashboard or filter")
     import_parser.add_argument("file", help="JSON file to import")
-    import_parser.add_argument("name", nargs="?", help="Override name")
+    import_parser.add_argument("--title", "-t", help="Override resource name/title")
     import_parser.add_argument("--rename", nargs=2, metavar=("OLD", "NEW"), help="Rename pattern (regex supported)")
 
     # Copy command
@@ -1029,7 +1060,7 @@ def main():
 
     if not args.command:
         parser.print_help()
-        sys.exit(0)
+        sys.exit(EXIT_SUCCESS)
 
     # Get token
     token = args.token
@@ -1047,11 +1078,15 @@ def main():
 
     # Handle "export" and "copy" with URL (server/project extracted from URL)
     if args.command == "export" and args.source.startswith("http"):
-        cmd_export(args, None, token)
+        cmd_export(args, None, token, export_parser)
         return
     if args.command == "copy" and args.source.startswith("http"):
-        cmd_copy(args, None, token)
+        cmd_copy(args, None, token, copy_parser)
         return
+
+    # Check if import was given a URL instead of a file
+    if args.command == "import" and args.file.startswith("http"):
+        import_parser.error("import expects a JSON file, not a URL. Use 'copy' to duplicate from a URL.")
 
     # All other commands require server and project
     if not args.server:
@@ -1071,15 +1106,17 @@ def main():
     if args.command == "list":
         cmd_list(args, client)
     elif args.command == "export":
-        cmd_export(args, client, token)
+        cmd_export(args, client, token, export_parser)
     elif args.command == "import":
         cmd_import(args, client)
     elif args.command == "copy":
-        cmd_copy(args, client, token)
+        cmd_copy(args, client, token, copy_parser)
     elif args.command == "upload":
         cmd_upload(args, client)
     else:
         parser.print_help()
+
+    sys.exit(EXIT_SUCCESS)
 
 
 if __name__ == "__main__":

@@ -159,11 +159,10 @@ Install RHODS
           FAIL    Provided test environment is not supported
       END
   END
-  Wait Until Csv Is Ready    display_name=${csv_display_name}    operators_namespace=${OPERATOR_NAMESPACE}
   IF  "${is_upgrade}" == "False"
       Add StartingCSV To Subscription
   END
-
+  Wait Until Csv Is Ready    display_name=${csv_display_name}    operators_namespace=${OPERATOR_NAMESPACE}
 
 Add StartingCSV To Subscription
     [Documentation]    Retrieves current RHOAI version from subscription status and add
@@ -171,9 +170,10 @@ Add StartingCSV To Subscription
     ...                Needed for post-upgrade test suites to identify which RHOAI version
     ...                was installed before upgrading
     ${current_starting_csv} =    Run And Return Rc And Output    oc get subscription ${OPERATOR_SUBSCRIPTION_NAME} -n ${OPERATOR_NAMESPACE} -o jsonpath='{.spec.startingCSV}'    #robocop:disable
-    Log    Current startingCSV field: ${current_starting_csv}[1]    console=yes
-    IF    "${current_starting_csv}[1]" == ""
-        Log    StartingCSV field is empty, patching ODH/RHOAI subscription to add startingCSV field    console=yes
+    ${starting_csv_value} =    Strip String    ${current_starting_csv}[1]
+    Log    Current startingCSV field: '${starting_csv_value}'    console=yes
+    IF    "${starting_csv_value}" in ["", "null"]
+        Log    StartingCSV field is '${starting_csv_value}', patching ODH/RHOAI subscription to add startingCSV field    console=yes
         ${rc}    ${out} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/add_starting_csv.sh
         Log    ${out}    console=yes
         Run Keyword And Continue On Failure    Should Be Equal As Numbers    ${rc}    ${0}
@@ -182,7 +182,7 @@ Add StartingCSV To Subscription
             ...    level=ERROR
         END
     ELSE
-        Log    StartingCSV field already exists: ${current_starting_csv}[1], skipping patch    console=yes
+        Log    StartingCSV field already exists: '${starting_csv_value}', skipping patch    console=yes
     END
 
 Verify RHODS Installation

@@ -38,7 +38,7 @@ jobs:
     name: python linters
     runs-on: ubuntu-latest
     env:
-      python_version: '3.11'
+      python_version: '3.11.x'
       poetry_version: '2.1.1'
     steps:
       - uses: actions/checkout@v4
@@ -54,6 +54,7 @@ jobs:
         with:
           python-version: '${{ env.python_version }}'
           cache: 'poetry'
+          allow-prereleases: false
 
       - name: Configure poetry
         run: |
@@ -78,7 +79,7 @@ jobs:
     name: selftests
     runs-on: ubuntu-latest
     env:
-      python_version: '3.11'
+      python_version: '3.11.x'
       poetry_version: '2.1.1'
     steps:
       - uses: actions/checkout@v4
@@ -92,6 +93,7 @@ jobs:
         with:
           python-version: '${{ env.python_version }}'
           cache: 'poetry'
+          allow-prereleases: false
 
       - name: Configure poetry
         run: poetry env use "${{ steps.setup-python.outputs.python-path }}"

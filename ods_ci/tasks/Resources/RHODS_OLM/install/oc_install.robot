@@ -340,7 +340,7 @@ Verify RHODS Installation
   ${modelsasservice} =    Is Nested Component Enabled    kserve    modelsAsService    ${DSC_NAME}
   IF    "${modelsasservice}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/part-of=modelsasservice
+    ...    label_selector=app.kubernetes.io/part-of=models-as-a-service
   END
 
   ${dashboard} =    Is Component Enabled    dashboard    ${DSC_NAME}

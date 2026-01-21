@@ -42,6 +42,8 @@ ${MLFLOWOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}         app.kubernetes.io/na
 ${MLFLOWOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}        mlflow-operator-controller-manager
 ${MODELSASSERVICE_CONTROLLER_MANAGER_LABEL_SELECTOR}        app.kubernetes.io/part-of=models-as-a-service
 ${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}       maas-api
+${SPARKOPERATOR_LABEL_SELECTOR}                             app.kubernetes.io/name=spark-operator
+${SPARKOPERATOR_DEPLOYMENT_NAME}                            spark-operator-controller-manager
 ${NOTEBOOK_CONTROLLER_DEPLOYMENT_LABEL_SELECTOR}            component.opendatahub.io/name=kf-notebook-controller
 ${NOTEBOOK_CONTROLLER_MANAGER_LABEL_SELECTOR}               component.opendatahub.io/name=odh-notebook-controller
 ${NOTEBOOK_DEPLOYMENT_NAME}                                 notebook-controller-deployment
@@ -61,6 +63,7 @@ ${IS_NOT_PRESENT}                                           1
 ...                                                         LLAMASTACKOPERATOR=${EMPTY}
 ...                                                         MLFLOWOPERATOR=${EMPTY}
 ...                                                         MODELSASSERVICE=${EMPTY}
+...                                                         SPARKOPERATOR=${EMPTY}
 
 @{CONTROLLERS_LIST}                                     # dashboard added in Suite Setup, since it's different in RHOAI vs ODH
 ...                                                     data-science-pipelines-operator-controller-manager
@@ -546,6 +549,56 @@ Validate Mlflowoperator Removed State
 
     [Teardown]      Restore DSC Component State     mlflowoperator       ${MLFLOWOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}     ${MLFLOWOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.MLFLOWOPERATOR}
 
+Validate Sparkoperator Default State
+    [Documentation]    Validate that sparkoperator component defaults to Removed state (dev preview).
+    ...                This verifies that the component is in Removed state by default and resources are not present.
+    [Tags]
+    ...    Operator
+    ...    Tier1
+    ...    sparkoperator-default
+    ...    Integration
+    ${current_state}=    Get DSC Component State    ${DSC_NAME}    sparkoperator    ${OPERATOR_NS}
+    Should Be Equal    ${current_state}    Removed    msg=Sparkoperator should default to Removed state in dev preview, but found ${current_state}
+    # Verify that resources are not present when in Removed state
+    Wait Until Keyword Succeeds    2 min    10 sec
+    ...    Is Resource Present     Deployment    ${SPARKOPERATOR_DEPLOYMENT_NAME}    ${APPLICATIONS_NS}    ${IS_NOT_PRESENT}
+
+Validate Sparkoperator Managed State
+    [Documentation]    Validate that the DSC Sparkoperator component Managed state creates the expected resources,
+    ...    check that Sparkoperator deployment is created and pod is in Ready state
+    [Tags]
+    ...    Operator
+    ...    Tier1
+    ...    sparkoperator-managed
+    ...    Integration
+    Set DSC Component Managed State And Wait For Completion
+    ...    sparkoperator
+    ...    ${SPARKOPERATOR_DEPLOYMENT_NAME}
+    ...    ${SPARKOPERATOR_LABEL_SELECTOR}
+    Check That Image Pull Path Is Correct       ${SPARKOPERATOR_DEPLOYMENT_NAME}      ${IMAGE_PULL_PATH}
+
+    [Teardown]      Restore DSC Component State     sparkoperator     ${SPARKOPERATOR_DEPLOYMENT_NAME}      ${SPARKOPERATOR_LABEL_SELECTOR}       ${SAVED_MANAGEMENT_STATES.SPARKOPERATOR}
+
+Validate Sparkoperator Removed State
+    [Documentation]    Validate that Sparkoperator management state Removed does remove relevant resources.
+    ...                Since sparkoperator is in dev preview and defaults to Removed state, first set it to Managed
+    ...                to ensure resources exist before testing removal.
+    [Tags]
+    ...    Operator
+    ...    Tier1
+    ...    sparkoperator-removed
+    ...    Integration
+    # Properly validate Removed state by first setting to Managed, which will ensure that resources
+    # are created as needed for later validating that they are removed when component is set to Removed
+    [Setup]     Set DSC Component Managed State And Wait For Completion     sparkoperator       ${SPARKOPERATOR_DEPLOYMENT_NAME}        ${SPARKOPERATOR_LABEL_SELECTOR}
+
+    Set DSC Component Removed State And Wait For Completion
+    ...    sparkoperator
+    ...    ${SPARKOPERATOR_DEPLOYMENT_NAME}
+    ...    ${SPARKOPERATOR_LABEL_SELECTOR}
+
+    [Teardown]      Restore DSC Component State     sparkoperator     ${SPARKOPERATOR_DEPLOYMENT_NAME}      ${SPARKOPERATOR_LABEL_SELECTOR}       ${SAVED_MANAGEMENT_STATES.SPARKOPERATOR}
+
 Validate Modelsasservice Managed State
     [Documentation]    Validate that the DSC Modelsasservice component Managed state creates the expected resources,
     ...    check that ModelsAsService deployment is created and pod is in Ready state
@@ -665,6 +718,7 @@ Suite Setup
     ${SAVED_MANAGEMENT_STATES.FEASTOPERATOR}=    Get DSC Component State    ${DSC_NAME}    feastoperator    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.LLAMASTACKOPERATOR}=    Get DSC Component State    ${DSC_NAME}    llamastackoperator    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.MLFLOWOPERATOR}=    Get DSC Component State    ${DSC_NAME}    mlflowoperator    ${OPERATOR_NS}
+    ${SAVED_MANAGEMENT_STATES.SPARKOPERATOR}=    Get DSC Component State    ${DSC_NAME}    sparkoperator    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.MODELSASSERVICE}=    Get DSC Nested Component State    ${DSC_NAME}    kserve    modelsAsService    ${OPERATOR_NS}
     Set Suite Variable    ${SAVED_MANAGEMENT_STATES}
     Append To List  ${CONTROLLERS_LIST}    ${DASHBOARD_DEPLOYMENT_NAME}

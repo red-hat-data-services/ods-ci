@@ -45,16 +45,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install poetry
-        run: pipx install poetry==${{ env.poetry_version }}
-
       - name: Set up Python
         id: setup-python
         uses: actions/setup-python@v5
         with:
           python-version: '${{ env.python_version }}'
-          cache: 'poetry'
-          allow-prereleases: false
+
+      - name: Install poetry
+        run: pipx install poetry==${{ env.poetry_version }} --python "${{ steps.setup-python.outputs.python-path }}"
 
       - name: Configure poetry
         run: |
@@ -84,16 +82,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install poetry
-        run: pipx install poetry==${{ env.poetry_version }}
-
       - name: Set up Python
         id: setup-python
         uses: actions/setup-python@v5
         with:
           python-version: '${{ env.python_version }}'
-          cache: 'poetry'
-          allow-prereleases: false
+
+      - name: Install poetry
+        run: pipx install poetry==${{ env.poetry_version }} --python "${{ steps.setup-python.outputs.python-path }}"
 
       - name: Configure poetry
         run: poetry env use "${{ steps.setup-python.outputs.python-path }}"

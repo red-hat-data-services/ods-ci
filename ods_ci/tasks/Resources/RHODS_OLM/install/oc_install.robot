@@ -64,6 +64,7 @@ ${CONNECTIVITY_LINK_OP_NAME}=  rhcl-operator
 ${CONNECTIVITY_LINK_SUB_NAME}=  rhcl-operator
 ${CONNECTIVITY_LINK_CHANNEL_NAME}=  stable
 ${CONNECTIVITY_LINK_NS}=  kuadrant-system
+${AUTHORINO_CSV_NAME}=  Authorino Operator
 ${RHODS_CSV_DISPLAY}=    Red Hat OpenShift AI
 ${ODH_CSV_DISPLAY}=    Open Data Hub Operator
 ${DEFAULT_OPERATOR_NAMESPACE_RHOAI}=    redhat-ods-operator
@@ -744,8 +745,8 @@ Configure Leader Worker Set Operator
 
 Install Connectivity Link Operator Via Cli
     [Documentation]    Install Red Hat Connectivity Link Operator Via CLI
-    ...                Installing in kuadrant-system namespace with operator group
-    ...                ensures all resources are created in kuadrant-system.
+    ...                Installing in ${CONNECTIVITY_LINK_NS} namespace with operator group
+    ...                ensures all resources are created in ${CONNECTIVITY_LINK_NS}.
     ${is_installed} =   Check If Operator Is Installed Via CLI   ${CONNECTIVITY_LINK_OP_NAME}
     IF    ${is_installed}
         Log To Console    message=Red Hat Connectivity Link Operator is already installed
@@ -768,6 +769,9 @@ Install Connectivity Link Operator Via Cli
              ...    retry=150
         Wait For Pods To Be Ready    label_selector=app=kuadrant
              ...    namespace=${CONNECTIVITY_LINK_NS}
+        # Wait for authorino-operator to be ready (installed by rhcl-operator as OLM dependency)
+        Wait Until Csv Is Ready    display_name=${AUTHORINO_CSV_NAME}
+             ...    operators_namespace=${CONNECTIVITY_LINK_NS}    timeout=5m
         ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/configure_connectivity_link_operator.sh
         Configure Authorino
     END
@@ -797,14 +801,14 @@ Configure Authorino
 
     Log To Console    Waiting for Authorino deployment rollout to complete...
     ${rc}    ${out} =    Run And Return Rc And Output
-    ...    oc rollout status deployment/authorino -n kuadrant-system --timeout=120s
+    ...    oc rollout status deployment/authorino -n ${CONNECTIVITY_LINK_NS} --timeout=120s
     Log    ${out}    console=yes
 
     Log To Console    Waiting for Authorino to be ready with SSL...
     # workaround for https://github.com/kubernetes/kubectl/issues/1120 (old authorino pod is still terminating when we run oc wait)
     Sleep  15s
     Wait For Pods To Be Ready    label_selector=authorino-resource=authorino
-    ...    namespace=kuadrant-system    timeout=150s
+    ...    namespace=${CONNECTIVITY_LINK_NS}    timeout=150s
 
 Install Kueue Operator Via Cli
     [Documentation]    Install Kueue Operator Via CLI

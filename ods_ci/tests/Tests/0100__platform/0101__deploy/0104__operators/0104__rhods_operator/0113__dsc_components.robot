@@ -558,10 +558,12 @@ Validate Sparkoperator Default State
     ...    sparkoperator-default
     ...    Integration
     ${current_state}=    Get DSC Component State    ${DSC_NAME}    sparkoperator    ${OPERATOR_NS}
-    Should Be Equal    ${current_state}    Removed    msg=Sparkoperator should default to Removed state in dev preview, but found ${current_state}
+    Should Be Equal    ${current_state}    Removed
+    ...    msg=Sparkoperator should default to Removed state in dev preview, but found ${current_state}
     # Verify that resources are not present when in Removed state
     Wait Until Keyword Succeeds    2 min    10 sec
-    ...    Is Resource Present     Deployment    ${SPARKOPERATOR_DEPLOYMENT_NAME}    ${APPLICATIONS_NS}    ${IS_NOT_PRESENT}
+    ...    Is Resource Present     Deployment    ${SPARKOPERATOR_DEPLOYMENT_NAME}    ${APPLICATIONS_NS}
+    ...    ${IS_NOT_PRESENT}
 
 Validate Sparkoperator Managed State
     [Documentation]    Validate that the DSC Sparkoperator component Managed state creates the expected resources,
@@ -577,7 +579,9 @@ Validate Sparkoperator Managed State
     ...    ${SPARKOPERATOR_LABEL_SELECTOR}
     Check That Image Pull Path Is Correct       ${SPARKOPERATOR_DEPLOYMENT_NAME}      ${IMAGE_PULL_PATH}
 
-    [Teardown]      Restore DSC Component State     sparkoperator     ${SPARKOPERATOR_DEPLOYMENT_NAME}      ${SPARKOPERATOR_LABEL_SELECTOR}       ${SAVED_MANAGEMENT_STATES.SPARKOPERATOR}
+    [Teardown]      Restore DSC Component State     sparkoperator
+    ...    ${SPARKOPERATOR_DEPLOYMENT_NAME}      ${SPARKOPERATOR_LABEL_SELECTOR}
+    ...    ${SAVED_MANAGEMENT_STATES.SPARKOPERATOR}
 
 Validate Sparkoperator Removed State
     [Documentation]    Validate that Sparkoperator management state Removed does remove relevant resources.
@@ -590,14 +594,17 @@ Validate Sparkoperator Removed State
     ...    Integration
     # Properly validate Removed state by first setting to Managed, which will ensure that resources
     # are created as needed for later validating that they are removed when component is set to Removed
-    [Setup]     Set DSC Component Managed State And Wait For Completion     sparkoperator       ${SPARKOPERATOR_DEPLOYMENT_NAME}        ${SPARKOPERATOR_LABEL_SELECTOR}
+    [Setup]     Set DSC Component Managed State And Wait For Completion     sparkoperator
+    ...    ${SPARKOPERATOR_DEPLOYMENT_NAME}        ${SPARKOPERATOR_LABEL_SELECTOR}
 
     Set DSC Component Removed State And Wait For Completion
     ...    sparkoperator
     ...    ${SPARKOPERATOR_DEPLOYMENT_NAME}
     ...    ${SPARKOPERATOR_LABEL_SELECTOR}
 
-    [Teardown]      Restore DSC Component State     sparkoperator     ${SPARKOPERATOR_DEPLOYMENT_NAME}      ${SPARKOPERATOR_LABEL_SELECTOR}       ${SAVED_MANAGEMENT_STATES.SPARKOPERATOR}
+    [Teardown]      Restore DSC Component State     sparkoperator
+    ...    ${SPARKOPERATOR_DEPLOYMENT_NAME}      ${SPARKOPERATOR_LABEL_SELECTOR}
+    ...    ${SAVED_MANAGEMENT_STATES.SPARKOPERATOR}
 
 Validate Modelsasservice Managed State
     [Documentation]    Validate that the DSC Modelsasservice component Managed state creates the expected resources,
@@ -718,7 +725,8 @@ Suite Setup
     ${SAVED_MANAGEMENT_STATES.FEASTOPERATOR}=    Get DSC Component State    ${DSC_NAME}    feastoperator    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.LLAMASTACKOPERATOR}=    Get DSC Component State    ${DSC_NAME}    llamastackoperator    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.MLFLOWOPERATOR}=    Get DSC Component State    ${DSC_NAME}    mlflowoperator    ${OPERATOR_NS}
-    ${SAVED_MANAGEMENT_STATES.SPARKOPERATOR}=    Get DSC Component State    ${DSC_NAME}    sparkoperator    ${OPERATOR_NS}
+    ${SAVED_MANAGEMENT_STATES.SPARKOPERATOR}=    Get DSC Component State    ${DSC_NAME}    sparkoperator
+    ...    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.MODELSASSERVICE}=    Get DSC Nested Component State    ${DSC_NAME}    kserve    modelsAsService    ${OPERATOR_NS}
     Set Suite Variable    ${SAVED_MANAGEMENT_STATES}
     Append To List  ${CONTROLLERS_LIST}    ${DASHBOARD_DEPLOYMENT_NAME}

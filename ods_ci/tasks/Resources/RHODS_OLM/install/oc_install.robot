@@ -767,16 +767,19 @@ Install Connectivity Link Operator Via Cli
              ...    reason=AllCatalogSourcesHealthy    subscription_name=${CONNECTIVITY_LINK_SUB_NAME}
              ...    namespace=${CONNECTIVITY_LINK_NS}
              ...    retry=150
-        Wait For Pods To Be Ready    label_selector=app=kuadrant
-             ...    namespace=${CONNECTIVITY_LINK_NS}
+        # Wait for rhcl-operator to be ready
+        Wait Until Csv Is Ready    display_name=${CONNECTIVITY_LINK_OP_NAME}
+             ...    operators_namespace=${CONNECTIVITY_LINK_NS}    timeout=5m
         # Wait for authorino-operator to be ready (installed by rhcl-operator as OLM dependency)
         Wait Until Csv Is Ready    display_name=${AUTHORINO_CSV_NAME}
              ...    operators_namespace=${CONNECTIVITY_LINK_NS}    timeout=5m
-        # Restart kuadrant-operator so it re-checks dependencies (it caches at startup)
-        Run    oc delete pod -n ${CONNECTIVITY_LINK_NS} -l control-plane=controller-manager,app=kuadrant
-        Wait For Pods To Be Ready    label_selector=app=kuadrant
-             ...    namespace=${CONNECTIVITY_LINK_NS}
         ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/configure_connectivity_link_operator.sh
+        Log    ${output}    console=yes
+        IF    ${rc} != ${0}
+            Log    Unable to configure Connectivity Link.\nCheck the cluster please    console=yes
+            ...    level=ERROR
+            RETURN
+        END
         Configure Authorino
     END
 
@@ -786,22 +789,22 @@ Configure Authorino
     Log To Console    Configuring Authorino with SSL
     ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/configure_authorino.sh
     Log    ${output}    console=yes
-    # Run Keyword And Continue On Failure    Should Be Equal As Numbers    ${rc}    ${0}
-    # IF    ${rc} != ${0}
-    #    Log    Unable to configure Authorino namespace.\nCheck the cluster please    console=yes
-    #    ...    level=ERROR
-    #    RETURN
-    # END
+    Run Keyword And Continue On Failure    Should Be Equal As Numbers    ${rc}    ${0}
+    IF    ${rc} != ${0}
+        Log    Unable to configure Authorino namespace.\nCheck the cluster please    console=yes
+        ...    level=ERROR
+        RETURN
+    END
 
     Log To Console    Updating Authorino to enable SSL...
     ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/update_authorino_ssl.sh
     Log    ${output}    console=yes
-    # Run Keyword And Continue On Failure    Should Be Equal As Numbers    ${rc}    ${0}
-    # IF    ${rc} != ${0}
-    #    Log    Unable to update Authorino with SSL configuration.\nCheck the cluster please    console=yes
-    #    ...    level=ERROR
-    #    RETURN
-    # END
+    Run Keyword And Continue On Failure    Should Be Equal As Numbers    ${rc}    ${0}
+    IF    ${rc} != ${0}
+        Log    Unable to update Authorino with SSL configuration.\nCheck the cluster please    console=yes
+        ...    level=ERROR
+        RETURN
+    END
 
     Log To Console    Waiting for Authorino deployment rollout to complete...
     ${rc}    ${out} =    Run And Return Rc And Output

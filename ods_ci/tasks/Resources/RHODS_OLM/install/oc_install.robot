@@ -772,6 +772,10 @@ Install Connectivity Link Operator Via Cli
         # Wait for authorino-operator to be ready (installed by rhcl-operator as OLM dependency)
         Wait Until Csv Is Ready    display_name=${AUTHORINO_CSV_NAME}
              ...    operators_namespace=${CONNECTIVITY_LINK_NS}    timeout=5m
+        # Restart kuadrant-operator so it re-checks dependencies (it caches at startup)
+        Run    oc delete pod -n ${CONNECTIVITY_LINK_NS} -l control-plane=controller-manager,app=kuadrant
+        Wait For Pods To Be Ready    label_selector=app=kuadrant
+             ...    namespace=${CONNECTIVITY_LINK_NS}
         ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/configure_connectivity_link_operator.sh
         Configure Authorino
     END

@@ -778,7 +778,7 @@ Install Connectivity Link Operator Via Cli
         IF    ${rc} != ${0}
             Log    Unable to configure Connectivity Link.\nCheck the cluster please    console=yes
             ...    level=ERROR
-            RETURN
+            FAIL    Unable to configure Connectivity Link
         END
         Configure Authorino
     END
@@ -793,7 +793,7 @@ Configure Authorino
     IF    ${rc} != ${0}
         Log    Unable to configure Authorino namespace.\nCheck the cluster please    console=yes
         ...    level=ERROR
-        RETURN
+        FAIL    Unable to configure Authorino
     END
 
     Log To Console    Updating Authorino to enable SSL...
@@ -803,7 +803,7 @@ Configure Authorino
     IF    ${rc} != ${0}
         Log    Unable to update Authorino with SSL configuration.\nCheck the cluster please    console=yes
         ...    level=ERROR
-        RETURN
+        FAIL    Unable to update Authorino with SSL configuration
     END
 
     Log To Console    Waiting for Authorino deployment rollout to complete...

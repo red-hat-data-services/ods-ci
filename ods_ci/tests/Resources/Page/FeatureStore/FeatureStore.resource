@@ -6,11 +6,11 @@ Resource         ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 
 
 *** Variables ***
-${FEATURE-STORE-RELEASE-TAG}             release-3.2
+${FEATURE-STORE-RELEASE-TAG}             release-3.3
 ${FEATURE-STORE_DIR}                     feature-store
-${FEATURE-STORE_REPO_URL}                %{FEATURE-STORE_REPO_URL=https://github.com/feast-dev/feast.git}
-${NOTEBOOK_IMAGE}                        quay.io/rhoai/odh-workbench-jupyter-datascience-cpu-py312-rhel9@sha256:c8d571c6b7c20e8556c2a1a222c9ea75dec693c3c7afd99bb5570cab9919c4d9
-${FEAST_VERSION}                         0.58.0
+${FEATURE-STORE_REPO_URL}                %{FEATURE-STORE_REPO_URL=https://github.com/opendatahub-io/feast.git}
+${NOTEBOOK_IMAGE}                        quay.io/rhoai/odh-workbench-jupyter-datascience-cpu-py312-rhel9@sha256:c9c5a46db3c7e0f2a07be8d143b49078300219c9c33ec9eadc2885e46ea1c44c
+${FEAST_VERSION}                         0.59.0
 ${DSC_NAME}                              default-dsc
 
 

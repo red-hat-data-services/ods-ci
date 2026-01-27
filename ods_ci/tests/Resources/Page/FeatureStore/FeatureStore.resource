@@ -42,6 +42,22 @@ Teardown Feast E2E Test Suite
     Remove Directory        ${FEATURE-STORE_DIR}    recursive=True
     Cleanup Feature Store Setup
 
+Ensure Kueue Unmanaged For Feast Ray Offline Store Test
+    [Documentation]    Ensure Kueue is Unmanaged for Feast tests
+    ${kueue_state}=    Get DSC Component State    ${DSC_NAME}    kueue    ${OPERATOR_NAMESPACE}
+    Set Test Variable    ${KUEUE_STATE_BEFORE_FEAST}    ${kueue_state}
+    IF    "${kueue_state}" != "Unmanaged"
+        Log To Console    Setting Kueue component to Unmanaged for Feast test
+        Set Component State    kueue    Unmanaged
+    END
+
+Restore Kueue State After Feast Ray Offline Store Test
+    [Documentation]    Restore Kueue state if changed for Feast tests
+    IF    "${KUEUE_STATE_BEFORE_FEAST}" != "Unmanaged"
+        Log To Console    Restoring Kueue component to Removed state after Feast test
+        Set Component State    kueue    Removed
+    END
+
 Run Feast Operator E2E Test
     [Documentation]   Run feast operator e2e test
     [Arguments]   ${TEST_NAME}    ${TEST_TYPE}
@@ -49,6 +65,7 @@ Run Feast Operator E2E Test
     ${command}=    Set Variable    cd ${FEATURE-STORE_DIR}/infra/feast-operator && git fetch origin && git checkout ${FEATURE-STORE-RELEASE-TAG} && git branch && go test -timeout 10m ./test/${TEST_TYPE}/ -v -ginkgo.focus=${TEST_NAME}
     ${result}=    Run Process    ${command}
     ...    shell=true
+    ...    timeout=10 min
     ...    env:RUN_ON_OPENSHIFT_CI=true
     ...    stderr=STDOUT
     Log To Console    ${result.stdout}
@@ -64,6 +81,7 @@ Run Feast Notebook Test
     ${result}=    Run Process    ${command}
     ...    shell=true
     ...    stderr=STDOUT
+    ...    timeout=10 min
     ...    env:RUN_ON_OPENSHIFT_CI=true
     ...    env:NOTEBOOK_IMAGE=${NOTEBOOK_IMAGE}
     ...    env:FEAST_VERSION=${FEAST_VERSION}

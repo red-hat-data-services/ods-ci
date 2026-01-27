@@ -24,14 +24,18 @@ Run feastWorkbenchIntegrationWithAuth Test
     ...     RHOAIENG-38921
     Run Feast Notebook Test    FeastWorkbenchIntegrationWithAuth
 
-Run feastWorkbenchIntegrationWithoutAuth Test
-    [Documentation]    Run Feast Notebook test: TestFeastWorkbenchIntegrationWithoutAuth
-    [Tags]  RHOAIENG-38921
-    Run Feast Notebook Test    FeastWorkbenchIntegrationWithoutAuth
-
 Run feastRayOfflineStore Test
     [Documentation]    Run Feast Notebook test: TestTestFeastRayOfflineStoreNotebook
+    [Setup]    Ensure Kueue Unmanaged For Feast Ray Offline Store Test
+    [Teardown]    Restore Kueue State After Feast Ray Offline Store Test
     [Tags]  Tier1
     ...     FeatureStore
     ...     RHOAIENG-38921
     Run Feast Notebook Test    TestFeastRayOfflineStoreNotebook
+
+Run feastWorkbenchIntegrationWithoutAuth Test
+    [Documentation]    Run Feast Notebook test: TestFeastWorkbenchIntegrationWithoutAuth
+    [Tags]  Tier1
+    ...     FeatureStore
+    ...     RHOAIENG-38921
+    Run Feast Notebook Test    FeastWorkbenchIntegrationWithoutAuth

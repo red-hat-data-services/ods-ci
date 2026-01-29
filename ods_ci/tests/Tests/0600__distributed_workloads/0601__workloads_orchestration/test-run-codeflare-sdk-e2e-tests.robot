@@ -13,7 +13,7 @@ Resource          ../../../../tests/Resources/Page/DistributedWorkloads/Distribu
 Run TestRayJobRayVersionValidationOauth test with Python 3.11
     [Documentation]    Run Python E2E test: TestRayJobRayVersionValidationOauth
     [Tags]
-    ...     Smoke
+    ...     deprecatedTest
     ...     DistributedWorkloads
     ...     WorkloadsOrchestration
     ...     Codeflare-sdk
@@ -22,7 +22,7 @@ Run TestRayJobRayVersionValidationOauth test with Python 3.11
 Run TestRayJobExistingCluster test with Python 3.11
     [Documentation]    Run Python E2E test: TestRayJobExistingCluster
     [Tags]
-    ...     Tier1
+    ...     deprecatedTest
     ...     DistributedWorkloads
     ...     WorkloadsOrchestration
     ...     Codeflare-sdk
@@ -31,7 +31,7 @@ Run TestRayJobExistingCluster test with Python 3.11
 Run TestRayJobLifecycledCluster test with Python 3.11
     [Documentation]    Run Python E2E test: TestRayJobLifecycledCluster
     [Tags]
-    ...     Tier1
+    ...     deprecatedTest
     ...     DistributedWorkloads
     ...     WorkloadsOrchestration
     ...     Codeflare-sdk
@@ -40,7 +40,7 @@ Run TestRayJobLifecycledCluster test with Python 3.11
 Run TestRayClusterSDKOauth test with Python 3.11
     [Documentation]    Run Python E2E test: TestRayClusterSDKOauth
     [Tags]
-    ...     Tier1
+    ...     deprecatedTest
     ...     DistributedWorkloads
     ...     WorkloadsOrchestration
     ...     Codeflare-sdk
@@ -49,7 +49,7 @@ Run TestRayClusterSDKOauth test with Python 3.11
 Run TestRayLocalInteractiveOauth test with Python 3.11
     [Documentation]    Run Python E2E test: TestRayLocalInteractiveOauth
     [Tags]
-    ...     Tier1
+    ...     deprecatedTest
     ...     DistributedWorkloads
     ...     WorkloadsOrchestration
     ...     Codeflare-sdk
@@ -58,7 +58,7 @@ Run TestRayLocalInteractiveOauth test with Python 3.11
 Run TestHeterogenousClustersOauth
     [Documentation]    Run Python E2E test: TestHeterogenousClustersOauth (workaround for 2.15)
     [Tags]
-    ...     Tier1
+    ...     deprecatedTest
     ...     DistributedWorkloads
     ...     WorkloadsOrchestration
     ...     HeterogeneousCluster

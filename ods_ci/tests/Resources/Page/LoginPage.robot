@@ -22,11 +22,19 @@ Is OpenShift OAuth Login Prompt Visible
 
 Is OpenShift Login Visible
    [Arguments]  ${timeout}=15s
-   ${login_prompt_visible} =  Run Keyword And Return Status
-   ...    Wait Until Page Contains    Log in with    timeout=${timeout}
+   ${cluster_auth_value}=    Get Variable Value    ${CLUSTER_AUTH}    ${EMPTY}
+   IF  "${cluster_auth_value}" == "oidc"
+       # this will work with keycloak, need a different way once we start with entra
+       ${login_prompt_visible} =  Run Keyword And Return Status
+       ...    Wait Until Page Contains    Sign in to your account  timeout=${timeout}
+   ELSE
+       ${login_prompt_visible} =  Run Keyword And Return Status
+       ...    Wait Until Page Contains    Log in with    timeout=${timeout}
+       IF  ${login_prompt_visible}    RETURN    ${TRUE}
+       ${login_prompt_visible} =  Run Keyword And Return Status
+       ...    Wait Until Page Contains    Log in to your account    timeout=${timeout}
+   END
    IF  ${login_prompt_visible}    RETURN    ${TRUE}
-   ${login_prompt_visible} =  Run Keyword And Return Status
-   ...    Wait Until Page Contains    Log in to your account    timeout=${timeout}
    RETURN    ${login_prompt_visible}
 
 Select Login Authentication Type
@@ -42,23 +50,33 @@ Login To Openshift
     ...    expected string in the destination app.
     [Arguments]  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
     # Wait until page is the Login page or the destination app
-    ${expected_text_list} =    Create List    Log in with    Administrator    Developer    Data Science Projects
+    ${expected_text_list} =    Create List    Log in with    Administrator    Developer    Data Science Projects  Sign in to your account
     Wait Until Page Contains A String In List    ${expected_text_list}
     # Return if page is not the Login page (no login required)
-    ${should_login} =    Does Current Sub Domain Start With    https://oauth
-    IF  not ${should_login}    RETURN
-    # If here we need to login
-    # pf-c-login = for OpenShift 4.18 and earlier
-    # pf-v6-c-login = for OpenShift 4.19+
-    Wait Until Element is Visible  xpath://div[@class="pf-c-login" or @class="pf-v6-c-login"]  timeout=10s
-    ${select_auth_type} =  Does Login Require Authentication Type
-    IF  ${select_auth_type}  Select Login Authentication Type   ${ocp_user_auth_type}
-    Wait Until Page Contains  Log in to your account
-    Input Text  id=inputUsername  ${ocp_user_name}
-    Input Text  id=inputPassword  ${ocp_user_pw}
-    Click Button   //*[@type="submit"]
-    Wait Until Page Does Not Contain    Log in to your account    timeout=30s
-    Maybe Skip Tour    ${ocp_user_name}
+    IF  "${ocp_user_auth_type}" == "oidc"
+        ${should_login} =    Does Current Sub Domain Start With    https://keycloak
+        IF  not ${should_login}    RETURN
+        Input Text  id=username  ${ocp_user_name}
+        Input Text  id=password  ${ocp_user_pw}
+        Click Button   //*[@type="submit"]
+        Wait Until Page Does Not Contain    Sign in to your account    timeout=30s
+        Maybe Skip Tour    ${ocp_user_name}
+    ELSE
+        ${should_login} =    Does Current Sub Domain Start With    https://oauth
+        IF  not ${should_login}    RETURN
+        # If here we need to login
+        # pf-c-login = for OpenShift 4.18 and earlier
+        # pf-v6-c-login = for OpenShift 4.19+
+        Wait Until Element is Visible  xpath://div[@class="pf-c-login" or @class="pf-v6-c-login"]  timeout=10s
+        ${select_auth_type} =  Does Login Require Authentication Type
+        IF  ${select_auth_type}  Select Login Authentication Type   ${ocp_user_auth_type}
+        Wait Until Page Contains  Log in to your account
+        Input Text  id=inputUsername  ${ocp_user_name}
+        Input Text  id=inputPassword  ${ocp_user_pw}
+        Click Button   //*[@type="submit"]
+        Wait Until Page Does Not Contain    Log in to your account    timeout=30s
+        Maybe Skip Tour    ${ocp_user_name}
+    END
 
 Log In Should Be Requested
     [Documentation]    Passes if the login page appears and fails otherwise

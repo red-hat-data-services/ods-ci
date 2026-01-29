@@ -39,8 +39,8 @@ ${DC_NAME} =    elyra-s3
 *** Test Cases ***
 Verify Pipelines Integration With Elyra When Using Standard Data Science Image
     [Documentation]    Verifies that a workbench using the Jupyter | Data Science | CPU | Python 3.12 Image can be used to
-    ...    create and run a Data Science Pipeline
-    [Tags]    Sanity    ODS-2197
+    ...    create and run a Pipeline
+    [Tags]    Smoke    ODS-2197
     [Timeout]    10m
     Verify Pipelines Integration With Elyra Running Hello World Pipeline Test
     ...    img=Jupyter | Data Science | CPU | Python 3.12
@@ -49,15 +49,15 @@ Verify Pipelines Integration With Elyra When Using Standard Data Science Image
 
 Verify Pipelines Integration With Elyra When Using Standard Data Science Based Images
     [Documentation]    Verifies that a workbench using an image based on the Jupyter | Data Science | CPU | Python 3.12 Image
-    ...    can be used to create and run a Data Science Pipeline
+    ...    can be used to create and run a Pipeline
     ...    Note: this a templated test case
     ...    (more info at https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#test-templates)
     [Template]    Verify Pipelines Integration With Elyra Running Hello World Pipeline Test
-    [Tags]        Tier1    ODS-2271
-    [Timeout]     30m
-    Jupyter | PyTorch | CUDA | Python 3.12       Runtime | Datascience | CPU | Python 3.12    pytorch-pipeline
-    Jupyter | TensorFlow | CUDA | Python 3.12    Runtime | Datascience | CPU | Python 3.12    tensorflow-pipeline
-    Jupyter | TrustyAI | CPU | Python 3.12       Runtime | Datascience | CPU | Python 3.12    trustyai-pipeline
+    [Tags]        Sanity    ODS-2271
+    [Timeout]     40m
+    Jupyter | PyTorch | CUDA | Python 3.12       Runtime | Datascience | CPU | Python 3.12    pytorch-pipeline      600s
+    Jupyter | TensorFlow | CUDA | Python 3.12    Runtime | Datascience | CPU | Python 3.12    tensorflow-pipeline   600s
+    Jupyter | TrustyAI | CPU | Python 3.12       Runtime | Datascience | CPU | Python 3.12    trustyai-pipeline     600s
 
 
 *** Keywords ***
@@ -79,15 +79,6 @@ Elyra Pipelines Suite Setup    # robocop: off=too-many-calls-in-keyword
     ...    project_title=${PRJ_TITLE}
     DataSciencePipelinesBackend.Wait Until Pipeline Server Is Deployed    namespace=${PRJ_TITLE}
     Sleep    15s    reason=Wait until pipeline server is detected by dashboard
-    # Workaround for the: https://issues.redhat.com/browse/RHOAIENG-24545
-    Create Workbench    workbench_title=workaround    workbench_description=workaround
-    ...                 prj_title=${PRJ_TITLE}    image_name=Jupyter | Minimal | CPU | Python 3.12  deployment_size=Small
-    ...                 storage=Persistent  pv_existent=${FALSE}
-    ...                 pv_name=${PV_NAME}_workaround  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
-    ...                 envs=${ENVS_LIST}
-    Start Workbench     workbench_title=workaround    timeout=300s
-    Delete Workbench    workbench_title=workaround
-    # End of the workaround
 
 Elyra Pipelines Suite Teardown
     [Documentation]    Closes the browser and performs RHOSi Teardown
@@ -98,13 +89,13 @@ Elyra Pipelines Suite Teardown
 Verify Pipelines Integration With Elyra Running Hello World Pipeline Test     # robocop: off=too-many-calls-in-keyword
     [Documentation]    Creates and starts a workbench using ${img} and verifies that the Hello World sample pipeline
     ...    runs successfully
-    [Arguments]    ${img}    ${runtime_image}    ${experiment_name}
+    [Arguments]    ${img}    ${runtime_image}    ${experiment_name}    ${workbench_timeout}=300s
     Create Workbench    workbench_title=elyra_${img}    workbench_description=Elyra test
-    ...                 prj_title=${PRJ_TITLE}    image_name=${img}  deployment_size=Small
+    ...                 prj_title=${PRJ_TITLE}    image_name=${img}    hardware_profile=default-profile
     ...                 storage=Persistent  pv_existent=${FALSE}
     ...                 pv_name=${PV_NAME}_${img}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
     ...                 envs=${ENVS_LIST}
-    Start Workbench     workbench_title=elyra_${img}    timeout=300s
+    Start Workbench     workbench_title=elyra_${img}    timeout=${workbench_timeout}
     Launch And Access Workbench    workbench_title=elyra_${img}
     Clone Git Repository And Open    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main
     ...    ods-ci-notebooks-main/notebooks/500__jupyterhub/pipelines/v2/elyra/run-pipelines-on-data-science-pipelines/hello-generic-world.pipeline  # robocop: disable
@@ -120,7 +111,7 @@ Verify Pipelines Integration With Elyra Running Hello World Pipeline Test     # 
     # We need to navigate to the page because the project name hold a state
     # In a fresh cluster, if not state found, it will select the first one
     # In this case, the first could not be the project created
-    Menu.Navigate To Page    Data science pipelines    Pipelines
+    Menu.Navigate To Page    Develop & train    Pipelines    Pipeline definitions
     Select Pipeline Project By Name    ${PRJ_TITLE}
     Log    ${pipeline_run_name}
     Verify Pipeline Run Is Completed    ${pipeline_run_name}    timeout=5m    experiment_name=${experiment_name}

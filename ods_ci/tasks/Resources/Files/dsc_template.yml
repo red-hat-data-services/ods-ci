@@ -16,12 +16,16 @@ spec:
       managementState: <aipipelines_value>
     kserve:
       managementState: <kserve_value>
+      modelsAsService:
+        managementState: <modelsasservice_value>
     kueue:
       managementState: <kueue_value>
     ray:
       managementState: <ray_value>
     trainingoperator:
       managementState: <trainingoperator_value>
+    trainer:
+      managementState: <trainer_value>
     trustyai:
       managementState: <trustyai_value>
     workbenches:
@@ -34,3 +38,5 @@ spec:
       managementState: <feastoperator_value>
     llamastackoperator:
       managementState: <llamastackoperator_value>
+    mlflowoperator:
+      managementState: <mlflowoperator_value>

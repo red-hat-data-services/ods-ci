@@ -7,7 +7,6 @@ spec:
   instance: "" # instance is empty by default
   topologyupdater: false # False by default
   operand:
-    # Image URL example: registry.redhat.io/openshift4/ose-node-feature-discovery:v4.11
     image: <imageUrl>
     imagePullPolicy: Always
   workerConfig:
@@ -51,8 +50,9 @@ spec:
             - "DMI"
         pci:
           deviceClassWhitelist:
-            - "0200"
-            - "03"
-            - "12"
+            - "0200"  # Network controller
+            - "0207"  # Serial controller
+            - "03"    # Display controllers (includes 0300, 0302, 0380)
+            - "12"    # Processing accelerators
           deviceLabelFields:
              - "vendor"

@@ -16,11 +16,14 @@ ${DSCI_NAME} =    default-dsci
 ...    kueue
 ...    ray
 ...    trainingoperator
+...    trainer
 ...    trustyai
 ...    workbenches
 ...    modelregistry
 ...    feastoperator
 ...    llamastackoperator
+...    mlflowoperator
+...    modelsasservice
 ${LWS_OP_NAME}=    leader-worker-set
 ${LWS_OP_NS}=    openshift-lws-operator
 ${LWS_SUB_NAME}=    leader-worker-set
@@ -46,12 +49,22 @@ ${TELEMETRY_CHANNEL_NAME}=  stable
 ${TELEMETRY_NS}=  openshift-opentelemetry-operator
 ${KUEUE_OP_NAME}=  kueue-operator
 ${KUEUE_SUB_NAME}=  kueue-operator
-${KUEUE_CHANNEL_NAME}=  stable-v1.1
+${KUEUE_CHANNEL_NAME}=  stable-v1.2
 ${KUEUE_NS}=  openshift-kueue-operator
+${JOBSET_OP_NAME}=  job-set
+${JOBSET_SUB_NAME}=  job-set
+${JOBSET_CHANNEL_NAME}=  tech-preview-v0.1
+${JOBSET_NS}=  openshift-jobset-operator
+${JOBSETOPERATOR_NAME}=  cluster
 ${CERT_MANAGER_OP_NAME}=  openshift-cert-manager-operator
 ${CERT_MANAGER_SUB_NAME}=  openshift-cert-manager-operator
 ${CERT_MANAGER_CHANNEL_NAME}=  stable-v1
 ${CERT_MANAGER_NS}=  cert-manager-operator
+${CONNECTIVITY_LINK_OP_NAME}=  rhcl-operator
+${CONNECTIVITY_LINK_SUB_NAME}=  rhcl-operator
+${CONNECTIVITY_LINK_CHANNEL_NAME}=  stable
+${CONNECTIVITY_LINK_NS}=  kuadrant-system
+${AUTHORINO_CSV_NAME}=  Authorino Operator
 ${RHODS_CSV_DISPLAY}=    Red Hat OpenShift AI
 ${ODH_CSV_DISPLAY}=    Open Data Hub Operator
 ${DEFAULT_OPERATOR_NAMESPACE_RHOAI}=    redhat-ods-operator
@@ -74,6 +87,9 @@ ${RHODS_OSD_INSTALL_REPO}=      ${EMPTY}
 ${OLM_DIR}=                     rhodsolm
 @{SUPPORTED_TEST_ENV}=          AWS   AWS_DIS   GCP   GCP_DIS   PSI   PSI_DIS   ROSA   IBM_CLOUD   CRC    AZURE	ROSA_HCP
 ${install_plan_approval}=       Manual
+${INSTALL_DEPENDENCIES_TYPE}=    Cli
+${GITOPS_DEFAULT_REPO_BRANCH}=    main
+${GITOPS_DEFAULT_REPO}=    ${EMPTY}
 
 *** Keywords ***
 Install RHODS
@@ -83,8 +99,14 @@ Install RHODS
   Log    \- rhoai_version: ${rhoai_version}\n\- is_upgrade: ${is_upgrade}\n\- install_plan_approval: ${install_plan_approval}\n\- CATALOG_SOURCE: ${CATALOG_SOURCE}   console=yes    #robocop:disable
   Assign Vars According To Product
   ${enable_new_observability_stack} =    Is New Observability Stack Enabled
-  IF    ${enable_new_observability_stack}
-          Install Observability Dependencies
+  IF  "${INSTALL_DEPENDENCIES_TYPE}" == "GitOps"
+    Install RHOAI Dependencies With GitOps Repo    ${enable_new_observability_stack}
+    ...    ${GITOPS_REPO_BRANCH}    ${GITOPS_REPO_URL}
+  ELSE
+    Install RHOAI Dependencies With CLI
+    IF    ${enable_new_observability_stack}
+            Install Observability Dependencies
+    END
   END
   Clone OLM Install Repo
   Configure Custom Namespaces
@@ -192,7 +214,7 @@ Verify RHODS Installation
             ...    ${OPERATOR_NAMESPACE}      ${IS_PRESENT}
             Wait Until Keyword Succeeds    6 min    0 sec
             ...    Is Resource Present    HardwareProfile    default-profile
-            ...    ${APPLICATIONS_NAMESPACEE}      ${IS_PRESENT}
+            ...    ${APPLICATIONS_NAMESPACE}      ${IS_PRESENT}
             ${enable_new_observability_stack} =    Is New Observability Stack Enabled
             IF    ${enable_new_observability_stack}
                     Patch DSCInitialization With Monitoring Info
@@ -205,6 +227,10 @@ Verify RHODS Installation
   ELSE
       IF  "${APPLICATIONS_NAMESPACE}" != "${DEFAULT_APPLICATIONS_NAMESPACE_RHOAI}" and "${APPLICATIONS_NAMESPACE}" != "${DEFAULT_APPLICATIONS_NAMESPACE_ODH}"
           Create DSCI With Custom Namespaces
+      ELSE IF   "${UPDATE_CHANNEL}" != "odh-nightlies" and "${PRODUCT}" == "ODH"
+            # this case is to handle ODH community, which needs to create the DSCI
+            Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
+            Wait For DSCInitialization CustomResource To Be Ready
       END
       Wait Until Keyword Succeeds    6 min    0 sec
       ...    Is Resource Present    DSCInitialization    ${DSCI_NAME}
@@ -247,7 +273,7 @@ Verify RHODS Installation
 
   ${kserve} =    Is Component Enabled    kserve    ${DSC_NAME}
   IF    "${kserve}" == "true"
-    Install KServe Dependencies
+    Configure Gateway API
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app=odh-model-controller    timeout=400s
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
@@ -260,7 +286,6 @@ Verify RHODS Installation
     IF    "${kueue_state}" == "Managed"
         Fail    msg=Kueue Managed mode is not supported on ODH/RHOAI 3.0+
     END
-    Install Kueue Dependencies
     Wait For Deployment Replica To Be Ready    namespace=${KUEUE_NS}
     ...    label_selector=app.kubernetes.io/name=kueue
   END
@@ -289,6 +314,12 @@ Verify RHODS Installation
     ...    label_selector=app.kubernetes.io/part-of=trainingoperator
   END
 
+  ${trainer} =     Is Component Enabled    trainer    ${DSC_NAME}
+  IF     "${trainer}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/name=trainer
+  END
+
   ${feastoperator} =    Is Component Enabled    feastoperator    ${DSC_NAME}
   IF    "${feastoperator}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
@@ -299,6 +330,18 @@ Verify RHODS Installation
   IF    "${llamastackoperator}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app.kubernetes.io/part-of=llamastackoperator
+  END
+
+  ${mlflowoperator} =    Is Component Enabled    mlflowoperator    ${DSC_NAME}
+  IF    "${mlflowoperator}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/part-of=mlflowoperator
+  END
+
+  ${modelsasservice} =    Is Nested Component Enabled    kserve    modelsAsService    ${DSC_NAME}
+  IF    "${modelsasservice}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/part-of=models-as-a-service
   END
 
   ${dashboard} =    Is Component Enabled    dashboard    ${DSC_NAME}
@@ -603,6 +646,25 @@ Is Component Enabled
          END
     END
 
+Is Nested Component Enabled
+    [Documentation]    Returns the enabled status of a nested component (true/false)
+    [Arguments]    ${parent_component}    ${nested_component}    ${dsc_name}=${DSC_NAME}
+    ${return_code}    ${output} =    Run And Return Rc And Output    oc get datasciencecluster ${dsc_name} -o json | jq '.spec.components.${parent_component}.${nested_component}.managementState // "Removed"'  #robocop:disable
+    Log    ${output}
+    Should Be Equal As Integers  ${return_code}  0  msg=Error detected while getting nested component status
+    ${n_output} =    Evaluate    '${output}' == ''
+    IF  ${n_output}
+          RETURN    false
+    ELSE
+         IF    ${output} == "Removed"
+               RETURN    false
+         ELSE IF    ${output} == "Managed"
+              RETURN    true
+         ELSE IF    ${output} == "Unmanaged"
+              RETURN    true
+         END
+    END
+
 Wait for Catalog To Be Ready
     [Documentation]    Verify catalog is Ready OR NOT
     [Arguments]    ${namespace}=openshift-marketplace   ${catalog_name}=odh-catalog-dev   ${timeout}=30
@@ -632,7 +694,7 @@ Install Cert Manager Operator Via Cli
              ...    namespace=${CERT_MANAGER_NS}
              ...    subscription_name=${CERT_MANAGER_SUB_NAME}
              ...    catalog_source_name=redhat-operators
-             ...    operator_group_name=cert-manager-operator
+             ...    operator_group_name=${CERT_MANAGER_OP_NAME}
              ...    operator_group_ns=${CERT_MANAGER_NS}
              ...    operator_group_target_ns=${NONE}
              ...    channel=${CERT_MANAGER_CHANNEL_NAME}
@@ -645,6 +707,116 @@ Install Cert Manager Operator Via Cli
              ...    namespace=${CERT_MANAGER_NS}
     END
 
+Install Leader Worker Set Operator Via Cli
+    [Documentation]    Install Leader Worker Set Operator Via CLI
+    ${is_installed} =   Check If Operator Is Installed Via CLI   ${LWS_OP_NAME}
+    IF    ${is_installed}
+        Log To Console    message=Leader Worker Set Operator is already installed
+    ELSE
+        ${rc}    ${out} =    Run And Return Rc And Output    oc create namespace ${LWS_OP_NS}
+        Install ISV Operator From OperatorHub Via CLI    operator_name=${LWS_OP_NAME}
+             ...    namespace=${LWS_OP_NS}
+             ...    subscription_name=${LWS_SUB_NAME}
+             ...    catalog_source_name=redhat-operators
+             ...    operator_group_name=${LWS_OP_NAME}
+             ...    operator_group_ns=${LWS_OP_NS}
+             ...    operator_group_target_ns=${LWS_OP_NS}
+             ...    channel=${LWS_CHANNEL_NAME}
+        Wait Until Operator Subscription Last Condition Is
+             ...    type=CatalogSourcesUnhealthy    status=False
+             ...    reason=AllCatalogSourcesHealthy    subscription_name=${LWS_SUB_NAME}
+             ...    namespace=${LWS_OP_NS}
+             ...    retry=150
+        Wait For Pods To Be Ready    label_selector=name=openshift-lws-operator
+             ...    namespace=${LWS_OP_NS}
+        Configure Leader Worker Set Operator
+    END
+
+Configure Leader Worker Set Operator
+    [Documentation]    Configure LeaderWorkerSetOperator custom resource after operator installation
+    Log To Console    Configuring LeaderWorkerSetOperator resource
+    ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/configure_lws_operator.sh
+    Log    ${output}    console=yes
+    Run Keyword And Continue On Failure    Should Be Equal As Numbers    ${rc}    ${0}
+    IF    ${rc} != ${0}
+        Log    Unable to configure LeaderWorkerSetOperator resource.\nCheck the cluster please    console=yes
+        ...    level=ERROR
+    END
+
+Install Connectivity Link Operator Via Cli
+    [Documentation]    Install Red Hat Connectivity Link Operator Via CLI
+    ...                Installing in ${CONNECTIVITY_LINK_NS} namespace with operator group
+    ...                ensures all resources are created in ${CONNECTIVITY_LINK_NS}.
+    ${is_installed} =   Check If Operator Is Installed Via CLI   ${CONNECTIVITY_LINK_OP_NAME}
+    IF    ${is_installed}
+        Log To Console    message=Red Hat Connectivity Link Operator is already installed
+    ELSE
+        Configure Gateway API
+        ${rc}    ${out} =    Run And Return Rc And Output    oc create namespace ${CONNECTIVITY_LINK_NS} --dry-run=client -o yaml | oc apply -f -
+        Should Be Equal As Integers    ${rc}    ${0}    msg=Failed to create namespace ${CONNECTIVITY_LINK_NS}: ${out}
+        Install ISV Operator From OperatorHub Via CLI    operator_name=${CONNECTIVITY_LINK_OP_NAME}
+             ...    namespace=${CONNECTIVITY_LINK_NS}
+             ...    subscription_name=${CONNECTIVITY_LINK_SUB_NAME}
+             ...    catalog_source_name=redhat-operators
+             ...    channel=${CONNECTIVITY_LINK_CHANNEL_NAME}
+             ...    operator_group_name=${CONNECTIVITY_LINK_OP_NAME}
+             ...    operator_group_ns=${CONNECTIVITY_LINK_NS}
+             ...    operator_group_target_ns=${NONE}
+        Wait Until Operator Subscription Last Condition Is
+             ...    type=CatalogSourcesUnhealthy    status=False
+             ...    reason=AllCatalogSourcesHealthy    subscription_name=${CONNECTIVITY_LINK_SUB_NAME}
+             ...    namespace=${CONNECTIVITY_LINK_NS}
+             ...    retry=150
+        # Wait for rhcl-operator to be ready
+        Wait Until Csv Is Ready    display_name=${CONNECTIVITY_LINK_OP_NAME}
+             ...    operators_namespace=${CONNECTIVITY_LINK_NS}    timeout=5m
+        # Wait for authorino-operator to be ready (installed by rhcl-operator as OLM dependency)
+        Wait Until Csv Is Ready    display_name=${AUTHORINO_CSV_NAME}
+             ...    operators_namespace=${CONNECTIVITY_LINK_NS}    timeout=5m
+        ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/configure_connectivity_link_operator.sh
+        Log    ${output}    console=yes
+        IF    ${rc} != ${0}
+            Log    Unable to configure Connectivity Link.\nCheck the cluster please    console=yes
+            ...    level=ERROR
+            FAIL    Unable to configure Connectivity Link
+        END
+        Configure Authorino
+    END
+
+Configure Authorino
+    [Documentation]    Configure Authorino with SSL after Kuadrant is configured.
+
+    Log To Console    Configuring Authorino with SSL
+    ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/configure_authorino.sh
+    Log    ${output}    console=yes
+    Run Keyword And Continue On Failure    Should Be Equal As Numbers    ${rc}    ${0}
+    IF    ${rc} != ${0}
+        Log    Unable to configure Authorino namespace.\nCheck the cluster please    console=yes
+        ...    level=ERROR
+        FAIL    Unable to configure Authorino
+    END
+
+    Log To Console    Updating Authorino to enable SSL...
+    ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/update_authorino_ssl.sh
+    Log    ${output}    console=yes
+    Run Keyword And Continue On Failure    Should Be Equal As Numbers    ${rc}    ${0}
+    IF    ${rc} != ${0}
+        Log    Unable to update Authorino with SSL configuration.\nCheck the cluster please    console=yes
+        ...    level=ERROR
+        FAIL    Unable to update Authorino with SSL configuration
+    END
+
+    Log To Console    Waiting for Authorino deployment rollout to complete...
+    ${rc}    ${out} =    Run And Return Rc And Output
+    ...    oc rollout status deployment/authorino -n ${CONNECTIVITY_LINK_NS} --timeout=120s
+    Log    ${out}    console=yes
+
+    Log To Console    Waiting for Authorino to be ready with SSL...
+    # workaround for https://github.com/kubernetes/kubectl/issues/1120 (old authorino pod is still terminating when we run oc wait)
+    Sleep  15s
+    Wait For Pods To Be Ready    label_selector=authorino-resource=authorino
+    ...    namespace=${CONNECTIVITY_LINK_NS}    timeout=150s
+
 Install Kueue Operator Via Cli
     [Documentation]    Install Kueue Operator Via CLI
     ${is_installed} =   Check If Operator Is Installed Via CLI   ${KUEUE_OP_NAME}
@@ -656,7 +828,7 @@ Install Kueue Operator Via Cli
              ...    namespace=${KUEUE_NS}
              ...    subscription_name=${KUEUE_SUB_NAME}
              ...    catalog_source_name=redhat-operators
-             ...    operator_group_name=kueue-operators
+             ...    operator_group_name=${KUEUE_OP_NAME}
              ...    operator_group_ns=${KUEUE_NS}
              ...    operator_group_target_ns=${NONE}
              ...    channel=${KUEUE_CHANNEL_NAME}
@@ -669,20 +841,48 @@ Install Kueue Operator Via Cli
              ...    namespace=${KUEUE_NS}
     END
 
-Install KServe Dependencies
-    [Documentation]    Install Dependent Operators For KServe
-    Set Suite Variable   ${FILES_RESOURCES_DIRPATH}    tests/Resources/Files
-    Set Suite Variable   ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
-    Set Suite Variable   ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
-    Install Cert Manager Operator Via Cli
+Create JobSetOperator CR
+    [Documentation]      Deploys JobSetOperator cluster CR for trainer component
+    ${file_path} =    Set Variable    tasks/Resources/Files/
+    Copy File    source=${file_path}jobsetoperator_template.yaml   destination=${file_path}jobsetoperator_apply.yml
+    Run    sed -i'' -e 's/<jobsetoperator_name>/${JOBSETOPERATOR_NAME}/' ${file_path}jobsetoperator_apply.yml
+    Run    sed -i'' -e 's/<jobsetoperator_namespace>/${JOBSET_NS}/' ${file_path}jobsetoperator_apply.yml
+    ${return_code}    ${output} =    Run And Return Rc And Output    oc apply -f ${file_path}jobsetoperator_apply.yml
+    Log To Console    ${output}
+    Should Be Equal As Integers  ${return_code}  0  msg=Error detected while creating JobSetOperator CR
+
+Install JobSet Operator Via Cli
+    [Documentation]    Install JobSet Operator Via CLI
+    ${is_installed} =   Check If Operator Is Installed Via CLI   ${JOBSET_OP_NAME}
+    IF    ${is_installed}
+        Log To Console    message=JobSet Operator is already installed
+    ELSE
+        ${rc}    ${out} =    Run And Return Rc And Output    oc create namespace ${JOBSET_NS}
+        Install ISV Operator From OperatorHub Via CLI    operator_name=${JOBSET_OP_NAME}
+             ...    namespace=${JOBSET_NS}
+             ...    subscription_name=${JOBSET_SUB_NAME}
+             ...    catalog_source_name=redhat-operators
+             ...    operator_group_name=${JOBSET_OP_NAME}
+             ...    operator_group_ns=${JOBSET_NS}
+             ...    operator_group_target_ns=${JOBSET_NS}
+             ...    channel=${JOBSET_CHANNEL_NAME}
+        Wait Until Operator Subscription Last Condition Is
+             ...    type=CatalogSourcesUnhealthy    status=False
+             ...    reason=AllCatalogSourcesHealthy    subscription_name=${JOBSET_SUB_NAME}
+             ...    namespace=${JOBSET_NS}
+             ...    retry=150
+        Wait For Pods To Be Ready    label_selector=name=jobset-operator
+             ...    namespace=${JOBSET_NS}
+    END
 
 Install Kueue Dependencies
     [Documentation]    Install Dependent Operators For Kueue
-    Set Suite Variable   ${FILES_RESOURCES_DIRPATH}    tests/Resources/Files
-    Set Suite Variable   ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
-    Set Suite Variable   ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
     Install Cert Manager Operator Via Cli
     Install Kueue Operator Via Cli
+
+Install JobSet Dependencies
+    Install JobSet Operator Via Cli
+    Create JobSetOperator CR
 
 Install Cluster Observability Operator Via Cli
     [Documentation]    Install Cluster Observability Operator Via CLI
@@ -693,7 +893,7 @@ Install Cluster Observability Operator Via Cli
              ...    subscription_name=${CLUSTER_OBS_SUB_NAME}
              ...    namespace=${CLUSTER_OBS_NS}
              ...    catalog_source_name=redhat-operators
-             ...    operator_group_name=openshift-cluster-observability-operator
+             ...    operator_group_name=${CLUSTER_OBS_OP_NAME}
              ...    operator_group_ns=${CLUSTER_OBS_NS}
              ...    operator_group_target_ns=${NONE}
           Wait Until Operator Subscription Last Condition Is
@@ -716,7 +916,7 @@ Install Tempo Operator Via Cli
              ...    subscription_name=${TEMPO_SUB_NAME}
              ...    namespace=${TEMPO_NS}
              ...    catalog_source_name=redhat-operators
-             ...    operator_group_name=openshift-tempo-operator
+             ...    operator_group_name=${TEMPO_OP_NAME}
              ...    operator_group_ns=${TEMPO_NS}
              ...    operator_group_target_ns=${NONE}
           Wait Until Operator Subscription Last Condition Is
@@ -739,7 +939,7 @@ Install OpenTelemetry Operator Via Cli
              ...    subscription_name=${TELEMETRY_SUB_NAME}
              ...    namespace=${TELEMETRY_NS}
              ...    catalog_source_name=redhat-operators
-             ...    operator_group_name=openshift-opentelemetry-operator
+             ...    operator_group_name=${TELEMETRY_OP_NAME}
              ...    operator_group_ns=${TELEMETRY_NS}
              ...    operator_group_target_ns=${NONE}
           Wait Until Operator Subscription Last Condition Is
@@ -762,7 +962,7 @@ Install Custom Metrics Autoscaler Operator Via Cli
             ...    namespace=${CMA_NS}
             ...    subscription_name=${CMA_SUB_NAME}
             ...    catalog_source_name=redhat-operators
-            ...    operator_group_name=openshift-keda-operator
+            ...    operator_group_name=${CMA_OP_NAME}
             ...    operator_group_ns=${CMA_NS}
             ...    operator_group_target_ns=${NONE}
             ...    channel=${CMA_CHANNEL_NAME}
@@ -777,11 +977,29 @@ Install Custom Metrics Autoscaler Operator Via Cli
         Log To Console    message=Custom Metrics Autoscaler Operator (KEDA) is already installed
     END
 
+Install RHOAI Dependencies With GitOps Repo
+    [Documentation]    Install dependent operators required for RHOAI installation using GitOps
+    [Arguments]     ${enable_new_observability_stack}
+    ...    ${gitops_repo_branch}=${GITOPS_DEFAULT_REPO_BRANCH}
+    ...    ${gitops_repo}=${GITOPS_DEFAULT_REPO}
+    Clone OLM Install Repo
+    ${m_flag} =    Set Variable If    not ${enable_new_observability_stack}    -M    ${EMPTY}
+    ${r_flag} =    Set Variable If    "${gitops_repo}" != "${EMPTY}"    -r ${gitops_repo}    ${EMPTY}
+    ${return_code} =    Run And Watch Command
+    ...    cd ${EXECDIR}/${OLM_DIR} && ./setup-dependencies.sh -b ${gitops_repo_branch} ${m_flag} ${r_flag}
+    ...    timeout=20 min
+    Should Be Equal As Integers   ${return_code}   0   msg=Error detected installing RHOAI dependencies using GitOps
+
+Install RHOAI Dependencies With CLI
+    [Documentation]    Install dependent operators required for RHOAI installation using CLI
+    Install Kueue Dependencies
+    Install Leader Worker Set Operator Via Cli
+    Install Connectivity Link Operator Via Cli
+    Install JobSet Dependencies
+    Configure MaaS Gateway API
+
 Install Observability Dependencies
     [Documentation]    Install dependent operators related to Observability
-    Set Suite Variable   ${FILES_RESOURCES_DIRPATH}    tests/Resources/Files
-    Set Suite Variable   ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-subscription.yaml
-    Set Suite Variable   ${OPERATORGROUP_YAML_TEMPLATE_FILEPATH}    ${FILES_RESOURCES_DIRPATH}/isv-operator-group.yaml
     Install Cluster Observability Operator Via Cli
     Install Tempo Operator Via Cli
     Install OpenTelemetry Operator Via Cli
@@ -884,6 +1102,22 @@ Set Component State
     END
     Log To Console    Component ${component} state was set to ${state}
 
+Set Nested Component State
+    [Documentation]    Set nested component state in Data Science Cluster (e.g., kserve.modelsAsService)
+    [Arguments]    ${parent_component}    ${nested_component}    ${state}
+    ${result} =    Run Process    oc get datascienceclusters.datasciencecluster.opendatahub.io -o name
+    ...    shell=true    stderr=STDOUT
+    IF    $result.stdout == ""
+        FAIL    Can not find datasciencecluster
+    END
+    ${cluster_name} =    Set Variable    ${result.stdout}
+    ${result} =    Run Process    oc patch ${cluster_name} --type 'json' -p '[{"op" : "replace" ,"path" : "/spec/components/${parent_component}/${nested_component}/managementState" ,"value" : "${state}"}]'
+    ...    shell=true    stderr=STDOUT
+    IF    $result.rc != 0
+        FAIL    Can not set ${parent_component}.${nested_component} to ${state}: ${result.stdout}
+    END
+    Log To Console    Nested component ${parent_component}.${nested_component} state was set to ${state}
+
 Get DSC Component State
     [Documentation]    Get component management state
     [Arguments]    ${dsc}    ${component}    ${namespace}
@@ -892,6 +1126,17 @@ Get DSC Component State
     ...    oc get DataScienceCluster/${dsc} -n ${namespace} -o 'jsonpath={.spec.components.${component}.managementState}'
     Should Be Equal    "${rc}"    "0"    msg=${state}
     Log To Console    Component ${component} state ${state}
+
+    RETURN    ${state}
+
+Get DSC Nested Component State
+    [Documentation]    Get nested component management state (e.g., kserve.modelsAsService)
+    [Arguments]    ${dsc}    ${parent_component}    ${nested_component}    ${namespace}
+
+    ${rc}   ${state}=    Run And Return Rc And Output
+    ...    oc get DataScienceCluster/${dsc} -n ${namespace} -o 'jsonpath={.spec.components.${parent_component}.${nested_component}.managementState}'
+    Should Be Equal    "${rc}"    "0"    msg=${state}
+    Log To Console    Nested component ${parent_component}.${nested_component} state ${state}
 
     RETURN    ${state}
 
@@ -973,3 +1218,19 @@ Deploy NFS Provisioner
     Log    ${output}    console=yes
     Wait For Pods To Be Ready    label_selector=nfsprovisioner_cr=${nfs_provisioner_name}
     ...    namespace=${NFS_OP_NS}
+
+Configure Gateway API
+    [Documentation]    Configure Gateway API for KServe inference traffic routing
+    Log To Console    Configuring Gateway API for KServe
+    ${rc}    ${output} =    Run And Return Rc And Output
+    ...    bash tasks/Resources/Gateway/configure_gateway.sh
+    Log To Console    ${output}
+    Should Be Equal As Integers    ${rc}    0    msg=Error configuring Gateway for KServe
+
+Configure MaaS Gateway API
+    [Documentation]    Configure Gateway API for MaaS traffic routing
+    Log To Console    Configuring Gateway API for MaaS
+    ${rc}    ${output} =    Run And Return Rc And Output
+    ...    bash tasks/Resources/Gateway/configure_maas_gateway.sh
+    Log To Console    ${output}
+    Should Be Equal As Integers    ${rc}    0    msg=Error configuring Gateway for MaaS

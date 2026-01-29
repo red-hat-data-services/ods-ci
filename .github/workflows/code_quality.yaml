@@ -38,22 +38,21 @@ jobs:
     name: python linters
     runs-on: ubuntu-latest
     env:
-      python_version: '3.11'
+      python_version: '3.11.x'
       poetry_version: '2.1.1'
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Install poetry
-        run: pipx install poetry==${{ env.poetry_version }}
-
       - name: Set up Python
         id: setup-python
         uses: actions/setup-python@v5
         with:
           python-version: '${{ env.python_version }}'
-          cache: 'poetry'
+
+      - name: Install poetry
+        run: pipx install poetry==${{ env.poetry_version }} --python "${{ steps.setup-python.outputs.python-path }}"
 
       - name: Configure poetry
         run: |
@@ -78,20 +77,19 @@ jobs:
     name: selftests
     runs-on: ubuntu-latest
     env:
-      python_version: '3.11'
+      python_version: '3.11.x'
       poetry_version: '2.1.1'
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install poetry
-        run: pipx install poetry==${{ env.poetry_version }}
 
       - name: Set up Python
         id: setup-python
         uses: actions/setup-python@v5
         with:
           python-version: '${{ env.python_version }}'
-          cache: 'poetry'
+
+      - name: Install poetry
+        run: pipx install poetry==${{ env.poetry_version }} --python "${{ steps.setup-python.outputs.python-path }}"
 
       - name: Configure poetry
         run: poetry env use "${{ steps.setup-python.outputs.python-path }}"

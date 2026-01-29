@@ -13,6 +13,9 @@ Get Must-Gather Logs
     ...                          shell=yes
     ...                          env:OPERATOR_NAMESPACE=${OPERATOR_NAMESPACE}
     ...                          env:APPLICATIONS_NAMESPACE=${APPLICATIONS_NAMESPACE}
+    ${disk_usage_err}=    Grep File    must-gather-results.txt    Disk usage exceeds the volume percentage
+    Should Be Empty    ${disk_usage_err}
+    ...                Must-Gather output should not contain "Disk usage exceeds" error, the output contained: ${disk_usage_err}
     Should Be Equal As Integers	  ${output.rc}	 0
     Should Not Contain    ${output.stdout}    FAIL
     ${must_gather_dir}=  Run     ls -d must-gather.local.*

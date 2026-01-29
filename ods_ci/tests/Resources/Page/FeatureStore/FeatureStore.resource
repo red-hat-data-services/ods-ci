@@ -6,23 +6,26 @@ Resource         ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 
 
 *** Variables ***
-${FEATURE-STORE-RELEASE-TAG}             master
+${FEATURE-STORE-RELEASE-TAG}             release-3.3
 ${FEATURE-STORE_DIR}                     feature-store
-${FEATURE-STORE_REPO_URL}                %{FEATURE-STORE_REPO_URL=https://github.com/feast-dev/feast.git}
-${NOTEBOOK_IMAGE}                        quay.io/rhoai/odh-workbench-jupyter-datascience-cpu-py312-rhel9@sha256:dd37de4ca53ce242a0f67a70d19eebf157679098a3417e9ffdf8e24378f6bdcc
-${FEAST_VERSION}                         0.55.0
+${FEATURE-STORE_REPO_URL}                %{FEATURE-STORE_REPO_URL=https://github.com/opendatahub-io/feast.git}
+${NOTEBOOK_IMAGE}                        quay.io/rhoai/odh-workbench-jupyter-datascience-cpu-py312-rhel9@sha256:c9c5a46db3c7e0f2a07be8d143b49078300219c9c33ec9eadc2885e46ea1c44c
+${FEAST_VERSION}                         0.59.0
+${DSC_NAME}                              default-dsc
 
 
 *** Keywords ***
 Prepare Feature Store Test Suite
     [Documentation]   Prepare Feature store setup by enabling component
     RHOSi Setup
-    Enable Component    feastoperator
-    Wait Component Ready    feastoperator
+    ${management_state}=    Get DSC Component State    ${DSC_NAME}    feastoperator    ${OPERATOR_NAMESPACE}
+    IF    "${management_state}" != "Managed"
+        Enable Component    feastoperator
+        Wait Component Ready    feastoperator
+    END
 
 Cleanup Feature Store Setup
     [Documentation]   cleanup Feature store setup by Disabling component
-    Disable Component    feastoperator
     RHOSi Teardown
 
 Prepare Feast E2E Test Suite

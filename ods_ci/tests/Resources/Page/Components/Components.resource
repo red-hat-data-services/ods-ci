@@ -95,6 +95,65 @@ Restore DSC Component State
         END
     END
 
+Set DSC Nested Component Removed State And Wait For Completion
+    [Documentation]    Set nested component management state to 'Removed', and wait for deployment and pod to be removed.
+    [Arguments]    ${parent_component}    ${nested_component}    ${deployment_name}    ${label_selector}
+    ...            ${namespace}=${APPLICATIONS_NS}     ${wait_for_completion}=True
+
+    ${management_state}=    Get DSC Nested Component State    ${DSC_NAME}    ${parent_component}    ${nested_component}    ${OPERATOR_NS}
+    IF    "${management_state}" != "Removed"
+            Set Nested Component State    ${parent_component}    ${nested_component}    Removed
+    END
+
+    IF     ${wait_for_completion}
+            Wait For Resources To Be Removed    ${deployment_name}    ${label_selector}     ${namespace}
+    END
+
+Set DSC Nested Component Managed State And Wait For Completion
+    [Documentation]    Set nested component management state to 'Managed', and wait for deployment and pod to be available.
+    ...                Also ensures parent component is Managed, as nested components require their parent to be enabled.
+    [Arguments]    ${parent_component}    ${nested_component}    ${deployment_name}    ${label_selector}
+    ...            ${namespace}=${APPLICATIONS_NS}      ${wait_for_completion}=True
+
+    # Ensure parent component is Managed before enabling nested component
+    ${parent_state}=    Get DSC Component State    ${DSC_NAME}    ${parent_component}    ${OPERATOR_NS}
+    IF    "${parent_state}" != "Managed"
+            Log To Console    Parent component ${parent_component} is ${parent_state}, setting to Managed to enable nested component ${nested_component}
+            Set Component State    ${parent_component}    Managed
+            Wait Component Ready    ${parent_component}
+    END
+
+    ${management_state}=    Get DSC Nested Component State    ${DSC_NAME}    ${parent_component}    ${nested_component}    ${OPERATOR_NS}
+    IF    "${management_state}" != "Managed"
+            Set Nested Component State    ${parent_component}    ${nested_component}    Managed
+    END
+
+    IF     ${wait_for_completion}
+            Wait For Resources To Be Available    ${deployment_name}    ${label_selector}
+    END
+
+Restore DSC Nested Component State
+    [Documentation]    Set nested component management state to original state, wait for component resources to be available.
+    ...                Note: This does NOT restore parent component state. If tests modify both parent and nested,
+    ...                parent should be restored separately using the suite-saved parent state.
+    [Arguments]    ${parent_component}    ${nested_component}    ${deployment_name}    ${label_selector}    ${saved_state}     ${namespace}=${APPLICATIONS_NAMESPACE}
+
+    ${current_state}=    Get DSC Nested Component State    ${DSC_NAME}    ${parent_component}    ${nested_component}    ${OPERATOR_NS}
+    IF    "${current_state}" != "${saved_state}"
+        IF    "${saved_state}" == "Managed"
+            # This will ensure parent is Managed if needed
+            Set DSC Nested Component Managed State And Wait For Completion    ${parent_component}    ${nested_component}    ${deployment_name}    ${label_selector}
+        ELSE IF    "${saved_state}" == "Removed"
+            Set DSC Nested Component Removed State And Wait For Completion    ${parent_component}    ${nested_component}    ${deployment_name}    ${label_selector}      ${namespace}
+        ELSE IF    "${saved_state}" == "${EMPTY}" or "${saved_state}" == ""
+            # If saved_state is empty, set component to Removed state as default
+            Log To Console    Nested component ${parent_component}.${nested_component} saved state was empty, setting to Removed state
+            Set DSC Nested Component Removed State And Wait For Completion    ${parent_component}    ${nested_component}    ${deployment_name}    ${label_selector}      ${namespace}
+        ELSE
+            FAIL    Nested component ${parent_component}.${nested_component} state "${saved_state}" not supported at this time
+        END
+    END
+
 Is Pod Ready
     [Documentation]    Check If Pod Is In Ready State.
     ...    Note: Will check that all pods with given label-selector are in Ready state.

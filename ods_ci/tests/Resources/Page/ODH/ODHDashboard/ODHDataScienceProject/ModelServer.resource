@@ -35,7 +35,7 @@ Create Model Server
     [Arguments]    ${no_replicas}=1    ${server_size}=Small    ${ext_route}=${TRUE}
     ...    ${token}=${TRUE}    ${runtime}=OpenVINO Model Server    ${server_name}=Model Serving Test
     ...    ${no_gpus}=0    ${existing_server}=${FALSE}
-    Move To Tab    Models
+    Move To Tab    model-server
     IF    ${existing_server}
         ${existing_server}=  Run Keyword And Return Status     Wait Until Page Contains Element    //button[.="${server_name}"]
         IF  ${existing_server}    Run Keyword And Return

@@ -77,12 +77,19 @@ Authorize rhods-dashboard service account
 Login To RHODS Dashboard
    [Arguments]  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
    # Wait until we are in the OpenShift auth page or already in Dashboard
-   ${expected_text_list}=    Create List    Log in with    Data Science Projects
-   Wait Until Page Contains A String In List    ${expected_text_list}
-   ${oauth_prompt_visible}=  Is OpenShift OAuth Login Prompt Visible
-   IF  ${oauth_prompt_visible}  Click Button  Log in with OpenShift
-   ${login-required}=  Is OpenShift Login Visible
-   IF  ${login-required}  Login To Openshift  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
+   IF  "${ocp_user_auth_type}" == "oidc"
+       ${expected_text_list}=    Create List    Sign in to your account    AI hub
+       Wait Until Page Contains A String In List    ${expected_text_list}
+       ${login-required}=  Is OpenShift Login Visible
+       IF  ${login-required}  Login To Openshift  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
+   ELSE
+       ${expected_text_list}=    Create List    Log in with    Data Sciencapodhrad-gcp-pool-gtcd5e Projects
+       Wait Until Page Contains A String In List    ${expected_text_list}
+       ${oauth_prompt_visible}=  Is OpenShift OAuth Login Prompt Visible
+       IF  ${oauth_prompt_visible}  Click Button  Log in with OpenShift
+       ${login-required}=  Is OpenShift Login Visible
+       IF  ${login-required}  Login To Openshift  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
+   END
    ${authorize_service_account}=  Is rhods-dashboard Service Account Authorization Required
    IF  ${authorize_service_account}  Authorize rhods-dashboard service account
 
@@ -93,7 +100,8 @@ Logout From RHODS Dashboard
     Click Button  ${USER_MENU_TOGGLE}
     Wait Until Page Contains Element  xpath:${LOGOUT_BTN}
     Click Element  xpath:${LOGOUT_BTN}
-    Wait Until Page Contains  Log in with
+    # Wait until we are in the OpenShift auth page
+    Is OpenShift Login Visible
 
 Wait For RHODS Dashboard To Load
     [Arguments]  ${dashboard_title}="${ODH_DASHBOARD_PROJECT_NAME}"    ${wait_for_cards}=${TRUE}

@@ -22,6 +22,8 @@ ${RAY_LABEL_SELECTOR}                                       app.kubernetes.io/na
 ${RAY_DEPLOYMENT_NAME}                                      kuberay-operator
 ${TRAINING_LABEL_SELECTOR}                                  app.kubernetes.io/name=training-operator
 ${TRAINING_DEPLOYMENT_NAME}                                 kubeflow-training-operator
+${TRAINER_LABEL_SELECTOR}                                   app.kubernetes.io/name=trainer
+${TRAINER_DEPLOYMENT_NAME}                                  kubeflow-trainer-controller-manager
 ${AIPIPELINES_LABEL_SELECTOR}                               app.kubernetes.io/name=data-science-pipelines-operator
 ${AIPIPELINES_DEPLOYMENT_NAME}                              data-science-pipelines-operator-controller-manager
 ${ODH_MODEL_CONTROLLER_LABEL_SELECTOR}                      app=odh-model-controller
@@ -36,6 +38,10 @@ ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}          app.kubernetes.io/pa
 ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}         feast-operator-controller-manager
 ${LLAMASTACKOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}     app.kubernetes.io/part-of=llamastackoperator
 ${LLAMASTACKOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    llama-stack-k8s-operator-controller-manager
+${MLFLOWOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}         app.kubernetes.io/name=mlflow-operator
+${MLFLOWOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}        mlflow-operator-controller-manager
+${MODELSASSERVICE_CONTROLLER_MANAGER_LABEL_SELECTOR}        app.kubernetes.io/part-of=models-as-a-service
+${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}       maas-api
 ${NOTEBOOK_CONTROLLER_DEPLOYMENT_LABEL_SELECTOR}            component.opendatahub.io/name=kf-notebook-controller
 ${NOTEBOOK_CONTROLLER_MANAGER_LABEL_SELECTOR}               component.opendatahub.io/name=odh-notebook-controller
 ${NOTEBOOK_DEPLOYMENT_NAME}                                 notebook-controller-deployment
@@ -44,6 +50,7 @@ ${IS_NOT_PRESENT}                                           1
 ...                                                         RAY=${EMPTY}
 ...                                                         KUEUE=${EMPTY}
 ...                                                         TRAINING=${EMPTY}
+...                                                         TRAINER=${EMPTY}
 ...                                                         DASHBOARD=${EMPTY}
 ...                                                         AIPIPELINES=${EMPTY}
 ...                                                         MODELREGISTRY=${EMPTY}
@@ -52,6 +59,8 @@ ${IS_NOT_PRESENT}                                           1
 ...                                                         WORKBENCHES=${EMPTY}
 ...                                                         FEASTOPERATOR=${EMPTY}
 ...                                                         LLAMASTACKOPERATOR=${EMPTY}
+...                                                         MLFLOWOPERATOR=${EMPTY}
+...                                                         MODELSASSERVICE=${EMPTY}
 
 @{CONTROLLERS_LIST}                                     # dashboard added in Suite Setup, since it's different in RHOAI vs ODH
 ...                                                     data-science-pipelines-operator-controller-manager
@@ -74,20 +83,14 @@ Validate Kueue Removed To Unmanaged State Transition
     ...    Tier1
     ...    kueue-unmanaged-from-removed
     ...    Integration
-    Uninstall Kueue Operator CLI
     Set DSC Component Removed State And Wait For Completion
     ...    kueue
     ...    ${KUEUE_DEPLOYMENT_NAME}
     ...    ${KUEUE_LABEL_SELECTOR}
     ...    namespace=${KUEUE_NS}
+    ...    wait_for_completion=False
     Set DSC Component Unmanaged State And Wait For Completion
     ...    kueue
-    ...    ${KUEUE_DEPLOYMENT_NAME}
-    ...    ${KUEUE_LABEL_SELECTOR}
-    ...    namespace=${KUEUE_NS}
-    ...    wait_for_completion=False
-    Install Kueue Dependencies
-    Wait For Resources To Be Available
     ...    ${KUEUE_DEPLOYMENT_NAME}
     ...    ${KUEUE_LABEL_SELECTOR}
     ...    namespace=${KUEUE_NS}
@@ -108,18 +111,12 @@ Validate Kueue Unmanaged To Removed State Transition
     ...    ${KUEUE_DEPLOYMENT_NAME}
     ...    ${KUEUE_LABEL_SELECTOR}
     ...    namespace=${KUEUE_NS}
-    ...    wait_for_completion=False
-    Install Kueue Dependencies
-    Wait For Resources To Be Available
-    ...    ${KUEUE_DEPLOYMENT_NAME}
-    ...    ${KUEUE_LABEL_SELECTOR}
-    ...    namespace=${KUEUE_NS}
-    Uninstall Kueue Operator CLI
     Set DSC Component Removed State And Wait For Completion
     ...    kueue
     ...    ${KUEUE_DEPLOYMENT_NAME}
     ...    ${KUEUE_LABEL_SELECTOR}
     ...    namespace=${KUEUE_NS}
+    ...    wait_for_completion=False
 
     [Teardown]      Restore Kueue Initial State
 
@@ -188,6 +185,40 @@ Validate Training Operator Removed State
     ...    ${TRAINING_LABEL_SELECTOR}
 
     [Teardown]      Restore DSC Component State     trainingoperator        ${TRAINING_DEPLOYMENT_NAME}     ${TRAINING_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.TRAINING}
+
+Validate Trainer Managed State
+    [Documentation]    Validate that the DSC Trainer component Managed state creates the expected resources,
+    ...    check that Training deployment is created and pod is in Ready state
+    [Tags]
+    ...    Operator
+    ...    Tier1
+    ...    trainer-managed
+    ...    Integration
+    ...    ExcludeOnODH
+
+    Set DSC Component Managed State And Wait For Completion
+    ...    trainer
+    ...    ${TRAINER_DEPLOYMENT_NAME}
+    ...    ${TRAINER_LABEL_SELECTOR}
+    Check That Image Pull Path Is Correct       ${TRAINER_DEPLOYMENT_NAME}     ${IMAGE_PULL_PATH}
+
+    [Teardown]      Restore DSC Component State     trainer        ${TRAINER_DEPLOYMENT_NAME}     ${TRAINER_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.TRAINER}
+
+Validate Trainer Removed State
+    [Documentation]    Validate that Trainer management state Removed does remove relevant resources.
+    [Tags]
+    ...    Operator
+    ...    Tier1
+    ...    trainer-removed
+    ...    Integration
+    ...    ExcludeOnODH
+
+    Set DSC Component Removed State And Wait For Completion
+    ...    trainer
+    ...    ${TRAINER_DEPLOYMENT_NAME}
+    ...    ${TRAINER_LABEL_SELECTOR}
+
+    [Teardown]      Restore DSC Component State     trainer      ${TRAINER_DEPLOYMENT_NAME}     ${TRAINER_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.TRAINER}
 
 Validate Dashboard Managed State
     [Documentation]    Validate that the DSC Dashboard component Managed state creates the expected resources,
@@ -479,6 +510,87 @@ Validate Llamastackoperator Removed State
 
     [Teardown]      Restore DSC Component State     llamastackoperator       ${LLAMASTACKOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}     ${LLAMASTACKOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.LLAMASTACKOPERATOR}
 
+Validate Mlflowoperator Managed State
+    [Documentation]    Validate that the DSC Mlflowoperator component Managed state creates the expected resources,
+    ...    check that MlflowOperator deployment is created and pod is in Ready state
+    [Tags]
+    ...    Operator
+    ...    Tier1
+    ...    mlflowoperator-managed
+    ...    Integration
+    ...    ExcludeOnODH
+
+    Set DSC Component Managed State And Wait For Completion
+    ...    mlflowoperator
+    ...    ${MLFLOWOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${MLFLOWOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
+    Check That Image Pull Path Is Correct
+    ...    ${MLFLOWOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${IMAGE_PULL_PATH}
+
+    [Teardown]      Restore DSC Component State     mlflowoperator       ${MLFLOWOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}     ${MLFLOWOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.MLFLOWOPERATOR}
+
+Validate Mlflowoperator Removed State
+    [Documentation]    Validate that MlflowOperator management state Removed does remove relevant resources.
+    [Tags]
+    ...    Operator
+    ...    Tier1
+    ...    mlflowoperator-removed
+    ...    Integration
+    ...    ExcludeOnODH
+
+    Set DSC Component Removed State And Wait For Completion
+    ...    mlflowoperator
+    ...    ${MLFLOWOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${MLFLOWOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
+
+    [Teardown]      Restore DSC Component State     mlflowoperator       ${MLFLOWOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}     ${MLFLOWOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.MLFLOWOPERATOR}
+
+Validate Modelsasservice Managed State
+    [Documentation]    Validate that the DSC Modelsasservice component Managed state creates the expected resources,
+    ...    check that ModelsAsService deployment is created and pod is in Ready state
+    [Tags]
+    ...    Operator
+    ...    Tier1
+    ...    modelsasservice-managed
+    ...    Integration
+    ...    ExcludeOnODH
+
+    Set DSC Nested Component Managed State And Wait For Completion
+    ...    kserve
+    ...    modelsAsService
+    ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_LABEL_SELECTOR}
+    Check That Image Pull Path Is Correct
+    ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${IMAGE_PULL_PATH}
+
+    [Teardown]      Restore Nested Component And Parent State
+    ...    kserve    modelsAsService
+    ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${MODELSASSERVICE_CONTROLLER_MANAGER_LABEL_SELECTOR}
+    ...    ${KSERVE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${KSERVE_CONTROLLER_MANAGER_LABEL_SELECTOR}
+    ...    ${SAVED_MANAGEMENT_STATES.MODELSASSERVICE}    ${SAVED_MANAGEMENT_STATES.KSERVE}
+
+Validate Modelsasservice Removed State
+    [Documentation]    Validate that ModelsAsService management state Removed does remove relevant resources.
+    [Tags]
+    ...    Operator
+    ...    Tier1
+    ...    modelsasservice-removed
+    ...    Integration
+    ...    ExcludeOnODH
+
+    Set DSC Nested Component Removed State And Wait For Completion
+    ...    kserve
+    ...    modelsAsService
+    ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_LABEL_SELECTOR}
+
+    [Teardown]      Restore Nested Component And Parent State
+    ...    kserve    modelsAsService
+    ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${MODELSASSERVICE_CONTROLLER_MANAGER_LABEL_SELECTOR}
+    ...    ${KSERVE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${KSERVE_CONTROLLER_MANAGER_LABEL_SELECTOR}
+    ...    ${SAVED_MANAGEMENT_STATES.MODELSASSERVICE}    ${SAVED_MANAGEMENT_STATES.KSERVE}
 
 Validate Support For Configuration Of Controller Resources
     [Documentation]    Validate support for configuration of controller resources in component deployments
@@ -543,6 +655,7 @@ Suite Setup
     ${SAVED_MANAGEMENT_STATES.RAY}=     Get DSC Component State    ${DSC_NAME}    ray    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.KUEUE}=     Get DSC Component State    ${DSC_NAME}    kueue    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.TRAINING}=     Get DSC Component State    ${DSC_NAME}    trainingoperator    ${OPERATOR_NS}
+    ${SAVED_MANAGEMENT_STATES.TRAINER}=     Get DSC Component State     ${DSC_NAME}     trainer    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.DASHBOARD}=     Get DSC Component State    ${DSC_NAME}    dashboard    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.AIPIPELINES}=     Get DSC Component State    ${DSC_NAME}    aipipelines    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.MODELREGISTRY}=     Get DSC Component State    ${DSC_NAME}    modelregistry    ${OPERATOR_NS}
@@ -551,6 +664,8 @@ Suite Setup
     ${SAVED_MANAGEMENT_STATES.WORKBENCHES}=    Get DSC Component State    ${DSC_NAME}    workbenches    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.FEASTOPERATOR}=    Get DSC Component State    ${DSC_NAME}    feastoperator    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.LLAMASTACKOPERATOR}=    Get DSC Component State    ${DSC_NAME}    llamastackoperator    ${OPERATOR_NS}
+    ${SAVED_MANAGEMENT_STATES.MLFLOWOPERATOR}=    Get DSC Component State    ${DSC_NAME}    mlflowoperator    ${OPERATOR_NS}
+    ${SAVED_MANAGEMENT_STATES.MODELSASSERVICE}=    Get DSC Nested Component State    ${DSC_NAME}    kserve    modelsAsService    ${OPERATOR_NS}
     Set Suite Variable    ${SAVED_MANAGEMENT_STATES}
     Append To List  ${CONTROLLERS_LIST}    ${DASHBOARD_DEPLOYMENT_NAME}
 
@@ -561,37 +676,11 @@ Suite Teardown
 Restore Kueue Initial State
     [Documentation]    Keyword to restore the initial state of the Kueue component. If the restored state is Unmanaged
     ...                we need to ensure the Kueue Operator is installed, if not, we need to make sure is not installed.
-    ${current_state}=    Get DSC Component State    ${DSC_NAME}    kueue    ${OPERATOR_NS}
-    ${ocp_version}=     Get Ocp Cluster Version
-    ${install_kueue_by_ocp_version}=    GTE    ${ocp_version}    4.18.0
     ${kueue_installed} =   Check If Operator Is Installed Via CLI      ${KUEUE_OP_NAME}
-    IF    "${SAVED_MANAGEMENT_STATES.KUEUE}" == "Managed"
-            IF    ${install_kueue_by_ocp_version}
-                    IF    ${kueue_installed}
-                            Uninstall Kueue Operator CLI
-                    END
-            END
-            ${namespace}=    Set Variable    ${APPLICATIONS_NAMESPACE}
-    ELSE IF    "${SAVED_MANAGEMENT_STATES.KUEUE}" == "Unmanaged"
-            IF    not ${kueue_installed}
-                    Install Kueue Dependencies
-            END
-            ${namespace}=    Set Variable    ${KUEUE_NS}
-    ELSE
-            IF    ${install_kueue_by_ocp_version}
-                    IF    ${kueue_installed}
-                            Uninstall Kueue Operator CLI
-                    END
-            END
-            IF       "${current_state}" == "Managed"
-                      ${namespace}=    Set Variable    ${APPLICATIONS_NAMESPACE}
-            ELSE IF        "${current_state}" == "Unmanaged"
-                      ${namespace}=    Set Variable    ${KUEUE_NS}
-            ELSE
-                      ${namespace}=    Set Variable    ${APPLICATIONS_NAMESPACE}
-            END
+    IF    not ${kueue_installed}
+          Install Kueue Dependencies
     END
-    Restore DSC Component State     kueue       ${KUEUE_DEPLOYMENT_NAME}        ${KUEUE_LABEL_SELECTOR}     ${SAVED_MANAGEMENT_STATES.KUEUE}     ${namespace}
+    Set Component State    kueue    ${SAVED_MANAGEMENT_STATES.KUEUE}
 
 Check Controller Conditions Are Accomplished
     [Documentation]    Wait for the conditions related to a specific controller are accomplished
@@ -630,3 +719,25 @@ Restore Component Deployments
         # delete the Deployment resource for operator to recreate
         Run  oc delete Deployment ${controller} -n ${APPLICATIONS_NAMESPACE}
     END
+
+Restore Nested Component And Parent State
+    [Documentation]    Restore both a nested component and its parent component to their original states.
+    ...                Restores nested component first, then parent component to handle dependencies correctly.
+    [Arguments]    ${parent_component}    ${nested_component}    ${nested_deployment_name}    ${nested_label_selector}
+    ...            ${parent_deployment_name}    ${parent_label_selector}    ${nested_saved_state}    ${parent_saved_state}
+
+    # First restore the nested component
+    Restore DSC Nested Component State
+    ...    ${parent_component}
+    ...    ${nested_component}
+    ...    ${nested_deployment_name}
+    ...    ${nested_label_selector}
+    ...    ${nested_saved_state}
+
+    # Then restore the parent component to its original state
+    # This ensures parent is in the correct state after the test
+    Restore DSC Component State
+    ...    ${parent_component}
+    ...    ${parent_deployment_name}
+    ...    ${parent_label_selector}
+    ...    ${parent_saved_state}

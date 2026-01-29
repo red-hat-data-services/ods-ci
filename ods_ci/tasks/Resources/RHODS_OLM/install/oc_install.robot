@@ -90,6 +90,8 @@ ${install_plan_approval}=       Manual
 ${INSTALL_DEPENDENCIES_TYPE}=    Cli
 ${GITOPS_DEFAULT_REPO_BRANCH}=    main
 ${GITOPS_DEFAULT_REPO}=    ${EMPTY}
+${HELM_CUSTOM_VALUES_FILE}=    ${EMPTY}
+@{HELM_SET_VALUES}=    @{EMPTY}
 
 *** Keywords ***
 Install RHODS
@@ -99,7 +101,9 @@ Install RHODS
   Log    \- rhoai_version: ${rhoai_version}\n\- is_upgrade: ${is_upgrade}\n\- install_plan_approval: ${install_plan_approval}\n\- CATALOG_SOURCE: ${CATALOG_SOURCE}   console=yes    #robocop:disable
   Assign Vars According To Product
   ${enable_new_observability_stack} =    Is New Observability Stack Enabled
-  IF  "${INSTALL_DEPENDENCIES_TYPE}" == "GitOps"
+  IF  "${INSTALL_TYPE}" == "Helm"
+    Log To Console    Helm installation handles dependencies and operator together
+  ELSE IF  "${INSTALL_DEPENDENCIES_TYPE}" == "GitOps"
     Install RHOAI Dependencies With GitOps Repo    ${enable_new_observability_stack}
     ...    ${GITOPS_REPO_BRANCH}    ${GITOPS_REPO_URL}
   ELSE
@@ -118,6 +122,9 @@ Install RHODS
   IF   "${cluster_type}" == "selfmanaged"
       IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "Cli"
              Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
+      ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "Helm"
+             Install RHOAI In Self Managed Cluster Using Helm  ${enable_new_observability_stack}
+             ...    ${GITOPS_REPO_BRANCH}    ${GITOPS_REPO_URL}
       ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "OperatorHub"
           IF  "${is_upgrade}" == "False"
               ${file_path} =    Set Variable    tasks/Resources/RHODS_OLM/install/
@@ -403,6 +410,51 @@ Install RHODS In Managed Cluster Using CLI
   ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${OLM_DIR} && ./setup.sh -t addon -u ${UPDATE_CHANNEL} -i ${image_url} -n ${OPERATOR_NAME} -p ${OPERATOR_NAMESPACE} -a ${APPLICATIONS_NAMESPACE} -m ${MONITORING_NAMESPACE}  #robocop:disable
   Log To Console    ${output}
   Should Be Equal As Integers   ${return_code}   0  msg=Error detected while installing RHODS
+
+Install RHOAI In Self Managed Cluster Using Helm
+  [Documentation]   Install ODH/RHOAI using Helm on a self-managed cluster, including its dependencies
+  ...
+  ...   Optional variables that can be set to customize Helm installation:
+  ...   - ${HELM_CUSTOM_VALUES_FILE}: Path to additional Helm values file to override the default chart
+  ...   - @{HELM_SET_VALUES}: List of key=value pairs for Helm --set flags, applied after the custom values file if used
+  ...   - ${GITOPS_REPO_BRANCH}: GitOps repository branch (uses ${GITOPS_DEFAULT_REPO_BRANCH} if not set)
+  ...   - ${GITOPS_REPO_URL}: Custom GitOps repository URL (uses ${GITOPS_DEFAULT_REPO} if not set)
+  [Arguments]     ${enable_monitoring}=${TRUE}
+  ...    ${gitops_branch}=${GITOPS_DEFAULT_REPO_BRANCH}
+  ...    ${gitops_repo}=${GITOPS_DEFAULT_REPO}
+  Log To Console    Installing ${PRODUCT} using Helm method
+  ${operator_type} =    Set Variable If    "${PRODUCT}" == "ODH"    odh    rhoai
+  Log To Console    Operator type for Helm: ${operator_type}
+
+  ${monitoring_flag} =    Set Variable If    not ${enable_monitoring}    -M    ${EMPTY}
+  ${branch_flag} =    Set Variable If    "${gitops_branch}" != "${EMPTY}"    -b ${gitops_branch}    ${EMPTY}
+  ${repo_flag} =    Set Variable If    "${gitops_repo}" != "${EMPTY}"    -r ${gitops_repo}    ${EMPTY}
+  ${values_file_flag} =    Set Variable If    "${HELM_CUSTOM_VALUES_FILE}" != "${EMPTY}"    -f ${HELM_CUSTOM_VALUES_FILE}    ${EMPTY}
+
+  ${set_values_flags} =    Set Variable    ${EMPTY}
+  FOR    ${set_value}    IN    @{HELM_SET_VALUES}
+      ${set_values_flags} =    Set Variable    ${set_values_flags} -s ${set_value}
+  END
+
+  # Log configuration
+  Log To Console    Monitoring dependencies: ${'Skipped' if not ${enable_monitoring} else 'Enabled'}
+  IF    "${gitops_branch}" != "${EMPTY}"
+      Log To Console    Using GitOps repo branch: ${gitops_branch}
+  END
+  IF    "${gitops_repo}" != "${EMPTY}"
+      Log To Console    Using custom GitOps repo: ${gitops_repo}
+  END
+  IF    "${HELM_CUSTOM_VALUES_FILE}" != "${EMPTY}"
+      Log To Console    Using custom values file: ${HELM_CUSTOM_VALUES_FILE}
+  END
+  IF    @{HELM_SET_VALUES}
+      Log To Console    Custom Helm values: @{HELM_SET_VALUES}
+  END
+
+  ${return_code} =    Run And Watch Command
+  ...    cd ${EXECDIR}/${OLM_DIR} && ./setup-helm.sh -o ${operator_type} ${monitoring_flag} ${repo_flag} ${branch_flag} ${values_file_flag} ${set_values_flags}
+  ...    timeout=20 min
+  Should Be Equal As Integers   ${return_code}   0   msg=Error detected while installing ${PRODUCT} with Helm
 
 Wait For Pods Numbers
   [Documentation]   Wait for number of pod during installation

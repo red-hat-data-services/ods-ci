@@ -142,7 +142,6 @@ ignore = [
   "N806", # Variable `outputText` in function should be lowercase
   "N813", # Camelcase `ElementTree` imported as lowercase `et`
   "N816", # Variable `rotatingHandler` in global scope should not be mixedCase
-  "N999", # Invalid module name: 'createPolarionTestRun'
   "PERF401", # Use a list comprehension to create a transformed list
   "PLC1901", # `filter_value != ""` can be simplified to `filter_value` as an empty string is falsey
   "PLR6201", # Use a `set` literal when testing for membership

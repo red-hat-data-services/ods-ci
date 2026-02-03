@@ -87,7 +87,6 @@ ${RHODS_OSD_INSTALL_REPO}=      ${EMPTY}
 ${OLM_DIR}=                     rhodsolm
 @{SUPPORTED_TEST_ENV}=          AWS   AWS_DIS   GCP   GCP_DIS   PSI   PSI_DIS   ROSA   IBM_CLOUD   CRC    AZURE	ROSA_HCP
 ${install_plan_approval}=       Manual
-${INSTALL_DEPENDENCIES_TYPE}=    Cli
 ${GITOPS_DEFAULT_REPO_BRANCH}=    main
 ${GITOPS_DEFAULT_REPO}=    ${EMPTY}
 ${HELM_CUSTOM_VALUES_FILE}=    ${EMPTY}
@@ -105,10 +104,12 @@ Install RHODS
   IF  "${INSTALL_TYPE}" == "Helm"
     Parse Component Names For Helm Install
     Log To Console    Helm installation handles dependencies and operator together
-  ELSE IF  "${INSTALL_DEPENDENCIES_TYPE}" == "Kustomize"
+  ELSE IF  "${INSTALL_TYPE}" == "Kustomize"
+    Log To Console    Kustomize install method, installing dependencies via GitOps repo, operator via CLI
     Install RHOAI Dependencies With GitOps Repo    ${enable_new_observability_stack}
     ...    ${GITOPS_REPO_BRANCH}    ${GITOPS_REPO_URL}
   ELSE
+    # Cli or OperatorHub - install dependencies via CLI
     Install RHOAI Dependencies With CLI
     IF    ${enable_new_observability_stack}
             Install Observability Dependencies
@@ -122,7 +123,8 @@ Install RHODS
        ${csv_display_name} =    Set Variable    ${RHODS_CSV_DISPLAY}
   END
   IF   "${cluster_type}" == "selfmanaged"
-      IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "Cli"
+      ${is_cli_install} =    Evaluate    "${INSTALL_TYPE}" in ["Cli", "Kustomize"]
+      IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and ${is_cli_install}
              Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
       ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "Helm"
              Install RHOAI In Self Managed Cluster Using Helm  ${enable_new_observability_stack}
@@ -158,12 +160,13 @@ Install RHODS
            FAIL    Provided test environment and install type is not supported
       END
   ELSE IF   "${cluster_type}" == "managed"
-      IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "Cli" and "${UPDATE_CHANNEL}" == "odh-nightlies"
+      ${is_cli_install_managed} =    Evaluate    "${INSTALL_TYPE}" in ["Cli", "Kustomize"]
+      IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and ${is_cli_install_managed} and "${UPDATE_CHANNEL}" == "odh-nightlies"
           # odh-nightly is not build for Managed, it is only possible for Self-Managed
           Set Global Variable    ${OPERATOR_NAMESPACE}    openshift-marketplace
           Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
           Set Global Variable    ${OPERATOR_NAME}         opendatahub-operator
-      ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "Cli"
+      ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and ${is_cli_install_managed}
           Install RHODS In Managed Cluster Using CLI  ${cluster_type}     ${image_url}
       ELSE
           FAIL    Provided test environment is not supported

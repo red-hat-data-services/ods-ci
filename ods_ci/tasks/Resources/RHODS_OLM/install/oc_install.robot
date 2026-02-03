@@ -92,6 +92,7 @@ ${GITOPS_DEFAULT_REPO_BRANCH}=    main
 ${GITOPS_DEFAULT_REPO}=    ${EMPTY}
 ${HELM_CUSTOM_VALUES_FILE}=    ${EMPTY}
 @{HELM_SET_VALUES}=    @{EMPTY}
+${COMPONENT_NAMES}=    ${EMPTY}
 
 *** Keywords ***
 Install RHODS
@@ -102,6 +103,7 @@ Install RHODS
   Assign Vars According To Product
   ${enable_new_observability_stack} =    Is New Observability Stack Enabled
   IF  "${INSTALL_TYPE}" == "Helm"
+    Parse Component Names For Helm Install
     Log To Console    Helm installation handles dependencies and operator together
   ELSE IF  "${INSTALL_DEPENDENCIES_TYPE}" == "GitOps"
     Install RHOAI Dependencies With GitOps Repo    ${enable_new_observability_stack}
@@ -193,6 +195,75 @@ Add StartingCSV To Subscription
     ELSE
         Log    StartingCSV field already exists: ${current_starting_csv}[1], skipping patch    console=yes
     END
+
+Parse Component Names For Helm Install
+    [Documentation]    Parses COMPONENT_NAMES string (received from Jenkins job) for Helm install method.
+    ...                Converts COMPONENT_NAMES to HELM_SET_VALUES list for Helm.
+    ...                Format: "componentName:managementState,componentName:managementState"
+    ...                Example: "dashboard:Managed,workbenches:Removed,feastoperator:Managed"
+    IF    "${COMPONENT_NAMES}" == "${EMPTY}"
+        Log To Console    COMPONENT_NAMES not set, will use defaults from Helm chart values
+        RETURN
+    END
+    Log To Console    Parsing COMPONENT_NAMES: ${COMPONENT_NAMES}
+
+    ${helm_values} =    Create List
+
+    # Get individual componentName:managementState pairs
+    @{pairs} =    Split String    ${COMPONENT_NAMES}    separator=,
+    FOR    ${pair}    IN    @{pairs}
+        ${pair} =    Strip String    ${pair}
+        IF    "${pair}" == "${EMPTY}"    CONTINUE
+
+        # Get component name and its managementState
+        @{parts} =    Split String    ${pair}    separator=:    max_split=1
+        ${len} =    Get Length    ${parts}
+        IF    ${len} != 2
+            Log To Console    WARNING: Invalid format '${pair}', expected 'component:state', skipping
+            CONTINUE
+        END
+        ${component} =    Strip String    ${parts}[0]
+        ${state} =    Strip String    ${parts}[1]
+
+        @{valid_states} =    Create List    Managed    Removed    Unmanaged
+        ${is_valid} =    Evaluate    "${state}" in ${valid_states}
+        IF    not ${is_valid}
+            Log To Console    WARNING: Invalid state '${state}' for component '${component}', skipping
+            CONTINUE
+        END
+
+        # For Helm install method, convert each parsed key-value pair to the expected Helm chart path
+        # and collect them into a list
+        ${helm_path} =    Get Helm Path For Component    ${component}
+        IF    "${helm_path}" != "${EMPTY}"
+            Append To List    ${helm_values}    ${helm_path}=${state}
+        END
+
+        Log To Console    Parsed component: ${component} -> ${state}
+    END
+
+    Set Global Variable    @{HELM_SET_VALUES}    @{helm_values}
+    Log To Console    HELM_SET_VALUES list: @{HELM_SET_VALUES}
+
+Get Helm Path For Component
+    [Documentation]    Maps component name to Helm chart path for managementState.
+    ...                Returns empty string for unknown components.
+    [Arguments]    ${component}
+
+    # Handling of special component cases:
+    # 1. modelsasservice is nested under kserve
+    IF    "${component}" == "modelsasservice"
+        RETURN    components.kserve.dsc.modelsAsService.managementState
+    END
+
+    # Handling of standard component cases:
+    ${is_known} =    Evaluate    "${component}" in ${COMPONENT_LIST}
+    IF    ${is_known}
+        RETURN    components.${component}.dsc.managementState
+    END
+
+    Log To Console    WARNING: Unknown component '${component}', no Helm path mapping available
+    RETURN    ${EMPTY}
 
 Verify RHODS Installation
   Set Global Variable    ${DASHBOARD_APP_NAME}    ${PRODUCT.lower()}-dashboard
@@ -415,6 +486,9 @@ Install RHOAI In Self Managed Cluster Using Helm
   [Documentation]   Install ODH/RHOAI using Helm on a self-managed cluster, including its dependencies
   ...
   ...   Optional variables that can be set to customize Helm installation:
+  ...   - ${COMPONENT_NAMES}: Comma-separated component:state pairs to configure DSC components, this is expected to be received from Jenkins job parameter.
+  ...     Example: "dashboard:Managed,workbenches:Removed,feastoperator:Managed"
+  ...     This string will be automatically parsed and converted to HELM_SET_VALUES entries.
   ...   - ${HELM_CUSTOM_VALUES_FILE}: Path to additional Helm values file to override the default chart
   ...   - @{HELM_SET_VALUES}: List of key=value pairs for Helm --set flags, applied after the custom values file if used
   ...   - ${GITOPS_REPO_BRANCH}: GitOps repository branch (uses ${GITOPS_DEFAULT_REPO_BRANCH} if not set)

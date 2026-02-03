@@ -35,8 +35,8 @@ Can Install RHODS Operator
       Set Global Variable  ${OPERATOR_YAML_LABEL}  rhods-operator
       Set Global Variable  ${MODEL_REGISTRY_NAMESPACE}    rhoai-model-registries
   END
-  IF  "${INSTALL_TYPE}" == "GitOps"
-      Set Global Variable  ${INSTALL_DEPENDENCIES_TYPE}  GitOps
+  IF  "${INSTALL_TYPE}" == "Kustomize"
+      Set Global Variable  ${INSTALL_DEPENDENCIES_TYPE}  Kustomize
       Set Global Variable  ${INSTALL_TYPE}  Cli
   ELSE
       Set Global Variable  ${INSTALL_DEPENDENCIES_TYPE}  Cli

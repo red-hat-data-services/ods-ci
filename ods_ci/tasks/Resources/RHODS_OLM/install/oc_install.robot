@@ -105,7 +105,7 @@ Install RHODS
   IF  "${INSTALL_TYPE}" == "Helm"
     Parse Component Names For Helm Install
     Log To Console    Helm installation handles dependencies and operator together
-  ELSE IF  "${INSTALL_DEPENDENCIES_TYPE}" == "GitOps"
+  ELSE IF  "${INSTALL_DEPENDENCIES_TYPE}" == "Kustomize"
     Install RHOAI Dependencies With GitOps Repo    ${enable_new_observability_stack}
     ...    ${GITOPS_REPO_BRANCH}    ${GITOPS_REPO_URL}
   ELSE

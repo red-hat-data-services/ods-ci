@@ -1200,6 +1200,9 @@ Install NFS Operator Via Cli
              ...    reason=AllCatalogSourcesHealthy    subscription_name=${NFS_SUB_NAME}
              ...    retry=150
              ...    namespace=${NFS_OP_NS}
+          # Wait for CSV to be ready to ensure CRDs are installed
+          Wait Until Csv Is Ready    display_name=${NFS_OP_NAME}
+             ...    operators_namespace=${NFS_OP_NS}    timeout=5m
     ELSE
           Log To Console    message=NFS Operator is already installed
     END

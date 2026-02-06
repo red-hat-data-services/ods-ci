@@ -28,9 +28,10 @@ Can Install ODH Operator
 
 Check DW Components Are Enabled By Default
     [Documentation]    Check that DW Components are enabled by default, can be run for OCP and OSD
-    [Tags]    ODS-2685    Operator    OSD
+    [Tags]    ODS-2685    RHOAIENG-7181    Operator    OSD
     Component Should Be Enabled    ray
-    Component Should Be Enabled    trainingoperator
+    Component Should Be Enabled    trainer
+    Component Should Not Be Enabled    trainingoperator    # Deprecated since 3.3
 
 Verify User Can Access RHODS Documentation From OCM Console
   [Documentation]   Checks user can access RHODS documentation from addon on OCM Console

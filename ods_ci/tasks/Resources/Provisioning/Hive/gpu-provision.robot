@@ -3,8 +3,12 @@ Library           OperatingSystem
 
 *** Keywords ***
 Create GPU Node In Self Managed AWS Cluster
+    [Documentation]    Create GPU node in self-managed AWS cluster using script defaults.
     Set Log Level    Info
-    ${gpu_node} =    Run Process    sh    tasks/Resources/Provisioning/Hive/AWS/provision-gpu.sh
+    ${gpu_node} =    Run Process    sh    tasks/Resources/Provisioning/GPU/provision-gpu.sh
+    Should Be Equal As Integers    ${gpu_node.rc}    0
+    ...    msg=AWS GPU node provisioning failed: ${gpu_node.stdout} ${gpu_node.stderr}
+    Log    AWS GPU node provisioning completed: ${gpu_node.stdout}    console=True
 
 Delete GPU Node In Self Managed AWS Cluster
     ${gpu_nodes} =    Oc Get    kind=Machine    label_selector=machine.openshift.io/instance-type=g4dn.xlarge

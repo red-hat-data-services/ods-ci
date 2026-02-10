@@ -20,7 +20,7 @@ ${UPGRADE_TO_IIB}=    ${EMPTY}
 *** Test Cases ***
 Upgrade RHODS
     [Documentation]    Approve the install plan for the upgrade and make sure that upgrade has completed
-    [Tags]      ODS-1766        Upgrade    Platform
+    [Tags]      ODS-1766        Upgrade    Platform    UpgradeOnly
     ${initial_version} =    Get RHODS Version
     ${initial_creation_date} =      Get Operator Pod Creation Date
     Set Suite Variable    ${UPDATE_CHANNEL}    ${UPGRADE_TO_UPDATE_CHANNEL}

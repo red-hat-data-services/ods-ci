@@ -1,0 +1,152 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: echo-service
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: echo-service-tokenreview
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:auth-delegator
+subjects:
+- kind: ServiceAccount
+  name: echo-service
+  namespace: opendatahub
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: echo-service
+rules:
+- apiGroups: [""]
+  resources: ["services/proxy"]
+  resourceNames: ["echo-service"]
+  verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: echo-service
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: echo-service
+subjects:
+- kind: ServiceAccount
+  name: echo-service
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: echo-service-config
+data:
+  config-file.yaml: |
+    authorization:
+      resourceAttributes:
+        namespace: opendatahub
+        apiVersion: v1
+        resource: services
+        subresource: proxy
+        name: echo-service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: echo-service
+  annotations:
+    service.beta.openshift.io/serving-cert-secret-name: echo-service-tls
+spec:
+  ports:
+  - name: https
+    port: 8443
+    targetPort: https
+  selector:
+    app: echo-service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echo-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: echo-service
+  template:
+    metadata:
+      labels:
+        app: echo-service
+    spec:
+      serviceAccountName: echo-service
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      # kube-rbac-proxy sidecar
+      - name: kube-rbac-proxy
+        image: quay.io/brancz/kube-rbac-proxy:v0.18.1
+        args:
+        - "--secure-listen-address=0.0.0.0:8443"
+        - "--upstream=http://127.0.0.1:8080/"
+        - "--config-file=/etc/kube-rbac-proxy/config-file.yaml"
+        - "--tls-cert-file=/etc/tls/private/tls.crt"
+        - "--tls-private-key-file=/etc/tls/private/tls.key"
+        - "--logtostderr=true"
+        - "--v=10"
+        ports:
+        - containerPort: 8443
+          name: https
+          protocol: TCP
+        volumeMounts:
+        - name: config
+          mountPath: /etc/kube-rbac-proxy
+          readOnly: true
+        - name: tls
+          mountPath: /etc/tls/private
+          readOnly: true
+        resources:
+          requests:
+            cpu: 10m
+            memory: 20Mi
+          limits:
+            cpu: 100m
+            memory: 40Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+      # echo application
+      - name: echo
+        image: ealen/echo-server:latest
+        env:
+        - name: PORT
+          value: "8080"
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        resources:
+          requests:
+            cpu: 10m
+            memory: 20Mi
+          limits:
+            cpu: 100m
+            memory: 40Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+      volumes:
+      - name: config
+        configMap:
+          name: echo-service-config
+      - name: tls
+        secret:
+          secretName: echo-service-tls

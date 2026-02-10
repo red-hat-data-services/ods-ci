@@ -161,10 +161,11 @@ Install RHODS
       END
   END
   Wait Until Csv Is Ready    display_name=${csv_display_name}    operators_namespace=${OPERATOR_NAMESPACE}
+  # Approve any pending installplans for transitive OLM dependencies (e.g. ServiceMesh)
+  Approve All Pending Installplans    openshift-operators
   IF  "${is_upgrade}" == "False"
       Add StartingCSV To Subscription
   END
-
 
 Add StartingCSV To Subscription
     [Documentation]    Retrieves current RHOAI version from subscription status and add

@@ -109,7 +109,7 @@ Install RHODS
     Install RHOAI Dependencies With GitOps Repo    ${enable_new_observability_stack}
     ...    ${GITOPS_REPO_BRANCH}    ${GITOPS_REPO_URL}
   ELSE
-    # Cli or OperatorHub - install dependencies via CLI
+    # Cli or OperatorHub - installs dependencies via CLI
     Install RHOAI Dependencies With CLI
     IF    ${enable_new_observability_stack}
             Install Observability Dependencies
@@ -513,8 +513,21 @@ Install RHOAI In Self Managed Cluster Using Helm
       ${set_values_flags} =    Set Variable    ${set_values_flags} -s ${set_value}
   END
 
+  # this ensures that the following namespaces/subscription name will match
+  ${required_helm_operator_flags} =    Catenate
+  ...    -s operator.${operator_type}.applicationsNamespace=${APPLICATIONS_NAMESPACE}
+  ...    -s operator.${operator_type}.monitoringNamespace=${MONITORING_NAMESPACE}
+  ...    -s operator.${operator_type}.olm.namespace=${OPERATOR_NAMESPACE}
+  ...    -s operator.${operator_type}.olm.name=${OPERATOR_NAME}
+
   # Log configuration
-  Log To Console    Monitoring dependencies: ${'Skipped' if not ${enable_monitoring} else 'Enabled'}
+  IF    not ${enable_monitoring}
+      ${monitoring_dependencies_state} =    Set Variable    Skipped
+  ELSE
+      ${monitoring_dependencies_state} =    Set Variable    Enabled
+  END
+  Log To Console    Monitoring dependencies: ${monitoring_dependencies_state}
+
   IF    "${gitops_branch}" != "${EMPTY}"
       Log To Console    Using GitOps repo branch: ${gitops_branch}
   END
@@ -527,9 +540,10 @@ Install RHOAI In Self Managed Cluster Using Helm
   IF    @{HELM_SET_VALUES}
       Log To Console    Custom Helm values: @{HELM_SET_VALUES}
   END
+  Log To Console    Enforcing Helm operator values: applicationsNamespace=${APPLICATIONS_NAMESPACE}, monitoringNamespace=${MONITORING_NAMESPACE}, operatorNamespace=${OPERATOR_NAMESPACE}, operatorSubscriptionName=${OPERATOR_NAME}
 
   ${return_code} =    Run And Watch Command
-  ...    cd ${EXECDIR}/${OLM_DIR} && ./setup-helm.sh -o ${operator_type} ${monitoring_flag} ${repo_flag} ${branch_flag} ${values_file_flag} ${set_values_flags}
+  ...    cd ${EXECDIR}/${OLM_DIR} && ./setup-helm.sh -o ${operator_type} ${monitoring_flag} ${repo_flag} ${branch_flag} ${values_file_flag} ${set_values_flags} ${required_helm_operator_flags}
   ...    timeout=20 min
   Should Be Equal As Integers   ${return_code}   0   msg=Error detected while installing ${PRODUCT} with Helm
 

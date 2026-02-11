@@ -414,6 +414,9 @@ if ! ${SUBFOLDER}; then
   esac
 fi
 
+# Temporary workaround for the https://issues.redhat.com/browse/RHOAIENG-44558 issue
+oc annotate sc standard-csi "opendatahub.io/sc-config={\"displayName\":\"standard-csi\",\"isEnabled\":true,\"isDefault\":true,\"lastModified\":\"$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)\",\"accessModeSettings\":{\"ReadWriteOnce\":true}}" --overwrite
+# Eof workaround
 
 robot ${TEST_EXCLUDE_TAG} ${TEST_INCLUDE_TAG} -d ${TEST_ARTIFACT_DIR} -x xunit_test_result.xml -r test_report.html ${TEST_VARIABLES} --variablefile ${TEST_VARIABLES_FILE} --exclude TBC ${EXTRA_ROBOT_ARGS} ${TEST_CASE_FILE}
 # shellcheck disable=SC2116

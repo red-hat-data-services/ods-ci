@@ -92,7 +92,7 @@ Storage Size Should Be
 Create PersistentVolume Storage
     [Documentation]    Create a PersistenVolume storage in DS Project details page
     [Arguments]    ${project_title}    ${name}    ${description}    ${size}    ${connected_workbench}=${NONE}
-    ...    ${press_cancel}=${FALSE}    ${existing_storage}=${FALSE}
+    ...    ${storage_class}=${NONE}    ${press_cancel}=${FALSE}    ${existing_storage}=${FALSE}
     Open Data Science Project Details Page    ${project_title}    tab_id=cluster-storages
     IF    ${existing_storage}
         ${storage_row_xpath}=    Set Variable    xpath://tr[starts-with(., '${name} ') and contains(., 'Persistent storage')]
@@ -105,7 +105,7 @@ Create PersistentVolume Storage
     ELSE
         Click Button    ${STORAGE_ADD_BTN_1_XP}
     END
-    Fill In New PV Data    ${name}    ${size}    ${description}    ${connected_workbench}
+    Fill In New PV Data    ${name}    ${size}    ${description}    ${connected_workbench}    ${storage_class}
     IF    ${press_cancel} == ${TRUE}
         Click Button    ${GENERIC_CANCEL_BTN_XP}
     ELSE
@@ -118,6 +118,7 @@ Create PersistentVolume Storage
 Fill In New PV Data
     [Documentation]    Compiles the modal for creating a new PersistenVolume storage in DS Project details page
     [Arguments]    ${name}    ${size}    ${description}=${NONE}    ${connected_workbench}=${NONE}    ${mount_dir}=${NONE}
+    ...    ${storage_class}=${NONE}
     ${is_storage_modal}=     Run Keyword And Return Status    Page Should Contain Element     ${STORAGE_SUBMIT_BTN_XP}
     Wait Until Page Contains Element    ${STORAGE_NAME_INPUT_XP}
     IF   ${is_storage_modal}     Run Keyword And Continue On Failure     Element Should Be Disabled    ${STORAGE_SUBMIT_BTN_XP}
@@ -125,6 +126,12 @@ Fill In New PV Data
     Input Text   ${STORAGE_NAME_INPUT_XP}   ${name}
     Wait Until Page Contains Element    ${STORAGE_DESCR_INPUT_XP}
     IF   "${description}" != "${NONE}"    Input Text   ${STORAGE_DESCR_INPUT_XP}   ${description}
+    IF    "${storage_class}" != "${NONE}"
+        Wait Until Element Is Visible    xpath=//button[@data-testid="storage-classes-selector"]    timeout=10s
+        Click Element    xpath=//button[@data-testid="storage-classes-selector"]
+        Wait Until Element Is Visible    xpath=//*[@id="storage-classes-selector"]//*[@data-testid="${storage_class}"]    timeout=10s
+        Click Element    xpath=//*[@id="storage-classes-selector"]//*[@data-testid="${storage_class}"]
+    END
     SeleniumLibrary.Wait Until Element Is Visible    ${STORAGE_SIZE_PLUS_BTN_XP}    timeout=10s
     SeleniumLibrary.Wait Until Element Is Enabled    ${STORAGE_SIZE_PLUS_BTN_XP}    timeout=10s
     SeleniumLibrary.Scroll Element Into View    ${STORAGE_SIZE_PLUS_BTN_XP}

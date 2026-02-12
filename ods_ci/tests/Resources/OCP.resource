@@ -415,8 +415,7 @@ Approve All Pending Installplans
     [Arguments]    ${namespace}=openshift-operators
     Log    Approving Install Plans in ${namespace}    console=yes
     ${rc}    ${output} =    Run And Return Rc And Output
-    ...    oc get installplan -n ${namespace} -o name 2>/dev/null
-    ...    | xargs -r oc patch -n ${namespace} -p '{"spec":{"approved": true}}' --type=merge
+    ...    oc get installplan -n ${namespace} -o name 2>/dev/null | xargs -r oc patch -n ${namespace} -p '{"spec":{"approved": true}}' --type=merge
     Log    ${output}    console=yes
     IF    ${rc} != ${0}
         Log    Failed to approve installplans in ${namespace}    console=yes    level=WARN

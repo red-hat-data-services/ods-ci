@@ -156,6 +156,7 @@ ignore = [
   "UP032", # Use f-string instead of `format` call
   "RET507", # Unnecessary `else` after `continue` statement
   "RET508", # Unnecessary `elif` after `break` statement
+  "N999", # Invalid module name (legacy PascalCase/mixed names; renaming would break many imports)
 ]
 
 # Allow unused variables when underscore-prefixed.

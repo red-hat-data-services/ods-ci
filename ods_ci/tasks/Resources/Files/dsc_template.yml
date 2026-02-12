@@ -40,3 +40,5 @@ spec:
       managementState: <llamastackoperator_value>
     mlflowoperator:
       managementState: <mlflowoperator_value>
+    sparkoperator:
+      managementState: <sparkoperator_value>

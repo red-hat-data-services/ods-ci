@@ -489,9 +489,6 @@ Install RHOAI In Self Managed Cluster Using Helm
   [Documentation]   Install ODH/RHOAI using Helm on a self-managed cluster, including its dependencies
   ...
   ...   Optional variables that can be set to customize Helm installation:
-  ...   - ${COMPONENT_NAMES}: Comma-separated component:state pairs to configure DSC components, this is expected to be received from Jenkins job parameter.
-  ...     Example: "dashboard:Managed,workbenches:Removed,feastoperator:Managed"
-  ...     This string will be automatically parsed and converted to HELM_SET_VALUES entries.
   ...   - ${HELM_CUSTOM_VALUES_FILE}: Path to additional Helm values file to override the default chart
   ...   - @{HELM_SET_VALUES}: List of key=value pairs for Helm --set flags, applied after the custom values file if used
   ...   - ${GITOPS_REPO_BRANCH}: GitOps repository branch (uses ${GITOPS_DEFAULT_REPO_BRANCH} if not set)

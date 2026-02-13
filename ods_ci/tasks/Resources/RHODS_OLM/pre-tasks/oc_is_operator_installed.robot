@@ -2,7 +2,7 @@
 Is RHODS Installed
   Log   Checking if RHODS is installed with "${clusterType}" "${UPDATE_CHANNEL}" "${INSTALL_TYPE}"      console=yes
   IF  "${cluster_type}" == "selfmanaged"
-      IF  "${INSTALL_TYPE}" == "Cli"
+      IF  "${INSTALL_TYPE}" in ["Cli", "Kustomize"]
           ${result}=  Run Keyword And Return Status
           ...  Run Keywords
           ...  Check A RHODS Family Operator Is Installed  namespace=${OPERATOR_NAMESPACE}
@@ -20,6 +20,21 @@ Is RHODS Installed
           ...  Oc Get  kind=Namespace  field_selector=metadata.name=${MONITORING_NAMESPACE}  AND
           ...  Oc Get  kind=Namespace  field_selector=metadata.name=${APPLICATIONS_NAMESPACE}  AND
           ...  Oc Get  kind=Namespace  field_selector=metadata.name=${OPERATOR_NAMESPACE}
+      ELSE IF  "${INSTALL_TYPE}" == "Helm"
+          ${enable_new_observability_stack}=  Get Variable Value    ${ENABLE_NEW_OBSERVABILITY_STACK}    false
+          ${enable_new_observability_stack}=  Convert To Boolean    ${enable_new_observability_stack}
+          ${result}=  Run Keyword And Return Status
+          ...  Run Keywords
+          ...  Check A RHODS Family Operator Is Installed  namespace=${OPERATOR_NAMESPACE}
+          ...                                              subscription=${OPERATOR_NAME}  AND
+          ...  Oc Get  kind=Namespace  field_selector=metadata.name=${APPLICATIONS_NAMESPACE}  AND
+          ...  Oc Get  kind=Namespace  field_selector=metadata.name=${OPERATOR_NAMESPACE}
+          IF  ${result} and ${enable_new_observability_stack}
+              ${result}=  Run Keyword And Return Status
+              ...  Oc Get  kind=Namespace  field_selector=metadata.name=${MONITORING_NAMESPACE}
+          ELSE IF  not ${enable_new_observability_stack}
+              Log  Monitoring namespace check skipped because ENABLE_NEW_OBSERVABILITY_STACK is disabled  console=yes
+          END
       ELSE
           FAIL    Provided test environment and install type combination is not supported
       END

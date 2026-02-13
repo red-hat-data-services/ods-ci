@@ -87,9 +87,11 @@ ${RHODS_OSD_INSTALL_REPO}=      ${EMPTY}
 ${OLM_DIR}=                     rhodsolm
 @{SUPPORTED_TEST_ENV}=          AWS   AWS_DIS   GCP   GCP_DIS   PSI   PSI_DIS   ROSA   IBM_CLOUD   CRC    AZURE	ROSA_HCP
 ${install_plan_approval}=       Manual
-${INSTALL_DEPENDENCIES_TYPE}=    Cli
 ${GITOPS_DEFAULT_REPO_BRANCH}=    main
 ${GITOPS_DEFAULT_REPO}=    ${EMPTY}
+${HELM_CUSTOM_VALUES_FILE}=    ${EMPTY}
+@{HELM_SET_VALUES}=    @{EMPTY}
+${COMPONENT_NAMES}=    ${EMPTY}
 
 *** Keywords ***
 Install RHODS
@@ -99,10 +101,15 @@ Install RHODS
   Log    \- rhoai_version: ${rhoai_version}\n\- is_upgrade: ${is_upgrade}\n\- install_plan_approval: ${install_plan_approval}\n\- CATALOG_SOURCE: ${CATALOG_SOURCE}   console=yes    #robocop:disable
   Assign Vars According To Product
   ${enable_new_observability_stack} =    Is New Observability Stack Enabled
-  IF  "${INSTALL_DEPENDENCIES_TYPE}" == "GitOps"
+  IF  "${INSTALL_TYPE}" == "Helm"
+    Parse Component Names For Helm Install
+    Log To Console    Helm installation handles dependencies and operator together
+  ELSE IF  "${INSTALL_TYPE}" == "Kustomize"
+    Log To Console    Kustomize install method, installing dependencies via GitOps repo, operator via CLI
     Install RHOAI Dependencies With GitOps Repo    ${enable_new_observability_stack}
     ...    ${GITOPS_REPO_BRANCH}    ${GITOPS_REPO_URL}
   ELSE
+    # Cli or OperatorHub - installs dependencies via CLI
     Install RHOAI Dependencies With CLI
     IF    ${enable_new_observability_stack}
             Install Observability Dependencies
@@ -116,8 +123,12 @@ Install RHODS
        ${csv_display_name} =    Set Variable    ${RHODS_CSV_DISPLAY}
   END
   IF   "${cluster_type}" == "selfmanaged"
-      IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "Cli"
+      ${is_cli_install} =    Evaluate    "${INSTALL_TYPE}" in ["Cli", "Kustomize"]
+      IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and ${is_cli_install}
              Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
+      ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "Helm"
+             Install RHOAI In Self Managed Cluster Using Helm  ${enable_new_observability_stack}
+             ...    ${GITOPS_REPO_BRANCH}    ${GITOPS_REPO_URL}
       ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "OperatorHub"
           IF  "${is_upgrade}" == "False"
               ${file_path} =    Set Variable    tasks/Resources/RHODS_OLM/install/
@@ -149,12 +160,13 @@ Install RHODS
            FAIL    Provided test environment and install type is not supported
       END
   ELSE IF   "${cluster_type}" == "managed"
-      IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "Cli" and "${UPDATE_CHANNEL}" == "odh-nightlies"
+      ${is_cli_install_managed} =    Evaluate    "${INSTALL_TYPE}" in ["Cli", "Kustomize"]
+      IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and ${is_cli_install_managed} and "${UPDATE_CHANNEL}" == "odh-nightlies"
           # odh-nightly is not build for Managed, it is only possible for Self-Managed
           Set Global Variable    ${OPERATOR_NAMESPACE}    openshift-marketplace
           Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
           Set Global Variable    ${OPERATOR_NAME}         opendatahub-operator
-      ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "Cli"
+      ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and ${is_cli_install_managed}
           Install RHODS In Managed Cluster Using CLI  ${cluster_type}     ${image_url}
       ELSE
           FAIL    Provided test environment is not supported
@@ -186,6 +198,75 @@ Add StartingCSV To Subscription
     ELSE
         Log    StartingCSV field already exists: ${current_starting_csv}[1], skipping patch    console=yes
     END
+
+Parse Component Names For Helm Install
+    [Documentation]    Parses COMPONENT_NAMES string (received from Jenkins job) for Helm install method.
+    ...                Converts COMPONENT_NAMES to HELM_SET_VALUES list for Helm.
+    ...                Format: "componentName:managementState,componentName:managementState"
+    ...                Example: "dashboard:Managed,workbenches:Removed,feastoperator:Managed"
+    IF    "${COMPONENT_NAMES}" == "${EMPTY}"
+        Log To Console    COMPONENT_NAMES not set, will use defaults from Helm chart values
+        RETURN
+    END
+    Log To Console    Parsing COMPONENT_NAMES: ${COMPONENT_NAMES}
+
+    ${helm_values} =    Create List
+
+    # Get individual componentName:managementState pairs
+    @{pairs} =    Split String    ${COMPONENT_NAMES}    separator=,
+    FOR    ${pair}    IN    @{pairs}
+        ${pair} =    Strip String    ${pair}
+        IF    "${pair}" == "${EMPTY}"    CONTINUE
+
+        # Get component name and its managementState
+        @{parts} =    Split String    ${pair}    separator=:    max_split=1
+        ${len} =    Get Length    ${parts}
+        IF    ${len} != 2
+            Log To Console    WARNING: Invalid format '${pair}', expected 'component:state', skipping
+            CONTINUE
+        END
+        ${component} =    Strip String    ${parts}[0]
+        ${state} =    Strip String    ${parts}[1]
+
+        @{valid_states} =    Create List    Managed    Removed    Unmanaged
+        ${is_valid} =    Evaluate    "${state}" in ${valid_states}
+        IF    not ${is_valid}
+            Log To Console    WARNING: Invalid state '${state}' for component '${component}', skipping
+            CONTINUE
+        END
+
+        # For Helm install method, convert each parsed key-value pair to the expected Helm chart path
+        # and collect them into a list
+        ${helm_path} =    Get Helm Path For Component    ${component}
+        IF    "${helm_path}" != "${EMPTY}"
+            Append To List    ${helm_values}    ${helm_path}=${state}
+        END
+
+        Log To Console    Parsed component: ${component} -> ${state}
+    END
+
+    Set Global Variable    @{HELM_SET_VALUES}    @{helm_values}
+    Log To Console    HELM_SET_VALUES list: @{HELM_SET_VALUES}
+
+Get Helm Path For Component
+    [Documentation]    Maps component name to Helm chart path for managementState.
+    ...                Returns empty string for unknown components.
+    [Arguments]    ${component}
+
+    # Handling of special component cases:
+    # 1. modelsasservice is nested under kserve
+    IF    "${component}" == "modelsasservice"
+        RETURN    components.kserve.dsc.modelsAsService.managementState
+    END
+
+    # Handling of standard component cases:
+    ${is_known} =    Evaluate    "${component}" in ${COMPONENT_LIST}
+    IF    ${is_known}
+        RETURN    components.${component}.dsc.managementState
+    END
+
+    Log To Console    WARNING: Unknown component '${component}', no Helm path mapping available
+    RETURN    ${EMPTY}
 
 Verify RHODS Installation
   Set Global Variable    ${DASHBOARD_APP_NAME}    ${PRODUCT.lower()}-dashboard
@@ -403,6 +484,65 @@ Install RHODS In Managed Cluster Using CLI
   ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${OLM_DIR} && ./setup.sh -t addon -u ${UPDATE_CHANNEL} -i ${image_url} -n ${OPERATOR_NAME} -p ${OPERATOR_NAMESPACE} -a ${APPLICATIONS_NAMESPACE} -m ${MONITORING_NAMESPACE}  #robocop:disable
   Log To Console    ${output}
   Should Be Equal As Integers   ${return_code}   0  msg=Error detected while installing RHODS
+
+Install RHOAI In Self Managed Cluster Using Helm
+  [Documentation]   Install ODH/RHOAI using Helm on a self-managed cluster, including its dependencies
+  ...
+  ...   Optional variables that can be set to customize Helm installation:
+  ...   - ${HELM_CUSTOM_VALUES_FILE}: Path to additional Helm values file to override the default chart
+  ...   - @{HELM_SET_VALUES}: List of key=value pairs for Helm --set flags, applied after the custom values file if used
+  ...   - ${GITOPS_REPO_BRANCH}: GitOps repository branch (uses ${GITOPS_DEFAULT_REPO_BRANCH} if not set)
+  ...   - ${GITOPS_REPO_URL}: Custom GitOps repository URL (uses ${GITOPS_DEFAULT_REPO} if not set)
+  [Arguments]     ${enable_monitoring}=${TRUE}
+  ...    ${gitops_branch}=${GITOPS_DEFAULT_REPO_BRANCH}
+  ...    ${gitops_repo}=${GITOPS_DEFAULT_REPO}
+  Log To Console    Installing ${PRODUCT} using Helm method
+  ${operator_type} =    Set Variable If    "${PRODUCT}" == "ODH"    odh    rhoai
+  Log To Console    Operator type for Helm: ${operator_type}
+
+  ${monitoring_flag} =    Set Variable If    not ${enable_monitoring}    -M    ${EMPTY}
+  ${branch_flag} =    Set Variable If    "${gitops_branch}" != "${EMPTY}"    -b ${gitops_branch}    ${EMPTY}
+  ${repo_flag} =    Set Variable If    "${gitops_repo}" != "${EMPTY}"    -r ${gitops_repo}    ${EMPTY}
+  ${values_file_flag} =    Set Variable If    "${HELM_CUSTOM_VALUES_FILE}" != "${EMPTY}"    -f ${HELM_CUSTOM_VALUES_FILE}    ${EMPTY}
+
+  ${set_values_flags} =    Set Variable    ${EMPTY}
+  FOR    ${set_value}    IN    @{HELM_SET_VALUES}
+      ${set_values_flags} =    Set Variable    ${set_values_flags} -s ${set_value}
+  END
+
+  # this ensures that the following namespaces/subscription name will match
+  ${required_helm_operator_flags} =    Catenate
+  ...    -s operator.${operator_type}.applicationsNamespace=${APPLICATIONS_NAMESPACE}
+  ...    -s operator.${operator_type}.monitoringNamespace=${MONITORING_NAMESPACE}
+  ...    -s operator.${operator_type}.olm.namespace=${OPERATOR_NAMESPACE}
+  ...    -s operator.${operator_type}.olm.name=${OPERATOR_NAME}
+
+  # Log configuration
+  IF    not ${enable_monitoring}
+      ${monitoring_dependencies_state} =    Set Variable    Skipped
+  ELSE
+      ${monitoring_dependencies_state} =    Set Variable    Enabled
+  END
+  Log To Console    Monitoring dependencies: ${monitoring_dependencies_state}
+
+  IF    "${gitops_branch}" != "${EMPTY}"
+      Log To Console    Using GitOps repo branch: ${gitops_branch}
+  END
+  IF    "${gitops_repo}" != "${EMPTY}"
+      Log To Console    Using custom GitOps repo: ${gitops_repo}
+  END
+  IF    "${HELM_CUSTOM_VALUES_FILE}" != "${EMPTY}"
+      Log To Console    Using custom values file: ${HELM_CUSTOM_VALUES_FILE}
+  END
+  IF    @{HELM_SET_VALUES}
+      Log To Console    Custom Helm values: @{HELM_SET_VALUES}
+  END
+  Log To Console    Enforcing Helm operator values: applicationsNamespace=${APPLICATIONS_NAMESPACE}, monitoringNamespace=${MONITORING_NAMESPACE}, operatorNamespace=${OPERATOR_NAMESPACE}, operatorSubscriptionName=${OPERATOR_NAME}
+
+  ${return_code} =    Run And Watch Command
+  ...    cd ${EXECDIR}/${OLM_DIR} && ./setup-helm.sh -o ${operator_type} ${monitoring_flag} ${repo_flag} ${branch_flag} ${values_file_flag} ${set_values_flags} ${required_helm_operator_flags}
+  ...    timeout=20 min
+  Should Be Equal As Integers   ${return_code}   0   msg=Error detected while installing ${PRODUCT} with Helm
 
 Wait For Pods Numbers
   [Documentation]   Wait for number of pod during installation

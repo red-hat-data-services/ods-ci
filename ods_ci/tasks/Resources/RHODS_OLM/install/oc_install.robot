@@ -76,6 +76,8 @@ ${DEFAULT_APPLICATIONS_NAMESPACE_RHOAI}=    redhat-ods-applications
 ${DEFAULT_APPLICATIONS_NAMESPACE_ODH}=    opendatahub
 ${DEFAULT_WORKBENCHES_NAMESPACE_RHOAI}=    rhods-notebooks
 ${DEFAULT_WORKBENCHES_NAMESPACE_ODH}=    opendatahub
+${DEFAULT_MODEL_REGISTRY_NAMESPACE_RHOAI}=    rhoai-model-registries
+${DEFAULT_MODEL_REGISTRY_NAMESPACE_ODH}=    odh-model-registries
 ${CUSTOM_MANIFESTS}=    ${EMPTY}
 ${IS_NOT_PRESENT}=      1
 ${DSC_TEMPLATE}=    dsc_template.yml
@@ -543,6 +545,18 @@ Install RHOAI In Self Managed Cluster Using Helm
   ${operator_type} =    Set Variable If    "${PRODUCT}" == "ODH"    odh    rhoai
   Log To Console    Operator type for Helm: ${operator_type}
 
+  ${notebooks_ns} =    Get Variable Value    ${NOTEBOOKS_NAMESPACE}    ${EMPTY}
+  IF    "${notebooks_ns}" == "${EMPTY}"
+      ${notebooks_ns} =    Set Variable If    "${operator_type}" == "odh"
+      ...    ${DEFAULT_WORKBENCHES_NAMESPACE_ODH}    ${DEFAULT_WORKBENCHES_NAMESPACE_RHOAI}
+  END
+
+  ${model_registry_ns} =    Get Variable Value    ${MODEL_REGISTRY_NAMESPACE}    ${EMPTY}
+  IF    "${model_registry_ns}" == "${EMPTY}"
+      ${model_registry_ns} =    Set Variable If    "${operator_type}" == "odh"
+      ...    ${DEFAULT_MODEL_REGISTRY_NAMESPACE_ODH}    ${DEFAULT_MODEL_REGISTRY_NAMESPACE_RHOAI}
+  END
+
   ${monitoring_flag} =    Set Variable If    not ${enable_monitoring}    -M    ${EMPTY}
   ${branch_flag} =    Set Variable If    "${gitops_branch}" != "${EMPTY}"    -b ${gitops_branch}    ${EMPTY}
   ${repo_flag} =    Set Variable If    "${gitops_repo}" != "${EMPTY}"    -r ${gitops_repo}    ${EMPTY}
@@ -559,6 +573,8 @@ Install RHOAI In Self Managed Cluster Using Helm
   ...    -s operator.${operator_type}.monitoringNamespace=${MONITORING_NAMESPACE}
   ...    -s operator.${operator_type}.olm.namespace=${OPERATOR_NAMESPACE}
   ...    -s operator.${operator_type}.olm.name=${OPERATOR_NAME}
+  ...    -s components.workbenches.dsc.workbenchNamespace=${notebooks_ns}
+  ...    -s components.modelregistry.dsc.registriesNamespace=${model_registry_ns}
 
   # Log configuration
   IF    not ${enable_monitoring}
@@ -580,7 +596,7 @@ Install RHOAI In Self Managed Cluster Using Helm
   IF    @{HELM_SET_VALUES}
       Log To Console    Custom Helm values: @{HELM_SET_VALUES}
   END
-  Log To Console    Enforcing Helm operator values: applicationsNamespace=${APPLICATIONS_NAMESPACE}, monitoringNamespace=${MONITORING_NAMESPACE}, operatorNamespace=${OPERATOR_NAMESPACE}, operatorSubscriptionName=${OPERATOR_NAME}
+  Log To Console    Enforcing Helm operator values: applicationsNamespace=${APPLICATIONS_NAMESPACE}, monitoringNamespace=${MONITORING_NAMESPACE}, operatorNamespace=${OPERATOR_NAMESPACE}, operatorSubscriptionName=${OPERATOR_NAME}, notebooksNamespace=${notebooks_ns}, modelRegistryNamespace=${model_registry_ns}
 
   ${return_code} =    Run And Watch Command
   ...    cd ${EXECDIR}/${OLM_DIR} && ./setup-helm.sh -o ${operator_type} ${monitoring_flag} ${repo_flag} ${branch_flag} ${values_file_flag} ${set_values_flags} ${required_helm_operator_flags}

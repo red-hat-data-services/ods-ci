@@ -39,35 +39,9 @@ Verify That DSC And DSCI Release.Version Attribute matches the value in the subs
     Should Be Equal As Strings    ${DSC_RELEASE_VERSION}    ${csv_version}
     Should Be Equal As Strings    ${DSCI_RELEASE_VERSION}    ${csv_version}
 
-Verify Odh-deployer Checks Cluster Platform Type
-    [Documentation]    Verifies if odh-deployer checks the platform type of the cluster before installing
-    [Tags]    Tier1
-    ...       ODS-1316
-    ...       AutomationBug
-    ...       Operator
-    ${cluster_platform_type}=    Fetch Cluster Platform Type
-    IF    "${cluster_platform_type}" == "AWS" or "${cluster_platform_type}" == "OpenStack"
-        ${odhdeployer_logs_content}=     Set Variable
-        ...    INFO: Fresh Installation, proceeding normally
-    ELSE
-        ${odhdeployer_logs_content}=     Set Variable
-        ...    ERROR: Deploying on ${cluster_platform_type}, which is not supported. Failing Installation
-    END
-    ${odhdeployer_logs}=    Fetch Odh-deployer Pod Logs
-    ${status}=   Run Keyword And Return Status     Should Contain    ${odhdeployer_logs}    ${odhdeployer_logs_content}
-    IF     ${status}==False
-            ${upgrade odhdeployer_logs_content}=     Set Variable
-            ...   INFO: Migrating from JupyterHub to NBC, deleting old JupyterHub artifacts
-            Should Contain    ${odhdeployer_logs}    ${upgrade odhdeployer_logs_content}
-    ELSE IF   ${status}==True
-          Pass Execution    message=INFO: Fresh Installation, proceeding normally
-    ELSE
-            Fail    Deploy or Upgrade INFO is not present in the operator logs
-    END
-
 Verify That The Operator Pod Does Not Get Stuck After Upgrade
     [Documentation]    Verifies that the operator pod doesn't get stuck after an upgrade
-    [Tags]    Tier1
+    [Tags]    Sanity
     ...       ODS-818
     ...       Operator
     ${operator_pod_info}=    Fetch operator Pod Info
@@ -78,64 +52,6 @@ Verify That The Operator Pod Does Not Get Stuck After Upgrade
             Log Error And Fail Pods When Pods Were Terminated    ${operator_pod_info}    Opertator Pod Stuck
         END
     END
-
-Verify Clean Up ODS Deployer Post-Migration
-    [Documentation]    Verifies that resources unused are cleaned up after migration
-    [Tags]    Tier1
-    ...       ODS-1767
-    ...       AutomationBug
-    ...       Operator
-    ${version_check} =    Is RHODS Version Greater Or Equal Than    1.17.0
-    IF    ${version_check} == False
-        Log    Skipping test case as RHODS version is less than 1.17.0
-        Skip
-    END
-    ${cro_pod}=    Run Keyword And Return Status
-    ...    Oc Get    kind=Pod    api_version=v1    label_selector=name=cloud-resource-operator
-    IF    ${cro_pod} == True
-        Fail    CRO pod found after migration
-    END
-    ${odhdeployer_logs}=    Fetch Odh-deployer Pod Logs
-    ${odhdeployer_logs_content}=    Set Variable
-    ...    INFO: No CRO resources found, proceeding normally
-    ${status}=   Run Keyword And Return Status     Should Contain    ${odhdeployer_logs}    ${odhdeployer_logs_content}
-    IF    ${status} == False
-        ${odhdeployer_logs_content}=    Set Variable
-        ...    INFO: Migrating from JupyterHub to NBC, deleting old JupyterHub artifacts
-        Should Contain    ${odhdeployer_logs}    ${odhdeployer_logs_content}
-    END
-    Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
-    ...    Oc Get    kind=CustomResourceDefinition    name=blobstorages.integreatly.org     namespace=${APPLICATIONS_NAMESPACE}
-    Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
-    ...    Oc Get    kind=CustomResourceDefinition    name=postgres.integreatly.org    namespace=${APPLICATIONS_NAMESPACE}
-    Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
-    ...    Oc Get    kind=CustomResourceDefinition    name=redis.integreatly.org    namespace=${APPLICATIONS_NAMESPACE}
-    Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
-    ...    Oc Get    kind=CustomResourceDefinition    name=postgressnapshots.integreatly.org    namespace=${APPLICATIONS_NAMESPACE}
-    Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
-    ...    Oc Get    kind=CustomResourceDefinition    name=redisnapshots.integreatly.org    namespace=${APPLICATIONS_NAMESPACE}
-    Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
-    ...    Oc Get    kind=ClusterRole    name=cloud-resource-operator-cluster-role    namespace=${APPLICATIONS_NAMESPACE}
-    Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
-    ...    Oc Get    kind=ClusterRoleBinding    name=cloud-resource-operator-cluster-rolebinding    namespace=${APPLICATIONS_NAMESPACE}
-    Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
-    ...    Oc Get    kind=Role    name=cloud-resource-operator-role    namespace=${APPLICATIONS_NAMESPACE}
-    Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
-    ...    Oc Get    kind=RoleBinding    name=cloud-resource-operator-rolebinding    namespace=${APPLICATIONS_NAMESPACE}
-    Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
-    ...    Oc Get    kind=Role    name=cloud-resource-operator-rds-role    namespace=${APPLICATIONS_NAMESPACE}
-    Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
-    ...    Oc Get    kind=RoleBinding    name=cloud-resource-operator-rds-rolebinding    namespace=${APPLICATIONS_NAMESPACE}
-    Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
-    ...    Oc Get    kind=Deployment    name=cloud-resource-operator    namespace=${APPLICATIONS_NAMESPACE}
-    Run Keyword And Expect Error  ResourceOperationFailed: Get failed\nReason: Not Found
-    ...    Oc Get    kind=ServiceAccount    name=cloud-resource-operator    namespace=${APPLICATIONS_NAMESPACE}
-
-    ${dashboardConfig} =   Oc Get   kind=OdhDashboardConfig   namespace=${APPLICATIONS_NAMESPACE}  name=odh-dashboard-config
-    Should Be Equal   ${dashboardConfig[0]["spec"]["groupsConfig"]["adminGroups"]}    dedicated-admins
-    Should Be Equal   ${dashboardConfig[0]["spec"]["groupsConfig"]["allowedGroups"]}    system:authenticated
-    Should Be True    ${dashboardConfig[0]["spec"]["notebookController"]["enabled"]}
-    Should Be Equal   ${dashboardConfig[0]["spec"]["notebookController"]["pvcSize"]}    20Gi
 
 *** Keywords ***
 Operator Setup

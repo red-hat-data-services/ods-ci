@@ -132,7 +132,7 @@ Install RHODS
              Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
       ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "Helm"
              Install RHOAI In Self Managed Cluster Using Helm  ${enable_new_observability_stack}
-             ...    ${GITOPS_REPO_BRANCH}    ${GITOPS_REPO_URL}
+             ...    ${GITOPS_REPO_BRANCH}    ${GITOPS_REPO_URL}    ${image_url}
       ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "OperatorHub"
           IF  "${is_upgrade}" == "False"
               ${file_path} =    Set Variable    tasks/Resources/RHODS_OLM/install/
@@ -495,6 +495,34 @@ Install RHODS In Managed Cluster Using CLI
   Log To Console    ${output}
   Should Be Equal As Integers   ${return_code}   0  msg=Error detected while installing RHODS
 
+Create Custom CatalogSource If Not Present
+  [Documentation]    Creates a CatalogSource in a given namespace (default openshift-marketplace) if it doesn't already exist.
+  ...    Requires image_url to build the CatalogSource from an index image.
+  [Arguments]    ${catalog_source_name}    ${image_url}    ${namespace}=openshift-marketplace
+  ${rc}    ${output} =    Run And Return Rc And Output
+  ...    oc get catalogsource ${catalog_source_name} -n ${namespace} --no-headers 2>/dev/null
+  IF    ${rc} == 0
+      Log To Console    CatalogSource '${catalog_source_name}' already exists in namespace '${namespace}'
+      RETURN
+  END
+
+  IF    "${image_url}" == "${EMPTY}"
+      Fail    Custom CatalogSource '${catalog_source_name}' not found and no image_url provided to create it
+  END
+
+  Log To Console    Creating CatalogSource '${catalog_source_name}' with image '${image_url}' in namespace '${namespace}'
+  ${template_path} =    Set Variable    tasks/Resources/RHODS_OLM/install/catalogsource_template.yaml
+  ${output_path} =    Set Variable    ${EXECDIR}/catalogsource_apply.yaml
+  ${template_data} =    Get File    ${template_path}
+  ${output_data} =    Replace Variables    ${template_data}
+  Create File    ${output_path}    ${output_data}
+
+  ${rc}    ${output} =    Run And Return Rc And Output    oc apply -f ${output_path}
+  Remove File    ${output_path}
+  Should Be Equal As Integers    ${rc}    0    msg=Failed to create CatalogSource '${catalog_source_name}': ${output}
+
+  Wait for Catalog To Be Ready    namespace=${namespace}    catalog_name=${catalog_source_name}
+
 Install RHOAI In Self Managed Cluster Using Helm
   [Documentation]   Install ODH/RHOAI using Helm on a self-managed cluster, including its dependencies
   ...
@@ -503,12 +531,20 @@ Install RHOAI In Self Managed Cluster Using Helm
   ...   - @{HELM_SET_VALUES}: List of key=value pairs for Helm --set flags, applied after the custom values file if used
   ...   - ${GITOPS_REPO_BRANCH}: GitOps repository branch (uses ${GITOPS_DEFAULT_REPO_BRANCH} if not set)
   ...   - ${GITOPS_REPO_URL}: Custom GitOps repository URL (uses ${GITOPS_DEFAULT_REPO} if not set)
+  ...   - image_url: Index image URL for creating a custom CatalogSource (if not already present)
   [Arguments]     ${enable_monitoring}=${TRUE}
   ...    ${gitops_branch}=${GITOPS_DEFAULT_REPO_BRANCH}
   ...    ${gitops_repo}=${GITOPS_DEFAULT_REPO}
+  ...    ${image_url}=${EMPTY}
   Log To Console    Installing ${PRODUCT} using Helm method
   ${operator_type} =    Set Variable If    "${PRODUCT}" == "ODH"    odh    rhoai
   Log To Console    Operator type for Helm: ${operator_type}
+
+  # Create custom CatalogSource if needed before running helm install
+  ${catalog_source} =    Get Variable Value    ${CATALOG_SOURCE}    ${EMPTY}
+  IF    "${catalog_source}" != "${EMPTY}" and "${image_url}" != "${EMPTY}"
+      Create Custom CatalogSource If Not Present    ${catalog_source}    ${image_url}
+  END
 
   ${notebooks_ns} =    Get Variable Value    ${NOTEBOOKS_NAMESPACE}    ${EMPTY}
   IF    "${notebooks_ns}" == "${EMPTY}"
@@ -541,6 +577,12 @@ Install RHOAI In Self Managed Cluster Using Helm
   ...    -s components.workbenches.dsc.workbenchNamespace=${notebooks_ns}
   ...    -s components.modelregistry.dsc.registriesNamespace=${model_registry_ns}
 
+  IF    "${catalog_source}" != "${EMPTY}"
+      ${required_helm_operator_flags} =    Catenate
+      ...    ${required_helm_operator_flags}
+      ...    -s operator.${operator_type}.olm.source=${catalog_source}
+  END
+
   # Log configuration
   IF    not ${enable_monitoring}
       ${monitoring_dependencies_state} =    Set Variable    Skipped
@@ -560,6 +602,9 @@ Install RHOAI In Self Managed Cluster Using Helm
   END
   IF    @{HELM_SET_VALUES}
       Log To Console    Custom Helm values: @{HELM_SET_VALUES}
+  END
+  IF    "${catalog_source}" != "${EMPTY}"
+      Log To Console    Using CatalogSource: ${catalog_source}
   END
   Log To Console    Enforcing Helm operator values: applicationsNamespace=${APPLICATIONS_NAMESPACE}, monitoringNamespace=${MONITORING_NAMESPACE}, operatorNamespace=${OPERATOR_NAMESPACE}, operatorSubscriptionName=${OPERATOR_NAME}, notebooksNamespace=${notebooks_ns}, modelRegistryNamespace=${model_registry_ns}
 

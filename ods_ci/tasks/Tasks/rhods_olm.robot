@@ -23,6 +23,7 @@ Can Install RHODS Operator
   IF  "${PRODUCT}" == "ODH" and "${UPDATE_CHANNEL}" != "odh-stable"
       Set Global Variable  ${OPERATOR_NAME_LABEL}  opendatahub-operator
       Set Global Variable  ${MODEL_REGISTRY_NAMESPACE}    odh-model-registries
+      Set Global Variable  ${OPERATOR_YAML_LABEL}  opendatahub-operator
       IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
           Set Global Variable  ${OPERATOR_NAME}  rhods-operator
       ELSE
@@ -32,6 +33,7 @@ Can Install RHODS Operator
       Set Global Variable  ${OPERATOR_NAME}  rhods-operator
       Set Global Variable  ${OPERATOR_NAME_LABEL}  rhods-operator
       Set Global Variable  ${MODEL_REGISTRY_NAMESPACE}    rhoai-model-registries
+      Set Global Variable  ${OPERATOR_YAML_LABEL}  rhods-operator
   END
   Given Selected Cluster Type ${cluster_type}
   When Installing RHODS Operator    ${image_url}    ${install_plan_approval}    ${RHOAI_VERSION}

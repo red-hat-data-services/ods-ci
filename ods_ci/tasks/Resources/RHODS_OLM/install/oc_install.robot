@@ -1286,24 +1286,30 @@ Create Namespace With Label
 
 Configure Custom Operator Namespace
     [Documentation]    Configures a custom namespace to be able to be used as the ODH/RHOAI operator namespace.
-    ...                If this namespace does not exist, its created.
+    ...                If this namespace does not exist, it will be created.
     [Arguments]    ${namespace}
     Create Namespace With Label    ${namespace}    opendatahub.io/custom-namespace=true
 
 Configure Custom Applications Namespace
     [Documentation]    Configures a custom namespace to be able to be used as the ODH/RHOAI applications namespace.
-    ...                If this namespace does not exist, its created.
+    ...                If this namespace does not exist, it will be created.
     [Arguments]    ${namespace}
     Create Namespace With Label    ${namespace}    opendatahub.io/application-namespace=true
 
 Configure Custom Workbenches Namespace
     [Documentation]    Configures a custom namespace to be able to be used as the ODH/RHOAI workbenches namespace.
-    ...                If this namespace does not exist, its created.
+    ...                If this namespace does not exist, it will be created.
     [Arguments]    ${namespace}
     Create Namespace With Label    ${namespace}    opendatahub.io/workbenches-namespace=true
 
+Configure Custom Model Registry Namespace
+    [Documentation]    Configures a custom namespace to be able to be used as the ODH/RHOAI model registry namespace.
+    ...                If this namespace does not exist, it will be created.
+    [Arguments]    ${namespace}
+    Create Namespace With Label    ${namespace}    opendatahub.io/model-registry-namespace=true
+
 Configure Custom Namespaces
-    [Documentation]    Configures both operator, application and workbenches namespaces when they are setted as custom ones
+    [Documentation]    Configures operator, application, workbenches and model registry namespaces when they are set as custom ones
     IF   "${OPERATOR_NAMESPACE}" != "${DEFAULT_OPERATOR_NAMESPACE_RHOAI}" and "${OPERATOR_NAMESPACE}" != "${DEFAULT_OPERATOR_NAMESPACE_ODH}"
        # If the operator namespace is not the default one, we need to check if exists
        # and create if not prior to installing ODH/RHOAI. Adding a custom label for automation purposes.
@@ -1316,6 +1322,10 @@ Configure Custom Namespaces
     IF  "${NOTEBOOKS_NAMESPACE}" != "${DEFAULT_WORKBENCHES_NAMESPACE_RHOAI}" and "${NOTEBOOKS_NAMESPACE}" != "${DEFAULT_WORKBENCHES_NAMESPACE_ODH}"
        # If the workbenches namespace is not the default one, we need to create prior to installing ODH/RHOAI
        Configure Custom Workbenches Namespace    ${NOTEBOOKS_NAMESPACE}
+    END
+    IF  "${MODEL_REGISTRY_NAMESPACE}" != "${DEFAULT_MODEL_REGISTRY_NAMESPACE_RHOAI}" and "${MODEL_REGISTRY_NAMESPACE}" != "${DEFAULT_MODEL_REGISTRY_NAMESPACE_ODH}"
+       # If the model registry namespace is not the default one, we need to create prior to installing ODH/RHOAI
+       Configure Custom Model Registry Namespace    ${MODEL_REGISTRY_NAMESPACE}
     END
 
 Create DSCI With Custom Namespaces

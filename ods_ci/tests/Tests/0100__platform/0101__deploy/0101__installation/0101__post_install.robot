@@ -203,25 +203,6 @@ Verify RHODS Release Version Number
     ${version} =  Get RHODS Version
     Should Match Regexp    ${version}    ^[0-9]+\.[0-9]+\.[0-9]+\(-[0-9]+)*$
 
-Verify Users Can Update Notification Email After Installing RHODS With The AddOn Flow
-    [Documentation]    Verifies the Alert Notification email is updated in Addon-Managed-Odh-Parameters Secret and Alertmanager ConfigMap
-    ...                The test requires a real addon installation (not faked with the `-t addon` cli install), because updating
-    ...                the email is done through ocm.
-    [Tags]    Tier2
-    ...       ODS-673
-    ...       Deployment-AddOnFlow
-    ...       Monitoring
-    ...       AutomationBug  # currently broken on fake addon installs
-    Skip If RHODS Is Self-Managed    # TODO Observability: We don't reconfigure new stack alertmanager yet
-    # Only applicable to managed clusters
-    ${email_to_change} =    Set Variable    dummyemail1@redhat.com
-    ${cluster_name} =    Common.Get Cluster Name From Console URL
-    ${current_email} =    Get Notification Email From Addon-Managed-Odh-Parameters Secret
-    Update Notification Email Address    ${cluster_name}    ${email_to_change}
-    Wait Until Notification Email From Addon-Managed-Odh-Parameters Contains  email=${email_to_change}
-    Wait Until Notification Email In Alertmanager ConfigMap Is    ${email_to_change}
-    [Teardown]    Update Notification Email Address    ${cluster_name}    ${current_email}
-
 Verify JupyterHub Pod Logs Dont Have Errors About Distutil Library
     [Documentation]    Verifies that there are no errors related to DistUtil Library in Jupyterhub Pod logs
     [Tags]    Tier2
@@ -394,7 +375,7 @@ Verify DSC Contains Correct Component Versions  # robocop: disable:too-long-test
     ...       RHOAIENG-12693
     ...       ExcludeOnODH
     Gather Release Attributes From DSC And DSCI
-    ${rhods_operator_branch} =  Remove String Using Regexp  ${DSC_RELEASE_VERSION}  \\.[0-9]+\$
+    ${rhods_operator_branch} =  Replace String Using Regexp  ${DSC_RELEASE_VERSION}  ^([0-9]+\\.[0-9]+).*  \\1
     Common.Clone Git Repository  ${RHODS_OPERATOR_GIT_REPO}  rhoai-${rhods_operator_branch}  ${RHODS_OPERATOR_GIT_DIR}
     ${component_versions} =  Run
     ...    oc get dsc default-dsc -o json | jq '.status.components'

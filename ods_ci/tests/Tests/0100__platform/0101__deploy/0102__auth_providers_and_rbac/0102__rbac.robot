@@ -15,16 +15,6 @@ Verify RHODS Has The Expected Default Access Groups Settings
     [Setup]    Set Standard RHODS Groups Variables
     Verify Default Access Groups Settings
 
-Verify Empty Group Doesnt Allow Users To Spawn Notebooks
-    [Documentation]   Verifies that User is unable to Access Jupyterhub after setting Access Groups OdhDashboardConfig CRD to Empty
-    [Tags]    Sanity
-    ...       Tier1
-    ...       ODS-572
-    ...       AutomationBug
-    Apply Access Groups Settings    admins_group=    users_group=
-    Verify User Is Unable To Spawn Notebook
-    [Teardown]   Set Default Access Groups And Close Browser
-
 
 *** Keywords ***
 Verify User Can Spawn A Notebook

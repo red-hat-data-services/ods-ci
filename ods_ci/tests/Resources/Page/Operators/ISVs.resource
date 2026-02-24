@@ -61,6 +61,8 @@ Install ISV Operator From OperatorHub Via CLI    # robocop: disable
     Wait Until Keyword Succeeds    1 min    0 sec
     ...    Is Resource Present    Subscription    ${subscription_name}     ${namespace}    ${IS_PRESENT}
     Wait For Installplan And Approve It    ${namespace}    ${operator_name}    ${subscription_name}
+    # Approve any pending installplans for transitive OLM dependencies (e.g. ServiceMesh)
+    Approve All Pending Installplans    openshift-operators
 
 Create Operator Group
     [Documentation]    Creates the Operator Group object which might be needed by an operator.

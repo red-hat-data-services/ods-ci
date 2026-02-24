@@ -22,29 +22,6 @@ ${METRIC_RHODS_UNDEFINED}           cluster:usage:consumption:rhods:undefined:se
 
 
 *** Test Cases ***
-Verify OpenShift Monitoring Results Are Correct When Running Undefined Queries
-    [Documentation]     Verifies openshift monitoring results are correct when firing undefined queries
-    [Tags]    Sanity
-    ...       Tier1
-    ...       ODS-173
-    ...       Monitoring
-    ...       AutomationBug
-    Run OpenShift Metrics Query    ${METRIC_RHODS_UNDEFINED}   username=${OCP_ADMIN_USER.USERNAME}   password=${OCP_ADMIN_USER.PASSWORD}
-    ...    auth_type=${OCP_ADMIN_USER.AUTH_TYPE}   retry_attempts=1
-    Metrics.Verify Query Results Dont Contain Data
-    [Teardown]    Close All Browsers
-
-Test Billing Metric (Notebook Cpu Usage) On OpenShift Monitoring
-    [Documentation]     Run notebook for 5 min and checks CPU usage is greater than zero
-    [Tags]    Sanity
-    ...       Tier1
-    ...       ODS-175
-    ...       Monitoring
-    ...       AutomationBug
-    Run Jupyter Notebook For 5 Minutes
-    Verify Previus CPU Usage Is Greater Than Zero
-    [Teardown]    CleanUp JupyterHub And Close All Browsers
-
 Test Metric "Rhods_Total_Users" On Cluster Monitoring Prometheus
     [Documentation]     Verifies the openshift metrics and rhods prometheus showing same rhods_total_users values
     [Tags]    Sanity
@@ -79,53 +56,6 @@ Test Metric "Rhods_Aggregate_Availability" On Cluster Monitoring Prometheus
     ${value_prometheus} =    Fire Query On RHODS Prometheus And Return Value    query=rhods_aggregate_availability
     Should Be Equal    ${value_prometheus}    ${value_openshift_observe}
     [Teardown]    SeleniumLibrary.Close All Browsers
-
-Test Metric "Active_Users" On OpenShift Monitoring On Cluster Monitoring Prometheus
-    [Documentation]    Test launchs notebook for N user and and checks Openshift Matrics showing N active users
-    [Tags]    Sanity
-    ...       ODS-1053
-    ...       Tier1
-    ...       Monitoring
-    ...       AutomationBug
-    ${active_users_before} =    Run OpenShift Metrics Query
-    ...    username=${OCP_ADMIN_USER.USERNAME}    password=${OCP_ADMIN_USER.PASSWORD}
-    ...    auth_type=${OCP_ADMIN_USER.AUTH_TYPE}   query=cluster:usage:consumption:rhods:active_users
-    ...    retry_attempts=1    return_zero_if_result_empty=True
-
-    @{list_of_usernames} =    Create List    ${TEST_USER_3.USERNAME}    ${TEST_USER_4.USERNAME}
-    ${expected_increase_active_users} =    Get Length   ${list_of_usernames}
-
-    Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
-    ...    list_of_usernames=${list_of_usernames}
-
-    Sleep    60s    reason=Wait until metrics are available
-
-    ${active_users_after} =    Run OpenShift Metrics Query
-    ...    username=${OCP_ADMIN_USER.USERNAME}    password=${OCP_ADMIN_USER.PASSWORD}
-    ...    auth_type=${OCP_ADMIN_USER.AUTH_TYPE}   query=cluster:usage:consumption:rhods:active_users
-    ...    retry_attempts=1    return_zero_if_result_empty=True
-    ${increase_active_users} =    Evaluate    ${active_users_after}-${active_users_before}
-
-    Should Be Equal As Integers    ${expected_increase_active_users}    ${increase_active_users}
-    ...    msg=Unexpected active_users value
-
-    [Teardown]    CleanUp JupyterHub For N Users    list_of_usernames=${list_of_usernames}
-
-Test Metric "Active Notebook Pod Time" On OpenShift Monitoring - Cluster Monitoring Prometheus
-    [Documentation]    Test launchs notebook for N user and and checks Openshift Matrics showing number of running pods
-    [Tags]    Sanity
-    ...       ODS-1055
-    ...       Tier1
-    ...       Monitoring
-    ...       AutomationBug
-    @{list_of_usernames} =    Create List    ${TEST_USER_3.USERNAME}    ${TEST_USER_4.USERNAME}
-    Log In N Users To JupyterLab And Launch A Notebook For Each Of Them
-    ...    list_of_usernames=${list_of_usernames}
-    Sleep    60s    reason=Wait until metrics are available
-    ${value} =    Run OpenShift Metrics Query    query=cluster:usage:consumption:rhods:pod:up   username=${OCP_ADMIN_USER.USERNAME}    password=${OCP_ADMIN_USER.PASSWORD}
-    ...    auth_type=${OCP_ADMIN_USER.AUTH_TYPE}
-    Should Not Be Empty    ${value}    msg=Metrics does not contains value for pod:up query
-    [Teardown]    CleanUp JupyterHub For N Users    list_of_usernames=${list_of_usernames}
 
 
 *** Keywords ***

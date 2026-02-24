@@ -86,6 +86,7 @@ Validate Kueue Removed To Unmanaged State Transition
     ...    Tier1
     ...    kueue-unmanaged-from-removed
     ...    Integration
+    ...    Smoke
     Set DSC Component Removed State And Wait For Completion
     ...    kueue
     ...    ${KUEUE_DEPLOYMENT_NAME}
@@ -108,6 +109,7 @@ Validate Kueue Unmanaged To Removed State Transition
     ...    Tier1
     ...    kueue-removed-from-unmanaged
     ...    Integration
+    ...    Sanity
 
     Set DSC Component Unmanaged State And Wait For Completion
     ...    kueue
@@ -132,6 +134,8 @@ Validate Ray Managed State
     ...    RHOAIENG-5435
     ...    ray-managed
     ...    Integration
+    ...    Smoke
+
     Set DSC Component Managed State And Wait For Completion
     ...    ray
     ...    ${RAY_DEPLOYMENT_NAME}
@@ -148,6 +152,7 @@ Validate Ray Removed State
     ...    RHOAIENG-5435
     ...    ray-removed
     ...    Integration
+    ...    Sanity
 
     Set DSC Component Removed State And Wait For Completion
     ...    ray
@@ -165,6 +170,8 @@ Validate Training Operator Managed State
     ...    RHOAIENG-6627
     ...    training-managed
     ...    Integration
+    ...    Smoke
+
     Set DSC Component Managed State And Wait For Completion
     ...    trainingoperator
     ...    ${TRAINING_DEPLOYMENT_NAME}
@@ -181,6 +188,7 @@ Validate Training Operator Removed State
     ...    RHOAIENG-6627
     ...    training-removed
     ...    Integration
+    ...    Sanity
 
     Set DSC Component Removed State And Wait For Completion
     ...    trainingoperator
@@ -198,6 +206,7 @@ Validate Trainer Managed State
     ...    trainer-managed
     ...    Integration
     ...    ExcludeOnODH
+    ...    Smoke
 
     Set DSC Component Managed State And Wait For Completion
     ...    trainer
@@ -215,6 +224,7 @@ Validate Trainer Removed State
     ...    trainer-removed
     ...    Integration
     ...    ExcludeOnODH
+    ...    Sanity
 
     Set DSC Component Removed State And Wait For Completion
     ...    trainer
@@ -232,6 +242,8 @@ Validate Dashboard Managed State
     ...    RHOAIENG-7298
     ...    dashboard-managed
     ...    Integration
+    ...    Smoke
+
     Set DSC Component Managed State And Wait For Completion
     ...    dashboard
     ...    ${DASHBOARD_DEPLOYMENT_NAME}
@@ -248,6 +260,7 @@ Validate Dashboard Removed State
     ...    RHOAIENG-7298
     ...    dashboard-removed
     ...    Integration
+    ...    Sanity
 
     Set DSC Component Removed State And Wait For Completion
     ...    dashboard
@@ -265,6 +278,8 @@ Validate Aipipelines Managed State
     ...    RHOAIENG-7298
     ...    operator-aipipelines-managed
     ...    Integration
+    ...    Smoke
+
     Set DSC Component Managed State And Wait For Completion
     ...    aipipelines
     ...    ${AIPIPELINES_DEPLOYMENT_NAME}
@@ -281,6 +296,7 @@ Validate Aipipelines Removed State
     ...    RHOAIENG-7298
     ...    operator-aipipelines-removed
     ...    Integration
+    ...    Sanity
 
     Set DSC Component Removed State And Wait For Completion
     ...    aipipelines
@@ -298,6 +314,8 @@ Validate TrustyAi Managed State
     ...    RHOAIENG-14018
     ...    trustyai-managed
     ...    Integration
+    ...    Smoke
+
     Set DSC Component Managed State And Wait For Completion
     ...    trustyai
     ...    ${TRUSTYAI_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
@@ -316,6 +334,7 @@ Validate TrustyAi Removed State
     ...    RHOAIENG-14018
     ...    trustyai-removed
     ...    Integration
+    ...    Sanity
 
     Set DSC Component Removed State And Wait For Completion
     ...    trustyai
@@ -333,6 +352,8 @@ Validate ModelRegistry Managed State
     ...    RHOAIENG-10404
     ...    modelregistry-managed
     ...    Integration
+    ...    Smoke
+
     Set DSC Component Managed State And Wait For Completion
     ...    modelregistry
     ...    ${MODELREGISTRY_CONTROLLER__DEPLOYMENT_NAME}
@@ -351,7 +372,9 @@ Validate ModelRegistry Removed State
     ...    RHOAIENG-10404
     ...    modelregistry-removed
     ...    Integration
-    # Properly validate Removed state by first setting to Manged, which will ensure that namspace
+    ...    Sanity
+
+    # Properly validate Removed state by first setting to Managed, which will ensure that namspace
     # was created as needed for later validating that namespace persisted when component is Removed
     [Setup]     Set DSC Component Managed State And Wait For Completion     modelregistry       ${MODELREGISTRY_CONTROLLER__DEPLOYMENT_NAME}        ${MODELREGISTRY_CONTROLLER__LABEL_SELECTOR}
 
@@ -374,6 +397,7 @@ Validate KServe Controller Manager Managed State
     ...    RHOAIENG-7217
     ...    kserve-controller-manager-managed
     ...    Integration
+    ...    Smoke
 
     Set DSC Component Managed State And Wait For Completion
     ...    kserve
@@ -391,6 +415,7 @@ Validate KServe Controller Manager Removed State
     ...    RHOAIENG-7217
     ...    kserve-controller-manager-removed
     ...    Integration
+    ...    Sanity
 
     Set DSC Component Removed State And Wait For Completion
     ...    kserve
@@ -412,7 +437,12 @@ Validate KServe Controller Manager Removed State
 Validate Workbenches Managed State
     [Documentation]    Validate that the DSC Workbenches component Managed state creates the expected resources,
     ...    check that Workbenches deployment is created and pods are in Ready state
-    [Tags]      Operator        Tier1       workbenches-managed     Integration
+    [Tags]
+    ...    Operator
+    ...    Tier1
+    ...    workbenches-managed
+    ...    Integration
+    ...    Smoke
 
     Set DSC Component Managed State And Wait For Completion
     ...    workbenches
@@ -428,7 +458,12 @@ Validate Workbenches Managed State
 
 Validate Workbenches Removed State
     [Documentation]    Validate that Workbenches component management state Removed does remove relevant resources.
-    [Tags]                  Operator                Tier1                   workbenches-removed     Integration
+    [Tags]
+    ...    Operator
+    ...    Tier1
+    ...    workbenches-removed
+    ...    Integration
+    ...    Sanity
 
     Set DSC Component Removed State And Wait For Completion
     ...    workbenches
@@ -450,6 +485,7 @@ Validate Feastoperator Managed State
     ...    feastoperator-managed
     ...    Integration
     ...    ExcludeOnODH
+    ...    Smoke
 
     Set DSC Component Managed State And Wait For Completion
     ...    feastoperator
@@ -469,6 +505,7 @@ Validate Feastoperator Removed State
     ...    feastoperator-removed
     ...    Integration
     ...    ExcludeOnODH
+    ...    Sanity
 
     Set DSC Component Removed State And Wait For Completion
     ...    feastoperator
@@ -486,6 +523,7 @@ Validate Llamastackoperator Managed State
     ...    llamastackoperator-managed
     ...    Integration
     ...    ExcludeOnODH
+    ...    Smoke
 
     Set DSC Component Managed State And Wait For Completion
     ...    llamastackoperator
@@ -505,6 +543,7 @@ Validate Llamastackoperator Removed State
     ...    llamastackoperator-removed
     ...    Integration
     ...    ExcludeOnODH
+    ...    Sanity
 
     Set DSC Component Removed State And Wait For Completion
     ...    llamastackoperator
@@ -522,6 +561,7 @@ Validate Mlflowoperator Managed State
     ...    mlflowoperator-managed
     ...    Integration
     ...    ExcludeOnODH
+    ...    Smoke
 
     Set DSC Component Managed State And Wait For Completion
     ...    mlflowoperator
@@ -541,6 +581,7 @@ Validate Mlflowoperator Removed State
     ...    mlflowoperator-removed
     ...    Integration
     ...    ExcludeOnODH
+    ...    Sanity
 
     Set DSC Component Removed State And Wait For Completion
     ...    mlflowoperator
@@ -615,6 +656,7 @@ Validate Modelsasservice Managed State
     ...    modelsasservice-managed
     ...    Integration
     ...    ExcludeOnODH
+    ...    Smoke
 
     Set DSC Nested Component Managed State And Wait For Completion
     ...    kserve
@@ -639,6 +681,7 @@ Validate Modelsasservice Removed State
     ...    modelsasservice-removed
     ...    Integration
     ...    ExcludeOnODH
+    ...    Sanity
 
     Set DSC Nested Component Removed State And Wait For Completion
     ...    kserve
@@ -654,7 +697,7 @@ Validate Modelsasservice Removed State
 
 Validate Support For Configuration Of Controller Resources
     [Documentation]    Validate support for configuration of controller resources in component deployments
-    [Tags]    Operator    Tier1    ODS-2664      Integration  RHOAIENG-12811
+    [Tags]    Operator    Sanity    ODS-2664      Integration  RHOAIENG-12811
     FOR   ${controller}    IN    @{CONTROLLERS_LIST}
         ${new_cpu_limit}=  Set Variable  1001m
         ${new_memory_limit}=  Set Variable  4001Mi

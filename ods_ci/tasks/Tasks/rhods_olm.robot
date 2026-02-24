@@ -20,7 +20,7 @@ ${RHOAI_VERSION}                ${EMPTY}
 *** Tasks ***
 Can Install RHODS Operator
   [Tags]  install
-  IF  "${PRODUCT}" == "ODH"
+  IF  "${PRODUCT}" == "ODH" and "${UPDATE_CHANNEL}" != "odh-stable"
       Set Global Variable  ${OPERATOR_NAME_LABEL}  opendatahub-operator
       Set Global Variable  ${MODEL_REGISTRY_NAMESPACE}    odh-model-registries
       Set Global Variable  ${OPERATOR_YAML_LABEL}  opendatahub-operator
@@ -35,12 +35,6 @@ Can Install RHODS Operator
       Set Global Variable  ${OPERATOR_YAML_LABEL}  rhods-operator
       Set Global Variable  ${MODEL_REGISTRY_NAMESPACE}    rhoai-model-registries
   END
-  IF  "${INSTALL_TYPE}" == "GitOps"
-      Set Global Variable  ${INSTALL_DEPENDENCIES_TYPE}  GitOps
-      Set Global Variable  ${INSTALL_TYPE}  Cli
-  ELSE
-      Set Global Variable  ${INSTALL_DEPENDENCIES_TYPE}  Cli
-  END
   Given Selected Cluster Type ${cluster_type}
   When Installing RHODS Operator    ${image_url}    ${install_plan_approval}    ${RHOAI_VERSION}
   Then RHODS Operator Should Be Installed
@@ -48,7 +42,7 @@ Can Install RHODS Operator
 
 Can Uninstall RHODS Operator
   [Tags]  uninstall
-  IF  "${PRODUCT}" == "ODH"
+  IF  "${PRODUCT}" == "ODH" and "${UPDATE_CHANNEL}" != "odh-stable"
       IF  "${UPDATE_CHANNEL}" == "odh-nightlies"
           Set Global Variable  ${OPERATOR_NAME}  rhods-operator
       ELSE

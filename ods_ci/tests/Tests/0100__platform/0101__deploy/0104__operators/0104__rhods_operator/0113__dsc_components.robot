@@ -43,7 +43,7 @@ ${MLFLOWOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}        mlflow-operator-cont
 ${MODELSASSERVICE_CONTROLLER_MANAGER_LABEL_SELECTOR}        app.kubernetes.io/part-of=models-as-a-service
 ${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}       maas-api
 ${SPARKOPERATOR_LABEL_SELECTOR}                             app.kubernetes.io/name=spark-operator
-${SPARKOPERATOR_DEPLOYMENT_NAME}                            spark-operator-controller-manager
+${SPARKOPERATOR_DEPLOYMENT_NAME}                            spark-operator-controller
 ${NOTEBOOK_CONTROLLER_DEPLOYMENT_LABEL_SELECTOR}            component.opendatahub.io/name=kf-notebook-controller
 ${NOTEBOOK_CONTROLLER_MANAGER_LABEL_SELECTOR}               component.opendatahub.io/name=odh-notebook-controller
 ${NOTEBOOK_DEPLOYMENT_NAME}                                 notebook-controller-deployment

@@ -9,7 +9,7 @@ CHANNEL="$(oc get packagemanifest gpu-operator-certified -n openshift-marketplac
 
 CSVNAME="$(oc get packagemanifests/gpu-operator-certified -n openshift-marketplace -o json | jq -r '.status.channels[] | select(.name == "'$CHANNEL'") | .currentCSV')"
 
-sed -i'' -e "0,/v1.11/s//$CHANNEL/g" "$GPU_INSTALL_DIR/gpu_install.yaml"
+sed -i'' -e "s|channel: \".*\"|channel: \"$CHANNEL\"|" "$GPU_INSTALL_DIR/gpu_install.yaml"
 
 oc apply -f "$GPU_INSTALL_DIR/gpu_install.yaml"
 /bin/bash tasks/Resources/Provisioning/GPU/NFD/install_nfd.sh

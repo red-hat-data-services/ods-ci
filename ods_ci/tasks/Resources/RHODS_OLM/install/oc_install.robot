@@ -24,6 +24,8 @@ ${DSCI_NAME} =    default-dsci
 ...    llamastackoperator
 ...    mlflowoperator
 ...    modelsasservice
+&{NESTED_COMPONENT_TO_PARENT_COMPONENT} =    modelsasservice=kserve
+&{COMPONENT_TO_COMPONENT_NAME_IN_DSC} =   modelsasservice=modelsAsService
 ${LWS_OP_NAME}=    leader-worker-set
 ${LWS_OP_NS}=    openshift-lws-operator
 ${LWS_SUB_NAME}=    leader-worker-set
@@ -423,7 +425,7 @@ Verify RHODS Installation
   ${mlflowoperator} =    Is Component Enabled    mlflowoperator    ${DSC_NAME}
   IF    "${mlflowoperator}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/part-of=mlflowoperator
+    ...    label_selector=app.kubernetes.io/name=mlflow-operator
   END
 
   ${modelsasservice} =    Is Nested Component Enabled    kserve    modelsAsService    ${DSC_NAME}
@@ -674,14 +676,30 @@ Apply DataScienceCluster CustomResource
         Should Be Equal As Integers  ${return_code}  0  msg=Error detected while applying DSC CR
         Remove File    ${file_path}dsc_apply.yml
         FOR    ${cmp}    IN    @{COMPONENT_LIST}
+            ${cmp_dsc} =    Convert Component Into Component DSC Name     ${cmp}
             IF    $cmp not in $COMPONENTS
-                    Component Should Not Be Enabled    ${cmp}
+                Component Should Not Be Enabled    ${cmp}
             ELSE IF    '${COMPONENTS.${cmp}}' == 'Managed'
-                    Component Should Be Enabled    ${cmp}
+                ${is_nested}=    Component Is A Nested Component      ${cmp}
+                IF     ${is_nested}
+                    Nested Component Should Be Enabled     ${NESTED_COMPONENT_TO_PARENT_COMPONENT.${cmp}}      ${cmp_dsc}
+                ELSE
+                    Component Should Be Enabled    ${cmp_dsc}
+                END
             ELSE IF    '${COMPONENTS.${cmp}}' == 'Unmanaged'
-                    Component Should Be Enabled    ${cmp}
+                ${is_nested}=    Component Is A Nested Component      ${cmp}
+                IF     ${is_nested}
+                    Nested Component Should Be Enabled     ${NESTED_COMPONENT_TO_PARENT_COMPONENT.${cmp}}      ${cmp_dsc}
+                ELSE
+                    Component Should Be Enabled    ${cmp_dsc}
+                END
             ELSE IF    '${COMPONENTS.${cmp}}' == 'Removed'
-                    Component Should Not Be Enabled    ${cmp}
+                ${is_nested}=    Component Is A Nested Component      ${cmp}
+                IF     ${is_nested}
+                    Nested Component Should Not Be Enabled     ${NESTED_COMPONENT_TO_PARENT_COMPONENT.${cmp}}      ${cmp_dsc}
+                ELSE
+                    Component Should Not Be Enabled    ${cmp_dsc}
+                END
             END
         END
     END
@@ -758,6 +776,23 @@ Wait For DataScienceCluster CustomResource To Be Ready
         Run Keyword And Continue On Failure    FAIL    Timeout- DataScienceCluster CustomResource is not Ready
   END
 
+Convert Component Into Component DSC Name
+    [Arguments]    ${component}
+    ${has_diff_name}=    Run Keyword And Return Status
+    ...    Dictionary Should Contain Key    ${COMPONENT_TO_COMPONENT_NAME_IN_DSC}    ${component}
+    IF    ${has_diff_name}
+        RETURN      ${COMPONENT_TO_COMPONENT_NAME_IN_DSC.${component}}
+    ELSE
+        RETURN      ${component}
+    END
+
+
+Component Is A Nested Component
+    [Arguments]    ${component}
+    ${is_nested}=    Run Keyword And Return Status
+    ...    Dictionary Should Contain Key    ${NESTED_COMPONENT_TO_PARENT_COMPONENT}    ${component}
+    RETURN    ${is_nested}
+
 Component Should Be Enabled
     [Arguments]    ${component}    ${dsc_name}=${DSC_NAME}
     ${status} =   Set Variable   False
@@ -766,11 +801,27 @@ Component Should Be Enabled
         IF    '${status}' == 'true'    BREAK
     END
 
+Nested Component Should Be Enabled
+    [Arguments]    ${parent_component}    ${nested_component}     ${dsc_name}=${DSC_NAME}
+    ${status} =   Set Variable   False
+    WHILE   '${status}' != 'true'    limit=60 seconds
+        ${status} =    Is Nested Component Enabled    ${parent_component}    ${nested_component}    ${dsc_name}
+        IF    '${status}' == 'true'    BREAK
+    END
+
 Component Should Not Be Enabled
     [Arguments]    ${component}    ${dsc_name}=${DSC_NAME}
     ${status} =   Set Variable   True
     WHILE   '${status}' != 'false'    limit=60 seconds
         ${status} =    Is Component Enabled    ${component}    ${dsc_name}
+        IF    '${status}' == 'false'    BREAK
+    END
+
+Nested Component Should Not Be Enabled
+    [Arguments]    ${parent_component}    ${nested_component}     ${dsc_name}=${DSC_NAME}
+    ${status} =   Set Variable   True
+    WHILE   '${status}' != 'false'    limit=60 seconds
+        ${status} =    Is Nested Component Enabled    ${parent_component}    ${nested_component}    ${dsc_name}
         IF    '${status}' == 'false'    BREAK
     END
 
@@ -783,14 +834,12 @@ Is Component Enabled
     ${n_output} =    Evaluate    '${output}' == ''
     IF  ${n_output}
           RETURN    false
-    ELSE
-         IF    ${output} == "Removed"
-               RETURN    false
-         ELSE IF    ${output} == "Managed"
-              RETURN    true
-         ELSE IF    ${output} == "Unmanaged"
-              RETURN    true
-         END
+    ELSE IF    ${output} == "Removed"
+          RETURN    false
+    ELSE IF    ${output} == "Managed"
+          RETURN    true
+    ELSE IF    ${output} == "Unmanaged"
+          RETURN    true
     END
 
 Is Nested Component Enabled
@@ -802,14 +851,12 @@ Is Nested Component Enabled
     ${n_output} =    Evaluate    '${output}' == ''
     IF  ${n_output}
           RETURN    false
-    ELSE
-         IF    ${output} == "Removed"
-               RETURN    false
-         ELSE IF    ${output} == "Managed"
-              RETURN    true
-         ELSE IF    ${output} == "Unmanaged"
-              RETURN    true
-         END
+    ELSE IF    ${output} == "Removed"
+          RETURN    false
+    ELSE IF    ${output} == "Managed"
+          RETURN    true
+    ELSE IF    ${output} == "Unmanaged"
+          RETURN    true
     END
 
 Wait for Catalog To Be Ready

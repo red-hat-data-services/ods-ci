@@ -128,7 +128,11 @@ Install RHODS
   IF   "${cluster_type}" == "selfmanaged"
       ${is_cli_install} =    Evaluate    "${INSTALL_TYPE}" in ["Cli", "Kustomize"]
       IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and ${is_cli_install}
-             Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
+          IF  "${is_upgrade}" == "False"
+              Install RHODS In Self Managed Cluster Using CLI  ${image_url}
+          ELSE
+              Upgrade RHODS In Self Managed Cluster Using CLI  ${image_url}     ${rhoai_version}
+          END
       ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "Helm"
              Install RHOAI In Self Managed Cluster Using Helm  ${enable_new_observability_stack}
              ...    ${GITOPS_REPO_BRANCH}    ${GITOPS_REPO_URL}
@@ -154,9 +158,7 @@ Install RHODS
               Oc Apply   kind=List   src=${destination_file}
               Remove File    ${destination_file}
           ELSE
-              ${patch_update_channel_status} =    Run And Return Rc   oc patch subscription ${OPERATOR_NAME} -n ${OPERATOR_NAMESPACE} --type='json' -p='[{"op": "replace", "path": "/spec/channel", "value": ${UPDATE_CHANNEL}}]'    #robocop:disable
-              Should Be Equal As Integers    ${patch_update_channel_status}    0    msg=Error while changing the UPDATE_CHANNEL    #robocop:disable
-              Sleep  30s      reason=wait for thirty seconds until old CSV is removed and new one is ready
+              Set Subscription Update Channel    ${OPERATOR_NAMESPACE}    ${UPDATE_CHANNEL}    ${OPERATOR_NAME}
           END
           Wait For Installplan And Approve It    ${OPERATOR_NAMESPACE}    ${OPERATOR_NAME}    ${OPERATOR_SUBSCRIPTION_NAME}    ${rhoai_version}    #robocop:disable
       ELSE
@@ -167,10 +169,10 @@ Install RHODS
       IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and ${is_cli_install_managed} and "${UPDATE_CHANNEL}" == "odh-nightlies"
           # odh-nightly is not build for Managed, it is only possible for Self-Managed
           Set Global Variable    ${OPERATOR_NAMESPACE}    openshift-marketplace
-          Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
+          Install RHODS In Self Managed Cluster Using CLI  ${image_url}
           Set Global Variable    ${OPERATOR_NAME}         opendatahub-operator
       ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and ${is_cli_install_managed}
-          Install RHODS In Managed Cluster Using CLI  ${cluster_type}     ${image_url}
+          Install RHODS In Managed Cluster Using CLI  ${image_url}
       ELSE
           FAIL    Provided test environment is not supported
       END
@@ -487,15 +489,26 @@ Clone OLM Install Repo
 
 Install RHODS In Self Managed Cluster Using CLI
   [Documentation]   Install rhods on self managed cluster using cli
-  [Arguments]     ${cluster_type}     ${image_url}    ${config_env}=${CONFIG_ENV}
+  [Arguments]     ${image_url}    ${config_env}=${CONFIG_ENV}
   ${return_code} =    Run And Watch Command
   ...    cd ${EXECDIR}/${OLM_DIR} && ./setup.sh -t operator -u ${UPDATE_CHANNEL} -i ${image_url} -n ${OPERATOR_NAME} -p ${OPERATOR_NAMESPACE} ${CONFIG_ENV}    # robocop: disable
   ...    timeout=20 min
   Should Be Equal As Integers   ${return_code}   0   msg=Error detected while installing RHODS
 
+Upgrade RHODS In Self Managed Cluster Using CLI
+  [Documentation]   Upgrade RHODS on self managed cluster using CLI by applying new catalog source
+  [Arguments]     ${image_url}     ${rhoai_version}
+  Log    Starting RHODS upgrade with image: ${image_url}    console=yes
+  Log    Update channel: ${UPDATE_CHANNEL}    console=yes
+
+  Set Subscription Install Plan Approval    ${OPERATOR_NAMESPACE}    Manual    ${OPERATOR_SUBSCRIPTION_NAME}
+  Set Subscription Update Channel    ${OPERATOR_NAMESPACE}    ${UPDATE_CHANNEL}    ${OPERATOR_SUBSCRIPTION_NAME}
+  Set Catalog Source Image    ${image_url}
+  Wait For Installplan And Approve It    ${OPERATOR_NAMESPACE}    ${OPERATOR_NAME}    ${OPERATOR_SUBSCRIPTION_NAME}    ${rhoai_version}    #robocop:disable
+
 Install RHODS In Managed Cluster Using CLI
   [Documentation]   Install rhods on managed managed cluster using cli
-  [Arguments]     ${cluster_type}     ${image_url}
+  [Arguments]     ${image_url}
   ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${OLM_DIR} && ./setup.sh -t addon -u ${UPDATE_CHANNEL} -i ${image_url} -n ${OPERATOR_NAME} -p ${OPERATOR_NAMESPACE} -a ${APPLICATIONS_NAMESPACE} -m ${MONITORING_NAMESPACE}  #robocop:disable
   Log To Console    ${output}
   Should Be Equal As Integers   ${return_code}   0  msg=Error detected while installing RHODS

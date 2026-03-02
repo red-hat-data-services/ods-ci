@@ -282,6 +282,8 @@ def generate_test_config_file(
         data["UPGRADE_TO_UPDATE_CHANNEL"] = config_data["UPGRADE_TO_UPDATE_CHANNEL"]
     if config_data.get("UPGRADE_TO_VERSION"):
         data["UPGRADE_TO_VERSION"] = config_data["UPGRADE_TO_VERSION"]
+    if config_data.get("UPGRADE_ODS_BUILD_URL"):
+        data["UPGRADE_ODS_BUILD_URL"] = config_data["UPGRADE_ODS_BUILD_URL"]
     data["RHODS_OSD_INSTALL_REPO"] = config_data["RHODS_OSD_INSTALL_REPO"]
     data["ENABLE_NEW_OBSERVABILITY_STACK"] = config_data["ENABLE_NEW_OBSERVABILITY_STACK"]
     if config_data.get("NGC_API_KEY"):

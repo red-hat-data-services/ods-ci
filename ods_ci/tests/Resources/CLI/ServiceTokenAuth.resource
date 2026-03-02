@@ -20,7 +20,7 @@ Call Gateway With Token Via Curl
     [Documentation]    Makes curl request to gateway with service account token
     [Arguments]    ${token}    ${path}=/echo    ${gateway_url}=${EMPTY}
     IF    "${gateway_url}" == "${EMPTY}"
-        ${gateway_url}=    Get Gateway URL From Route
+        ${gateway_url}=    Get Gateway URL For Curl
     END
     # Use -i to include headers, then extract status code from first line
     ${rc}    ${full_response}=    Run And Return Rc And Output
@@ -35,14 +35,49 @@ Call Gateway With Token Via Curl
     Log    message=Gateway response (HTTP ${http_code}): ${response}
     RETURN    ${response}
 
-Get Gateway URL From Route
-    [Documentation]    Gets the gateway hostname from the ingress route
+Get Gateway URL For Curl
+    [Documentation]    Gets gateway hostname for curl. Uses ODH_DASHBOARD_URL if set (works for all
+    ...                ingress modes), otherwise falls back to Gateway resource or Route.
+    ${url}=    Get Variable Value    ODH_DASHBOARD_URL    ${EMPTY}
+    IF    "${url}" != "${EMPTY}"
+        ${url}=    Remove String    ${url}    https://    http://
+        ${host}=    Fetch From Left    ${url}    /
+        RETURN    ${host}
+    END
+    ${rc}    ${url}=    Run And Return Rc And Output
+    ...    oc get gateway data-science-gateway -n openshift-ingress -o jsonpath='{.status.addresses[0].value}'
+    IF    ${rc} == 0 and "${url}" != ""
+        RETURN    ${url}
+    END
     ${rc}    ${url}=    Run And Return Rc And Output
     ...    oc get route data-science-gateway -n openshift-ingress -o jsonpath='{.spec.host}'
     Should Be Equal As Integers    ${rc}    0
     Should Not Be Empty    ${url}
     Log    message=Gateway URL: ${url}
     RETURN    ${url}
+
+Call Gateway Without Token
+    [Documentation]    Makes curl request to gateway without authentication token
+    [Arguments]    ${path}=/echo
+    ${gateway_url}=    Get Gateway URL For Curl
+    ${rc}    ${full_response}=    Run And Return Rc And Output
+    ...    curl -k -s -i https://${gateway_url}${path}
+    Should Be Equal As Integers    ${rc}    0
+    ${status_line}=    Get Line    ${full_response}    0
+    @{status_parts}=    Split String    ${status_line}
+    ${http_code}=    Set Variable    ${status_parts}[1]
+    ${response}=    Set Variable    ${full_response}${\n}HTTP_CODE:${http_code}
+    RETURN    ${response}
+
+Verify Response Is Auth Challenge
+    [Documentation]    Verifies that response indicates auth challenge (403 or 302)
+    [Arguments]    ${response}
+    ${contains_forbidden}=    Run Keyword And Return Status
+    ...    Should Contain    ${response}    HTTP_CODE:403
+    ${contains_redirect}=    Run Keyword And Return Status
+    ...    Should Contain    ${response}    HTTP_CODE:302
+    ${is_challenged}=    Evaluate    ${contains_forbidden} or ${contains_redirect}
+    Should Be True    ${is_challenged}    msg=Request without token should be challenged
 
 Verify Response Contains Auth Headers
     [Documentation]    Verifies that the response contains expected authentication headers

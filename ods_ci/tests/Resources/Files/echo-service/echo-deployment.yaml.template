@@ -14,7 +14,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: echo-service
-  namespace: opendatahub
+  namespace: ${APPLICATIONS_NAMESPACE}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -46,7 +46,7 @@ data:
   config-file.yaml: |
     authorization:
       resourceAttributes:
-        namespace: opendatahub
+        namespace: ${APPLICATIONS_NAMESPACE}
         apiVersion: v1
         resource: services
         subresource: proxy
@@ -86,9 +86,9 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       containers:
-      # kube-rbac-proxy sidecar
+      # kube-rbac-proxy sidecar (Red Hat image for disconnected)
       - name: kube-rbac-proxy
-        image: quay.io/brancz/kube-rbac-proxy:v0.18.1
+        image: ${KUBE_RBAC_PROXY_IMAGE}
         args:
         - "--secure-listen-address=0.0.0.0:8443"
         - "--upstream=http://127.0.0.1:8080/"
@@ -121,9 +121,9 @@ spec:
           capabilities:
             drop:
             - ALL
-      # echo application
+      # echo application (override ECHO_SERVER_IMAGE for disconnected)
       - name: echo
-        image: ealen/echo-server:latest
+        image: ${ECHO_SERVER_IMAGE}
         env:
         - name: PORT
           value: "8080"

@@ -24,6 +24,7 @@ ${DSCI_NAME} =    default-dsci
 ...    llamastackoperator
 ...    mlflowoperator
 ...    modelsasservice
+...    sparkoperator
 &{NESTED_COMPONENT_TO_PARENT_COMPONENT} =    modelsasservice=kserve
 &{COMPONENT_TO_COMPONENT_NAME_IN_DSC} =   modelsasservice=modelsAsService
 ${LWS_OP_NAME}=    leader-worker-set
@@ -428,6 +429,12 @@ Verify RHODS Installation
     ...    label_selector=app.kubernetes.io/name=mlflow-operator
   END
 
+  ${sparkoperator} =    Is Component Enabled    sparkoperator    ${DSC_NAME}
+  IF    "${sparkoperator}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/name=spark-operator
+  END
+
   ${modelsasservice} =    Is Nested Component Enabled    kserve    modelsAsService    ${DSC_NAME}
   IF    "${modelsasservice}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
@@ -444,7 +451,7 @@ Verify RHODS Installation
     END
   END
 
-  IF    "${dashboard}" == "true" or "${workbenches}" == "true" or "${aipipelines}" == "true" or "${kserve}" == "true" or "${kueue}" == "true" or "${ray}" == "true" or "${trustyai}" == "true" or "${modelregistry}" == "true" or "${trainingoperator}" == "true"    # robocop: disable
+  IF    "${dashboard}" == "true" or "${workbenches}" == "true" or "${aipipelines}" == "true" or "${kserve}" == "true" or "${kueue}" == "true" or "${ray}" == "true" or "${trustyai}" == "true" or "${modelregistry}" == "true" or "${trainingoperator}" == "true" or "${sparkoperator}" == "true"    # robocop: disable
       Log To Console    Waiting for pod status in ${APPLICATIONS_NAMESPACE}
       Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=600
       Log  Verified Applications NS: ${APPLICATIONS_NAMESPACE}  console=yes

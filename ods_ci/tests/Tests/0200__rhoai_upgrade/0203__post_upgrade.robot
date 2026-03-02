@@ -41,14 +41,14 @@ ${UPGRADE_CONFIG_MAP}    upgrade-config-map
 *** Test Cases ***
 Verify PVC Size
     [Documentation]    Verify PVC Size after the upgrade
-    [Tags]      Upgrade
+    [Tags]      Upgrade    Dashboard    deprecatedTest
     Get Dashboard Config Data
     ${size}     Set Variable        ${payload[0]['spec']['notebookController']['pvcSize']}[:-2]
     Should Be Equal As Strings      '${size}'       '${S_SIZE}'
 
 Verify Pod Toleration
     [Documentation]    Verify Pod toleration after the upgrade
-    [Tags]      Upgrade
+    [Tags]      Upgrade    Dashboard    deprecatedTest
     ${enable}    Set Variable
     ...    ${payload[0]['spec']['notebookController']['notebookTolerationSettings']['enabled']}
     Should Be Equal As Strings      '${enable}'     'True'
@@ -64,7 +64,7 @@ Verify RHODS User Groups
 
 Verify Culler is Enabled
     [Documentation]    Verify Culler Configuration after the upgrade
-    [Tags]      Upgrade
+    [Tags]      Upgrade    Dashboard    deprecatedTest
     ${status}    Check If ConfigMap Exists
     ...    ${APPLICATIONS_NAMESPACE}
     ...    notebook-controller-culler-config
@@ -114,21 +114,21 @@ Verify Disable Runtime Is Present
 
 Reset PVC Size Via UI
     [Documentation]    Sets a Pod toleration via the admin UI
-    [Tags]      Upgrade
+    [Tags]      Upgrade    Dashboard    deprecatedTest
     [Setup]     Begin Web Test
     Set PVC Value In RHODS Dashboard        20
     [Teardown]      Dashboard Test Teardown
 
 Reset Culler Timeout
     [Documentation]    Sets a culler timeout via the admin UI
-    [Tags]      Upgrade
+    [Tags]      Upgrade    Dashboard    deprecatedTest
     [Setup]     Begin Web Test
     Disable Notebook Culler
     [Teardown]      Dashboard Test Teardown
 
 Resetting Pod Toleration Via UI
     [Documentation]    Sets a Pod toleration via the admin UI
-    [Tags]                  Upgrade
+    [Tags]                  Upgrade    Dashboard    deprecatedTest
     [Setup]                 Begin Web Test
     Menu.Navigate To Page       Settings        Cluster settings
     Wait Until Page Contains        Notebook pod tolerations

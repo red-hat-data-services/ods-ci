@@ -25,11 +25,13 @@ This directory contains automated tests for Service Account Token Authentication
 ### Test Infrastructure
 ```
 tests/Resources/Files/echo-service/
-├── echo-deployment.yaml              # Echo service with kube-rbac-proxy sidecar
+├── echo-deployment.yaml.template     # Template (uses Create File From Template)
 ├── echo-httproute.yaml               # HTTPRoute to expose via gateway
 ├── test-serviceaccount.yaml          # Test ServiceAccount for tokens
 └── test-serviceaccount-rbac.yaml     # RBAC permissions for test SA
 ```
+
+For disconnected environments, set `KUBE_RBAC_PROXY_IMAGE` and `ECHO_SERVER_IMAGE` variables to mirrored images.
 
 ### Test Resources (Keywords)
 ```

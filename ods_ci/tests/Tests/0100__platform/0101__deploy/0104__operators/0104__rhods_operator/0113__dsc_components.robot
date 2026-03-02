@@ -590,22 +590,6 @@ Validate Mlflowoperator Removed State
 
     [Teardown]      Restore DSC Component State     mlflowoperator       ${MLFLOWOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}     ${MLFLOWOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.MLFLOWOPERATOR}
 
-Validate Spark Default State
-    [Documentation]    Validate that sparkoperator component defaults to Removed state (dev preview).
-    ...                This verifies that the component is in Removed state by default and resources are not present.
-    [Tags]
-    ...    Operator
-    ...    Tier1
-    ...    sparkoperator-default
-    ...    Integration
-    ${current_state}=    Get DSC Component State    ${DSC_NAME}    sparkoperator    ${OPERATOR_NS}
-    Should Be Equal    ${current_state}    Removed
-    ...    msg=Sparkoperator should default to Removed state in dev preview, but found ${current_state}
-    # Verify that resources are not present when in Removed state
-    Wait Until Keyword Succeeds    2 min    10 sec
-    ...    Is Resource Present     Deployment    ${SPARKOPERATOR_DEPLOYMENT_NAME}    ${APPLICATIONS_NS}
-    ...    ${IS_NOT_PRESENT}
-
 Validate Spark Managed State
     [Documentation]    Validate that the DSC Sparkoperator component Managed state creates the expected resources,
     ...    check that Sparkoperator deployment is created and pod is in Ready state

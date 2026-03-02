@@ -72,7 +72,7 @@ Validate Trusted CA Bundles State Unmanaged
 Validate Trusted CA Bundles State Removed
     [Documentation]  The purpose of this test case is to validate Trusted CA Bundles when in state Removed
     ...    With Trusted CA Bundles Removed, all odh-trusted-ca-bundle ConfigMaps will be removed.
-    [Tags]    Operator    Smoke    ODS-2638    TrustedCABundle-Removed
+    [Tags]    Operator    Sanity    ODS-2638    TrustedCABundle-Removed
 
     Set Trusted CA Bundle Management State    ${DSCI_NAME}    Removed    ${OPERATOR_NS}
 
@@ -84,7 +84,7 @@ Validate Trusted CA Bundles State Removed
 
 Validate Trusted CA Bundles Exclude Namespace
     [Documentation]  The purpose of this test case is to validate Trusted CA Bundles can be excluded from a namespace.
-    [Tags]    Operator    ODS-2638    TrustedCABundle-Exclude-Namespace
+    [Tags]    Operator    ODS-2638    TrustedCABundle-Exclude-Namespace   Sanity
 
     Set Trusted CA Bundle Management State    ${DSCI_NAME}    Managed    ${OPERATOR_NS}
 

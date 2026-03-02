@@ -24,6 +24,8 @@ ${DSCI_NAME} =    default-dsci
 ...    llamastackoperator
 ...    mlflowoperator
 ...    modelsasservice
+&{NESTED_COMPONENT_TO_PARENT_COMPONENT} =    modelsasservice=kserve
+&{COMPONENT_TO_COMPONENT_NAME_IN_DSC} =   modelsasservice=modelsAsService
 ${LWS_OP_NAME}=    leader-worker-set
 ${LWS_OP_NS}=    openshift-lws-operator
 ${LWS_SUB_NAME}=    leader-worker-set
@@ -53,7 +55,7 @@ ${KUEUE_CHANNEL_NAME}=  stable-v1.2
 ${KUEUE_NS}=  openshift-kueue-operator
 ${JOBSET_OP_NAME}=  job-set
 ${JOBSET_SUB_NAME}=  job-set
-${JOBSET_CHANNEL_NAME}=  tech-preview-v0.1
+${JOBSET_CHANNEL_NAME}=  stable-v1.0
 ${JOBSET_NS}=  openshift-jobset-operator
 ${JOBSETOPERATOR_NAME}=  cluster
 ${CERT_MANAGER_OP_NAME}=  openshift-cert-manager-operator
@@ -87,9 +89,11 @@ ${RHODS_OSD_INSTALL_REPO}=      ${EMPTY}
 ${OLM_DIR}=                     rhodsolm
 @{SUPPORTED_TEST_ENV}=          AWS   AWS_DIS   GCP   GCP_DIS   PSI   PSI_DIS   ROSA   IBM_CLOUD   CRC    AZURE	ROSA_HCP
 ${install_plan_approval}=       Manual
-${INSTALL_DEPENDENCIES_TYPE}=    Cli
 ${GITOPS_DEFAULT_REPO_BRANCH}=    main
 ${GITOPS_DEFAULT_REPO}=    ${EMPTY}
+${HELM_CUSTOM_VALUES_FILE}=    ${EMPTY}
+@{HELM_SET_VALUES}=    @{EMPTY}
+${COMPONENT_NAMES}=    ${EMPTY}
 
 *** Keywords ***
 Install RHODS
@@ -99,10 +103,15 @@ Install RHODS
   Log    \- rhoai_version: ${rhoai_version}\n\- is_upgrade: ${is_upgrade}\n\- install_plan_approval: ${install_plan_approval}\n\- CATALOG_SOURCE: ${CATALOG_SOURCE}   console=yes    #robocop:disable
   Assign Vars According To Product
   ${enable_new_observability_stack} =    Is New Observability Stack Enabled
-  IF  "${INSTALL_DEPENDENCIES_TYPE}" == "GitOps"
+  IF  "${INSTALL_TYPE}" == "Helm"
+    Parse Component Names For Helm Install
+    Log To Console    Helm installation handles dependencies and operator together
+  ELSE IF  "${INSTALL_TYPE}" == "Kustomize"
+    Log To Console    Kustomize install method, installing dependencies via GitOps repo, operator via CLI
     Install RHOAI Dependencies With GitOps Repo    ${enable_new_observability_stack}
     ...    ${GITOPS_REPO_BRANCH}    ${GITOPS_REPO_URL}
   ELSE
+    # Cli or OperatorHub - installs dependencies via CLI
     Install RHOAI Dependencies With CLI
     IF    ${enable_new_observability_stack}
             Install Observability Dependencies
@@ -110,14 +119,18 @@ Install RHODS
   END
   Clone OLM Install Repo
   Configure Custom Namespaces
-  IF   "${PRODUCT}" == "ODH"
+  IF   "${PRODUCT}" == "ODH" and "${UPDATE_CHANNEL}" != "odh-stable"
        ${csv_display_name} =    Set Variable    ${ODH_CSV_DISPLAY}
   ELSE
        ${csv_display_name} =    Set Variable    ${RHODS_CSV_DISPLAY}
   END
   IF   "${cluster_type}" == "selfmanaged"
-      IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "Cli"
+      ${is_cli_install} =    Evaluate    "${INSTALL_TYPE}" in ["Cli", "Kustomize"]
+      IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and ${is_cli_install}
              Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
+      ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "Helm"
+             Install RHOAI In Self Managed Cluster Using Helm  ${enable_new_observability_stack}
+             ...    ${GITOPS_REPO_BRANCH}    ${GITOPS_REPO_URL}
       ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "OperatorHub"
           IF  "${is_upgrade}" == "False"
               ${file_path} =    Set Variable    tasks/Resources/RHODS_OLM/install/
@@ -149,22 +162,24 @@ Install RHODS
            FAIL    Provided test environment and install type is not supported
       END
   ELSE IF   "${cluster_type}" == "managed"
-      IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "Cli" and "${UPDATE_CHANNEL}" == "odh-nightlies"
+      ${is_cli_install_managed} =    Evaluate    "${INSTALL_TYPE}" in ["Cli", "Kustomize"]
+      IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and ${is_cli_install_managed} and "${UPDATE_CHANNEL}" == "odh-nightlies"
           # odh-nightly is not build for Managed, it is only possible for Self-Managed
           Set Global Variable    ${OPERATOR_NAMESPACE}    openshift-marketplace
           Install RHODS In Self Managed Cluster Using CLI  ${cluster_type}     ${image_url}
           Set Global Variable    ${OPERATOR_NAME}         opendatahub-operator
-      ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "Cli"
+      ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and ${is_cli_install_managed}
           Install RHODS In Managed Cluster Using CLI  ${cluster_type}     ${image_url}
       ELSE
           FAIL    Provided test environment is not supported
       END
   END
   Wait Until Csv Is Ready    display_name=${csv_display_name}    operators_namespace=${OPERATOR_NAMESPACE}
+  # Approve any pending installplans for transitive OLM dependencies (e.g. ServiceMesh)
+  Approve All Pending Installplans    openshift-operators
   IF  "${is_upgrade}" == "False"
       Add StartingCSV To Subscription
   END
-
 
 Add StartingCSV To Subscription
     [Documentation]    Retrieves current RHOAI version from subscription status and add
@@ -186,8 +201,83 @@ Add StartingCSV To Subscription
         Log    StartingCSV field already exists: ${current_starting_csv}[1], skipping patch    console=yes
     END
 
+Parse Component Names For Helm Install
+    [Documentation]    Parses COMPONENT_NAMES string (received from Jenkins job) for Helm install method.
+    ...                Converts COMPONENT_NAMES to HELM_SET_VALUES list for Helm.
+    ...                Format: "componentName:managementState,componentName:managementState"
+    ...                Example: "dashboard:Managed,workbenches:Removed,feastoperator:Managed"
+    IF    "${COMPONENT_NAMES}" == "${EMPTY}"
+        Log To Console    COMPONENT_NAMES not set, will use defaults from Helm chart values
+        RETURN
+    END
+    Log To Console    Parsing COMPONENT_NAMES: ${COMPONENT_NAMES}
+
+    ${helm_values} =    Create List
+
+    # Get individual componentName:managementState pairs
+    @{pairs} =    Split String    ${COMPONENT_NAMES}    separator=,
+    FOR    ${pair}    IN    @{pairs}
+        ${pair} =    Strip String    ${pair}
+        IF    "${pair}" == "${EMPTY}"    CONTINUE
+
+        # Get component name and its managementState
+        @{parts} =    Split String    ${pair}    separator=:    max_split=1
+        ${len} =    Get Length    ${parts}
+        IF    ${len} != 2
+            Log To Console    WARNING: Invalid format '${pair}', expected 'component:state', skipping
+            CONTINUE
+        END
+        ${component} =    Strip String    ${parts}[0]
+        ${state} =    Strip String    ${parts}[1]
+
+        @{valid_states} =    Create List    Managed    Removed    Unmanaged
+        ${is_valid} =    Evaluate    "${state}" in ${valid_states}
+        IF    not ${is_valid}
+            Log To Console    WARNING: Invalid state '${state}' for component '${component}', skipping
+            CONTINUE
+        END
+
+        # For Helm install method, convert each parsed key-value pair to the expected Helm chart path
+        # and collect them into a list
+        ${helm_path} =    Get Helm Path For Component    ${component}
+        IF    "${helm_path}" != "${EMPTY}"
+            Append To List    ${helm_values}    ${helm_path}=${state}
+        END
+
+        Log To Console    Parsed component: ${component} -> ${state}
+    END
+
+    Set Global Variable    @{HELM_SET_VALUES}    @{helm_values}
+    Log To Console    HELM_SET_VALUES list: @{HELM_SET_VALUES}
+
+Get Helm Path For Component
+    [Documentation]    Maps component name to Helm chart path for managementState.
+    ...                Returns empty string for unknown components.
+    [Arguments]    ${component}
+
+    # Handling of special component cases:
+    # 1. modelsasservice is nested under kserve
+    IF    "${component}" == "modelsasservice"
+        RETURN    components.kserve.dsc.modelsAsService.managementState
+    END
+
+    # Handling of standard component cases:
+    ${is_known} =    Evaluate    "${component}" in ${COMPONENT_LIST}
+    IF    ${is_known}
+        RETURN    components.${component}.dsc.managementState
+    END
+
+    Log To Console    WARNING: Unknown component '${component}', no Helm path mapping available
+    RETURN    ${EMPTY}
+
 Verify RHODS Installation
-  Set Global Variable    ${DASHBOARD_APP_NAME}    ${PRODUCT.lower()}-dashboard
+
+  IF    "${UPDATE_CHANNEL}" == "odh-stable"
+      Set Global Variable    ${DASHBOARD_APP_NAME}    rhods-dashboard
+  ELSE
+      Set Global Variable    ${DASHBOARD_APP_NAME}    ${PRODUCT.lower()}-dashboard
+  END
+
   Log    Verifying RHODS installation    console=yes
   Log    Waiting for all RHODS resources to be up and running    console=yes
   Wait For Deployment Replica To Be Ready    namespace=${OPERATOR_NAMESPACE}
@@ -196,7 +286,7 @@ Verify RHODS Installation
   Log  Verified ${OPERATOR_NAMESPACE}  console=yes
 
   IF   "${cluster_type}" == "managed"
-       IF   "${PRODUCT}" == "ODH"
+       IF   "${PRODUCT}" == "ODH" and "${UPDATE_CHANNEL}" != "odh-stable"
             Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
             Wait For DSCInitialization CustomResource To Be Ready
             Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
@@ -227,7 +317,7 @@ Verify RHODS Installation
   ELSE
       IF  "${APPLICATIONS_NAMESPACE}" != "${DEFAULT_APPLICATIONS_NAMESPACE_RHOAI}" and "${APPLICATIONS_NAMESPACE}" != "${DEFAULT_APPLICATIONS_NAMESPACE_ODH}"
           Create DSCI With Custom Namespaces
-      ELSE IF   "${UPDATE_CHANNEL}" != "odh-nightlies" and "${PRODUCT}" == "ODH"
+      ELSE IF   "${UPDATE_CHANNEL}" != "odh-nightlies" and "${UPDATE_CHANNEL}" != "odh-stable" and "${PRODUCT}" == "ODH"
             # this case is to handle ODH community, which needs to create the DSCI
             Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
             Wait For DSCInitialization CustomResource To Be Ready
@@ -335,7 +425,7 @@ Verify RHODS Installation
   ${mlflowoperator} =    Is Component Enabled    mlflowoperator    ${DSC_NAME}
   IF    "${mlflowoperator}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/part-of=mlflowoperator
+    ...    label_selector=app.kubernetes.io/name=mlflow-operator
   END
 
   ${modelsasservice} =    Is Nested Component Enabled    kserve    modelsAsService    ${DSC_NAME}
@@ -402,6 +492,65 @@ Install RHODS In Managed Cluster Using CLI
   ${return_code}    ${output}    Run And Return Rc And Output   cd ${EXECDIR}/${OLM_DIR} && ./setup.sh -t addon -u ${UPDATE_CHANNEL} -i ${image_url} -n ${OPERATOR_NAME} -p ${OPERATOR_NAMESPACE} -a ${APPLICATIONS_NAMESPACE} -m ${MONITORING_NAMESPACE}  #robocop:disable
   Log To Console    ${output}
   Should Be Equal As Integers   ${return_code}   0  msg=Error detected while installing RHODS
+
+Install RHOAI In Self Managed Cluster Using Helm
+  [Documentation]   Install ODH/RHOAI using Helm on a self-managed cluster, including its dependencies
+  ...
+  ...   Optional variables that can be set to customize Helm installation:
+  ...   - ${HELM_CUSTOM_VALUES_FILE}: Path to additional Helm values file to override the default chart
+  ...   - @{HELM_SET_VALUES}: List of key=value pairs for Helm --set flags, applied after the custom values file if used
+  ...   - ${GITOPS_REPO_BRANCH}: GitOps repository branch (uses ${GITOPS_DEFAULT_REPO_BRANCH} if not set)
+  ...   - ${GITOPS_REPO_URL}: Custom GitOps repository URL (uses ${GITOPS_DEFAULT_REPO} if not set)
+  [Arguments]     ${enable_monitoring}=${TRUE}
+  ...    ${gitops_branch}=${GITOPS_DEFAULT_REPO_BRANCH}
+  ...    ${gitops_repo}=${GITOPS_DEFAULT_REPO}
+  Log To Console    Installing ${PRODUCT} using Helm method
+  ${operator_type} =    Set Variable If    "${PRODUCT}" == "ODH"    odh    rhoai
+  Log To Console    Operator type for Helm: ${operator_type}
+
+  ${monitoring_flag} =    Set Variable If    not ${enable_monitoring}    -M    ${EMPTY}
+  ${branch_flag} =    Set Variable If    "${gitops_branch}" != "${EMPTY}"    -b ${gitops_branch}    ${EMPTY}
+  ${repo_flag} =    Set Variable If    "${gitops_repo}" != "${EMPTY}"    -r ${gitops_repo}    ${EMPTY}
+  ${values_file_flag} =    Set Variable If    "${HELM_CUSTOM_VALUES_FILE}" != "${EMPTY}"    -f ${HELM_CUSTOM_VALUES_FILE}    ${EMPTY}
+
+  ${set_values_flags} =    Set Variable    ${EMPTY}
+  FOR    ${set_value}    IN    @{HELM_SET_VALUES}
+      ${set_values_flags} =    Set Variable    ${set_values_flags} -s ${set_value}
+  END
+
+  # this ensures that the following namespaces/subscription name will match
+  ${required_helm_operator_flags} =    Catenate
+  ...    -s operator.${operator_type}.applicationsNamespace=${APPLICATIONS_NAMESPACE}
+  ...    -s operator.${operator_type}.monitoringNamespace=${MONITORING_NAMESPACE}
+  ...    -s operator.${operator_type}.olm.namespace=${OPERATOR_NAMESPACE}
+  ...    -s operator.${operator_type}.olm.name=${OPERATOR_NAME}
+
+  # Log configuration
+  IF    not ${enable_monitoring}
+      ${monitoring_dependencies_state} =    Set Variable    Skipped
+  ELSE
+      ${monitoring_dependencies_state} =    Set Variable    Enabled
+  END
+  Log To Console    Monitoring dependencies: ${monitoring_dependencies_state}
+
+  IF    "${gitops_branch}" != "${EMPTY}"
+      Log To Console    Using GitOps repo branch: ${gitops_branch}
+  END
+  IF    "${gitops_repo}" != "${EMPTY}"
+      Log To Console    Using custom GitOps repo: ${gitops_repo}
+  END
+  IF    "${HELM_CUSTOM_VALUES_FILE}" != "${EMPTY}"
+      Log To Console    Using custom values file: ${HELM_CUSTOM_VALUES_FILE}
+  END
+  IF    @{HELM_SET_VALUES}
+      Log To Console    Custom Helm values: @{HELM_SET_VALUES}
+  END
+  Log To Console    Enforcing Helm operator values: applicationsNamespace=${APPLICATIONS_NAMESPACE}, monitoringNamespace=${MONITORING_NAMESPACE}, operatorNamespace=${OPERATOR_NAMESPACE}, operatorSubscriptionName=${OPERATOR_NAME}
+
+  ${return_code} =    Run And Watch Command
+  ...    cd ${EXECDIR}/${OLM_DIR} && ./setup-helm.sh -o ${operator_type} ${monitoring_flag} ${repo_flag} ${branch_flag} ${values_file_flag} ${set_values_flags} ${required_helm_operator_flags}
+  ...    timeout=20 min
+  Should Be Equal As Integers   ${return_code}   0   msg=Error detected while installing ${PRODUCT} with Helm
 
 Wait For Pods Numbers
   [Documentation]   Wait for number of pod during installation
@@ -527,14 +676,30 @@ Apply DataScienceCluster CustomResource
         Should Be Equal As Integers  ${return_code}  0  msg=Error detected while applying DSC CR
         Remove File    ${file_path}dsc_apply.yml
         FOR    ${cmp}    IN    @{COMPONENT_LIST}
+            ${cmp_dsc} =    Convert Component Into Component DSC Name     ${cmp}
             IF    $cmp not in $COMPONENTS
-                    Component Should Not Be Enabled    ${cmp}
+                Component Should Not Be Enabled    ${cmp}
             ELSE IF    '${COMPONENTS.${cmp}}' == 'Managed'
-                    Component Should Be Enabled    ${cmp}
+                ${is_nested}=    Component Is A Nested Component      ${cmp}
+                IF     ${is_nested}
+                    Nested Component Should Be Enabled     ${NESTED_COMPONENT_TO_PARENT_COMPONENT.${cmp}}      ${cmp_dsc}
+                ELSE
+                    Component Should Be Enabled    ${cmp_dsc}
+                END
             ELSE IF    '${COMPONENTS.${cmp}}' == 'Unmanaged'
-                    Component Should Be Enabled    ${cmp}
+                ${is_nested}=    Component Is A Nested Component      ${cmp}
+                IF     ${is_nested}
+                    Nested Component Should Be Enabled     ${NESTED_COMPONENT_TO_PARENT_COMPONENT.${cmp}}      ${cmp_dsc}
+                ELSE
+                    Component Should Be Enabled    ${cmp_dsc}
+                END
             ELSE IF    '${COMPONENTS.${cmp}}' == 'Removed'
-                    Component Should Not Be Enabled    ${cmp}
+                ${is_nested}=    Component Is A Nested Component      ${cmp}
+                IF     ${is_nested}
+                    Nested Component Should Not Be Enabled     ${NESTED_COMPONENT_TO_PARENT_COMPONENT.${cmp}}      ${cmp_dsc}
+                ELSE
+                    Component Should Not Be Enabled    ${cmp_dsc}
+                END
             END
         END
     END
@@ -611,6 +776,23 @@ Wait For DataScienceCluster CustomResource To Be Ready
         Run Keyword And Continue On Failure    FAIL    Timeout- DataScienceCluster CustomResource is not Ready
   END
 
+Convert Component Into Component DSC Name
+    [Arguments]    ${component}
+    ${has_diff_name}=    Run Keyword And Return Status
+    ...    Dictionary Should Contain Key    ${COMPONENT_TO_COMPONENT_NAME_IN_DSC}    ${component}
+    IF    ${has_diff_name}
+        RETURN      ${COMPONENT_TO_COMPONENT_NAME_IN_DSC.${component}}
+    ELSE
+        RETURN      ${component}
+    END
+
+
+Component Is A Nested Component
+    [Arguments]    ${component}
+    ${is_nested}=    Run Keyword And Return Status
+    ...    Dictionary Should Contain Key    ${NESTED_COMPONENT_TO_PARENT_COMPONENT}    ${component}
+    RETURN    ${is_nested}
+
 Component Should Be Enabled
     [Arguments]    ${component}    ${dsc_name}=${DSC_NAME}
     ${status} =   Set Variable   False
@@ -619,11 +801,27 @@ Component Should Be Enabled
         IF    '${status}' == 'true'    BREAK
     END
 
+Nested Component Should Be Enabled
+    [Arguments]    ${parent_component}    ${nested_component}     ${dsc_name}=${DSC_NAME}
+    ${status} =   Set Variable   False
+    WHILE   '${status}' != 'true'    limit=60 seconds
+        ${status} =    Is Nested Component Enabled    ${parent_component}    ${nested_component}    ${dsc_name}
+        IF    '${status}' == 'true'    BREAK
+    END
+
 Component Should Not Be Enabled
     [Arguments]    ${component}    ${dsc_name}=${DSC_NAME}
     ${status} =   Set Variable   True
     WHILE   '${status}' != 'false'    limit=60 seconds
         ${status} =    Is Component Enabled    ${component}    ${dsc_name}
+        IF    '${status}' == 'false'    BREAK
+    END
+
+Nested Component Should Not Be Enabled
+    [Arguments]    ${parent_component}    ${nested_component}     ${dsc_name}=${DSC_NAME}
+    ${status} =   Set Variable   True
+    WHILE   '${status}' != 'false'    limit=60 seconds
+        ${status} =    Is Nested Component Enabled    ${parent_component}    ${nested_component}    ${dsc_name}
         IF    '${status}' == 'false'    BREAK
     END
 
@@ -636,14 +834,12 @@ Is Component Enabled
     ${n_output} =    Evaluate    '${output}' == ''
     IF  ${n_output}
           RETURN    false
-    ELSE
-         IF    ${output} == "Removed"
-               RETURN    false
-         ELSE IF    ${output} == "Managed"
-              RETURN    true
-         ELSE IF    ${output} == "Unmanaged"
-              RETURN    true
-         END
+    ELSE IF    ${output} == "Removed"
+          RETURN    false
+    ELSE IF    ${output} == "Managed"
+          RETURN    true
+    ELSE IF    ${output} == "Unmanaged"
+          RETURN    true
     END
 
 Is Nested Component Enabled
@@ -655,14 +851,12 @@ Is Nested Component Enabled
     ${n_output} =    Evaluate    '${output}' == ''
     IF  ${n_output}
           RETURN    false
-    ELSE
-         IF    ${output} == "Removed"
-               RETURN    false
-         ELSE IF    ${output} == "Managed"
-              RETURN    true
-         ELSE IF    ${output} == "Unmanaged"
-              RETURN    true
-         END
+    ELSE IF    ${output} == "Removed"
+          RETURN    false
+    ELSE IF    ${output} == "Managed"
+          RETURN    true
+    ELSE IF    ${output} == "Unmanaged"
+          RETURN    true
     END
 
 Wait for Catalog To Be Ready

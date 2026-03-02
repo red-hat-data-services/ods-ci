@@ -408,6 +408,19 @@ Wait For Installplan And Approve It
         END
     END
 
+Approve All Pending Installplans
+    [Documentation]    Approves any unapproved installplans in the given namespace.
+    ...                Useful for transitive OLM dependencies (e.g. ServiceMesh) that inherit
+    ...                Manual approval from a parent subscription.
+    [Arguments]    ${namespace}=openshift-operators
+    Log    Approving Install Plans in ${namespace}    console=yes
+    ${rc}    ${output} =    Run And Return Rc And Output
+    ...    oc get installplan -n ${namespace} -o name 2>/dev/null | xargs -r oc patch -n ${namespace} -p '{"spec":{"approved": true}}' --type=merge
+    Log    ${output}    console=yes
+    IF    ${rc} != ${0}
+        Log    Failed to approve installplans in ${namespace}    console=yes    level=WARN
+    END
+
 Wait For Namespace To Be Active
     [Documentation]    Waits for a given namespace to become active
     [Arguments]    ${namespace}    ${timeout}=30s

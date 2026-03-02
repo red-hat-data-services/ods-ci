@@ -10,7 +10,7 @@ Resource         ../../../Resources/CLI/MustGather/MustGather.resource
 *** Test Cases ***
 Verify that the must-gather image provides RHODS logs and info
     [Documentation]   Tests the must-gather image for ODH/RHOAI
-    [Tags]   Smoke
+    [Tags]   Sanity
     ...      ODS-505
     ...      Operator
     ...      MustGather

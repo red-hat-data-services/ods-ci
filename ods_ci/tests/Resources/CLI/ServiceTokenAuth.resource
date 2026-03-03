@@ -6,6 +6,14 @@ Resource            ../Common.robot
 
 
 *** Keywords ***
+Create Test Service Account For Token Auth
+    [Documentation]    Ensures test ServiceAccount exists for token auth E2E tests
+    [Arguments]    ${sa_name}=test-svc-token-auth    ${namespace}=opendatahub
+    ${rc}    ${_}=    Run And Return Rc And Output
+    ...    oc create serviceaccount ${sa_name} -n ${namespace} --dry-run=client -o yaml | oc apply -f -
+    Should Be Equal As Integers    ${rc}    0
+    Log    message=Test ServiceAccount ${sa_name} ready in ${namespace}
+
 Create Service Account Token
     [Documentation]    Creates a service account token via oc CLI
     [Arguments]    ${sa_name}    ${namespace}    ${duration}=1h
@@ -18,7 +26,7 @@ Create Service Account Token
 
 Call Gateway With Token Via Curl
     [Documentation]    Makes curl request to gateway with service account token
-    [Arguments]    ${token}    ${path}=/echo    ${gateway_url}=${EMPTY}
+    [Arguments]    ${token}    ${path}=/    ${gateway_url}=${EMPTY}
     IF    "${gateway_url}" == "${EMPTY}"
         ${gateway_url}=    Get Gateway URL For Curl
     END
@@ -37,8 +45,8 @@ Call Gateway With Token Via Curl
 
 Get Gateway URL For Curl
     [Documentation]    Gets gateway hostname for curl. Uses ODH_DASHBOARD_URL if set (works for all
-    ...                ingress modes), otherwise falls back to Gateway resource or Route.
-    ${url}=    Get Variable Value    ODH_DASHBOARD_URL    ${EMPTY}
+    ...                ingress modes), otherwise Gateway resource.
+    ${url}=    Get Variable Value    \${ODH_DASHBOARD_URL}    ${EMPTY}
     IF    "${url}" != "${EMPTY}"
         ${url}=    Remove String    ${url}    https://    http://
         ${host}=    Fetch From Left    ${url}    /
@@ -46,11 +54,6 @@ Get Gateway URL For Curl
     END
     ${rc}    ${url}=    Run And Return Rc And Output
     ...    oc get gateway data-science-gateway -n openshift-ingress -o jsonpath='{.status.addresses[0].value}'
-    IF    ${rc} == 0 and "${url}" != ""
-        RETURN    ${url}
-    END
-    ${rc}    ${url}=    Run And Return Rc And Output
-    ...    oc get route data-science-gateway -n openshift-ingress -o jsonpath='{.spec.host}'
     Should Be Equal As Integers    ${rc}    0
     Should Not Be Empty    ${url}
     Log    message=Gateway URL: ${url}
@@ -58,7 +61,7 @@ Get Gateway URL For Curl
 
 Call Gateway Without Token
     [Documentation]    Makes curl request to gateway without authentication token
-    [Arguments]    ${path}=/echo
+    [Arguments]    ${path}=/
     ${gateway_url}=    Get Gateway URL For Curl
     ${rc}    ${full_response}=    Run And Return Rc And Output
     ...    curl -k -s -i https://${gateway_url}${path}
@@ -79,13 +82,6 @@ Verify Response Is Auth Challenge
     ${is_challenged}=    Evaluate    ${contains_forbidden} or ${contains_redirect}
     Should Be True    ${is_challenged}    msg=Request without token should be challenged
 
-Verify Response Contains Auth Headers
-    [Documentation]    Verifies that the response contains expected authentication headers
-    [Arguments]    ${response}    ${expected_user}
-    Should Contain    ${response}    x-auth-request-user
-    Should Contain    ${response}    ${expected_user}
-    Log    message=Response contains expected auth headers for ${expected_user}
-
 Verify Response HTTP Code
     [Documentation]    Extracts and verifies HTTP response code from curl output
     [Arguments]    ${response}    ${expected_code}=200
@@ -93,6 +89,25 @@ Verify Response HTTP Code
     Should Not Be Empty    ${http_code}
     Should Be Equal As Strings    ${http_code}[0]    ${expected_code}
     Log    message=HTTP response code: ${http_code}[0]
+
+Get Json Body From Curl Response
+    [Documentation]    Extracts JSON body from curl -i response (body is after headers)
+    [Arguments]    ${response}
+    @{parts}=    Split String    ${response}    \n\n    1
+    ${body_section}=    Set Variable    ${parts}[1]
+    ${body}=    Fetch From Left    ${body_section}    ${\n}HTTP_CODE:
+    ${body}=    Strip String    ${body}
+    RETURN    ${body}
+
+Verify API Status Returns User Name
+    [Documentation]    Calls /api/status with token, verifies response contains expected userName
+    [Arguments]    ${token}    ${expected_user}
+    ${response}=    Call Gateway With Token Via Curl    ${token}    path=/api/status
+    Verify Response HTTP Code    ${response}    expected_code=200
+    ${body}=    Get Json Body From Curl Response    ${response}
+    ${user_name}=    Evaluate    json.loads(r"""${body}""")["kube"]["userName"]    json
+    Should Be Equal As Strings    ${user_name}    ${expected_user}
+    Log    message=API status returned expected userName: ${user_name}
 
 Get Deployment Args
     [Documentation]    Gets container args from a deployment

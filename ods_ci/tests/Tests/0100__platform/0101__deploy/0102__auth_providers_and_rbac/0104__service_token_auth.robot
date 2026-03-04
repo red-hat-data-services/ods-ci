@@ -55,6 +55,37 @@ Verify Service Account Can Authenticate Via Token
     Verify Response HTTP Code    ${response}    expected_code=200
     Log    message=Service account successfully authenticated via bearer token to dashboard
 
+Verify User Can Authenticate Via Opaque Token
+    [Documentation]    E2E: user authenticates through gateway to dashboard using oc token
+    [Tags]    Operator    Tier1    E2E    RHOAIENG-47496
+    ${cluster_auth_value}=    Get Variable Value    ${CLUSTER_AUTH}    ${EMPTY}
+    IF  "${cluster_auth_value}" == "oidc"
+        Skip  "Not supported with BYOIDC"
+    END
+    ${rc}    ${token}=    Run And Return Rc And Output
+    ...    oc whoami --show-token
+    Should Be Equal As Integers    ${rc}    0
+    Should Not Be Empty    ${token}
+    ${response}=    Call Gateway With Token Via Curl    ${token}    path=${DASHBOARD_PATH}
+    Verify Response HTTP Code    ${response}    expected_code=200
+    Log    message=User successfully authenticated via opaque token to dashboard
+
+Verify User Can Authenticate Via OIDC JWT
+    [Documentation]    E2E: user authenticates through gateway to dashboard using JWT token
+    [Tags]    Operator    Tier1    E2E    RHOAIENG-47496
+    ${cluster_auth_value}=    Get Variable Value    ${CLUSTER_AUTH}    ${EMPTY}
+    IF  "${cluster_auth_value}" != "oidc"
+        Skip  "Only applicable with BYOIDC"
+    END
+    ${token}=    Get Oidc Token
+    ...      ${CLUSTER_OIDC_ISSUER}
+    ...      ${TEST_USER.USERNAME}
+    ...      ${TEST_USER.PASSWORD}
+    Should Not Be Empty    ${token}
+    ${response}=    Call Gateway With Token Via Curl    ${token}    path=${DASHBOARD_PATH}
+    Verify Response HTTP Code    ${response}    expected_code=200
+    Log    message=User successfully authenticated via opaque token to dashboard
+
 # /api/status is served by the ODH Dashboard backend (opendatahub-io/odh-dashboard).
 # When authenticated via Bearer token, it returns kube.userName as the service account identity.
 # Example response for service account token auth:
@@ -69,6 +100,37 @@ Verify API Status Returns Service Account Identity
     ${expected_user}=    Set Variable    system:serviceaccount:${APPLICATIONS_NAMESPACE}:${TEST_SA_NAME}
     Verify API Status Returns User Name    ${token}    ${expected_user}
     Log    message=API status correctly returned service account identity
+
+Verify API Status Returns User Identity With Opaque Token
+    [Documentation]    E2E: /api/status returns userName when authenticated via Bearer token
+    [Tags]    Operator    Tier1    E2E    RHOAIENG-47496
+    ${cluster_auth_value}=    Get Variable Value    ${CLUSTER_AUTH}    ${EMPTY}
+    IF  "${cluster_auth_value}" == "oidc"
+        Skip  "Not supported with BYOIDC"
+    END
+    ${rc}    ${token}=    Run And Return Rc And Output
+    ...    oc whoami --show-token
+    Should Be Equal As Integers    ${rc}    0
+    Should Not Be Empty    ${token}
+    ${_}    ${expected_user}=    Run And Return Rc And Output
+    ...    oc whoami
+    Verify API Status Returns User Name    ${token}    ${expected_user}
+    Log    message=API status correctly returned user identity
+
+Verify API Status Returns User Identity With OIDC JWT
+    [Documentation]    E2E: /api/status returns userName when authenticated via Bearer token
+    [Tags]    Operator    Tier1    E2E    RHOAIENG-47496
+    ${cluster_auth_value}=    Get Variable Value    ${CLUSTER_AUTH}    ${EMPTY}
+    IF  "${cluster_auth_value}" != "oidc"
+        Skip  "Only applicable with BYOIDC"
+    END
+    ${token}=    Get Oidc Token
+    ...      ${CLUSTER_OIDC_ISSUER}
+    ...      ${TEST_USER.USERNAME}
+    ...      ${TEST_USER.PASSWORD}
+    Should Not Be Empty    ${token}
+    Verify API Status Returns User Name    ${token}    ${TEST_USER.USERNAME}
+    Log    message=API status correctly returned user identity
 
 Verify Invalid Token Is Rejected
     [Documentation]    Verifies that an invalid token is rejected by the gateway

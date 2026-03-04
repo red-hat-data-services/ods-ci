@@ -96,6 +96,8 @@ Run Codeflare-SDK Test
     ...    env:TOLERATION_KEY=node-role.kubernetes.io/master
     ...    shell=true
     ...    stderr=STDOUT
+    ...    timeout=20m
+    ...    on_timeout=terminate
     Log To Console    ${result.stdout}
     IF    ${result.rc} != 0
         FAIL    Running test ${TEST_NAME} failed

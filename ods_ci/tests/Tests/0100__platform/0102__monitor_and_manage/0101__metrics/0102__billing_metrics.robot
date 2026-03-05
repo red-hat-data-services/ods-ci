@@ -26,7 +26,7 @@ Test Metric "Rhods_Total_Users" On Cluster Monitoring Prometheus
     [Documentation]     Verifies the openshift metrics and rhods prometheus showing same rhods_total_users values
     [Tags]    Sanity
     ...       ODS-634
-    ...       Tier1
+    ...       Tier2
     ...       Monitoring
     Skip If RHODS Is Self-Managed   # TODO Observability: We don't propagate data yet from new stack
     ${value} =    Run OpenShift Metrics Query    query=rhods_total_users   username=${OCP_ADMIN_USER.USERNAME}   password=${OCP_ADMIN_USER.PASSWORD}
@@ -40,7 +40,7 @@ Test Metric "Rhods_Aggregate_Availability" On Cluster Monitoring Prometheus
     ...   in RHODS Prometheus. Verify their value matches
     [Tags]    Smoke
     ...       ODS-637
-    ...       Tier1
+    ...       Tier2
     ...       Monitoring
     Skip If RHODS Is Self-Managed   # TODO Observability: We don't propagate data yet from new stack
 

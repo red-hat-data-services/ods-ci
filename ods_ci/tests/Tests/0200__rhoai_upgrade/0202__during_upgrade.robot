@@ -14,7 +14,7 @@ Library             JupyterLibrary
 Test Tags           DuringUpgrade
 
 *** Variables ***
-${UPGRADE_TO_IIB}=    ${EMPTY}
+${UPGRADE_ODS_BUILD_URL}=    ${EMPTY}
 
 
 *** Test Cases ***
@@ -24,7 +24,7 @@ Upgrade RHODS
     ${initial_version} =    Get RHODS Version
     ${initial_creation_date} =      Get Operator Pod Creation Date
     Set Suite Variable    ${UPDATE_CHANNEL}    ${UPGRADE_TO_UPDATE_CHANNEL}
-    Install RHODS   ${CLUSTER_TYPE}    ${UPGRADE_TO_IIB}    Manual    ${UPGRADE_TO_VERSION}    True
+    Install RHODS   ${CLUSTER_TYPE}    ${UPGRADE_ODS_BUILD_URL}    Manual    ${UPGRADE_TO_VERSION}    True
     RHODS Version Should Be Greater Than        ${initial_version}
     Operator Pod Creation Date Should Be Updated        ${initial_creation_date}
     OpenShiftLibrary.Wait For Pods Status       namespace=${OPERATOR_NAMESPACE}     timeout=300

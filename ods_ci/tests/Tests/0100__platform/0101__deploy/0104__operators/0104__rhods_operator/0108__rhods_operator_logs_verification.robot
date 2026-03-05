@@ -23,7 +23,7 @@ ${regex_pattern}       level":"([Ee]rror).*|([Ff]ailed) to list .*
 
 *** Test Cases ***
 Verify RHODS Operator Logs After Restart
-   [Tags]  Sanity
+   [Tags]  Tier1
    ...     ODS-1007
    ...     Operator
    Restart RHODS Operator Pod

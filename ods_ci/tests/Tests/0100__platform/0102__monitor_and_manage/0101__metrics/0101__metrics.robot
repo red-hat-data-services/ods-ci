@@ -44,8 +44,7 @@ Test Existence of Prometheus Recording Rules
 
 Test Metric "Notebook CPU Usage" On ODS Prometheus
     [Documentation]    Verifing the notebook cpu usage showing on RHODS promethues
-    [Tags]    Sanity
-    ...       Tier1
+    [Tags]    Tier2
     ...       ODS-178
     ...       Monitoring
     Skip If RHODS Is Self-Managed And New Observability Stack Is Disabled
@@ -57,8 +56,7 @@ Test Metric "Notebook CPU Usage" On ODS Prometheus
 Test Metric "Rhods_Total_Users" On ODS Prometheus
     [Documentation]    Verifies that metric value for rhods_total_users
     ...    matches the value of its corresponding expression
-    [Tags]    Sanity
-    ...       Tier1
+    [Tags]    Tier2
     ...       ODS-628
     ...       Monitoring
     Skip If RHODS Is Self-Managed And New Observability Stack Is Disabled
@@ -83,8 +81,7 @@ Test Metric "Rhods_Total_Users" On ODS Prometheus
 
 Test Metric Existence For "Rhods_Aggregate_Availability" On ODS Prometheus
     [Documentation]    Verifies the rhods aggregate availability on rhods prometheus
-    [Tags]    Sanity
-    ...       Tier1
+    [Tags]    Tier2
     ...       ODS-636
     ...       Monitoring
     Skip If RHODS Is Self-Managed And New Observability Stack Is Disabled
@@ -96,8 +93,7 @@ Test Metric Existence For "Rhods_Aggregate_Availability" On ODS Prometheus
 
 Test Targets Are Available And Up In RHOAI Prometheus
     [Documentation]   Verifies the expected targets in Prometheus are available and up running
-    [Tags]    Sanity
-    ...       Tier1
+    [Tags]    Tier2
     ...       ODS-179
     ...       RHOAIENG-13066
     ...       Monitoring
@@ -122,8 +118,7 @@ Test Targets Are Available And Up In RHOAI Prometheus
 
 Test RHOAI Operator Metrics Are Defined
     [Documentation]   Verifies the RHOAI Operator Metrics are defined and show meaningful values
-    [Tags]    Sanity
-    ...       Tier1
+    [Tags]    Tier2
     ...       ODS-192
     ...       RHOAIENG-13081
     ...       Monitoring
@@ -166,8 +161,7 @@ Test RHOAI Operator Metrics Are Defined
 Test RHOAI Dashboard Metrics By Code Are Defined
     [Documentation]   Verifies the RHOAI Dashboard Metrics By Code Are Defined and show accurate values
     ...               (2xx and 5xx codes)
-    [Tags]    Sanity
-    ...       Tier1
+    [Tags]    Tier2
     ...       ODS-195
     ...       RHOAIENG-13261
     ...       Monitoring
@@ -200,8 +194,7 @@ Test RHOAI Dashboard Metrics By Code Are Defined
 
 Test RHOAI Dashboard Metrics Are Defined
     [Documentation]   Verifies the RHOAI Dashboard Metrics Are Defined and show meaningful values
-    [Tags]    Sanity
-    ...       Tier1
+    [Tags]    Tier2
     ...       ODS-194
     ...       RHOAIENG-13260
     ...       Monitoring
@@ -226,8 +219,7 @@ Test RHOAI Dashboard Metrics Are Defined
 
 Test RHOAI DSP Operator Recording Rules On Prometheus
     [Documentation]   Verifies the RHOAI DSP Operator is recording some rules on Prometheus
-    [Tags]    Sanity
-    ...       Tier1
+    [Tags]    Tier2
     ...       ODS-2168
     ...       RHOAIENG-13263
     ...       Monitoring

@@ -80,7 +80,6 @@ Validate Kueue Removed To Unmanaged State Transition
     ...    check that kueue deployment is created and pod is in Ready state
     [Tags]
     ...    Operator
-    ...    Tier1
     ...    kueue-unmanaged-from-removed
     ...    Integration
     ...    Smoke
@@ -106,7 +105,6 @@ Validate Kueue Unmanaged To Removed State Transition
     ...    Tier1
     ...    kueue-removed-from-unmanaged
     ...    Integration
-    ...    Sanity
 
     Set DSC Component Unmanaged State And Wait For Completion
     ...    kueue
@@ -127,7 +125,6 @@ Validate Ray Managed State
     ...    check that Ray deployment is created and pod is in Ready state
     [Tags]
     ...    Operator
-    ...    Tier1
     ...    RHOAIENG-5435
     ...    ray-managed
     ...    Integration
@@ -149,7 +146,6 @@ Validate Ray Removed State
     ...    RHOAIENG-5435
     ...    ray-removed
     ...    Integration
-    ...    Sanity
 
     Set DSC Component Removed State And Wait For Completion
     ...    ray
@@ -163,7 +159,6 @@ Validate Training Operator Managed State
     ...    check that Training deployment is created and pod is in Ready state
     [Tags]
     ...    Operator
-    ...    Tier1
     ...    RHOAIENG-6627
     ...    training-managed
     ...    Integration
@@ -185,7 +180,6 @@ Validate Training Operator Removed State
     ...    RHOAIENG-6627
     ...    training-removed
     ...    Integration
-    ...    Sanity
 
     Set DSC Component Removed State And Wait For Completion
     ...    trainingoperator
@@ -199,7 +193,6 @@ Validate Trainer Managed State
     ...    check that Training deployment is created and pod is in Ready state
     [Tags]
     ...    Operator
-    ...    Tier1
     ...    trainer-managed
     ...    Integration
     ...    ExcludeOnODH
@@ -221,7 +214,6 @@ Validate Trainer Removed State
     ...    trainer-removed
     ...    Integration
     ...    ExcludeOnODH
-    ...    Sanity
 
     Set DSC Component Removed State And Wait For Completion
     ...    trainer
@@ -235,7 +227,6 @@ Validate Dashboard Managed State
     ...    check that Dashboard deployment is created and all pods are in Ready state
     [Tags]
     ...    Operator
-    ...    Tier1
     ...    RHOAIENG-7298
     ...    dashboard-managed
     ...    Integration
@@ -257,7 +248,6 @@ Validate Dashboard Removed State
     ...    RHOAIENG-7298
     ...    dashboard-removed
     ...    Integration
-    ...    Sanity
 
     Set DSC Component Removed State And Wait For Completion
     ...    dashboard
@@ -271,7 +261,6 @@ Validate Aipipelines Managed State
     ...    check that Datasciencepipelines deployment is created and pod is in Ready state
     [Tags]
     ...    Operator
-    ...    Tier1
     ...    RHOAIENG-7298
     ...    operator-aipipelines-managed
     ...    Integration
@@ -293,7 +282,6 @@ Validate Aipipelines Removed State
     ...    RHOAIENG-7298
     ...    operator-aipipelines-removed
     ...    Integration
-    ...    Sanity
 
     Set DSC Component Removed State And Wait For Completion
     ...    aipipelines
@@ -307,7 +295,6 @@ Validate TrustyAi Managed State
     ...    check that TrustyAi deployment is created and pod is in Ready state
     [Tags]
     ...    Operator
-    ...    Tier1
     ...    RHOAIENG-14018
     ...    trustyai-managed
     ...    Integration
@@ -331,7 +318,6 @@ Validate TrustyAi Removed State
     ...    RHOAIENG-14018
     ...    trustyai-removed
     ...    Integration
-    ...    Sanity
 
     Set DSC Component Removed State And Wait For Completion
     ...    trustyai
@@ -345,7 +331,6 @@ Validate ModelRegistry Managed State
     ...    check that ModelRegistry deployment is created and pod is in Ready state
     [Tags]
     ...    Operator
-    ...    Tier1
     ...    RHOAIENG-10404
     ...    modelregistry-managed
     ...    Integration
@@ -369,7 +354,6 @@ Validate ModelRegistry Removed State
     ...    RHOAIENG-10404
     ...    modelregistry-removed
     ...    Integration
-    ...    Sanity
 
     # Properly validate Removed state by first setting to Managed, which will ensure that namspace
     # was created as needed for later validating that namespace persisted when component is Removed
@@ -390,7 +374,6 @@ Validate KServe Controller Manager Managed State
     ...    check that KServe Controller Manager deployment is created and pod is in Ready state
     [Tags]
     ...    Operator
-    ...    Tier1
     ...    RHOAIENG-7217
     ...    kserve-controller-manager-managed
     ...    Integration
@@ -412,7 +395,6 @@ Validate KServe Controller Manager Removed State
     ...    RHOAIENG-7217
     ...    kserve-controller-manager-removed
     ...    Integration
-    ...    Sanity
 
     Set DSC Component Removed State And Wait For Completion
     ...    kserve
@@ -436,7 +418,6 @@ Validate Workbenches Managed State
     ...    check that Workbenches deployment is created and pods are in Ready state
     [Tags]
     ...    Operator
-    ...    Tier1
     ...    workbenches-managed
     ...    Integration
     ...    Smoke
@@ -460,7 +441,6 @@ Validate Workbenches Removed State
     ...    Tier1
     ...    workbenches-removed
     ...    Integration
-    ...    Sanity
 
     Set DSC Component Removed State And Wait For Completion
     ...    workbenches
@@ -478,10 +458,8 @@ Validate Feastoperator Managed State
     ...    check that FeastOperator deployment is created and pod is in Ready state
     [Tags]
     ...    Operator
-    ...    Tier1
     ...    feastoperator-managed
     ...    Integration
-    ...    ExcludeOnODH
     ...    Smoke
 
     Set DSC Component Managed State And Wait For Completion
@@ -501,8 +479,6 @@ Validate Feastoperator Removed State
     ...    Tier1
     ...    feastoperator-removed
     ...    Integration
-    ...    ExcludeOnODH
-    ...    Sanity
 
     Set DSC Component Removed State And Wait For Completion
     ...    feastoperator
@@ -516,10 +492,8 @@ Validate Llamastackoperator Managed State
     ...    check that LlamastackOperator deployment is created and pod is in Ready state
     [Tags]
     ...    Operator
-    ...    Tier1
     ...    llamastackoperator-managed
     ...    Integration
-    ...    ExcludeOnODH
     ...    Smoke
 
     Set DSC Component Managed State And Wait For Completion
@@ -539,8 +513,6 @@ Validate Llamastackoperator Removed State
     ...    Tier1
     ...    llamastackoperator-removed
     ...    Integration
-    ...    ExcludeOnODH
-    ...    Sanity
 
     Set DSC Component Removed State And Wait For Completion
     ...    llamastackoperator
@@ -554,10 +526,8 @@ Validate Mlflowoperator Managed State
     ...    check that MlflowOperator deployment is created and pod is in Ready state
     [Tags]
     ...    Operator
-    ...    Tier1
     ...    mlflowoperator-managed
     ...    Integration
-    ...    ExcludeOnODH
     ...    Smoke
 
     Set DSC Component Managed State And Wait For Completion
@@ -577,8 +547,6 @@ Validate Mlflowoperator Removed State
     ...    Tier1
     ...    mlflowoperator-removed
     ...    Integration
-    ...    ExcludeOnODH
-    ...    Sanity
 
     Set DSC Component Removed State And Wait For Completion
     ...    mlflowoperator
@@ -592,10 +560,8 @@ Validate Modelsasservice Managed State
     ...    check that ModelsAsService deployment is created and pod is in Ready state
     [Tags]
     ...    Operator
-    ...    Tier1
     ...    modelsasservice-managed
     ...    Integration
-    ...    ExcludeOnODH
     ...    Smoke
 
     Set DSC Nested Component Managed State And Wait For Completion
@@ -620,8 +586,6 @@ Validate Modelsasservice Removed State
     ...    Tier1
     ...    modelsasservice-removed
     ...    Integration
-    ...    ExcludeOnODH
-    ...    Sanity
 
     Set DSC Nested Component Removed State And Wait For Completion
     ...    kserve
@@ -637,7 +601,7 @@ Validate Modelsasservice Removed State
 
 Validate Support For Configuration Of Controller Resources
     [Documentation]    Validate support for configuration of controller resources in component deployments
-    [Tags]    Operator    Sanity    ODS-2664      Integration  RHOAIENG-12811
+    [Tags]    Operator    Tier1    ODS-2664      Integration     RHOAIENG-12811
     FOR   ${controller}    IN    @{CONTROLLERS_LIST}
         ${new_cpu_limit}=  Set Variable  1001m
         ${new_memory_limit}=  Set Variable  4001Mi

@@ -106,7 +106,8 @@ Fetch Cluster Type By Domain
 Assign Vars According To Product
     [Documentation]    Assign vars related to product
     # Product specific vars
-    IF    "${PRODUCT}" == "RHODS"
+    # If UPDATE_CHANNEL is "odh-stable", use RHODS variables regardless of PRODUCT
+    IF    "${PRODUCT}" == "RHODS" or "${UPDATE_CHANNEL}" == "odh-stable"
         Set Suite Variable    ${OPERATOR_SUBSCRIPTION_LABEL}     operators.coreos.com/rhods-operator.${OPERATOR_NAMESPACE}
         Set Suite Variable    ${OPERATOR_APPNAME}     "Red Hat OpenShift AI"
         Set Suite Variable    ${OPERATOR_YAML_LABEL}  rhods-operator

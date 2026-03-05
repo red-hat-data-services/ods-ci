@@ -503,7 +503,7 @@ Upgrade RHODS In Self Managed Cluster Using CLI
 
   Set Subscription Install Plan Approval    ${OPERATOR_NAMESPACE}    Manual    ${OPERATOR_SUBSCRIPTION_NAME}
   Set Subscription Update Channel    ${OPERATOR_NAMESPACE}    ${UPDATE_CHANNEL}    ${OPERATOR_SUBSCRIPTION_NAME}
-  Set Catalog Source Image    ${image_url}
+  Set Catalog Source Image    ${image_url}    cs_name=${CATALOG_SOURCE}
   Wait For Installplan And Approve It    ${OPERATOR_NAMESPACE}    ${OPERATOR_NAME}    ${OPERATOR_SUBSCRIPTION_NAME}    ${rhoai_version}    #robocop:disable
 
 Install RHODS In Managed Cluster Using CLI

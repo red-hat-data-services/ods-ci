@@ -92,6 +92,7 @@ Required Global Variables Should Exist
     Variable Should Exist    ${MONITORING_NAMESPACE}
     Variable Should Exist    ${OPERATOR_NAMESPACE}
     Variable Should Exist    ${NOTEBOOKS_NAMESPACE}
+    Variable Should Exist    ${MODEL_REGISTRY_NAMESPACE}
 
 Fetch Cluster Type By Domain
     [Documentation]    This Keyword outputs the kind of cluster depending on the console URL domain
@@ -126,7 +127,6 @@ Assign Vars According To Product
                 Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     rhods-operator
             END
         END
-        Set Suite Variable  ${MODEL_REGISTRY_NAMESPACE}    rhoai-model-registries
         Set Suite Variable    ${IMAGE_PULL_PATH}        registry.redhat.io
         Set Suite Variable    ${KSERVE_IMAGE_PULL_PATH}        registry.redhat.io
         Set Suite Variable    ${KUEUE_IMAGE_PULL_PATH}        registry.redhat.io
@@ -160,7 +160,6 @@ Assign Vars According To Product
         Set Suite Variable    ${DASHBOARD_LABEL_SELECTOR}     app.kubernetes.io/part-of=dashboard
         Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     rhoai-operator-dev
         Set Suite Variable    ${ADMIN_GROUPS}       odh-admins
-        Set Suite Variable    ${MODEL_REGISTRY_NAMESPACE}    odh-model-registries
 
     END
 

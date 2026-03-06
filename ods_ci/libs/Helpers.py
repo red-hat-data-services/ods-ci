@@ -341,3 +341,31 @@ class Helpers:
                     continue
                 out.append(line.split(" "))
         return out
+
+    @keyword
+    def get_oidc_token(self, issuer, username, password):
+        url = f"{issuer}/protocol/openid-connect/token"
+        headers = {"Content-Type": "application/x-www-form-urlencoded", "User-Agent": "python-requests"}
+
+        data = {
+            "username": username,
+            "password": password,
+            "grant_type": "password",
+            "client_id": "oc-cli",
+            "scope": "openid",
+        }
+
+        response = requests.post(
+            url=url,
+            headers=headers,
+            data=data,
+            allow_redirects=True,
+            timeout=30,
+            verify=True,
+        )
+        response.raise_for_status()
+        json_response = response.json()
+
+        if "id_token" not in json_response:
+            raise AssertionError(f"No id_token in response: {json_response}")
+        return json_response["id_token"]

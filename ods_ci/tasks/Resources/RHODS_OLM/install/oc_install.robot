@@ -105,7 +105,7 @@ Install RHODS
   # From RHOAI 3.0 onwards, managed service is no longer supported.
   # Force self-managed deployment when INSTALL_TYPE is "Cli" or "OperatorHub".
   IF    "${INSTALL_TYPE}" in ["Cli", "OperatorHub"] and "${cluster_type}" == "managed"
-      Log    Forcing self-managed deployment: managed service is no longer supported from RHOAI 3.0 onwards    console=yes
+      Log    Forcing self-managed deployment: managed service is no longer supported from RHOAI 3.0 onwards    console=yes    #robocop:disable
       ${cluster_type} =    Set Variable    selfmanaged
       Set Suite Variable    ${cluster_type}    selfmanaged
   END

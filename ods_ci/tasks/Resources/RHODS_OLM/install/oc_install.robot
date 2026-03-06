@@ -102,6 +102,13 @@ Install RHODS
   ...    ${rhoai_version}=${EMPTY}    ${is_upgrade}=False
   Log    Start installing RHOAI with:\n\- cluster type: ${cluster_type}\n\- image_url: ${image_url}\n\- update_channel: ${UPDATE_CHANNEL}    console=yes    #robocop:disable
   Log    \- rhoai_version: ${rhoai_version}\n\- is_upgrade: ${is_upgrade}\n\- install_plan_approval: ${install_plan_approval}\n\- CATALOG_SOURCE: ${CATALOG_SOURCE}   console=yes    #robocop:disable
+  # From RHOAI 3.0 onwards, managed service is no longer supported.
+  # Force self-managed deployment when INSTALL_TYPE is "Cli" or "OperatorHub".
+  IF    "${INSTALL_TYPE}" in ["Cli", "OperatorHub"] and "${cluster_type}" == "managed"
+      Log    Forcing self-managed deployment: managed service is no longer supported from RHOAI 3.0 onwards    console=yes    #robocop:disable
+      ${cluster_type} =    Set Variable    selfmanaged
+      Set Suite Variable    ${cluster_type}    selfmanaged
+  END
   Assign Vars According To Product
   ${enable_new_observability_stack} =    Is New Observability Stack Enabled
   IF  "${INSTALL_TYPE}" == "Helm"

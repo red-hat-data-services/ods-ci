@@ -133,15 +133,22 @@ Assign Vars According To Product
         ${CSV_NAME} =   Catenate    SEPARATOR=   ${OPERATOR_NAME}.     ${RHODS_VERSION}
         Set Suite Variable      ${CSV_NAME}
     ELSE IF    "${PRODUCT}" == "ODH"
-        # ODH-nightlies
+        # ODH-nightlies (rhods-operator same as RHODS deployment/pod names)
         IF      "${OPERATOR_NAME}" == "rhods-operator"
             Set Suite Variable    ${OPERATOR_SUBSCRIPTION_LABEL}     operators.coreos.com/rhods-operator.${OPERATOR_NAMESPACE}
             Set Suite Variable    ${IMAGE_PULL_PATH}        registry.redhat.io
             Set Suite Variable    ${KSERVE_IMAGE_PULL_PATH}        quay.io
             Set Suite Variable    ${KUEUE_IMAGE_PULL_PATH}        registry.redhat.io
-            ${CSV_NAME} =   Catenate    SEPARATOR=   opendatahub-operator.  ${RHODS_VERSION}
+            ${CSV_NAME} =   Catenate    SEPARATOR=   rhods-operator.  ${RHODS_VERSION}
             Set Suite Variable      ${CSV_NAME}
-            # ODH COMMUNITY
+            Set Suite Variable    ${OPERATOR_DEPLOYMENT_NAME}    rhods-operator
+            Set Suite Variable    ${OPERATOR_POD_CONTAINER_NAME}  rhods-operator
+            Set Suite Variable    ${OPERATOR_LABEL_SELECTOR}    name=rhods-operator
+            Set Suite Variable    ${DASHBOARD_DEPLOYMENT_NAME}    rhods-dashboard
+            Set Suite Variable    ${DASHBOARD_LABEL_SELECTOR}     app.kubernetes.io/part-of=rhods-dashboard
+            Set Suite Variable    ${OPERATOR_YAML_LABEL}  rhods-operator
+            Set Suite Variable    ${MODEL_REGISTRY_NAMESPACE}    rhoai-model-registries
+        # ODH COMMUNITY (opendatahub-operator)
         ELSE IF     "${OPERATOR_NAME}" == "opendatahub-operator"
             Set Suite Variable    ${OPERATOR_SUBSCRIPTION_LABEL}     operators.coreos.com/opendatahub-operator.${OPERATOR_NAMESPACE}
             Set Suite Variable    ${IMAGE_PULL_PATH}        quay.io
@@ -149,18 +156,17 @@ Assign Vars According To Product
             Set Suite Variable    ${KUEUE_IMAGE_PULL_PATH}        registry.k8s.io
             ${CSV_NAME} =   Catenate    SEPARATOR=   ${OPERATOR_NAME}.v   ${RHODS_VERSION}
             Set Suite Variable      ${CSV_NAME}
-
+            Set Suite Variable    ${OPERATOR_DEPLOYMENT_NAME}    opendatahub-operator-controller-manager
+            Set Suite Variable    ${OPERATOR_POD_CONTAINER_NAME}  manager
+            Set Suite Variable    ${OPERATOR_LABEL_SELECTOR}    control-plane=controller-manager
+            Set Suite Variable    ${DASHBOARD_DEPLOYMENT_NAME}    odh-dashboard
+            Set Suite Variable    ${DASHBOARD_LABEL_SELECTOR}     app.kubernetes.io/part-of=dashboard
+            Set Suite Variable    ${OPERATOR_YAML_LABEL}  opendatahub-operator
+            Set Suite Variable    ${MODEL_REGISTRY_NAMESPACE}    odh-model-registries
         END
         Set Suite Variable    ${OPERATOR_APPNAME}  "Open Data Hub Operator"
-        Set Suite Variable    ${OPERATOR_YAML_LABEL}  opendatahub-operator
-        Set Suite Variable    ${OPERATOR_DEPLOYMENT_NAME}    opendatahub-operator-controller-manager
-        Set Suite Variable    ${OPERATOR_POD_CONTAINER_NAME}  manager
-        Set Suite Variable    ${OPERATOR_LABEL_SELECTOR}    control-plane=controller-manager
-        Set Suite Variable    ${DASHBOARD_DEPLOYMENT_NAME}    odh-dashboard
-        Set Suite Variable    ${DASHBOARD_LABEL_SELECTOR}     app.kubernetes.io/part-of=dashboard
         Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     rhoai-operator-dev
         Set Suite Variable    ${ADMIN_GROUPS}       odh-admins
-        Set Suite Variable    ${MODEL_REGISTRY_NAMESPACE}    odh-model-registries
 
     END
 
@@ -182,7 +188,8 @@ Gather Release Attributes From DSC And DSCI
 
 Set Expected Value For Release Name
     [Documentation]    Sets the expected value for release.name attribute from the DSC and DSCI.
-    ...                ODH: Open Data Hub
+    ...                ODH community: Open Data Hub
+    ...                ODH nightly (rhods-operator): OpenShift AI Self-Managed
     ...                RHOAI managed: OpenShift AI Cloud Service
     ...                RHOAI selfmanaged: OpenShift AI Self-Managed
 
@@ -193,7 +200,12 @@ Set Expected Value For Release Name
              ${expected_release_name}=    Set Variable     ${RHOAI_MANAGED_RELEASE_NAME}
         END
     ELSE IF    "${PRODUCT}" == "ODH"
-        ${expected_release_name}=    Set Variable     ${ODH_RELEASE_NAME}
+        # ODH nightly uses rhods-operator which reports OpenShift AI Self-Managed
+        IF    "${OPERATOR_NAME}" == "rhods-operator"
+            ${expected_release_name}=    Set Variable     ${RHOAI_SELFMANAGED_RELEASE_NAME}
+        ELSE
+            ${expected_release_name}=    Set Variable     ${ODH_RELEASE_NAME}
+        END
     END
 
     Set Suite Variable    ${expected_release_name}

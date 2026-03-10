@@ -105,6 +105,7 @@ Install RHODS
   Log    \- rhoai_version: ${rhoai_version}\n\- is_upgrade: ${is_upgrade}\n\- install_plan_approval: ${install_plan_approval}\n\- CATALOG_SOURCE: ${CATALOG_SOURCE}   console=yes    #robocop:disable
   # Save original cluster type for future purpose
   ${ORIGINAL_CLUSTER_TYPE} =    Set Variable    ${cluster_type}
+  Log    Saved original cluster type: "${ORIGINAL_CLUSTER_TYPE}"  console=yes
   # From RHOAI 3.0 onwards, managed service is no longer supported.
   # Force self-managed deployment when INSTALL_TYPE is "Cli" or "OperatorHub".
   IF    "${INSTALL_TYPE}" in ["Cli", "OperatorHub"] and "${cluster_type}" == "managed"

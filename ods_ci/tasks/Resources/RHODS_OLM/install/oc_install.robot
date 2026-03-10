@@ -95,6 +95,7 @@ ${GITOPS_DEFAULT_REPO}=    ${EMPTY}
 ${HELM_CUSTOM_VALUES_FILE}=    ${EMPTY}
 @{HELM_SET_VALUES}=    @{EMPTY}
 ${COMPONENT_NAMES}=    ${EMPTY}
+${ORIGINAL_CLUSTER_TYPE}=    ${EMPTY}
 
 *** Keywords ***
 Install RHODS
@@ -102,6 +103,8 @@ Install RHODS
   ...    ${rhoai_version}=${EMPTY}    ${is_upgrade}=False
   Log    Start installing RHOAI with:\n\- cluster type: ${cluster_type}\n\- image_url: ${image_url}\n\- update_channel: ${UPDATE_CHANNEL}    console=yes    #robocop:disable
   Log    \- rhoai_version: ${rhoai_version}\n\- is_upgrade: ${is_upgrade}\n\- install_plan_approval: ${install_plan_approval}\n\- CATALOG_SOURCE: ${CATALOG_SOURCE}   console=yes    #robocop:disable
+  # Save original cluster type for future purpose
+  ${ORIGINAL_CLUSTER_TYPE} =    Set Variable    ${cluster_type}
   # From RHOAI 3.0 onwards, managed service is no longer supported.
   # Force self-managed deployment when INSTALL_TYPE is "Cli" or "OperatorHub".
   IF    "${INSTALL_TYPE}" in ["Cli", "OperatorHub"] and "${cluster_type}" == "managed"
@@ -353,6 +356,10 @@ Verify RHODS Installation
 
   IF  "${CLUSTER_AUTH}" == "oidc"
       Patch GatewayConfig With OIDC Info
+  END
+
+  IF  "${ORIGINAL_CLUSTER_TYPE}" == "managed"
+      Patch GatewayConfig Disable Ingress
   END
 
   ${workbenches} =    Is Component Enabled    workbenches    ${DSC_NAME}
@@ -651,6 +658,14 @@ Patch GatewayConfig With OIDC Info
     Run    sed -i'' -e 's|<issuerURL>|${CLUSTER_OIDC_ISSUER}|' ${gw_config_file}
     ${rc}   ${output}=    Run And Return Rc And Output
     ...         oc patch gatewayconfig/default-gateway --patch-file="${gw_config_file}" --type merge    #robocop:disable
+    Should Be Equal    "${rc}"    "0"   msg=${output}
+
+Patch GatewayConfig Disable Ingress
+    [Documentation] Patches the GatewayConfig to disable ingress that is necessary in managed clusters
+    Log  Patching gatewayconfig to disable ingress in managed cluster  console=yes
+    ${gw_file_path} =    Set Variable    tasks/Resources/Files/gatewayconfig-patch-disable-ingress-payload.json
+    ${rc}   ${output}=    Run And Return Rc And Output
+    ...         oc patch gatewayconfig/default-gateway --patch-file="${gw_file_path}" --type merge    #robocop:disable
     Should Be Equal    "${rc}"    "0"   msg=${output}
 
 Wait For DSCInitialization CustomResource To Be Ready

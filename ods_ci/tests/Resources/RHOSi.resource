@@ -183,12 +183,8 @@ Set Expected Value For Release Name
              ${expected_release_name}=    Set Variable     ${RHOAI_MANAGED_RELEASE_NAME}
         END
     ELSE IF    "${PRODUCT}" == "ODH"
-        # ODH nightly uses rhods-operator which reports OpenShift AI Self-Managed
-        IF    "${OPERATOR_NAME}" == "rhods-operator"
-            ${expected_release_name}=    Set Variable     ${RHOAI_SELFMANAGED_RELEASE_NAME}
-        ELSE
-            ${expected_release_name}=    Set Variable     ${ODH_RELEASE_NAME}
-        END
+        ${expected_release_name}=    Set Variable     ${ODH_RELEASE_NAME}
+
     END
 
     Set Suite Variable    ${expected_release_name}

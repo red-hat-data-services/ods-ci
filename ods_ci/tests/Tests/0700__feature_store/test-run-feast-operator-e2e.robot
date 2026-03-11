@@ -18,14 +18,14 @@ ${FEAST_INSTANCE_NAME}=  test-image-reference
 *** Test Cases ***
 Run runTestDeploySimpleCRFunc test
     [Documentation]    Run Go E2E test: runTestDeploySimpleCRFunc
-    [Tags]  Sanity
+    [Tags]  Tier1
     ...     FeatureStore
     ...     RHOAIENG-14799
     Run Feast Operator E2E Test    TesDefaultFeastCR    e2e
 
 Run runTestWithRemoteRegistryFunction test
     [Documentation]    Run Go E2E test: runTestWithRemoteRegistryFunction
-    [Tags]  Sanity
+    [Tags]  Tier1
     ...     FeatureStore
     ...     RHOAIENG-14799
     Run Feast Operator E2E Test    TestRemoteRegistryFeastCR    e2e
@@ -39,7 +39,7 @@ Run runTestApplyAndMaterializeFeastDefinitions test
 
 Verify Feast Instances Utilizing Correct Feature Server Images
     [Documentation]   Verify that the Feast instance correctly references the expected Feature Server image
-    [Tags]  Sanity
+    [Tags]  Tier1
     ...     FeatureStore
     ...     RHOAIENG-23500
     Log To Console    Creating Data Science Project ${PRJ_TITLE}

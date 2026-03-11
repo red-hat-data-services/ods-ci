@@ -176,7 +176,7 @@ Set Expected Value For Release Name
     ...                RHOAI managed: OpenShift AI Cloud Service
     ...                RHOAI selfmanaged: OpenShift AI Self-Managed
 
-    IF    "${PRODUCT}" == "RHODS"
+    IF    "${PRODUCT}" == "RHODS" or "${UPDATE_CHANNEL}" == "odh-stable"
         IF     ${IS_SELF_MANAGED}
              ${expected_release_name}=    Set Variable     ${RHOAI_SELFMANAGED_RELEASE_NAME}
         ELSE

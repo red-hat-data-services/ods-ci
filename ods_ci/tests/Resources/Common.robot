@@ -174,9 +174,9 @@ Get RHODS Version
     [Arguments]    ${force_fetch}=False
     IF  "${RHODS_VERSION}" == "${None}" or "${force_fetch}"=="True"
         # Use OPERATOR_NAME when set (e.g. ODH nightly uses rhods-operator CSV)
-        IF  "${OPERATOR_NAME}" != "${None}" and "${OPERATOR_NAME}" == "rhods-operator"
+        IF  "${OPERATOR_NAME}" == "rhods-operator"
             ${RHODS_VERSION}=  Run  oc get csv -n ${OPERATOR_NAMESPACE} | grep "rhods-operator" | awk -F ' {2,}' '{print $3}'
-        ELSE IF  "${OPERATOR_NAME}" != "${None}" and "${OPERATOR_NAME}" == "opendatahub-operator"
+        ELSE IF  "${OPERATOR_NAME}" == "opendatahub-operator"
             ${RHODS_VERSION}=  Run  oc get csv -n ${OPERATOR_NAMESPACE} | grep "opendatahub" | awk -F ' {2,}' '{print $3}'
         ELSE IF  "${PRODUCT}" == "${None}" or "${PRODUCT}" == "RHODS"
             ${RHODS_VERSION}=  Run  oc get csv -n ${OPERATOR_NAMESPACE} | grep "rhods-operator" | awk -F ' {2,}' '{print $3}'

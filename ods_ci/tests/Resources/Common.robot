@@ -178,8 +178,7 @@ Get RHODS Version
             ${RHODS_VERSION}=  Run  oc get csv -n ${OPERATOR_NAMESPACE} | grep "rhods-operator" | awk -F ' {2,}' '{print $3}'
         ELSE IF  "${OPERATOR_NAME}" == "opendatahub-operator"
             ${RHODS_VERSION}=  Run  oc get csv -n ${OPERATOR_NAMESPACE} | grep "opendatahub" | awk -F ' {2,}' '{print $3}'
-        ELSE IF  "${PRODUCT}" == "${None}" or "${PRODUCT}" == "RHODS"
-            ${RHODS_VERSION}=  Run  oc get csv -n ${OPERATOR_NAMESPACE} | grep "rhods-operator" | awk -F ' {2,}' '{print $3}'
+        IF  "${PRODUCT}" == "${None}" or "${PRODUCT}" == "RHODS" or "${UPDATE_CHANNEL}" == "odh-stable"
         ELSE
             ${RHODS_VERSION}=  Run  oc get csv -n ${OPERATOR_NAMESPACE} | grep "opendatahub" | awk -F ' {2,}' '{print $3}'
         END

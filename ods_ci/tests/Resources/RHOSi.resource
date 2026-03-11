@@ -146,11 +146,9 @@ Assign Vars According To Product
             Set Suite Variable    ${DASHBOARD_LABEL_SELECTOR}     app.kubernetes.io/part-of=dashboard
             Set Suite Variable    ${OPERATOR_YAML_LABEL}  opendatahub-operator
             Set Suite Variable    ${MODEL_REGISTRY_NAMESPACE}    odh-model-registries
-        END
         Set Suite Variable    ${OPERATOR_APPNAME}  "Open Data Hub Operator"
         Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     rhoai-operator-dev
         Set Suite Variable    ${ADMIN_GROUPS}       odh-admins
-
     END
 
 Gather Release Attributes From DSC And DSCI

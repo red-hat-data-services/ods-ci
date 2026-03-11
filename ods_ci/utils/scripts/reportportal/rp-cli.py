@@ -47,8 +47,9 @@ import re
 import sys
 import tempfile
 import xml.etree.ElementTree as ET  # noqa: N817
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
+from typing import Optional
 from urllib.parse import quote
 
 try:
@@ -197,7 +198,7 @@ class ReportPortalClient:
     def create_dashboard(self, name: str, description: str = "") -> dict:
         return self.post("dashboard", {"name": name, "description": description})
 
-    def find_dashboard_by_name(self, name: str) -> dict | None:
+    def find_dashboard_by_name(self, name: str) -> Optional[dict]:
         result = self.get(f"dashboard?filter.eq.name={quote(name)}")
         content = result.get("content", [])
         return content[0] if content else None
@@ -236,7 +237,7 @@ class ReportPortalClient:
         return (existing["id"], False) if existing else (None, False)
 
     # Launch/Test item operations (for upload)
-    def start_launch(self, name: str, description: str = "", attributes: list | None = None) -> str:
+    def start_launch(self, name: str, description: str = "", attributes: Optional[list] = None) -> str:
         return self.post(
             "launch",
             {
@@ -256,9 +257,9 @@ class ReportPortalClient:
         name: str,
         item_type: str,
         launch_uuid: str,
-        parent_uuid: str | None = None,
-        attributes: list | None = None,
-        code_ref: str | None = None,
+        parent_uuid: Optional[str] = None,
+        attributes: Optional[list] = None,
+        code_ref: Optional[str] = None,
     ) -> str:
         data = {
             "name": name,
@@ -280,7 +281,7 @@ class ReportPortalClient:
 
     @staticmethod
     def _timestamp() -> str:
-        return datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
+        return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
 
 
 # ============================================================================
@@ -294,7 +295,7 @@ def load_json_file(file_path: str) -> dict:
         return json.load(f)
 
 
-def read_file_or_value(file_path: str | None, direct_value: str | None, description: str = "File") -> str | None:
+def read_file_or_value(file_path: Optional[str], direct_value: Optional[str], description: str = "File") -> Optional[str]:
     """Read content from file if path provided, otherwise return direct value."""
     if file_path:
         if not os.path.exists(file_path):
@@ -347,7 +348,7 @@ def build_export_metadata(export_type: str, project: str, source_id: int) -> dic
     """Build standardized export metadata"""
     return {
         "type": export_type,
-        "exportedAt": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "exportedAt": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "project": project,
         "sourceId": source_id,
     }
@@ -602,7 +603,7 @@ def cmd_import(args, client: ReportPortalClient):
         err("Invalid JSON: must be dashboard (.widgets) or filter (.conditions)", EXIT_USAGE)
 
 
-def cmd_import_filter(args, client: ReportPortalClient, data: dict | None = None):
+def cmd_import_filter(args, client: ReportPortalClient, data: Optional[dict] = None):
     if data is None:
         data = load_json_file(args.file)
 
@@ -623,7 +624,7 @@ def cmd_import_filter(args, client: ReportPortalClient, data: dict | None = None
         api_err("Failed to create filter", resp)
 
 
-def cmd_import_dashboard(args, client: ReportPortalClient, data: dict | None = None):  # noqa: PLR0914
+def cmd_import_dashboard(args, client: ReportPortalClient, data: Optional[dict] = None):  # noqa: PLR0914
     if data is None:
         data = load_json_file(args.file)
 
@@ -726,9 +727,9 @@ def cmd_upload(args, client: ReportPortalClient):
 def _upload_xunit(  # noqa: PLR0914
     client: ReportPortalClient,
     file_path: str,
-    name: str | None = None,
-    description: str | None = None,
-    attributes: str | None = None,
+    name: Optional[str] = None,
+    description: Optional[str] = None,
+    attributes: Optional[str] = None,
 ):
     """Internal xUnit upload logic - reusable"""
     launch_name = name or Path(file_path).stem
@@ -889,7 +890,7 @@ class Config:
 pass_config = click.make_pass_decorator(Config, ensure=True)
 
 
-def get_token(token: str | None, token_file: str | None) -> str | None:
+def get_token(token: Optional[str], token_file: Optional[str]) -> Optional[str]:
     """Resolve token from arg, file, or default location."""
     if token:
         return token
@@ -921,8 +922,8 @@ def require_client(config: Config) -> ReportPortalClient:
 
 
 def require_client_for_source(
-    config: Config, source: str, resource_id: int | None
-) -> tuple[ReportPortalClient, str, int]:
+    config: Config, source: str, resource_id: Optional[int]
+) -> tuple:
     """
     Get client and resolve source to resource_type and resource_id.
     If source is a URL, extracts server/project from it and creates client.

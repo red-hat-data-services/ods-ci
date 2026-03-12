@@ -665,7 +665,7 @@ Patch GatewayConfig Disable Ingress
     [Documentation]  Patches the GatewayConfig to disable ingress that is necessary in managed clusters
     Log  Patching gatewayconfig to disable ingress in managed cluster  console=yes
     ${gw_file_path} =    Set Variable    tasks/Resources/Files/gatewayconfig-patch-disable-ingress-payload.json
-    ${rc}   ${output}=    Run And Return Rc And Output
+    ${rc}   ${output} =    Run And Return Rc And Output
     ...         oc patch gatewayconfig/default-gateway --patch-file="${gw_file_path}" --type merge    #robocop:disable
     Should Be Equal    "${rc}"    "0"   msg=${output}
 

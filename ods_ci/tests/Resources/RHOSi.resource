@@ -133,19 +133,19 @@ Assign Vars According To Product
         ${CSV_NAME} =   Catenate    SEPARATOR=   ${OPERATOR_NAME}.     ${RHODS_VERSION}
         Set Suite Variable      ${CSV_NAME}
     ELSE IF    "${PRODUCT}" == "ODH" AND "${OPERATOR_NAME}" == "opendatahub-operator"
-            Set Suite Variable    ${OPERATOR_SUBSCRIPTION_LABEL}     operators.coreos.com/opendatahub-operator.${OPERATOR_NAMESPACE}
-            Set Suite Variable    ${IMAGE_PULL_PATH}        quay.io
-            Set Suite Variable    ${KSERVE_IMAGE_PULL_PATH}        registry.k8s.io
-            Set Suite Variable    ${KUEUE_IMAGE_PULL_PATH}        registry.k8s.io
-            ${CSV_NAME} =   Catenate    SEPARATOR=   ${OPERATOR_NAME}.v   ${RHODS_VERSION}
-            Set Suite Variable      ${CSV_NAME}
-            Set Suite Variable    ${OPERATOR_DEPLOYMENT_NAME}    opendatahub-operator-controller-manager
-            Set Suite Variable    ${OPERATOR_POD_CONTAINER_NAME}  manager
-            Set Suite Variable    ${OPERATOR_LABEL_SELECTOR}    control-plane=controller-manager
-            Set Suite Variable    ${DASHBOARD_DEPLOYMENT_NAME}    odh-dashboard
-            Set Suite Variable    ${DASHBOARD_LABEL_SELECTOR}     app.kubernetes.io/part-of=dashboard
-            Set Suite Variable    ${OPERATOR_YAML_LABEL}  opendatahub-operator
-            Set Suite Variable    ${MODEL_REGISTRY_NAMESPACE}    odh-model-registries
+        Set Suite Variable    ${OPERATOR_SUBSCRIPTION_LABEL}     operators.coreos.com/opendatahub-operator.${OPERATOR_NAMESPACE}
+        Set Suite Variable    ${IMAGE_PULL_PATH}        quay.io
+        Set Suite Variable    ${KSERVE_IMAGE_PULL_PATH}        registry.k8s.io
+        Set Suite Variable    ${KUEUE_IMAGE_PULL_PATH}        registry.k8s.io
+        ${CSV_NAME} =   Catenate    SEPARATOR=   ${OPERATOR_NAME}.v   ${RHODS_VERSION}
+        Set Suite Variable      ${CSV_NAME}
+        Set Suite Variable    ${OPERATOR_DEPLOYMENT_NAME}    opendatahub-operator-controller-manager
+        Set Suite Variable    ${OPERATOR_POD_CONTAINER_NAME}  manager
+        Set Suite Variable    ${OPERATOR_LABEL_SELECTOR}    control-plane=controller-manager
+        Set Suite Variable    ${DASHBOARD_DEPLOYMENT_NAME}    odh-dashboard
+        Set Suite Variable    ${DASHBOARD_LABEL_SELECTOR}     app.kubernetes.io/part-of=dashboard
+        Set Suite Variable    ${OPERATOR_YAML_LABEL}  opendatahub-operator
+        Set Suite Variable    ${MODEL_REGISTRY_NAMESPACE}    odh-model-registries
         Set Suite Variable    ${OPERATOR_APPNAME}  "Open Data Hub Operator"
         Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     rhoai-operator-dev
         Set Suite Variable    ${ADMIN_GROUPS}       odh-admins

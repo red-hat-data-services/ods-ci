@@ -149,6 +149,8 @@ Assign Vars According To Product
         Set Suite Variable    ${OPERATOR_APPNAME}  "Open Data Hub Operator"
         Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     rhoai-operator-dev
         Set Suite Variable    ${ADMIN_GROUPS}       odh-admins
+    ELSE
+        Log    PRODUCT=${PRODUCT} OPERATOR_NAME=${OPERATOR_NAME} - no matching branch in Assign Vars According To Product    console=yes
     END
 
 Gather Release Attributes From DSC And DSCI
@@ -182,7 +184,6 @@ Set Expected Value For Release Name
         END
     ELSE IF    "${PRODUCT}" == "ODH"
         ${expected_release_name}=    Set Variable     ${ODH_RELEASE_NAME}
-
     END
 
     Set Suite Variable    ${expected_release_name}

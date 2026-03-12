@@ -851,10 +851,24 @@ def get_component(testcase):
 
 
 def parse_attributes(attrs_str: str) -> list:
+    """Parse launch attributes from either JSON array or key:val,... format.
+
+    JSON array (passes through directly to the RP API):
+        '[{"key": "Cluster Type", "value": "selfmanaged"}, {"key": "Build", "value": "1.2"}]'
+
+    key:val comma-separated (convenient for CLI use):
+        'Cluster Type:selfmanaged,Build:1.2'
+
+    Value-only tags are also supported in the key:val format:
+        'nightly,smoke'
+    """
     if not attrs_str:
         return []
+    stripped = attrs_str.strip()
+    if stripped.startswith("["):
+        return json.loads(stripped)
     result = []
-    for pair in attrs_str.split(","):
+    for pair in stripped.split(","):
         pair = pair.strip()
         if ":" in pair:
             key, val = pair.split(":", 1)

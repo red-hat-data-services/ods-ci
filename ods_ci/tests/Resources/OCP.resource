@@ -408,6 +408,104 @@ Wait For Installplan And Approve It
         END
     END
 
+Set Subscription Install Plan Approval
+    [Documentation]    Changes the installPlanApproval mode of a subscription between Manual and Automatic.
+    ...                Example: Set Subscription Install Plan Approval    redhat-ods-operator    Manual    rhoai-operator-dev
+    [Arguments]    ${namespace}    ${approval_mode}    ${sub_name}
+    Log    Setting subscription installPlanApproval to ${approval_mode} in namespace ${namespace}    console=yes
+    IF    "${approval_mode}" not in ["Manual", "Automatic"]
+        FAIL    Invalid approval_mode: ${approval_mode}. Must be 'Manual' or 'Automatic'.
+    END
+    Log    Patching subscription ${sub_name} in namespace ${namespace} to set installPlanApproval=${approval_mode}    console=yes
+    ${patch_status}=    Run And Return Rc
+    ...    oc patch subscription ${sub_name} -n ${namespace} --type merge --patch '{"spec": {"installPlanApproval": "${approval_mode}"}}'
+    IF    ${patch_status} == 0
+        Log    Successfully set installPlanApproval to ${approval_mode} for subscription ${sub_name}    console=yes
+        ${current_approval}=    Get Resource Attribute    ${namespace}    Subscription    ${sub_name}    .spec.installPlanApproval
+        Log    Verified: Current installPlanApproval is ${current_approval}    console=yes
+        Should Be Equal As Strings    ${current_approval}    ${approval_mode}    msg=InstallPlanApproval verification failed
+    ELSE
+        FAIL    Failed to set installPlanApproval to ${approval_mode} for subscription ${sub_name} in namespace ${namespace}
+    END
+
+Set Subscription Update Channel
+    [Documentation]    Changes the update channel of a subscription.
+    ...                Waits for old CSV to be deleted and new CSV to become ready after patching.
+    ...                Example: Set Subscription Update Channel    redhat-ods-operator    fast-3.x    rhods-operator
+    [Arguments]    ${namespace}    ${channel}    ${sub_name}
+    Log    Setting subscription update channel to ${channel} in namespace ${namespace}    console=yes
+    ${rc}    ${old_csv_name}=    Run And Return Rc And Output
+    ...    oc get subscription ${sub_name} -n ${namespace} -o jsonpath='{.status.currentCSV}' 2>/dev/null
+    IF    ${rc} == 0 and "${old_csv_name}" != ""
+        Log    Current CSV: ${old_csv_name}    console=yes
+    ELSE
+        Log    No current CSV found for subscription ${sub_name}    console=yes
+    END
+    ${patch_status}=    Run And Return Rc
+    ...    oc patch subscription ${sub_name} -n ${namespace} --type='json' -p='[{"op": "replace", "path": "/spec/channel", "value": "${channel}"}]'
+    IF    ${patch_status} == 0
+        Log    Successfully set channel to ${channel} for subscription ${sub_name}    console=yes
+        ${current_channel}=    Get Resource Attribute    ${namespace}    Subscription    ${sub_name}    .spec.channel
+        Log    Verified: Current channel is ${current_channel}    console=yes
+        Should Be Equal As Strings    ${current_channel}    ${channel}    msg=Channel verification failed
+        IF    ${rc} == 0 and "${old_csv_name}" != ""
+            Log    Waiting for old CSV ${old_csv_name} to be deleted    console=yes
+            ${delete_rc}=    Run And Return Rc
+            ...    oc wait csv ${old_csv_name} -n ${namespace} --for=delete --timeout=120s
+            IF    ${delete_rc} == 0
+                Log    Old CSV ${old_csv_name} has been deleted    console=yes
+            ELSE
+                Log    Old CSV may already be deleted or timeout reached    console=yes    level=WARN
+            END
+        ELSE
+            Log    No old CSV to wait for, continuing    console=yes
+        END
+        Log    Waiting for new CSV to become ready    console=yes
+        ${ready_rc}=    Run And Return Rc
+        ...    oc wait csv -n ${namespace} -l operators.coreos.com/${sub_name} --for=jsonpath='{.status.phase}'=Succeeded --timeout=300s
+        IF    ${ready_rc} == 0
+            Log    New CSV is ready and succeeded    console=yes
+        ELSE
+            Log    New CSV may not be ready yet or timeout reached    console=yes    level=WARN
+        END
+    ELSE
+        FAIL    Failed to set channel to ${channel} for subscription ${sub_name} in namespace ${namespace}
+    END
+
+Set Catalog Source Image
+    [Documentation]    Updates the image endpoint of a catalog source.
+    ...                Example: Set Catalog Source Image    quay.io/rhoai/rhoai-fbc-fragment:latest    openshift-marketplace    rhoai-catalog-dev
+    [Arguments]    ${new_image_url}    ${namespace}=openshift-marketplace    ${cs_name}=rhoai-catalog-dev
+    Log    Setting catalog source image to ${new_image_url} in namespace ${namespace}    console=yes
+    ${old_image}=    Get Resource Attribute    ${namespace}    CatalogSource    ${cs_name}    .spec.image
+    Log    Current catalog source image: ${old_image}    console=yes
+    Log    Patching catalog source ${cs_name} in namespace ${namespace} to set image=${new_image_url}    console=yes
+    ${patch_status}=    Run And Return Rc
+    ...    oc patch catalogsource ${cs_name} -n ${namespace} --type merge --patch '{"spec": {"image": "${new_image_url}"}}'
+    IF    ${patch_status} == 0
+        Log    Successfully updated catalog source image for ${cs_name}    console=yes
+        ${current_image}=    Get Resource Attribute    ${namespace}    CatalogSource    ${cs_name}    .spec.image
+        Log    Verified: Current catalog source image is ${current_image}    console=yes
+        Should Be Equal As Strings    ${current_image}    ${new_image_url}    msg=Catalog source image verification failed
+        Log    Waiting for catalog source pod to restart and become ready    console=yes
+        ${rc}=    Run And Return Rc
+        ...    oc wait pod -n ${namespace} -l olm.catalogSource=${cs_name} --for=delete --timeout=120s
+        IF    ${rc} == 0
+            Log    Old catalog source pod deleted    console=yes
+        ELSE
+            Log    Old catalog source pod may already be deleted or timeout reached    console=yes    level=WARN
+        END
+        ${rc}=    Run And Return Rc
+        ...    oc wait pod -n ${namespace} -l olm.catalogSource=${cs_name} --for=condition=Ready --timeout=300s
+        IF    ${rc} == 0
+            Log    New catalog source pod is ready    console=yes
+        ELSE
+            Log    Catalog source pod did not become ready within timeout, but continuing    console=yes    level=WARN
+        END
+    ELSE
+        FAIL    Failed to update catalog source image for ${cs_name} in namespace ${namespace}
+    END
+
 Wait For Namespace To Be Active
     [Documentation]    Waits for a given namespace to become active
     [Arguments]    ${namespace}    ${timeout}=30s

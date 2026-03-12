@@ -28,6 +28,7 @@ Examples:
   rp-cli.py copy "https://server/ui/#project/dashboard/123"     # uses original name
   rp-cli.py upload results.xml -n "Launch Name" -a "key1:val1,key2:val2"
   rp-cli.py upload results.xml -df description.txt -af attributes.txt
+  rp-cli.py --verify-token
 
 Exit Codes:
   0   Success
@@ -181,12 +182,27 @@ class ReportPortalClient:
         resp = self._handle_request("put", f"{self.base_url}/{endpoint}", json=data)
         return resp.json() if resp.text else {}
 
-    def validate_token(self) -> bool:
+    def validate_token(self) -> tuple:
+        """Returns (valid: bool, error_message: str or None)."""
         try:
-            result = self.get("dashboard")
-            return "content" in result
-        except Exception:
-            return False
+            url = f"{self.base_url}/dashboard"
+            resp = self._handle_request("get", url)
+            if resp.status_code == 401:
+                return False, "Token is expired or invalid (HTTP 401)"
+            if resp.status_code == 403:
+                return False, "Token lacks permissions for this project (HTTP 403)"
+            if resp.status_code >= 400:
+                return False, f"Server returned HTTP {resp.status_code}"
+            result = resp.json()
+            if "content" in result:
+                return True, None
+            return False, "Unexpected response from server"
+        except requests.exceptions.ConnectionError:
+            return False, f"Cannot connect to {self.url}"
+        except requests.exceptions.Timeout:
+            return False, f"Connection timed out to {self.url}"
+        except Exception as e:
+            return False, str(e)
 
     # Dashboard operations
     def list_dashboards(self) -> list:
@@ -915,8 +931,9 @@ def require_client(config: Config) -> ReportPortalClient:
     if not config.token:
         err("API token required. Set RP_API_TOKEN, use --token, or --token-file", EXIT_AUTH_ERROR)
     client = ReportPortalClient(config.server, config.project, config.token)
-    if not client.validate_token():
-        err("Invalid token or cannot connect to ReportPortal. Run --help for auth instructions.", EXIT_AUTH_ERROR)
+    valid, token_err = client.validate_token()
+    if not valid:
+        err(f"{token_err}. Run --help for auth instructions.", EXIT_AUTH_ERROR)
     config.client = client
     return client
 
@@ -946,8 +963,9 @@ def require_client_for_source(
         print()
 
         client = ReportPortalClient(parsed["server"], parsed["project"], config.token)
-        if not client.validate_token():
-            err("Invalid token or cannot connect to ReportPortal.", EXIT_AUTH_ERROR)
+        valid, token_err = client.validate_token()
+        if not valid:
+            err(f"{token_err}.", EXIT_AUTH_ERROR)
 
         return client, parsed["resource_type"], parsed["resource_id"]
 
@@ -961,17 +979,35 @@ def require_client_for_source(
     return client, source, resource_id
 
 
-@click.group(epilog=__doc__)
+@click.group(epilog=__doc__, invoke_without_command=True)
 @click.option("--server", envvar="RP_SERVER", help="ReportPortal server URL (or set RP_SERVER)")
 @click.option("--project", envvar="RP_PROJECT", help="ReportPortal project name (or set RP_PROJECT)")
 @click.option("--token", envvar="RP_API_TOKEN", help="API token (or set RP_API_TOKEN)")
 @click.option("--token-file", help="Path to file containing API token")
+@click.option("--verify-token", is_flag=True, default=False, help="Verify token validity and exit")
 @pass_config
-def cli(config: Config, server: str, project: str, token: str, token_file: str):
+def cli(config: Config, server: str, project: str, token: str, token_file: str, verify_token: bool):
     """ReportPortal CLI Tool - Manage dashboards, filters, and upload test results."""
     config.server = server
     config.project = project
     config.token = get_token(token, token_file)
+    ctx = click.get_current_context()
+    if verify_token:
+        if not config.server:
+            err("ReportPortal server URL required. Set RP_SERVER or use --server")
+        if not config.project:
+            err("Project name required. Set RP_PROJECT or use --project")
+        if not config.token:
+            err("API token required. Set RP_API_TOKEN, use --token, or --token-file", EXIT_AUTH_ERROR)
+        client = ReportPortalClient(config.server, config.project, config.token)
+        valid, token_err = client.validate_token()
+        if valid:
+            info(f"Token is valid for project '{config.project}' on {config.server}")
+            sys.exit(EXIT_SUCCESS)
+        else:
+            err(f"{token_err}.", EXIT_AUTH_ERROR)
+    elif ctx.invoked_subcommand is None:
+        click.echo(ctx.get_help())
 
 
 @cli.command("list")
@@ -1068,6 +1104,7 @@ def cli_copy(config: Config, source: str, id: int, title: str, filters: str, ren
     finally:
         if os.path.exists(temp_file):
             os.remove(temp_file)
+
 
 
 @cli.command("upload")

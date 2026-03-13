@@ -172,8 +172,8 @@ Get RHODS Version
     [Documentation]    Return RHODS/ODH operator version number.
     ...    Will fetch version only if $RHODS_VERSION was not already set, or $force_fetch is True.
     [Arguments]    ${force_fetch}=False
-    IF  "${RHODS_VERSION}" == "${None}" or "${force_fetch}"=="True"
-        IF  "${PRODUCT}" == "${None}" or "${PRODUCT}" == "RHODS"
+    IF  "${RHODS_VERSION}" == "${None}" or "${force_fetch}" == "True"
+        IF  "${OPERATOR_NAME}" == "rhods-operator" or "${UPDATE_CHANNEL}" == "odh-stable"
             ${RHODS_VERSION}=  Run  oc get csv -n ${OPERATOR_NAMESPACE} | grep "rhods-operator" | awk -F ' {2,}' '{print $3}'
         ELSE
             ${RHODS_VERSION}=  Run  oc get csv -n ${OPERATOR_NAMESPACE} | grep "opendatahub" | awk -F ' {2,}' '{print $3}'

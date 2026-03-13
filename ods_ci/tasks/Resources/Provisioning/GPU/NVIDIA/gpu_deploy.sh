@@ -7,9 +7,12 @@ GPU_INSTALL_DIR="$(dirname "$0")"
 
 CHANNEL="$(oc get packagemanifest gpu-operator-certified -n openshift-marketplace -o jsonpath='{.status.defaultChannel}')"
 
-CSVNAME="$(oc get packagemanifests/gpu-operator-certified -n openshift-marketplace -o json | jq -r '.status.channels[] | select(.name == "'$CHANNEL'") | .currentCSV')"
+CSVNAME="$(oc get packagemanifests/gpu-operator-certified -n openshift-marketplace -o json | jq -r ".status.channels[] | select(.name == \"$CHANNEL\") | .currentCSV")"
 
-sed -i'' -e "s|channel: \".*\"|channel: \"$CHANNEL\"|" "$GPU_INSTALL_DIR/gpu_install.yaml"
+# For mac OS
+# sed -i'' -e "s|channel: \".*\"|channel: \"$CHANNEL\"|" "$GPU_INSTALL_DIR/gpu_install.yaml"
+# Since CI uses Linux machines use the below command
+sed -i -e "s|channel:.*|channel: \"$CHANNEL\"|" "$GPU_INSTALL_DIR/gpu_install.yaml"
 
 oc apply -f "$GPU_INSTALL_DIR/gpu_install.yaml"
 /bin/bash tasks/Resources/Provisioning/GPU/NFD/install_nfd.sh

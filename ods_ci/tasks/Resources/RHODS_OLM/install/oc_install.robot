@@ -641,7 +641,6 @@ Create DSCInitialization CustomResource Using Test Variables
     Run    sed -i'' -e 's/<dsci_name>/${dsci_name}/' ${file_path}dsci_apply.yml
     Run    sed -i'' -e 's/<application_namespace>/${APPLICATIONS_NAMESPACE}/' ${file_path}dsci_apply.yml
     Run    sed -i'' -e 's/<monitoring_namespace>/${MONITORING_NAMESPACE}/' ${file_path}dsci_apply.yml
-    Run    sed -i'' -e 's/<operator_yaml_label>/${OPERATOR_YAML_LABEL}/' ${file_path}dsci_apply.yml
 
 Patch DSCInitialization With Monitoring Info
     [Documentation]  Patches the DSCInitialization with the Monitoring info if the new obs stack is being used
@@ -684,65 +683,49 @@ Wait For DSCInitialization CustomResource To Be Ready
 
 Apply DataScienceCluster CustomResource
     [Documentation]
-    [Arguments]        ${dsc_name}=${DSC_NAME}      ${custom}=False       ${custom_cmp}=''
-    ...    ${dsc_template}=${DSC_TEMPLATE}
+    [Arguments]        ${dsc_name}=${DSC_NAME}    ${dsc_template}=${DSC_TEMPLATE}
     ${file_path} =    Set Variable    tasks/Resources/Files/
-    IF      ${custom} == True
-        Log to Console    message=Creating DataScience Cluster using custom configuration
-        Generate CustomManifest In DSC YAML
-        ...    dsc_name=${dsc_name}
-        ...    dsc_template=${dsc_template}
-        ${yml} =    Get File    ${file_path}dsc_apply.yml
-        Log To Console    Applying DSC yaml
-        Log To Console    ${yml}
-        ${return_code}    ${output} =    Run And Return Rc And Output    oc apply -f ${file_path}dsc_apply.yml
-        Log To Console    ${output}
-        Should Be Equal As Integers  ${return_code}  0  msg=Error detected while applying DSC CR
-        #Remove File    ${file_path}dsc_apply.yml
-        Wait For DSC Ready State    ${OPERATOR_NAMESPACE}     ${DSC_NAME}
-    ELSE
-        Log to Console    Requested Configuration:
-        FOR    ${cmp}    IN    @{COMPONENT_LIST}
-            TRY
-                Log To Console    ${cmp} - ${COMPONENTS.${cmp}}
-            EXCEPT
-                Log To Console    ${cmp} - Removed
-            END
+    Log to Console    Requested Configuration:
+    FOR    ${cmp}    IN    @{COMPONENT_LIST}
+        TRY
+            Log To Console    ${cmp} - ${COMPONENTS.${cmp}}
+        EXCEPT
+            Log To Console    ${cmp} - Removed
         END
-        Log to Console    message=Creating DataScience Cluster using yml template
-        Create DataScienceCluster CustomResource Using Test Variables
-        ${yml} =    Get File    ${file_path}dsc_apply.yml
-        Log To Console    Applying DSC yaml
-        Log To Console    ${yml}
-        ${return_code}    ${output} =    Run And Return Rc And Output    oc apply -f ${file_path}dsc_apply.yml
-        Log To Console    ${output}
-        Should Be Equal As Integers  ${return_code}  0  msg=Error detected while applying DSC CR
-        Remove File    ${file_path}dsc_apply.yml
-        FOR    ${cmp}    IN    @{COMPONENT_LIST}
-            ${cmp_dsc} =    Convert Component Into Component DSC Name     ${cmp}
-            IF    $cmp not in $COMPONENTS
-                Component Should Not Be Enabled    ${cmp}
-            ELSE IF    '${COMPONENTS.${cmp}}' == 'Managed'
-                ${is_nested}=    Component Is A Nested Component      ${cmp}
-                IF     ${is_nested}
-                    Nested Component Should Be Enabled     ${NESTED_COMPONENT_TO_PARENT_COMPONENT.${cmp}}      ${cmp_dsc}
-                ELSE
-                    Component Should Be Enabled    ${cmp_dsc}
-                END
-            ELSE IF    '${COMPONENTS.${cmp}}' == 'Unmanaged'
-                ${is_nested}=    Component Is A Nested Component      ${cmp}
-                IF     ${is_nested}
-                    Nested Component Should Be Enabled     ${NESTED_COMPONENT_TO_PARENT_COMPONENT.${cmp}}      ${cmp_dsc}
-                ELSE
-                    Component Should Be Enabled    ${cmp_dsc}
-                END
-            ELSE IF    '${COMPONENTS.${cmp}}' == 'Removed'
-                ${is_nested}=    Component Is A Nested Component      ${cmp}
-                IF     ${is_nested}
-                    Nested Component Should Not Be Enabled     ${NESTED_COMPONENT_TO_PARENT_COMPONENT.${cmp}}      ${cmp_dsc}
-                ELSE
-                    Component Should Not Be Enabled    ${cmp_dsc}
-                END
+    END
+    Log to Console    message=Creating DataScience Cluster using yml template
+    Create DataScienceCluster CustomResource Using Test Variables    dsc_name=${dsc_name}    dsc_template=${dsc_template}
+    ${yml} =    Get File    ${file_path}dsc_apply.yml
+    Log To Console    Applying DSC yaml
+    Log To Console    ${yml}
+    ${return_code}    ${output} =    Run And Return Rc And Output    oc apply -f ${file_path}dsc_apply.yml
+    Log To Console    ${output}
+    Should Be Equal As Integers  ${return_code}  0  msg=Error detected while applying DSC CR
+    Remove File    ${file_path}dsc_apply.yml
+    FOR    ${cmp}    IN    @{COMPONENT_LIST}
+        ${cmp_dsc} =    Convert Component Into Component DSC Name     ${cmp}
+        IF    $cmp not in $COMPONENTS
+            Component Should Not Be Enabled    ${cmp}
+        ELSE IF    '${COMPONENTS.${cmp}}' == 'Managed'
+            ${is_nested}=    Component Is A Nested Component      ${cmp}
+            IF     ${is_nested}
+                Nested Component Should Be Enabled     ${NESTED_COMPONENT_TO_PARENT_COMPONENT.${cmp}}      ${cmp_dsc}
+            ELSE
+                Component Should Be Enabled    ${cmp_dsc}
+            END
+        ELSE IF    '${COMPONENTS.${cmp}}' == 'Unmanaged'
+            ${is_nested}=    Component Is A Nested Component      ${cmp}
+            IF     ${is_nested}
+                Nested Component Should Be Enabled     ${NESTED_COMPONENT_TO_PARENT_COMPONENT.${cmp}}      ${cmp_dsc}
+            ELSE
+                Component Should Be Enabled    ${cmp_dsc}
+            END
+        ELSE IF    '${COMPONENTS.${cmp}}' == 'Removed'
+            ${is_nested}=    Component Is A Nested Component      ${cmp}
+            IF     ${is_nested}
+                Nested Component Should Not Be Enabled     ${NESTED_COMPONENT_TO_PARENT_COMPONENT.${cmp}}      ${cmp_dsc}
+            ELSE
+                Component Should Not Be Enabled    ${cmp_dsc}
             END
         END
     END
@@ -753,7 +736,6 @@ Create DataScienceCluster CustomResource Using Test Variables
     ${file_path} =    Set Variable    tasks/Resources/Files/
     Copy File    source=${file_path}${dsc_template}    destination=${file_path}dsc_apply.yml
     Run    sed -i'' -e 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
-    Run    sed -i'' -e 's/<operator_yaml_label>/${OPERATOR_YAML_LABEL}/' ${file_path}dsc_apply.yml
     FOR    ${cmp}    IN    @{COMPONENT_LIST}
             IF    $cmp not in $COMPONENTS
                 Run    sed -i'' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
@@ -774,32 +756,6 @@ Create DataScienceCluster CustomResource Using Test Variables
             END
     END
 
-Generate CustomManifest In DSC YAML
-    [Arguments]    ${dsc_name}=${DSC_NAME}    ${dsc_template}=${DSC_TEMPLATE}
-    Log To Console      ${custom_cmp}.items
-    ${file_path} =    Set Variable    tasks/Resources/Files/
-    Copy File    source=${file_path}${dsc_template}    destination=${file_path}dsc_apply.yml
-    Run    sed -i'' -e 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
-    FOR    ${cmp}    IN    @{COMPONENT_LIST}
-            ${value}=       Get From Dictionary 	${custom_cmp} 	${cmp}
-            ${status}=       Get From Dictionary 	${value} 	managementState
-            Log To Console      ${status}
-            IF    '${status}' == 'Managed'
-                Run    sed -i'' -e 's/<${cmp}_value>/Managed/' ${file_path}dsc_apply.yml
-            ELSE IF    '${status}' == 'Unmanaged'
-                Run    sed -i'' -e 's/<${cmp}_value>/Unmanaged/' ${file_path}dsc_apply.yml
-            ELSE IF    '${status}' == 'Removed'
-                Run    sed -i'' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
-            END
-            # The model registry component needs to set the namespace used, so adding this special statement just for it
-            IF    '${cmp}' == 'modelregistry'
-                Run    sed -i'' -e 's/<modelregistry_namespace>/${MODEL_REGISTRY_NAMESPACE}/' ${file_path}dsc_apply.yml
-            END
-            # The workbenches component needs to set the namespace used, so adding this special statement just for it
-            IF    '${cmp}' == 'workbenches'
-                Run    sed -i'' -e 's/<workbenches_namespace>/${NOTEBOOKS_NAMESPACE}/' ${file_path}dsc_apply.yml
-            END
-    END
 
 Wait For DataScienceCluster CustomResource To Be Ready
   [Documentation]   Wait for DataScienceCluster CustomResource To Be Ready

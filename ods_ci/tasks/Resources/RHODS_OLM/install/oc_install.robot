@@ -698,7 +698,12 @@ Apply DataScienceCluster CustomResource
         FOR    ${cmp}    IN    @{COMPONENT_LIST}
             ${cmp_dsc} =    Convert Component Into Component DSC Name     ${cmp}
             IF    $cmp not in $COMPONENTS
-                Component Should Not Be Enabled    ${cmp}
+                ${is_nested}=    Component Is A Nested Component      ${cmp}
+                IF     ${is_nested}
+                    Nested Component Should Not Be Enabled     ${NESTED_COMPONENT_TO_PARENT_COMPONENT.${cmp}}      ${cmp_dsc}
+                ELSE
+                    Component Should Not Be Enabled    ${cmp_dsc}
+                END
             ELSE IF    '${COMPONENTS.${cmp}}' == 'Managed'
                 ${is_nested}=    Component Is A Nested Component      ${cmp}
                 IF     ${is_nested}

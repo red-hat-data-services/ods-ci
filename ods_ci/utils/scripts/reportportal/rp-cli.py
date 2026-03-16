@@ -12,6 +12,9 @@ Authentication:
      localStorage.getItem('token') || sessionStorage.getItem('token')
   3. Extract the "value" field from the JSON response
 
+Global options (apply to all commands):
+  --timeout SECONDS  Per-request HTTP timeout in seconds. Default: 600. Use 0 for no timeout.
+
 Examples:
   rp-cli.py list dashboards
   rp-cli.py list filters
@@ -29,6 +32,7 @@ Examples:
   rp-cli.py upload results.xml -n "Launch Name" -a "key1:val1,key2:val2"
   rp-cli.py upload results.xml -df description.txt -af attributes.txt
   rp-cli.py --verify-token
+  rp-cli.py --timeout 600 upload results.xml -n "My Launch"
 
 Exit Codes:
   0   Success
@@ -42,15 +46,25 @@ Exit Codes:
   15  API error
 """
 
+from __future__ import annotations
+
 import json
 import os
 import re
 import sys
 import tempfile
+import time
 import xml.etree.ElementTree as ET  # noqa: N817
-from datetime import UTC, datetime
+from datetime import datetime
 from pathlib import Path
 from urllib.parse import quote
+
+if sys.version_info >= (3, 11):  # noqa: UP036
+    from datetime import UTC
+else:
+    from datetime import timezone
+
+    UTC = timezone.utc  # noqa: UP017
 
 try:
     import click
@@ -86,6 +100,8 @@ EXIT_AUTH_ERROR = 12
 EXIT_NOT_FOUND = 13  # Resource not found
 EXIT_DUPLICATE = 14  # Resource already exists
 EXIT_API_ERROR = 15  # Other API errors
+
+MSG_API_TOKEN_REQUIRED = "API token required. Set RP_API_TOKEN, use --token, or --token-file"
 
 
 def usage_err(message: str, exit_code: int = EXIT_USAGE) -> None:
@@ -151,35 +167,46 @@ def api_err(msg: str, resp: dict):
 class ReportPortalClient:
     """ReportPortal API client - centralized API operations"""
 
-    def __init__(self, url: str, project: str, token: str):
+    def __init__(self, url: str, project: str, token: str, timeout: int | None = 600):
         self.url = url.rstrip("/")
         self.project = project
         self.token = token
         self.base_url = f"{self.url}/api/v1/{self.project}"
         self.headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+        self.timeout = timeout
 
     # Core HTTP methods
     def _handle_request(self, method: str, url: str, **kwargs) -> requests.Response:
-        """Execute HTTP request with connection error handling."""
+        """Execute HTTP request with configured timeout."""
+        kwargs.setdefault("timeout", self.timeout)
         try:
             return getattr(requests, method)(url, headers=self.headers, **kwargs)
-        except requests.exceptions.ConnectionError:
-            err(f"Connection error: cannot reach {self.url}", EXIT_CONNECTION_ERROR)
-        except requests.exceptions.Timeout:
-            err(f"Connection timeout: {self.url}", EXIT_CONNECTION_ERROR)
         except requests.exceptions.RequestException as e:
             err(f"Request error: {e}", EXIT_CONNECTION_ERROR)
 
+    def _check_response(self, resp: requests.Response, label: str) -> dict:
+        """Parse JSON response and report errors with HTTP status and RP message."""
+        result = resp.json() if resp.text else {}
+        if resp.status_code >= 400 or result.get("errorCode"):
+            msg = result.get("message", result)
+            warn(f"  [WARN] {label} failed (HTTP {resp.status_code}): {msg}")
+        return result
+
     def get(self, endpoint: str) -> dict:
         url = f"{self.base_url}/{endpoint}" if not endpoint.startswith("http") else endpoint
-        return self._handle_request("get", url).json()
+        return self._check_response(self._handle_request("get", url), f"GET /{endpoint}")
 
     def post(self, endpoint: str, data: dict) -> dict:
-        return self._handle_request("post", f"{self.base_url}/{endpoint}", json=data).json()
+        return self._check_response(
+            self._handle_request("post", f"{self.base_url}/{endpoint}", json=data),
+            f"POST /{endpoint}",
+        )
 
     def put(self, endpoint: str, data: dict) -> dict:
-        resp = self._handle_request("put", f"{self.base_url}/{endpoint}", json=data)
-        return resp.json() if resp.text else {}
+        return self._check_response(
+            self._handle_request("put", f"{self.base_url}/{endpoint}", json=data),
+            f"PUT /{endpoint}",
+        )
 
     def validate_token(self) -> tuple:  # noqa: PLR0911
         """Returns (valid: bool, error_message: str or None)."""
@@ -253,7 +280,12 @@ class ReportPortalClient:
 
     # Launch/Test item operations (for upload)
     def start_launch(self, name: str, description: str = "", attributes: list | None = None) -> str:
-        return self.post(
+        """Start a launch and return the server-assigned launch UUID.
+
+        Uses the UUID from the server response (resp["id"]) for all subsequent
+        API calls and ID resolution.
+        """
+        resp = self.post(
             "launch",
             {
                 "name": name,
@@ -262,9 +294,47 @@ class ReportPortalClient:
                 "mode": "DEFAULT",
                 "attributes": attributes or [],
             },
-        ).get("id")
+        )
+        launch_uuid = resp.get("id", "")
+        if not launch_uuid:
+            err(f"POST /launch response missing 'id': {resp}", EXIT_API_ERROR)
+        return launch_uuid
+
+    def get_launch_numeric_id(self, launch_uuid: str) -> str:
+        """Resolve the numeric database ID for a launch UUID.
+
+        Polls GET /launch?filter.eq.uuid={uuid} with exponential backoff
+        (capped at 30s) within self.timeout budget.
+        Returns launch_uuid unchanged if lookup fails within the budget.
+        """
+        budget = self.timeout if self.timeout else 60
+        deadline = time.monotonic() + budget
+        attempt = 0
+        info(f"  Resolving numeric launch ID (budget {budget}s)...")
+
+        while time.monotonic() < deadline:
+            if attempt > 0:
+                delay = min(2**attempt, 30)
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    break
+                info(f"  Waiting {min(delay, remaining):.0f}s (attempt {attempt + 1})...")
+                time.sleep(min(delay, remaining))
+
+            resp = self.get(f"launch?filter.eq.uuid={launch_uuid}&page.size=1")
+            content = resp.get("content", [])
+            if content and isinstance(content[0].get("id"), int):
+                numeric_id = content[0]["id"]
+                info(f"  Resolved launch ID: {numeric_id} (attempt {attempt + 1})")
+                return str(numeric_id)
+
+            attempt += 1
+
+        warn(f"  [WARN] Could not resolve numeric launch ID; URL will use UUID: {launch_uuid}")
+        return launch_uuid
 
     def finish_launch(self, launch_uuid: str) -> None:
+        """Finish a launch by its UUID (RP requires UUID, not numeric ID)."""
         self.put(f"launch/{launch_uuid}/finish", {"endTime": self._timestamp()})
 
     def start_item(
@@ -450,7 +520,7 @@ def cmd_list(args, client: ReportPortalClient):
         for item in items:
             print(f"  {item['id']}\t{item['name']}\t{item.get('type', '')}")
     else:
-        err(f"Unknown type: {what}. Use 'dashboards' or 'filters'")
+        err(f"Unknown type: {what}. Use 'dashboards' or 'filters'", EXIT_USAGE)
 
 
 # ============================================================================
@@ -752,10 +822,10 @@ def _upload_xunit(  # noqa: PLR0914
     launch_attrs = parse_attributes(attributes)
 
     info("Uploading xUnit results to ReportPortal...")
-    print(f"  File: {file_path}")
-    print(f"  Launch: {launch_name}")
+    click.echo(f"  File: {file_path}")
+    click.echo(f"  Launch: {launch_name}")
     if launch_attrs:
-        print(f"  Attributes: {attributes}")
+        click.echo(f"  Attributes: {attributes}")
 
     # Parse xUnit
     tree = ET.parse(file_path)
@@ -766,21 +836,26 @@ def _upload_xunit(  # noqa: PLR0914
         testsuites = [root]
 
     if not testsuites:
-        err("No testsuites found in xUnit file")
+        err("No testsuites found in xUnit file", EXIT_USAGE)
 
-    # Start launch
+    total_tests = sum(len(s.findall("testcase")) for s in testsuites)
+    click.echo(f"  Found {len(testsuites)} suite(s), {total_tests} test(s)")
+
+    # Start launch — use UUID for item linking; resolve numeric ID before finish
     launch_uuid = client.start_launch(launch_name, launch_desc, launch_attrs)
-    print(f"  Started launch: {launch_uuid}")
+    click.echo(f"  Started launch: {launch_uuid}")
 
     stats = {"total": 0, "passed": 0, "failed": 0, "skipped": 0}
 
     try:
-        for suite in testsuites:
+        for si, suite in enumerate(testsuites, 1):
             suite_name = suite.get("name", "Unknown Suite")
+            suite_tests = suite.findall("testcase")
+            click.echo(f"  Uploading suite {si}/{len(testsuites)}: {suite_name} ({len(suite_tests)} tests)")
 
             suite_uuid = client.start_item(name=suite_name, item_type="SUITE", launch_uuid=launch_uuid)
 
-            for testcase in suite.findall("testcase"):
+            for testcase in suite_tests:
                 test_name = testcase.get("name", "Unknown Test")
                 classname = testcase.get("classname", "")
                 status = get_test_status(testcase)
@@ -813,17 +888,21 @@ def _upload_xunit(  # noqa: PLR0914
 
             client.finish_item(suite_uuid, launch_uuid, "PASSED")
 
-        client.finish_launch(launch_uuid)
-
-        print(
-            f"  Tests: {stats['total']} (passed: {stats['passed']}, "
+        click.echo(
+            f"  Done: {stats['total']} tests (passed: {stats['passed']}, "
             f"failed: {stats['failed']}, skipped: {stats['skipped']})"
         )
+
+        client.finish_launch(launch_uuid)
+
+        # Resolve numeric database ID for the UI URL
+        launch_id = client.get_launch_numeric_id(launch_uuid)
+
         ok("✓ Upload complete")
-        print(f"  URL: {client.url}/ui/#{client.project}/launches/all/{launch_uuid}")
+        click.echo(f"  URL: {client.url}/ui/#{client.project}/launches/all/{launch_id}")
 
     except Exception as e:
-        print(f"Error during upload: {e}")
+        click.echo(f"Error during upload: {e}")
         try:
             client.finish_launch(launch_uuid)
         except Exception:
@@ -865,16 +944,18 @@ def parse_attributes(attrs_str: str) -> list:
         return []
     stripped = attrs_str.strip()
     if stripped.startswith("["):
-        return json.loads(stripped)
-    result = []
-    for pair in stripped.split(","):
-        pair = pair.strip()
-        if ":" in pair:
-            key, val = pair.split(":", 1)
-            result.append({"key": key.strip(), "value": val.strip()})
-        elif pair:
-            result.append({"value": pair})
-    return result
+        attrs = json.loads(stripped)
+    else:
+        attrs = []
+        for pair in stripped.split(","):
+            pair = pair.strip()
+            if ":" in pair:
+                key, val = pair.split(":", 1)
+                attrs.append({"key": key.strip(), "value": val.strip()})
+            elif pair:
+                attrs.append({"value": pair})
+    # RP rejects attributes with empty or whitespace-only values
+    return [a for a in attrs if a.get("value", "").strip()]
 
 
 # ============================================================================
@@ -914,6 +995,7 @@ class Config:
         self.project = None
         self.token = None
         self.client = None
+        self.timeout: int | None = 600
 
 
 pass_config = click.make_pass_decorator(Config, ensure=True)
@@ -938,12 +1020,12 @@ def require_client(config: Config) -> ReportPortalClient:
     if config.client:
         return config.client
     if not config.server:
-        err("ReportPortal server URL required. Set RP_SERVER or use --server")
+        err("ReportPortal server URL required. Set RP_SERVER or use --server", EXIT_USAGE)
     if not config.project:
-        err("Project name required. Set RP_PROJECT or use --project")
+        err("Project name required. Set RP_PROJECT or use --project", EXIT_USAGE)
     if not config.token:
-        err("API token required. Set RP_API_TOKEN, use --token, or --token-file", EXIT_AUTH_ERROR)
-    client = ReportPortalClient(config.server, config.project, config.token)
+        err(MSG_API_TOKEN_REQUIRED, EXIT_AUTH_ERROR)
+    client = ReportPortalClient(config.server, config.project, config.token, timeout=config.timeout)
     valid, token_err = client.validate_token()
     if not valid:
         err(f"{token_err}. Run --help for auth instructions.", EXIT_AUTH_ERROR)
@@ -959,7 +1041,7 @@ def require_client_for_source(config: Config, source: str, resource_id: int | No
     Returns (client, resource_type, resource_id).
     """
     if not config.token:
-        err("API token required. Set RP_API_TOKEN, use --token, or --token-file", EXIT_AUTH_ERROR)
+        err(MSG_API_TOKEN_REQUIRED, EXIT_AUTH_ERROR)
 
     if source.startswith("http"):
         parsed = parse_rp_url(source)
@@ -973,7 +1055,7 @@ def require_client_for_source(config: Config, source: str, resource_id: int | No
         print(f"  ID: {parsed['resource_id']}")
         print()
 
-        client = ReportPortalClient(parsed["server"], parsed["project"], config.token)
+        client = ReportPortalClient(parsed["server"], parsed["project"], config.token, timeout=config.timeout)
         valid, token_err = client.validate_token()
         if not valid:
             err(f"{token_err}.", EXIT_AUTH_ERROR)
@@ -996,21 +1078,25 @@ def require_client_for_source(config: Config, source: str, resource_id: int | No
 @click.option("--token", envvar="RP_API_TOKEN", help="API token (or set RP_API_TOKEN)")
 @click.option("--token-file", help="Path to file containing API token")
 @click.option("--verify-token", is_flag=True, default=False, help="Verify token validity and exit")
+@click.option(
+    "--timeout", default=600, show_default=True, type=int, help="Per-request timeout in seconds (0 = no timeout)"
+)
 @pass_config
-def cli(config: Config, server: str, project: str, token: str, token_file: str, verify_token: bool):
+def cli(config: Config, server: str, project: str, token: str, token_file: str, verify_token: bool, timeout: int):
     """ReportPortal CLI Tool - Manage dashboards, filters, and upload test results."""
     config.server = server
     config.project = project
     config.token = get_token(token, token_file)
+    config.timeout = timeout or None  # 0 means no timeout; requests expects None for that
     ctx = click.get_current_context()
     if verify_token:
         if not config.server:
-            err("ReportPortal server URL required. Set RP_SERVER or use --server")
+            err("ReportPortal server URL required. Set RP_SERVER or use --server", EXIT_USAGE)
         if not config.project:
-            err("Project name required. Set RP_PROJECT or use --project")
+            err("Project name required. Set RP_PROJECT or use --project", EXIT_USAGE)
         if not config.token:
-            err("API token required. Set RP_API_TOKEN, use --token, or --token-file", EXIT_AUTH_ERROR)
-        client = ReportPortalClient(config.server, config.project, config.token)
+            err(MSG_API_TOKEN_REQUIRED, EXIT_AUTH_ERROR)
+        client = ReportPortalClient(config.server, config.project, config.token, timeout=config.timeout)
         valid, token_err = client.validate_token()
         if valid:
             info(f"Token is valid for project '{config.project}' on {config.server}")

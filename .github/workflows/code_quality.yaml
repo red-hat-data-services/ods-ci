@@ -30,7 +30,8 @@ jobs:
       -   name: Run robocop
           run: robocop --verbose --reports sarif . || true
       -   name: Upload SARIF file
-          uses: github/codeql-action/upload-sarif@v3
+          if: github.event.repository.fork == false
+          uses: github/codeql-action/upload-sarif@v4
           with:
             sarif_file: .sarif.json
             category: robocop

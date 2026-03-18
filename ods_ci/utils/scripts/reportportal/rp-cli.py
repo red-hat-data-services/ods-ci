@@ -364,6 +364,16 @@ class ReportPortalClient:
             data["issue"] = {"issueType": ISSUE_TO_INVESTIGATE}
         self.put(f"item/{item_uuid}", data)
 
+    def create_log(self, item_uuid: str, launch_uuid: str, message: str, level: str = "ERROR") -> None:
+        data = {
+            "itemUuid": item_uuid,
+            "launchUuid": launch_uuid,
+            "time": self._timestamp(),
+            "message": message,
+            "level": level,
+        }
+        self.post("log/entry", data)
+
     @staticmethod
     def _timestamp() -> str:
         return datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
@@ -809,6 +819,19 @@ def cmd_upload(args, client: ReportPortalClient):
     _upload_xunit(client, file_path, args.name, description, attributes)
 
 
+def _send_testcase_logs(client: ReportPortalClient, testcase, item_uuid: str, launch_uuid: str) -> None:
+    """Send failure/error/stdout/stderr from an xUnit testcase as RP log entries."""
+    for tag, level in [("failure", "ERROR"), ("error", "ERROR"), ("system-err", "WARN"), ("system-out", "INFO")]:
+        elem = testcase.find(tag)
+        if elem is None:
+            continue
+        msg = elem.get("message", "")
+        body = (elem.text or "").strip()
+        log_msg = f"{msg}\n\n{body}" if body else (msg or body)
+        if log_msg.strip():
+            client.create_log(item_uuid, launch_uuid, log_msg, level)
+
+
 def _upload_xunit(  # noqa: PLR0914
     client: ReportPortalClient,
     file_path: str,
@@ -857,7 +880,6 @@ def _upload_xunit(  # noqa: PLR0914
 
             for testcase in suite_tests:
                 test_name = testcase.get("name", "Unknown Test")
-                classname = testcase.get("classname", "")
                 status = get_test_status(testcase)
                 component = get_component(testcase)
 
@@ -867,14 +889,14 @@ def _upload_xunit(  # noqa: PLR0914
 
                 test_uuid = client.start_item(
                     name=test_name,
-                    item_type="TEST",
+                    item_type="STEP",
                     launch_uuid=launch_uuid,
                     parent_uuid=suite_uuid,
                     attributes=test_attrs,
-                    code_ref=classname if classname else None,
                 )
 
                 has_issue = testcase.find("failure") is not None or testcase.find("error") is not None
+                _send_testcase_logs(client, testcase, test_uuid, launch_uuid)
 
                 client.finish_item(test_uuid, launch_uuid, status, has_issue)
 

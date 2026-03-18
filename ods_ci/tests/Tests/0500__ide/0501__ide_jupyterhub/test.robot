@@ -15,25 +15,13 @@ Test Tags        JupyterHub
 
 
 *** Test Cases ***
-Logged Into OpenShift
-    [Tags]   Smoke
-    ...      ODS-127
-    Open Page    ${OCP_CONSOLE_URL}
-    Login To Openshift  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-    Wait Until OpenShift Console Is Loaded
-
-Can Launch Jupyterhub
-    [Tags]   Smoke
-    ...      ODS-935
-    #This keyword will work with accounts that are not cluster admins.
-    Launch RHOAI Via OCP Application Launcher
-    Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
-    Wait For RHODS Dashboard To Load
-    Launch Jupyter From RHODS Dashboard Link
-
 Can Login To Jupyterhub
     [Tags]   Smoke
     ...      ODS-936
+    SeleniumLibrary.Open Browser  ${ODH_DASHBOARD_URL}  browser=${BROWSER.NAME}  options=${BROWSER.OPTIONS}
+    Login To RHODS Dashboard  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
+    Wait For RHODS Dashboard To Load
+    Launch Jupyter From RHODS Dashboard Link
     Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
     Verify Service Account Authorization Not Required
     Wait Until Page Contains  Start a basic workbench

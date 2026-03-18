@@ -376,6 +376,12 @@ Verify DSC Contains Correct Component Versions  # robocop: disable:too-long-test
     ...       ExcludeOnODH
     Gather Release Attributes From DSC And DSCI
     ${rhods_operator_branch} =  Replace String Using Regexp  ${DSC_RELEASE_VERSION}  ^([0-9]+\\.[0-9]+).*  \\1
+    # Adding this logic to pull the changes from the proper EA branch
+    IF  "-ea.1" in "${DSC_RELEASE_VERSION}"
+        ${rhods_operator_branch} =  Set Variable  ${rhods_operator_branch}-ea.1
+    ELSE IF  "-ea.2" in "${DSC_RELEASE_VERSION}"
+        ${rhods_operator_branch} =  Set Variable  ${rhods_operator_branch}-ea.2
+    END
     Common.Clone Git Repository  ${RHODS_OPERATOR_GIT_REPO}  rhoai-${rhods_operator_branch}  ${RHODS_OPERATOR_GIT_DIR}
     ${component_versions} =  Run
     ...    oc get dsc default-dsc -o json | jq '.status.components'

@@ -31,7 +31,7 @@ Launch KFNBC Spawner As Base User
     Launch Dashboard    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}    ${TEST_USER_3.AUTH_TYPE}
     ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
     Launch JupyterHub Spawner From Dashboard    ${TEST_USER_3.USERNAME}    ${TEST_USER_3.PASSWORD}
-    ...    ${TEST_USER.AUTH_TYPE}
+    ...    ${TEST_USER_3.AUTH_TYPE}
 
 Launch Notebook And Go Back To Control Panel Window
     [Documentation]    Spawns a notebook server, opens it in a new tab, and Switches
@@ -43,12 +43,11 @@ Launch Notebook And Go Back To Control Panel Window
     Switch Window    ${handle}
 
 Verify That Server Can Be Stopped
-    [Documentation]    Tries to stop a server and verifies that the pod is group_name
+    [Documentation]    Tries to stop a server and verifies that the pod is gone
     ...    from the cluster, waiting for a configurable `${timeout}` for it to disappear
     [Arguments]    ${timeout}=30
+    ${notebook_pod_name} =    Get User Notebook Pod Name    ${TEST_USER_3.USERNAME}
     Handle Control Panel
-    Wait Until JupyterHub Spawner Is Ready
-    ${notebook_pod_name} =   Get User Notebook Pod Name  ${TEST_USER_3.USERNAME}
     ${stopped} =    Set Variable    ${False}
     TRY
         WHILE    not ${stopped}    limit=${timeout}

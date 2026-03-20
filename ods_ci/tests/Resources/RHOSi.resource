@@ -97,7 +97,7 @@ Fetch Cluster Type By Domain
     [Documentation]    This Keyword outputs the kind of cluster depending on the console URL domain
     ${matches}=    Get Regexp Matches    ${OCP_CONSOLE_URL}    rh-ods|rhaiseng
     ${matches_len}=     Get Length      ${matches}
-    IF  '${matches_len}' == '0'
+    IF  '$matches_len' == '0'
         Set Global Variable    ${CLUSTER_TYPE}    managed
     ELSE
         Set Global Variable    ${CLUSTER_TYPE}    selfmanaged
@@ -107,7 +107,7 @@ Assign Vars According To Product
     [Documentation]    Assign vars related to product
     # Product specific vars
     # If UPDATE_CHANNEL is "odh-stable", use RHODS variables regardless of PRODUCT
-    IF    "${PRODUCT}" == "RHODS" or "${UPDATE_CHANNEL}" == "odh-stable"
+    IF    "$PRODUCT" == "RHODS" or "$UPDATE_CHANNEL" == "odh-stable"
         Set Suite Variable    ${OPERATOR_SUBSCRIPTION_LABEL}     operators.coreos.com/rhods-operator.${OPERATOR_NAMESPACE}
         Set Suite Variable    ${OPERATOR_APPNAME}     "Red Hat OpenShift AI"
         Set Suite Variable    ${OPERATOR_DEPLOYMENT_NAME}    rhods-operator
@@ -115,13 +115,13 @@ Assign Vars According To Product
         Set Suite Variable    ${OPERATOR_LABEL_SELECTOR}    name=rhods-operator
         Set Suite Variable    ${DASHBOARD_DEPLOYMENT_NAME}    rhods-dashboard
         Set Suite Variable    ${DASHBOARD_LABEL_SELECTOR}     app.kubernetes.io/part-of=rhods-dashboard
-        IF  "${CLUSTER_TYPE}" == "managed"
+        IF  "$CLUSTER_TYPE" == "managed"
             Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     addon-managed-odh
             Set Suite Variable    ${ADMIN_GROUPS}       dedicated-admins
         ELSE
             Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     rhoai-operator-dev
             Set Suite Variable    ${ADMIN_GROUPS}       rhods-admins', 'rhods-users
-            IF  "${INSTALL_TYPE}" == "OperatorHub"
+            IF  "$INSTALL_TYPE" == "OperatorHub"
                 Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     rhods-operator
             END
         END
@@ -131,7 +131,7 @@ Assign Vars According To Product
         Set Suite Variable    ${KUEUE_IMAGE_PULL_PATH}        registry.redhat.io
         ${CSV_NAME} =   Catenate    SEPARATOR=   ${OPERATOR_NAME}.     ${RHODS_VERSION}
         Set Suite Variable      ${CSV_NAME}
-    ELSE IF    "${PRODUCT}" == "ODH" AND "${OPERATOR_NAME}" == "opendatahub-operator"
+    ELSE IF    "$PRODUCT" == "ODH" and "$OPERATOR_NAME" == "opendatahub-operator"
         Set Suite Variable    ${OPERATOR_SUBSCRIPTION_LABEL}     operators.coreos.com/opendatahub-operator.${OPERATOR_NAMESPACE}
         Set Suite Variable    ${IMAGE_PULL_PATH}        quay.io
         Set Suite Variable    ${KSERVE_IMAGE_PULL_PATH}        registry.k8s.io
@@ -174,13 +174,13 @@ Set Expected Value For Release Name
     ...                RHOAI managed: OpenShift AI Cloud Service
     ...                RHOAI selfmanaged: OpenShift AI Self-Managed
 
-    IF    "${PRODUCT}" == "RHODS" or "${UPDATE_CHANNEL}" == "odh-stable"
-        IF     ${IS_SELF_MANAGED}
+    IF    "$PRODUCT" == "RHODS" or "$UPDATE_CHANNEL" == "odh-stable"
+        IF     $IS_SELF_MANAGED
              ${expected_release_name}=    Set Variable     ${RHOAI_SELFMANAGED_RELEASE_NAME}
         ELSE
              ${expected_release_name}=    Set Variable     ${RHOAI_MANAGED_RELEASE_NAME}
         END
-    ELSE IF    "${PRODUCT}" == "ODH"
+    ELSE IF    "$PRODUCT" == "ODH"
         ${expected_release_name}=    Set Variable     ${ODH_RELEASE_NAME}
     END
 

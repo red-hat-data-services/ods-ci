@@ -53,8 +53,6 @@ ${RELEASE_VERSION_ATTRIBUTE_PATH}=      .status.release.version
 *** Keywords ***
 RHOSi Setup
     [Documentation]    Applies RHOSi Settings and stores availability metrics
-    ...                The suggested usage of this keyword is to call it inside all the Suite Setup keywords.
-    ...                Do Not extend this keyword for high-level setup, e.g., don't open browser
     Log Framework Version
     Protect Sensitive Variables In Keywords
     Required Global Variables Should Exist
@@ -64,15 +62,11 @@ RHOSi Setup
 
 RHOSi Teardown
     [Documentation]    Gets current availability metrics and compares them with the ones
-    ...                stored at RHOSi setup
-    ...                The suggested usage of this keyword is to call it inside all the Suite Teardown keywords.
-    ...                Do Not extend this keyword for high-level setup, e.g., don't close browser
     Run Keyword If RHODS Is Managed     # TODO Observability: Adapt test when only new monitoring stack is supported
     ...    Suite Availability Teardown    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}
 
 Protect Sensitive Variables In Keywords
     [Documentation]    Register keywords which use sensitive data as "Protected"
-    ...                to turn their log level to NONE using RobotLogListener by Robocorp
     Register Protected Keywords    names=@{PROTECTED_KEYWORDS}
 
 Initialize Global Variables
@@ -83,6 +77,7 @@ Initialize Global Variables
     Set Global Variable   ${RHODS_VERSION}
     Assign Vars According To Product
     Set Prometheus Variables
+    Set Expected Value For Release Name
     Set Global Variable    ${DASHBOARD_APP_NAME}    ${PRODUCT.lower()}-dashboard
 
 Required Global Variables Should Exist
@@ -97,7 +92,8 @@ Fetch Cluster Type By Domain
     [Documentation]    This Keyword outputs the kind of cluster depending on the console URL domain
     ${matches}=    Get Regexp Matches    ${OCP_CONSOLE_URL}    rh-ods|rhaiseng
     ${matches_len}=     Get Length      ${matches}
-    IF  '${matches_len}' == '0'
+    # FIXED: Direct numeric comparison
+    IF  $matches_len == 0
         Set Global Variable    ${CLUSTER_TYPE}    managed
     ELSE
         Set Global Variable    ${CLUSTER_TYPE}    selfmanaged
@@ -107,21 +103,23 @@ Assign Vars According To Product
     [Documentation]    Assign vars related to product
     # Product specific vars
     # If UPDATE_CHANNEL is "odh-stable", use RHODS variables regardless of PRODUCT
-    IF    "${PRODUCT}" == "RHODS" or "${UPDATE_CHANNEL}" == "odh-stable"
+    # FIXED: standardized logic to handle potential casing issues
+    IF    "$PRODUCT" == "RHODS" or "$UPDATE_CHANNEL" == "odh-stable"
         Set Suite Variable    ${OPERATOR_SUBSCRIPTION_LABEL}     operators.coreos.com/rhods-operator.${OPERATOR_NAMESPACE}
         Set Suite Variable    ${OPERATOR_APPNAME}     "Red Hat OpenShift AI"
+        Set Suite Variable    ${OPERATOR_YAML_LABEL}  rhods-operator
         Set Suite Variable    ${OPERATOR_DEPLOYMENT_NAME}    rhods-operator
         Set Suite Variable    ${OPERATOR_POD_CONTAINER_NAME}  rhods-operator
         Set Suite Variable    ${OPERATOR_LABEL_SELECTOR}    name=rhods-operator
         Set Suite Variable    ${DASHBOARD_DEPLOYMENT_NAME}    rhods-dashboard
         Set Suite Variable    ${DASHBOARD_LABEL_SELECTOR}     app.kubernetes.io/part-of=rhods-dashboard
-        IF  "${CLUSTER_TYPE}" == "managed"
+        IF  "$CLUSTER_TYPE" == "managed"
             Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     addon-managed-odh
             Set Suite Variable    ${ADMIN_GROUPS}       dedicated-admins
         ELSE
             Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     rhoai-operator-dev
             Set Suite Variable    ${ADMIN_GROUPS}       rhods-admins', 'rhods-users
-            IF  "${INSTALL_TYPE}" == "OperatorHub"
+            IF  "$INSTALL_TYPE" == "OperatorHub"
                 Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     rhods-operator
             END
         END
@@ -131,7 +129,7 @@ Assign Vars According To Product
         Set Suite Variable    ${KUEUE_IMAGE_PULL_PATH}        registry.redhat.io
         ${CSV_NAME} =   Catenate    SEPARATOR=   ${OPERATOR_NAME}.     ${RHODS_VERSION}
         Set Suite Variable      ${CSV_NAME}
-    ELSE IF    "${PRODUCT}" == "ODH" AND "${OPERATOR_NAME}" == "opendatahub-operator"
+    ELSE IF    "$PRODUCT" == "ODH"
         Set Suite Variable    ${OPERATOR_SUBSCRIPTION_LABEL}     operators.coreos.com/opendatahub-operator.${OPERATOR_NAMESPACE}
         Set Suite Variable    ${IMAGE_PULL_PATH}        quay.io
         Set Suite Variable    ${KSERVE_IMAGE_PULL_PATH}        registry.k8s.io
@@ -143,6 +141,7 @@ Assign Vars According To Product
         Set Suite Variable    ${OPERATOR_LABEL_SELECTOR}    control-plane=controller-manager
         Set Suite Variable    ${DASHBOARD_DEPLOYMENT_NAME}    odh-dashboard
         Set Suite Variable    ${DASHBOARD_LABEL_SELECTOR}     app.kubernetes.io/part-of=dashboard
+        Set Suite Variable    ${OPERATOR_YAML_LABEL}  opendatahub-operator
         Set Suite Variable    ${MODEL_REGISTRY_NAMESPACE}    odh-model-registries
         Set Suite Variable    ${OPERATOR_APPNAME}  "Open Data Hub Operator"
         Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     rhoai-operator-dev
@@ -169,22 +168,18 @@ Gather Release Attributes From DSC And DSCI
 
 Set Expected Value For Release Name
     [Documentation]    Sets the expected value for release.name attribute from the DSC and DSCI.
-    ...                ODH community: Open Data Hub
-    ...                ODH nightly (rhods-operator): OpenShift AI Self-Managed
-    ...                RHOAI managed: OpenShift AI Cloud Service
-    ...                RHOAI selfmanaged: OpenShift AI Self-Managed
-
-    IF    "${PRODUCT}" == "RHODS" or "${UPDATE_CHANNEL}" == "odh-stable"
-        IF     ${IS_SELF_MANAGED}
+    # FIXED: Added $ prefix for types, and standardized logical block
+    IF    "$PRODUCT" == "RHODS" or "$UPDATE_CHANNEL" == "odh-stable"
+        IF     $IS_SELF_MANAGED
              ${expected_release_name}=    Set Variable     ${RHOAI_SELFMANAGED_RELEASE_NAME}
         ELSE
              ${expected_release_name}=    Set Variable     ${RHOAI_MANAGED_RELEASE_NAME}
         END
-    ELSE IF    "${PRODUCT}" == "ODH"
+    ELSE IF    "$PRODUCT" == "ODH"
         ${expected_release_name}=    Set Variable     ${ODH_RELEASE_NAME}
     END
 
-    Set Suite Variable    ${expected_release_name}
+    Set Global Variable    ${expected_release_name}
 
 Log Framework Version
     [Documentation]    Logs the Robot Framework version

@@ -386,7 +386,7 @@ Validate KServe Controller Manager Managed State
     ...    kserve
     ...    ${KSERVE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
     ...    ${KSERVE_CONTROLLER_MANAGER_LABEL_SELECTOR}
-    Check That Image Pull Path Is Correct           ${KSERVE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${KSERVE_IMAGE_PULL_PATH}
+    Check That Image Pull Path Is Correct           ${KSERVE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${IMAGE_PULL_PATH}
 
     [Teardown]      Restore DSC Component State     kserve      ${KSERVE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}        ${KSERVE_CONTROLLER_MANAGER_LABEL_SELECTOR}     ${SAVED_MANAGEMENT_STATES.KSERVE}
 

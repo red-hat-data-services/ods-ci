@@ -7,9 +7,25 @@ GPU_INSTALL_DIR="$(dirname "$0")"
 
 CHANNEL="$(oc get packagemanifest gpu-operator-certified -n openshift-marketplace -o jsonpath='{.status.defaultChannel}')"
 
+if [ -z "$CHANNEL" ]; then
+  echo "ERROR: Could not determine defaultChannel from gpu-operator-certified packagemanifest."
+  echo "Falling back to 'stable' channel."
+  CHANNEL="stable"
+fi
+echo "Using GPU Operator channel: $CHANNEL"
+
 CSVNAME="$(oc get packagemanifests/gpu-operator-certified -n openshift-marketplace -o json | jq -r '.status.channels[] | select(.name == "'$CHANNEL'") | .currentCSV')"
 
-sed -i'' -e "s|channel: \".*\"|channel: \"$CHANNEL\"|" "$GPU_INSTALL_DIR/gpu_install.yaml"
+if [ -z "$CSVNAME" ]; then
+  echo "ERROR: Could not determine CSV name for channel '$CHANNEL'."
+  echo "Available channels:"
+  oc get packagemanifest gpu-operator-certified -n openshift-marketplace -o jsonpath='{.status.channels[*].name}'
+  echo ""
+  exit 1
+fi
+echo "Using GPU Operator CSV: $CSVNAME"
+
+sed -i'' -e "0,/v1.11/s//$CHANNEL/g" "$GPU_INSTALL_DIR/gpu_install.yaml"
 
 oc apply -f "$GPU_INSTALL_DIR/gpu_install.yaml"
 /bin/bash tasks/Resources/Provisioning/GPU/NFD/install_nfd.sh

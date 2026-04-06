@@ -25,7 +25,14 @@ if [ -z "$CSVNAME" ]; then
 fi
 echo "Using GPU Operator CSV: $CSVNAME"
 
-sed -i'' -e "0,/v1.11/s//$CHANNEL/g" "$GPU_INSTALL_DIR/gpu_install.yaml"
+# Rewrite subscription channel regardless of template value (PLACEHOLDER, v1.11, v25.3, ...).
+sed -i'' -E "s|^([[:space:]]*)channel:.*|\1channel: \"${CHANNEL}\"|" "$GPU_INSTALL_DIR/gpu_install.yaml"
+
+if grep -E '^[[:space:]]*channel:[[:space:]]*"PLACEHOLDER"' "$GPU_INSTALL_DIR/gpu_install.yaml" \
+  || grep -E '^[[:space:]]*channel:[[:space:]]*PLACEHOLDER([[:space:]]|$)' "$GPU_INSTALL_DIR/gpu_install.yaml"; then
+  echo "ERROR: GPU Operator subscription channel was not substituted (still PLACEHOLDER). Check gpu_install.yaml and sed."
+  exit 1
+fi
 
 oc apply -f "$GPU_INSTALL_DIR/gpu_install.yaml"
 /bin/bash tasks/Resources/Provisioning/GPU/NFD/install_nfd.sh

@@ -14,7 +14,7 @@ if [ -z "$CHANNEL" ]; then
 fi
 echo "Using GPU Operator channel: $CHANNEL"
 
-CSVNAME="$(oc get packagemanifests/gpu-operator-certified -n openshift-marketplace -o json | jq -r '.status.channels[] | select(.name == "'$CHANNEL'") | .currentCSV')"
+CSVNAME="$(oc get packagemanifests/gpu-operator-certified -n openshift-marketplace -o json | jq -r ".status.channels[] | select(.name == \"${CHANNEL}\") | .currentCSV")"
 
 if [ -z "$CSVNAME" ]; then
   echo "ERROR: Could not determine CSV name for channel '$CHANNEL'."
@@ -47,15 +47,14 @@ function wait_until_pod_ready_status() {
   local namespace=nvidia-gpu-operator
   local timeout=${2:-360}
   start_time=$(date +%s)
-  while [ $(($(date +%s) - start_time)) -lt $timeout ]; do
+  while [ $(($(date +%s) - start_time)) -lt "$timeout" ]; do
      pod_status="$(oc get pod -l app="$pod_label" -n "$namespace" --no-headers=true 2>/dev/null)"
      daemon_status="$(oc get daemonset -l app="$pod_label" -n "$namespace" --no-headers=true 2>/dev/null)"
      if [[ -n "$daemon_status" || -n "$pod_status" ]] ; then
         echo "Waiting until GPU Pods or Daemonset of '$pod_label' in namespace '$namespace' are in running state..."
         echo "Pods status: '$pod_status'"
         echo "Daemonset status: '$daemon_status'"
-        oc wait --timeout=10s --for=condition=ready pod -n "$namespace" -l app="$pod_label" || \
-        if [ $? -ne 0 ]; then
+        if ! oc wait --timeout=10s --for=condition=ready pod -n "$namespace" -l app="$pod_label"; then
           continue
         fi
         oc rollout status --watch --timeout=3m daemonset -n "$namespace" -l app="$pod_label" || continue
@@ -74,7 +73,7 @@ function rerun_accelerator_migration() {
   # Context: https://github.com/opendatahub-io/odh-dashboard/issues/1938
   echo "Creating NVIDIA Accelerator Profile via RHOAI Dashboard deployment rollout"
   configmap=$(oc get configmap migration-gpu-status --ignore-not-found -n redhat-ods-applications -oname)
-  if [ -z $configmap ];
+  if [ -z "$configmap" ];
     then
       echo "migration-gpu-status not found. Is RHOAI Installed? NVIDIA Accelerator Profile creation SKIPPED."
       return 0

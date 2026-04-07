@@ -47,12 +47,12 @@ jobs:
           fetch-depth: 0
 
       # Install Python before pipx: otherwise Poetry is bound to the runner default (3.12) and poetry sync fails.
+      # No cache: 'poetry' here — setup-python runs poetry for cache keys; Poetry is installed in the next step.
       - name: Set up Python
         id: setup-python
         uses: actions/setup-python@v5
         with:
           python-version: '${{ env.python_version }}'
-          cache: 'poetry'
 
       - name: Install poetry
         run: pipx install poetry==${{ env.poetry_version }} --python "${{ steps.setup-python.outputs.python-path }}"
@@ -90,7 +90,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '${{ env.python_version }}'
-          cache: 'poetry'
 
       - name: Install poetry
         run: pipx install poetry==${{ env.poetry_version }} --python "${{ steps.setup-python.outputs.python-path }}"

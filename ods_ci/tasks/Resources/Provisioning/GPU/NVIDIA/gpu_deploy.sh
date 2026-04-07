@@ -8,8 +8,8 @@ GPU_INSTALL_DIR="$(dirname "$0")"
 CHANNEL="$(oc get packagemanifest gpu-operator-certified -n openshift-marketplace -o jsonpath='{.status.defaultChannel}')"
 
 if [[ -z "${CHANNEL}" ]]; then
-  echo "ERROR: Could not determine defaultChannel from gpu-operator-certified packagemanifest."
-  echo "Falling back to 'stable' channel."
+  echo "ERROR: Could not determine defaultChannel from gpu-operator-certified packagemanifest." >&2
+  echo "Falling back to 'stable' channel." >&2
   CHANNEL="stable"
 fi
 echo "Using GPU Operator channel: $CHANNEL"
@@ -17,10 +17,10 @@ echo "Using GPU Operator channel: $CHANNEL"
 CSVNAME="$(oc get packagemanifests/gpu-operator-certified -n openshift-marketplace -o json | jq -r ".status.channels[] | select(.name == \"${CHANNEL}\") | .currentCSV")"
 
 if [[ -z "${CSVNAME}" ]]; then
-  echo "ERROR: Could not determine CSV name for channel '$CHANNEL'."
-  echo "Available channels:"
-  oc get packagemanifest gpu-operator-certified -n openshift-marketplace -o jsonpath='{.status.channels[*].name}'
-  echo ""
+  echo "ERROR: Could not determine CSV name for channel '$CHANNEL'." >&2
+  echo "Available channels:" >&2
+  oc get packagemanifest gpu-operator-certified -n openshift-marketplace -o jsonpath='{.status.channels[*].name}' >&2
+  echo "" >&2
   exit 1
 fi
 echo "Using GPU Operator CSV: $CSVNAME"
@@ -30,7 +30,7 @@ sed -i'' -E "s|^([[:space:]]*)channel:.*|\1channel: \"${CHANNEL}\"|" "$GPU_INSTA
 
 if grep -E '^[[:space:]]*channel:[[:space:]]*"PLACEHOLDER"' "$GPU_INSTALL_DIR/gpu_install.yaml" \
   || grep -E '^[[:space:]]*channel:[[:space:]]*PLACEHOLDER([[:space:]]|$)' "$GPU_INSTALL_DIR/gpu_install.yaml"; then
-  echo "ERROR: GPU Operator subscription channel was not substituted (still PLACEHOLDER). Check gpu_install.yaml and sed."
+  echo "ERROR: GPU Operator subscription channel was not substituted (still PLACEHOLDER). Check gpu_install.yaml and sed." >&2
   exit 1
 fi
 
@@ -87,14 +87,14 @@ function rerun_accelerator_migration() {
   echo "Deleting configmap migration-gpu-status"
   if ! oc delete configmap migration-gpu-status -n redhat-ods-applications;
     then
-      echo "ERROR: When trying to delete the migration-gpu-status configmap"
+      echo "ERROR: When trying to delete the migration-gpu-status configmap" >&2
       return 1
   fi
 
   echo "Rollout restart rhods-dashboard deployment"
   if ! oc rollout restart deployment.apps/rhods-dashboard -n redhat-ods-applications;
     then
-      echo "ERROR: When trying to rollout restart rhods-dashboard deployment"
+      echo "ERROR: When trying to rollout restart rhods-dashboard deployment" >&2
       return 1
   fi
 

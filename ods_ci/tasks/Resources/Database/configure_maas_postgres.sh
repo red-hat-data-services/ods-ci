@@ -1,17 +1,29 @@
 #!/bin/bash
+set -euo pipefail
 
 APPS_NS="${APPLICATIONS_NAMESPACE:-redhat-ods-applications}"
 POSTGRES_IMAGE="registry.redhat.io/rhel9/postgresql-15:latest"
 
-# Generate random credentials
-PG_USER="maas-$(head /dev/urandom | tr -dc a-z0-9 | head -c 8)"
-PG_PASS="$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 32)"
-PG_DB="maas-$(head /dev/urandom | tr -dc a-z0-9 | head -c 8)"
-
-# Skip if already provisioned
-if oc get secret maas-db-config -n "${APPS_NS}" &>/dev/null; then
-    echo "maas-db-config already exists in ${APPS_NS}, skipping."
+# Skip if all resources already exist and deployment is ready
+if oc get secret maas-db-config -n "${APPS_NS}" &>/dev/null \
+   && oc get secret postgres-creds -n "${APPS_NS}" &>/dev/null \
+   && oc get service postgres -n "${APPS_NS}" &>/dev/null \
+   && oc get deployment postgres -n "${APPS_NS}" &>/dev/null; then
+    oc wait deployment/postgres -n "${APPS_NS}" --for=condition=Available --timeout=5m
+    echo "MaaS PostgreSQL prerequisites already exist in ${APPS_NS}, skipping."
     exit 0
+fi
+
+# Reuse existing credentials if postgres-creds secret is present, otherwise generate new ones
+if oc get secret postgres-creds -n "${APPS_NS}" &>/dev/null; then
+    PG_USER="$(oc get secret postgres-creds -n "${APPS_NS}" -o jsonpath='{.data.POSTGRES_USER}' | base64 -d)"
+    PG_PASS="$(oc get secret postgres-creds -n "${APPS_NS}" -o jsonpath='{.data.POSTGRES_PASSWORD}' | base64 -d)"
+    PG_DB="$(oc get secret postgres-creds -n "${APPS_NS}" -o jsonpath='{.data.POSTGRES_DB}' | base64 -d)"
+    echo "Reusing existing postgres-creds in ${APPS_NS}"
+else
+    PG_USER="maas-$(head /dev/urandom | tr -dc a-z0-9 | head -c 8)"
+    PG_PASS="$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 32)"
+    PG_DB="maas-$(head /dev/urandom | tr -dc a-z0-9 | head -c 8)"
 fi
 
 # 1. postgres-creds secret
@@ -130,8 +142,9 @@ spec:
 EOF
 
 # Wait for postgres to be ready
-oc wait deployment/postgres -n "${APPS_NS}" \
-  --for=condition=Available --timeout=5m || \
-echo "PostgreSQL deployment may not be ready; check with: oc get deployment postgres -n ${APPS_NS}"
+if ! oc wait deployment/postgres -n "${APPS_NS}" --for=condition=Available --timeout=5m; then
+    echo "PostgreSQL deployment is not ready in ${APPS_NS}" >&2
+    exit 1
+fi
 
 echo "MaaS PostgreSQL prerequisites provisioned in ${APPS_NS}"

@@ -7,7 +7,7 @@ GPU_INSTALL_DIR="$(dirname "$0")"
 
 CHANNEL="$(oc get packagemanifest gpu-operator-certified -n openshift-marketplace -o jsonpath='{.status.defaultChannel}')"
 
-if [ -z "$CHANNEL" ]; then
+if [[ -z "${CHANNEL}" ]]; then
   echo "ERROR: Could not determine defaultChannel from gpu-operator-certified packagemanifest."
   echo "Falling back to 'stable' channel."
   CHANNEL="stable"
@@ -16,7 +16,7 @@ echo "Using GPU Operator channel: $CHANNEL"
 
 CSVNAME="$(oc get packagemanifests/gpu-operator-certified -n openshift-marketplace -o json | jq -r ".status.channels[] | select(.name == \"${CHANNEL}\") | .currentCSV")"
 
-if [ -z "$CSVNAME" ]; then
+if [[ -z "${CSVNAME}" ]]; then
   echo "ERROR: Could not determine CSV name for channel '$CHANNEL'."
   echo "Available channels:"
   oc get packagemanifest gpu-operator-certified -n openshift-marketplace -o jsonpath='{.status.channels[*].name}'
@@ -54,7 +54,7 @@ function wait_until_pod_ready_status() {
   local namespace=nvidia-gpu-operator
   local timeout=${2:-360}
   start_time=$(date +%s)
-  while [ $(($(date +%s) - start_time)) -lt "$timeout" ]; do
+  while [[ $(($(date +%s) - start_time)) -lt "${timeout}" ]]; do
      pod_status="$(oc get pod -l app="$pod_label" -n "$namespace" --no-headers=true 2>/dev/null)"
      daemon_status="$(oc get daemonset -l app="$pod_label" -n "$namespace" --no-headers=true 2>/dev/null)"
      if [[ -n "$daemon_status" || -n "$pod_status" ]] ; then
@@ -80,10 +80,9 @@ function rerun_accelerator_migration() {
   # Context: https://github.com/opendatahub-io/odh-dashboard/issues/1938
   echo "Creating NVIDIA Accelerator Profile via RHOAI Dashboard deployment rollout"
   configmap=$(oc get configmap migration-gpu-status --ignore-not-found -n redhat-ods-applications -oname)
-  if [ -z "$configmap" ];
-    then
-      echo "migration-gpu-status not found. Is RHOAI Installed? NVIDIA Accelerator Profile creation SKIPPED."
-      return 0
+  if [[ -z "${configmap}" ]]; then
+    echo "migration-gpu-status not found. Is RHOAI Installed? NVIDIA Accelerator Profile creation SKIPPED."
+    return 0
   fi
   echo "Deleting configmap migration-gpu-status"
   if ! oc delete configmap migration-gpu-status -n redhat-ods-applications;

@@ -6,11 +6,11 @@ Resource         ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 
 
 *** Variables ***
-${FEATURE-STORE-RELEASE-TAG}             release-3.4-ea.1
+${FEATURE-STORE-RELEASE-TAG}             release-3.4-ea.2
 ${FEATURE-STORE_DIR}                     feature-store
 ${FEATURE-STORE_REPO_URL}                %{FEATURE-STORE_REPO_URL=https://github.com/opendatahub-io/feast.git}
-${NOTEBOOK_IMAGE}                        quay.io/rhoai/odh-workbench-jupyter-datascience-cpu-py312-rhel9@sha256:c9c5a46db3c7e0f2a07be8d143b49078300219c9c33ec9eadc2885e46ea1c44c
-${FEAST_VERSION}                         0.59.0
+${NOTEBOOK_IMAGE}                        quay.io/rhoai/odh-workbench-jupyter-datascience-cpu-py312-rhel9@sha256:b6e4f25a2585e4dfdcbc9d1fdc6aed099dcab8b6ff2a542636385a2f698cb664
+${FEAST_VERSION}                         0.60.0
 ${DSC_NAME}                              default-dsc
 
 
@@ -67,6 +67,25 @@ Run Feast Operator E2E Test
     ...    shell=true
     ...    timeout=10 min
     ...    env:RUN_ON_OPENSHIFT_CI=true
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Running test ${TEST_NAME} failed
+    END
+
+Run Feast Operator Upgrade Test
+    [Documentation]   Run feast operator Upgrade test
+    [Arguments]   ${TEST_NAME}
+    Log To Console    "Running feature-store operator Upgrade test: ${TEST_NAME}"
+    ${command}=    Set Variable    cd ${FEATURE-STORE_DIR}/infra/feast-operator && git fetch origin && git checkout ${FEATURE-STORE-RELEASE-TAG} && git branch && go test -timeout 10m ./test/e2e_rhoai/ -v -ginkgo.focus=${TEST_NAME}
+    ${result}=    Run Process    ${command}
+    ...    shell=true
+    ...    timeout=10 min
+    ...    env:RUN_ON_OPENSHIFT_CI=true
+    ...    env:AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+    ...    env:AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    ...    env:AWS_DEFAULT_REGION=${S3.BUCKET_1.REGION}
+    ...    env:AWS_S3_BUCKET=${S3.BUCKET_1.NAME}
     ...    stderr=STDOUT
     Log To Console    ${result.stdout}
     IF    ${result.rc} != 0

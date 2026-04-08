@@ -346,7 +346,7 @@ Run Keyword If RHODS Is Self-Managed
 Get Sub Domain Of Current URL
     [Documentation]    Gets the sub-domain of the current URL (i.e. everything before the first dot in the URL)
     ...    e.g. https://console-openshift-console.apps.<cluster>.rhods.ccitredhat.com -> https://console-openshift-console
-    ...    e.g. https://data-science-gateway.apps.<cluster>.rhods.ccitredhat.com/ -> https://data-science-gateway
+    ...    e.g. https://rh-ai.apps.<cluster>.rhods.ccitredhat.com/ -> https://rh-ai
     ${current_url} =    Get Location
     ${domain} =    Fetch From Left    string=${current_url}    marker=.
     RETURN    ${domain}

@@ -1441,6 +1441,6 @@ Configure MaaS Database
     [Documentation]    Provision PostgreSQL and maas-db-config secret required by maas-api
     Log To Console    Provisioning MaaS PostgreSQL prerequisites
     ${rc}    ${output} =    Run And Return Rc And Output
-    ...    bash tasks/Resources/Database/configure_maas_postgres.sh
+    ...    bash tasks/Resources/Database/configure_maas_postgres.sh --namespace ${APPLICATIONS_NAMESPACE}
     Log To Console    ${output}
     Should Be Equal As Integers    ${rc}    0    msg=Error provisioning MaaS PostgreSQL prerequisites

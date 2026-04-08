@@ -1,7 +1,21 @@
 #!/bin/bash
 set -euo pipefail
 
-APPS_NS="${APPLICATIONS_NAMESPACE:-redhat-ods-applications}"
+while [ "$#" -gt 0 ]; do
+    case $1 in
+        --namespace)
+            shift
+            APPS_NS=$1
+            shift
+            ;;
+        *)
+            echo "Unknown command line switch: $1"
+            exit 1
+            ;;
+    esac
+done
+
+APPS_NS="${APPS_NS:-redhat-ods-applications}"
 POSTGRES_IMAGE="registry.redhat.io/rhel9/postgresql-15:latest"
 
 # Skip if all resources already exist and deployment is ready

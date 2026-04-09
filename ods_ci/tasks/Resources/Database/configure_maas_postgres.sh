@@ -18,6 +18,9 @@ done
 APPS_NS="${APPS_NS:-redhat-ods-applications}"
 POSTGRES_IMAGE="registry.redhat.io/rhel9/postgresql-15:latest"
 
+# Ensure namespace exists
+oc create namespace "${APPS_NS}" --dry-run=client -o yaml | oc apply -f -
+
 # Skip if all resources already exist and deployment is ready
 if oc get secret maas-db-config -n "${APPS_NS}" &>/dev/null \
    && oc get secret postgres-creds -n "${APPS_NS}" &>/dev/null \

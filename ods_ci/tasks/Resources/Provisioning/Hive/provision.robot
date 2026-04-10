@@ -177,7 +177,7 @@ Get Web Console URL
     ...    oc -n ${pool_namespace} get cd ${clusterdeployment_name} -o json | jq -r '.status.webConsoleURL' --exit-status    # robocop: disable:line-too-long
     ...    shell=yes
     Should Be True    ${web_console_url.rc} == 0
-    RETURN    ${web_console_url.stdout}
+    RETURN    ${web_console_url}
 
 Wait For Cluster To Be Ready
     IF    ${use_cluster_pool}

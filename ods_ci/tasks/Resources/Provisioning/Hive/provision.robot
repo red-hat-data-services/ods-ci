@@ -193,10 +193,10 @@ Wait For Cluster To Be Ready
     ...    shell=yes
     IF    ${use_cluster_pool}
         ${custer_status} =    Run Process
-        ...    oc -n ${hive_namespace} wait --for\=condition\=ClusterRunning\=True clusterclaim ${claim_name} --timeout\=15m    shell=yes    # robocop: disable:line-too-long
+        ...    oc -n ${hive_namespace} wait --for\=condition\=ClusterRunning\=True clusterclaim ${claim_name} --timeout\=25m    shell=yes    # robocop: disable:line-too-long
     ELSE
         ${custer_status} =    Run Process
-        ...    oc -n ${hive_namespace} wait --for\=condition\=Ready\=True clusterdeployment ${clusterdeployment_name} --timeout\=15m    shell=yes    # robocop: disable:line-too-long
+        ...    oc -n ${hive_namespace} wait --for\=condition\=Ready\=True clusterdeployment ${clusterdeployment_name} --timeout\=25m    shell=yes    # robocop: disable:line-too-long
     END
     # Workaround for old Hive with Openstack - Cluster is displayed as Resuming even when it is Running
     # add also support to the new Hive where the Cluster is displayed as Running

@@ -16,7 +16,7 @@ while [ "$#" -gt 0 ]; do
 done
 
 APPS_NS="${APPS_NS:-redhat-ods-applications}"
-POSTGRES_IMAGE="registry.redhat.io/rhel9/postgresql-15:latest"
+POSTGRES_IMAGE="registry.redhat.io/rhel9/postgresql-15@sha256:90ec347a35ab8a5d530c8d09f5347b13cc71df04f3b994bfa8b1a409b1171d59"
 
 # Ensure namespace exists
 oc create namespace "${APPS_NS}" --dry-run=client -o yaml | oc apply -f -
@@ -36,11 +36,15 @@ if oc get secret postgres-creds -n "${APPS_NS}" &>/dev/null; then
     PG_USER="$(oc get secret postgres-creds -n "${APPS_NS}" -o jsonpath='{.data.POSTGRES_USER}' | base64 -d)"
     PG_PASS="$(oc get secret postgres-creds -n "${APPS_NS}" -o jsonpath='{.data.POSTGRES_PASSWORD}' | base64 -d)"
     PG_DB="$(oc get secret postgres-creds -n "${APPS_NS}" -o jsonpath='{.data.POSTGRES_DB}' | base64 -d)"
+    if [[ -z "${PG_USER}" || -z "${PG_PASS}" || -z "${PG_DB}" ]]; then
+        echo "postgres-creds in ${APPS_NS} is missing required keys/values" >&2
+        exit 1
+    fi
     echo "Reusing existing postgres-creds in ${APPS_NS}"
 else
-    PG_USER="maas-$(head /dev/urandom | tr -dc a-z0-9 | head -c 8)"
-    PG_PASS="$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 32)"
-    PG_DB="maas-$(head /dev/urandom | tr -dc a-z0-9 | head -c 8)"
+    PG_USER="maas-$(tr -dc a-z0-9 </dev/urandom | head -c 8)"
+    PG_PASS="$(tr -dc A-Za-z0-9 </dev/urandom | head -c 32)"
+    PG_DB="maas-$(tr -dc a-z0-9 </dev/urandom | head -c 8)"
 fi
 
 # 1. postgres-creds secret

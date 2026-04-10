@@ -188,6 +188,10 @@ Wait For Cluster To Be Ready
     ${provision_status} =    Run Process
     ...    oc -n ${pool_namespace} wait --for\=condition\=ProvisionFailed\=False cd ${clusterdeployment_name} --timeout\=15m    # robocop: disable:line-too-long
     ...    shell=yes
+    # temporary workaround
+    Wait Until Keyword Succeeds    15m    10s    Run Process
+    ...    oc -n ${pool_namespace} get cd ${clusterdeployment_name} -o json | jq -r '.status.webConsoleURL' --exit-status    # robocop: disable:line-too-long
+    ...    shell=yes
     ${web_access} =    Run Process
     ...    oc -n ${pool_namespace} get cd ${clusterdeployment_name} -o json | jq -r '.status.webConsoleURL' --exit-status    # robocop: disable:line-too-long
     ...    shell=yes

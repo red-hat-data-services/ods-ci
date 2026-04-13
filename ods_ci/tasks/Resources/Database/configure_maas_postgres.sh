@@ -1,5 +1,4 @@
 #!/bin/bash
-set -euo pipefail
 
 while [ "$#" -gt 0 ]; do
     case $1 in
@@ -42,9 +41,9 @@ if oc get secret postgres-creds -n "${APPS_NS}" &>/dev/null; then
     fi
     echo "Reusing existing postgres-creds in ${APPS_NS}"
 else
-    PG_USER="maas-$(tr -dc a-z0-9 </dev/urandom | head -c 8)"
-    PG_PASS="$(tr -dc A-Za-z0-9 </dev/urandom | head -c 32)"
-    PG_DB="maas-$(tr -dc a-z0-9 </dev/urandom | head -c 8)"
+    PG_USER="maas-$(cat /dev/urandom | tr -dc a-z0-9 | head -c 8)"
+    PG_PASS="$(cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 32)"
+    PG_DB="maas-$(cat /dev/urandom | tr -dc a-z0-9 | head -c 8)"
 fi
 
 # 1. postgres-creds secret

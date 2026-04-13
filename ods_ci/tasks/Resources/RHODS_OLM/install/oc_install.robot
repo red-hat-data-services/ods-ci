@@ -1194,6 +1194,7 @@ Install RHOAI Dependencies With CLI
     Install Leader Worker Set Operator Via Cli
     Install Connectivity Link Operator Via Cli
     Install JobSet Dependencies
+    Configure MaaS Database
     Configure MaaS Gateway API
 
 Install Observability Dependencies
@@ -1435,3 +1436,11 @@ Configure MaaS Gateway API
     ...    bash tasks/Resources/Gateway/configure_maas_gateway.sh
     Log To Console    ${output}
     Should Be Equal As Integers    ${rc}    0    msg=Error configuring Gateway for MaaS
+
+Configure MaaS Database
+    [Documentation]    Provision PostgreSQL and maas-db-config secret required by maas-api
+    Log To Console    Provisioning MaaS PostgreSQL prerequisites
+    ${rc}    ${output} =    Run And Return Rc And Output
+    ...    bash tasks/Resources/Database/configure_maas_postgres.sh --namespace ${APPLICATIONS_NAMESPACE}
+    Log To Console    ${output}
+    Should Be Equal As Integers    ${rc}    0    msg=Error provisioning MaaS PostgreSQL prerequisites

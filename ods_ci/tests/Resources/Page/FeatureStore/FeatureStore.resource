@@ -73,6 +73,25 @@ Run Feast Operator E2E Test
         FAIL    Running test ${TEST_NAME} failed
     END
 
+Run Feast Operator Upgrade Test
+    [Documentation]   Run feast operator Upgrade test
+    [Arguments]   ${TEST_NAME}
+    Log To Console    "Running feature-store operator Upgrade test: ${TEST_NAME}"
+    ${command}=    Set Variable    cd ${FEATURE-STORE_DIR}/infra/feast-operator && git fetch origin && git checkout ${FEATURE-STORE-RELEASE-TAG} && git branch && go test -timeout 10m ./test/e2e_rhoai/ -v -ginkgo.focus=${TEST_NAME}
+    ${result}=    Run Process    ${command}
+    ...    shell=true
+    ...    timeout=10 min
+    ...    env:RUN_ON_OPENSHIFT_CI=true
+    ...    env:AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+    ...    env:AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    ...    env:AWS_DEFAULT_REGION=${S3.BUCKET_1.REGION}
+    ...    env:AWS_S3_BUCKET=${S3.BUCKET_1.NAME}
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Running test ${TEST_NAME} failed
+    END
+
 Run Feast Notebook Test
     [Documentation]    Run feast Notebook test
     [Arguments]   ${TEST_NAME}

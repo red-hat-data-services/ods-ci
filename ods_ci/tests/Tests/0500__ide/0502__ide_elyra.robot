@@ -45,7 +45,7 @@ Verify Pipelines Integration With Elyra When Using Standard Data Science Image
     Verify Pipelines Integration With Elyra Running Hello World Pipeline Test
     ...    img=Jupyter | Data Science | CPU | Python 3.12
     ...    runtime_image=Runtime | Datascience | CPU | Python 3.12
-    ...    experiment_name=standard-data-science-pipeline
+    ...    pipeline_name=standard-data-science-pipeline
 
 Verify Pipelines Integration With Elyra When Using Standard Data Science Based Images
     [Documentation]    Verifies that a workbench using an image based on the Jupyter | Data Science | CPU | Python 3.12 Image
@@ -89,7 +89,7 @@ Elyra Pipelines Suite Teardown
 Verify Pipelines Integration With Elyra Running Hello World Pipeline Test     # robocop: off=too-many-calls-in-keyword
     [Documentation]    Creates and starts a workbench using ${img} and verifies that the Hello World sample pipeline
     ...    runs successfully
-    [Arguments]    ${img}    ${runtime_image}    ${experiment_name}    ${workbench_timeout}=300s
+    [Arguments]    ${img}    ${runtime_image}    ${pipeline_name}    ${workbench_timeout}=300s
     Create Workbench    workbench_title=elyra_${img}    workbench_description=Elyra test
     ...                 prj_title=${PRJ_TITLE}    image_name=${img}    hardware_profile=default-profile
     ...                 storage=Persistent  pv_existent=${FALSE}
@@ -101,7 +101,7 @@ Verify Pipelines Integration With Elyra Running Hello World Pipeline Test     # 
     ...    ods-ci-notebooks-main/notebooks/500__jupyterhub/pipelines/v2/elyra/run-pipelines-on-data-science-pipelines/hello-generic-world.pipeline  # robocop: disable
     Verify Hello World Pipeline Elements
     Set Runtime Image In All Nodes    runtime_image=${runtime_image}
-    Run Pipeline    pipeline_name=${experiment_name}
+    Run Pipeline    pipeline_name=${pipeline_name}
     Wait Until Page Contains Element    xpath=//a[.="Run Details."]    timeout=30s
     ${pipeline_run_name} =    Get Pipeline Run Name
     Switch To Pipeline Execution Page
@@ -114,7 +114,7 @@ Verify Pipelines Integration With Elyra Running Hello World Pipeline Test     # 
     Menu.Navigate To Page    Develop & train    Pipelines    Pipeline definitions
     Select Pipeline Project By Name    ${PRJ_TITLE}
     Log    ${pipeline_run_name}
-    Verify Pipeline Run Is Completed    ${pipeline_run_name}    timeout=5m    experiment_name=${experiment_name}
+    Verify Pipeline Run Is Completed    ${pipeline_run_name}    timeout=5m
     [Teardown]    Verify Pipelines Integration With Elyra Teardown    ${img}
 
 Verify Pipelines Integration With Elyra Teardown

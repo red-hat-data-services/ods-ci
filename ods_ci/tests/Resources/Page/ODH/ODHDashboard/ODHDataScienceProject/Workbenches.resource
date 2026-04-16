@@ -10,7 +10,7 @@ Resource       Projects.resource
 *** Variables ***
 ${PV_MOUNT_PATH}=    ods-ci-test-path
 ${WORKBENCH_SECTION_XP}=             xpath=//div[@data-testid="section-workbenches"]
-${WORKBENCH_CREATE_BTN_XP}=           xpath=//*[@data-testid="create-workbench-button"]
+${WORKBENCH_CREATE_BTN_XP}=           xpath=//button[@data-testid="create-workbench-button"]
 ${WORKBENCH_CREATE_BTN_2_XP}=         xpath=//button[@id="create-button"]
 ${WORKBENCH_CANCEL_BTN_XP}=         xpath=//button[@id="cancel-button"]
 ${WORKBENCH_NAME_INPUT_XP}=               xpath=//input[@name="workbench-name"]
@@ -30,7 +30,7 @@ ${WORKBENCH_ADD_VAR_BTN_XP}=           xpath=//button[@data-testid="add-variable
 ${WORKBENCH_USE_CONNECTION_CHK_XP}=           xpath=//input[@name="enable-data-connection-checkbox"]
 ${WORKBENCH_EXISTING_CONNECTION_RAD_XP}=      xpath=//button[@data-testid="attach-existing-connection-button"]
 ${WORKBENCH_STATUS_STOPPED}=                  Stopped
-${WORKBENCH_STATUS_RUNNING}=                  Ready
+${WORKBENCH_STATUS_RUNNING}=                  Running
 ${WORKBENCH_STATUS_STARTING}=                 Starting
 ${WORKBENCH_STATUS_FAILED}=                   Failed
 ${WORKBENCH_IMAGE_VER_LABEL}=        //label[@for="workbench-image-version-selection"]

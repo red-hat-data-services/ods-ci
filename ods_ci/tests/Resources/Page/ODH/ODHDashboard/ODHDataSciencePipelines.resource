@@ -203,7 +203,7 @@ Verify Pipeline Run Is Completed
     [Documentation]    Open the Pipeline detail and wait for the Completed Status
     [Arguments]    ${pipeline_run_name}    ${timeout}=10m   ${experiment_name}=Default
     Open Pipeline Run    ${pipeline_run_name}    ${experiment_name}
-    Wait Until Page Contains Element    //span[@class='pf-v6-c-label__text' and text()='Complete']    timeout=${timeout}
+    Wait Until Page Contains Element    //span[@class='pf-v6-c-label__text' and text()='Succeeded']    timeout=${timeout}
     Capture Page Screenshot
 
 # robocop: disable:line-too-long

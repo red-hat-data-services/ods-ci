@@ -274,7 +274,7 @@ Spawn Notebook
         Wait Until Page Contains    TriggeredScaleUp    timeout=120s
     END
     Wait Until Page Contains Element
-    ...    //*[@data-testid="notebook-status-text"]//*[text() = "Ready"]
+    ...    //*[@data-testid="notebook-status-text"]//*[text() = "Running"]
     ...    ${spawner_timeout}
     IF  ${same_tab}
         Click Button    Open in current tab

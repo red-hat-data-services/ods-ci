@@ -190,7 +190,20 @@ if [ "$gpu_nodes_found" = false ]; then
 fi
 
 echo "Applying NVIDIA GPU ClusterPolicy"
-oc apply -f "${GPU_INSTALL_DIR}/cluster-policy.yaml"
+if [ "${ENABLE_RDMA:-false}" = "true" ]; then
+  echo "RDMA enabled - applying kernel module params and enabling RDMA in ClusterPolicy"
+  oc apply -f "${GPU_INSTALL_DIR}/rdma-kernel-module-params.yaml"
+  sed -e 's/<rdma_enabled>/true/g' \
+      -e 's/<gdrcopy_enabled>/true/g' \
+      -e 's/<kernel_module_config>/kernel-module-params/g' \
+      "${GPU_INSTALL_DIR}/cluster-policy.yaml" | oc apply -f -
+else
+  echo "RDMA disabled (set ENABLE_RDMA=true to enable)"
+  sed -e 's/<rdma_enabled>/false/g' \
+      -e 's/<gdrcopy_enabled>/false/g' \
+      -e 's/<kernel_module_config>/""/g' \
+      "${GPU_INSTALL_DIR}/cluster-policy.yaml" | oc apply -f -
+fi
 wait_until_pod_ready_status "nvidia-device-plugin-daemonset" 600
 wait_until_pod_ready_status "nvidia-container-toolkit-daemonset"
 wait_until_pod_ready_status "nvidia-dcgm-exporter"

@@ -15,6 +15,7 @@ Test Tags           DuringUpgrade
 
 *** Variables ***
 ${UPGRADE_TO_IIB}=    ${EMPTY}
+${UPGRADE_ODS_BUILD_URL}=    ${EMPTY}
 
 
 *** Test Cases ***
@@ -24,7 +25,9 @@ Upgrade RHODS
     ${initial_version} =    Get RHODS Version
     ${initial_creation_date} =      Get Operator Pod Creation Date
     Set Suite Variable    ${UPDATE_CHANNEL}    ${UPGRADE_TO_UPDATE_CHANNEL}
-    Install RHODS   ${CLUSTER_TYPE}    ${UPGRADE_TO_IIB}    Manual    ${UPGRADE_TO_VERSION}    True
+    ${upgrade_image} =    Set Variable If    "${UPGRADE_ODS_BUILD_URL}" != "${EMPTY}"
+    ...    ${UPGRADE_ODS_BUILD_URL}    ${UPGRADE_TO_IIB}
+    Install RHODS   ${CLUSTER_TYPE}    ${upgrade_image}    Manual    ${UPGRADE_TO_VERSION}    True
     RHODS Version Should Be Greater Than        ${initial_version}
     Operator Pod Creation Date Should Be Updated        ${initial_creation_date}
     OpenShiftLibrary.Wait For Pods Status       namespace=${OPERATOR_NAMESPACE}     timeout=300

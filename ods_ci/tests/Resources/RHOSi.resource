@@ -83,6 +83,7 @@ Initialize Global Variables
     Set Global Variable   ${RHODS_VERSION}
     Assign Vars According To Product
     Set Prometheus Variables
+    Set Expected Value For Release Name
     Set Global Variable    ${DASHBOARD_APP_NAME}    ${PRODUCT.lower()}-dashboard
 
 Required Global Variables Should Exist
@@ -97,7 +98,7 @@ Fetch Cluster Type By Domain
     [Documentation]    This Keyword outputs the kind of cluster depending on the console URL domain
     ${matches}=    Get Regexp Matches    ${OCP_CONSOLE_URL}    rh-ods|rhaiseng
     ${matches_len}=     Get Length      ${matches}
-    IF  '${matches_len}' == '0'
+    IF    $matches_len == 0
         Set Global Variable    ${CLUSTER_TYPE}    managed
     ELSE
         Set Global Variable    ${CLUSTER_TYPE}    selfmanaged
@@ -107,28 +108,30 @@ Assign Vars According To Product
     [Documentation]    Assign vars related to product
     # Product specific vars
     # If UPDATE_CHANNEL is "odh-stable", use RHODS variables regardless of PRODUCT
-    IF    "${PRODUCT}" == "RHODS" or "${UPDATE_CHANNEL}" == "odh-stable"
+    # ODH + rhods-operator (RHOAI) shares RHODS subscription layout; use $VAR in IF (not "${VAR}") for Python eval
+    IF    $PRODUCT == "RHODS" or $UPDATE_CHANNEL == "odh-stable" or $PRODUCT == "ODH" and $OPERATOR_NAME == "rhods-operator"
         Set Suite Variable    ${OPERATOR_SUBSCRIPTION_LABEL}     operators.coreos.com/rhods-operator.${OPERATOR_NAMESPACE}
         Set Suite Variable    ${OPERATOR_APPNAME}     "Red Hat OpenShift AI"
+        Set Suite Variable    ${OPERATOR_YAML_LABEL}  rhods-operator
         Set Suite Variable    ${OPERATOR_DEPLOYMENT_NAME}    rhods-operator
         Set Suite Variable    ${OPERATOR_POD_CONTAINER_NAME}  rhods-operator
         Set Suite Variable    ${OPERATOR_LABEL_SELECTOR}    name=rhods-operator
         Set Suite Variable    ${DASHBOARD_DEPLOYMENT_NAME}    rhods-dashboard
         Set Suite Variable    ${DASHBOARD_LABEL_SELECTOR}     app.kubernetes.io/part-of=rhods-dashboard
-        IF  "${CLUSTER_TYPE}" == "managed"
+        IF    $CLUSTER_TYPE == "managed"
             Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     addon-managed-odh
             Set Suite Variable    ${ADMIN_GROUPS}       dedicated-admins
         ELSE
             Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     rhoai-operator-dev
-            Set Suite Variable    ${ADMIN_GROUPS}       rhods-admins', 'rhods-users
-            IF  "${INSTALL_TYPE}" == "OperatorHub"
+            Set Suite Variable    ${ADMIN_GROUPS}       rhods-admins,rhods-users
+            IF    $INSTALL_TYPE == "OperatorHub"
                 Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     rhods-operator
             END
         END
         Set Suite Variable  ${MODEL_REGISTRY_NAMESPACE}    rhoai-model-registries
         ${CSV_NAME} =   Catenate    SEPARATOR=   ${OPERATOR_NAME}.     ${RHODS_VERSION}
         Set Suite Variable      ${CSV_NAME}
-    ELSE IF    "${PRODUCT}" == "ODH" AND "${OPERATOR_NAME}" == "opendatahub-operator"
+    ELSE IF    $PRODUCT == "ODH" and $OPERATOR_NAME == "opendatahub-operator"
         Set Suite Variable    ${OPERATOR_SUBSCRIPTION_LABEL}     operators.coreos.com/opendatahub-operator.${OPERATOR_NAMESPACE}
         ${CSV_NAME} =   Catenate    SEPARATOR=   ${OPERATOR_NAME}.v   ${RHODS_VERSION}
         Set Suite Variable      ${CSV_NAME}
@@ -137,6 +140,7 @@ Assign Vars According To Product
         Set Suite Variable    ${OPERATOR_LABEL_SELECTOR}    control-plane=controller-manager
         Set Suite Variable    ${DASHBOARD_DEPLOYMENT_NAME}    odh-dashboard
         Set Suite Variable    ${DASHBOARD_LABEL_SELECTOR}     app.kubernetes.io/part-of=dashboard
+        Set Suite Variable    ${OPERATOR_YAML_LABEL}  opendatahub-operator
         Set Suite Variable    ${MODEL_REGISTRY_NAMESPACE}    odh-model-registries
         Set Suite Variable    ${OPERATOR_APPNAME}  "Open Data Hub Operator"
         Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     rhoai-operator-dev
@@ -173,15 +177,18 @@ Set Expected Value For Release Name
     ...                ODH nightly (rhods-operator): OpenShift AI Self-Managed
     ...                RHOAI managed: OpenShift AI Cloud Service
     ...                RHOAI selfmanaged: OpenShift AI Self-Managed
-
-    IF    "${PRODUCT}" == "RHODS" or "${UPDATE_CHANNEL}" == "odh-stable"
-        IF     ${IS_SELF_MANAGED}
+    ${IS_SELF_MANAGED}=    Is RHODS Self-Managed
+    Set Suite Variable    ${IS_SELF_MANAGED}
+    IF    $PRODUCT == "RHODS" or $UPDATE_CHANNEL == "odh-stable"
+        IF    ${IS_SELF_MANAGED}
              ${expected_release_name}=    Set Variable     ${RHOAI_SELFMANAGED_RELEASE_NAME}
         ELSE
              ${expected_release_name}=    Set Variable     ${RHOAI_MANAGED_RELEASE_NAME}
         END
-    ELSE IF    "${PRODUCT}" == "ODH"
+    ELSE IF    $PRODUCT == "ODH"
         ${expected_release_name}=    Set Variable     ${ODH_RELEASE_NAME}
+    ELSE
+        Fail    Unsupported PRODUCT for expected release name: PRODUCT=${PRODUCT}
     END
 
     Set Suite Variable    ${expected_release_name}

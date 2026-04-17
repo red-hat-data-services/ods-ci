@@ -97,9 +97,7 @@ Verify Pipelines Integration With Elyra Running Hello World Pipeline Test     # 
     ...                 envs=${ENVS_LIST}
     Start Workbench     workbench_title=elyra_${img}    timeout=${workbench_timeout}
     Launch And Access Workbench    workbench_title=elyra_${img}
-    Clone Git Repository And Open    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main
-    ...    ods-ci-notebooks-main/notebooks/500__jupyterhub/pipelines/v2/elyra/run-pipelines-on-data-science-pipelines/hello-generic-world.pipeline  # robocop: disable
-    Verify Hello World Pipeline Elements
+    Wait Until Keyword Succeeds    3x    20s    Clone And Verify Hello World Pipeline Elements
     Set Runtime Image In All Nodes    runtime_image=${runtime_image}
     Run Pipeline    pipeline_name=${experiment_name}
     Wait Until Page Contains Element    xpath=//a[.="Run Details."]    timeout=30s
@@ -133,6 +131,12 @@ Verify Hello World Pipeline Elements
     Page Should Contain Element    xpath=${SVG_CANVAS}${SVG_INTERACTABLE}${SVG_PIPELINE_NODES}${SVG_SINGLE_NODE}//span[.="Part 1 - Data Cleaning.ipynb"]  # robocop: disable
     Page Should Contain Element    xpath=${SVG_CANVAS}${SVG_INTERACTABLE}${SVG_PIPELINE_NODES}${SVG_SINGLE_NODE}//span[.="Part 2 - Data Analysis.ipynb"]  # robocop: disable
     Page Should Contain Element    xpath=${SVG_CANVAS}${SVG_INTERACTABLE}${SVG_PIPELINE_NODES}${SVG_SINGLE_NODE}//span[.="Part 3 - Time Series Forecasting.ipynb"]  # robocop: disable
+
+Clone And Verify Hello World Pipeline Elements
+    [Documentation]    Clone and open the pipeline, then verify elements in a single retryable step.
+    Clone Git Repository And Open    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main
+    ...    ods-ci-notebooks-main/notebooks/500__jupyterhub/pipelines/v2/elyra/run-pipelines-on-data-science-pipelines/hello-generic-world.pipeline  # robocop: disable
+    Verify Hello World Pipeline Elements
 
 Select Pipeline Project By Name
     [Documentation]    Select the project by project name

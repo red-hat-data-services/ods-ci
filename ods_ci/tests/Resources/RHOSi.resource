@@ -128,7 +128,7 @@ Assign Vars According To Product
         Set Suite Variable  ${MODEL_REGISTRY_NAMESPACE}    rhoai-model-registries
         ${CSV_NAME} =   Catenate    SEPARATOR=   ${OPERATOR_NAME}.     ${RHODS_VERSION}
         Set Suite Variable      ${CSV_NAME}
-    ELSE IF    "${PRODUCT}" == "ODH" AND "${OPERATOR_NAME}" == "opendatahub-operator"
+    ELSE IF    $PRODUCT == "ODH" and $OPERATOR_NAME == "opendatahub-operator"
         Set Suite Variable    ${OPERATOR_SUBSCRIPTION_LABEL}     operators.coreos.com/opendatahub-operator.${OPERATOR_NAMESPACE}
         ${CSV_NAME} =   Catenate    SEPARATOR=   ${OPERATOR_NAME}.v   ${RHODS_VERSION}
         Set Suite Variable      ${CSV_NAME}

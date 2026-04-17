@@ -127,9 +127,6 @@ Assign Vars According To Product
             END
         END
         Set Suite Variable    ${MODEL_REGISTRY_NAMESPACE}    rhoai-model-registries
-        Set Suite Variable    ${IMAGE_PULL_PATH}        registry.redhat.io
-        Set Suite Variable    ${KSERVE_IMAGE_PULL_PATH}        registry.redhat.io
-        Set Suite Variable    ${KUEUE_IMAGE_PULL_PATH}        registry.redhat.io
         ${CSV_NAME} =   Catenate    SEPARATOR=   ${OPERATOR_NAME}.     ${RHODS_VERSION}
         Set Suite Variable      ${CSV_NAME}
     ELSE IF    "${PRODUCT}" == "ODH" AND "${OPERATOR_NAME}" == "opendatahub-operator"

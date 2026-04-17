@@ -19,7 +19,7 @@ ${PIPELINE_RUN_DESC_INPUT_XP}=                   id:run-description
 ${PIPELINE_RUN_EXPERIMENT_BUTTON_XP}=            xpath://*[@data-testid="experiment-selector-toggle"]
 ${PIPELINE_RUN_EXPERIMENT_SELECTOR_TABLE_XP}=    xpath://*[@data-testid="experiment-selector-table-list"]
 ${PIPELINE_RUN_CREATE_BTN_XP}=                   xpath://*[@data-testid="run-page-submit-button"]
-${PIPELINE_EXPERIMENT_TABLE_XP}=                 xpath://*[@data-testid="experiment-table"]
+${PIPELINE_RUNS_TABLE_XP}=                       xpath://*[@data-testid="active-runs-table"]
 
 
 *** Keywords ***
@@ -171,13 +171,10 @@ Open Pipeline Detail
 
 Open Pipeline Run
     [Documentation]    Open the Pipeline Run detail.
-    [Arguments]    ${pipeline_run_name}    ${experiment_name}=Default
-    Navigate To Page    Develop & train    Experiments
+    [Arguments]    ${pipeline_run_name}
+    Navigate To Page    Develop & train    Pipelines    Runs
     ODHDashboard.Maybe Wait For Dashboard Loading Spinner Page    timeout=30s
-    Wait Until Page Contains    ${experiment_name}
-    Click Element    ${PIPELINE_EXPERIMENT_TABLE_XP}//*[@data-testid="table-row-title"]//*[text()="${experiment_name}"]
-    ODHDashboard.Maybe Wait For Dashboard Loading Spinner Page     timeout=30s
-    Wait Until Page Contains Element    xpath=//*[@data-testid="active-runs-tab"]      timeout=30s
+    Wait Until Page Contains Element    ${PIPELINE_RUNS_TABLE_XP}      timeout=30s
     Click Element    xpath=//*[@data-testid="active-runs-tab"]
     Wait Until Page Contains Element    xpath=//span[text()='${pipeline_run_name}']
     Click Element    xpath=//td[@data-label="Name"]//span[contains(text(), '${pipeline_run_name}')]
@@ -201,16 +198,16 @@ Get Pipeline Run Step Log
 
 Verify Pipeline Run Is Completed
     [Documentation]    Open the Pipeline detail and wait for the Completed Status
-    [Arguments]    ${pipeline_run_name}    ${timeout}=10m   ${experiment_name}=Default
-    Open Pipeline Run    ${pipeline_run_name}    ${experiment_name}
+    [Arguments]    ${pipeline_run_name}    ${timeout}=10m
+    Open Pipeline Run    ${pipeline_run_name}
     Wait Until Page Contains Element    //span[@class='pf-v6-c-label__text' and text()='Complete']    timeout=${timeout}
     Capture Page Screenshot
 
 # robocop: disable:line-too-long
 Get Pipeline Run Duplicate Parameters
     [Documentation]    Get Pipeline Run Duplicate Parameters
-    [Arguments]    ${pipeline_run_name}    ${experiment_name}=Default
-    Open Pipeline Run    ${pipeline_run_name}    ${experiment_name}
+    [Arguments]    ${pipeline_run_name}
+    Open Pipeline Run    ${pipeline_run_name}
     Wait Until Page Contains Element    xpath://button[contains(span/text(), 'Actions')]
     Click Element    xpath://button[contains(span/text(), 'Actions')]
     Wait Until Page Contains Element    xpath://a[@role='menuitem' and text()='Duplicate']

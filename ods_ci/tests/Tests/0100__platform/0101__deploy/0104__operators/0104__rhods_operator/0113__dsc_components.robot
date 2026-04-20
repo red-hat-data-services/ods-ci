@@ -8,7 +8,6 @@ Resource            ../../../../../../tasks/Resources/RHODS_OLM/install/oc_insta
 Resource            ../../../../../Resources/Page/Components/Components.resource
 
 Suite Setup         Suite Setup
-Suite Teardown      Suite Teardown
 
 
 *** Variables ***
@@ -723,10 +722,6 @@ Suite Setup
     ${SAVED_MANAGEMENT_STATES.MODELSASSERVICE}=    Get DSC Nested Component State    ${DSC_NAME}    kserve    modelsAsService    ${OPERATOR_NS}
     Set Suite Variable    ${SAVED_MANAGEMENT_STATES}
     Append To List  ${CONTROLLERS_LIST}    ${DASHBOARD_DEPLOYMENT_NAME}
-
-Suite Teardown
-    [Documentation]    Suite Teardown
-    RHOSi Teardown
 
 Restore Kueue Initial State
     [Documentation]    Keyword to restore the initial state of the Kueue component. If the restored state is Unmanaged

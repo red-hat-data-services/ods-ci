@@ -8,7 +8,6 @@ Resource          ../../../../Resources/OCP.resource
 Resource          ../../../../Resources/Common.robot
 Resource          ../../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 Suite Setup       Operator Setup
-Suite Teardown    RHOSi Teardown
 
 
 *** Test Cases ***

@@ -5,7 +5,6 @@ Resource          ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 Resource          ../../Resources/Page/FeatureStore/FeatureStore.resource
 Resource          ../../../tests/Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 Suite Setup       Prepare Feature Store Test Suite
-Suite Teardown    Cleanup Feature Store Setup
 Test Tags         ExcludeOnODH
 
 *** Test Cases ***

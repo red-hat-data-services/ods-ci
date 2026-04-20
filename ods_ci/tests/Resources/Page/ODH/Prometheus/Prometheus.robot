@@ -14,19 +14,11 @@ Run Query
     [Documentation]    Runs a prometheus query, obtaining the current value. More info at:
     ...                - https://promlabs.com/blog/2020/06/18/the-anatomy-of-a-promql-query
     ...                - https://prometheus.io/docs/prometheus/latest/querying/api/#range-queries
-    [Arguments]    ${pm_url}    ${pm_token}    ${pm_query}  ${project}=RHODS
+    [Arguments]    ${pm_url}    ${pm_token}    ${pm_query}
     ${pm_headers}=    Create Dictionary    Authorization=Bearer ${pm_token}
-
-    IF  "${project}" == "SERH"
-        ${resp}=    RequestsLibrary.GET    url=${pm_url}?query=${pm_query}
-        ...    headers=${pm_headers}    verify=${False}
-        Status Should Be    200    ${resp}
-
-    ELSE
-        ${resp}=    RequestsLibrary.GET    url=${pm_url}/api/v1/query?query=${pm_query}
-        ...    headers=${pm_headers}    verify=${False}
-        Status Should Be    200    ${resp}
-    END
+    ${resp}=    RequestsLibrary.GET    url=${pm_url}/api/v1/query?query=${pm_query}
+    ...    headers=${pm_headers}    verify=${False}
+    Status Should Be    200    ${resp}
     RETURN    ${resp}
 
 Run Range Query
@@ -387,32 +379,33 @@ Set Prometheus Variables
         ${prometheus_route_name}=    Set Variable    data-science-prometheus-route
         ${protocol}=    Set Variable    http
         ${service_account}=    Set Variable    data-science-monitoringstack-prometheus
-    ELSE
-        ${prometheus_route_name}=    Set Variable    prometheus
-        ${protocol}=    Set Variable    https
-        ${service_account}=    Set Variable    prometheus
-    END
 
-    ${result}= 	Run Process 	oc get route ${prometheus_route_name} -n ${MONITORING_NAMESPACE} -o jsonpath\='{.spec.host}'    shell=yes
-    IF    ${result.rc} == 0
+        ${result}= 	Run Process 	oc get route ${prometheus_route_name} -n ${MONITORING_NAMESPACE} -o jsonpath\='{.spec.host}'    shell=yes
+        IF    ${result.rc} == 0
         ${prometheus_url}=    Set Variable    ${result.stdout}
         Log    Prometheus is running at spec.host: ${prometheus_url}    console=True
-        IF    "${RHODS_PROMETHEUS_URL}" == "" or "${RHODS_PROMETHEUS_URL}" == "PROMETHEUS_URL"
-            ${RHODS_PROMETHEUS_URL}=    Set Variable    ${protocol}://${prometheus_url}
-            Log    Setting RHODS_PROMETHEUS_URL to: ${RHODS_PROMETHEUS_URL}    console=True
-            Set Global Variable   ${RHODS_PROMETHEUS_URL}
+            IF    "${RHODS_PROMETHEUS_URL}" == "" or "${RHODS_PROMETHEUS_URL}" == "PROMETHEUS_URL"
+                ${RHODS_PROMETHEUS_URL}=    Set Variable    ${protocol}://${prometheus_url}
+                Log    Setting RHODS_PROMETHEUS_URL to: ${RHODS_PROMETHEUS_URL}    console=True
+                Set Global Variable   ${RHODS_PROMETHEUS_URL}
+            ELSE
+                Log    Skipping setting RHODS_PROMETHEUS_URL, it already has value: ${RHODS_PROMETHEUS_URL}    console=True
+            END
+            IF    "${RHODS_PROMETHEUS_TOKEN}" == "" or "${RHODS_PROMETHEUS_TOKEN}" == "PROMETHEUS_TOKEN"
+                ${result}= 	Run Process 	oc create token ${service_account} -n ${MONITORING_NAMESPACE} --duration 6h    shell=yes
+                Should Be True    ${result.rc} == 0    Error creating Prometheus token: ${result.stderr}
+                ${RHODS_PROMETHEUS_TOKEN}=    Set Variable    ${result.stdout}
+                Log    Setting RHODS_PROMETHEUS_TOKEN for service account ${service_account}    console=True
+                Set Global Variable   ${RHODS_PROMETHEUS_TOKEN}
+            ELSE
+                Log    Skipping setting RHODS_PROMETHEUS_TOKEN, it is already set    console=True
+            END
+            Log      message=Prometheus URL: ${RHODS_PROMETHEUS_URL}, Prometheus Token: ${RHODS_PROMETHEUS_TOKEN}      console=True
         ELSE
-            Log    Skipping setting RHODS_PROMETHEUS_URL, it already has value: ${RHODS_PROMETHEUS_URL}    console=True
-        END
-        IF    "${RHODS_PROMETHEUS_TOKEN}" == "" or "${RHODS_PROMETHEUS_TOKEN}" == "PROMETHEUS_TOKEN"
-            ${result}= 	Run Process 	oc create token ${service_account} -n ${MONITORING_NAMESPACE} --duration 6h    shell=yes
-            Should Be True    ${result.rc} == 0    Error creating Prometheus token: ${result.stderr}
-            ${RHODS_PROMETHEUS_TOKEN}=    Set Variable    ${result.stdout}
-            Log    Setting RHODS_PROMETHEUS_TOKEN for service account ${service_account}    console=True
-            Set Global Variable   ${RHODS_PROMETHEUS_TOKEN}
-        ELSE
-            Log    Skipping setting RHODS_PROMETHEUS_TOKEN, it is already set    console=True
+            Log    message=No Prometheus found   level=WARN
         END
     ELSE
-        Log    message=No Prometheus found   level=WARN
+        Log     Skipping setting Prometheus variables since the new Observability Stack is not enabled    console=True
     END
+
+

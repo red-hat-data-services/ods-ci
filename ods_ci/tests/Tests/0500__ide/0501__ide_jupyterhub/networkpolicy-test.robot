@@ -78,7 +78,5 @@ Run Additional Notebook Cells
     Should Be Equal    ${out2}    Server did not respond after 10 seconds, assuming connection is blocked
 
 Network Policy Suite Teardown
-    [Documentation]    Suite teardown to close remaining notebook servers and running
-    ...                RHOSi teardown
+    [Documentation]    Suite teardown to close remaining notebook servers
     End Web Test
-    RHOSi Teardown

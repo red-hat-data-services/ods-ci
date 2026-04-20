@@ -6,7 +6,6 @@ Resource            ../../../../Resources/Page/OCPDashboard/OCPDashboard.resourc
 Resource            ../../../../Resources/RHOSi.resource
 
 Suite Setup         Auth Crd Suite Setup
-Suite Teardown      Auth Crd Suite Teardown
 
 
 *** Test Cases ***
@@ -24,10 +23,6 @@ Verify Auth Crd
 Auth Crd Suite Setup
     [Documentation]    Suite setup
     RHOSi Setup
-
-Auth Crd Suite Teardown
-    [Documentation]    Suite teardown
-    RHOSi Teardown
 
 Get User Groups From Auth Cr And Check Rolebinding Exists
     [Documentation]    Get User Groups From Auth CR And Check Rolebinding Exists

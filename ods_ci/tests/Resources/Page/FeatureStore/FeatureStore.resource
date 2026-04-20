@@ -23,11 +23,7 @@ Prepare Feature Store Test Suite
         Enable Component    feastoperator
         Wait Component Ready    feastoperator
     END
-
-Cleanup Feature Store Setup
-    [Documentation]   cleanup Feature store setup by Disabling component
-    RHOSi Teardown
-
+    
 Prepare Feast E2E Test Suite
     [Documentation]    Prepare Feast E2E Test Suite
     Log To Console    Preparing Feast E2E Test Suite
@@ -40,7 +36,6 @@ Teardown Feast E2E Test Suite
     [Documentation]   Cleanup directory and Feast E2E Test Suite
     Log To Console     "Removing directory ${FEATURE-STORE_DIR}"
     Remove Directory        ${FEATURE-STORE_DIR}    recursive=True
-    Cleanup Feature Store Setup
 
 Ensure Kueue Unmanaged For Feast Ray Offline Store Test
     [Documentation]    Ensure Kueue is Unmanaged for Feast tests

@@ -255,4 +255,3 @@ Project Suite Teardown
     ...    Delete Project Via CLI By Display Name   ${PRJ_TITLE}    AND
     ...    Wait Until Data Science Project Is Deleted  ${PRJ_TITLE}
     SeleniumLibrary.Close All Browsers
-    RHOSi Teardown

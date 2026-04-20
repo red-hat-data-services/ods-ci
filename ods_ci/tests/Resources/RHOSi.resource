@@ -59,16 +59,6 @@ RHOSi Setup
     Protect Sensitive Variables In Keywords
     Required Global Variables Should Exist
     Initialize Global Variables
-    Run Keyword If RHODS Is Managed     # TODO Observability: Adapt test when only new monitoring stack is supported
-    ...    Suite Availability Setup    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}
-
-RHOSi Teardown
-    [Documentation]    Gets current availability metrics and compares them with the ones
-    ...                stored at RHOSi setup
-    ...                The suggested usage of this keyword is to call it inside all the Suite Teardown keywords.
-    ...                Do Not extend this keyword for high-level setup, e.g., don't close browser
-    Run Keyword If RHODS Is Managed     # TODO Observability: Adapt test when only new monitoring stack is supported
-    ...    Suite Availability Teardown    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}
 
 Protect Sensitive Variables In Keywords
     [Documentation]    Register keywords which use sensitive data as "Protected"
@@ -129,7 +119,7 @@ Assign Vars According To Product
         Set Suite Variable    ${MODEL_REGISTRY_NAMESPACE}    rhoai-model-registries
         ${CSV_NAME} =   Catenate    SEPARATOR=   ${OPERATOR_NAME}.     ${RHODS_VERSION}
         Set Suite Variable      ${CSV_NAME}
-    ELSE IF    $PRODUCT == "ODH" and $OPERATOR_NAME == "opendatahub-operator"
+    ELSE IF    "${PRODUCT}" == "ODH" and "${OPERATOR_NAME}" == "opendatahub-operator"
         Set Suite Variable    ${OPERATOR_SUBSCRIPTION_LABEL}     operators.coreos.com/opendatahub-operator.${OPERATOR_NAMESPACE}
         ${CSV_NAME} =   Catenate    SEPARATOR=   ${OPERATOR_NAME}.v   ${RHODS_VERSION}
         Set Suite Variable      ${CSV_NAME}

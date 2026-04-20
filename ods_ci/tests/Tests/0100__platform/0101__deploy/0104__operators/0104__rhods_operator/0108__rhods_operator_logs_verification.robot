@@ -14,7 +14,6 @@ Library           OperatingSystem
 Library           String
 
 Suite Setup       RHOSi Setup
-Suite Teardown    RHOSi Teardown
 
 
 *** Variables ***

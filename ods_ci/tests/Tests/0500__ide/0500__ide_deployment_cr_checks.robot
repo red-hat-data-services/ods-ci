@@ -5,7 +5,6 @@ Resource         ../../Resources/OCP.resource
 Resource         ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 Test Tags        IDE    Smoke
 Suite Setup      Suite Setup
-Suite Teardown   Suite Teardown
 
 
 *** Variables ***
@@ -88,7 +87,3 @@ Suite Setup
     IF    "${workbenches}" != "true"
         Fail    The workbench component isn't enabled!
     END
-
-Suite Teardown
-    [Documentation]    Suite teardown
-    RHOSi Teardown

@@ -145,8 +145,8 @@ Install RHODS
               Upgrade RHODS In Self Managed Cluster Using CLI  ${image_url}     ${rhoai_version}
           END
       ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "Helm"
-             Install RHOAI In Self Managed Cluster Using Helm  ${enable_new_observability_stack}
-             ...    ${GITOPS_REPO_BRANCH}    ${GITOPS_REPO_URL}
+          Install RHOAI In Self Managed Cluster Using Helm    ${enable_new_observability_stack}
+          ...    ${GITOPS_REPO_BRANCH}    ${GITOPS_REPO_URL}
       ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "OperatorHub"
           IF  "${is_upgrade}" == "False"
               ${file_path} =    Set Variable    tasks/Resources/RHODS_OLM/install/
@@ -299,6 +299,8 @@ Verify RHODS Installation
   Wait For Pods Status  namespace=${OPERATOR_NAMESPACE}  timeout=1200
   Log  Verified ${OPERATOR_NAMESPACE}  console=yes
 
+  ${enable_new_observability_stack} =    Is New Observability Stack Enabled
+
   IF   "${cluster_type}" == "managed"
        IF   "${PRODUCT}" == "ODH" and "${UPDATE_CHANNEL}" != "odh-stable"
             Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
@@ -319,7 +321,6 @@ Verify RHODS Installation
             Wait Until Keyword Succeeds    6 min    0 sec
             ...    Is Resource Present    HardwareProfile    default-profile
             ...    ${APPLICATIONS_NAMESPACE}      ${IS_PRESENT}
-            ${enable_new_observability_stack} =    Is New Observability Stack Enabled
             IF    ${enable_new_observability_stack}
                     Patch DSCInitialization With Monitoring Info
             END
@@ -348,9 +349,8 @@ Verify RHODS Installation
       Wait Until Keyword Succeeds    6 min    0 sec
       ...    Is Resource Present    HardwareProfile    default-profile
       ...    ${APPLICATIONS_NAMESPACE}      ${IS_PRESENT}
-      ${enable_new_observability_stack} =    Is New Observability Stack Enabled
       IF    ${enable_new_observability_stack}
-              Patch DSCInitialization With Monitoring Info
+          Patch DSCInitialization With Monitoring Info
       END
       Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
   END

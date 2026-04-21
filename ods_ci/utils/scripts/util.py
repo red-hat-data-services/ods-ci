@@ -160,7 +160,9 @@ def oc_login(ocp_api_url="", username="", password="", kubeconfig_path="", timeo
         sys.exit(1)
 
 
-def oc_login_oidc(ocp_api_url, username, password, issuer_url, timeout=600):
+def oc_login_oidc(ocp_api_url, username, password, issuer_url,
+                  token_endpoint="", client_id="oc-cli",
+                  client_secret="", scope="openid", timeout=600):
     """
     Login to test cluster using oidc
     """
@@ -174,7 +176,9 @@ def oc_login_oidc(ocp_api_url, username, password, issuer_url, timeout=600):
         oc config use-context main
     """
     execute_command(setup_cmd)
-    tokens = get_oidc_tokens(username, password, issuer_url)
+    tokens = get_oidc_tokens(username, password, issuer_url,
+                             token_endpoint=token_endpoint, client_id=client_id,
+                             client_secret=client_secret, scope=scope)
     count = 0
     chk_flag = 0
     while count <= timeout:
@@ -182,15 +186,15 @@ def oc_login_oidc(ocp_api_url, username, password, issuer_url, timeout=600):
             oc config set-credentials "{username}"  \
                     --auth-provider=oidc  \
                     --auth-provider-arg=idp-issuer-url={issuer_url} \
-                    --auth-provider-arg=client-id=oc-cli  \
-                    --auth-provider-arg=client-secret=""  \
+                    --auth-provider-arg=client-id={client_id}  \
+                    --auth-provider-arg=client-secret="{client_secret}"  \
                     --auth-provider-arg=refresh-token={tokens["refresh_token"]} \
                     --auth-provider-arg=id-token={tokens["id_token"]}
             oc auth whoami
         """
         out = execute_command(cmd)
-        if (out is not None) and (username in out):
-            print("Logged into cluster successfully")
+        if out is not None and ("Username" in out or username in out):
+            print(f"Logged into cluster successfully as: {out.strip()}")
             chk_flag = 1
             break
         time.sleep(5)
@@ -200,14 +204,18 @@ def oc_login_oidc(ocp_api_url, username, password, issuer_url, timeout=600):
         sys.exit(1)
 
 
-def get_oidc_tokens(username, password, issuer_url, timeout=60):
+def get_oidc_tokens(username, password, issuer_url,
+                    token_endpoint="", client_id="oc-cli",
+                    client_secret="", scope="openid", timeout=60):
     """
     Get id and refresh token from OIDC issuer
     """
+    effective_token_endpoint = token_endpoint or f"{issuer_url}/protocol/openid-connect/token"
     cmd = f"""
-        curl -s -L -X POST "{issuer_url}/protocol/openid-connect/token" \
+        curl -s -L -X POST "{effective_token_endpoint}" \
             -H "Content-Type: application/x-www-form-urlencoded" -d "username={username}" \
-            -d "password={password}" -d "grant_type=password" -d "client_id=oc-cli" -d "scope=openid"
+            -d "password={password}" -d "grant_type=password" -d "client_id={client_id}" \
+            -d "client_secret={client_secret}" -d "scope={scope}"
     """
     count = 0
     chk_flag = 0
@@ -215,7 +223,10 @@ def get_oidc_tokens(username, password, issuer_url, timeout=60):
         out = execute_command(cmd)
         try:
             tokens = json.loads(out)
-            if "refresh_token" in tokens and "id_token" in tokens:
+            if "id_token" in tokens:
+                if "refresh_token" not in tokens:
+                    print("Warning: no refresh_token in response (add offline_access to scope to get one)")
+                    tokens["refresh_token"] = ""
                 print("Logged into OIDC issuer correctly")
                 chk_flag = 1
                 return tokens

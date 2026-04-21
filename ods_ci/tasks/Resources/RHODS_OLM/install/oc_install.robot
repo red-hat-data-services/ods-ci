@@ -357,6 +357,7 @@ Verify RHODS Installation
 
   IF  "${CLUSTER_AUTH}" == "oidc"
       Patch GatewayConfig With OIDC Info
+      Configure OIDC Auth CR Groups
   END
 
   IF  "${ORIGINAL_CLUSTER_TYPE}" == "managed"
@@ -465,6 +466,9 @@ Verify RHODS Installation
     IF  "${PRODUCT}" == "ODH"
         #This line of code is strictly used for the exploratory cluster to accommodate UI/UX team requests
         Add UI Admin Group To Dashboard Admin
+    END
+    IF  "${CLUSTER_AUTH}" == "oidc"
+        Configure OIDC Dashboard Groups
     END
   END
 
@@ -655,9 +659,40 @@ Patch GatewayConfig With OIDC Info
     ${file_path} =    Set Variable    tasks/Resources/Files/
     ${gw_config_file} =  Set Variable  ${file_path}/gatewayconfig-patch-payload-apply.json
     Copy File    source=${file_path}gatewayconfig-patch-payload.json    destination=${gw_config_file}
-    Run    sed -i'' -e 's|<issuerURL>|${CLUSTER_OIDC_ISSUER}|' ${gw_config_file}
+    ${odh_client_id} =    Get Variable Value    ${CLIENT_ID_ODH_CLIENT}    odh-client
+    Run    sed -i'' -e 's|<issuerURL>|${CLUSTER_OIDC_ISSUER}|' -e 's|<clientID>|${odh_client_id}|' ${gw_config_file}
     ${rc}   ${output}=    Run And Return Rc And Output
     ...         oc patch gatewayconfig/default-gateway --patch-file="${gw_config_file}" --type merge    #robocop:disable
+    Should Be Equal    "${rc}"    "0"   msg=${output}
+
+Configure OIDC Auth CR Groups
+    [Documentation]  Configures RHOAI Auth CR with the OIDC admin/user groups
+    ${admin_group} =    Get Variable Value    ${OIDC_ADMIN_GROUP}    ${EMPTY}
+    ${user_group} =     Get Variable Value    ${OIDC_USER_GROUP}     ${EMPTY}
+    IF  "${admin_group}" != ""
+        Log  Patching Auth CR with adminGroups=${admin_group}, allowedGroups=${user_group}  console=yes
+        ${rc}  ${output} =    Run And Return Rc And Output
+        ...    oc patch Auth auth --type=merge -p '{"spec": {"adminGroups": ["${admin_group}"], "allowedGroups": ["${user_group}"]}}'    #robocop:disable
+        Should Be Equal    "${rc}"    "0"   msg=${output}
+    ELSE
+        Log  No OIDC_ADMIN_GROUP configured, skipping Auth CR group configuration  console=yes
+    END
+
+Configure OIDC Dashboard Groups
+    [Documentation]  Configures OdhDashboardConfig with the OIDC admin and user groups (must run after dashboard is ready)
+    ${admin_group} =    Get Variable Value    ${OIDC_ADMIN_GROUP}    ${EMPTY}
+    ${user_group} =     Get Variable Value    ${OIDC_USER_GROUP}     system:authenticated
+    IF  "${admin_group}" != ""
+        Log  Patching OdhDashboardConfig with adminGroups=${admin_group}, allowedGroups=${user_group}  console=yes
+        Wait Until Keyword Succeeds    2 min    10 sec
+        ...    Patch OdhDashboardConfig Groups    ${admin_group}    ${user_group}
+    END
+
+Patch OdhDashboardConfig Groups
+    [Documentation]  Patches OdhDashboardConfig groups config (helper for retry)
+    [Arguments]    ${admin_group}    ${allowed_group}
+    ${rc}  ${output} =    Run And Return Rc And Output
+    ...    oc patch OdhDashboardConfig odh-dashboard-config -n ${APPLICATIONS_NAMESPACE} --type merge -p '{"spec":{"groupsConfig":{"adminGroups":"${admin_group}","allowedGroups":"${allowed_group}"}}}'    #robocop:disable
     Should Be Equal    "${rc}"    "0"   msg=${output}
 
 Patch GatewayConfig Disable Ingress

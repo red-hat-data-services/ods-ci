@@ -7,9 +7,31 @@ GPU_INSTALL_DIR="$(dirname "$0")"
 
 CHANNEL="$(oc get packagemanifest gpu-operator-certified -n openshift-marketplace -o jsonpath='{.status.defaultChannel}')"
 
-CSVNAME="$(oc get packagemanifests/gpu-operator-certified -n openshift-marketplace -o json | jq -r '.status.channels[] | select(.name == "'$CHANNEL'") | .currentCSV')"
+if [[ -z "${CHANNEL}" ]]; then
+  echo "ERROR: Could not determine defaultChannel from gpu-operator-certified packagemanifest." >&2
+  echo "Falling back to 'stable' channel." >&2
+  CHANNEL="stable"
+fi
+echo "Using GPU Operator channel: $CHANNEL"
 
-sed -i'' -e "s|channel: \".*\"|channel: \"$CHANNEL\"|" "$GPU_INSTALL_DIR/gpu_install.yaml"
+CSVNAME="$(oc get packagemanifests/gpu-operator-certified -n openshift-marketplace -o json | jq -r ".status.channels[] | select(.name == \"${CHANNEL}\") | .currentCSV")"
+
+if [[ -z "${CSVNAME}" ]]; then
+  echo "ERROR: Could not determine CSV name for channel '$CHANNEL'." >&2
+  echo "Available channels:" >&2
+  oc get packagemanifest gpu-operator-certified -n openshift-marketplace -o jsonpath='{.status.channels[*].name}' >&2
+  echo "" >&2
+  exit 1
+fi
+echo "Using GPU Operator CSV: $CSVNAME"
+
+# Rewrite subscription channel regardless of template value (PLACEHOLDER, v1.11, v25.3, ...).
+sed -i'' -E "s|^([[:space:]]*)channel:.*|\1channel: \"${CHANNEL}\"|" "$GPU_INSTALL_DIR/gpu_install.yaml"
+
+if grep -qE '^[[:space:]]*channel:[[:space:]]*"?PLACEHOLDER"?' "$GPU_INSTALL_DIR/gpu_install.yaml"; then
+  echo "ERROR: GPU Operator subscription channel was not substituted (still PLACEHOLDER). Check gpu_install.yaml and sed." >&2
+  exit 1
+fi
 
 oc apply -f "$GPU_INSTALL_DIR/gpu_install.yaml"
 /bin/bash tasks/Resources/Provisioning/GPU/NFD/install_nfd.sh

@@ -1281,6 +1281,10 @@ Deploy NFS Provisioner
     Log    ${output}    console=yes
     Wait For Pods To Be Ready    label_selector=nfsprovisioner_cr=${nfs_provisioner_name}
     ...    namespace=${NFS_OP_NS}
+    ${rc}    ${output} =    Run And Return Rc And Output
+    ...    oc patch storageclass nfs -p '{"mountOptions":["nfsvers=3"]}'
+    Should Be Equal As Integers    ${rc}    0
+    Log    ${output}    console=yes
 
 Configure Gateway API
     [Documentation]    Configure Gateway API for KServe inference traffic routing

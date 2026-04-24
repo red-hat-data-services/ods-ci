@@ -31,11 +31,11 @@ ${TEST_ALERT_PVC100_NOTEBOOK_PATH}      SEPARATOR=
 *** Test Cases ***
 Verify All Alerts Severity
     [Documentation]    Verifies that all alerts have the expected severity
-    [Tags]    Smoke
-    ...       Tier1
+    [Tags]    Tier2
     ...       ODS-1227
-    ...       Operator
     ...       Monitoring
+    ...       Operator
+    Skip If New Observability Stack Is Disabled
     Verify "DeadManSnitch" Alerts Severity And Continue On Failure
     Verify "Kubeflow Notebook Controller Pod Is Not Running" Alerts Severity And Continue On Failure
     Verify "ODH Notebook Controller Pod Is Not Running" Alerts Severity And Continue On Failure
@@ -50,6 +50,8 @@ Verify Alert RHODS-PVC-Usage-Above-90 Is Fired When User PVC Is Above 90 Percent
     [Tags]    Tier2
     ...       ODS-516
     ...       Monitoring
+    ...       Operator
+    Skip If New Observability Stack Is Disabled
     Fill Up User PVC    ${NOTEBOOK_REPO_URL}    ${TEST_ALERT_PVC90_NOTEBOOK_PATH}
 
     Prometheus.Wait Until Alert Is Firing    ${RHODS_PROMETHEUS_URL}
@@ -66,6 +68,8 @@ Verify Alert RHODS-PVC-Usage-At-100 Is Fired When User PVC Is At 100 Percent
     [Tags]    Tier2
     ...       ODS-517
     ...       Monitoring
+    ...       Operator
+    Skip If New Observability Stack Is Disabled
     Fill Up User PVC    ${NOTEBOOK_REPO_URL}    ${TEST_ALERT_PVC100_NOTEBOOK_PATH}
 
     Prometheus.Wait Until Alert Is Firing    ${RHODS_PROMETHEUS_URL}
@@ -79,11 +83,12 @@ Verify Alert RHODS-PVC-Usage-At-100 Is Fired When User PVC Is At 100 Percent
 Verify Alerts Are Fired When RHODS Dashboard Is Down    # robocop: disable:too-long-test-case
     [Documentation]    Verifies that alert "RHODS Dashboard Route Error Burn Rate" and "RHODS Probe Success Burn Rate"
     ...    are fired when rhods-dashboard is not working
-    [Tags]    Tier3
+    [Tags]    Tier2
     ...       ODS-739
     ...       Monitoring
+    ...       Operator
     ...       AutomationBug
-
+    Skip If New Observability Stack Is Disabled
     ODS.Scale Deployment    ${OPERATOR_NAMESPACE}    rhods-operator    replicas=0
     ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    rhods-dashboard    replicas=0
 
@@ -122,10 +127,12 @@ Verify Alerts Are Fired When RHODS Dashboard Is Down    # robocop: disable:too-l
 Verify Alert "Kubeflow notebook controller pod is not running" Is Fired When Kubeflow Controller Is Down    # robocop: disable:too-long-test-case
     [Documentation]    Verifies that alert "Kubeflow notebook controller pod is not running"  is fired
     ...    when notebook-controller-deployment-xxx pod is not running
-    [Tags]    Tier3
+    [Tags]    Tier2
     ...       ODS-1700
     ...       Monitoring
+    ...       Operator
 
+    Skip If New Observability Stack Is Disabled
     ODS.Scale Deployment    ${OPERATOR_NAMESPACE}        rhods-operator                    replicas=0
     ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    notebook-controller-deployment    replicas=0
 
@@ -150,10 +157,12 @@ Verify Alert "Kubeflow notebook controller pod is not running" Is Fired When Kub
 Verify Alert "ODH notebook controller pod is not running" Is Fired When ODH Controller Manager Is Down    # robocop: disable:too-long-test-case
     [Documentation]    Verifies that alert "ODH notebook controller pod is not running"  is fired
     ...    when odh-notebook-controller-manager-xxx pod is not running
-    [Tags]    Tier3
+    [Tags]    Tier2
     ...       ODS-1701
     ...       Monitoring
+    ...       Operator
 
+    Skip If New Observability Stack Is Disabled
     ODS.Scale Deployment    ${OPERATOR_NAMESPACE}        rhods-operator                     replicas=0
     ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    odh-notebook-controller-manager    replicas=0
 
@@ -177,10 +186,12 @@ Verify Alert "ODH notebook controller pod is not running" Is Fired When ODH Cont
 
 Verify That MT-SRE Are Not Paged For Alerts In Clusters Used For Development Or Testing
     [Documentation]     Verify that MT-SRE are not paged for alerts in clusters used for development or testing
-    [Tags]              Sanity
+    [Tags]              Tier2
     ...                 ODS-1058
-    ...                 Tier1
-    ...       Monitoring
+    ...                 Monitoring
+    ...                 Operator
+
+    Skip If New Observability Stack Is Disabled
     ${res} =    Check Cluster Name Contain "Aisrhods" Or Not
     IF    ${res}
         ${receiver} =         Set Variable    alerts-sink
@@ -191,11 +202,13 @@ Verify That MT-SRE Are Not Paged For Alerts In Clusters Used For Development Or 
 
 Verify Ai Pipelines Application Alerts
     [Documentation]    Verifies that Data Science Pipelines Application alerts are fired when various parts are not running
-    [Tags]    Tier3
+    [Tags]    Tier2
     ...       ODS-2170
     ...       RHOAIENG-12886
     ...       Monitoring
+    ...       Operator
 
+    Skip If New Observability Stack Is Disabled
     Set Test Variable  ${PROJECT}  test-dspa-alerts
 
     Log To Console    "Creating Data Science Pipelines Application"
@@ -325,11 +338,13 @@ Verify Ai Pipelines Application Alerts
 
 Verify Data Science Pipelines Operator Alert Fires When Operator Is Down
     [Documentation]     Verifies that alert "Data Science Pipelines Operator Probe Success Burn Rate (for 5m)" is fired
-    [Tags]    Tier3
+    [Tags]    Tier2
     ...       ODS-2166
     ...       RHOAIENG-13262
     ...       Monitoring
+    ...       Operator
 
+    Skip If New Observability Stack Is Disabled
     ODS.Scale Deployment    ${OPERATOR_NAMESPACE}        rhods-operator                                      replicas=0
     ODS.Scale Deployment    ${APPLICATIONS_NAMESPACE}    data-science-pipelines-operator-controller-manager  replicas=0
 
@@ -351,10 +366,13 @@ Verify Data Science Pipelines Operator Alert Fires When Operator Is Down
 
 Verify Alerts Have Links To The Triage Guide
     [Documentation]    Verifies that all alerts have expected and working links to the triage guide
-    [Tags]    Tier3
+    [Tags]    Tier2
     ...       ODS-558
     ...       RHOAIENG-13073
     ...       Monitoring
+    ...       Operator
+
+    Skip If New Observability Stack Is Disabled
     ${all_rules}=    Get Rules    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    alert
     ${all_rules}=    Get From Dictionary    ${all_rules['data']}    groups
 
@@ -397,12 +415,10 @@ Verify Alerts Have Links To The Triage Guide
 Alerts Suite Setup
     [Documentation]    Test suite configuration
     Set Library Search Order    SeleniumLibrary
-    Skip If RHODS Is Self-Managed And New Observability Stack Is Disabled    # TODO Observability: We don't configure alerts yet with new observability stack, so may likely fail
     RHOSi Setup
 
 Alerts Suite Teardown
     [Documentation]    Test suite teardown
-    Skip If RHODS Is Self-Managed And New Observability Stack Is Disabled
     RHOSi Teardown
 
 Teardown PVC Alert Test

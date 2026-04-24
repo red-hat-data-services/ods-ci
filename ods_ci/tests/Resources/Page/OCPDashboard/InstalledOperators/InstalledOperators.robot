@@ -93,7 +93,7 @@ Is RHODS Version Greater Or Equal Than
     ...    - RHODS version is 1.18.x (needed for testing odh-nightlies)
     ...    - ${PRODUCT}=ODH
     [Arguments]  ${target}
-    IF  "${PRODUCT}" == "ODH"  RETURN     ${TRUE}
+    IF  "$PRODUCT" == "ODH"  RETURN     ${TRUE}
     ${ver} =  Get RHODS version
     ${ver} =  Fetch From Left  ${ver}  -
     IF  "1.18" in "${ver}"  RETURN     ${TRUE}

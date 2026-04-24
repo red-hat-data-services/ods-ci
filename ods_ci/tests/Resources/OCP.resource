@@ -68,11 +68,11 @@ Verify Notebook CR Is Running
     @{cr_obj} =  OpenShiftLibrary.Oc Get  kind=Notebook  name=${cr_name}
     &{cr_obj_dictionary} =  Set Variable  ${cr_obj}[0]
     Should Match  ${cr_obj_dictionary.metadata.name}  ${cr_name}
-    
+
     # Check if the notebook has ready replicas (indicates it's running)
     ${ready_replicas} =    Set Variable    ${cr_obj_dictionary.status.readyReplicas}
     Should Be Equal    ${ready_replicas}    ${1}    msg=Notebook ${cr_name} is not ready (readyReplicas: ${ready_replicas})
-    
+
     # Log the current status for debugging
     Log    Notebook ${cr_name} status: readyReplicas=${ready_replicas}
 

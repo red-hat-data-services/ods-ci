@@ -36,8 +36,18 @@ Special User Testing Suite Setup
 
 Login Verify Logout
     [Arguments]  ${username}  ${password}  ${auth}
-    Logout From RHODS Dashboard
+    # Clear session cookies while still on the dashboard domain, then navigate
+    # to about:blank to kill all active WebSocket/AJAX connections. Without this,
+    # stale background requests trigger competing OAuth flows that overwrite the
+    # CSRF cookie, causing intermittent login failures (CSRF token mismatch).
+    Delete All Cookies
+    Go To  about:blank
+    Go To  ${ODH_DASHBOARD_URL}
     Login To RHODS Dashboard  ${username}  ${password}  ${auth}
+    # Wait for dashboard framework to load (title + logo) before navigating.
+    # We only check page-agnostic elements since the post-login redirect target varies.
+    Wait For Condition    return document.title == "${ODH_DASHBOARD_PROJECT_NAME}"    timeout=30
+    Wait Until Page Contains Element    xpath:${RHODS_LOGO_XPATH}    timeout=30
     # We need to Launch Jupyter app again, because there is a redirect to the `enabled` page in the
     # Login To RHODS Dashboard keyword now as a workaround.
     Launch Jupyter From RHODS Dashboard Link

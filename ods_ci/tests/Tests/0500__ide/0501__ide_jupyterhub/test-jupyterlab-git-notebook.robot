@@ -13,27 +13,27 @@ Test Tags       JupyterHub
 
 *** Test Cases ***
 Open RHODS Dashboard
-  [Tags]  Tier1
+  [Tags]  Tier2
   Wait For RHODS Dashboard To Load
 
 Can Launch Jupyterhub
-  [Tags]  Tier1
+  [Tags]  Tier2
   Launch Jupyter From RHODS Dashboard Link
 
 Can Login to Jupyterhub
-  [Tags]  Tier1
+  [Tags]  Tier2
   Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Verify Service Account Authorization Not Required
   #Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']
   Wait Until Page Contains  Start a basic workbench
 
 Can Spawn Notebook
-  [Tags]  Tier1
+  [Tags]  Tier2
   Fix Spawner Status
   Spawn Notebook With Arguments  image=science-notebook
 
 Can Launch Python3 Smoke Test Notebook
-  [Tags]  Tier1
+  [Tags]  Tier2
   ##################################################
   # Manual Notebook Input
   ##################################################

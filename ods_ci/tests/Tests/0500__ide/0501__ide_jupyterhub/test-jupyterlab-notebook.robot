@@ -16,27 +16,27 @@ Test Tags       JupyterHub
 
 *** Test Cases ***
 Open RHODS Dashboard
-  [Tags]  Sanity
+  [Tags]  Tier1
   Wait For RHODS Dashboard To Load
 
 Can Launch Jupyterhub
-  [Tags]  Sanity
+  [Tags]  Tier1
   Launch Jupyter From RHODS Dashboard Link
 
 Can Login to Jupyterhub
-  [Tags]  Sanity
+  [Tags]  Tier1
   Login To Jupyterhub  ${TEST_USER.USERNAME}  ${TEST_USER.PASSWORD}  ${TEST_USER.AUTH_TYPE}
   Verify Service Account Authorization Not Required
   #Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']
   Wait Until Page Contains  Start a basic workbench
 
 Can Spawn Notebook
-  [Tags]  Sanity
+  [Tags]  Tier1
   Fix Spawner Status
   Spawn Notebook With Arguments  image=science-notebook
 
 Can Launch Python3 Smoke Test Notebook
-  [Tags]  Sanity  ODS-906
+  [Tags]  Tier1  ODS-906
   Add And Run JupyterLab Code Cell In Active Notebook  import os
   Add And Run JupyterLab Code Cell In Active Notebook  print("Hello World!")
   Capture Page Screenshot
@@ -54,7 +54,7 @@ Can Launch Python3 Smoke Test Notebook
 Verify A Default Image Is Provided And Starts Successfully
     [Documentation]    Verify that, if a user doesn't explicitly select any jupyter image
     ...    a default one is selected and it can be spawned successfully
-    [Tags]    Sanity
+    [Tags]    Tier1
     ...       ODS-469
     Clean Up Server
     Stop JupyterLab Notebook Server

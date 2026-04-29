@@ -53,7 +53,7 @@ Verify Pipelines Integration With Elyra When Using Standard Data Science Based I
     ...    Note: this a templated test case
     ...    (more info at https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#test-templates)
     [Template]    Verify Pipelines Integration With Elyra Running Hello World Pipeline Test
-    [Tags]        Sanity    ODS-2271
+    [Tags]        Tier1    ODS-2271
     [Timeout]     40m
     Jupyter | PyTorch | CUDA | Python 3.12       Runtime | Datascience | CPU | Python 3.12    pytorch-pipeline      600s
     Jupyter | TensorFlow | CUDA | Python 3.12    Runtime | Datascience | CPU | Python 3.12    tensorflow-pipeline   600s

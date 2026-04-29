@@ -25,49 +25,49 @@ ${JupyterLab-git_Version}     v0.51
 *** Test Cases ***
 Open JupyterHub Spawner Page
     [Documentation]    Verifies that Spawner page can be loaded
-    [Tags]    Tier1
+    [Tags]    Tier2
     ...       ODS-695
     Pass Execution    Passing tests, as suite setup ensures that spawner can be loaded
 
 Verify Libraries in Minimal Image
     [Documentation]    Verifies libraries in Minimal Python image
-    [Tags]    Tier1
+    [Tags]    Tier2
     Verify List Of Libraries In Image    minimal-notebook    JupyterLab-git ${JupyterLab-git_Version}
 
 Verify Libraries in Cuda Image
     [Documentation]    Verifies libraries in Cuda image
-    [Tags]    Tier1
+    [Tags]    Tier2
     Verify List Of Libraries In Image    minimal-gpu    JupyterLab-git ${JupyterLab-git_Version}
 
 Verify Libraries in SDS Image
     [Documentation]    Verifies libraries in Standard Data Science image
-    [Tags]    Tier1
+    [Tags]    Tier2
     Verify List Of Libraries In Image    science-notebook    JupyterLab ${JupyterLab_Version}
     ...    JupyterLab-git ${JupyterLab-git_Version}
 
 Verify Libraries in PyTorch Image
     [Documentation]    Verifies libraries in PyTorch image
-    [Tags]    Tier1
+    [Tags]    Tier2
     ...       ODS-215    ODS-216    ODS-217    ODS-218    ODS-466
     Verify List Of Libraries In Image
     ...    pytorch    JupyterLab ${JupyterLab_Version}    JupyterLab-git ${JupyterLab-git_Version}
 
 Verify Libraries in Tensorflow Image
     [Documentation]    Verifies libraries in Tensorflow image
-    [Tags]    Tier1
+    [Tags]    Tier2
     ...       ODS-204    ODS-205    ODS-206    ODS-207  ODS-474
     Verify List Of Libraries In Image
     ...    tensorflow    JupyterLab ${JupyterLab_Version}    JupyterLab-git ${JupyterLab-git_Version}
 
 Verify Libraries in TrustyAI Image
     [Documentation]    Verifies libraries in TrustyAI image
-    [Tags]    Tier1
+    [Tags]    Tier2
     Verify List Of Libraries In Image
     ...    odh-trustyai-notebook    JupyterLab ${JupyterLab_Version}    JupyterLab-git ${JupyterLab-git_Version}
 
 Verify All Images And Spawner
     [Documentation]    Verifies that all images have the correct libraries with same versions
-    [Tags]    Tier1
+    [Tags]    Tier2
     ...       ODS-340    ODS-452    ODS-468
     List Should Not Contain Value    ${status_list}    FAIL
     ${length} =    Get Length    ${status_list}

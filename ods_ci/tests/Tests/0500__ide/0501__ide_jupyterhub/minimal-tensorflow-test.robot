@@ -24,13 +24,13 @@ ${TENSORBOARD_FRAME_XPATH} =  //iframe[contains(@id, "tensorboard-frame")]
 *** Test Cases ***
 Verify Tensorflow Image Can Be Spawned
     [Documentation]    Spawns tensorflow image
-    [Tags]  Tier1
+    [Tags]  Tier2
     ...     ODS-1155
     Pass Execution    Passing tests, as suite setup ensures that image can be spawned
 
 Tensorflow Workload Test
     [Documentation]    Runs tensorflow workload
-    [Tags]  Tier1
+    [Tags]  Tier2
     ...     ODS-1156
     Run Repo And Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/tensorflow/GPU-no-warnings.ipynb
     Capture Page Screenshot
@@ -38,7 +38,7 @@ Tensorflow Workload Test
 
 Verify Tensorboard Is Accessible
     [Documentation]  Verifies that tensorboard is accessible
-    [Tags]  Tier1
+    [Tags]  Tier2
     ...     ODS-1413
     Close Previous Server
     Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  hardware_profile=default-profile
@@ -51,7 +51,7 @@ Verify Tensorboard Is Accessible
 
 Verify Tensorflow Image Can Be Spawned With GPU
     [Documentation]    Spawns PyTorch image with 1 GPU
-    [Tags]  Tier1
+    [Tags]  Tier2
     ...     Resources-GPU    NVIDIA-GPUs
     ...     ODS-1151
     Close Previous Server
@@ -60,21 +60,21 @@ Verify Tensorflow Image Can Be Spawned With GPU
 
 Verify Tensorflow Image Includes Expected CUDA Version
     [Documentation]    Checks CUDA version
-    [Tags]  Tier1
+    [Tags]  Tier2
     ...     Resources-GPU    NVIDIA-GPUs
     ...     ODS-1152
     Verify Installed CUDA Version    ${EXPECTED_CUDA_VERSION}
 
 Verify Tensorflow Library Can See GPUs In Tensorflow Image
     [Documentation]    Verifies Tensorlow can see the GPU
-    [Tags]  Tier1
+    [Tags]  Tier2
     ...     Resources-GPU    NVIDIA-GPUs
     ...     ODS-1153
     Verify Tensorflow Can See GPU
 
 Verify Tensorflow Image GPU Workload
     [Documentation]  Runs a workload on GPUs in Tensorflow image
-    [Tags]  Tier1
+    [Tags]  Tier2
     ...     Resources-GPU    NVIDIA-GPUs
     ...     ODS-1154
     Run Repo And Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/tensorflow/GPU-no-warnings.ipynb

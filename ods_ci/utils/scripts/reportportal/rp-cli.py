@@ -55,7 +55,7 @@ import sys
 import tempfile
 import time
 import xml.etree.ElementTree as ET  # noqa: N817
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from urllib.parse import quote
 
@@ -345,10 +345,11 @@ class ReportPortalClient:
         parent_uuid: str | None = None,
         attributes: list | None = None,
         code_ref: str | None = None,
+        start_time: str | None = None,
     ) -> str:
         data = {
             "name": name,
-            "startTime": self._timestamp(),
+            "startTime": start_time or self._timestamp(),
             "type": item_type,
             "launchUuid": launch_uuid,
             "attributes": attributes or [],
@@ -358,8 +359,10 @@ class ReportPortalClient:
         endpoint = f"item/{parent_uuid}" if parent_uuid else "item"
         return self.post(endpoint, data).get("id")
 
-    def finish_item(self, item_uuid: str, launch_uuid: str, status: str, has_issue: bool = False) -> None:
-        data = {"endTime": self._timestamp(), "status": status, "launchUuid": launch_uuid}
+    def finish_item(
+        self, item_uuid: str, launch_uuid: str, status: str, has_issue: bool = False, end_time: str | None = None
+    ) -> None:
+        data = {"endTime": end_time or self._timestamp(), "status": status, "launchUuid": launch_uuid}
         if has_issue and status == "FAILED":
             data["issue"] = {"issueType": ISSUE_TO_INVESTIGATE}
         self.put(f"item/{item_uuid}", data)
@@ -376,7 +379,11 @@ class ReportPortalClient:
 
     @staticmethod
     def _timestamp() -> str:
-        return datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
+        return ReportPortalClient._format_dt(datetime.now(UTC))
+
+    @staticmethod
+    def _format_dt(dt: datetime) -> str:
+        return dt.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
 
 
 # ============================================================================
@@ -871,44 +878,63 @@ def _upload_xunit(  # noqa: PLR0914
     stats = {"total": 0, "passed": 0, "failed": 0, "skipped": 0}
 
     try:
+        fmt = ReportPortalClient._format_dt
+        cursor = datetime.now(UTC)
+
         for si, suite in enumerate(testsuites, 1):
             suite_name = suite.get("name", "Unknown Suite")
             suite_tests = suite.findall("testcase")
             click.echo(f"  Uploading suite {si}/{len(testsuites)}: {suite_name} ({len(suite_tests)} tests)")
 
-            suite_uuid = client.start_item(name=suite_name, item_type="SUITE", launch_uuid=launch_uuid)
+            suite_start = cursor
+            suite_uuid = client.start_item(
+                name=suite_name, item_type="SUITE", launch_uuid=launch_uuid, start_time=fmt(suite_start)
+            )
 
+            suite_status = "PASSED"
             for testcase in suite_tests:
                 test_name = testcase.get("name", "Unknown Test")
                 status = get_test_status(testcase)
                 component = get_component(testcase)
+                raw_duration = (testcase.get("time") or "").strip()
+                try:
+                    duration_sec = float(raw_duration) if raw_duration else 0.0
+                except ValueError:
+                    click.echo(f"  [WARN] Invalid testcase time '{raw_duration}' for '{test_name}', defaulting to 0s")
+                    duration_sec = 0.0
 
                 test_attrs = []
                 if component:
                     test_attrs.append({"key": "Component", "value": component})
 
+                test_start = cursor
                 test_uuid = client.start_item(
                     name=test_name,
                     item_type="STEP",
                     launch_uuid=launch_uuid,
                     parent_uuid=suite_uuid,
                     attributes=test_attrs,
+                    start_time=fmt(test_start),
                 )
 
                 has_issue = testcase.find("failure") is not None or testcase.find("error") is not None
                 _send_testcase_logs(client, testcase, test_uuid, launch_uuid)
 
-                client.finish_item(test_uuid, launch_uuid, status, has_issue)
+                cursor += timedelta(seconds=max(duration_sec, 0.001))
+                client.finish_item(test_uuid, launch_uuid, status, has_issue, end_time=fmt(cursor))
 
                 stats["total"] += 1
                 if status == "PASSED":
                     stats["passed"] += 1
                 elif status == "FAILED":
                     stats["failed"] += 1
+                    suite_status = "FAILED"
                 else:
                     stats["skipped"] += 1
+                    if suite_status != "FAILED":
+                        suite_status = "SKIPPED"
 
-            client.finish_item(suite_uuid, launch_uuid, "PASSED")
+            client.finish_item(suite_uuid, launch_uuid, suite_status, end_time=fmt(cursor))
 
         click.echo(
             f"  Done: {stats['total']} tests (passed: {stats['passed']}, "

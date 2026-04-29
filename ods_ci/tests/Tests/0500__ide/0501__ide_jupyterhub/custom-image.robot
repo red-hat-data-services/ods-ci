@@ -30,14 +30,14 @@ ${IMAGESTREAM_NAME}=
 Verify Admin User Can Access Custom Notebook Settings
     [Documentation]    Verifies an admin user can reach the custom notebook
     ...    settings page.
-    [Tags]    Tier1
+    [Tags]    Tier2
     ...       ODS-1366
     Pass Execution    Passing tests, as suite setup ensures page can be reached
 
 Verify Custom Image Can Be Added
     [Documentation]    Imports the custom image via UI
     ...                Then loads the spawner and tries using the custom img
-    [Tags]    Tier1    ExcludeOnDisconnected
+    [Tags]    Tier2    ExcludeOnDisconnected
     ...       ODS-1208    ODS-1365
     ${CLEANUP}=  Set Variable  False
     Create Custom Image
@@ -63,7 +63,7 @@ Verify Custom Image Can Be Added
 Test Duplicate Image
     [Documentation]  Test adding two images with the same name (should fail)
     ...       There was a bug related https://issues.redhat.com/browse/RHOAIENG-1192
-    [Tags]    Tier1    ExcludeOnDisconnected
+    [Tags]    Tier3    ExcludeOnDisconnected
     ...       ODS-1368
     Sleep  1
     Create Custom Image
@@ -80,7 +80,7 @@ Test Duplicate Image
 
 Test Bad Image URL
     [Documentation]  Test adding an image with a bad repo URL (should fail)
-    [Tags]    Tier1
+    [Tags]    Tier3
     ...       ODS-1367
     ${OG_URL}=  Set Variable  ${IMG_URL}
     ${IMG_URL}=  Set Variable  quay.io/RandomName/RandomImage:v1.2.3
@@ -93,7 +93,7 @@ Test Bad Image URL
 
 Test Image From Local registry
     [Documentation]  Try creating a custom image using a local registry URL (i.e. OOTB image)
-    [Tags]    Tier1
+    [Tags]    Tier2
     ...       ODS-2470
     ...       ExcludeOnDisconnected    # Since we don't have internal image registry enabled there usually
     ...       InternalImageRegistry    # Requires internal image registry enabled

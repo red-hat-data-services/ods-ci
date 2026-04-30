@@ -55,7 +55,7 @@ import sys
 import tempfile
 import time
 import xml.etree.ElementTree as ET  # noqa: N817
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from urllib.parse import quote
 
@@ -279,7 +279,9 @@ class ReportPortalClient:
         return (existing["id"], False) if existing else (None, False)
 
     # Launch/Test item operations (for upload)
-    def start_launch(self, name: str, description: str = "", attributes: list | None = None) -> str:
+    def start_launch(
+        self, name: str, description: str = "", attributes: list | None = None, start_time: str | None = None
+    ) -> str:
         """Start a launch and return the server-assigned launch UUID.
 
         Uses the UUID from the server response (resp["id"]) for all subsequent
@@ -290,7 +292,7 @@ class ReportPortalClient:
             {
                 "name": name,
                 "description": description,
-                "startTime": self._timestamp(),
+                "startTime": start_time or self._timestamp(),
                 "mode": "DEFAULT",
                 "attributes": attributes or [],
             },
@@ -333,9 +335,9 @@ class ReportPortalClient:
         warn(f"  [WARN] Could not resolve numeric launch ID; URL will use UUID: {launch_uuid}")
         return launch_uuid
 
-    def finish_launch(self, launch_uuid: str) -> None:
+    def finish_launch(self, launch_uuid: str, end_time: str | None = None) -> None:
         """Finish a launch by its UUID (RP requires UUID, not numeric ID)."""
-        self.put(f"launch/{launch_uuid}/finish", {"endTime": self._timestamp()})
+        self.put(f"launch/{launch_uuid}/finish", {"endTime": end_time or self._timestamp()})
 
     def start_item(
         self,
@@ -345,10 +347,11 @@ class ReportPortalClient:
         parent_uuid: str | None = None,
         attributes: list | None = None,
         code_ref: str | None = None,
+        start_time: str | None = None,
     ) -> str:
         data = {
             "name": name,
-            "startTime": self._timestamp(),
+            "startTime": start_time or self._timestamp(),
             "type": item_type,
             "launchUuid": launch_uuid,
             "attributes": attributes or [],
@@ -358,17 +361,21 @@ class ReportPortalClient:
         endpoint = f"item/{parent_uuid}" if parent_uuid else "item"
         return self.post(endpoint, data).get("id")
 
-    def finish_item(self, item_uuid: str, launch_uuid: str, status: str, has_issue: bool = False) -> None:
-        data = {"endTime": self._timestamp(), "status": status, "launchUuid": launch_uuid}
+    def finish_item(
+        self, item_uuid: str, launch_uuid: str, status: str, has_issue: bool = False, end_time: str | None = None
+    ) -> None:
+        data = {"endTime": end_time or self._timestamp(), "status": status, "launchUuid": launch_uuid}
         if has_issue and status == "FAILED":
             data["issue"] = {"issueType": ISSUE_TO_INVESTIGATE}
         self.put(f"item/{item_uuid}", data)
 
-    def create_log(self, item_uuid: str, launch_uuid: str, message: str, level: str = "ERROR") -> None:
+    def create_log(
+        self, item_uuid: str, launch_uuid: str, message: str, level: str = "ERROR", log_time: str | None = None
+    ) -> None:
         data = {
             "itemUuid": item_uuid,
             "launchUuid": launch_uuid,
-            "time": self._timestamp(),
+            "time": log_time or self._timestamp(),
             "message": message,
             "level": level,
         }
@@ -376,7 +383,11 @@ class ReportPortalClient:
 
     @staticmethod
     def _timestamp() -> str:
-        return datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
+        return ReportPortalClient._format_dt(datetime.now(UTC))
+
+    @staticmethod
+    def _format_dt(dt: datetime) -> str:
+        return dt.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
 
 
 # ============================================================================
@@ -819,7 +830,9 @@ def cmd_upload(args, client: ReportPortalClient):
     _upload_xunit(client, file_path, args.name, description, attributes)
 
 
-def _send_testcase_logs(client: ReportPortalClient, testcase, item_uuid: str, launch_uuid: str) -> None:
+def _send_testcase_logs(
+    client: ReportPortalClient, testcase, item_uuid: str, launch_uuid: str, log_time: str | None = None
+) -> None:
     """Send failure/error/stdout/stderr from an xUnit testcase as RP log entries."""
     for tag, level in [("failure", "ERROR"), ("error", "ERROR"), ("system-err", "WARN"), ("system-out", "INFO")]:
         elem = testcase.find(tag)
@@ -829,7 +842,7 @@ def _send_testcase_logs(client: ReportPortalClient, testcase, item_uuid: str, la
         body = (elem.text or "").strip()
         log_msg = f"{msg}\n\n{body}" if body else (msg or body)
         if log_msg.strip():
-            client.create_log(item_uuid, launch_uuid, log_msg, level)
+            client.create_log(item_uuid, launch_uuid, log_msg, level, log_time=log_time)
 
 
 def _upload_xunit(  # noqa: PLR0914
@@ -864,8 +877,22 @@ def _upload_xunit(  # noqa: PLR0914
     total_tests = sum(len(s.findall("testcase")) for s in testsuites)
     click.echo(f"  Found {len(testsuites)} suite(s), {total_tests} test(s)")
 
+    # Pre-compute total xUnit duration to backdate the synthetic timeline so that
+    # the launch ends at upload time and all item timestamps are in the past.
+    total_xunit_duration = 0.0
+    for s in testsuites:
+        for tc in s.findall("testcase"):
+            raw = (tc.get("time") or "").strip()
+            try:
+                total_xunit_duration += float(raw) if raw else 0.0
+            except ValueError:
+                pass
+
+    fmt = ReportPortalClient._format_dt
+    cursor = datetime.now(UTC) - timedelta(seconds=total_xunit_duration)
+
     # Start launch — use UUID for item linking; resolve numeric ID before finish
-    launch_uuid = client.start_launch(launch_name, launch_desc, launch_attrs)
+    launch_uuid = client.start_launch(launch_name, launch_desc, launch_attrs, start_time=fmt(cursor))
     click.echo(f"  Started launch: {launch_uuid}")
 
     stats = {"total": 0, "passed": 0, "failed": 0, "skipped": 0}
@@ -876,46 +903,62 @@ def _upload_xunit(  # noqa: PLR0914
             suite_tests = suite.findall("testcase")
             click.echo(f"  Uploading suite {si}/{len(testsuites)}: {suite_name} ({len(suite_tests)} tests)")
 
-            suite_uuid = client.start_item(name=suite_name, item_type="SUITE", launch_uuid=launch_uuid)
+            suite_start = cursor
+            suite_uuid = client.start_item(
+                name=suite_name, item_type="SUITE", launch_uuid=launch_uuid, start_time=fmt(suite_start)
+            )
 
+            suite_status = "PASSED"
             for testcase in suite_tests:
                 test_name = testcase.get("name", "Unknown Test")
                 status = get_test_status(testcase)
                 component = get_component(testcase)
+                raw_duration = (testcase.get("time") or "").strip()
+                try:
+                    duration_sec = float(raw_duration) if raw_duration else 0.0
+                except ValueError:
+                    click.echo(f"  [WARN] Invalid testcase time '{raw_duration}' for '{test_name}', defaulting to 0s")
+                    duration_sec = 0.0
 
                 test_attrs = []
                 if component:
                     test_attrs.append({"key": "Component", "value": component})
 
+                test_start = cursor
                 test_uuid = client.start_item(
                     name=test_name,
                     item_type="STEP",
                     launch_uuid=launch_uuid,
                     parent_uuid=suite_uuid,
                     attributes=test_attrs,
+                    start_time=fmt(test_start),
                 )
 
                 has_issue = testcase.find("failure") is not None or testcase.find("error") is not None
-                _send_testcase_logs(client, testcase, test_uuid, launch_uuid)
+                _send_testcase_logs(client, testcase, test_uuid, launch_uuid, log_time=fmt(test_start))
 
-                client.finish_item(test_uuid, launch_uuid, status, has_issue)
+                cursor += timedelta(seconds=max(duration_sec, 0.001))
+                client.finish_item(test_uuid, launch_uuid, status, has_issue, end_time=fmt(cursor))
 
                 stats["total"] += 1
                 if status == "PASSED":
                     stats["passed"] += 1
                 elif status == "FAILED":
                     stats["failed"] += 1
+                    suite_status = "FAILED"
                 else:
                     stats["skipped"] += 1
+                    if suite_status != "FAILED":
+                        suite_status = "SKIPPED"
 
-            client.finish_item(suite_uuid, launch_uuid, "PASSED")
+            client.finish_item(suite_uuid, launch_uuid, suite_status, end_time=fmt(cursor))
 
         click.echo(
             f"  Done: {stats['total']} tests (passed: {stats['passed']}, "
             f"failed: {stats['failed']}, skipped: {stats['skipped']})"
         )
 
-        client.finish_launch(launch_uuid)
+        client.finish_launch(launch_uuid, end_time=fmt(cursor))
 
         # Resolve numeric database ID for the UI URL
         launch_id = client.get_launch_numeric_id(launch_uuid)

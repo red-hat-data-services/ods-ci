@@ -1,0 +1,20 @@
+# This is a basic workflow that is manually triggered
+
+name: Self hosted runners
+
+on:
+  push:
+    branches: [ "**" ]   # run on all branches
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: [self-hosted, fedora-vm-01]  # must match your runner labels
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show system info
+        run: |
+          cat /etc/os-release
+          uname -a
+

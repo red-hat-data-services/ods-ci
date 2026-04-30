@@ -92,6 +92,7 @@ Required Global Variables Should Exist
     Variable Should Exist    ${MONITORING_NAMESPACE}
     Variable Should Exist    ${OPERATOR_NAMESPACE}
     Variable Should Exist    ${NOTEBOOKS_NAMESPACE}
+    Variable Should Exist    ${MODEL_REGISTRY_NAMESPACE}
 
 Fetch Cluster Type By Domain
     [Documentation]    This Keyword outputs the kind of cluster depending on the console URL domain
@@ -125,7 +126,7 @@ Assign Vars According To Product
                 Set Suite Variable    ${OPERATOR_SUBSCRIPTION_NAME}     rhods-operator
             END
         END
-        Set Suite Variable  ${MODEL_REGISTRY_NAMESPACE}    rhoai-model-registries
+        Set Suite Variable    ${MODEL_REGISTRY_NAMESPACE}    rhoai-model-registries
         ${CSV_NAME} =   Catenate    SEPARATOR=   ${OPERATOR_NAME}.     ${RHODS_VERSION}
         Set Suite Variable      ${CSV_NAME}
     ELSE IF    "${PRODUCT}" == "ODH" AND "${OPERATOR_NAME}" == "opendatahub-operator"

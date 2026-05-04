@@ -17,7 +17,6 @@ Resource            ../../Resources/Common.robot
 Resource            ../../Resources/Page/OCPDashboard/Pods/Pods.robot
 Resource            ../../Resources/Page/OCPDashboard/Builds/Builds.robot
 Resource            ../../Resources/Page/HybridCloudConsole/OCM.robot
-Resource            ../../Resources/CLI/DataSciencePipelines/DataSciencePipelinesUpgradeTesting.resource
 Resource            ../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 Resource            ../../Resources/Page/DistributedWorkloads/WorkloadMetricsUI.resource
 Resource            ../../Resources/Page/FeatureStore/FeatureStore.resource
@@ -146,11 +145,6 @@ Verify Distributed Workload Metrics Resources By Creating Ray Cluster Workload
     ...     Run Keyword If Test Failed      Codeflare Upgrade Tests Teardown        ${PRJ_UPGRADE}      ${DW_PROJECT_CREATED}       # robocop: disable:line-too-long
 
 
-
-Data Science Pipelines Pre Upgrade Configuration
-    [Documentation]    Creates project dsp-test-upgrade and configures the pipeline resources testing upgrade
-    [Tags]      Upgrade     DataSciencePipelines-Backend
-    DataSciencePipelinesUpgradeTesting.Setup Environment For Upgrade Testing
 
 Long Running Jupyter Notebook
     [Documentation]    Launch a long running notebook before the upgrade

@@ -24,6 +24,8 @@ ${TRAINING_LABEL_SELECTOR}                                  app.kubernetes.io/na
 ${TRAINING_DEPLOYMENT_NAME}                                 kubeflow-training-operator
 ${TRAINER_LABEL_SELECTOR}                                   app.kubernetes.io/name=trainer
 ${TRAINER_DEPLOYMENT_NAME}                                  kubeflow-trainer-controller-manager
+${AIPIPELINES_LABEL_SELECTOR}                               app.kubernetes.io/name=data-science-pipelines-operator
+${AIPIPELINES_DEPLOYMENT_NAME}                              data-science-pipelines-operator-controller-manager
 ${ODH_MODEL_CONTROLLER_LABEL_SELECTOR}                      app=odh-model-controller
 ${ODH_MODEL_CONTROLLER_DEPLOYMENT_NAME}                     odh-model-controller
 ${MODELREGISTRY_CONTROLLER_LABEL_SELECTOR}                  control-plane=model-registry-operator
@@ -52,6 +54,7 @@ ${IS_NOT_PRESENT}                                           1
 ...                                                         TRAINING=${EMPTY}
 ...                                                         TRAINER=${EMPTY}
 ...                                                         DASHBOARD=${EMPTY}
+...                                                         AIPIPELINES=${EMPTY}
 ...                                                         MODELREGISTRY=${EMPTY}
 ...                                                         KSERVE=${EMPTY}
 ...                                                         TRUSTYAI=${EMPTY}
@@ -63,6 +66,7 @@ ${IS_NOT_PRESENT}                                           1
 ...                                                         SPARKOPERATOR=${EMPTY}
 
 @{CONTROLLERS_LIST}                                     # dashboard added in Suite Setup, since it's different in RHOAI vs ODH
+...                                                     data-science-pipelines-operator-controller-manager
 ...                                                     kuberay-operator
 #...                                                     kueue-controller-manager   # RHOAIENG-34529
 ...                                                     notebook-controller-deployment
@@ -254,6 +258,40 @@ Validate Dashboard Removed State
     ...    ${DASHBOARD_LABEL_SELECTOR}
 
     [Teardown]      Restore DSC Component State     dashboard       ${DASHBOARD_DEPLOYMENT_NAME}        ${DASHBOARD_LABEL_SELECTOR}     ${SAVED_MANAGEMENT_STATES.DASHBOARD}
+
+Validate Aipipelines Managed State
+    [Documentation]    Validate that the DSC Aipipelines component Managed state creates the expected resources,
+    ...    check that Datasciencepipelines deployment is created and pod is in Ready state
+    [Tags]
+    ...    Operator
+    ...    RHOAIENG-7298
+    ...    operator-aipipelines-managed
+    ...    Integration
+    ...    Smoke
+
+    Set DSC Component Managed State And Wait For Completion
+    ...    aipipelines
+    ...    ${AIPIPELINES_DEPLOYMENT_NAME}
+    ...    ${AIPIPELINES_LABEL_SELECTOR}
+    Check That Image Pull Path Is Correct       ${AIPIPELINES_DEPLOYMENT_NAME}     ${IMAGE_PULL_PATH}
+
+    [Teardown]      Restore DSC Component State     aipipelines        ${AIPIPELINES_DEPLOYMENT_NAME}     ${AIPIPELINES_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.AIPIPELINES}
+
+Validate Aipipelines Removed State
+    [Documentation]    Validate that Aipipelines management state Removed does remove relevant resources.
+    [Tags]
+    ...    Operator
+    ...    Tier1
+    ...    RHOAIENG-7298
+    ...    operator-aipipelines-removed
+    ...    Integration
+
+    Set DSC Component Removed State And Wait For Completion
+    ...    aipipelines
+    ...    ${AIPIPELINES_DEPLOYMENT_NAME}
+    ...    ${AIPIPELINES_LABEL_SELECTOR}
+
+    [Teardown]      Restore DSC Component State     aipipelines        ${AIPIPELINES_DEPLOYMENT_NAME}     ${AIPIPELINES_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.AIPIPELINES}
 
 Validate TrustyAi Managed State
     [Documentation]    Validate that the DSC TrustyAi component Managed state creates the expected resources,
@@ -672,6 +710,7 @@ Suite Setup
     ${SAVED_MANAGEMENT_STATES.TRAINING}=     Get DSC Component State    ${DSC_NAME}    trainingoperator    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.TRAINER}=     Get DSC Component State     ${DSC_NAME}     trainer    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.DASHBOARD}=     Get DSC Component State    ${DSC_NAME}    dashboard    ${OPERATOR_NS}
+    ${SAVED_MANAGEMENT_STATES.AIPIPELINES}=     Get DSC Component State    ${DSC_NAME}    aipipelines    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.MODELREGISTRY}=     Get DSC Component State    ${DSC_NAME}    modelregistry    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.KSERVE}=     Get DSC Component State    ${DSC_NAME}    kserve    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.TRUSTYAI}=     Get DSC Component State    ${DSC_NAME}    trustyai    ${OPERATOR_NS}

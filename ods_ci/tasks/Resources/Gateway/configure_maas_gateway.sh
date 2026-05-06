@@ -92,7 +92,7 @@ for i in $(seq 1 24); do
 done
 
 if [ -z "${SVC_NAME}" ]; then
-  echo "ERROR: No service found for gateway maas-default-gateway in ${INGRESS_NS} after 2 minutes"
+  echo "ERROR: No service found for gateway maas-default-gateway in ${INGRESS_NS} after 2 minutes" >&2
   exit 1
 fi
 echo "Found service: ${SVC_NAME}"
@@ -117,7 +117,7 @@ spec:
   wildcardPolicy: None
 EOF
 then
-  echo "ERROR: Failed to create maas-gateway-route in ${INGRESS_NS}"
+  echo "ERROR: Failed to create maas-gateway-route in ${INGRESS_NS}" >&2
   exit 1
 fi
 

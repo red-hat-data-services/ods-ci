@@ -1,37 +1,44 @@
 # How To Create An ods-ci Release
 
-As an example, for RHOAI release 2.22 we would create a branch `release-2.22` and add a `2.22` tag.
+As an example, for RHOAI release 3.4 we would create a branch `release-3.4` and add a `3.4` tag.
 
 ## Steps:
-    Use the main repo instead of a fork
-    1. git clone https://github.com/red-hat-data-services/ods-ci
+Use the main repo instead of a fork.
 
-        In case you had the repo already cloned, remember to pull new changes from master
-        1. git checkout master
-        2. git pull
+1. `git clone https://github.com/red-hat-data-services/ods-ci`
 
-    Remove “stable” tag from local and remote
-    2. git tag -d stable
-    3. git push --delete origin stable 
+In case you had the repo already cloned, remember to pull new changes from master:
 
-    Create a branch and tag for this release.
-    Note that the tag format should be 'x.y'. This is required in order to make the automatic release notes work properly
-    4. git checkout -b release-2.22
-    5. git tag 2.22
+2. `git checkout master`
+3. `git pull`
 
-    Add also the “stable” tag (ISV team needs it) 
-    6. git tag stable
+Remove `stable` tag from local and remote:
 
-    Finally, push branch and tags
-    7. git push --set-upstream origin release-2.22
-    8. git push --tags
+4. `git tag -d stable`
+5. `git push --delete origin stable`
 
-    Go to GitHub and publish the release
-    9. Go to https://github.com/red-hat-data-services/ods-ci/tags
-    10. In tag 2.22, click on the three dots and then Create release
-    11. Release title: 2.22
-    12. Auto-generate release notes
-    13. Publish release
+Create a branch and tag for this release.  
+Note that the tag format should be `x.y`. This is required in order to make the automatic release notes work properly.
+
+6. `git checkout -b release-3.4`
+7. `git tag 3.4`
+
+Add also the `stable` tag (ISV team needs it):
+
+8. `git tag stable`
+
+Finally, push branch and tags:
+
+9. `git push --set-upstream origin release-3.4`
+10. `git push --tags`
+
+Go to GitHub and publish the release:
+
+11. Go to https://github.com/red-hat-data-services/ods-ci/tags
+12. In tag `3.4`, click on the three dots and then Create release
+13. Set the `Release title` to: `3.4`
+14. Choose the Previous tag `3.4-ea.2` for `Generate release notes`
+15. Click on `Publish release`
 
 
 # How to update dependencies with Poetry

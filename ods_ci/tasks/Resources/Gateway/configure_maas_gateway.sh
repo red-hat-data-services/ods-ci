@@ -79,23 +79,23 @@ echo "Gateway may not expose 'Accepted' condition; check with: oc get gateway -n
 # internal IP.  Create an OpenShift Route so maas.<cluster-domain> is reachable
 # externally through the cluster's default router.  The route is safe to apply on
 # all platforms — on AWS it simply provides an additional ingress path.
-echo "Looking up service for gateway maas-default-gateway in ${INGRESS_NS}..."
-SVC_NAME=$(oc get svc -n "${INGRESS_NS}" \
-  -l gateway.networking.k8s.io/gateway-name=maas-default-gateway \
-  -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+echo "Waiting for service to appear for gateway maas-default-gateway in ${INGRESS_NS}..."
+SVC_NAME=""
+for i in $(seq 1 24); do
+  SVC_NAME=$(oc get svc -n "${INGRESS_NS}" \
+    -l gateway.networking.k8s.io/gateway-name=maas-default-gateway \
+    -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+  if [ -n "${SVC_NAME}" ]; then
+    break
+  fi
+  sleep 5
+done
 
 if [ -z "${SVC_NAME}" ]; then
-  echo "ERROR: No service found for gateway maas-default-gateway in ${INGRESS_NS}"
+  echo "ERROR: No service found for gateway maas-default-gateway in ${INGRESS_NS} after 2 minutes"
   exit 1
 fi
 echo "Found service: ${SVC_NAME}"
-
-echo "Waiting for service ${SVC_NAME} in ${INGRESS_NS}..."
-if ! oc wait service/"${SVC_NAME}" -n "${INGRESS_NS}" \
-  --for=jsonpath='{.spec.clusterIP}' --timeout=2m; then
-  echo "ERROR: service ${SVC_NAME} not ready in ${INGRESS_NS}; cannot create Route"
-  exit 1
-fi
 
 if ! oc apply -f - <<EOF
 apiVersion: route.openshift.io/v1

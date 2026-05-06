@@ -160,9 +160,17 @@ def oc_login(ocp_api_url="", username="", password="", kubeconfig_path="", timeo
         sys.exit(1)
 
 
-def oc_login_oidc(ocp_api_url, username, password, issuer_url,
-                  token_endpoint="", client_id="oc-cli",
-                  client_secret="", scope="openid", timeout=600):
+def oc_login_oidc(
+    ocp_api_url,
+    username,
+    password,
+    issuer_url,
+    token_endpoint="",
+    client_id="oc-cli",
+    client_secret="",
+    scope="openid",
+    timeout=600,
+):
     """
     Login to test cluster using oidc
     """
@@ -176,9 +184,15 @@ def oc_login_oidc(ocp_api_url, username, password, issuer_url,
         oc config use-context main
     """
     execute_command(setup_cmd)
-    tokens = get_oidc_tokens(username, password, issuer_url,
-                             token_endpoint=token_endpoint, client_id=client_id,
-                             client_secret=client_secret, scope=scope)
+    tokens = get_oidc_tokens(
+        username,
+        password,
+        issuer_url,
+        token_endpoint=token_endpoint,
+        client_id=client_id,
+        client_secret=client_secret,
+        scope=scope,
+    )
     count = 0
     chk_flag = 0
     while count <= timeout:
@@ -204,9 +218,9 @@ def oc_login_oidc(ocp_api_url, username, password, issuer_url,
         sys.exit(1)
 
 
-def get_oidc_tokens(username, password, issuer_url,
-                    token_endpoint="", client_id="oc-cli",
-                    client_secret="", scope="openid", timeout=60):
+def get_oidc_tokens(
+    username, password, issuer_url, token_endpoint="", client_id="oc-cli", client_secret="", scope="openid", timeout=60
+):
     """
     Get id and refresh token from OIDC issuer
     """

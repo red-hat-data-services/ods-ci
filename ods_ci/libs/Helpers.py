@@ -343,8 +343,7 @@ class Helpers:
         return out
 
     @keyword
-    def get_oidc_token(self, issuer, username, password,
-                       token_endpoint="", client_id="oc-cli", scope="openid"):
+    def get_oidc_token(self, issuer, username, password, token_endpoint="", client_id="oc-cli", scope="openid"):
         url = token_endpoint if token_endpoint else f"{issuer}/protocol/openid-connect/token"
         headers = {"Content-Type": "application/x-www-form-urlencoded", "User-Agent": "python-requests"}
 

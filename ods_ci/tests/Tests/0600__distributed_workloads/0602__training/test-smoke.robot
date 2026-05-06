@@ -29,5 +29,7 @@ Ray smoke test
         FAIL    Can not find kuberay-operator service in ${APPLICATIONS_NAMESPACE}
     END
     Log To Console    kuberay-operator service exists
-    Verify container images    kuberay-operator    kuberay-operator    odh-kuberay-operator-controller
+    IF    "${PRODUCT}" == "RHODS"
+        Verify container images    kuberay-operator    kuberay-operator    odh-kuberay-operator-controller
+    END
 

@@ -32,8 +32,8 @@ ${KFNBC_CONTROL_PANEL_HEADER_XPATH} =    //h1[.="Notebook server control panel"]
 ${KFNBC_ENV_VAR_NAME_PRE} =    //span[.="Variable name"]/../../../div[@class="pf-v6-c-form__group-control"]
 ${DEFAULT_PYTHON_VER} =    3.12
 ${PREVIOUS_PYTHON_VER} =    3.12
-${DEFAULT_NOTEBOOK_VER} =    3.4
-${PREVIOUS_NOTEBOOK_VER} =    2025.2
+${DEFAULT_NOTEBOOK_VER} =    3.5
+${PREVIOUS_NOTEBOOK_VER} =    3.4
 
 
 *** Keywords ***
@@ -274,7 +274,7 @@ Spawn Notebook
         Wait Until Page Contains    TriggeredScaleUp    timeout=120s
     END
     Wait Until Page Contains Element
-    ...    //*[@data-testid="notebook-status-text"]//*[text() = "Running"]
+    ...    //*[@data-testid="notebook-status-text"]//*[text() = "Ready"]
     ...    ${spawner_timeout}
     IF  ${same_tab}
         Click Button    Open in current tab

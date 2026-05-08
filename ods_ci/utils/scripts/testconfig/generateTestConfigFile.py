@@ -241,6 +241,28 @@ def generate_test_config_file(
         data["CLUSTER_AUTH"] = config_data["TEST_CLUSTERS"][test_cluster]["CLUSTER_AUTH"]
     if config_data["TEST_CLUSTERS"][test_cluster].get("CLUSTER_OIDC_ISSUER"):
         data["CLUSTER_OIDC_ISSUER"] = config_data["TEST_CLUSTERS"][test_cluster]["CLUSTER_OIDC_ISSUER"]
+
+    # OIDC provider config (with backward-compatible defaults)
+    cluster_data = config_data["TEST_CLUSTERS"][test_cluster]
+    if data["CLUSTER_AUTH"] == "oidc":
+        data["OIDC_PROVIDER"] = cluster_data.get("OIDC_PROVIDER", "keycloak")
+        issuer = data.get("CLUSTER_OIDC_ISSUER", "")
+        data["OIDC_TOKEN_ENDPOINT"] = cluster_data.get(
+            "OIDC_TOKEN_ENDPOINT", f"{issuer}/protocol/openid-connect/token" if issuer else ""
+        )
+        data["CLIENT_ID_OC_CLI"] = cluster_data.get("CLIENT_ID_OC_CLI", "oc-cli")
+        data["CLIENT_ID_ODH_CLIENT"] = cluster_data.get("CLIENT_ID_ODH_CLIENT", "odh-client")
+        data["OIDC_LOGIN_SCOPE"] = cluster_data.get("OIDC_LOGIN_SCOPE", "openid")
+        data["OIDC_ADMIN_GROUP"] = cluster_data.get("OIDC_ADMIN_GROUP", "")
+        data["OIDC_USER_GROUP"] = cluster_data.get("OIDC_USER_GROUP", "")
+    else:
+        data["OIDC_PROVIDER"] = cluster_data.get("OIDC_PROVIDER", "")
+        data["OIDC_TOKEN_ENDPOINT"] = cluster_data.get("OIDC_TOKEN_ENDPOINT", "")
+        data["CLIENT_ID_OC_CLI"] = cluster_data.get("CLIENT_ID_OC_CLI", "")
+        data["CLIENT_ID_ODH_CLIENT"] = cluster_data.get("CLIENT_ID_ODH_CLIENT", "")
+        data["OIDC_LOGIN_SCOPE"] = cluster_data.get("OIDC_LOGIN_SCOPE", "")
+        data["OIDC_ADMIN_GROUP"] = cluster_data.get("OIDC_ADMIN_GROUP", "")
+        data["OIDC_USER_GROUP"] = cluster_data.get("OIDC_USER_GROUP", "")
     data["SSO"]["USERNAME"] = config_data["SSO"]["USERNAME"]
     data["SSO"]["PASSWORD"] = config_data["SSO"]["PASSWORD"]
     data["RHODS_BUILD"]["PULL_SECRET"] = config_data["RHODS_BUILD"]["PULL_SECRET"]
@@ -340,6 +362,9 @@ def generate_test_config_file(
             data["OCP_ADMIN_USER"]["USERNAME"],
             data["OCP_ADMIN_USER"]["PASSWORD"],
             data["CLUSTER_OIDC_ISSUER"],
+            token_endpoint=data.get("OIDC_TOKEN_ENDPOINT", ""),
+            client_id=data.get("CLIENT_ID_OC_CLI", "oc-cli"),
+            scope=data.get("OIDC_LOGIN_SCOPE", "openid"),
         )
     elif data.get("EXTERNAL_AUTH", {}).get("METHOD") == "kubeconfig":
         kubeconfig_path = os.getenv("EXTERNAL_KUBECONFIG")

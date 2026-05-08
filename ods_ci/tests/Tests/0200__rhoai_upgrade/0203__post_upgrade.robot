@@ -261,7 +261,7 @@ Run Feast operator PostUpgrade Test Use Case
     [Documentation]    Verifies the Feast CR status and perform Feast apply and materialize functionality
     [Tags]  Upgrade    FeatureStoreUpgrade
     [Setup]    Prepare Feast E2E Test Suite
-    Run Feast Operator E2E Test    feastPostUpgrade    e2e_rhoai
+    Run Feast Operator Upgrade Test    feastPostUpgrade
     [Teardown]    Teardown Feast E2E Test Suite
 
 

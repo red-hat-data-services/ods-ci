@@ -75,4 +75,50 @@ oc wait gateway -n "${INGRESS_NS}" maas-default-gateway \
 --for=condition=Accepted --timeout=5m || \
 echo "Gateway may not expose 'Accepted' condition; check with: oc get gateway -n ${INGRESS_NS} maas-default-gateway"
 
+# On non-AWS platforms (GCP, OpenStack, etc.) the Gateway service only receives an
+# internal IP.  Create an OpenShift Route so maas.<cluster-domain> is reachable
+# externally through the cluster's default router.  The route is safe to apply on
+# all platforms — on AWS it simply provides an additional ingress path.
+echo "Waiting for service to appear for gateway maas-default-gateway in ${INGRESS_NS}..."
+SVC_NAME=""
+for i in $(seq 1 24); do
+  SVC_NAME=$(oc get svc -n "${INGRESS_NS}" \
+    -l gateway.networking.k8s.io/gateway-name=maas-default-gateway \
+    -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+  if [ -n "${SVC_NAME}" ]; then
+    break
+  fi
+  sleep 5
+done
+
+if [ -z "${SVC_NAME}" ]; then
+  echo "ERROR: No service found for gateway maas-default-gateway in ${INGRESS_NS} after 2 minutes" >&2
+  exit 1
+fi
+echo "Found service: ${SVC_NAME}"
+
+if ! oc apply -f - <<EOF
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: maas-gateway-route
+  namespace: ${INGRESS_NS}
+spec:
+  host: maas.${CLUSTER_DOMAIN}
+  port:
+    targetPort: https
+  to:
+    kind: Service
+    name: ${SVC_NAME}
+    weight: 100
+  tls:
+    termination: passthrough
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None
+EOF
+then
+  echo "ERROR: Failed to create maas-gateway-route in ${INGRESS_NS}" >&2
+  exit 1
+fi
+
 echo "MaaS Gateway configured successfully with domain: maas.${CLUSTER_DOMAIN}"

@@ -81,6 +81,9 @@ Verify User Can Authenticate Via OIDC JWT
     ...      ${CLUSTER_OIDC_ISSUER}
     ...      ${TEST_USER.USERNAME}
     ...      ${TEST_USER.PASSWORD}
+    ...      token_endpoint=${OIDC_TOKEN_ENDPOINT}
+    ...      client_id=${CLIENT_ID_OC_CLI}
+    ...      scope=${OIDC_LOGIN_SCOPE}
     Should Not Be Empty    ${token}
     ${response}=    Call Gateway With Token Via Curl    ${token}    path=${DASHBOARD_PATH}
     Verify Response HTTP Code    ${response}    expected_code=200
@@ -128,6 +131,9 @@ Verify API Status Returns User Identity With OIDC JWT
     ...      ${CLUSTER_OIDC_ISSUER}
     ...      ${TEST_USER.USERNAME}
     ...      ${TEST_USER.PASSWORD}
+    ...      token_endpoint=${OIDC_TOKEN_ENDPOINT}
+    ...      client_id=${CLIENT_ID_OC_CLI}
+    ...      scope=${OIDC_LOGIN_SCOPE}
     Should Not Be Empty    ${token}
     Verify API Status Returns User Name    ${token}    ${TEST_USER.USERNAME}
     Log    message=API status correctly returned user identity

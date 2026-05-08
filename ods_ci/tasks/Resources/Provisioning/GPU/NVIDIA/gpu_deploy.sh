@@ -33,24 +33,29 @@ function wait_until_pod_ready_status() {
   local pod_label=$1
   local namespace=nvidia-gpu-operator
   local timeout=${2:-600}
-  start_time=$(date +%s)
+  local start_time=$(date +%s)
   while [ $(($(date +%s) - start_time)) -lt $timeout ]; do
      pod_status="$(oc get pod -l app="$pod_label" -n "$namespace" --no-headers=true 2>/dev/null)"
      daemon_status="$(oc get daemonset -l app="$pod_label" -n "$namespace" --no-headers=true 2>/dev/null)"
      if [[ -n "$daemon_status" || -n "$pod_status" ]] ; then
         echo "Waiting until GPU Pods or Daemonset of '$pod_label' in namespace '$namespace' are in running state..."
         echo "Pods status: '$pod_status'"
-        echo "Daemonset status: '$daemon_status'"
-        oc wait --timeout=10s --for=condition=ready pod -n "$namespace" -l app="$pod_label" || \
-        if [ $? -ne 0 ]; then
+        echo "Daemonset status: '$daemon_status'"       
+        if [[ -n "$pod_status" ]] && \
+           ! oc wait --timeout=10s --for=condition=ready pod -n "$namespace" -l app="$pod_label"; then
           continue
         fi
-        oc rollout status --watch --timeout=3m daemonset -n "$namespace" -l app="$pod_label" || continue
-        break
+        if [[ -n "$daemon_status" ]] && \
+           ! oc rollout status --watch --timeout=3m daemonset -n "$namespace" -l app="$pod_label"; then
+          continue
+        fi
+        return 0
      fi
      echo "Waiting for Pods or Daemonset with label app='$pod_label' in namespace '$namespace' to be present..."
      sleep 5
   done
+  echo "ERROR: Timed out after ${timeout}s waiting for '$pod_label' in namespace '$namespace' to become ready" >&2
+  return 1
 }
 
 function create_gpu_profile() {
@@ -185,7 +190,20 @@ if [ "$gpu_nodes_found" = false ]; then
 fi
 
 echo "Applying NVIDIA GPU ClusterPolicy"
-oc apply -f "${GPU_INSTALL_DIR}/cluster-policy.yaml"
+if [ "${ENABLE_RDMA:-false}" = "true" ]; then
+  echo "RDMA enabled - applying kernel module params and enabling RDMA in ClusterPolicy"
+  oc apply -f "${GPU_INSTALL_DIR}/rdma-kernel-module-params.yaml"
+  sed -e 's/<rdma_enabled>/true/g' \
+      -e 's/<gdrcopy_enabled>/true/g' \
+      -e 's/<kernel_module_config>/kernel-module-params/g' \
+      "${GPU_INSTALL_DIR}/cluster-policy.yaml" | oc apply -f -
+else
+  echo "RDMA disabled (set ENABLE_RDMA=true to enable)"
+  sed -e 's/<rdma_enabled>/false/g' \
+      -e 's/<gdrcopy_enabled>/false/g' \
+      -e 's/<kernel_module_config>/""/g' \
+      "${GPU_INSTALL_DIR}/cluster-policy.yaml" | oc apply -f -
+fi
 wait_until_pod_ready_status "nvidia-device-plugin-daemonset" 600
 wait_until_pod_ready_status "nvidia-container-toolkit-daemonset"
 wait_until_pod_ready_status "nvidia-dcgm-exporter"

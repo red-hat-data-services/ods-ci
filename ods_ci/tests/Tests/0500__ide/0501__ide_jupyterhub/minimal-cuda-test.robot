@@ -13,8 +13,8 @@ Test Tags       JupyterHub
 
 *** Variables ***
 ${NOTEBOOK_IMAGE} =         minimal-gpu
-${EXPECTED_CUDA_VERSION} =  12.9
-${EXPECTED_CUDA_VERSION_N_1} =  12.6
+${EXPECTED_CUDA_VERSION} =  13.0
+${EXPECTED_CUDA_VERSION_N_1} =  12.9
 
 
 *** Test Cases ***

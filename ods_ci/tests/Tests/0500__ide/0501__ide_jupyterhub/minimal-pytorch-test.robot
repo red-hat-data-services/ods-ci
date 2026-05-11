@@ -16,7 +16,7 @@ Test Tags       JupyterHub
 *** Variables ***
 ${NOTEBOOK_IMAGE} =         pytorch
 ${EXPECTED_CUDA_VERSION} =  12.9
-${EXPECTED_CUDA_VERSION_N_1} =  12.6
+${EXPECTED_CUDA_VERSION_N_1} =  12.9
 ${TENSORBOARD_FRAME_XPATH} =  //iframe[contains(@id, "tensorboard-frame")]
 
 

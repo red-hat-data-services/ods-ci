@@ -36,8 +36,8 @@ ${TRUSTYAI_CONTROLLER_MANAGER_LABEL_SELECTOR}               app.kubernetes.io/pa
 ${TRUSTYAI_CONTROLLER_MANAGER_DEPLOYMENT_NAME}              trustyai-service-operator-controller-manager
 ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}          app.kubernetes.io/part-of=feastoperator
 ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}         feast-operator-controller-manager
-${LLAMASTACKOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}     app.kubernetes.io/part-of=llamastackoperator
-${LLAMASTACKOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    llama-stack-k8s-operator-controller-manager
+${OGX_CONTROLLER_MANAGER_LABEL_SELECTOR}                    app.kubernetes.io/part-of=ogx
+${OGX_CONTROLLER_MANAGER_DEPLOYMENT_NAME}                   ogx-k8s-operator-controller-manager
 ${MLFLOWOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}         app.kubernetes.io/name=mlflow-operator
 ${MLFLOWOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}        mlflow-operator-controller-manager
 ${MODELSASSERVICE_CONTROLLER_MANAGER_LABEL_SELECTOR}        app.kubernetes.io/part-of=modelsasservice
@@ -60,7 +60,7 @@ ${IS_NOT_PRESENT}                                           1
 ...                                                         TRUSTYAI=${EMPTY}
 ...                                                         WORKBENCHES=${EMPTY}
 ...                                                         FEASTOPERATOR=${EMPTY}
-...                                                         LLAMASTACKOPERATOR=${EMPTY}
+...                                                         OGX=${EMPTY}
 ...                                                         MLFLOWOPERATOR=${EMPTY}
 ...                                                         MODELSASSERVICE=${EMPTY}
 ...                                                         SPARKOPERATOR=${EMPTY}
@@ -490,39 +490,39 @@ Validate Feastoperator Removed State
 
     [Teardown]      Restore DSC Component State     feastoperator       ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}     ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.FEASTOPERATOR}
 
-Validate Llamastackoperator Managed State
-    [Documentation]    Validate that the DSC Llamastackoperator component Managed state creates the expected resources,
-    ...    check that LlamastackOperator deployment is created and pod is in Ready state
+Validate Ogx Managed State
+    [Documentation]    Validate that the DSC Ogx component Managed state creates the expected resources,
+    ...    check that OGX deployment is created and pod is in Ready state
     [Tags]
     ...    Operator
-    ...    llamastackoperator-managed
+    ...    Ogx-managed
     ...    Integration
     ...    Smoke
 
     Set DSC Component Managed State And Wait For Completion
-    ...    llamastackoperator
-    ...    ${LLAMASTACKOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
-    ...    ${LLAMASTACKOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
+    ...    ogx
+    ...    ${OGX_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${OGX_CONTROLLER_MANAGER_LABEL_SELECTOR}
     Check That Image Pull Path Is Correct
-    ...    ${LLAMASTACKOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${OGX_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
     ...    ${IMAGE_PULL_PATH}
 
-    [Teardown]      Restore DSC Component State     llamastackoperator       ${LLAMASTACKOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}     ${LLAMASTACKOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.LLAMASTACKOPERATOR}
+    [Teardown]      Restore DSC Component State     ogx       ${OGX_CONTROLLER_MANAGER_DEPLOYMENT_NAME}     ${OGX_CONTROLLER_MANAGER_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.OGX}
 
-Validate Llamastackoperator Removed State
-    [Documentation]    Validate that LlamastackOperator management state Removed does remove relevant resources.
+Validate Ogx Removed State
+    [Documentation]    Validate that Ogx management state Removed does remove relevant resources.
     [Tags]
     ...    Operator
     ...    Tier1
-    ...    llamastackoperator-removed
+    ...    Ogx-removed
     ...    Integration
 
     Set DSC Component Removed State And Wait For Completion
-    ...    llamastackoperator
-    ...    ${LLAMASTACKOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
-    ...    ${LLAMASTACKOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
+    ...    ogx
+    ...    ${OGX_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${OGX_CONTROLLER_MANAGER_LABEL_SELECTOR}
 
-    [Teardown]      Restore DSC Component State     llamastackoperator       ${LLAMASTACKOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}     ${LLAMASTACKOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.LLAMASTACKOPERATOR}
+    [Teardown]      Restore DSC Component State     ogx       ${OGX_CONTROLLER_MANAGER_DEPLOYMENT_NAME}     ${OGX_CONTROLLER_MANAGER_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.OGX}
 
 Validate Mlflowoperator Managed State
     [Documentation]    Validate that the DSC Mlflowoperator component Managed state creates the expected resources,
@@ -716,7 +716,7 @@ Suite Setup
     ${SAVED_MANAGEMENT_STATES.TRUSTYAI}=     Get DSC Component State    ${DSC_NAME}    trustyai    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.WORKBENCHES}=    Get DSC Component State    ${DSC_NAME}    workbenches    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.FEASTOPERATOR}=    Get DSC Component State    ${DSC_NAME}    feastoperator    ${OPERATOR_NS}
-    ${SAVED_MANAGEMENT_STATES.LLAMASTACKOPERATOR}=    Get DSC Component State    ${DSC_NAME}    llamastackoperator    ${OPERATOR_NS}
+    ${SAVED_MANAGEMENT_STATES.OGX}=    Get DSC Component State    ${DSC_NAME}    ogx    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.MLFLOWOPERATOR}=    Get DSC Component State    ${DSC_NAME}    mlflowoperator    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.SPARKOPERATOR}=    Get DSC Component State    ${DSC_NAME}    sparkoperator
     ...    ${OPERATOR_NS}

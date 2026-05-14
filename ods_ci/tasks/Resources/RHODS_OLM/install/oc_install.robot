@@ -22,6 +22,7 @@ ${DSCI_NAME} =    default-dsci
 ...    modelregistry
 ...    feastoperator
 ...    llamastackoperator
+...    ogx
 ...    mlflowoperator
 ...    modelsasservice
 ...    sparkoperator
@@ -441,6 +442,12 @@ Verify RHODS Installation
   IF    "${llamastackoperator}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app.kubernetes.io/part-of=llamastackoperator
+  END
+
+  ${ogx} =     Is Component Enabled    ogx    ${DSC_NAME}
+  IF    "${ogx}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/part-of=ogx
   END
 
   ${mlflowoperator} =    Is Component Enabled    mlflowoperator    ${DSC_NAME}

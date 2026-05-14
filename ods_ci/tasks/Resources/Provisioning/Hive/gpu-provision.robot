@@ -22,5 +22,6 @@ Delete GPU Node In Self Managed AWS Cluster
 Install GPU Operator on Self Managed Cluster
    [Documentation]  Install GPU operator on Self Managed cluster
    ${gpu_install} =    Run Process    sh    tasks/Resources/Provisioning/GPU/gpu_deploy.sh   shell=yes
+   Should Be Equal As Integers    ${gpu_install.rc}    0
    Should Not Contain    ${gpu_install.stdout}    FAIL
    Wait For Pods Status   namespace=nvidia-gpu-operator   timeout=600

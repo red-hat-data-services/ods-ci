@@ -24,9 +24,14 @@ Is OpenShift Login Visible
    [Arguments]  ${timeout}=15s
    ${cluster_auth_value}=    Get Variable Value    ${CLUSTER_AUTH}    ${EMPTY}
    IF  "${cluster_auth_value}" == "oidc"
-       # this will work with keycloak, need a different way once we start with entra
-       ${login_prompt_visible} =  Run Keyword And Return Status
-       ...    Wait Until Page Contains    Sign in to your account  timeout=${timeout}
+       ${oidc_provider}=    Get Variable Value    ${OIDC_PROVIDER}    keycloak
+       IF  "${oidc_provider}" == "entra"
+           ${login_prompt_visible} =  Run Keyword And Return Status
+           ...    Wait Until Page Contains    Sign in  timeout=${timeout}
+       ELSE
+           ${login_prompt_visible} =  Run Keyword And Return Status
+           ...    Wait Until Page Contains    Sign in to your account  timeout=${timeout}
+       END
    ELSE
        ${login_prompt_visible} =  Run Keyword And Return Status
        ...    Wait Until Page Contains    Log in with    timeout=${timeout}
@@ -50,16 +55,17 @@ Login To Openshift
     ...    expected string in the destination app.
     [Arguments]  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
     # Wait until page is the Login page or the destination app
-    ${expected_text_list} =    Create List    Log in with    Administrator    Developer    Data Science Projects  Sign in to your account
+    ${expected_text_list} =    Create List    Log in with    Administrator    Developer
+    ...    Data Science Projects    Sign in to your account    Sign in
     Wait Until Page Contains A String In List    ${expected_text_list}
     # Return if page is not the Login page (no login required)
     IF  "${ocp_user_auth_type}" == "oidc"
-        ${should_login} =    Does Current Sub Domain Start With    https://keycloak
-        IF  not ${should_login}    RETURN
-        Input Text  id=username  ${ocp_user_name}
-        Input Text  id=password  ${ocp_user_pw}
-        Click Button   //*[@type="submit"]
-        Wait Until Page Does Not Contain    Sign in to your account    timeout=30s
+        ${oidc_provider}=    Get Variable Value    ${OIDC_PROVIDER}    keycloak
+        IF  "${oidc_provider}" == "entra"
+            Login To Openshift Via Entra    ${ocp_user_name}    ${ocp_user_pw}
+        ELSE
+            Login To Openshift Via Keycloak    ${ocp_user_name}    ${ocp_user_pw}
+        END
         Maybe Skip Tour    ${ocp_user_name}
     ELSE
         ${should_login} =    Does Current Sub Domain Start With    https://oauth
@@ -77,6 +83,38 @@ Login To Openshift
         Wait Until Page Does Not Contain    Log in to your account    timeout=30s
         Maybe Skip Tour    ${ocp_user_name}
     END
+
+Login To Openshift Via Keycloak
+    [Documentation]    Login to OpenShift via Keycloak OIDC provider
+    [Arguments]    ${ocp_user_name}    ${ocp_user_pw}
+    ${should_login} =    Does Current Sub Domain Start With    https://keycloak
+    IF  not ${should_login}    RETURN
+    Input Text  id=username  ${ocp_user_name}
+    Input Text  id=password  ${ocp_user_pw}
+    Click Button   //*[@type="submit"]
+    Wait Until Page Does Not Contain    Sign in to your account    timeout=30s
+
+Login To Openshift Via Entra
+    [Documentation]    Login to OpenShift via Entra ID (Microsoft) OIDC provider.
+    ...    Entra uses a two-step Microsoft login flow.
+    [Arguments]    ${ocp_user_name}    ${ocp_user_pw}
+    ${should_login} =    Does Current Sub Domain Start With    https://login
+    IF  not ${should_login}    RETURN
+    # Step 1: Enter username
+    Wait Until Element Is Visible    name=loginfmt    timeout=30s
+    Input Text    name=loginfmt    ${ocp_user_name}
+    Click Element    xpath=//*[@type="submit"]
+    # Step 2: Enter password
+    Wait Until Element Is Visible    name=passwd    timeout=30s
+    Input Text    name=passwd    ${ocp_user_pw}
+    Click Element    xpath=//*[@type="submit"]
+    # Handle optional "Stay signed in?" prompt
+    ${stay_signed_in}=    Run Keyword And Return Status
+    ...    Wait Until Element Is Visible    id=idBtn_Back    timeout=10s
+    IF    ${stay_signed_in}
+        Click Element    id=idBtn_Back
+    END
+    Wait Until Page Does Not Contain    Sign in    timeout=30s
 
 Log In Should Be Requested
     [Documentation]    Passes if the login page appears and fails otherwise

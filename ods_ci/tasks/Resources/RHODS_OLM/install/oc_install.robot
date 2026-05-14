@@ -52,7 +52,7 @@ ${TELEMETRY_CHANNEL_NAME}=  stable
 ${TELEMETRY_NS}=  openshift-opentelemetry-operator
 ${KUEUE_OP_NAME}=  kueue-operator
 ${KUEUE_SUB_NAME}=  kueue-operator
-${KUEUE_CHANNEL_NAME}=  stable-v1.2
+${KUEUE_CHANNEL_NAME}=  stable-v1.3
 ${KUEUE_NS}=  openshift-kueue-operator
 ${JOBSET_OP_NAME}=  job-set
 ${JOBSET_SUB_NAME}=  job-set
@@ -76,6 +76,8 @@ ${DEFAULT_APPLICATIONS_NAMESPACE_RHOAI}=    redhat-ods-applications
 ${DEFAULT_APPLICATIONS_NAMESPACE_ODH}=    opendatahub
 ${DEFAULT_WORKBENCHES_NAMESPACE_RHOAI}=    rhods-notebooks
 ${DEFAULT_WORKBENCHES_NAMESPACE_ODH}=    opendatahub
+${DEFAULT_MODEL_REGISTRY_NAMESPACE_RHOAI}=    rhoai-model-registries
+${DEFAULT_MODEL_REGISTRY_NAMESPACE_ODH}=    odh-model-registries
 ${CUSTOM_MANIFESTS}=    ${EMPTY}
 ${IS_NOT_PRESENT}=      1
 ${DSC_TEMPLATE}=    dsc_template.yml
@@ -146,7 +148,7 @@ Install RHODS
           END
       ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "Helm"
              Install RHOAI In Self Managed Cluster Using Helm  ${enable_new_observability_stack}
-             ...    ${GITOPS_REPO_BRANCH}    ${GITOPS_REPO_URL}
+             ...    ${GITOPS_REPO_BRANCH}    ${GITOPS_REPO_URL}    ${image_url}
       ELSE IF  "${TEST_ENV}" in "${SUPPORTED_TEST_ENV}" and "${INSTALL_TYPE}" == "OperatorHub"
           IF  "${is_upgrade}" == "False"
               ${file_path} =    Set Variable    tasks/Resources/RHODS_OLM/install/
@@ -357,6 +359,7 @@ Verify RHODS Installation
 
   IF  "${CLUSTER_AUTH}" == "oidc"
       Patch GatewayConfig With OIDC Info
+      Configure OIDC Auth CR Groups
   END
 
   IF  "${ORIGINAL_CLUSTER_TYPE}" == "managed"
@@ -466,6 +469,9 @@ Verify RHODS Installation
         #This line of code is strictly used for the exploratory cluster to accommodate UI/UX team requests
         Add UI Admin Group To Dashboard Admin
     END
+    IF  "${CLUSTER_AUTH}" == "oidc"
+        Configure OIDC Dashboard Groups
+    END
   END
 
   IF    "${dashboard}" == "true" or "${workbenches}" == "true" or "${aipipelines}" == "true" or "${kserve}" == "true" or "${kueue}" == "true" or "${ray}" == "true" or "${trustyai}" == "true" or "${modelregistry}" == "true" or "${trainingoperator}" == "true" or "${sparkoperator}" == "true"    # robocop: disable
@@ -528,6 +534,34 @@ Install RHODS In Managed Cluster Using CLI
   Log To Console    ${output}
   Should Be Equal As Integers   ${return_code}   0  msg=Error detected while installing RHODS
 
+Create Custom CatalogSource If Not Present
+  [Documentation]    Creates a CatalogSource in a given namespace (default openshift-marketplace) if it doesn't already exist.
+  ...    Requires image_url to build the CatalogSource from an index image.
+  [Arguments]    ${catalog_source_name}    ${image_url}    ${namespace}=openshift-marketplace
+  ${rc}    ${_} =    Run And Return Rc And Output
+  ...    oc get catalogsource ${catalog_source_name} -n ${namespace} --no-headers 2>/dev/null
+  IF    ${rc} == 0
+      Log To Console    CatalogSource '${catalog_source_name}' already exists in namespace '${namespace}'
+      RETURN
+  END
+
+  IF    "${image_url}" == "${EMPTY}"
+      Fail    Custom CatalogSource '${catalog_source_name}' not found and no image_url provided to create it
+  END
+
+  Log To Console    Creating CatalogSource '${catalog_source_name}' with image '${image_url}' in namespace '${namespace}'
+  ${template_path} =    Set Variable    tasks/Resources/RHODS_OLM/install/catalogsource_template.yaml
+  ${output_path} =    Set Variable    ${EXECDIR}/catalogsource_apply.yaml
+  ${template_data} =    Get File    ${template_path}
+  ${output_data} =    Replace Variables    ${template_data}
+  Create File    ${output_path}    ${output_data}
+
+  ${rc}    ${output} =    Run And Return Rc And Output    oc apply -f ${output_path}
+  Remove File    ${output_path}
+  Should Be Equal As Integers    ${rc}    0    msg=Failed to create CatalogSource '${catalog_source_name}': ${output}
+
+  Wait for Catalog To Be Ready    namespace=${namespace}    catalog_name=${catalog_source_name}
+
 Install RHOAI In Self Managed Cluster Using Helm
   [Documentation]   Install ODH/RHOAI using Helm on a self-managed cluster, including its dependencies
   ...
@@ -539,9 +573,24 @@ Install RHOAI In Self Managed Cluster Using Helm
   [Arguments]     ${enable_monitoring}=${TRUE}
   ...    ${gitops_branch}=${GITOPS_DEFAULT_REPO_BRANCH}
   ...    ${gitops_repo}=${GITOPS_DEFAULT_REPO}
+  ...    ${image_url}=${EMPTY}
   Log To Console    Installing ${PRODUCT} using Helm method
   ${operator_type} =    Set Variable If    "${PRODUCT}" == "ODH"    odh    rhoai
   Log To Console    Operator type for Helm: ${operator_type}
+
+  ${catalog_source} =    Get Variable Value    ${CATALOG_SOURCE}    ${EMPTY}
+
+  ${notebooks_ns} =    Get Variable Value    ${NOTEBOOKS_NAMESPACE}    ${EMPTY}
+  IF    "${notebooks_ns}" == "${EMPTY}"
+      ${notebooks_ns} =    Set Variable If    "${operator_type}" == "odh"
+      ...    ${DEFAULT_WORKBENCHES_NAMESPACE_ODH}    ${DEFAULT_WORKBENCHES_NAMESPACE_RHOAI}
+  END
+
+  ${model_registry_ns} =    Get Variable Value    ${MODEL_REGISTRY_NAMESPACE}    ${EMPTY}
+  IF    "${model_registry_ns}" == "${EMPTY}"
+      ${model_registry_ns} =    Set Variable If    "${operator_type}" == "odh"
+      ...    ${DEFAULT_MODEL_REGISTRY_NAMESPACE_ODH}    ${DEFAULT_MODEL_REGISTRY_NAMESPACE_RHOAI}
+  END
 
   ${monitoring_flag} =    Set Variable If    not ${enable_monitoring}    -M    ${EMPTY}
   ${branch_flag} =    Set Variable If    "${gitops_branch}" != "${EMPTY}"    -b ${gitops_branch}    ${EMPTY}
@@ -559,6 +608,18 @@ Install RHOAI In Self Managed Cluster Using Helm
   ...    -s operator.${operator_type}.monitoringNamespace=${MONITORING_NAMESPACE}
   ...    -s operator.${operator_type}.olm.namespace=${OPERATOR_NAMESPACE}
   ...    -s operator.${operator_type}.olm.name=${OPERATOR_NAME}
+  ...    -s components.workbenches.dsc.workbenchNamespace=${notebooks_ns}
+  ...    -s components.modelregistry.dsc.registriesNamespace=${model_registry_ns}
+
+  # Create custom CatalogSource and set olm.source if a custom catalog is specified
+  IF    "${catalog_source}" != "${EMPTY}"
+      IF    "${image_url}" != "${EMPTY}"
+          Create Custom CatalogSource If Not Present    ${catalog_source}    ${image_url}
+      END
+      ${required_helm_operator_flags} =    Catenate
+      ...    ${required_helm_operator_flags}
+      ...    -s operator.${operator_type}.olm.source=${catalog_source}
+  END
 
   # Log configuration
   IF    not ${enable_monitoring}
@@ -580,7 +641,10 @@ Install RHOAI In Self Managed Cluster Using Helm
   IF    @{HELM_SET_VALUES}
       Log To Console    Custom Helm values: @{HELM_SET_VALUES}
   END
-  Log To Console    Enforcing Helm operator values: applicationsNamespace=${APPLICATIONS_NAMESPACE}, monitoringNamespace=${MONITORING_NAMESPACE}, operatorNamespace=${OPERATOR_NAMESPACE}, operatorSubscriptionName=${OPERATOR_NAME}
+  IF    "${catalog_source}" != "${EMPTY}"
+      Log To Console    Using CatalogSource: ${catalog_source}
+  END
+  Log To Console    Enforcing Helm operator values: applicationsNamespace=${APPLICATIONS_NAMESPACE}, monitoringNamespace=${MONITORING_NAMESPACE}, operatorNamespace=${OPERATOR_NAMESPACE}, operatorSubscriptionName=${OPERATOR_NAME}, notebooksNamespace=${notebooks_ns}, modelRegistryNamespace=${model_registry_ns}
 
   ${return_code} =    Run And Watch Command
   ...    cd ${EXECDIR}/${OLM_DIR} && ./setup-helm.sh -o ${operator_type} ${monitoring_flag} ${repo_flag} ${branch_flag} ${values_file_flag} ${set_values_flags} ${required_helm_operator_flags}
@@ -655,9 +719,40 @@ Patch GatewayConfig With OIDC Info
     ${file_path} =    Set Variable    tasks/Resources/Files/
     ${gw_config_file} =  Set Variable  ${file_path}/gatewayconfig-patch-payload-apply.json
     Copy File    source=${file_path}gatewayconfig-patch-payload.json    destination=${gw_config_file}
-    Run    sed -i'' -e 's|<issuerURL>|${CLUSTER_OIDC_ISSUER}|' ${gw_config_file}
+    ${odh_client_id} =    Get Variable Value    ${CLIENT_ID_ODH_CLIENT}    odh-client
+    Run    sed -i'' -e 's|<issuerURL>|${CLUSTER_OIDC_ISSUER}|' -e 's|<clientID>|${odh_client_id}|' ${gw_config_file}
     ${rc}   ${output}=    Run And Return Rc And Output
     ...         oc patch gatewayconfig/default-gateway --patch-file="${gw_config_file}" --type merge    #robocop:disable
+    Should Be Equal    "${rc}"    "0"   msg=${output}
+
+Configure OIDC Auth CR Groups
+    [Documentation]  Configures RHOAI Auth CR with the OIDC admin/user groups
+    ${admin_group} =    Get Variable Value    ${OIDC_ADMIN_GROUP}    ${EMPTY}
+    ${user_group} =     Get Variable Value    ${OIDC_USER_GROUP}     ${EMPTY}
+    IF  "${admin_group}" != ""
+        Log  Patching Auth CR with adminGroups=${admin_group}, allowedGroups=${user_group}  console=yes
+        ${rc}  ${output} =    Run And Return Rc And Output
+        ...    oc patch Auth auth --type=merge -p '{"spec": {"adminGroups": ["${admin_group}"], "allowedGroups": ["${user_group}"]}}'    #robocop:disable
+        Should Be Equal    "${rc}"    "0"   msg=${output}
+    ELSE
+        Log  No OIDC_ADMIN_GROUP configured, skipping Auth CR group configuration  console=yes
+    END
+
+Configure OIDC Dashboard Groups
+    [Documentation]  Configures OdhDashboardConfig with the OIDC admin and user groups (must run after dashboard is ready)
+    ${admin_group} =    Get Variable Value    ${OIDC_ADMIN_GROUP}    ${EMPTY}
+    ${user_group} =     Get Variable Value    ${OIDC_USER_GROUP}     system:authenticated
+    IF  "${admin_group}" != ""
+        Log  Patching OdhDashboardConfig with adminGroups=${admin_group}, allowedGroups=${user_group}  console=yes
+        Wait Until Keyword Succeeds    2 min    10 sec
+        ...    Patch OdhDashboardConfig Groups    ${admin_group}    ${user_group}
+    END
+
+Patch OdhDashboardConfig Groups
+    [Documentation]  Patches OdhDashboardConfig groups config (helper for retry)
+    [Arguments]    ${admin_group}    ${allowed_group}
+    ${rc}  ${output} =    Run And Return Rc And Output
+    ...    oc patch OdhDashboardConfig odh-dashboard-config -n ${APPLICATIONS_NAMESPACE} --type merge -p '{"spec":{"groupsConfig":{"adminGroups":"${admin_group}","allowedGroups":"${allowed_group}"}}}'    #robocop:disable
     Should Be Equal    "${rc}"    "0"   msg=${output}
 
 Patch GatewayConfig Disable Ingress
@@ -1194,6 +1289,7 @@ Install RHOAI Dependencies With CLI
     Install Leader Worker Set Operator Via Cli
     Install Connectivity Link Operator Via Cli
     Install JobSet Dependencies
+    Configure MaaS Database
     Configure MaaS Gateway API
 
 Install Observability Dependencies
@@ -1224,24 +1320,30 @@ Create Namespace With Label
 
 Configure Custom Operator Namespace
     [Documentation]    Configures a custom namespace to be able to be used as the ODH/RHOAI operator namespace.
-    ...                If this namespace does not exist, its created.
+    ...                If this namespace does not exist, it will be created.
     [Arguments]    ${namespace}
     Create Namespace With Label    ${namespace}    opendatahub.io/custom-namespace=true
 
 Configure Custom Applications Namespace
     [Documentation]    Configures a custom namespace to be able to be used as the ODH/RHOAI applications namespace.
-    ...                If this namespace does not exist, its created.
+    ...                If this namespace does not exist, it will be created.
     [Arguments]    ${namespace}
     Create Namespace With Label    ${namespace}    opendatahub.io/application-namespace=true
 
 Configure Custom Workbenches Namespace
     [Documentation]    Configures a custom namespace to be able to be used as the ODH/RHOAI workbenches namespace.
-    ...                If this namespace does not exist, its created.
+    ...                If this namespace does not exist, it will be created.
     [Arguments]    ${namespace}
     Create Namespace With Label    ${namespace}    opendatahub.io/workbenches-namespace=true
 
+Configure Custom Model Registry Namespace
+    [Documentation]    Configures a custom namespace to be able to be used as the ODH/RHOAI model registry namespace.
+    ...                If this namespace does not exist, it will be created.
+    [Arguments]    ${namespace}
+    Create Namespace With Label    ${namespace}    opendatahub.io/model-registry-namespace=true
+
 Configure Custom Namespaces
-    [Documentation]    Configures both operator, application and workbenches namespaces when they are setted as custom ones
+    [Documentation]    Configures operator, application, workbenches and model registry namespaces when they are set as custom ones
     IF   "${OPERATOR_NAMESPACE}" != "${DEFAULT_OPERATOR_NAMESPACE_RHOAI}" and "${OPERATOR_NAMESPACE}" != "${DEFAULT_OPERATOR_NAMESPACE_ODH}"
        # If the operator namespace is not the default one, we need to check if exists
        # and create if not prior to installing ODH/RHOAI. Adding a custom label for automation purposes.
@@ -1254,6 +1356,10 @@ Configure Custom Namespaces
     IF  "${NOTEBOOKS_NAMESPACE}" != "${DEFAULT_WORKBENCHES_NAMESPACE_RHOAI}" and "${NOTEBOOKS_NAMESPACE}" != "${DEFAULT_WORKBENCHES_NAMESPACE_ODH}"
        # If the workbenches namespace is not the default one, we need to create prior to installing ODH/RHOAI
        Configure Custom Workbenches Namespace    ${NOTEBOOKS_NAMESPACE}
+    END
+    IF  "${MODEL_REGISTRY_NAMESPACE}" != "${EMPTY}" and "${MODEL_REGISTRY_NAMESPACE}" != "${DEFAULT_MODEL_REGISTRY_NAMESPACE_RHOAI}" and "${MODEL_REGISTRY_NAMESPACE}" != "${DEFAULT_MODEL_REGISTRY_NAMESPACE_ODH}"
+       # If the model registry namespace is not the default one, we need to create prior to installing ODH/RHOAI
+       Configure Custom Model Registry Namespace    ${MODEL_REGISTRY_NAMESPACE}
     END
 
 Create DSCI With Custom Namespaces
@@ -1419,6 +1525,10 @@ Deploy NFS Provisioner
     Log    ${output}    console=yes
     Wait For Pods To Be Ready    label_selector=nfsprovisioner_cr=${nfs_provisioner_name}
     ...    namespace=${NFS_OP_NS}
+    ${rc}    ${output} =    Run And Return Rc And Output
+    ...    oc patch storageclass nfs -p '{"mountOptions":["nfsvers=3"]}'
+    Should Be Equal As Integers    ${rc}    0
+    Log    ${output}    console=yes
 
 Configure Gateway API
     [Documentation]    Configure Gateway API for KServe inference traffic routing
@@ -1435,3 +1545,11 @@ Configure MaaS Gateway API
     ...    bash tasks/Resources/Gateway/configure_maas_gateway.sh
     Log To Console    ${output}
     Should Be Equal As Integers    ${rc}    0    msg=Error configuring Gateway for MaaS
+
+Configure MaaS Database
+    [Documentation]    Provision PostgreSQL and maas-db-config secret required by maas-api
+    Log To Console    Provisioning MaaS PostgreSQL prerequisites
+    ${rc}    ${output} =    Run And Return Rc And Output
+    ...    bash tasks/Resources/Database/configure_maas_postgres.sh --namespace ${APPLICATIONS_NAMESPACE}
+    Log To Console    ${output}
+    Should Be Equal As Integers    ${rc}    0    msg=Error provisioning MaaS PostgreSQL prerequisites

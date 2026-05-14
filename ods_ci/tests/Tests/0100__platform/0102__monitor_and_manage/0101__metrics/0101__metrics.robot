@@ -12,12 +12,11 @@ Test Tags           ExcludeOnODH
 
 
 *** Variables ***
-@{RECORD_GROUPS}    SLOs - Data Science Pipelines Operator    SLOs - AI Pipelines Application
-...    SLOs - ODH Model Controller    SLOs - Kserve Controller Manager    SLOs - ODH Dashboard    Availability Metrics
+@{RECORD_GROUPS}    SLOs - ODH Model Controller    SLOs - Kserve Controller Manager    SLOs - ODH Dashboard
+...    Availability Metrics
 ...    SLOs - RHODS Operator v2    SLOs - TrustyAI Controller Manager    SLOs - Notebook Controller
 
-@{ALERT_GROUPS}    SLOs-haproxy_backend_http_responses_dsp    RHODS AI Pipelines    SLOs-probe_success_dsp
-...    DeadManSnitch     KubeFlow Training Operator
+@{ALERT_GROUPS}    DeadManSnitch     KubeFlow Training Operator
 ...    SLOs-haproxy_backend_http_responses_dashboard     SLOs-probe_success_model_controller     SLOs-probe_success_kserve
 ...    Distributed Workloads Kuberay     Distributed Workloads Kueue     RHODS-PVC-Usage     RHODS Notebook controllers
 ...    SLOs-probe_success_trustyai
@@ -103,7 +102,6 @@ Test Targets Are Available And Up In RHOAI Prometheus
     ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
     ...    username=${OCP_ADMIN_USER.USERNAME}
     ...    password=${OCP_ADMIN_USER.PASSWORD}
-    List Should Contain Value    ${targets}    Data Science Pipelines Operator
     List Should Contain Value    ${targets}    Federate Prometheus
     List Should Contain Value    ${targets}    Kserve Controller Manager
     List Should Contain Value    ${targets}    KubeRay Operator
@@ -112,7 +110,6 @@ Test Targets Are Available And Up In RHOAI Prometheus
     List Should Contain Value    ${targets}    ODH Model Controller
     List Should Contain Value    ${targets}    ODH Notebook Controller Service Metrics
     List Should Contain Value    ${targets}    TrustyAI Controller Manager
-    List Should Contain Value    ${targets}    user_facing_endpoints_status_dsp
     List Should Contain Value    ${targets}    user_facing_endpoints_status_rhods_dashboard
     List Should Contain Value    ${targets}    user_facing_endpoints_status_workbenches
 
@@ -129,7 +126,7 @@ Test RHOAI Operator Metrics Are Defined
     ...                                     controller_runtime_reconcile_time_seconds_sum  controller_runtime_reconcile_total
 
     @{expected_controller_names} =     Create List  auth  dashboard
-    ...                                    datasciencecluster  aipipelines  dscinitialization  kserve  kueue
+    ...                                    datasciencecluster  dscinitialization  kserve  kueue
     ...                                    modelcontroller  modelregistry  monitoring  ray
     ...                                    trainingoperator  trustyai  workbenches
 
@@ -216,62 +213,6 @@ Test RHOAI Dashboard Metrics Are Defined
     FOR    ${metric}    IN    @{expected_metric_names}
         Should Contain    ${metrics_names}    ${metric}
     END
-
-Test RHOAI DSP Operator Recording Rules On Prometheus
-    [Documentation]   Verifies the RHOAI DSP Operator is recording some rules on Prometheus
-    [Tags]    Tier2
-    ...       ODS-2168
-    ...       RHOAIENG-13263
-    ...       Monitoring
-    Skip If RHODS Is Self-Managed And New Observability Stack Is Disabled
-    ${user_facing_endpoints_status_dsp_response} =    Prometheus.Run Query
-    ...    pm_url=${RHODS_PROMETHEUS_URL}
-    ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
-    ...    pm_query=probe_success{job="user_facing_endpoints_status_dsp", name="data-science-pipelines-operator"}
-    ${user_facing_endpoints_status_dsp} =   Run  echo '${user_facing_endpoints_status_dsp_response.text}' | jq .data.result[0].value[1]
-    Should Be True      ${user_facing_endpoints_status_dsp} == "1"
-
-    ${burnrate_5m_response} =    Prometheus.Run Query
-    ...    pm_url=${RHODS_PROMETHEUS_URL}
-    ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
-    ...    pm_query=sum by(instance) (probe_success:burnrate5m{instance=~"data-science-pipelines-operator"})
-    ${burnrate_5m} =   Run  echo '${burnrate_5m_response.text}' | jq .data.result[0].value[1]
-    Should Be True      ${burnrate_5m} == "0"
-
-    ${burnrate_30m_response} =    Prometheus.Run Query
-    ...    pm_url=${RHODS_PROMETHEUS_URL}
-    ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
-    ...    pm_query=sum by(instance) (probe_success:burnrate30m{instance=~"data-science-pipelines-operator"})
-    ${burnrate_30m} =   Run  echo '${burnrate_30m_response.text}' | jq .data.result[0].value[1]
-    Should Be True      ${burnrate_30m} == "0"
-
-    ${burnrate_1h_response} =    Prometheus.Run Query
-    ...    pm_url=${RHODS_PROMETHEUS_URL}
-    ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
-    ...    pm_query=sum by(instance) (probe_success:burnrate1h{instance=~"data-science-pipelines-operator"})
-    ${burnrate_1h} =   Run  echo '${burnrate_1h_response.text}' | jq .data.result[0].value[1]
-    Should Be True      ${burnrate_1h} == "0"
-
-    ${burnrate_2h_response} =    Prometheus.Run Query
-    ...    pm_url=${RHODS_PROMETHEUS_URL}
-    ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
-    ...    pm_query=sum by(instance) (probe_success:burnrate2h{instance=~"data-science-pipelines-operator"})
-    ${burnrate_2h} =   Run  echo '${burnrate_2h_response.text}' | jq .data.result[0].value[1]
-    Should Be True      ${burnrate_2h} == "0"
-
-    ${burnrate_6h_response} =    Prometheus.Run Query
-    ...    pm_url=${RHODS_PROMETHEUS_URL}
-    ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
-    ...    pm_query=sum by(instance) (probe_success:burnrate6h{instance=~"data-science-pipelines-operator"})
-    ${burnrate_6h} =   Run  echo '${burnrate_6h_response.text}' | jq .data.result[0].value[1]
-    Should Be True      ${burnrate_6h} == "0"
-
-    ${burnrate_1d_response} =    Prometheus.Run Query
-    ...    pm_url=${RHODS_PROMETHEUS_URL}
-    ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
-    ...    pm_query=sum by(instance) (probe_success:burnrate1d{instance=~"data-science-pipelines-operator"})
-    ${burnrate_1d} =   Run  echo '${burnrate_1d_response.text}' | jq .data.result[0].value[1]
-    Should Be True      ${burnrate_1d} == "0"
 
 *** Keywords ***
 Begin Metrics Web Test

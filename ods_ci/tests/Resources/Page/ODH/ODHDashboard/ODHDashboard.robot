@@ -78,12 +78,12 @@ Login To RHODS Dashboard
    [Arguments]  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
    # Wait until we are in the OpenShift auth page or already in Dashboard
    IF  "${ocp_user_auth_type}" == "oidc"
-       ${expected_text_list}=    Create List    Sign in to your account    AI hub
+       ${expected_text_list}=    Create List    Sign in to your account    Sign in    AI hub
        Wait Until Page Contains A String In List    ${expected_text_list}
        ${login-required}=  Is OpenShift Login Visible
        IF  ${login-required}  Login To Openshift  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
    ELSE
-       ${expected_text_list}=    Create List    Log in with    Data Sciencapodhrad-gcp-pool-gtcd5e Projects
+       ${expected_text_list}=    Create List    Log in with    Data Science Projects
        Wait Until Page Contains A String In List    ${expected_text_list}
        ${oauth_prompt_visible}=  Is OpenShift OAuth Login Prompt Visible
        IF  ${oauth_prompt_visible}  Click Button  Log in with OpenShift

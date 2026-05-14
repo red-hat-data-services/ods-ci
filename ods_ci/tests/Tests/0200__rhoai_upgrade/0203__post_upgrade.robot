@@ -21,7 +21,6 @@ Resource            ../../Resources/Page/HybridCloudConsole/OCM.robot
 Resource            ../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 Resource            ../../Resources/Page/DistributedWorkloads/WorkloadMetricsUI.resource
 Resource            ../../Resources/CLI/MustGather/MustGather.resource
-Resource            ../../Resources/CLI/DataSciencePipelines/DataSciencePipelinesUpgradeTesting.resource
 Resource            ../../Resources/Page/FeatureStore/FeatureStore.resource
 
 Suite Setup         Upgrade Suite Setup
@@ -245,11 +244,6 @@ Verify That DSC And DSCI Release.Version Attribute matches the value in the subs
     Should Be Equal As Strings      ${DSC_RELEASE_VERSION}      ${csv_version}
     Should Be Equal As Strings      ${DSCI_RELEASE_VERSION}     ${csv_version}
 
-Data Science Pipelines Post Upgrade Verifications
-    [Documentation]    Verifies the status of the resources created in project dsp-test-upgrade after the upgradea
-    [Tags]      Upgrade     DataSciencePipelines-Backend
-    DataSciencePipelinesUpgradeTesting.Verify Resources After Upgrade
-
 Run Feast operator TestRemoteRegistryFeastCR Test Use Case
     [Documentation]    Run TestRemoteRegistryFeastCR Test Use Case
     [Tags]  Upgrade    FeatureStoreUpgrade
@@ -261,7 +255,7 @@ Run Feast operator PostUpgrade Test Use Case
     [Documentation]    Verifies the Feast CR status and perform Feast apply and materialize functionality
     [Tags]  Upgrade    FeatureStoreUpgrade
     [Setup]    Prepare Feast E2E Test Suite
-    Run Feast Operator E2E Test    feastPostUpgrade    e2e_rhoai
+    Run Feast Operator Upgrade Test    feastPostUpgrade
     [Teardown]    Teardown Feast E2E Test Suite
 
 

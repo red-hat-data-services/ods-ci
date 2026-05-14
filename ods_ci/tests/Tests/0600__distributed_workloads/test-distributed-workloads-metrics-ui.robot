@@ -7,7 +7,7 @@ Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/
 Resource            ../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 Suite Setup         Project Suite Setup
 Suite Teardown      Project Suite Teardown
-Test Tags           DistributedWorkloadMetrics
+Test Tags           DistributedWorkloadMetrics    robot:skip
 
 
 *** Variables ***

@@ -438,12 +438,6 @@ Verify RHODS Installation
     ...    label_selector=app.kubernetes.io/part-of=feastoperator
   END
 
-  ${llamastackoperator} =    Is Component Enabled    llamastackoperator    ${DSC_NAME}
-  IF    "${llamastackoperator}" == "true"
-    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/part-of=llamastackoperator
-  END
-
   ${ogx} =     Is Component Enabled    ogx    ${DSC_NAME}
   IF    "${ogx}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}

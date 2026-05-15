@@ -68,11 +68,11 @@ Verify Notebook CR Is Running
     @{cr_obj} =  OpenShiftLibrary.Oc Get  kind=Notebook  name=${cr_name}
     &{cr_obj_dictionary} =  Set Variable  ${cr_obj}[0]
     Should Match  ${cr_obj_dictionary.metadata.name}  ${cr_name}
-    
+
     # Check if the notebook has ready replicas (indicates it's running)
     ${ready_replicas} =    Set Variable    ${cr_obj_dictionary.status.readyReplicas}
     Should Be Equal    ${ready_replicas}    ${1}    msg=Notebook ${cr_name} is not ready (readyReplicas: ${ready_replicas})
-    
+
     # Log the current status for debugging
     Log    Notebook ${cr_name} status: readyReplicas=${ready_replicas}
 
@@ -452,11 +452,11 @@ Set Subscription Update Channel
     IF    ${rc} == 0 and "${old_csv_name}" != ""
         Log    Current CSV: ${old_csv_name}    console=yes
     ELSE
-        Log    No current CSV found for subscription ${sub_name}    console=yes
+        Log    No current CSV found for subscription ${sub_name}     console=yes
     END
-    ${patch_status}=    Run And Return Rc
+    ${rc}     ${out}=    Run And Return Rc And Output
     ...    oc patch subscription ${sub_name} -n ${namespace} --type='json' -p='[{"op": "replace", "path": "/spec/channel", "value": "${channel}"}]'
-    IF    ${patch_status} == 0
+    IF    ${rc} == 0
         Log    Successfully set channel to ${channel} for subscription ${sub_name}    console=yes
         ${current_channel}=    Get Resource Attribute    ${namespace}    Subscription    ${sub_name}    .spec.channel
         Log    Verified: Current channel is ${current_channel}    console=yes
@@ -482,7 +482,7 @@ Set Subscription Update Channel
             Log    New CSV may not be ready yet or timeout reached    console=yes    level=WARN
         END
     ELSE
-        FAIL    Failed to set channel to ${channel} for subscription ${sub_name} in namespace ${namespace}
+        FAIL    Failed to set channel to ${channel} for subscription ${sub_name} in namespace ${namespace}. Reason: ${out}
     END
 
 Set Catalog Source Image

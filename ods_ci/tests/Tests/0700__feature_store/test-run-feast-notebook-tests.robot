@@ -39,3 +39,14 @@ Run feastWorkbenchIntegrationWithoutAuth Test
     ...     FeatureStore
     ...     RHOAIENG-38921
     Run Feast Notebook Test    FeastWorkbenchIntegrationWithoutAuth
+
+Run feastWorkbenchOIDCAuth Test
+    [Documentation]    Run Feast Notebook test: TestFeastWorkbenchIntegrationWithoutAuth
+    [Tags]  Tier1
+    ...     FeatureStore
+    ...     RHOAIENG-56206
+    ${cluster_auth_value}=    Get Variable Value    ${CLUSTER_AUTH}    ${EMPTY}
+    IF  "${cluster_auth_value}" != "oidc"
+        Skip  "Only applicable with BYOIDC"
+    END
+    Run Feast Notebook Test    OIDC

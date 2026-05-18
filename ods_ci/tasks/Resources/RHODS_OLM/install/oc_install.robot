@@ -401,15 +401,85 @@ Install RHODS In Self Managed Cluster Using CLI
   Should Be Equal As Integers   ${return_code}   0   msg=Error detected while installing RHODS
 
 Upgrade RHODS In Self Managed Cluster Using CLI
-  [Documentation]   Upgrade RHODS on self managed cluster using CLI by applying new catalog source
+  [Documentation]   Upgrade RHODS on self managed cluster using CLI by updating catalog source and subscription.
+  ...              Uses OPERATOR_NAME as the subscription name since setup.sh creates the subscription
+  ...              with that name (not OPERATOR_SUBSCRIPTION_NAME which differs for Cli installs).
+  ...              When a catalog source image is provided, creates/updates the catalog and points
+  ...              the subscription to it. Approves any intermediate install plans before the target.
   [Arguments]     ${image_url}     ${rhoai_version}
   Log    Starting RHODS upgrade with image: ${image_url}    console=yes
   Log    Update channel: ${UPDATE_CHANNEL}    console=yes
+  Log    Using subscription name: ${OPERATOR_NAME} (from setup.sh -n flag)    console=yes
+  Set Subscription Install Plan Approval    ${OPERATOR_NAMESPACE}    Manual    ${OPERATOR_NAME}
+  Set Subscription Update Channel    ${OPERATOR_NAMESPACE}    ${UPDATE_CHANNEL}    ${OPERATOR_NAME}
+  IF    "${image_url}" != "${EMPTY}"
+      Set Catalog Source Image    ${image_url}    cs_name=${CATALOG_SOURCE}
+      Update Subscription Source    ${OPERATOR_NAMESPACE}    ${OPERATOR_NAME}    ${CATALOG_SOURCE}
+  END
+  Approve Intermediate Installplans    ${OPERATOR_NAMESPACE}    ${OPERATOR_NAME}    ${rhoai_version}
+  Wait For Target CSV    ${OPERATOR_NAMESPACE}    ${OPERATOR_NAME}    ${rhoai_version}
 
-  Set Subscription Install Plan Approval    ${OPERATOR_NAMESPACE}    Manual    ${OPERATOR_SUBSCRIPTION_NAME}
-  Set Subscription Update Channel    ${OPERATOR_NAMESPACE}    ${UPDATE_CHANNEL}    ${OPERATOR_SUBSCRIPTION_NAME}
-  Set Catalog Source Image    ${image_url}    cs_name=${CATALOG_SOURCE}
-  Wait For Installplan And Approve It    ${OPERATOR_NAMESPACE}    ${OPERATOR_NAME}    ${OPERATOR_SUBSCRIPTION_NAME}    ${rhoai_version}    #robocop:disable
+Update Subscription Source
+  [Documentation]   Updates the source catalog of a subscription.
+  [Arguments]    ${namespace}    ${sub_name}    ${catalog_source}
+  Log    Updating subscription source to ${catalog_source}    console=yes
+  ${rc} =    Run And Return Rc
+  ...    oc patch subscription ${sub_name} -n ${namespace} --type merge --patch '{"spec": {"source": "${catalog_source}"}}'    #robocop:disable
+  IF    ${rc} != 0
+      Log    Failed to update subscription source, continuing    console=yes    level=WARN
+  END
+
+Approve Intermediate Installplans
+  [Documentation]   Approves pending install plans until the target version's plan appears.
+  ...              OLM may require intermediate upgrades (e.g. 2.25.0 -> 2.25.2 -> 2.25.3).
+  [Arguments]    ${namespace}    ${sub_name}    ${target_version}
+  ${target_csv} =    Set Variable    ${sub_name}.${target_version}
+  Log    Waiting for target CSV ${target_csv}, approving intermediate install plans    console=yes
+  FOR    ${_}    IN RANGE    20
+      ${ip_csv}    ${ip_name}    ${ip_approved} =    Get Current Installplan Info
+      ...    ${namespace}    ${sub_name}
+      IF    "${ip_name}" == ""
+          Sleep    30s
+          CONTINUE
+      END
+      Log    Install plan ${ip_name}: csv=${ip_csv}, approved=${ip_approved}    console=yes
+      IF    "${ip_approved}" == "false"
+          Log    Approving install plan ${ip_name} for ${ip_csv}    console=yes
+          Run And Return Rc
+          ...    oc patch installplan ${ip_name} -n ${namespace} -p '{"spec":{"approved": true}}' --type=merge    #robocop:disable
+      END
+      IF    "${ip_csv}" == "${target_csv}"
+          Log    Target install plan found and approved: ${ip_name}    console=yes
+          BREAK
+      END
+      Sleep    30s
+  END
+
+Get Current Installplan Info
+  [Documentation]   Returns the CSV name, installplan name, and approval status for the current installplan.
+  [Arguments]    ${namespace}    ${sub_name}
+  ${rc}    ${ip_name} =    Run And Return Rc And Output
+  ...    oc get subscription ${sub_name} -n ${namespace} -o jsonpath='{.status.installplan.name}'
+  IF    ${rc} != 0 or "${ip_name}" == "" or "${ip_name}" == "null"
+      RETURN    ${EMPTY}    ${EMPTY}    ${EMPTY}
+  END
+  ${rc}    ${ip_csv} =    Run And Return Rc And Output
+  ...    oc get installplan ${ip_name} -n ${namespace} -o jsonpath='{.spec.clusterServiceVersionNames[0]}'
+  ${rc}    ${ip_approved} =    Run And Return Rc And Output
+  ...    oc get installplan ${ip_name} -n ${namespace} -o jsonpath='{.spec.approved}'
+  RETURN    ${ip_csv}    ${ip_name}    ${ip_approved}
+
+Wait For Target CSV
+  [Documentation]   Waits for the target CSV to reach Succeeded state.
+  [Arguments]    ${namespace}    ${operator_name}    ${target_version}
+  ${target_csv} =    Set Variable    ${operator_name}.${target_version}
+  Log    Waiting for target CSV ${target_csv} to succeed    console=yes
+  ${rc} =    Run And Return Rc
+  ...    oc wait --timeout=600s --for jsonpath='{.status.phase}'=Succeeded csv -n ${namespace} ${target_csv}
+  IF    ${rc} != 0
+      FAIL    Target CSV ${target_csv} did not reach Succeeded state
+  END
+  Log    Upgrade to ${target_csv} completed successfully    console=yes
 
 Install RHODS In Managed Cluster Using CLI
   [Documentation]   Install rhods on managed managed cluster using cli

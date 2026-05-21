@@ -83,7 +83,7 @@ Login To RHODS Dashboard
        ${login-required}=  Is OpenShift Login Visible
        IF  ${login-required}  Login To Openshift  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
    ELSE
-       ${expected_text_list}=    Create List    Log in with    Data Science Projects
+       ${expected_text_list}=    Create List    Log in with    Projects
        Wait Until Page Contains A String In List    ${expected_text_list}
        ${oauth_prompt_visible}=  Is OpenShift OAuth Login Prompt Visible
        IF  ${oauth_prompt_visible}  Click Button  Log in with OpenShift

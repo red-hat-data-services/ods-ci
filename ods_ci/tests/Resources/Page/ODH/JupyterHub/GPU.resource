@@ -1,6 +1,7 @@
 *** Settings ***
 Documentation  Set of Keywords for GPU support
 Resource    ../../../OCP.resource
+Resource    JupyterLabLauncher.robot
 Library     OperatingSystem
 
 
@@ -19,8 +20,7 @@ Verify Pytorch Can See GPU
     [Documentation]    Verifies that PyTorch can see a GPU
     [Arguments]    ${install}=False
     IF  ${install}==True
-        # TODO: use Install And Import Package In JupyterLab after #202 is merged
-        Run Cell And Check For Errors    !pip install torch numpy    timeout=300s
+        Install And Import Package In JupyterLab    torch    timeout=300s
     END
     Run Cell And Check Output
     ...    import torch; device = "cuda" if torch.cuda.is_available() else "cpu"; print(f"Using {device} device")
@@ -30,7 +30,7 @@ Verify Tensorflow Can See GPU
     [Documentation]    Verifies that Tensorflow can see a GPU
     [Arguments]    ${install}=False
     IF  ${install}==True
-        Run Cell And Check For Errors    !pip install tensorflow    timeout=300s
+        Install And Import Package In JupyterLab    tensorflow    timeout=300s
     END
     # Need to wrap output in double quotes
     ${out} =    Run Cell And Get Output    import tensorflow as tf; import os; os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'; tf.config.list_physical_devices('GPU')  # robocop: disable

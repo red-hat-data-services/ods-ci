@@ -57,7 +57,7 @@ Verify PyTorch Image Can Be Spawned With GPU
     Stop JupyterLab Notebook Server
     Fix Spawner Status
     Wait Until JupyterHub Spawner Is Ready
-    Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  hardware_profile=NVIDIA GPU
+    Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  hardware_profile=nvidia-gpu-profile
 
 Verify PyTorch Image Includes Expected CUDA Version
     [Documentation]    Checks CUDA version
@@ -86,7 +86,7 @@ Verify Previous PyTorch Notebook Image With GPU
     ...       Resources-GPU    NVIDIA-GPUs
     ...       ODS-2129
     [Setup]    N-1 PyTorch Setup
-    Spawn Notebook With Arguments    image=${NOTEBOOK_IMAGE}    hardware_profile=NVIDIA GPU    version=previous
+    Spawn Notebook With Arguments    image=${NOTEBOOK_IMAGE}    hardware_profile=nvidia-gpu-profile    version=previous
     Verify Installed CUDA Version    ${EXPECTED_CUDA_VERSION_N_1}
     Verify PyTorch Can See GPU
     Run Repo And Clean    https://github.com/lugi0/notebook-benchmarks    notebook-benchmarks/pytorch/fgsm_tutorial.ipynb

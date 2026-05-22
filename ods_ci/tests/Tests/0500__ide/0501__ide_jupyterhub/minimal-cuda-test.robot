@@ -61,7 +61,7 @@ Verify Previous CUDA Notebook Image With GPU
     ...       Resources-GPU    NVIDIA-GPUs
     ...       ODS-2128
     [Setup]    N-1 CUDA Setup
-    Spawn Notebook With Arguments    image=${NOTEBOOK_IMAGE}    hardware_profile=NVIDIA GPU    version=previous
+    Spawn Notebook With Arguments    image=${NOTEBOOK_IMAGE}    hardware_profile=nvidia-gpu-profile    version=previous
     Verify Installed CUDA Version    ${EXPECTED_CUDA_VERSION_N_1}
     Verify PyTorch Can See GPU    install=True
     Verify Tensorflow Can See GPU    install=True
@@ -79,7 +79,7 @@ Verify CUDA Image Suite Setup
     Close All Browsers
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
-    Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  hardware_profile=NVIDIA GPU
+    Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  hardware_profile=nvidia-gpu-profile
     # TODO: GPU allocation check skipped — Fetch Max Number Of GPUs In Spawner Page
     # relies on the removed accelerator dropdown (dashboard PRs #5053/#5140/#5206/#5484).
     # Needs rewrite to use hardware profiles before re-enabling.

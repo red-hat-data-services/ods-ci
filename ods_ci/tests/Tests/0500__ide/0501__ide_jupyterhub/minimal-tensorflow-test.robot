@@ -55,7 +55,7 @@ Verify Tensorflow Image Can Be Spawned With GPU
     ...     Resources-GPU    NVIDIA-GPUs
     ...     ODS-1151
     Close Previous Server
-    Spawn Notebook With Arguments    image=${NOTEBOOK_IMAGE}    hardware_profile=NVIDIA GPU
+    Spawn Notebook With Arguments    image=${NOTEBOOK_IMAGE}    hardware_profile=nvidia-gpu-profile
 
 Verify Tensorflow Image Includes Expected CUDA Version
     [Documentation]    Checks CUDA version
@@ -84,7 +84,7 @@ Verify Previous Tensorflow Notebook Image With GPU
     ...       Resources-GPU    NVIDIA-GPUs
     ...       ODS-2130
     [Setup]    N-1 Tensorflow Setup
-    Spawn Notebook With Arguments    image=${NOTEBOOK_IMAGE}    hardware_profile=NVIDIA GPU    version=previous
+    Spawn Notebook With Arguments    image=${NOTEBOOK_IMAGE}    hardware_profile=nvidia-gpu-profile    version=previous
     Verify Installed CUDA Version    ${EXPECTED_CUDA_VERSION_N_1}
     Verify Tensorflow Can See GPU
     Run Repo And Clean  https://github.com/lugi0/notebook-benchmarks  notebook-benchmarks/tensorflow/GPU-no-warnings.ipynb

@@ -20,7 +20,7 @@ Verify Pytorch Can See GPU
     [Arguments]    ${install}=False
     IF  ${install}==True
         # TODO: use Install And Import Package In JupyterLab after #202 is merged
-        Run Cell And Check For Errors    !pip install torch==2.4.1 numpy==2.1.3    timeout=300s
+        Run Cell And Check For Errors    !pip install torch numpy    timeout=300s
     END
     Run Cell And Check Output
     ...    import torch; device = "cuda" if torch.cuda.is_available() else "cpu"; print(f"Using {device} device")
@@ -30,8 +30,7 @@ Verify Tensorflow Can See GPU
     [Documentation]    Verifies that Tensorflow can see a GPU
     [Arguments]    ${install}=False
     IF  ${install}==True
-        # This installs the latest .z stream available for 2.7 to avoid the protobuf bug
-        Run Cell And Check For Errors    !pip install tensorflow~=2.7    timeout=300s
+        Run Cell And Check For Errors    !pip install tensorflow    timeout=300s
     END
     # Need to wrap output in double quotes
     ${out} =    Run Cell And Get Output    import tensorflow as tf; import os; os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'; tf.config.list_physical_devices('GPU')  # robocop: disable

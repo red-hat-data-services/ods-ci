@@ -1,7 +1,7 @@
 import argparse
 import re
 
-from rosaOps import (
+from .rosaOps import (
     create_account_roles,
     rosa_create_cluster,
     rosa_whoami,

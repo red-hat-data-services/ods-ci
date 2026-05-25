@@ -52,7 +52,7 @@ dependencies = [
 robotframework-lsp = ">=1.11.0"
 robotframework-robocop = "^4.1.0"
 robotframework-tidy = "^4.5.0"
-ruff = "0.3.4"
+ruff = ">=0.15.0"
 pyright = "1.1.356"
 pre-commit = "3.7.0"
 
@@ -100,13 +100,11 @@ select = [
   "INP", # flake8-no-pep420
   "INT", # flake8-gettext
   "ISC", # flake8-implicit-str-concat
-  "ISC", # implicit string concatenation
   "N", # pep8-naming
   "NPY002", # numpy-legacy-random
   "PERF", # Perflint
   "PGH", # pygrep-hooks
   "PIE", # misc lints
-  "PL", # pylint
   "PL", # pylint
   "PYI", # flake8-pyi
   "Q", # flake8-quotes
@@ -130,8 +128,7 @@ ignore = [
   "PLR0912", # Too many branches
   "PLR0913", # Too many arguments in function definition (6 > 5)
   "PLR0915", # Too many statements
-  "PLR0917", # Too many positional arguments (10/5)
-  "PLR0917", # Too many positional arguments (7/5)
+  "PLR0917", # Too many positional arguments
   "PLR2004", # Magic value used in comparison
   # "W503", # not yet implemented; line break before binary operator
   # "W504", # not yet implemented; line break after binary operator

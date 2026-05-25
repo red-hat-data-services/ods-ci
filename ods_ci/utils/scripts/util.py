@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import os
 import re
@@ -5,6 +7,7 @@ import shutil
 import subprocess
 import sys
 import time
+from typing import Any, overload
 
 import jinja2
 import yaml
@@ -12,7 +15,7 @@ import yaml
 from ods_ci.utils.scripts.logger import log
 
 
-def clone_config_repo(**kwargs):
+def clone_config_repo(**kwargs: str) -> bool:
     """
     Helper function to clone git repo
     """
@@ -26,24 +29,24 @@ def clone_config_repo(**kwargs):
         if os.path.exists(kwargs["repo_dir"]) and os.path.isdir(kwargs["repo_dir"]):
             shutil.rmtree(kwargs["repo_dir"])
         os.makedirs(kwargs["repo_dir"])
-        print("git repo dir '%s' created successfully" % kwargs["repo_dir"])
+        print(f"git repo dir '{kwargs['repo_dir']}' created successfully")
     except OSError:
-        print("git repo dir '%s' can not be created." % kwargs["repo_dir"])
+        print(f"git repo dir '{kwargs['repo_dir']}' can not be created.")
         return False
 
     git_repo_with_credens = kwargs["git_repo"]
     if kwargs["git_username"] != "" and kwargs["git_password"] != "":
-        git_credens = "{}:{}".format(kwargs["git_username"], kwargs["git_password"])
+        git_credens = f"{kwargs['git_username']}:{kwargs['git_password']}"
         git_repo_with_credens = re.sub(r"(https://)(.*)", r"\1" + git_credens + "@" + r"\2", kwargs["git_repo"])
-    cmd = "git clone {} -b {} {}".format(git_repo_with_credens, kwargs["git_branch"], kwargs["repo_dir"])
+    cmd = f"git clone {git_repo_with_credens} -b {kwargs['git_branch']} {kwargs['repo_dir']}"
     ret = subprocess.call(cmd, shell=True)
     if ret:
-        print("Failed to clone repo {}.".format(kwargs["git_repo"]))
+        print(f"Failed to clone repo {kwargs['git_repo']}.")
         return False
     return True
 
 
-def read_yaml(filename):
+def read_yaml(filename: str) -> dict[str, Any] | None:
     """
     Reads the given config file and returns the contents of file in dict format
     """
@@ -255,7 +258,7 @@ def get_oidc_tokens(
     return None
 
 
-def render_template(search_path, template_file, output_file, replace_vars):
+def render_template(search_path: str, template_file: str, output_file: str, replace_vars: dict[str, Any]) -> None:
     """Helper module to render jinja template"""
 
     try:
@@ -266,11 +269,11 @@ def render_template(search_path, template_file, output_file, replace_vars):
         with open(output_file, "w") as fh:
             fh.write(outputText)
     except Exception:
-        print("Failed to render template and create json file {}".format(output_file))
+        print(f"Failed to render template and create json file {output_file}")
         sys.exit(1)
 
 
-def read_data_from_json(filename):
+def read_data_from_json(filename: str) -> Any | None:
     """
     Helper to read Json file
     """
@@ -282,7 +285,7 @@ def read_data_from_json(filename):
         return None
 
 
-def write_data_in_json(filename, data):
+def write_data_in_json(filename: str, data: Any) -> None:
     """
     Helper to write JSON file
     """
@@ -290,7 +293,7 @@ def write_data_in_json(filename, data):
         convert_file.write(json.dumps(data))
 
 
-def compare_dicts(dict1, dict2, level=0):
+def compare_dicts(dict1: Any, dict2: Any, level: int = 0) -> str | list[str] | None:
     """
     Helper to compare Dictionary and returns Difference
     """
@@ -309,9 +312,9 @@ def compare_dicts(dict1, dict2, level=0):
     max_len = max(tuple(map(len, keys1 | keys2))) + 2
     for key in keys1 & keys2:
         if compare_dicts(dict1[key], dict2[key], level=level + 1) == "MISMATCH!":
-            lst_to_trigger_job.append("{}-latest".format(key))
+            lst_to_trigger_job.append(f"{key}-latest")
     for key in keys1 - keys2:
-        lst_to_trigger_job.append("{}-latest".format(key))
+        lst_to_trigger_job.append(f"{key}-latest")
     for key in keys2 - keys1:
         print(f'{key + ":":<{max_len}}' + "presented only in old", end="")
     return "" if level else lst_to_trigger_job

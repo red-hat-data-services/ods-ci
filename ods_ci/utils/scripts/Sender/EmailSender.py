@@ -7,7 +7,7 @@ from email.utils import COMMASPACE, formatdate
 from os.path import basename
 from typing import Any
 
-from Sender import Sender
+from .Sender import Sender
 
 
 class EmailSender(Sender):
@@ -29,7 +29,7 @@ class EmailSender(Sender):
             for filepath in attachments:
                 with open(filepath, "rb") as file:
                     part = MIMEApplication(file.read(), Name=basename(filepath))
-                    part["Content-Disposition"] = 'attachment; filename="%s"' % basename(filepath)
+                    part["Content-Disposition"] = f'attachment; filename="{basename(filepath)}"'
                     self._message.attach(part)
 
     def prepare_header(self):

@@ -7,7 +7,7 @@ os.environ["OTEL_TRACES_EXPORTER"] = "none"
 # It allows auto instrumentation for robot and pabot use cases
 # Node (jgarciao): I've removed the import to solve an error preventing running the listerner in Jenkins
 #import opentelemetry.instrumentation.auto_instrumentation.sitecustomize
-from urllib.parse import quote as quote
+from urllib.parse import quote
 import datetime
 import requests
 import jwt
@@ -177,10 +177,10 @@ def selenium_get_url(test_name, test_session_id):
             response = f(*args, **kwargs)
             try:
                 self = args[0]
-                script = 'const testStartEvent = new CustomEvent("set:baggage", {detail: { "x-sl-test-name": "%s", "x-sl-test-session-id": "%s" }});window.dispatchEvent(testStartEvent);' % (test_name, test_session_id)
+                script = f'const testStartEvent = new CustomEvent("set:baggage", {{detail: {{ "x-sl-test-name": "{test_name}", "x-sl-test-session-id": "{test_session_id}" }}}});window.dispatchEvent(testStartEvent);'
                 self.execute_script(script)
                 return response
-            except:
+            except Exception:
                 return response
         return wrapper
     return inner
@@ -194,6 +194,6 @@ def selenium_close_quit(f):
             script = 'await window.$SealightsAgent.sendAllFootprints();'
             self.execute_script(script)
             return f(*args, **kwargs)
-        except:
+        except Exception:
             return f(*args, **kwargs)
     return wrapper

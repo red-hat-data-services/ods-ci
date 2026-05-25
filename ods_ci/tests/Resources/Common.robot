@@ -123,7 +123,9 @@ Get All Text Under Element
     FOR    ${element}    IN    @{elements}
         ${status}    ${text}=    Run Keyword And Ignore Error
         ...    Get Element Attribute    ${element}    textContent
-        Run Keyword If    '${status}' == 'PASS'    Append To List    ${text_list}    ${text}
+        IF    '${status}' == 'PASS'
+            Append To List    ${text_list}    ${text}
+        END
     END
     RETURN   ${text_list}
 

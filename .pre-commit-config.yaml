@@ -1,11 +1,22 @@
 repos:
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  # Ruff version.
-  rev: v0.3.4
+  rev: v0.15.0
   hooks:
     # Run the linter.
     - id: ruff
       args: [ --fix ]
     # Run the formatter.
     - id: ruff-format
+
+- repo: https://github.com/MarketSquare/robotframework-robocop
+  rev: 5.7.0
+  hooks:
+    - id: robocop
+      args: [ --no-return-status ]
+
+- repo: https://github.com/MarketSquare/robotframework-tidy
+  rev: 4.14.0
+  hooks:
+    - id: robotidy
+      args: [ --check, --diff, --config, ods_ci/robotidy.toml ]

@@ -1,6 +1,6 @@
 import argparse
 
-from EmailSender import EmailSender
+from .EmailSender import EmailSender
 
 
 def send_email_report(

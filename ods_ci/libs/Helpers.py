@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 import ast
 import decimal
 import numbers
 import random
 import re
 from pathlib import Path
+from typing import Any
 
 import requests
 from fuzzywuzzy import fuzz
@@ -21,13 +24,13 @@ class Helpers:
         self.BuiltIn = BuiltIn()
 
     @keyword
-    def text_to_list(self, text):
+    def text_to_list(self, text: str) -> list[str]:
         rows = text.split("\n")
         print(rows)
         return rows
 
     @keyword
-    def gt(self, version, target):
+    def gt(self, version: str, target: str) -> bool:
         """Returns True if the version > target
         and otherwise False including if an exception is thrown"""
         try:
@@ -40,7 +43,7 @@ class Helpers:
             return False
 
     @keyword
-    def gte(self, version, target):
+    def gte(self, version: str, target: str) -> bool:
         """Returns True if the SemVer version >= target
         and otherwise False including if an exception is thrown"""
         try:
@@ -53,7 +56,7 @@ class Helpers:
             return False
 
     @keyword
-    def install_rhoam_addon(self, cluster_name):
+    def install_rhoam_addon(self, cluster_name: str) -> None:
         ocm_client = OpenshiftClusterManager()
         ocm_client.cluster_name = cluster_name
         result = ocm_client.install_rhoam_addon(exit_on_failure=False)
@@ -61,13 +64,13 @@ class Helpers:
             self.BuiltIn.fail("Something got wrong while installing RHOAM. Check the logs")
 
     @keyword
-    def uninstall_rhoam_using_addon_flow(self, cluster_name):
+    def uninstall_rhoam_using_addon_flow(self, cluster_name: str) -> None:
         ocm_client = OpenshiftClusterManager()
         ocm_client.cluster_name = cluster_name
         ocm_client.uninstall_rhoam_addon(exit_on_failure=False)
 
     @keyword
-    def get_cluster_name(self, cluster_identifier):
+    def get_cluster_name(self, cluster_identifier: str) -> str:
         ocm_client = OpenshiftClusterManager()
         # to manipulate ocm_describe on line 45
         ocm_client.cluster_name = cluster_identifier
@@ -76,14 +79,14 @@ class Helpers:
         return cluster_name
 
     @keyword
-    def is_rhods_addon_installed(self, cluster_name):
+    def is_rhods_addon_installed(self, cluster_name: str) -> bool:
         ocm_client = OpenshiftClusterManager()
         ocm_client.cluster_name = cluster_name
         install_flag = ocm_client.is_addon_installed(addon_name="managed-odh")
         return install_flag
 
     @keyword
-    def uninstall_rhods_using_addon(self, cluster_name):
+    def uninstall_rhods_using_addon(self, cluster_name: str) -> None:
         ocm_client = OpenshiftClusterManager()
         ocm_client.cluster_name = cluster_name
         ocm_client.uninstall_rhods()
@@ -98,14 +101,14 @@ class Helpers:
             self.BuiltIn.fail("Unable to update notification email, Check if operator is installed via Add-on")
 
     @keyword
-    def convert_to_hours_and_minutes(self, seconds):
+    def convert_to_hours_and_minutes(self, seconds: int | float | str) -> tuple[int, int]:
         """Converts seconds in hours and minutes"""
         m, _ = divmod(int(seconds), 60)
         h, m = divmod(m, 60)
         return h, m
 
     @keyword
-    def install_isv_by_name(self, operator_name, channel, source="certified-operators"):
+    def install_isv_by_name(self, operator_name: str, channel: str, source: str = "certified-operators") -> None:
         ocm_client = OpenshiftClusterManager()
         ocm_client.install_openshift_isv(operator_name, channel, source, exit_on_failure=False)
         if operator_name == "ovms":
@@ -114,11 +117,11 @@ class Helpers:
             status = ocm_client.wait_for_isv_installation_to_complete(operator_name)
         if not status:
             self.BuiltIn.fail(
-                "Unable to install the {} isv, Check if ISV subscription is created{}".format(operator_name, status)
+                f"Unable to install the {operator_name} isv, Check if ISV subscription is created{status}"
             )
 
     @keyword
-    def parse_file_for_tolerations(self, filename):
+    def parse_file_for_tolerations(self, filename: str) -> list[str]:
         tolerations = []
         with open(filename, "r") as f:
             content = f.readlines()
@@ -140,7 +143,7 @@ class Helpers:
         return tolerations
 
     @keyword
-    def install_managed_starburst_addon(self, email_address, license, cluster_name):
+    def install_managed_starburst_addon(self, email_address: str, license: str, cluster_name: str) -> None:
         ocm_client = OpenshiftClusterManager()
         ocm_client.cluster_name = cluster_name
         ocm_client.notification_email = email_address
@@ -150,13 +153,13 @@ class Helpers:
             self.BuiltIn.fail("Something got wrong while installing Managed Starburst. Check the logs")
 
     @keyword
-    def uninstall_managed_starburst_using_addon_flow(self, cluster_name):
+    def uninstall_managed_starburst_using_addon_flow(self, cluster_name: str) -> None:
         ocm_client = OpenshiftClusterManager()
         ocm_client.cluster_name = cluster_name
         ocm_client.uninstall_managed_starburst_addon(exit_on_failure=False)
 
     @keyword
-    def inference_comparison(self, expected, received, threshold=0.00001):
+    def inference_comparison(self, expected: str, received: str, threshold: float = 0.00001) -> tuple[bool, list[Any]]:
         try:
             model_name = re.compile(r"^[\S]+(__isvc-)?[\w\d]+$")
 
@@ -188,7 +191,7 @@ class Helpers:
                             [
                                 expected,
                                 received,
-                                "{0:.{1}f}".format(expected - received, d),
+                                f"{expected - received:.{d}f}",
                             ]
                         )
                 else:
@@ -265,7 +268,7 @@ class Helpers:
         return response.status_code, response.text  # pyright: ignore [reportPossiblyUnboundVariable]
 
     @keyword
-    def process_resource_list(self, filename_in, filename_out=None):
+    def process_resource_list(self, filename_in: str, filename_out: str | None = None) -> None:
         r"""
         Tries to remove pseudorandom substring from openshift resource names using a regex.
         This portion of the regex: -\b(?:[a-z]+\d|\d+[a-z])[a-z0-9]*\b tries to find an
@@ -291,11 +294,11 @@ class Helpers:
             outfile.write("".join(str(l) for l in out))
 
     @keyword
-    def escape_forward_slashes(self, string_to_escape):
+    def escape_forward_slashes(self, string_to_escape: str) -> str:
         return string_to_escape.replace("/", r"\/")
 
     @keyword
-    def is_string_empty(self, string):
+    def is_string_empty(self, string: str | None) -> bool:
         """
         Check if a given string (including multi-line string) is empty.
         Robot Framework doesn't properly handle multi-line strings and throws
@@ -305,7 +308,7 @@ class Helpers:
         return string is None or string == ""
 
     @keyword
-    def multiline_to_oneline_string(self, multiline_string, delimeter=" "):
+    def multiline_to_oneline_string(self, multiline_string: str, delimeter: str = " ") -> str:
         """
         Converts a mutliline string into a oneline string with a provided delimeter.
         Robot Framework doesn't properly handle multi-line strings and throws
@@ -315,14 +318,14 @@ class Helpers:
         return multiline_string.replace("\n", delimeter)
 
     @keyword
-    def get_strings_matching_ratio(self, string1, string2):
+    def get_strings_matching_ratio(self, string1: str, string2: str) -> int:
         """
         Calculate simple string matching ratio based on Levenshtein distance
         """
         return fuzz.ratio(string1, string2)
 
     @keyword
-    def get_vllm_metrics_and_values(self, endpoint):
+    def get_vllm_metrics_and_values(self, endpoint: str) -> list[list[str]]:
         """
         Fetch exposed metrics and their current values from a deployed vllm endpoint
         """

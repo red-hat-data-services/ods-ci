@@ -119,8 +119,11 @@ Create Openstack Resources
     Set Task Variable    ${OSP_CLOUD}    ${result.stdout}
     ${FIP_API}    Evaluate    ${infrastructure_configurations}.get('fip_api')
     ${FIP_APPS}    Evaluate    ${infrastructure_configurations}.get('fip_apps')
-    Run Keyword If    "${FIP_API}" == "" or "${FIP_APPS}" == ""    Create Floating IPs
-    ...    ELSE    Log    Reusing existing Floating IPs    console=True
+    IF    "${FIP_API}" == "" or "${FIP_APPS}" == ""
+        Create Floating IPs
+    ELSE
+        Log    Reusing existing Floating IPs    console=True
+    END
     Set Task Variable    ${FIP_API}
     Set Task Variable    ${FIP_APPS}
     Log    FIP_API = ${FIP_API}    console=True

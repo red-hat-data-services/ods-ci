@@ -386,6 +386,10 @@ Verify RHODS Installation
   ${kserve} =    Is Component Enabled    kserve    ${DSC_NAME}
   IF    "${kserve}" == "true"
     Configure Gateway API
+    ${enable_model_cache} =    Is Model Cache Enabled
+    IF    ${enable_model_cache} and "${cluster_type}" == "managed"
+        Patch DSC With Model Cache Config
+    END
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app=odh-model-controller    timeout=400s
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
@@ -855,6 +859,10 @@ Create DataScienceCluster CustomResource Using Test Variables
             IF    '${cmp}' == 'workbenches'
                 Run    sed -i'' -e 's/<workbenches_namespace>/${NOTEBOOKS_NAMESPACE}/' ${file_path}dsc_apply.yml
             END
+    END
+    ${enable_model_cache} =    Is Model Cache Enabled
+    IF    ${enable_model_cache}
+        Add Model Cache Config To DSC Yaml    ${file_path}dsc_apply.yml
     END
 
 
@@ -1538,6 +1546,50 @@ Configure Gateway API
     ...    bash tasks/Resources/Gateway/configure_gateway.sh
     Log To Console    ${output}
     Should Be Equal As Integers    ${rc}    0    msg=Error configuring Gateway for KServe
+
+Get Worker Node Names As JSON Array
+    [Documentation]    Dynamically fetch all worker node names and return them as a JSON array string
+    ${rc}    ${output} =    Run And Return Rc And Output
+    ...    oc get nodes -l node-role.kubernetes.io/worker= --no-headers -o custom-columns=":metadata.name" | jq -R . | jq -sc .
+    Should Be Equal As Integers    ${rc}    0    msg=Failed to fetch worker node names
+    Should Not Be Empty    ${output}    msg=No worker nodes found in the cluster
+    Log To Console    Fetched worker node names: ${output}
+    RETURN    ${output}
+
+Add Model Cache Config To DSC Yaml
+    [Documentation]    Inject modelCache config into DSC YAML using yq before apply
+    [Arguments]    ${dsc_yaml_path}
+    ${rc}    ${node_names} =    Run And Return Rc And Output
+    ...    oc get nodes -l node-role.kubernetes.io/worker= --no-headers -o custom-columns=":metadata.name"
+    Should Be Equal As Integers    ${rc}    0    msg=Failed to fetch worker node names
+    Should Not Be Empty    ${node_names}    msg=No worker nodes found in the cluster
+    Log To Console    Adding modelCache config with worker nodes: ${node_names}
+    ${rc}    ${output} =    Run And Return Rc And Output
+    ...    yq -i '.spec.components.kserve.modelCache.cacheSize = "20Gi" | .spec.components.kserve.modelCache.managementState = "Managed"' ${dsc_yaml_path}    #robocop:disable
+    Should Be Equal As Integers    ${rc}    0    msg=Failed to add modelCache config: ${output}
+    ${rc}    ${output} =    Run And Return Rc And Output
+    ...    yq -i '.spec.components.kserve.modelCache.nodeNames = []' ${dsc_yaml_path}
+    Should Be Equal As Integers    ${rc}    0    msg=Failed to initialize nodeNames: ${output}
+    @{nodes} =    Split String    ${node_names}    \n
+    FOR    ${node}    IN    @{nodes}
+        ${node} =    Strip String    ${node}
+        IF    "${node}" != "${EMPTY}"
+            ${rc}    ${output} =    Run And Return Rc And Output
+            ...    yq -i '.spec.components.kserve.modelCache.nodeNames += ["${node}"]' ${dsc_yaml_path}
+            Should Be Equal As Integers    ${rc}    0    msg=Failed to add node ${node}: ${output}
+        END
+    END
+
+Patch DSC With Model Cache Config
+    [Documentation]    Patch the DataScienceCluster with modelCache config
+    ...    using dynamically fetched worker node names (used for managed clusters only)
+    [Arguments]    ${dsc_name}=${DSC_NAME}
+    ${node_names_json} =    Get Worker Node Names As JSON Array
+    Log To Console    Patching DSC ${dsc_name} with modelCache config (nodes: ${node_names_json})
+    ${rc}    ${output} =    Run And Return Rc And Output
+    ...    oc patch DataScienceCluster/${dsc_name} --type merge -p '{"spec":{"components":{"kserve":{"modelCache":{"cacheSize":"20Gi","managementState":"Managed","nodeNames":${node_names_json}}}}}}'    #robocop:disable
+    Log To Console    ${output}
+    Should Be Equal As Integers    ${rc}    0    msg=Error patching DSC with modelCache config: ${output}
 
 Configure MaaS Gateway API
     [Documentation]    Configure Gateway API for MaaS traffic routing

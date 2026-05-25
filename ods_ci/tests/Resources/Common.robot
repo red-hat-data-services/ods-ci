@@ -614,3 +614,11 @@ Skip If New Observability Stack Is Disabled
     [Documentation]    Skips test if new observability stack is disabled
     ${enabled}=    Is New Observability Stack Enabled
     Skip If    condition=${enabled}==False    msg=This test is skipped because new observability stack is disabled
+
+Is Model Cache Enabled
+    [Documentation]    Checks whether model cache is enabled, controlled by ENABLE_MODEL_CACHE test variable.
+    ...    Returns ${TRUE} if enabled (True|true|"True"|"true")
+    ...    Returns ${FALSE} otherwise, i.e. the variable is not defined or has a false value
+    ${enable_model_cache}=    Get Variable Value    ${ENABLE_MODEL_CACHE}    false
+    ${enable_model_cache}=    Convert To Boolean    ${enable_model_cache}
+    RETURN    ${enable_model_cache}

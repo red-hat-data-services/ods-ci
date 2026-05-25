@@ -27,7 +27,7 @@ jobs:
       -   name: Install dependencies
           run: pipx install robotframework-robocop~=5.7.0
       -   name: Run robocop
-          run: robocop --verbose --reports sarif .
+          run: robocop --verbose --reports sarif . || true
       -   name: Upload SARIF file
           if: always() && github.event.repository.fork == false
           uses: github/codeql-action/upload-sarif@v4

@@ -1,6 +1,9 @@
 import argparse
 
-from .EmailSender import EmailSender
+try:
+    from .EmailSender import EmailSender
+except ImportError:
+    from EmailSender import EmailSender
 
 
 def send_email_report(

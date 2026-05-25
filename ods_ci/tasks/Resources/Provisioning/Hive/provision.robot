@@ -119,7 +119,7 @@ Create Openstack Resources
     Set Task Variable    ${OSP_CLOUD}    ${result.stdout}
     ${FIP_API}    Evaluate    ${infrastructure_configurations}.get('fip_api')
     ${FIP_APPS}    Evaluate    ${infrastructure_configurations}.get('fip_apps')
-    IF    "${FIP_API}" == "" or "${FIP_APPS}" == ""
+    IF    not $FIP_API or not $FIP_APPS
         Create Floating IPs
     ELSE
         Log    Reusing existing Floating IPs    console=True

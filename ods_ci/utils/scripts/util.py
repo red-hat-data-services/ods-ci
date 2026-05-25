@@ -38,8 +38,8 @@ def clone_config_repo(**kwargs: str) -> bool:
     if kwargs["git_username"] != "" and kwargs["git_password"] != "":
         git_credens = f"{kwargs['git_username']}:{kwargs['git_password']}"
         git_repo_with_credens = re.sub(r"(https://)(.*)", r"\1" + git_credens + "@" + r"\2", kwargs["git_repo"])
-    cmd = f"git clone {git_repo_with_credens} -b {kwargs['git_branch']} {kwargs['repo_dir']}"
-    ret = subprocess.call(cmd, shell=True)
+    args = ["git", "clone", git_repo_with_credens, "-b", kwargs["git_branch"], kwargs["repo_dir"]]
+    ret = subprocess.call(args)
     if ret:
         print(f"Failed to clone repo {kwargs['git_repo']}.")
         return False

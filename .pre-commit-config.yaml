@@ -13,7 +13,6 @@ repos:
   rev: 5.7.0
   hooks:
     - id: robocop
-      args: [ --no-return-status ]
 
 - repo: https://github.com/MarketSquare/robotframework-tidy
   rev: 4.14.0

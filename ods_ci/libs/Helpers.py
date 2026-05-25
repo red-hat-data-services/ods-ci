@@ -101,7 +101,7 @@ class Helpers:
             self.BuiltIn.fail("Unable to update notification email, Check if operator is installed via Add-on")
 
     @keyword
-    def convert_to_hours_and_minutes(self, seconds: int | float | str) -> tuple[int, int]:
+    def convert_to_hours_and_minutes(self, seconds: float | str) -> tuple[int, int]:
         """Converts seconds in hours and minutes"""
         m, _ = divmod(int(seconds), 60)
         h, m = divmod(m, 60)

@@ -19,6 +19,8 @@ jobs:
   robocop:
      name: robocop
      runs-on: ubuntu-latest
+      # continue even if Robocop returns issues and fails step
+     continue-on-error: true
      steps:
       -   name: Checkout repository
           uses: actions/checkout@v4

@@ -7,7 +7,7 @@ import shutil
 import subprocess
 import sys
 import time
-from typing import Any, overload
+from typing import Any
 
 import jinja2
 import yaml

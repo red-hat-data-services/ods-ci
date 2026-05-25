@@ -1548,9 +1548,10 @@ Configure Gateway API
     Should Be Equal As Integers    ${rc}    0    msg=Error configuring Gateway for KServe
 
 Get Worker Node Names As JSON Array
-    [Documentation]    Dynamically fetch all worker node names and return them as a JSON array string
-    ${rc}    ${output} =    Run And Return Rc And Output
-    ...    oc get nodes -l node-role.kubernetes.io/worker= --no-headers -o custom-columns=":metadata.name" | jq -R . | jq -sc .
+    [Documentation]    Dynamically fetch all worker node names as a JSON array string
+    ${cmd} =    Set Variable
+    ...    oc get nodes -l node-role.kubernetes.io/worker= --no-headers -o custom-columns=":metadata.name" | jq -R . | jq -sc .    #robocop:disable
+    ${rc}    ${output} =    Run And Return Rc And Output    ${cmd}
     Should Be Equal As Integers    ${rc}    0    msg=Failed to fetch worker node names
     Should Not Be Empty    ${output}    msg=No worker nodes found in the cluster
     Log To Console    Fetched worker node names: ${output}
@@ -1567,6 +1568,11 @@ Add Model Cache Config To DSC Yaml
     ${rc}    ${output} =    Run And Return Rc And Output
     ...    yq -i '.spec.components.kserve.modelCache.cacheSize = "20Gi" | .spec.components.kserve.modelCache.managementState = "Managed"' ${dsc_yaml_path}    #robocop:disable
     Should Be Equal As Integers    ${rc}    0    msg=Failed to add modelCache config: ${output}
+    Add Node Names To Model Cache Yaml    ${dsc_yaml_path}    ${node_names}
+
+Add Node Names To Model Cache Yaml
+    [Documentation]    Add worker node names to modelCache.nodeNames in DSC YAML
+    [Arguments]    ${dsc_yaml_path}    ${node_names}
     ${rc}    ${output} =    Run And Return Rc And Output
     ...    yq -i '.spec.components.kserve.modelCache.nodeNames = []' ${dsc_yaml_path}
     Should Be Equal As Integers    ${rc}    0    msg=Failed to initialize nodeNames: ${output}

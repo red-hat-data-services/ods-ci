@@ -6,11 +6,11 @@ Resource         ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 
 
 *** Variables ***
-${FEATURE-STORE-RELEASE-TAG}             release-3.4
+${FEATURE-STORE-RELEASE-TAG}             release-3.5-ea.1
 ${FEATURE-STORE_DIR}                     feature-store
 ${FEATURE-STORE_REPO_URL}                %{FEATURE-STORE_REPO_URL=https://github.com/opendatahub-io/feast.git}
-${NOTEBOOK_IMAGE}                        quay.io/rhoai/odh-workbench-jupyter-datascience-cpu-py312-rhel9@sha256:aad51a27254dd57ae33fb4220af989f54b81c53c852a4e51c55d8a253a38a0e0
-${FEAST_VERSION}                         0.62.0
+${NOTEBOOK_IMAGE}                        quay.io/rhoai/odh-workbench-jupyter-datascience-cpu-py312-rhel9@sha256:0bcbcb167d1643009f3374464579bbbb4ff0f07111bf15f7e9e5d53d9d542555
+${FEAST_VERSION}                         0.63.0
 ${DSC_NAME}                              default-dsc
 
 
@@ -24,10 +24,6 @@ Prepare Feature Store Test Suite
         Wait Component Ready    feastoperator
     END
 
-Cleanup Feature Store Setup
-    [Documentation]   cleanup Feature store setup by Disabling component
-    RHOSi Teardown
-
 Prepare Feast E2E Test Suite
     [Documentation]    Prepare Feast E2E Test Suite
     Log To Console    Preparing Feast E2E Test Suite
@@ -40,7 +36,6 @@ Teardown Feast E2E Test Suite
     [Documentation]   Cleanup directory and Feast E2E Test Suite
     Log To Console     "Removing directory ${FEATURE-STORE_DIR}"
     Remove Directory        ${FEATURE-STORE_DIR}    recursive=True
-    Cleanup Feature Store Setup
 
 Ensure Kueue Unmanaged For Feast Ray Offline Store Test
     [Documentation]    Ensure Kueue is Unmanaged for Feast tests
@@ -96,6 +91,16 @@ Run Feast Notebook Test
     [Documentation]    Run feast Notebook test
     [Arguments]   ${TEST_NAME}
     Log To Console    "Running feature-store Notebook test: ${TEST_NAME}"
+    ${cluster_auth_value}=    Get Variable Value    ${CLUSTER_AUTH}    ${EMPTY}
+    IF  "${cluster_auth_value}" == "oidc"
+        ${token}=    Get Oidc Token
+        ...      ${CLUSTER_OIDC_ISSUER}
+        ...      ${TEST_USER.USERNAME}
+        ...      ${TEST_USER.PASSWORD}
+        Should Not Be Empty    ${token}
+    ELSE
+        ${token}=    Set Variable    ${EMPTY}
+    END
     ${command}=    Set Variable    cd ${FEATURE-STORE_DIR}/infra/feast-operator && git fetch origin && git checkout ${FEATURE-STORE-RELEASE-TAG} && git branch && go test -timeout 10m ./test/e2e_rhoai/ -v -ginkgo.focus=${TEST_NAME}
     ${result}=    Run Process    ${command}
     ...    shell=true
@@ -108,6 +113,7 @@ Run Feast Notebook Test
     ...    env:OPENAI_API_KEY=${OPENAI_API_KEY}
     ...    env:PIP_INDEX_URL=${PIP_INDEX_URL}
     ...    env:PIP_TRUSTED_HOST=${PIP_TRUSTED_HOST}
+    ...    env:TOKEN=${token}
     Log To Console    ${result.stdout}
     IF    ${result.rc} != 0
         FAIL    Running test ${TEST_NAME} failed
@@ -157,8 +163,10 @@ Check Feast Instance Pod Images Pull Path Is Correct
         Log To Console    Check deployment ${deployment_name} pull path for image ${featureServerImage}
         Run Keyword And Continue On Failure
         ...    Should Start With    ${image}   ${image_pull_path}    msg=Deployment image pull path ${image} does not start with ${image_pull_path}
-        Run Keyword And Continue On Failure
-            ...    Should Match Regexp    ${image}    @sha256:[a-f0-9]{64}$    msg=Deployment image pull path ${image} does not contain sha256 digest
-        Run Keyword And Continue On Failure
-        ...    Should Be Equal As Strings    ${featureServerImage}    ${image}
+        IF    "${PRODUCT}" == "RHODS"
+            Run Keyword And Continue On Failure
+                ...    Should Match Regexp    ${image}    @sha256:[a-f0-9]{64}$    msg=Deployment image pull path ${image} does not contain sha256 digest
+            Run Keyword And Continue On Failure
+            ...    Should Be Equal As Strings    ${featureServerImage}    ${image}
+        END
     END

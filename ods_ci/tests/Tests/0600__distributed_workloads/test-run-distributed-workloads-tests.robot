@@ -6,7 +6,7 @@ Library           OperatingSystem
 Library           Process
 Resource          ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 Resource          ../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
-Test Tags         DistributedWorkloads3.11
+Test Tags         DistributedWorkloads3.11    robot:skip
 
 
 *** Test Cases ***

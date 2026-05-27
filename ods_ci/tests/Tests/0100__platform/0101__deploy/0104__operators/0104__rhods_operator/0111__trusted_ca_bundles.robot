@@ -120,7 +120,6 @@ Suite Setup
 Suite Teardown
     [Documentation]    Suite Teardown
     Delete Namespace From Openshift    ${TEST_NS}
-    RHOSi Teardown
 
 Restore DSCI Trusted CA Bundle Settings
     [Documentation]    Restore DSCI Trusted CA Bundle settings to original tate

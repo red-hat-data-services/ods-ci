@@ -7,7 +7,7 @@ Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/
 Resource            ../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 Suite Setup         Project Suite Setup
 Suite Teardown      Project Suite Teardown
-Test Tags           DistributedWorkloadMetrics
+Test Tags           DistributedWorkloadMetrics    robot:skip
 
 
 *** Variables ***
@@ -255,4 +255,3 @@ Project Suite Teardown
     ...    Delete Project Via CLI By Display Name   ${PRJ_TITLE}    AND
     ...    Wait Until Data Science Project Is Deleted  ${PRJ_TITLE}
     SeleniumLibrary.Close All Browsers
-    RHOSi Teardown

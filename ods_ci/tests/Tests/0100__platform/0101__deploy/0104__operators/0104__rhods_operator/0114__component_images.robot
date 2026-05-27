@@ -4,7 +4,6 @@ Documentation       Test Suite to check for components
 Resource            ../../../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 Resource            ../../../../../../tests/Resources/Page/Components/Components.resource
 Suite Setup         Suite Setup
-Suite Teardown      Suite Teardown
 
 
 *** Variables ***
@@ -41,10 +40,6 @@ Check For Correct Component Images
 Suite Setup
     [Documentation]    Suite Setup
     RHOSi Setup
-
-Suite Teardown
-    [Documentation]    Suite Teardown
-    RHOSi Teardown
 
 Check Image On Csv And Deployment
     [Documentation]    Check Image On Csv And Deployment

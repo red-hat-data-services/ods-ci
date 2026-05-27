@@ -22,7 +22,6 @@ Resource            ../../Resources/Page/DistributedWorkloads/WorkloadMetricsUI.
 Resource            ../../Resources/Page/FeatureStore/FeatureStore.resource
 
 Suite Setup         Upgrade Suite Setup
-Suite Teardown      RHOSi Teardown
 
 Test Tags           PreUpgrade
 

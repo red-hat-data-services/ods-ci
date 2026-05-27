@@ -1,6 +1,7 @@
 *** Settings ***
 Documentation       Queries Prometheus using API calls
 Resource            ../../../Common.robot
+Resource            ../Monitoring/Monitoring.resource
 
 Library             Collections
 Library             Process
@@ -14,19 +15,14 @@ Run Query
     [Documentation]    Runs a prometheus query, obtaining the current value. More info at:
     ...                - https://promlabs.com/blog/2020/06/18/the-anatomy-of-a-promql-query
     ...                - https://prometheus.io/docs/prometheus/latest/querying/api/#range-queries
-    [Arguments]    ${pm_url}    ${pm_token}    ${pm_query}  ${project}=RHODS
+    [Arguments]    ${pm_url}    ${pm_token}    ${pm_query}
     ${pm_headers}=    Create Dictionary    Authorization=Bearer ${pm_token}
-
-    IF  "${project}" == "SERH"
-        ${resp}=    RequestsLibrary.GET    url=${pm_url}?query=${pm_query}
-        ...    headers=${pm_headers}    verify=${False}
-        Status Should Be    200    ${resp}
-
-    ELSE
-        ${resp}=    RequestsLibrary.GET    url=${pm_url}/api/v1/query?query=${pm_query}
-        ...    headers=${pm_headers}    verify=${False}
-        Status Should Be    200    ${resp}
+    ${resp}=    RequestsLibrary.GET    url=${pm_url}/api/v1/query?query=${pm_query}
+    ...    headers=${pm_headers}    verify=${False}    expected_status=any
+    IF    ${resp.status_code} != 200
+        Log    Error running Prometheus query: ${resp.text}    level=ERROR    console=True
     END
+    Status Should Be    200    ${resp}
     RETURN    ${resp}
 
 Run Range Query
@@ -38,7 +34,10 @@ Run Range Query
     ${time}=    Get Start Time And End Time  interval=${interval}
     ${pm_headers}=    Create Dictionary    Authorization=Bearer ${pm_token}
     ${resp}=    RequestsLibrary.GET    url=${pm_url}/api/v1/query_range?query=${pm_query}&start=${time[0]}&end=${time[1]}&step=${steps}    #robocop:disable
-    ...    headers=${pm_headers}    verify=${False}
+    ...    headers=${pm_headers}    verify=${False}    expected_status=any
+    IF    ${resp.status_code} != 200
+        Log    Error running Prometheus range query: ${resp.text}    level=ERROR    console=True
+    END
     Status Should Be    200    ${resp}
     RETURN    ${resp}
 
@@ -57,7 +56,10 @@ Get Rules
     [Arguments]    ${pm_url}    ${pm_token}    ${rule_type}
     ${pm_headers}=    Create Dictionary    Authorization=Bearer ${pm_token}
     ${resp}=    RequestsLibrary.GET    url=${pm_url}/api/v1/rules?type=${rule_type}
-    ...    headers=${pm_headers}    verify=${False}
+    ...    headers=${pm_headers}    verify=${False}    expected_status=any
+    IF    ${resp.status_code} != 200
+        Log    Error getting Prometheus rules: ${resp.text}    level=ERROR    console=True
+    END
     Status Should Be    200    ${resp}
     RETURN    ${resp.json()}
 
@@ -376,43 +378,22 @@ Run Query Range
     [Arguments]   &{pm_query}
     ${pm_headers}=    Create Dictionary    Authorization=Bearer ${RHODS_PROMETHEUS_TOKEN}
     ${resp}=    RequestsLibrary.GET    url=${RHODS_PROMETHEUS_URL}/api/v1/query_range   params=&{pm_query}
-    ...    headers=${pm_headers}    verify=${False}
-    Request Should Be Successful
+    ...    headers=${pm_headers}    verify=${False}    expected_status=any
+    IF    ${resp.status_code} != 200
+        Log    Error running Prometheus query range: ${resp.text}    level=ERROR    console=True
+    END
+    Status Should Be    200    ${resp}
     RETURN    ${resp}
 
 Set Prometheus Variables
-    [Documentation]    Update Global Variables RHODS_PROMETHEUS_URL and RHODS_PROMETHEUS_TOKEN if missing
+    [Documentation]    Set Global variables RHODS_PROMETHEUS_URL and RHODS_PROMETHEUS_TOKEN
     ${enable_new_observability_stack}=    Is New Observability Stack Enabled
     IF    ${enable_new_observability_stack}
-        ${prometheus_route_name}=    Set Variable    data-science-prometheus-route
-        ${protocol}=    Set Variable    http
-        ${service_account}=    Set Variable    data-science-monitoringstack-prometheus
+        Set Thanos Credentials Variables
+        ${RHODS_PROMETHEUS_URL}=    Set Variable    https://${THANOS_URL}
+        ${RHODS_PROMETHEUS_TOKEN}=    Set Variable    ${THANOS_TOKEN}
     ELSE
-        ${prometheus_route_name}=    Set Variable    prometheus
-        ${protocol}=    Set Variable    https
-        ${service_account}=    Set Variable    prometheus
+        Log     Skipping setting Prometheus variables since the new Observability Stack is not enabled    console=True
     END
 
-    ${result}= 	Run Process 	oc get route ${prometheus_route_name} -n ${MONITORING_NAMESPACE} -o jsonpath\='{.spec.host}'    shell=yes
-    IF    ${result.rc} == 0
-        ${prometheus_url}=    Set Variable    ${result.stdout}
-        Log    Prometheus is running at spec.host: ${prometheus_url}    console=True
-        IF    "${RHODS_PROMETHEUS_URL}" == "" or "${RHODS_PROMETHEUS_URL}" == "PROMETHEUS_URL"
-            ${RHODS_PROMETHEUS_URL}=    Set Variable    ${protocol}://${prometheus_url}
-            Log    Setting RHODS_PROMETHEUS_URL to: ${RHODS_PROMETHEUS_URL}    console=True
-            Set Global Variable   ${RHODS_PROMETHEUS_URL}
-        ELSE
-            Log    Skipping setting RHODS_PROMETHEUS_URL, it already has value: ${RHODS_PROMETHEUS_URL}    console=True
-        END
-        IF    "${RHODS_PROMETHEUS_TOKEN}" == "" or "${RHODS_PROMETHEUS_TOKEN}" == "PROMETHEUS_TOKEN"
-            ${result}= 	Run Process 	oc create token ${service_account} -n ${MONITORING_NAMESPACE} --duration 6h    shell=yes
-            Should Be True    ${result.rc} == 0    Error creating Prometheus token: ${result.stderr}
-            ${RHODS_PROMETHEUS_TOKEN}=    Set Variable    ${result.stdout}
-            Log    Setting RHODS_PROMETHEUS_TOKEN for service account ${service_account}    console=True
-            Set Global Variable   ${RHODS_PROMETHEUS_TOKEN}
-        ELSE
-            Log    Skipping setting RHODS_PROMETHEUS_TOKEN, it is already set    console=True
-        END
-    ELSE
-        Log    message=No Prometheus found   level=WARN
-    END
+

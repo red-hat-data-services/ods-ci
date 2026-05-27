@@ -3,7 +3,6 @@ Resource            ../../../../Resources/ODS.robot
 Resource            ../../../../Resources/Page/OCPDashboard/OCPDashboard.resource
 Resource            ../../../../Resources/RHOSi.resource
 Suite Setup         Rbac Suite Setup
-Suite Teardown      Rbac Suite Teardown
 
 
 *** Test Cases ***
@@ -49,7 +48,3 @@ Rbac Suite Setup
     [Documentation]    Suite setup
     Set Library Search Order  SeleniumLibrary
     RHOSi Setup
-
-Rbac Suite Teardown
-    [Documentation]    Suite teardown
-    RHOSi Teardown

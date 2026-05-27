@@ -5,7 +5,6 @@ Library             OpenShiftLibrary
 Resource          ../../../../Resources/ODS.robot
 Resource          ../../../../Resources/RHOSi.resource
 Suite Setup       RHOSi Setup
-Suite Teardown    RHOSi Teardown
 
 
 *** Test Cases ***

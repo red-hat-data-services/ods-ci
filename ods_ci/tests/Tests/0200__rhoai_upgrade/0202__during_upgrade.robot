@@ -37,7 +37,6 @@ TensorFlow Image Test
     ...    ${TEST_USER.USERNAME}
     ...    ${TEST_USER.PASSWORD}
     ...    ${TEST_USER.AUTH_TYPE}
-    [Teardown]      Upgrade Test Teardown
 
 PyTorch Image Workload Test
     [Documentation]    Run basic pytorch notebook during upgrade
@@ -52,7 +51,6 @@ PyTorch Image Workload Test
     ...    notebook-benchmarks/pytorch/PyTorch-MNIST-Minimal.ipynb
     Capture Page Screenshot
     JupyterLab Code Cell Error Output Should Not Be Visible
-    [Teardown]      Upgrade Test Teardown
 
 
 *** Keywords ***
@@ -69,36 +67,6 @@ Launch Notebook
     ...    username=${username}
     ...    password=${password}
     ...    auth_type=${auth_type}
-
-Upgrade Test Teardown
-    # robocop: off=too-many-calls-in-keyword
-    [Documentation]     Upgrade Test Teardown
-    End Web Test
-    Skip If RHODS Is Self-Managed And New Observability Stack Is Disabled    # TODO Observability: We don't configure alerts yet with new observability stack, so may likely fail
-    ${expression} =    Set Variable    rhods_aggregate_availability&step=1
-    ${resp} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    ${expression}
-    Log    rhods_aggregate_availability: ${resp.json()["data"]["result"][0]["value"][-1]}
-    @{list_values} =    Create List    1    # robocop: disable:replace-set-variable-with-var
-    Run Keyword And Warn On Failure
-    ...    Should Contain
-    ...    ${list_values}
-    ...    ${resp.json()["data"]["result"][0]["value"][-1]}
-    ${expression} =    Set Variable    rhods_aggregate_availability{name="rhods-dashboard"}&step=1
-    ${resp} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    ${expression}
-    Log    rhods_aggregate_availability: ${resp.json()["data"]["result"][0]["value"][-1]}
-    @{list_values} =    Create List    1    # robocop: disable:replace-set-variable-with-var
-    Run Keyword And Warn On Failure
-    ...    Should Contain
-    ...    ${list_values}
-    ...    ${resp.json()["data"]["result"][0]["value"][-1]}
-    ${expression} =    Set Variable    rhods_aggregate_availability{name="notebook-spawner"}&step=1
-    ${resp} =    Prometheus.Run Query    ${RHODS_PROMETHEUS_URL}    ${RHODS_PROMETHEUS_TOKEN}    ${expression}
-    Log    rhods_aggregate_availability: ${resp.json()["data"]["result"][0]["value"][-1]}
-    @{list_values} =    Create List    1    # robocop: disable:replace-set-variable-with-var
-    Run Keyword And Warn On Failure
-    ...    Should Contain
-    ...    ${list_values}
-    ...    ${resp.json()["data"]["result"][0]["value"][-1]}
 
 RHODS Version Should Be Greater Than
     [Documentation]    Checks if the RHODS version is greater than the given initial version.

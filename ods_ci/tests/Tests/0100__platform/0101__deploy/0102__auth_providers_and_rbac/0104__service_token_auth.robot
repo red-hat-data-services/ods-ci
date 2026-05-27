@@ -6,7 +6,6 @@ Resource            ../../../../Resources/CLI/ServiceTokenAuth.resource
 Resource            ../../../../Resources/Common.robot
 
 Suite Setup         RHOSi Setup
-Suite Teardown      RHOSi Teardown
 
 Test Tags           ServiceTokenAuth
 

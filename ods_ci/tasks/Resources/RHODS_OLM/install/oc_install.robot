@@ -22,6 +22,7 @@ ${DSCI_NAME} =    default-dsci
 ...    modelregistry
 ...    feastoperator
 ...    llamastackoperator
+...    ogx
 ...    mlflowoperator
 ...    modelsasservice
 ...    sparkoperator
@@ -301,6 +302,8 @@ Verify RHODS Installation
   Wait For Pods Status  namespace=${OPERATOR_NAMESPACE}  timeout=1200
   Log  Verified ${OPERATOR_NAMESPACE}  console=yes
 
+  ${enable_new_observability_stack} =    Is New Observability Stack Enabled
+
   IF   "${cluster_type}" == "managed"
        IF   "${PRODUCT}" == "ODH" and "${UPDATE_CHANNEL}" != "odh-stable"
             Apply DSCInitialization CustomResource    dsci_name=${DSCI_NAME}
@@ -321,7 +324,6 @@ Verify RHODS Installation
             Wait Until Keyword Succeeds    6 min    0 sec
             ...    Is Resource Present    HardwareProfile    default-profile
             ...    ${APPLICATIONS_NAMESPACE}      ${IS_PRESENT}
-            ${enable_new_observability_stack} =    Is New Observability Stack Enabled
             IF    ${enable_new_observability_stack}
                     Patch DSCInitialization With Monitoring Info
             END
@@ -350,9 +352,8 @@ Verify RHODS Installation
       Wait Until Keyword Succeeds    6 min    0 sec
       ...    Is Resource Present    HardwareProfile    default-profile
       ...    ${APPLICATIONS_NAMESPACE}      ${IS_PRESENT}
-      ${enable_new_observability_stack} =    Is New Observability Stack Enabled
       IF    ${enable_new_observability_stack}
-              Patch DSCInitialization With Monitoring Info
+          Patch DSCInitialization With Monitoring Info
       END
       Apply DataScienceCluster CustomResource    dsc_name=${DSC_NAME}
   END
@@ -437,10 +438,10 @@ Verify RHODS Installation
     ...    label_selector=app.kubernetes.io/part-of=feastoperator
   END
 
-  ${llamastackoperator} =    Is Component Enabled    llamastackoperator    ${DSC_NAME}
-  IF    "${llamastackoperator}" == "true"
+  ${ogx} =     Is Component Enabled    ogx    ${DSC_NAME}
+  IF    "${ogx}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/part-of=llamastackoperator
+    ...    label_selector=app.kubernetes.io/part-of=ogx
   END
 
   ${mlflowoperator} =    Is Component Enabled    mlflowoperator    ${DSC_NAME}

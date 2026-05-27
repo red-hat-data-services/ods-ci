@@ -11,7 +11,7 @@ Library          String
 ${cluster_type}                 selfmanaged
 ${image_url}                    ${EMPTY}
 ${TEST_ENV}                     AWS
-${INSTALL_TYPE}                 OperatorHub
+${INSTALL_TYPE}                 Cli
 ${UPDATE_CHANNEL}               odh-nightlies
 ${RHODS_VERSION}                None
 ${CATALOG_SOURCE}               redhat-operators

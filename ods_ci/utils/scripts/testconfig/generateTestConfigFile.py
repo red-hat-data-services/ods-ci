@@ -295,7 +295,7 @@ def generate_test_config_file(
 
     data["CLUSTER_TYPE"] = config_data["CLUSTER_TYPE"]
     data["TEST_ENV"] = config_data["TEST_ENV"]
-    data["INSTALL_TYPE"] = config_data["INSTALL_TYPE"] if config_data.get("INSTALL_TYPE") else "OperatorHub"
+    data["INSTALL_TYPE"] = config_data["INSTALL_TYPE"] if config_data.get("INSTALL_TYPE") else "Cli"
     data["UPDATE_CHANNEL"] = config_data["UPDATE_CHANNEL"]
     data["CATALOG_SOURCE"] = config_data["CATALOG_SOURCE"]
     if config_data.get("RHOAI_VERSION"):

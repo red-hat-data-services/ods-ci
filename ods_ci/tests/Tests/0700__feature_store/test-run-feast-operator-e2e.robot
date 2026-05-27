@@ -47,5 +47,5 @@ Verify Feast Instances Utilizing Correct Feature Server Images
     Create Feast Instance    ${PRJ_TITLE}    ${FEAST_INSTANCE_NAME}    ${FEAST_CR_FILE}
     Log To Console    Waiting for Feast Project ${FEAST_INSTANCE_NAME} Pods to be ready
     Wait For Pods To Be Ready    feast.dev/name=${FEAST_INSTANCE_NAME}    ${PRJ_TITLE}
-    Check Feast Instance Pod Images Pull Path Is Correct    ${PRJ_TITLE}    feast-${FEAST_INSTANCE_NAME}    registry.redhat.io
+    Check Feast Instance Pod Images Pull Path Is Correct       ${PRJ_TITLE}    feast-${FEAST_INSTANCE_NAME}     ${IMAGE_PULL_PATH}
     [Teardown]    Delete Feast Instance And Project    ${PRJ_TITLE}    ${FEAST_INSTANCE_NAME}

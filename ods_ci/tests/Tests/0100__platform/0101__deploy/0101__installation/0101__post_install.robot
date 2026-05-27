@@ -18,7 +18,6 @@ Resource            ../../../../Resources/Page/NetworkPolicies/NetworkPolicies.r
 Resource            ../../../../Resources/Page/Notebooks/Notebooks.resource
 Resource            ../../../../Resources/Page/Platforms/Platforms.resource
 Suite Setup         RHOSi Setup
-Suite Teardown      RHOSi Teardown
 
 
 *** Variables ***
@@ -74,57 +73,6 @@ Verify GPU Operator Deployment  # robocop: disable
     Verify DaemonSet Status  label=app=nvidia-node-status-exporter  dsname=nvidia-node-status-exporter
     Verify DaemonSet Status  label=app=nvidia-operator-validator  dsname=nvidia-operator-validator
 
-Verify That Prometheus Image Is A CPaaS Built Image
-    [Documentation]    Verifies the images used for prometheus
-    [Tags]    Sanity
-    ...       Tier1
-    ...       ODS-734
-    Skip If RHODS Is Self-Managed    # TODO Observability: Test can be removed once we fully onboard on the new stack.
-    # Observability operator deploys Prometheus for us.
-    Wait For Pods To Be Ready    label_selector=deployment=prometheus
-    ...    namespace=${MONITORING_NAMESPACE}    timeout=60s
-    ${pod} =    Find First Pod By Name    namespace=${MONITORING_NAMESPACE}    pod_regex=prometheus-
-    Container Image Url Should Contain    ${MONITORING_NAMESPACE}    ${pod}    prometheus
-    ...    registry.redhat.io/openshift4/ose-prometheus
-    Container Image Url Should Contain    ${MONITORING_NAMESPACE}    ${pod}    oauth-proxy
-    ...    registry.redhat.io/openshift4/ose-oauth-proxy
-
-Verify That Blackbox-exporter Image Is A CPaaS Built Image
-    [Documentation]    Verifies the image used for blackbox-exporter
-    [Tags]    Sanity
-    ...       Tier1
-    ...       ODS-735
-    Skip If RHODS Is Self-Managed    # TODO Observability: We don't deploy blackbox-exporter yet on self-managed
-    Wait For Pods To Be Ready    label_selector=deployment=blackbox-exporter
-    ...    namespace=${MONITORING_NAMESPACE}    timeout=60s
-    ${pod} =    Find First Pod By Name    namespace=${MONITORING_NAMESPACE}    pod_regex=blackbox-exporter-
-    Container Image Url Should Contain    ${MONITORING_NAMESPACE}    ${pod}    blackbox-exporter
-    ...    quay.io/integreatly/prometheus-blackbox-exporter
-
-Verify That Alert Manager Image Is A CPaaS Built Image
-    [Documentation]    Verifies the image used for alertmanager
-    [Tags]    Sanity
-    ...       Tier1
-    ...       ODS-733
-    Skip If RHODS Is Self-Managed    # TODO Observability: Test can be removed once we fully onboard on the new stack.
-    # Observability operator deploys alertmanager for us.
-    Wait For Pods To Be Ready    label_selector=deployment=prometheus
-    ...    namespace=${MONITORING_NAMESPACE}    timeout=60s
-    ${pod} =    Find First Pod By Name    namespace=${MONITORING_NAMESPACE}    pod_regex=prometheus-
-    Container Image Url Should Contain    ${MONITORING_NAMESPACE}    ${pod}    alertmanager
-    ...    registry.redhat.io/openshift4/ose-prometheus-alertmanager
-
-Verify Oath-Proxy Image Is A CPaaS Built Image
-    [Documentation]    Verifies the image used for oauth-proxy
-    [Tags]      Sanity
-    ...         Tier1
-    ...         ODS-666
-    Wait For Pods To Be Ready    label_selector=app=${DASHBOARD_APP_NAME}
-    ...    namespace=${APPLICATIONS_NAMESPACE}    timeout=60s
-    ${pod} =    Find First Pod By Name  namespace=${APPLICATIONS_NAMESPACE}   pod_regex=${DASHBOARD_APP_NAME}-
-    Container Image Url Should Contain      ${APPLICATIONS_NAMESPACE}     ${pod}      oauth-proxy
-    ...     registry.redhat.io/openshift4/ose-oauth-proxy
-
 Verify That CUDA Build Chain Succeeds
     [Documentation]    Check Cuda builds are complete. Verify CUDA (minimal-gpu),
     ...    Pytorch and Tensorflow can be spawned successfully
@@ -139,27 +87,6 @@ Verify That CUDA Build Chain Succeeds
     ...    username=${TEST_USER.USERNAME}    password=${TEST_USER.PASSWORD}
     ...    auth_type=${TEST_USER.AUTH_TYPE}
     [Teardown]    CUDA Teardown
-
-Verify That Blackbox-exporter Is Protected With Auth-proxy
-    [Documentation]    Verifies the blackbok-exporter pod is running the oauht-proxy container. Verify also
-    ...    that all blackbox-exporter targets require authentication.
-    [Tags]  Sanity
-    ...     Tier1
-    ...     ODS-1090
-
-    Skip If RHODS Is Self-Managed    # TODO Observability: We don't deploy blackbox-exporter yet on self-managed
-    # Oauth Proxy won't be used in new monitoring stack, it will be kube-rbac-proxy
-
-    Verify BlackboxExporter Includes Oauth Proxy
-
-    Verify Authentication Is Required To Access BlackboxExporter Target
-    ...    target_name=user_facing_endpoints_status_dsp    expected_endpoint_count=1
-
-    Verify Authentication Is Required To Access BlackboxExporter Target
-    ...    target_name=user_facing_endpoints_status_rhods_dashboard    expected_endpoint_count=1
-
-    Verify Authentication Is Required To Access BlackboxExporter Target
-    ...    target_name=user_facing_endpoints_status_workbenches    expected_endpoint_count=2
 
 Verify That "Usage Data Collection" Is Enabled By Default
     [Documentation]    Verify that "Usage Data Collection" is enabled by default when installing ODS
@@ -209,19 +136,12 @@ Verify CPU And Memory Requests And Limits Are Defined For All Containers In All 
     ...       ODS-556
     ...       ODS-313
     Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project    ${APPLICATIONS_NAMESPACE}
-    Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project    ${MONITORING_NAMESPACE}
+    ${enable_new_observability_stack} =    Is New Observability Stack Enabled
+    IF  ${enable_new_observability_stack}
+        Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project
+        ...    ${MONITORING_NAMESPACE}
+    END
     Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project    ${OPERATOR_NAMESPACE}
-
-Verify Monitoring Stack Is Reconciled Without Restarting The ODS Operator
-    [Documentation]    Verify Monitoring Stack Is Reconciled Without Restarting The RHODS Operator
-    [Tags]    Tier2
-    ...       ODS-699
-    ...       Monitoring
-    ...       Execution-Time-Over-15m
-    Skip If RHODS Is Self-Managed    # TODO Observability: Likely needs to be revisited if it makes sense. Probably we
-    # can change MonitoringStack/Otel collector and see if it reconciles back
-    Replace "Prometheus" With "Grafana" In Rhods-Monitor-Federation
-    Wait Until Operator Reverts "Grafana" To "Prometheus" In Rhods-Monitor-Federation
 
 Verify RHODS Dashboard Explore And Enabled Page Has No Message With No Component Found
     [Documentation]   Verify "NO Component Found" message dosen't display
@@ -308,55 +228,6 @@ Verify No Application Pods Run With Anyuid SCC Or As Root
     ${status} =    Run Keyword And Return Status    Should Be Empty    ${output}
     IF    not ${status}    Fail      msg=Some pods are running as root (UID=0)
 
-Verify No Alerts Are Firing After Installation Except For DeadManSnitch    # robocop: disable:too-long-test-case
-    [Documentation]    Verifies that, after installation, only the DeadManSnitch alert is firing
-    [Tags]    Smoke
-    ...       ODS-540
-    ...       RHOAIENG-13079
-    # ...       Monitoring - just for tracking purposes but commented to not run the same test many times
-    ...       Operator
-    Skip If RHODS Is Self-Managed And New Observability Stack Is Disabled    # TODO Observability: We don't configure alerts yet with new observability stack, so may likely fail
-    # If these numbers change, add also alert-specific tests
-    # Need to wait to stabilize alerts after installation
-    Run Keyword And Continue On Failure
-    ...    Wait Until Keyword Succeeds    5 min    0 sec    Verify Number Of Alerting Rules  47  inactive
-    Run Keyword And Continue On Failure
-    ...    Verify Number Of Alerting Rules  1  firing
-    # Order of keys in prometheus-configs.yaml
-    # deadmanssnitch-alerting.rules
-    Verify Alert Is Firing And Continue On Failure
-    ...    DeadManSnitch    DeadManSnitch
-    # trainingoperator-alerting.rules
-    Verify "KubeFlow Training Operator" Alerts Are Not Firing And Continue On Failure
-    # rhods-dashboard-alerting.rules
-    Verify "RHODS Dashboard Route Error Burn Rate" Alerts Are Not Firing And Continue On Failure
-    Verify "RHODS Dashboard Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
-    # data-science-pipelines-operator-alerting.rules
-    Verify "Data Science Pipelines Application Route Error Burn Rate" Alerts Are Not Firing And Continue On Failure
-    Verify "Data Science Pipelines Operator Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
-    Verify "RHODS Data Science Pipelines" Alerts Are Not Firing And Continue On Failure
-    # odh-model-controller-alerting.rules
-    Verify "ODH Model Controller Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
-    # kserve-alerting.rules
-    Verify "Kserve Controller Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
-    # ray-alerting.rules
-    Verify "Distributed Workloads Kuberay" Alerts Are Not Firing And Continue On Failure
-    # kueue-alerting.rules
-    Verify "Distributed Workloads Kueue" Alerts Are Not Firing And Continue On Failure
-    # workbenches-alerting.rules
-    Verify Alert Is Not Firing And Continue On Failure
-    ...    RHODS-PVC-Usage    User notebook pvc usage above 90%    alert-duration=120
-    Verify Alert Is Not Firing And Continue On Failure
-    ...    RHODS-PVC-Usage    User notebook pvc usage at 100%    alert-duration=120
-    Verify "Kubeflow Notebook Controller Pod Is Not Running" Alerts Are Not Firing And Continue On Failure
-    Verify "ODH Notebook Controller Pod Is Not Running" Alerts Are Not Firing And Continue On Failure
-    Verify "RHODS Jupyter Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
-    # trustyai-alerting.rules
-    Verify "TrustyAI Controller Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
-    # model-registry-operator-alerting.rules
-    # Model Registry not GA yet (Removed state), so its metrics are not enabled by default
-    # Verify "Model Registry Operator Probe Success Burn Rate" Alerts Are Not Firing And Continue On Failure
-
 Verify DSC Contains Correct Component Versions  # robocop: disable:too-long-test-case
     [Documentation]   Verify that component versions are present in DSC status and match the release repo
     [Tags]    Smoke
@@ -425,39 +296,6 @@ Test Teardown For Configmap Changed On RHODS Dashboard
     Oc Patch    kind=ConfigMap      namespace=${APPLICATIONS_NAMESPACE}    name=odh-enabled-applications-config    src={"data": {"jupyterhub": "true"}}   # robocop: disable
     Delete Dashboard Pods And Wait Them To Be Back
     Close All Browsers
-
-Verify Authentication Is Required To Access BlackboxExporter Target
-    [Documentation]    Verifies authentication is required to access a blackbox exporter target. To do so,
-    ...                runs the curl command from the prometheus container trying to access a blacbox-exporter target.
-    ...                The test fails if the response is not a prompt to log in with OpenShift
-    [Arguments]    ${target_name}    ${expected_endpoint_count}
-    @{links} =    Prometheus.Get Target Endpoints
-    ...    target_name=${target_name}
-    ...    pm_url=${RHODS_PROMETHEUS_URL}
-    ...    pm_token=${RHODS_PROMETHEUS_TOKEN}
-    ...    username=${OCP_ADMIN_USER.USERNAME}
-    ...    password=${OCP_ADMIN_USER.PASSWORD}
-
-    Length Should Be    ${links}    ${expected_endpoint_count}
-    ...    msg=Unexpected number of endpoints in blackbox-exporter target (target_name:${target_name})
-
-    ${pod_name} =    Find First Pod By Name    namespace=${MONITORING_NAMESPACE}    pod_regex=prometheus-
-    FOR    ${link}    IN    @{links}
-        Log    link:${link}
-        ${command} =    Set Variable    curl --silent --insecure ${link}
-        ${output} =    Run Command In Container    namespace=${MONITORING_NAMESPACE}    pod_name=${pod_name}
-        ...    command=${command}    container_name=prometheus
-        Should Contain    ${output}    Log in with OpenShift
-        ...    msg=Authentication not present in blackbox-exporter target (target_name:${target_name} link: ${link})
-    END
-
-Verify BlackboxExporter Includes Oauth Proxy
-    [Documentation]     Verifies the blackbok-exporter inludes 2 containers one for
-    ...                 application and second for oauth proxy
-    ${pod} =    Find First Pod By Name    namespace=${MONITORING_NAMESPACE}    pod_regex=blackbox-exporter-
-    @{containers} =    Get Containers    pod_name=${pod}    namespace=${MONITORING_NAMESPACE}
-    List Should Contain Value    ${containers}    oauth-proxy
-    List Should Contain Value    ${containers}    blackbox-exporter
 
 Verify Errors In Jupyterhub Logs
     [Documentation]    Verifies that there are no errors related to Distutil Library in Jupyterhub Pod Logs

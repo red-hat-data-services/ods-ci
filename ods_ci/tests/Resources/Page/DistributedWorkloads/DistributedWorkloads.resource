@@ -252,7 +252,6 @@ Teardown DistributedWorkloads Integration Test Suite
     Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
     Log To Console    "Removing test binaries"
     Remove File        ${ODH_BINARY_NAME}
-    RHOSi Teardown
     # Set Kueue component back to Removed state
     Log To Console    "Setting Kueue component to Removed state"
     Set Component State    kueue    Removed

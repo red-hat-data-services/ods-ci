@@ -113,7 +113,7 @@ Verify Tracking Key Used For "Usage Data Collection"
 
 Verify RHOAI Release Version Number
     [Documentation]    Verify RHOAI version matches x.y.z or x.y.z-prerelease format
-    [Tags]    Sanity
+    [Tags]    Smoke
     ...       Tier1
     ...       ODS-478   ODS-472
     ${version} =  Get RHODS Version

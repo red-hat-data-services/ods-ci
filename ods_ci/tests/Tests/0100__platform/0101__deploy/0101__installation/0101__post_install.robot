@@ -111,13 +111,13 @@ Verify Tracking Key Used For "Usage Data Collection"
 
     ODS.Verify "Usage Data Collection" Key
 
-Verify RHODS Release Version Number
-    [Documentation]    Verify RHODS version matches x.y.z-build format
-    [Tags]    Sanity
+Verify RHOAI Release Version Number
+    [Documentation]    Verify RHOAI version matches x.y.z or x.y.z-prerelease format
+    [Tags]    Smoke
     ...       Tier1
     ...       ODS-478   ODS-472
     ${version} =  Get RHODS Version
-    Should Match Regexp    ${version}    ^[0-9]+\.[0-9]+\.[0-9]+\(-[0-9]+)*$
+    Should Match Regexp    ${version}    ^[0-9]+\\.[0-9]+\\.[0-9]+(-[a-zA-Z0-9.]+)*$
 
 Verify JupyterHub Pod Logs Dont Have Errors About Distutil Library
     [Documentation]    Verifies that there are no errors related to DistUtil Library in Jupyterhub Pod logs

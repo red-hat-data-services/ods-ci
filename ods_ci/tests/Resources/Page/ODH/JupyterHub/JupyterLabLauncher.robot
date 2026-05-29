@@ -547,10 +547,11 @@ Check Versions In JupyterLab
 
 Install And Import Package In JupyterLab
     [Documentation]  Install any Package and import it
-    [Arguments]  ${package}
+    [Arguments]  ${package}    ${timeout}=120seconds
     Add And Run JupyterLab Code Cell In Active Notebook  !pip install ${package}
+    Wait Until JupyterLab Code Cell Is Not Active    ${timeout}
     Add And Run JupyterLab Code Cell In Active Notebook  import ${package}
-    Wait Until JupyterLab Code Cell Is Not Active
+    Wait Until JupyterLab Code Cell Is Not Active    ${timeout}
     JupyterLab Code Cell Error Output Should Not Be Visible
     Capture Page Screenshot
 

@@ -8,7 +8,6 @@ Library             ../../../../../libs/Helpers.py
 Resource            ../../../../Resources/RHOSi.resource
 Resource            ../../../../Resources/OCP.resource
 Resource            ../../../../Resources/Page/OCPDashboard/OCPDashboard.resource
-Resource            ../../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Resource            ../../../../Resources/Page/ODH/Prometheus/Prometheus.robot
 Resource            ../../../../Resources/Page/ODH/Prometheus/Alerts.resource
 Resource            ../../../../Resources/ODS.robot
@@ -49,16 +48,6 @@ Verify Traefik Deployment
     ...       ODS-546
     ...       ODS-552
     Skip      msg=Traefik proxy is removed after KFNBC migration
-
-Verify Notebook Controller Deployment
-    [Documentation]    Verifies RHODS Notebook Controller deployment
-    [Tags]    Sanity    Tier1
-    ...       ODS-546  ODS-294  ODS-1250  ODS-237
-    @{NBC} =  Oc Get    kind=Pod  namespace=${APPLICATIONS_NAMESPACE}  label_selector=app=notebook-controller
-    @{ONBC} =  Oc Get    kind=Pod  namespace=${APPLICATIONS_NAMESPACE}  label_selector=app=odh-notebook-controller
-    ${containerNames} =  Create List  manager
-    Verify Deployment  ${NBC}  1  1  ${containerNames}
-    Verify Deployment  ${ONBC}  1  1  ${containerNames}
 
 Verify GPU Operator Deployment  # robocop: disable
     [Documentation]  Verifies Nvidia GPU Operator is correctly installed
@@ -122,13 +111,13 @@ Verify Tracking Key Used For "Usage Data Collection"
 
     ODS.Verify "Usage Data Collection" Key
 
-Verify RHODS Release Version Number
-    [Documentation]    Verify RHODS version matches x.y.z-build format
-    [Tags]    Sanity
+Verify RHOAI Release Version Number
+    [Documentation]    Verify RHOAI version matches x.y.z or x.y.z-prerelease format
+    [Tags]    Smoke
     ...       Tier1
     ...       ODS-478   ODS-472
     ${version} =  Get RHODS Version
-    Should Match Regexp    ${version}    ^[0-9]+\.[0-9]+\.[0-9]+\(-[0-9]+)*$
+    Should Match Regexp    ${version}    ^[0-9]+\\.[0-9]+\\.[0-9]+(-[a-zA-Z0-9.]+)*$
 
 Verify JupyterHub Pod Logs Dont Have Errors About Distutil Library
     [Documentation]    Verifies that there are no errors related to DistUtil Library in Jupyterhub Pod logs

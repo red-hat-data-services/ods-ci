@@ -2,15 +2,40 @@
 """
 ReportPortal CLI Tool - Manage dashboards, filters, and upload test results.
 
-Authentication:
-  Set RP_API_TOKEN environment variable, use --token-file <path>, or place token in:
-  ./secrets/rp-api-token (relative to script directory)
+Configuration (required for most commands):
+  export RP_SERVER="<server-url>"
+  export RP_PROJECT="<project-name>"
 
-  To get a token:
-  1. Log into ReportPortal UI
-  2. Open developer mode (F12), open console, and run:
-     localStorage.getItem('token') || sessionStorage.getItem('token')
-  3. Extract the "value" field from the JSON response
+  Or pass --server and --project on the command line. VPN access is required for the PSI-hosted server.
+
+Authentication:
+  To call ReportPortal APIs locally, you need a Personal Access Token (or UAT token,
+  depending on your ReportPortal version). This token is sent as a Bearer token on each
+  API request. Provide it via one of:
+
+    export RP_API_TOKEN="<your-token>"
+    rp-cli.py --token "<your-token>"
+    rp-cli.py --token-file /path/to/token
+    ./secrets/rp-api-token   (relative to this script directory)
+
+  Getting a token from the ReportPortal UI:
+    1. Log in to the ReportPortal web console.
+    2. Click your profile avatar (bottom left) and select Profile.
+    3. Open App Configuration or API Keys (label varies by version):
+       - ReportPortal v5: UAT Token section (bottom of profile) or Api Keys tab.
+       - ReportPortal v6+: API Keys tab → Generate Key → name it (e.g. local-api-testing)
+         → Generate.
+    4. Copy the token immediately (v6+ shows it only once).
+
+  Verify configuration before other commands:
+
+    export RP_API_TOKEN="<your-token>"
+    rp-cli.py --verify-token
+
+  Alternative (session token from an active browser login):
+    1. Open developer tools (F12) → Console.
+    2. Run: localStorage.getItem('token') || sessionStorage.getItem('token')
+    3. Copy the "value" field from the JSON response.
 
 Global options (apply to all commands):
   --timeout SECONDS  Per-request HTTP timeout in seconds. Default: 600. Use 0 for no timeout.

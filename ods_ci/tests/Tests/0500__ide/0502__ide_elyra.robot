@@ -81,10 +81,9 @@ Elyra Pipelines Suite Setup    # robocop: off=too-many-calls-in-keyword
     Sleep    15s    reason=Wait until pipeline server is detected by dashboard
 
 Elyra Pipelines Suite Teardown
-    [Documentation]    Closes the browser and performs RHOSi Teardown
+    [Documentation]    Closes the browser and deletes the test project
     Delete Project Via CLI By Display Name    displayed_name=${PROJECT_TO_DELETE}
     Close All Browsers
-    RHOSi Teardown
 
 Verify Pipelines Integration With Elyra Running Hello World Pipeline Test     # robocop: off=too-many-calls-in-keyword
     [Documentation]    Creates and starts a workbench using ${img} and verifies that the Hello World sample pipeline

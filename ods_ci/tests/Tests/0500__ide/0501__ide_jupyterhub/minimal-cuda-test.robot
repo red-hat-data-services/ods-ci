@@ -42,9 +42,11 @@ Verify PyTorch Library Can See GPUs In Minimal CUDA
 
 Verify Tensorflow Library Can See GPUs In Minimal CUDA
     [Documentation]    Installs Tensorflow and verifies it can see the GPU
+    ...    ProductBug:RHAIENG-5546 - tensorflow not on CUDA 13 AIPCC RHAI pip index
     [Tags]  Tier2
     ...     Resources-GPU    NVIDIA-GPUs
     ...     ODS-1143
+    ...     ProductBug    # https://issues.redhat.com/browse/RHAIENG-5546
     Verify Tensorflow Can See GPU    install=True
 
 Verify Cuda Image Has NVCC Installed
@@ -64,7 +66,9 @@ Verify Previous CUDA Notebook Image With GPU
     Spawn Notebook With Arguments    image=${NOTEBOOK_IMAGE}    hardware_profile=nvidia-gpu-profile    version=previous
     Verify Installed CUDA Version    ${EXPECTED_CUDA_VERSION_N_1}
     Verify PyTorch Can See GPU    install=True
-    Verify Tensorflow Can See GPU    install=True
+    # TensorFlow not on CUDA 13 RHAI pip index: https://issues.redhat.com/browse/RHAIENG-5546
+    # Verify Tensorflow Can See GPU    install=True
+    Log    Skipping TensorFlow GPU check (RHAIENG-5546)    console=yes
     ${nvcc_version} =  Run Cell And Get Output    input=!nvcc --version
     Should Not Contain    ${nvcc_version}  /usr/bin/sh: nvcc: command not found
     [Teardown]    End Web Test

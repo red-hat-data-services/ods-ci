@@ -56,7 +56,7 @@ Login To Openshift
     [Arguments]  ${ocp_user_name}  ${ocp_user_pw}  ${ocp_user_auth_type}
     # Wait until page is the Login page or the destination app
     ${expected_text_list} =    Create List    Log in with    Administrator    Developer
-    ...    Data Science Projects    Sign in to your account    Sign in
+    ...    Projects    Sign in to your account    Sign in
     Wait Until Page Contains A String In List    ${expected_text_list}
     # Return if page is not the Login page (no login required)
     IF  "${ocp_user_auth_type}" == "oidc"

@@ -1545,7 +1545,7 @@ Patch DSC With Model Cache Config
     [Documentation]    Patch the DataScienceCluster with modelCache config using dynamically fetched worker node names
     [Arguments]    ${dsc_name}=${DSC_NAME}
     ${cmd} =    Set Variable
-    ...    oc get nodes -l node-role.kubernetes.io/worker= --no-headers -o custom-columns=":metadata.name" | jq -R . | jq -sc .    #robocop:disable
+    ...    oc get nodes -l node-role.kubernetes.io/worker= --no-headers -o custom-columns=":metadata.name" | head -2 | jq -R . | jq -sc .    #robocop:disable
     ${rc}    ${node_names_json} =    Run And Return Rc And Output    ${cmd}
     Should Be Equal As Integers    ${rc}    0    msg=Failed to fetch worker node names
     Should Not Be Empty    ${node_names_json}    msg=No worker nodes found in the cluster

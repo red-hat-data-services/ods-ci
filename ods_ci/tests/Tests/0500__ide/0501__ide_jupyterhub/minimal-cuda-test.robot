@@ -61,8 +61,7 @@ Verify Previous CUDA Notebook Image With GPU
     ...       Resources-GPU    NVIDIA-GPUs
     ...       ODS-2128
     [Setup]    N-1 CUDA Setup
-    # TODOjstourac = we need to define our custom profile with a gpu
-    Spawn Notebook With Arguments    image=${NOTEBOOK_IMAGE}    hardware_profile=default-profile    version=previous
+    Spawn Notebook With Arguments    image=${NOTEBOOK_IMAGE}    hardware_profile=nvidia-gpu-profile    version=previous
     Verify Installed CUDA Version    ${EXPECTED_CUDA_VERSION_N_1}
     Verify PyTorch Can See GPU    install=True
     Verify Tensorflow Can See GPU    install=True
@@ -80,26 +79,11 @@ Verify CUDA Image Suite Setup
     Close All Browsers
     Begin Web Test
     Launch JupyterHub Spawner From Dashboard
-    # TODOjstourac = we need to define our custom profile with a gpu
-    Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  hardware_profile=default-profile
-    # Verifies that now there are no GPUs available for selection
-    @{old_browser} =  Get Browser Ids
-    Sleep  30s  msg=Give time to spawner to update GPU count
-    Launch Dashboard    ${TEST_USER2.USERNAME}    ${TEST_USER2.PASSWORD}    ${TEST_USER2.AUTH_TYPE}
-    ...    ${ODH_DASHBOARD_URL}    ${BROWSER.NAME}    ${BROWSER.OPTIONS}
-    Launch JupyterHub Spawner From Dashboard    ${TEST_USER_2.USERNAME}    ${TEST_USER.PASSWORD}
-    ...    ${TEST_USER.AUTH_TYPE}
-    # This will fail in case there are two nodes with the same number of GPUs
-    # Since the overall available number won't change even after 1 GPU is assigned
-    # However I can't think of a better way to execute this check, under the assumption that
-    # the Resources-GPU will always ensure there is 1 node with 1 GPU on the cluster.
-    ${maxNo} =    Find Max Number Of GPUs In One Node
-    ${maxSpawner} =    Fetch Max Number Of GPUs In Spawner Page
-    # Need to continue execution even on failure or the whole suite will be failed
-    # And not executed at all.
-    Run Keyword And Warn On Failure  Should Be Equal    ${maxSpawner}    ${maxNo-1}
-    Close Browser
-    Switch Browser  ${old_browser}[0]
+    Spawn Notebook With Arguments  image=${NOTEBOOK_IMAGE}  hardware_profile=nvidia-gpu-profile
+    # TODO: GPU allocation check skipped — Fetch Max Number Of GPUs In Spawner Page
+    # relies on the removed accelerator dropdown (dashboard PRs #5053/#5140/#5206/#5484).
+    # Needs rewrite to use hardware profiles before re-enabling.
+    Log    Skipping GPU allocation check (accelerator dropdown removed in 3.5)    console=yes
 
 N-1 CUDA Setup
     [Documentation]    Closes the previous browser (if any) and starts a clean

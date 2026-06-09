@@ -28,7 +28,7 @@ ${KFNBC_MODAL_HEADER_XPATH} =    //div[@aria-label="Starting server modal"]
 ${KFNBC_MODAL_CANCEL_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Cancel"]
 ${KFNBC_MODAL_CLOSE_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[.="Close"]
 ${KFNBC_MODAL_X_XPATH} =    ${KFNBC_MODAL_HEADER_XPATH}//button[@aria-label="Close"]
-${KFNBC_CONTROL_PANEL_HEADER_XPATH} =    //h1[.="Notebook server control panel"]
+${KFNBC_CONTROL_PANEL_HEADER_XPATH} =    //h1[.="Workbench control panel"]
 ${KFNBC_ENV_VAR_NAME_PRE} =    //span[.="Variable name"]/../../../div[@class="pf-v6-c-form__group-control"]
 ${DEFAULT_PYTHON_VER} =    3.12
 ${PREVIOUS_PYTHON_VER} =    3.12
@@ -398,7 +398,7 @@ Launch JupyterHub Spawner From Dashboard
     Verify Service Account Authorization Not Required
     Fix Spawner Status
     #Wait Until Page Contains Element  xpath://span[@id='jupyterhub-logo']
-    Wait Until Page Contains   Start workbench
+    Wait Until Page Contains   ${KFNBC_SPAWNER_HEADER_TITLE}    timeout=30s
     Wait Until JupyterHub Spawner Is Ready
 
 Get Spawner Progress Message
@@ -443,7 +443,7 @@ Handle Server Is Stopping
 Control Panel Is Visible
    [Documentation]  Checks if Control Panel page is open
    Sleep  2s
-   ${control_panel_visible} =  Run Keyword And Return Status  Page Should Contain  Notebook server control panel
+   ${control_panel_visible} =  Run Keyword And Return Status  Page Should Contain  Workbench control panel
    RETURN  ${control_panel_visible}
 
 Handle Control Panel

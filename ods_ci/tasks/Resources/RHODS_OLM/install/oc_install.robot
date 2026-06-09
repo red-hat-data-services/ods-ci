@@ -387,9 +387,7 @@ Verify RHODS Installation
   IF    "${kserve}" == "true"
     Configure Gateway API
     ${enable_model_cache} =    Is Model Cache Enabled
-    IF    ${enable_model_cache}
-        Patch DSC With Model Cache Config
-    END
+    IF    ${enable_model_cache}    Patch DSC With Model Cache Config
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app=odh-model-controller    timeout=400s
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
@@ -1551,9 +1549,10 @@ Patch DSC With Model Cache Config
     ${rc}    ${node_names_json} =    Run And Return Rc And Output    ${cmd}
     Should Be Equal As Integers    ${rc}    0    msg=Failed to fetch worker node names
     Should Not Be Empty    ${node_names_json}    msg=No worker nodes found in the cluster
+    Should Not Be Equal    ${node_names_json}    []    msg=No worker nodes found in the cluster
     Log To Console    Patching DSC ${dsc_name} with modelCache config (nodes: ${node_names_json})
     ${rc}    ${output} =    Run And Return Rc And Output
-    ...    oc patch DataScienceCluster/${dsc_name} --type merge -p '{"spec":{"components":{"kserve":{"modelCache":{"cacheSize":"20Gi","managementState":"Managed","nodeNames":${node_names_json}}}}}}'    #robocop:disable
+    ...    oc patch DataScienceCluster/${dsc_name} --type merge -p '{"spec":{"components":{"kserve":{"modelCache":{"cacheSize":"10Gi","managementState":"Managed","nodeNames":${node_names_json}}}}}}'    #robocop:disable
     Log To Console    ${output}
     Should Be Equal As Integers    ${rc}    0    msg=Error patching DSC with modelCache config: ${output}
 

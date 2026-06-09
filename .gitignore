@@ -20,3 +20,5 @@ robocop.log
 infrastructure_configuration.yaml
 log/
 text-generation-inference/
+.cursor/
+Agents.md

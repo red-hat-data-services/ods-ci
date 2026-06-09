@@ -386,6 +386,8 @@ Verify RHODS Installation
   ${kserve} =    Is Component Enabled    kserve    ${DSC_NAME}
   IF    "${kserve}" == "true"
     Configure Gateway API
+    ${enable_model_cache} =    Is Model Cache Enabled
+    IF    ${enable_model_cache}    Patch DSC With Model Cache Config
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app=odh-model-controller    timeout=400s
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
@@ -1538,6 +1540,31 @@ Configure Gateway API
     ...    bash tasks/Resources/Gateway/configure_gateway.sh
     Log To Console    ${output}
     Should Be Equal As Integers    ${rc}    0    msg=Error configuring Gateway for KServe
+
+Patch DSC With Model Cache Config    #robocop:disable=TooManyKeywords
+    [Documentation]    Patch the DataScienceCluster with modelCache config.
+    ...    Uses MODEL_CACHE_NODE_COUNT (default 2) to decide how many worker nodes to include.
+    ...    If 0, sets managementState to Removed. If >= 1, sets Managed with that many nodes.
+    [Arguments]    ${dsc_name}=${DSC_NAME}
+    ${node_count} =    Get Variable Value    ${MODEL_CACHE_NODE_COUNT}    2
+    ${node_count} =    Convert To Integer    ${node_count}
+    IF    ${node_count} == ${0}
+        Log To Console    MODEL_CACHE_NODE_COUNT is 0, setting modelCache managementState to Removed
+        ${rc}    ${output} =    Run And Return Rc And Output
+        ...    oc patch DataScienceCluster/${dsc_name} --type merge -p '{"spec":{"components":{"kserve":{"modelCache":{"managementState":"Removed"}}}}}'    #robocop:disable
+    ELSE
+        ${cmd} =    Set Variable
+        ...    oc get nodes -l node-role.kubernetes.io/worker= --no-headers -o custom-columns=":metadata.name" | head -${node_count} | jq -R . | jq -sc .    #robocop:disable
+        ${rc}    ${node_names_json} =    Run And Return Rc And Output    ${cmd}
+        Should Be Equal As Integers    ${rc}    0    msg=Failed to fetch worker node names
+        Should Not Be Empty    ${node_names_json}    msg=No worker nodes found in the cluster
+        Should Not Be Equal    ${node_names_json}    []    msg=No worker nodes found in the cluster
+        Log To Console    Patching DSC with modelCache (nodes: ${node_names_json}, count: ${node_count})
+        ${rc}    ${output} =    Run And Return Rc And Output
+        ...    oc patch DataScienceCluster/${dsc_name} --type merge -p '{"spec":{"components":{"kserve":{"modelCache":{"cacheSize":"10Gi","managementState":"Managed","nodeNames":${node_names_json}}}}}}'    #robocop:disable
+    END
+    Log To Console    ${output}
+    Should Be Equal As Integers    ${rc}    0    msg=Error patching DSC with modelCache config: ${output}
 
 Configure MaaS Gateway API
     [Documentation]    Configure Gateway API for MaaS traffic routing

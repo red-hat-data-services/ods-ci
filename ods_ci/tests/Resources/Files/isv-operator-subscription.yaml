@@ -9,3 +9,4 @@ spec:
   name: <OPERATOR_NAME>
   source: <CATALOG_SOURCE>
   sourceNamespace: <CS_NAMESPACE>
+  startingCSV: <STARTING_CSV>

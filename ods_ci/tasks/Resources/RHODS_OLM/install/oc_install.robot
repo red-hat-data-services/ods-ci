@@ -67,7 +67,7 @@ ${CERT_MANAGER_NS}=  cert-manager-operator
 ${CONNECTIVITY_LINK_OP_NAME}=  rhcl-operator
 ${CONNECTIVITY_LINK_SUB_NAME}=  rhcl-operator
 ${CONNECTIVITY_LINK_CHANNEL_NAME}=  stable
-${CONNECTIVITY_LINK_STARTING_CSV}=  1.3.4
+${CONNECTIVITY_LINK_STARTING_CSV}=  ${CONNECTIVITY_LINK_OP_NAME}.v1.3.4
 ${CONNECTIVITY_LINK_NS}=  kuadrant-system
 ${AUTHORINO_CSV_NAME}=  Authorino Operator
 ${RHODS_CSV_DISPLAY}=    Red Hat OpenShift AI
@@ -1060,6 +1060,7 @@ Install Connectivity Link Operator Via Cli
              ...    operator_group_ns=${CONNECTIVITY_LINK_NS}
              ...    operator_group_target_ns=${NONE}
              ...    starting_csv=${CONNECTIVITY_LINK_STARTING_CSV}
+             ...    approval=Manual
         Wait Until Operator Subscription Last Condition Is
              ...    type=CatalogSourcesUnhealthy    status=False
              ...    reason=AllCatalogSourcesHealthy    subscription_name=${CONNECTIVITY_LINK_SUB_NAME}

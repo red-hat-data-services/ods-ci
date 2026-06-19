@@ -5,7 +5,7 @@ metadata:
   namespace: <OPERATOR_NAMESPACE>
 spec:
   channel: <UPDATE_CHANNEL>
-  installPlanApproval: Automatic
+  installPlanApproval: <INSTALL_PLAN_APPROVAL>
   name: <OPERATOR_NAME>
   source: <CATALOG_SOURCE>
   sourceNamespace: <CS_NAMESPACE>

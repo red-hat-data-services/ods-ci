@@ -20,7 +20,7 @@ Install ISV Operator From OperatorHub Via CLI    # robocop: disable
     ...            ${channel}=stable    ${catalog_source_name}=certified-operators
     ...            ${cs_namespace}=openshift-marketplace    ${operator_group_name}=${NONE}
     ...            ${operator_group_ns}=${NONE}    ${operator_group_target_ns}=${NONE}
-    ...            ${approval}=Automatic     ${starting_csv}=${NONE}    
+    ...            ${approval}=Automatic     ${starting_csv}=${NONE}
     [Timeout]    10 minutes
     Log To Console    message=Installing the '${operator_name}' Operator
     IF    "${operator_group_name}" != "${NONE}"
@@ -69,7 +69,8 @@ Install ISV Operator From OperatorHub Via CLI    # robocop: disable
     IF  "${operator_name}" == "job-set"
         ${operator_name}=    Set Variable    jobset-operator
     END
-    Wait For Installplan And Approve It    ${namespace}    ${operator_name}    ${subscription_name}    ${operator_version}
+    Wait For Installplan And Approve It    ${namespace}    ${operator_name}    ${subscription_name}
+    ...    ${operator_version}
     Wait Until Keyword Succeeds    1 min    0 sec
     ...    Is Resource Present    Subscription    ${subscription_name}     ${namespace}    ${IS_PRESENT}
     # Approve any pending installplans for transitive OLM dependencies (e.g. ServiceMesh)

@@ -31,7 +31,7 @@ Install ISV Operator From OperatorHub Via CLI    # robocop: disable
     IF     "${starting_csv}" != "${NONE}"
         ${operator_version}=    Replace String    ${starting_csv}    ${operator_name}.    ${EMPTY}
     ELSE
-        ${operator_version}=    ${EMPTY}
+        ${operator_version}=    Set Variable    ${EMPTY}
     END
     ${operator_sub_filepath}=    Set Variable    ${FILES_RESOURCES_DIRPATH}/${operator_name}-sub.yaml
     Copy File    ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${operator_sub_filepath}

@@ -1079,10 +1079,11 @@ Install Connectivity Link Operator Via Cli
                 ...    level=ERROR
                 FAIL    Unable to configure Connectivity Link
             END
+            Configure Authorino
         ELSE
             Log    Skipping configure_connectivity_link_operator.sh for s390x architecture    console=yes
+            Log    Skipping Authorino configuration for s390x architecture    console=yes
         END
-        Configure Authorino
     END
 
 Configure Authorino

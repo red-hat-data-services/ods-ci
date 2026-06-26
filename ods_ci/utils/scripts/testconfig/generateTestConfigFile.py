@@ -318,6 +318,8 @@ def generate_test_config_file(
         data["PIP_CA_BUNDLE"] = config_data["PIP_CA_BUNDLE"]
     if config_data.get("OPENAI_API_KEY"):
         data["OPENAI_API_KEY"] = config_data["OPENAI_API_KEY"]
+    if config_data.get("GEMINI_API_KEY"):
+        data["GEMINI_API_KEY"] = config_data["GEMINI_API_KEY"]
 
     # Git mirror details (optional)
     if config_data.get("GIT_HTTP_URL"):

@@ -80,14 +80,22 @@ echo "Gateway may not expose 'Accepted' condition; check with: oc get gateway -n
 AUTHORINO_NS="${AUTHORINO_NAMESPACE:-kuadrant-system}"
 echo "Configuring Authorino TLS in namespace: ${AUTHORINO_NS}..."
 
+if ! oc get svc authorino-authorino-authorization -n "${AUTHORINO_NS}" &>/dev/null; then
+  echo "ERROR: Authorino service not found in ${AUTHORINO_NS}. Is Authorino installed?" >&2
+  exit 1
+fi
+
 echo "Annotating Authorino service for TLS certificate..."
-oc annotate service authorino-authorino-authorization \
+if ! oc annotate service authorino-authorino-authorization \
   -n "${AUTHORINO_NS}" \
   service.beta.openshift.io/serving-cert-secret-name=authorino-server-cert \
-  --overwrite
+  --overwrite; then
+  echo "ERROR: Failed to annotate Authorino service" >&2
+  exit 1
+fi
 
 echo "Patching Authorino CR for TLS listener..."
-oc patch authorino authorino -n "${AUTHORINO_NS}" --type=merge --patch '{
+if ! oc patch authorino authorino -n "${AUTHORINO_NS}" --type=merge --patch '{
   "spec": {
     "listener": {
       "tls": {
@@ -98,12 +106,18 @@ oc patch authorino authorino -n "${AUTHORINO_NS}" --type=merge --patch '{
       }
     }
   }
-}'
+}'; then
+  echo "ERROR: Failed to patch Authorino CR for TLS" >&2
+  exit 1
+fi
 
 echo "Adding CA bundle environment variables to Authorino deployment..."
-oc -n "${AUTHORINO_NS}" set env deployment/authorino \
+if ! oc -n "${AUTHORINO_NS}" set env deployment/authorino \
   SSL_CERT_FILE=/etc/ssl/certs/openshift-service-ca/service-ca-bundle.crt \
-  REQUESTS_CA_BUNDLE=/etc/ssl/certs/openshift-service-ca/service-ca-bundle.crt
+  REQUESTS_CA_BUNDLE=/etc/ssl/certs/openshift-service-ca/service-ca-bundle.crt; then
+  echo "ERROR: Failed to set environment variables on Authorino deployment" >&2
+  exit 1
+fi
 
 echo "Authorino TLS configuration complete"
 

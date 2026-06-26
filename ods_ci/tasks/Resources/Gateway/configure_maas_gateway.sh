@@ -40,6 +40,7 @@ metadata:
   namespace: ${INGRESS_NS}
   annotations:
     opendatahub.io/managed: "false"
+    security.opendatahub.io/authorino-tls-bootstrap: "true"
   labels:
     app.kubernetes.io/name: maas
     app.kubernetes.io/instance: maas-default-gateway
@@ -74,6 +75,37 @@ EOF
 oc wait gateway -n "${INGRESS_NS}" maas-default-gateway \
 --for=condition=Accepted --timeout=5m || \
 echo "Gateway may not expose 'Accepted' condition; check with: oc get gateway -n ${INGRESS_NS} maas-default-gateway"
+
+# Configure Authorino TLS for maas-api communication
+AUTHORINO_NS="${AUTHORINO_NAMESPACE:-kuadrant-system}"
+echo "Configuring Authorino TLS in namespace: ${AUTHORINO_NS}..."
+
+echo "Annotating Authorino service for TLS certificate..."
+oc annotate service authorino-authorino-authorization \
+  -n "${AUTHORINO_NS}" \
+  service.beta.openshift.io/serving-cert-secret-name=authorino-server-cert \
+  --overwrite
+
+echo "Patching Authorino CR for TLS listener..."
+oc patch authorino authorino -n "${AUTHORINO_NS}" --type=merge --patch '{
+  "spec": {
+    "listener": {
+      "tls": {
+        "enabled": true,
+        "certSecretRef": {
+          "name": "authorino-server-cert"
+        }
+      }
+    }
+  }
+}'
+
+echo "Adding CA bundle environment variables to Authorino deployment..."
+oc -n "${AUTHORINO_NS}" set env deployment/authorino \
+  SSL_CERT_FILE=/etc/ssl/certs/openshift-service-ca/service-ca-bundle.crt \
+  REQUESTS_CA_BUNDLE=/etc/ssl/certs/openshift-service-ca/service-ca-bundle.crt
+
+echo "Authorino TLS configuration complete"
 
 # On non-AWS platforms (GCP, OpenStack, etc.) the Gateway service only receives an
 # internal IP.  Create an OpenShift Route so maas.<cluster-domain> is reachable

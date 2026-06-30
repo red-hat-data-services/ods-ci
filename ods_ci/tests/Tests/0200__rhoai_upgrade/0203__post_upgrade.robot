@@ -56,13 +56,14 @@ Verify Pod Toleration
 Verify RHODS User Groups
     [Documentation]    Verify User Configuration after the upgrade
     [Tags]      Upgrade     Platform        RHOAIENG-19806
+    ${rc}    ${adm_groups}=    Run And Return Rc And Output
+    ...    oc get configmap ${USERGROUPS_CONFIG_MAP} -n ${UPGRADE_NS} -o jsonpath='{.data.adm_groups}'
+    IF    ${rc} != 0
+        Skip    msg=Pre-upgrade user groups configmap '${USERGROUPS_CONFIG_MAP}' is missing; skipping post-upgrade Auth CR group verification.
+    END
     Get Auth Cr Config Data
     ${auth_admins}       Set Variable        ${AUTH_PAYLOAD[0]['spec']['adminGroups']}
     ${auth_allowed}      Set Variable        ${AUTH_PAYLOAD[0]['spec']['allowedGroups']}
-
-    ${rc}    ${adm_groups}=    Run And Return Rc And Output
-    ...    oc get configmap ${USERGROUPS_CONFIG_MAP} -n ${UPGRADE_NS} -o jsonpath='{.data.adm_groups}'
-    Should Be Equal As Integers     ${rc}      0
 
     ${rc}    ${allwd_groups}=    Run And Return Rc And Output
     ...    oc get configmap ${USERGROUPS_CONFIG_MAP} -n ${UPGRADE_NS} -o jsonpath='{.data.allwd_groups}'

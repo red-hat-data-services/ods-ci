@@ -110,6 +110,35 @@ Set Default Access Groups Settings
     Apply Access Groups Settings    admins_group=${STANDARD_ADMINS_GROUP}
     ...    users_group=${STANDARD_SYSTEM_GROUP}
 
+Auth Cr Is Available
+    [Documentation]    Returns True when the cluster-scoped Auth CR is installed (RHOAI 3.4+).
+    ${status}=    Run Keyword And Return Status    Oc Get    kind=Auth    name=auth
+    RETURN    ${status}
+
+Set Auth Cr Multiple Access Groups
+    [Documentation]    Patches Auth CR with multiple admin groups and allowed groups.
+    [Arguments]    @{admin_groups}    ${allowed_group}=system:authenticated
+    ${admin_list}=    Create List    @{admin_groups}
+    ${allowed_list}=    Create List    ${allowed_group}
+    ${patch}=    Evaluate    json.dumps({"spec": {"adminGroups": admin_list, "allowedGroups": allowed_list}})    modules=json, admin_list=${admin_list}, allowed_list=${allowed_list}
+    ${return_code}    ${output}=    Run And Return Rc And Output    oc patch Auth auth --type=merge -p '${patch}'    #robocop:disable
+    Should Be Equal As Integers    ${return_code}    0    msg=${output}
+
+Create Usergroups Upgrade Configmap
+    [Documentation]    Stores expected admin/allowed group values for post-upgrade verification.
+    [Arguments]    ${namespace}    ${configmap_name}    ${adm_groups}    ${allwd_groups}
+    ${return_code}    ${cmd_output}=    Run And Return Rc And Output
+    ...    oc create configmap ${configmap_name} -n ${namespace} --from-literal=adm_groups="${adm_groups}" --from-literal=allwd_groups="${allwd_groups}"
+    Should Be Equal As Integers    ${return_code}    0    msg=${cmd_output}
+
+Auth Cr Groups Should Match Expected
+    [Documentation]    Verifies Auth CR adminGroups and allowedGroups match expected values.
+    [Arguments]    @{expected_admin_groups}    ${expected_allowed_group}=system:authenticated
+    ${auth}=    Oc Get    kind=Auth    name=auth
+    ${expected_admins}=    Create List    @{expected_admin_groups}
+    Lists Should Be Equal    ${auth[0]['spec']['adminGroups']}    ${expected_admins}    ignore_order=True
+    Should Contain    ${auth[0]['spec']['allowedGroups']}    ${expected_allowed_group}
+
 Uninstall RHODS From OSD Cluster
     [Documentation]    Selects the cluster type and triggers the RHODS uninstallation
     [Arguments]     ${clustername}

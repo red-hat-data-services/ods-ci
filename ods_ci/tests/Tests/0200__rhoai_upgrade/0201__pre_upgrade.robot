@@ -64,25 +64,17 @@ Setting Pod Toleration Via UI
     [Teardown]      Dashboard Test Teardown
 
 Verify RHODS Accept Multiple Admin Groups And CRD Gets Updates
-    [Documentation]    Verify that users can set multiple admin groups and
-    ...    check OdhDashboardConfig CRD gets updated according to Admin UI
+    [Documentation]    Verify that multiple admin groups can be configured and
+    ...    persist across upgrade. RHOAI 3.4+ uses the Auth CR; older releases
+    ...    use the Dashboard User management UI (OdhDashboardConfig).
     [Tags]      Upgrade     RHOAIENG-14306    Platform      RHOAIENG-19806
-    [Setup]     Begin Web Test
-    # robocop: disable
-    Launch Dashboard And Check User Management Option Is Available For The User
-    ...    ${TEST_USER.USERNAME}
-    ...    ${TEST_USER.PASSWORD}
-    ...    ${TEST_USER.AUTH_TYPE}
-    Clear User Management Settings
-    # Create a configmap and store both groups
-    ${return_code}    ${cmd_output}=    Run And Return Rc And Output
-    ...    oc create configmap ${USERGROUPS_CONFIG_MAP} -n ${UPGRADE_NS} --from-literal=adm_groups="['rhods-admins', 'rhods-users']" --from-literal=allwd_groups="['system:authenticated']"
-    Should Be Equal As Integers     ${return_code}      0       msg=${cmd_output}
-
-    Add OpenShift Groups To Data Science Administrators     rhods-admins    rhods-users
-    Add OpenShift Groups To Data Science User Groups        system:authenticated
-    Save Changes In User Management Setting
-    [Teardown]      Dashboard Test Teardown
+    [Setup]     Upgrade User Groups Pre Test Setup
+    IF    ${USE_AUTH_CR_FOR_USER_GROUPS}
+        Configure Upgrade User Groups Via Auth Cr
+    ELSE
+        Configure Upgrade User Groups Via Dashboard Ui
+    END
+    [Teardown]    Upgrade User Groups Pre Test Teardown
 
 Verify Custom Image Can Be Added
     [Documentation]    Create Custome notebook using Cli
@@ -212,3 +204,40 @@ Upgrade Suite Setup
 Dashboard Test Teardown
     [Documentation]    Basic suite teardown
     Close All Browsers
+
+Upgrade User Groups Pre Test Setup
+    [Documentation]    Use Auth CR on RHOAI 3.4+; open browser only for legacy Dashboard UI path.
+    ${auth_cr_available}=    Auth Cr Is Available
+    Set Test Variable    ${USE_AUTH_CR_FOR_USER_GROUPS}    ${auth_cr_available}
+    IF    not ${auth_cr_available}
+        Begin Web Test
+    END
+
+Upgrade User Groups Pre Test Teardown
+    [Documentation]    Close browser only when the legacy Dashboard UI path was used.
+    IF    not ${USE_AUTH_CR_FOR_USER_GROUPS}
+        Close All Browsers
+    END
+
+Configure Upgrade User Groups Via Auth Cr
+    [Documentation]    Configure multiple admin groups on Auth CR and store expected values.
+    ${adm_groups_str}=    Set Variable    ['rhods-admins', 'rhods-users']
+    ${allwd_groups_str}=    Set Variable    ['system:authenticated']
+    Create Usergroups Upgrade Configmap    ${UPGRADE_NS}    ${USERGROUPS_CONFIG_MAP}
+    ...    ${adm_groups_str}    ${allwd_groups_str}
+    Set Auth Cr Multiple Access Groups    rhods-admins    rhods-users    system:authenticated
+    Auth Cr Groups Should Match Expected    rhods-admins    rhods-users    system:authenticated
+
+Configure Upgrade User Groups Via Dashboard Ui
+    [Documentation]    Legacy path for releases before Auth CR group management.
+    # robocop: disable
+    Launch Dashboard And Check User Management Option Is Available For The User
+    ...    ${TEST_USER.USERNAME}
+    ...    ${TEST_USER.PASSWORD}
+    ...    ${TEST_USER.AUTH_TYPE}
+    Clear User Management Settings
+    Create Usergroups Upgrade Configmap    ${UPGRADE_NS}    ${USERGROUPS_CONFIG_MAP}
+    ...    ['rhods-admins', 'rhods-users']    ['system:authenticated']
+    Add OpenShift Groups To Data Science Administrators     rhods-admins    rhods-users
+    Add OpenShift Groups To Data Science User Groups        system:authenticated
+    Save Changes In User Management Setting

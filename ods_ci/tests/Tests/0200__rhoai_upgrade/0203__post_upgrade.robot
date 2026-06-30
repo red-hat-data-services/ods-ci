@@ -69,8 +69,10 @@ Verify RHODS User Groups
     ...    oc get configmap ${USERGROUPS_CONFIG_MAP} -n ${UPGRADE_NS} -o jsonpath='{.data.allwd_groups}'
     Should Be Equal As Integers     ${rc}      0
 
-    Should Be Equal    "${adm_groups}"    "${auth_admins}"   msg="Admin groups are not equal"
-    Should Be Equal    "${allwd_groups}"    "${auth_allowed}"   msg="Allowed groups are not equal"
+    ${expected_admins}=    Evaluate    __import__('ast').literal_eval("""${adm_groups}""")
+    ${expected_allowed}=    Evaluate    __import__('ast').literal_eval("""${allwd_groups}""")
+    Lists Should Be Equal    ${expected_admins}    ${auth_admins}    ignore_order=True    msg=Admin groups are not equal
+    Lists Should Be Equal    ${expected_allowed}    ${auth_allowed}    ignore_order=True    msg=Allowed groups are not equal
 
     [Teardown]      Set Default Users
 

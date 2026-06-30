@@ -6,7 +6,7 @@ jobs:
      name: shellcheck linter
      runs-on: ubuntu-latest
      steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: shellcheck_
         uses: reviewdog/action-shellcheck@v1
         with:
@@ -23,7 +23,7 @@ jobs:
      continue-on-error: true
      steps:
       -   name: Checkout repository
-          uses: actions/checkout@v4
+          uses: actions/checkout@v7
       -   name: Install dependencies
           #  robocop 6.X includes a new cli format and its not compatible with --reports
           run: pipx install robotframework-robocop~=5.0.0
@@ -41,7 +41,7 @@ jobs:
       python_version: '3.11'
       poetry_version: '2.1.1'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -81,7 +81,7 @@ jobs:
       python_version: '3.11'
       poetry_version: '2.1.1'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install poetry
         run: pipx install poetry==${{ env.poetry_version }}

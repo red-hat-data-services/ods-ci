@@ -1072,14 +1072,21 @@ Install Connectivity Link Operator Via Cli
         # Wait for authorino-operator to be ready (installed by rhcl-operator as OLM dependency)
         Wait Until Csv Is Ready    display_name=${AUTHORINO_CSV_NAME}
              ...    operators_namespace=${CONNECTIVITY_LINK_NS}    timeout=5m
-        ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/configure_connectivity_link_operator.sh
-        Log    ${output}    console=yes
-        IF    ${rc} != ${0}
-            Log    Unable to configure Connectivity Link.\nCheck the cluster please    console=yes
-            ...    level=ERROR
-            FAIL    Unable to configure Connectivity Link
+        # Skip configure_connectivity_link_operator.sh for s390x architecture
+        ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    x86_64
+        IF    '${arch_type}' != 's390x'
+            ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/configure_connectivity_link_operator.sh
+            Log    ${output}    console=yes
+            IF    ${rc} != ${0}
+                Log    Unable to configure Connectivity Link.\nCheck the cluster please    console=yes
+                ...    level=ERROR
+                FAIL    Unable to configure Connectivity Link
+            END
+            Configure Authorino
+        ELSE
+            Log    Skipping configure_connectivity_link_operator.sh for s390x architecture    console=yes
+            Log    Skipping Authorino configuration for s390x architecture    console=yes
         END
-        Configure Authorino
     END
 
 Configure Authorino

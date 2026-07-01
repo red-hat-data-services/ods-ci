@@ -170,6 +170,15 @@ Watch Hive Install Log
     END
     Sleep   10s    reason=Let's wait some seconds before proceeding with next checks
 
+Get Web Console URL
+    [Documentation]    Get the web console URL for the given namespace
+    [Arguments]    ${pool_namespace}    ${clusterdeployment_name}
+    ${web_console_url} =    Run Process
+    ...    oc -n ${pool_namespace} get cd ${clusterdeployment_name} -o json | jq -r '.status.webConsoleURL' --exit-status    # robocop: disable:line-too-long
+    ...    shell=yes
+    Should Be True    ${web_console_url.rc} == 0
+    RETURN    ${web_console_url}
+
 Wait For Cluster To Be Ready
     IF    ${use_cluster_pool}
         ${pool_namespace} =    Get Cluster Pool Namespace    ${pool_name}
@@ -188,15 +197,15 @@ Wait For Cluster To Be Ready
     ${provision_status} =    Run Process
     ...    oc -n ${pool_namespace} wait --for\=condition\=ProvisionFailed\=False cd ${clusterdeployment_name} --timeout\=15m    # robocop: disable:line-too-long
     ...    shell=yes
-    ${web_access} =    Run Process
-    ...    oc -n ${pool_namespace} get cd ${clusterdeployment_name} -o json | jq -r '.status.webConsoleURL' --exit-status    # robocop: disable:line-too-long
-    ...    shell=yes
+    # temporary workaround
+    Wait Until Keyword Succeeds    15m    10s    Get Web Console URL    ${pool_namespace}    ${clusterdeployment_name}
+    ${web_access} =    Get Web Console URL    ${pool_namespace}    ${clusterdeployment_name}
     IF    ${use_cluster_pool}
         ${custer_status} =    Run Process
-        ...    oc -n ${hive_namespace} wait --for\=condition\=ClusterRunning\=True clusterclaim ${claim_name} --timeout\=15m    shell=yes    # robocop: disable:line-too-long
+        ...    oc -n ${hive_namespace} wait --for\=condition\=ClusterRunning\=True clusterclaim ${claim_name} --timeout\=25m    shell=yes    # robocop: disable:line-too-long
     ELSE
         ${custer_status} =    Run Process
-        ...    oc -n ${hive_namespace} wait --for\=condition\=Ready\=True clusterdeployment ${clusterdeployment_name} --timeout\=15m    shell=yes    # robocop: disable:line-too-long
+        ...    oc -n ${hive_namespace} wait --for\=condition\=Ready\=True clusterdeployment ${clusterdeployment_name} --timeout\=25m    shell=yes    # robocop: disable:line-too-long
     END
     # Workaround for old Hive with Openstack - Cluster is displayed as Resuming even when it is Running
     # add also support to the new Hive where the Cluster is displayed as Running

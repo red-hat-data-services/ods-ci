@@ -40,3 +40,7 @@ spec:
       managementState: <mlflowoperator_value>
     sparkoperator:
       managementState: <sparkoperator_value>
+    aigateway:
+      managementState: <aigateway_value>
+      batchGateway:
+        managementState: <batchgateway_value>

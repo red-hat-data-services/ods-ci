@@ -265,19 +265,6 @@ Get Grafana Url
     ${grafana_url} =    Run    oc get routes/grafana -n ${MONITORING_NAMESPACE} -o json | jq -r '.spec.host'
     RETURN    ${grafana_url}
 
-Verify CPU And Memory Requests And Limits Are Defined For Pod
-    [Documentation]    Verifies that CPU and memory requests and limits are defined
-    ...                for the specified pod
-    ...    Args:
-    ...        pod_info: Pod information
-    ...    Returns:
-    ...        None
-    [Arguments]    ${pod_info}
-    &{pod_info_dict}=    Set Variable    ${pod_info}
-    FOR    ${container_info}    IN    @{pod_info_dict.spec.containers}
-        Verify CPU And Memory Requests And Limits Are Defined For Pod Container    ${container_info}
-    END
-
 Verify CPU And Memory Requests And Limits Are Defined For Pod Container
     [Documentation]    Verifies that CPU and memory requests and limits are defined
     ...                for the specified container

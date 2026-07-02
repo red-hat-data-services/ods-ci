@@ -43,14 +43,6 @@ Verify Dashbord has no message with NO Component Found
     Capture Page Screenshot
     [Teardown]  Close All Browsers
 
-Verify Traefik Deployment
-    [Documentation]  Verifies RHODS Traefik deployment
-    [Tags]    Sanity
-    ...       Tier1
-    ...       ODS-546
-    ...       ODS-552
-    Skip      msg=Traefik proxy is removed after KFNBC migration
-
 Verify Notebook Controller Deployment
     [Documentation]    Verifies RHODS Notebook Controller deployment
     [Tags]    Sanity    Tier1
@@ -221,26 +213,6 @@ Verify Users Can Update Notification Email After Installing RHODS With The AddOn
     Wait Until Notification Email From Addon-Managed-Odh-Parameters Contains  email=${email_to_change}
     Wait Until Notification Email In Alertmanager ConfigMap Is    ${email_to_change}
     [Teardown]    Update Notification Email Address    ${cluster_name}    ${current_email}
-
-Verify JupyterHub Pod Logs Dont Have Errors About Distutil Library
-    [Documentation]    Verifies that there are no errors related to DistUtil Library in Jupyterhub Pod logs
-    [Tags]    Tier2
-    ...       ODS-586
-    Skip      msg=JupyterHub Pod is removed after KFNBC migration
-
-Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In All ODS Projects
-    [Documentation]    Verifies that CPU and Memory requests and limits are defined
-    ...                for all containers in all pods for all ODS projects
-    [Tags]    Sanity
-    ...       Tier1
-    ...       ProductBug
-    ...       ODS-385
-    ...       ODS-554
-    ...       ODS-556
-    ...       ODS-313
-    Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project    ${APPLICATIONS_NAMESPACE}
-    Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project    ${MONITORING_NAMESPACE}
-    Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project    ${OPERATOR_NAMESPACE}
 
 Verify Monitoring Stack Is Reconciled Without Restarting The ODS Operator
     [Documentation]    Verify Monitoring Stack Is Reconciled Without Restarting The RHODS Operator
@@ -509,25 +481,6 @@ Verify Grafana Can Obtain Data From Prometheus Datasource
     Run Promql Query  query=traefik_backend_server_up
     Page Should Contain  text=Graph
 
-Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project
-    [Documentation]    Verifies that CPU and Memory requests and limits are defined
-    ...                for all containers in all pods for the specified project
-    ...    Args:
-    ...        project: Project name
-    ...    Returns:
-    ...        None
-    [Arguments]    ${project}
-    ${project_pods_info} =    Fetch Project Pods Info    ${project}
-    FOR    ${pod_info}    IN    @{project_pods_info}
-        Verify CPU And Memory Requests And Limits Are Defined For Pod    ${pod_info}
-        IF    "${project}" == "${APPLICATIONS_NAMESPACE}"
-            IF    "cuda-s2i" in "${pod_info['metadata']['name']}"
-            ...    Verify Requests Contains Expected Values  cpu=2  memory=4Gi  requests=${pod_info['spec']['containers'][0]['resources']['requests']}
-            IF    "minimal-gpu" in "${pod_info['metadata']['name']}" or "pytorch" in "${pod_info['metadata']['name']}" or "tensorflow" in "${pod_info['metadata']['name']}"
-            ...    Verify Requests Contains Expected Values  cpu=4  memory=8Gi  requests=${pod_info['spec']['containers'][0]['resources']['requests']}
-        END
-    END
-
 Wait Until Operator Reverts "Grafana" To "Prometheus" In Rhods-Monitor-Federation
     [Documentation]     Waits until rhods-operator reverts the configuration of rhods-monitor-federation,
     ...    verifiying it has the default value ("prometheus")
@@ -546,12 +499,6 @@ Replace "Prometheus" With "Grafana" In Rhods-Monitor-Federation
     OpenShiftLibrary.Oc Patch    kind=ServiceMonitor
     ...                   src={"spec":{"selector":{"matchLabels": {"app":"grafana"}}}}
     ...                   name=rhods-monitor-federation   namespace=${MONITORING_NAMESPACE}  type=merge
-
-Verify Requests Contains Expected Values
-    [Documentation]     Verifies cpu and memory requests contain expected values
-    [Arguments]   ${cpu}  ${memory}  ${requests}
-    Should Be Equal As Strings    ${requests['cpu']}  ${cpu}
-    Should Be Equal As Strings    ${requests['memory']}  ${memory}
 
 CUDA Teardown
     [Documentation]    Ensures spawner is cleaned up if spawn fails

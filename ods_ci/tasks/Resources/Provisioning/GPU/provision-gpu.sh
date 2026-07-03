@@ -48,7 +48,8 @@ echo "========================================"
 KUSTOMIZE_PATH="$PWD/tasks/Resources/Provisioning/Hive/GPU"
 MACHINESET_PATH="$KUSTOMIZE_PATH/base/source-machineset.yaml"
 PROVIDER_OVERLAY_DIR=$KUSTOMIZE_PATH/overlays/$PROVIDER
-MACHINE_WAIT_TIMEOUT=10m
+# Increasing timeout, for larger instances 10 mins is not sufficient
+MACHINE_WAIT_TIMEOUT=20m
 # Check if existing machineset GPU already exists
 EXISTING_GPU_MACHINESET="$(oc get machinesets.machine.openshift.io -n openshift-machine-api -o jsonpath="{.items[?(@.metadata.annotations['machine\.openshift\.io/GPU']>'0')].metadata.name}")"
 if [[ -n "$EXISTING_GPU_MACHINESET" ]] ; then

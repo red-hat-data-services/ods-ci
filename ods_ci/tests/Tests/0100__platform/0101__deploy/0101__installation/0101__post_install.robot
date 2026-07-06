@@ -195,26 +195,6 @@ Verify RHODS Release Version Number
     ${version} =  Get RHODS Version
     Should Match Regexp    ${version}    ^[0-9]+\.[0-9]+\.[0-9]+\(-[0-9]+)*$
 
-Verify JupyterHub Pod Logs Dont Have Errors About Distutil Library
-    [Documentation]    Verifies that there are no errors related to DistUtil Library in Jupyterhub Pod logs
-    [Tags]    Tier2
-    ...       ODS-586
-    Skip      msg=JupyterHub Pod is removed after KFNBC migration
-
-Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In All ODS Projects
-    [Documentation]    Verifies that CPU and Memory requests and limits are defined
-    ...                for all containers in all pods for all ODS projects
-    [Tags]    Sanity
-    ...       Tier1
-    ...       ProductBug
-    ...       ODS-385
-    ...       ODS-554
-    ...       ODS-556
-    ...       ODS-313
-    Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project    ${APPLICATIONS_NAMESPACE}
-    Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project    ${MONITORING_NAMESPACE}
-    Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project    ${OPERATOR_NAMESPACE}
-
 Verify Monitoring Stack Is Reconciled Without Restarting The ODS Operator
     [Documentation]    Verify Monitoring Stack Is Reconciled Without Restarting The RHODS Operator
     [Tags]    Tier2

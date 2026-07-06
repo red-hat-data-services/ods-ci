@@ -41,21 +41,21 @@ ${USERGROUPS_CONFIG_MAP}    usergroups-config-map
 *** Test Cases ***
 Set PVC Size Via UI
     [Documentation]    Sets a Pod toleration via the admin UI
-    [Tags]      Upgrade    Dashboard
+    [Tags]      Upgrade    Dashboard    deprecatedTest
     [Setup]     Begin Web Test
     Set PVC Value In RHODS Dashboard        ${S_SIZE}
     [Teardown]      Dashboard Test Teardown
 
 Set Culler Timeout
     [Documentation]     Sets a culler timeout via the admin UI
-    [Tags]      Upgrade    Dashboard
+    [Tags]      Upgrade    Dashboard    deprecatedTest
     [Setup]     Begin Web Test
     Modify Notebook Culler Timeout      ${CUSTOM_CULLER_TIMEOUT}
     [Teardown]      Dashboard Test Teardown
 
 Setting Pod Toleration Via UI
     [Documentation]    Sets a Pod toleration via the admin UI
-    [Tags]      Upgrade    Dashboard
+    [Tags]      Upgrade    Dashboard    deprecatedTest
     [Setup]     Begin Web Test
     Menu.Navigate To Page       Settings        Cluster settings
     Wait Until Page Contains        Notebook pod tolerations

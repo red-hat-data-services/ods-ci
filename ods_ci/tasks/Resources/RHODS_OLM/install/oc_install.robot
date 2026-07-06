@@ -172,6 +172,9 @@ Install RHODS
               Run    sed -i'' -e 's/<INSTALL_PLAN_APPROVAL>/${install_plan_approval}/' ${destination_file}
               Oc Apply   kind=List   src=${destination_file}
               Remove File    ${destination_file}
+              IF    '${CATALOG_SOURCE}' == 'rhoai-catalog-dev'
+                  Wait for Catalog To Be Ready    catalog_name=rhoai-catalog-dev    timeout=120
+              END
           ELSE
               Set Subscription Update Channel    ${OPERATOR_NAMESPACE}    ${UPDATE_CHANNEL}    ${OPERATOR_NAME}
           END
@@ -519,6 +522,7 @@ Install RHODS In Self Managed Cluster Using CLI
   ...    cd ${EXECDIR}/${OLM_DIR} && ./setup.sh -t operator -u ${UPDATE_CHANNEL} -i ${image_url} -n ${OPERATOR_NAME} -p ${OPERATOR_NAMESPACE} ${CONFIG_ENV}    # robocop: disable
   ...    timeout=20 min
   Should Be Equal As Integers   ${return_code}   0   msg=Error detected while installing RHODS
+  Wait for Catalog To Be Ready    catalog_name=rhoai-catalog-dev    timeout=120
 
 Upgrade RHODS In Self Managed Cluster Using CLI
   [Documentation]   Upgrade RHODS on self managed cluster using CLI by applying new catalog source
@@ -967,7 +971,7 @@ Wait for Catalog To Be Ready
     [Arguments]    ${namespace}=openshift-marketplace   ${catalog_name}=odh-catalog-dev   ${timeout}=30
     Log    Waiting for the '${catalog_name}' CatalogSource in '${namespace}' namespace to be in 'Ready' status state
     ...    console=yes
-    Wait Until Keyword Succeeds    12 times   10 seconds
+    Wait Until Keyword Succeeds    ${timeout} times   10 seconds
     ...   Catalog Is Ready    ${namespace}   ${catalog_name}
     Log    CatalogSource '${catalog_name}' in '${namespace}' namespace in 'Ready' status now, let's continue
     ...    console=yes

@@ -1412,7 +1412,7 @@ Set Component State
         FAIL    Can not find datasciencecluster
     END
     ${cluster_name} =    Set Variable    ${result.stdout}
-    ${result} =    Run Process    oc patch ${cluster_name} --type 'json' -p '[{"op" : "replace" ,"path" : "/spec/components/${component}/managementState" ,"value" : "${state}"}]'
+    ${result} =    Run Process    oc patch ${cluster_name} --type merge -p '{"spec":{"components":{"${component}":{"managementState":"${state}"}}}}'
     ...    shell=true    stderr=STDOUT
     IF    $result.rc != 0
         FAIL    Can not enable ${component}: ${result.stdout}

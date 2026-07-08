@@ -82,6 +82,7 @@ PRODUCT: RHODS
 OPERATOR_NAME: rhods-operator
 INSTALL_TYPE: Cli
 APPLICATIONS_NAMESPACE: redhat-ods-applications
+AI_GATEWAY_INFRA_NAMESPACE: redhat-ai-gateway-infra
 MONITORING_NAMESPACE: redhat-ods-monitoring
 OPERATOR_NAMESPACE: redhat-ods-operator
 NOTEBOOKS_NAMESPACE: rhods-notebooks

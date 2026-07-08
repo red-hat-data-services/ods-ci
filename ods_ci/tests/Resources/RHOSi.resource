@@ -79,6 +79,7 @@ Required Global Variables Should Exist
     [Documentation]   Fails if new required global variables are not set
     Variable Should Exist    ${PRODUCT}
     Variable Should Exist    ${APPLICATIONS_NAMESPACE}
+    Variable Should Exist    ${AI_GATEWAY_INFRA_NAMESPACE}
     Variable Should Exist    ${MONITORING_NAMESPACE}
     Variable Should Exist    ${OPERATOR_NAMESPACE}
     Variable Should Exist    ${NOTEBOOKS_NAMESPACE}

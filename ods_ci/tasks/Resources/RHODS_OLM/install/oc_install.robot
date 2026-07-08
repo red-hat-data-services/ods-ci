@@ -76,6 +76,8 @@ ${DEFAULT_OPERATOR_NAMESPACE_RHOAI}=    redhat-ods-operator
 ${DEFAULT_OPERATOR_NAMESPACE_ODH}=    opendatahub-operators
 ${DEFAULT_APPLICATIONS_NAMESPACE_RHOAI}=    redhat-ods-applications
 ${DEFAULT_APPLICATIONS_NAMESPACE_ODH}=    opendatahub
+${DEFAULT_AI_GATEWAY_INFRA_NAMESPACE_RHOAI}=    redhat-ai-gateway-infra
+${DEFAULT_AI_GATEWAY_INFRA_NAMESPACE_ODH}=    odh-ai-gateway-infra
 ${DEFAULT_WORKBENCHES_NAMESPACE_RHOAI}=    rhods-notebooks
 ${DEFAULT_WORKBENCHES_NAMESPACE_ODH}=    opendatahub
 ${DEFAULT_MODEL_REGISTRY_NAMESPACE_RHOAI}=    rhoai-model-registries
@@ -1588,6 +1590,6 @@ Configure MaaS Database
     [Documentation]    Provision PostgreSQL and maas-db-config secret required by maas-api
     Log To Console    Provisioning MaaS PostgreSQL prerequisites
     ${rc}    ${output} =    Run And Return Rc And Output
-    ...    bash tasks/Resources/Database/configure_maas_postgres.sh --namespace ${APPLICATIONS_NAMESPACE}
+    ...    bash tasks/Resources/Database/configure_maas_postgres.sh --namespace ${AI_GATEWAY_INFRA_NAMESPACE}
     Log To Console    ${output}
     Should Be Equal As Integers    ${rc}    0    msg=Error provisioning MaaS PostgreSQL prerequisites

@@ -4,7 +4,7 @@ while [ "$#" -gt 0 ]; do
     case $1 in
         --namespace)
             shift
-            APPS_NS=$1
+            INFRA_NS=$1
             shift
             ;;
         *)
@@ -14,32 +14,32 @@ while [ "$#" -gt 0 ]; do
     esac
 done
 
-APPS_NS="${APPS_NS:-redhat-ods-applications}"
+INFRA_NS="${INFRA_NS:-redhat-ai-gateway-infra}"
 POSTGRES_IMAGE="registry.redhat.io/rhel9/postgresql-15@sha256:90ec347a35ab8a5d530c8d09f5347b13cc71df04f3b994bfa8b1a409b1171d59"
 
 # Ensure namespace exists
-oc create namespace "${APPS_NS}" --dry-run=client -o yaml | oc apply -f -
+oc create namespace "${INFRA_NS}" --dry-run=client -o yaml | oc apply -f -
 
 # Skip if all resources already exist and deployment is ready
-if oc get secret maas-db-config -n "${APPS_NS}" &>/dev/null \
-   && oc get secret postgres-creds -n "${APPS_NS}" &>/dev/null \
-   && oc get service postgres -n "${APPS_NS}" &>/dev/null \
-   && oc get deployment postgres -n "${APPS_NS}" &>/dev/null; then
-    oc wait deployment/postgres -n "${APPS_NS}" --for=condition=Available --timeout=5m
-    echo "MaaS PostgreSQL prerequisites already exist in ${APPS_NS}, skipping."
+if oc get secret maas-db-config -n "${INFRA_NS}" &>/dev/null \
+   && oc get secret postgres-creds -n "${INFRA_NS}" &>/dev/null \
+   && oc get service postgres -n "${INFRA_NS}" &>/dev/null \
+   && oc get deployment postgres -n "${INFRA_NS}" &>/dev/null; then
+    oc wait deployment/postgres -n "${INFRA_NS}" --for=condition=Available --timeout=5m
+    echo "MaaS PostgreSQL prerequisites already exist in ${INFRA_NS}, skipping."
     exit 0
 fi
 
 # Reuse existing credentials if postgres-creds secret is present, otherwise generate new ones
-if oc get secret postgres-creds -n "${APPS_NS}" &>/dev/null; then
-    PG_USER="$(oc get secret postgres-creds -n "${APPS_NS}" -o jsonpath='{.data.POSTGRES_USER}' | base64 -d)"
-    PG_PASS="$(oc get secret postgres-creds -n "${APPS_NS}" -o jsonpath='{.data.POSTGRES_PASSWORD}' | base64 -d)"
-    PG_DB="$(oc get secret postgres-creds -n "${APPS_NS}" -o jsonpath='{.data.POSTGRES_DB}' | base64 -d)"
+if oc get secret postgres-creds -n "${INFRA_NS}" &>/dev/null; then
+    PG_USER="$(oc get secret postgres-creds -n "${INFRA_NS}" -o jsonpath='{.data.POSTGRES_USER}' | base64 -d)"
+    PG_PASS="$(oc get secret postgres-creds -n "${INFRA_NS}" -o jsonpath='{.data.POSTGRES_PASSWORD}' | base64 -d)"
+    PG_DB="$(oc get secret postgres-creds -n "${INFRA_NS}" -o jsonpath='{.data.POSTGRES_DB}' | base64 -d)"
     if [[ -z "${PG_USER}" || -z "${PG_PASS}" || -z "${PG_DB}" ]]; then
-        echo "postgres-creds in ${APPS_NS} is missing required keys/values" >&2
+        echo "postgres-creds in ${INFRA_NS} is missing required keys/values" >&2
         exit 1
     fi
-    echo "Reusing existing postgres-creds in ${APPS_NS}"
+    echo "Reusing existing postgres-creds in ${INFRA_NS}"
 else
     PG_USER="maas-$(cat /dev/urandom | tr -dc a-z0-9 | head -c 8)"
     PG_PASS="$(cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 32)"
@@ -52,7 +52,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: postgres-creds
-  namespace: ${APPS_NS}
+  namespace: ${INFRA_NS}
   labels:
     app: postgres
     purpose: poc
@@ -70,7 +70,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: maas-db-config
-  namespace: ${APPS_NS}
+  namespace: ${INFRA_NS}
   labels:
     app: maas-api
     purpose: poc
@@ -85,7 +85,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: postgres
-  namespace: ${APPS_NS}
+  namespace: ${INFRA_NS}
   labels:
     app: postgres
     purpose: poc
@@ -105,7 +105,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgres
-  namespace: ${APPS_NS}
+  namespace: ${INFRA_NS}
   labels:
     app: postgres
     purpose: poc
@@ -162,9 +162,9 @@ spec:
 EOF
 
 # Wait for postgres to be ready
-if ! oc wait deployment/postgres -n "${APPS_NS}" --for=condition=Available --timeout=5m; then
-    echo "PostgreSQL deployment is not ready in ${APPS_NS}" >&2
+if ! oc wait deployment/postgres -n "${INFRA_NS}" --for=condition=Available --timeout=5m; then
+    echo "PostgreSQL deployment is not ready in ${INFRA_NS}" >&2
     exit 1
 fi
 
-echo "MaaS PostgreSQL prerequisites provisioned in ${APPS_NS}"
+echo "MaaS PostgreSQL prerequisites provisioned in ${INFRA_NS}"

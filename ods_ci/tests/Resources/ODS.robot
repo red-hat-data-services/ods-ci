@@ -218,17 +218,6 @@ OpenShift Resource Field Value Should Match Regexp
         Should Match Regexp    ${dict.${actual}}    ${expected}
     END
 
-OpenShift Resource Component Should Contain Field
-    [Documentation]    Checks if the specified OpenShift resource component contains
-    ...                the specified field
-    ...    Args:
-    ...        resource_component: Resource component
-    ...        field: Field
-    ...    Returns:
-    ...        None
-    [Arguments]    ${resource_component}    ${field}
-    Run Keyword And Continue On Failure    Should Contain    ${resource_component}    ${field}
-
 Verify Auth CR Contains Expected Values
     [Documentation]    Verifies if the group contains the expected value
     [Arguments]        &{exp_values}
@@ -264,50 +253,6 @@ Get Grafana Url
     [Documentation]  Returns Grafana URL
     ${grafana_url} =    Run    oc get routes/grafana -n ${MONITORING_NAMESPACE} -o json | jq -r '.spec.host'
     RETURN    ${grafana_url}
-
-Verify CPU And Memory Requests And Limits Are Defined For Pod
-    [Documentation]    Verifies that CPU and memory requests and limits are defined
-    ...                for the specified pod
-    ...    Args:
-    ...        pod_info: Pod information
-    ...    Returns:
-    ...        None
-    [Arguments]    ${pod_info}
-    &{pod_info_dict}=    Set Variable    ${pod_info}
-    FOR    ${container_info}    IN    @{pod_info_dict.spec.containers}
-        Verify CPU And Memory Requests And Limits Are Defined For Pod Container    ${container_info}
-    END
-
-Verify CPU And Memory Requests And Limits Are Defined For Pod Container
-    [Documentation]    Verifies that CPU and memory requests and limits are defined
-    ...                for the specified container
-    ...    Args:
-    ...        container_info: Container information
-    ...    Returns:
-    ...        None
-    [Arguments]    ${container_info}    ${nvidia_gpu}=${FALSE}
-    &{container_info_dict} =    Set Variable    ${container_info}
-    OpenShift Resource Component Should Contain Field     ${container_info_dict}    resources
-    IF   'resources' in ${container_info_dict}
-    ...    OpenShift Resource Component Should Contain Field     ${container_info_dict.resources}    requests
-    IF   'resources' in ${container_info_dict}
-    ...    OpenShift Resource Component Should Contain Field     ${container_info_dict.resources}    limits
-    IF   'requests' in ${container_info_dict.resources}
-    ...    OpenShift Resource Component Should Contain Field     ${container_info_dict.resources.requests}    cpu
-    IF   'requests' in ${container_info_dict.resources}
-    ...    OpenShift Resource Component Should Contain Field     ${container_info_dict.resources.requests}    memory
-    IF   'limits' in ${container_info_dict.resources}
-    ...    OpenShift Resource Component Should Contain Field     ${container_info_dict.resources.limits}    cpu
-    IF   'limits' in ${container_info_dict.resources}
-    ...    OpenShift Resource Component Should Contain Field     ${container_info_dict.resources.limits}    memory
-    IF    ${nvidia_gpu} == ${TRUE}
-        IF   'requests' in ${container_info_dict.resources}
-        ...    OpenShift Resource Component Should Contain Field
-        ...    ${container_info_dict.resources.requests}    nvidia.com/gpu
-        IF   'limits' in ${container_info_dict.resources}
-        ...    OpenShift Resource Component Should Contain Field
-        ...    ${container_info_dict.resources.limits}    nvidia.com/gpu
-    END
 
 Fetch Project Pods Info
     [Documentation]    Fetches information of all Pods for the specified Project

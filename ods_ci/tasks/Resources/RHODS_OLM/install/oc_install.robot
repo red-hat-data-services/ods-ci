@@ -67,6 +67,7 @@ ${CERT_MANAGER_NS}=  cert-manager-operator
 ${CONNECTIVITY_LINK_OP_NAME}=  rhcl-operator
 ${CONNECTIVITY_LINK_SUB_NAME}=  rhcl-operator
 ${CONNECTIVITY_LINK_CHANNEL_NAME}=  stable
+${CONNECTIVITY_LINK_STARTING_CSV}=  ${CONNECTIVITY_LINK_OP_NAME}.v1.3.4
 ${CONNECTIVITY_LINK_NS}=  kuadrant-system
 ${AUTHORINO_CSV_NAME}=  Authorino Operator
 ${RHODS_CSV_DISPLAY}=    Red Hat OpenShift AI
@@ -1064,6 +1065,8 @@ Install Connectivity Link Operator Via Cli
              ...    operator_group_name=${CONNECTIVITY_LINK_OP_NAME}
              ...    operator_group_ns=${CONNECTIVITY_LINK_NS}
              ...    operator_group_target_ns=${NONE}
+             ...    starting_csv=${CONNECTIVITY_LINK_STARTING_CSV}
+             ...    approval=Manual
         Wait Until Operator Subscription Last Condition Is
              ...    type=CatalogSourcesUnhealthy    status=False
              ...    reason=AllCatalogSourcesHealthy    subscription_name=${CONNECTIVITY_LINK_SUB_NAME}
@@ -1075,14 +1078,21 @@ Install Connectivity Link Operator Via Cli
         # Wait for authorino-operator to be ready (installed by rhcl-operator as OLM dependency)
         Wait Until Csv Is Ready    display_name=${AUTHORINO_CSV_NAME}
              ...    operators_namespace=${CONNECTIVITY_LINK_NS}    timeout=5m
-        ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/configure_connectivity_link_operator.sh
-        Log    ${output}    console=yes
-        IF    ${rc} != ${0}
-            Log    Unable to configure Connectivity Link.\nCheck the cluster please    console=yes
-            ...    level=ERROR
-            FAIL    Unable to configure Connectivity Link
+        # Skip configure_connectivity_link_operator.sh for s390x architecture
+        ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
+        IF    '${arch_type}' != 's390x'
+            ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/configure_connectivity_link_operator.sh
+            Log    ${output}    console=yes
+            IF    ${rc} != ${0}
+                Log    Unable to configure Connectivity Link.\nCheck the cluster please    console=yes
+                ...    level=ERROR
+                FAIL    Unable to configure Connectivity Link
+            END
+            Configure Authorino
+        ELSE
+            Log    Skipping configure_connectivity_link_operator.sh for s390x architecture    console=yes
+            Log    Skipping Authorino configuration for s390x architecture    console=yes
         END
-        Configure Authorino
     END
 
 Configure Authorino
@@ -1408,7 +1418,7 @@ Set Component State
         FAIL    Can not find datasciencecluster
     END
     ${cluster_name} =    Set Variable    ${result.stdout}
-    ${result} =    Run Process    oc patch ${cluster_name} --type 'json' -p '[{"op" : "replace" ,"path" : "/spec/components/${component}/managementState" ,"value" : "${state}"}]'
+    ${result} =    Run Process    oc patch ${cluster_name} --type merge -p '{"spec":{"components":{"${component}":{"managementState":"${state}"}}}}'
     ...    shell=true    stderr=STDOUT
     IF    $result.rc != 0
         FAIL    Can not enable ${component}: ${result.stdout}
@@ -1424,7 +1434,7 @@ Set Nested Component State
         FAIL    Can not find datasciencecluster
     END
     ${cluster_name} =    Set Variable    ${result.stdout}
-    ${result} =    Run Process    oc patch ${cluster_name} --type 'json' -p '[{"op" : "replace" ,"path" : "/spec/components/${parent_component}/${nested_component}/managementState" ,"value" : "${state}"}]'
+    ${result} =    Run Process    oc patch ${cluster_name} --type merge -p '{"spec":{"components":{"${parent_component}":{"${nested_component}":{"managementState":"${state}"}}}}}'
     ...    shell=true    stderr=STDOUT
     IF    $result.rc != 0
         FAIL    Can not set ${parent_component}.${nested_component} to ${state}: ${result.stdout}

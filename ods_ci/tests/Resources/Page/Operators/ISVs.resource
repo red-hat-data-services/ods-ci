@@ -20,6 +20,7 @@ Install ISV Operator From OperatorHub Via CLI    # robocop: disable
     ...            ${channel}=stable    ${catalog_source_name}=certified-operators
     ...            ${cs_namespace}=openshift-marketplace    ${operator_group_name}=${NONE}
     ...            ${operator_group_ns}=${NONE}    ${operator_group_target_ns}=${NONE}
+    ...            ${approval}=Automatic     ${starting_csv}=${NONE}
     [Timeout]    10 minutes
     Log To Console    message=Installing the '${operator_name}' Operator
     IF    "${operator_group_name}" != "${NONE}"
@@ -27,14 +28,25 @@ Install ISV Operator From OperatorHub Via CLI    # robocop: disable
         ...    namespace=${operator_group_ns}    target_namespace=${operator_group_target_ns}
         ...    operator_name=${operator_name}
     END
+    IF     "${starting_csv}" != "${NONE}"
+        ${operator_version}=    Replace String    ${starting_csv}    ${operator_name}.    ${EMPTY}
+    ELSE
+        ${operator_version}=    Set Variable    ${EMPTY}
+    END
     ${operator_sub_filepath}=    Set Variable    ${FILES_RESOURCES_DIRPATH}/${operator_name}-sub.yaml
     Copy File    ${SUBSCRIPTION_YAML_TEMPLATE_FILEPATH}    ${operator_sub_filepath}
     ${rc}    ${out}=    Run And Return Rc And Output    sed -i'' -e "s/<SUBSCRIPTION_NAME>/${subscription_name}/g" ${operator_sub_filepath}    # robocop: disable
+    ${rc}    ${out}=    Run And Return Rc And Output    sed -i'' -e "s/<INSTALL_PLAN_APPROVAL>/${approval}/g" ${operator_sub_filepath}    # robocop: disable
     ${rc}    ${out}=    Run And Return Rc And Output    sed -i'' -e "s/<OPERATOR_NAMESPACE>/${namespace}/g" ${operator_sub_filepath}    # robocop: disable
     ${rc}    ${out}=    Run And Return Rc And Output    sed -i'' -e "s/<UPDATE_CHANNEL>/${channel}/g" ${operator_sub_filepath}    # robocop: disable
     ${rc}    ${out}=    Run And Return Rc And Output    sed -i'' -e "s/<OPERATOR_NAME>/${operator_name}/g" ${operator_sub_filepath}    # robocop: disable
     ${rc}    ${out}=    Run And Return Rc And Output    sed -i'' -e "s/<CATALOG_SOURCE>/${catalog_source_name}/g" ${operator_sub_filepath}    # robocop: disable
     ${rc}    ${out}=    Run And Return Rc And Output    sed -i'' -e "s/<CS_NAMESPACE>/${cs_namespace}/g" ${operator_sub_filepath}    # robocop: disable
+    IF    "${starting_csv}" != "${NONE}"
+        ${rc}    ${out}=    Run And Return Rc And Output    sed -i'' -e "s/<STARTING_CSV>/${starting_csv}/g" ${operator_sub_filepath}    # robocop: disable
+    ELSE
+        ${rc}    ${out}=    Run And Return Rc And Output    sed -i'' -e "/<STARTING_CSV>/d" ${operator_sub_filepath}    # robocop: disable
+    END
     ${return_code}    ${output} =    Run And Return Rc And Output    oc apply -f ${operator_sub_filepath}
     Log To Console    ${output}
     # TODO: Remove this once the operator_name will be tempo-operator
@@ -58,9 +70,9 @@ Install ISV Operator From OperatorHub Via CLI    # robocop: disable
         ${operator_name}=    Set Variable    jobset-operator
     END
     Wait For Installplan And Approve It    ${namespace}    ${operator_name}    ${subscription_name}
+    ...    ${operator_version}
     Wait Until Keyword Succeeds    1 min    0 sec
     ...    Is Resource Present    Subscription    ${subscription_name}     ${namespace}    ${IS_PRESENT}
-    Wait For Installplan And Approve It    ${namespace}    ${operator_name}    ${subscription_name}
     # Approve any pending installplans for transitive OLM dependencies (e.g. ServiceMesh)
     Approve All Pending Installplans    openshift-operators
 

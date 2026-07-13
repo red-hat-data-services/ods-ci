@@ -31,6 +31,18 @@ derive_infra_namespace() {
 
 detect_infra_namespace() {
     local apps_ns="$1"
+
+    # MaaS provisioning may run before the RHOAI operator has deployed the
+    # maas-controller. Without waiting, detect would see no controller and
+    # always fall back to the apps namespace — then when the operator deploys
+    # a controller with INFRA_NAMESPACE=AUTO it looks in the infra namespace
+    # where the secret doesn't exist, and maas-api never starts.
+    echo "Waiting for maas-controller deployment in ${apps_ns}..."
+    for i in $(seq 1 30); do
+        oc get deployment maas-controller -n "${apps_ns}" &>/dev/null && break
+        sleep 10
+    done
+
     local infra_val
     infra_val=$(oc get deployment maas-controller -n "${apps_ns}" \
         -o jsonpath='{.spec.template.spec.containers[0].env[?(@.name=="INFRA_NAMESPACE")].value}' \

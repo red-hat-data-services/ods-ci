@@ -1045,9 +1045,9 @@ Install Connectivity Link Operator Via Cli
     ...                Installing in ${CONNECTIVITY_LINK_NS} namespace with operator group
     ...                ensures all resources are created in ${CONNECTIVITY_LINK_NS}.
     ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
-    IF    '${arch_type}' == 's390x'
-        Log    Skipping Red Hat Connectivity Link Operator installation for s390x architecture    console=yes
-        Log    Skipping Authorino Operator installation for s390x architecture    console=yes
+    IF    '${arch_type}' == 's390x' or '${arch_type}' == 'ppc64le'
+        Log    Skipping Red Hat Connectivity Link Operator installation for s390x/ppc64le architecture    console=yes
+        Log    Skipping Authorino Operator installation for s390x/ppc64le architecture    console=yes
         RETURN
     END
     ${is_installed} =   Check If Operator Is Installed Via CLI   ${CONNECTIVITY_LINK_OP_NAME}

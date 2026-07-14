@@ -22,6 +22,8 @@ ${RAY_ROCM_IMAGE_3.12}                   quay.io/modh/ray@sha256:900c35ec2fe4279
 ${RAY_ROCM_IMAGE_3.11}                   quay.io/modh/ray@sha256:28a8745be454b0e881ce6c200599ddfcb3366b707a5b53cfa73087d599555158
 # Corresponds to quay.io/rhoai/ray:2.35.0-py311-rocm61-torch24-fa26
 ${RAY_TORCH_ROCM_IMAGE_3.11}             quay.io/rhoai/ray@sha256:b0e129cd2f4cdea7ad7a7859031357ffd9915410551f94fbcb942af2198cdf78
+# Corresponds to quay.io/modh/ray:2.55.1-py312-cu129-th081
+${RAY_TRAINING_HUB_IMAGE}                quay.io/modh/ray@sha256:f63a015302758f805e5332605669b886e4d7ac60ec929413a2ffc19a904211c6
 # Corresponds to quay.io/modh/training:py311-cuda121-torch241
 ${CUDA_TRAINING_IMAGE_TORCH241}          quay.io/modh/training@sha256:f64f7bba3f1020d39491ac84d40d362a52e4822bdc11a33cfff021178b7c4097
 # Corresponds to quay.io/modh/training:py311-rocm62-torch241
@@ -32,6 +34,8 @@ ${CUDA_TRAINING_IMAGE_TORCH251}          quay.io/modh/training@sha256:1d0caea3e5
 ${ROCM_TRAINING_IMAGE_TORCH251}          quay.io/modh/training@sha256:6cdae840fa029da33cccab620367e82404d24ddf67762eb4537a9bffe1af306d
 # Corresponds to quay.io/repository/modh/odh-workbench-jupyter-datascience-cpu-py311-ubi9:rhoai-2.22
 ${NOTEBOOK_IMAGE_3.11}                   quay.io/modh/odh-workbench-jupyter-datascience-cpu-py311-ubi9@sha256:48c2be818e8d2a5005a69e2c76f9a2d40ddeb1d03376e04516ca6da13418c887
+# Corresponds to registry.redhat.io/rhoai/odh-workbench-jupyter-datascience-cpu-py312-rhel9:3.4
+${NOTEBOOK_IMAGE_3.12}                   registry.redhat.io/rhoai/odh-workbench-jupyter-datascience-cpu-py312-rhel9@sha256:d07dacbceeaa335854c3aed2d93e149c122a938abf59497c8235c751dae755cb
 ${NOTEBOOK_USER_NAME}                    ${TEST_USER_3.USERNAME}
 ${NOTEBOOK_USER_PASSWORD}                ${TEST_USER_3.PASSWORD}
 ${KFTO_BINARY_NAME}                      kfto
@@ -43,6 +47,7 @@ ${AWS_STORAGE_BUCKET}                    ${S3.BUCKET_5.NAME}
 ${AWS_ACCESS_KEY_ID}                     ${S3.AWS_ACCESS_KEY_ID}
 ${AWS_SECRET_ACCESS_KEY}                 ${S3.AWS_SECRET_ACCESS_KEY}
 ${AWS_STORAGE_BUCKET_MNIST_DIR}          mnist-datasets
+${AWS_STORAGE_BUCKET_RAY_TRAINING_HUB_DIR}    ray-training-hub
 ${KUBECONFIGPATH}                        %{HOME}/.kube/config
 
 
@@ -289,6 +294,40 @@ Run DistributedWorkloads ODH Test
     ...    env:AWS_STORAGE_BUCKET_MNIST_DIR=${AWS_STORAGE_BUCKET_MNIST_DIR}
     ...    env:PIP_INDEX_URL=${PIP_INDEX_URL}
     ...    env:PIP_TRUSTED_HOST=${PIP_TRUSTED_HOST}
+    Log To Console    ${result.stdout}
+    Check missing Go test    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    ${TEST_NAME} failed
+    END
+
+Run DistributedWorkloads Training Hub ODH Test
+    [Documentation]    Run DistributedWorkloads Training Hub ODH Test
+    [Arguments]    ${TEST_NAME}    ${DW_RAY_IMAGE}    ${NOTEBOOK_IMAGE}
+    Log To Console    "Running Training Hub test: ${TEST_NAME}"
+    ${result} =    Run Process    ./${ODH_BINARY_NAME} -test.run ${TEST_NAME}
+    ...    shell=true
+    ...    stderr=STDOUT
+    ...    env:TEST_TIER=Examples-CUDA
+    ...    env:TEST_TIMEOUT_SHORT=5m
+    ...    env:TEST_TIMEOUT_MEDIUM=15m
+    ...    env:TEST_TIMEOUT_LONG=30m
+    ...    env:TEST_TIMEOUT_GPU_PROVISIONING=40m
+    ...    env:TEST_OUTPUT_DIR=%{WORKSPACE}/distributed-workloads-odh-logs
+    ...    env:TEST_RAY_IMAGE=${DW_RAY_IMAGE}
+    ...    env:TEST_RAY_TRAINING_HUB_IMAGE=${DW_RAY_IMAGE}
+    ...    env:ODH_NAMESPACE=${APPLICATIONS_NAMESPACE}
+    ...    env:NOTEBOOK_USER_NAME=${NOTEBOOK_USER_NAME}
+    ...    env:NOTEBOOK_USER_TOKEN=${NOTEBOOK_USER_TOKEN}
+    ...    env:NOTEBOOK_IMAGE=${NOTEBOOK_IMAGE}
+    ...    env:AWS_DEFAULT_ENDPOINT=${AWS_DEFAULT_ENDPOINT}
+    ...    env:AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+    ...    env:AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    ...    env:AWS_STORAGE_BUCKET=${AWS_STORAGE_BUCKET}
+    ...    env:AWS_STORAGE_BUCKET_MNIST_DIR=${AWS_STORAGE_BUCKET_MNIST_DIR}
+    ...    env:AWS_STORAGE_BUCKET_RAY_TRAINING_HUB_DIR=${AWS_STORAGE_BUCKET_RAY_TRAINING_HUB_DIR}
+    ...    env:PIP_INDEX_URL=${PIP_INDEX_URL}
+    ...    env:PIP_TRUSTED_HOST=${PIP_TRUSTED_HOST}
+    ...    timeout=45 min
     Log To Console    ${result.stdout}
     Check missing Go test    ${result.stdout}
     IF    ${result.rc} != 0

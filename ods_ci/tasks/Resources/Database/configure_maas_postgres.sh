@@ -32,13 +32,15 @@ derive_infra_namespace() {
 detect_infra_namespace() {
     local apps_ns="$1"
 
-    # MaaS provisioning may run before the RHOAI operator has deployed the
-    # maas-controller. Without waiting, detect would see no controller and
-    # always fall back to the apps namespace — then when the operator deploys
-    # a controller with INFRA_NAMESPACE=AUTO it looks in the infra namespace
-    # where the secret doesn't exist, and maas-api never starts.
+    # MaaS provisioning may run before the RHOAI operator has fully deployed
+    # the maas-controller (CRD registration, reconciliation, and pod scheduling
+    # can take 10+ minutes after the CSV is ready). Without waiting, detect
+    # would see no controller and fall back to the apps namespace — then when
+    # the operator deploys a controller with INFRA_NAMESPACE=AUTO it looks in
+    # the infra namespace where the secret doesn't exist, and maas-api never
+    # starts. Wait up to 15 minutes to cover slow clusters.
     echo "Waiting for maas-controller deployment in ${apps_ns}..." >&2
-    for i in $(seq 1 30); do
+    for i in $(seq 1 90); do
         oc get deployment maas-controller -n "${apps_ns}" &>/dev/null && break
         sleep 10
     done

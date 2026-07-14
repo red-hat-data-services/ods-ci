@@ -29,7 +29,37 @@ derive_infra_namespace() {
     esac
 }
 
-INFRA_NS=$(derive_infra_namespace "${APPS_NS}")
+detect_infra_namespace() {
+    local apps_ns="$1"
+
+    # MaaS provisioning may run before the RHOAI operator has fully deployed
+    # the maas-controller (CRD registration, reconciliation, and pod scheduling
+    # can take 10+ minutes after the CSV is ready). Without waiting, detect
+    # would see no controller and fall back to the apps namespace — then when
+    # the operator deploys a controller with INFRA_NAMESPACE=AUTO it looks in
+    # the infra namespace where the secret doesn't exist, and maas-api never
+    # starts. Wait up to 15 minutes to cover slow clusters.
+    echo "Waiting for maas-controller deployment in ${apps_ns}..." >&2
+    for i in $(seq 1 90); do
+        oc get deployment maas-controller -n "${apps_ns}" &>/dev/null && break
+        sleep 10
+    done
+
+    local infra_val
+    infra_val=$(oc get deployment maas-controller -n "${apps_ns}" \
+        -o jsonpath='{.spec.template.spec.containers[0].env[?(@.name=="INFRA_NAMESPACE")].value}' \
+        2>/dev/null)
+
+    if [[ "${infra_val}" == "AUTO" ]]; then
+        derive_infra_namespace "${apps_ns}"
+    elif [[ -n "${infra_val}" ]]; then
+        echo "${infra_val}"
+    else
+        echo "${apps_ns}"
+    fi
+}
+
+INFRA_NS=$(detect_infra_namespace "${APPS_NS}")
 
 # Ensure namespaces exist
 oc create namespace "${APPS_NS}" --dry-run=client -o yaml | oc apply -f -

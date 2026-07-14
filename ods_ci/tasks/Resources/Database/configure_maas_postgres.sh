@@ -17,16 +17,33 @@ done
 APPS_NS="${APPS_NS:-redhat-ods-applications}"
 POSTGRES_IMAGE="registry.redhat.io/rhel9/postgresql-15@sha256:90ec347a35ab8a5d530c8d09f5347b13cc71df04f3b994bfa8b1a409b1171d59"
 
-# Ensure namespace exists
+# Derive MaaS infrastructure namespace (matches MaaS controller logic from PR #1051).
+# When INFRA_NAMESPACE=AUTO (default since 3.5), the controller expects maas-db-config
+# in a separate infra namespace. Postgres stays in APPS_NS; maas-db-config is copied
+# to the infra namespace with a cross-namespace connection URL.
+derive_infra_namespace() {
+    case "$1" in
+        redhat-ods-applications) echo "redhat-ai-gateway-infra" ;;
+        opendatahub)             echo "odh-ai-gateway-infra" ;;
+        *)                       echo "$1" ;;
+    esac
+}
+
+INFRA_NS=$(derive_infra_namespace "${APPS_NS}")
+
+# Ensure namespaces exist
 oc create namespace "${APPS_NS}" --dry-run=client -o yaml | oc apply -f -
+if [[ "${INFRA_NS}" != "${APPS_NS}" ]]; then
+    oc create namespace "${INFRA_NS}" --dry-run=client -o yaml | oc apply -f -
+fi
 
 # Skip if all resources already exist and deployment is ready
-if oc get secret maas-db-config -n "${APPS_NS}" &>/dev/null \
+if oc get secret maas-db-config -n "${INFRA_NS}" &>/dev/null \
    && oc get secret postgres-creds -n "${APPS_NS}" &>/dev/null \
    && oc get service postgres -n "${APPS_NS}" &>/dev/null \
    && oc get deployment postgres -n "${APPS_NS}" &>/dev/null; then
     oc wait deployment/postgres -n "${APPS_NS}" --for=condition=Available --timeout=5m
-    echo "MaaS PostgreSQL prerequisites already exist in ${APPS_NS}, skipping."
+    echo "MaaS PostgreSQL prerequisites already exist (postgres in ${APPS_NS}, maas-db-config in ${INFRA_NS}), skipping."
     exit 0
 fi
 
@@ -64,13 +81,19 @@ stringData:
 EOF
 
 # 2. maas-db-config secret (DB_CONNECTION_URL key)
-DB_URL="postgresql://${PG_USER}:${PG_PASS}@postgres:5432/${PG_DB}?sslmode=disable"
+# Use cross-namespace DNS when postgres and maas-db-config are in different namespaces
+if [[ "${INFRA_NS}" != "${APPS_NS}" ]]; then
+    PG_HOST="postgres.${APPS_NS}.svc"
+else
+    PG_HOST="postgres"
+fi
+DB_URL="postgresql://${PG_USER}:${PG_PASS}@${PG_HOST}:5432/${PG_DB}?sslmode=disable"
 oc apply -f - <<EOF
 apiVersion: v1
 kind: Secret
 metadata:
   name: maas-db-config
-  namespace: ${APPS_NS}
+  namespace: ${INFRA_NS}
   labels:
     app: maas-api
     purpose: poc
@@ -167,4 +190,8 @@ if ! oc wait deployment/postgres -n "${APPS_NS}" --for=condition=Available --tim
     exit 1
 fi
 
-echo "MaaS PostgreSQL prerequisites provisioned in ${APPS_NS}"
+if [[ "${INFRA_NS}" != "${APPS_NS}" ]]; then
+    echo "MaaS PostgreSQL prerequisites provisioned (postgres in ${APPS_NS}, maas-db-config in ${INFRA_NS})"
+else
+    echo "MaaS PostgreSQL prerequisites provisioned in ${APPS_NS}"
+fi

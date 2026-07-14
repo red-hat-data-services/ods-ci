@@ -9,6 +9,7 @@ spec:
     monitoring:
         managementState: Managed
         namespace: <monitoring_namespace>
+        metrics: {}
     trustedCABundle:
         customCABundle: ''
         managementState: Managed

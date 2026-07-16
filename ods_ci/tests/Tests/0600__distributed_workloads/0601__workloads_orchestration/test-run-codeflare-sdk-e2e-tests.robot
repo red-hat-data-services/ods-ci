@@ -31,7 +31,7 @@ Run TestRayLocalInteractiveOauth test with Python 3.11
 Run TestHeterogenousClustersOauth
     [Documentation]    Run Python E2E test: TestHeterogenousClustersOauth (workaround for 2.15)
     [Tags]
-    ...     Tier1
+    ...     deprecatedTest
     ...     DistributedWorkloads
     ...     WorkloadsOrchestration
     ...     HeterogeneousCluster
@@ -41,6 +41,7 @@ Run TestHeterogenousClustersOauth
 *** Keywords ***
 Prepare Codeflare-sdk E2E Test Suite
     [Documentation]    Prepare codeflare-sdk E2E Test Suite
+    Setup Kueue Batch User RoleBinding
     Prepare Codeflare-SDK Test Setup
     RHOSi Setup
 

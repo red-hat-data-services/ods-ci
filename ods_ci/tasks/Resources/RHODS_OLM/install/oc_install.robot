@@ -1584,6 +1584,11 @@ Patch DSC With Model Cache Config    #robocop:disable=TooManyKeywords
 
 Configure MaaS Gateway API
     [Documentation]    Configure Gateway API for MaaS traffic routing
+    ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
+    IF    '${arch_type}' == 'ppc64le'
+        Log    Skipping MaaS Gateway API installation for ppc64le architecture    console=yes
+        RETURN
+    END
     Log To Console    Configuring Gateway API for MaaS
     ${rc}    ${output} =    Run And Return Rc And Output
     ...    bash tasks/Resources/Gateway/configure_maas_gateway.sh
@@ -1592,6 +1597,11 @@ Configure MaaS Gateway API
 
 Configure MaaS Database
     [Documentation]    Provision PostgreSQL and maas-db-config secret required by maas-api
+    ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
+    IF    '${arch_type}' == 'ppc64le'
+        Log    Skipping MaaS Database installation for ppc64le architecture    console=yes
+        RETURN
+    END
     Log To Console    Provisioning MaaS PostgreSQL prerequisites
     ${rc}    ${output} =    Run And Return Rc And Output
     ...    bash tasks/Resources/Database/configure_maas_postgres.sh --namespace ${APPLICATIONS_NAMESPACE}

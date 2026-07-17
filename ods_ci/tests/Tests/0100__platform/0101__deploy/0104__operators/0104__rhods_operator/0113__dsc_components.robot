@@ -609,20 +609,24 @@ Validate Modelsasservice Managed State
     ...    Integration
     ...    Smoke
 
+    ${maas_infra_ns} =    Detect MaaS Infra Namespace
     Set DSC Nested Component Managed State And Wait For Completion
     ...    kserve
     ...    modelsAsService
     ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
     ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_LABEL_SELECTOR}
+    ...    namespace=${maas_infra_ns}
     Check That Image Pull Path Is Correct
     ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
     ...    ${IMAGE_PULL_PATH}
+    ...    namespace=${maas_infra_ns}
 
     [Teardown]      Restore Nested Component And Parent State
     ...    kserve    modelsAsService
     ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${MODELSASSERVICE_CONTROLLER_MANAGER_LABEL_SELECTOR}
     ...    ${KSERVE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${KSERVE_CONTROLLER_MANAGER_LABEL_SELECTOR}
     ...    ${SAVED_MANAGEMENT_STATES.MODELSASSERVICE}    ${SAVED_MANAGEMENT_STATES.KSERVE}
+    ...    nested_namespace=${maas_infra_ns}
 
 Validate Modelsasservice Removed State
     [Documentation]    Validate that ModelsAsService management state Removed does remove relevant resources.
@@ -632,17 +636,20 @@ Validate Modelsasservice Removed State
     ...    modelsasservice-removed
     ...    Integration
 
+    ${maas_infra_ns} =    Detect MaaS Infra Namespace
     Set DSC Nested Component Removed State And Wait For Completion
     ...    kserve
     ...    modelsAsService
     ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
     ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_LABEL_SELECTOR}
+    ...    namespace=${maas_infra_ns}
 
     [Teardown]      Restore Nested Component And Parent State
     ...    kserve    modelsAsService
     ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${MODELSASSERVICE_CONTROLLER_MANAGER_LABEL_SELECTOR}
     ...    ${KSERVE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${KSERVE_CONTROLLER_MANAGER_LABEL_SELECTOR}
     ...    ${SAVED_MANAGEMENT_STATES.MODELSASSERVICE}    ${SAVED_MANAGEMENT_STATES.KSERVE}
+    ...    nested_namespace=${maas_infra_ns}
 
 Validate Support For Configuration Of Controller Resources
     [Documentation]    Validate support for configuration of controller resources in component deployments
@@ -775,6 +782,7 @@ Restore Nested Component And Parent State
     ...                Restores nested component first, then parent component to handle dependencies correctly.
     [Arguments]    ${parent_component}    ${nested_component}    ${nested_deployment_name}    ${nested_label_selector}
     ...            ${parent_deployment_name}    ${parent_label_selector}    ${nested_saved_state}    ${parent_saved_state}
+    ...            ${nested_namespace}=${APPLICATIONS_NAMESPACE}
 
     # First restore the nested component
     Restore DSC Nested Component State
@@ -783,6 +791,7 @@ Restore Nested Component And Parent State
     ...    ${nested_deployment_name}
     ...    ${nested_label_selector}
     ...    ${nested_saved_state}
+    ...    ${nested_namespace}
 
     # Then restore the parent component to its original state
     # This ensures parent is in the correct state after the test

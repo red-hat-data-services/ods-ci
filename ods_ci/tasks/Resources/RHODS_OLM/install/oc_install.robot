@@ -461,7 +461,8 @@ Verify RHODS Installation
 
   ${modelsasservice} =    Is Nested Component Enabled    kserve    modelsAsService    ${DSC_NAME}
   IF    "${modelsasservice}" == "true"
-    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ${maas_infra_ns} =    Detect MaaS Infra Namespace
+    Wait For Deployment Replica To Be Ready    namespace=${maas_infra_ns}
     ...    label_selector=app.kubernetes.io/part-of=modelsasservice
   END
 
@@ -482,6 +483,15 @@ Verify RHODS Installation
       Log To Console    Waiting for pod status in ${APPLICATIONS_NAMESPACE}
       Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=600
       Log  Verified Applications NS: ${APPLICATIONS_NAMESPACE}  console=yes
+  END
+
+  IF    "${modelsasservice}" == "true"
+      ${maas_infra_ns} =    Detect MaaS Infra Namespace
+      IF    "${maas_infra_ns}" != "${APPLICATIONS_NAMESPACE}"
+          Log To Console    Waiting for pod status in MaaS infra namespace ${maas_infra_ns}
+          Wait For Pods Status  namespace=${maas_infra_ns}  timeout=600
+          Log  Verified MaaS Infra NS: ${maas_infra_ns}  console=yes
+      END
   END
 
   # Monitoring stack only deployed for managed, as modelserving monitoring stack is no longer deployed
@@ -1597,3 +1607,21 @@ Configure MaaS Database
     ...    bash tasks/Resources/Database/configure_maas_postgres.sh --namespace ${APPLICATIONS_NAMESPACE}
     Log To Console    ${output}
     Should Be Equal As Integers    ${rc}    0    msg=Error provisioning MaaS PostgreSQL prerequisites
+
+Detect MaaS Infra Namespace
+    [Documentation]    Detect the MaaS infrastructure namespace from the maas-controller deployment.
+    ...    Reads the INFRA_NAMESPACE env var from the controller; when AUTO or absent,
+    ...    derives the namespace from APPLICATIONS_NAMESPACE using the same mapping as
+    ...    configure_maas_postgres.sh. Returns APPLICATIONS_NAMESPACE if no mapping matches.
+    ${rc}    ${infra_val} =    Run And Return Rc And Output
+    ...    oc get deployment maas-controller -n ${APPLICATIONS_NAMESPACE} -o jsonpath='{.spec.template.spec.containers[0].env[?(@.name=="INFRA_NAMESPACE")].value}' 2>/dev/null
+    IF    ${rc} == 0 and "${infra_val}" != "" and "${infra_val}" != "AUTO"
+        RETURN    ${infra_val}
+    END
+    # Derive from APPLICATIONS_NAMESPACE (matches configure_maas_postgres.sh derive_infra_namespace)
+    IF    "${APPLICATIONS_NAMESPACE}" == "redhat-ods-applications"
+        RETURN    redhat-ai-gateway-infra
+    ELSE IF    "${APPLICATIONS_NAMESPACE}" == "opendatahub"
+        RETURN    odh-ai-gateway-infra
+    END
+    RETURN    ${APPLICATIONS_NAMESPACE}

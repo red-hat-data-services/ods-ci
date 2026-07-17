@@ -129,7 +129,7 @@ Set DSC Nested Component Managed State And Wait For Completion
     END
 
     IF     ${wait_for_completion}
-            Wait For Resources To Be Available    ${deployment_name}    ${label_selector}
+            Wait For Resources To Be Available    ${deployment_name}    ${label_selector}    ${namespace}
     END
 
 Restore DSC Nested Component State
@@ -142,7 +142,7 @@ Restore DSC Nested Component State
     IF    "${current_state}" != "${saved_state}"
         IF    "${saved_state}" == "Managed"
             # This will ensure parent is Managed if needed
-            Set DSC Nested Component Managed State And Wait For Completion    ${parent_component}    ${nested_component}    ${deployment_name}    ${label_selector}
+            Set DSC Nested Component Managed State And Wait For Completion    ${parent_component}    ${nested_component}    ${deployment_name}    ${label_selector}    ${namespace}
         ELSE IF    "${saved_state}" == "Removed"
             Set DSC Nested Component Removed State And Wait For Completion    ${parent_component}    ${nested_component}    ${deployment_name}    ${label_selector}      ${namespace}
         ELSE IF    "${saved_state}" == "${EMPTY}" or "${saved_state}" == ""

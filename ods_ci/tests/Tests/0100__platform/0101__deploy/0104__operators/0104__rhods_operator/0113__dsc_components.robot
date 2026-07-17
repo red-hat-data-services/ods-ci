@@ -609,7 +609,7 @@ Validate Modelsasservice Managed State
     ...    Integration
     ...    Smoke
 
-    ${maas_infra_ns} =    Detect MaaS Infra Namespace
+    ${maas_infra_ns}=    Detect MaaS Infra Namespace
     Set DSC Nested Component Managed State And Wait For Completion
     ...    kserve
     ...    modelsAsService
@@ -636,7 +636,7 @@ Validate Modelsasservice Removed State
     ...    modelsasservice-removed
     ...    Integration
 
-    ${maas_infra_ns} =    Detect MaaS Infra Namespace
+    ${maas_infra_ns}=    Detect MaaS Infra Namespace
     Set DSC Nested Component Removed State And Wait For Completion
     ...    kserve
     ...    modelsAsService

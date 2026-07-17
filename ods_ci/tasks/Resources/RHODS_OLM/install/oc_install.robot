@@ -1614,7 +1614,9 @@ Detect MaaS Infra Namespace
     ...    derives the namespace from APPLICATIONS_NAMESPACE using the same mapping as
     ...    configure_maas_postgres.sh. Returns APPLICATIONS_NAMESPACE if no mapping matches.
     ${rc}    ${infra_val} =    Run And Return Rc And Output
-    ...    oc get deployment maas-controller -n ${APPLICATIONS_NAMESPACE} -o jsonpath='{.spec.template.spec.containers[0].env[?(@.name=="INFRA_NAMESPACE")].value}' 2>/dev/null
+    ...    oc get deployment maas-controller -n ${APPLICATIONS_NAMESPACE}
+    ...    -o jsonpath='{.spec.template.spec.containers[0].env[?(@.name=="INFRA_NAMESPACE")].value}'
+    ...    2>/dev/null
     IF    ${rc} == 0 and "${infra_val}" != "" and "${infra_val}" != "AUTO"
         RETURN    ${infra_val}
     END

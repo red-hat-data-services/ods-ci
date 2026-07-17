@@ -31,7 +31,7 @@ derive_infra_namespace() {
 
 detect_infra_namespace() {
     local apps_ns="$1"
-
+    
     # MaaS provisioning may run before the RHOAI operator has fully deployed
     # the maas-controller (CRD registration, reconciliation, and pod scheduling
     # can take 10+ minutes after the CSV is ready). Without waiting, detect
@@ -96,6 +96,24 @@ refresh_maas_db_config_secrets() {
     fi
 }
 
+# Restart maas-api so it reloads DB_CONNECTION_URL after secret refresh.
+# No-op if the deployment is not present yet (e.g. first-time install before DSC).
+restart_maas_api_in_ns() {
+    local ns="$1"
+    if oc get deployment maas-api -n "${ns}" &>/dev/null; then
+        echo "Restarting maas-api in ${ns} to pick up refreshed maas-db-config"
+        oc rollout restart deployment/maas-api -n "${ns}"
+        oc rollout status deployment/maas-api -n "${ns}" --timeout=5m
+    fi
+}
+
+restart_maas_api_if_present() {
+    restart_maas_api_in_ns "${INFRA_NS}"
+    if [[ "${INFRA_NS}" != "${APPS_NS}" ]]; then
+        restart_maas_api_in_ns "${APPS_NS}"
+    fi
+}
+
 load_or_generate_postgres_creds() {
     if oc get secret postgres-creds -n "${APPS_NS}" &>/dev/null; then
         PG_USER="$(oc get secret postgres-creds -n "${APPS_NS}" -o jsonpath='{.data.POSTGRES_USER}' | base64 -d)"
@@ -129,6 +147,7 @@ if oc get secret postgres-creds -n "${APPS_NS}" &>/dev/null \
     oc wait deployment/postgres -n "${APPS_NS}" --for=condition=Available --timeout=5m
     load_or_generate_postgres_creds
     refresh_maas_db_config_secrets
+    restart_maas_api_if_present
     echo "MaaS PostgreSQL already provisioned in ${APPS_NS}; refreshed maas-db-config in ${INFRA_NS}$([[ "${INFRA_NS}" != "${APPS_NS}" ]] && echo " and ${APPS_NS}")."
     exit 0
 fi
@@ -243,6 +262,8 @@ if ! oc wait deployment/postgres -n "${APPS_NS}" --for=condition=Available --tim
     echo "PostgreSQL deployment is not ready in ${APPS_NS}" >&2
     exit 1
 fi
+
+restart_maas_api_if_present
 
 if [[ "${INFRA_NS}" != "${APPS_NS}" ]]; then
     echo "MaaS PostgreSQL prerequisites provisioned (postgres in ${APPS_NS}, maas-db-config in ${INFRA_NS} and ${APPS_NS})"

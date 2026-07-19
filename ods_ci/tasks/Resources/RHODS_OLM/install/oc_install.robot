@@ -2,6 +2,7 @@
 Library    String
 Library    OpenShiftLibrary
 Library    OperatingSystem
+Library    Collections
 Resource   ../../../../tests/Resources/Page/Operators/ISVs.resource
 Resource   ../../../../tests/Resources/Page/OCPDashboard/UserManagement/Groups.robot
 Resource   ../../../../tests/Resources/OCP.resource
@@ -13,6 +14,7 @@ ${DSCI_NAME} =    default-dsci
 @{COMPONENT_LIST} =    dashboard
 ...    aipipelines
 ...    kserve
+...    aigateway
 ...    kueue
 ...    ray
 ...    trainingoperator
@@ -26,8 +28,9 @@ ${DSCI_NAME} =    default-dsci
 ...    mlflowoperator
 ...    modelsasservice
 ...    sparkoperator
-&{NESTED_COMPONENT_TO_PARENT_COMPONENT} =    modelsasservice=kserve
-&{COMPONENT_TO_COMPONENT_NAME_IN_DSC} =   modelsasservice=modelsAsService
+# MaaS moved from kserve.modelsAsService to aigateway.modelsAsAService (ODH operator #3723)
+&{NESTED_COMPONENT_TO_PARENT_COMPONENT} =    modelsasservice=aigateway
+&{COMPONENT_TO_COMPONENT_NAME_IN_DSC} =   modelsasservice=modelsAsAService
 ${LWS_OP_NAME}=    leader-worker-set
 ${LWS_OP_NS}=    openshift-lws-operator
 ${LWS_SUB_NAME}=    leader-worker-set
@@ -274,9 +277,9 @@ Get Helm Path For Component
     [Arguments]    ${component}
 
     # Handling of special component cases:
-    # 1. modelsasservice is nested under kserve
+    # 1. modelsasservice is nested under aigateway (was kserve prior to ODH 3.5 / operator #3723)
     IF    "${component}" == "modelsasservice"
-        RETURN    components.kserve.dsc.modelsAsService.managementState
+        RETURN    components.aigateway.dsc.modelsAsAService.managementState
     END
 
     # Handling of standard component cases:
@@ -459,7 +462,7 @@ Verify RHODS Installation
     ...    label_selector=app.kubernetes.io/name=spark-operator
   END
 
-  ${modelsasservice} =    Is Nested Component Enabled    kserve    modelsAsService    ${DSC_NAME}
+  ${modelsasservice} =    Is Nested Component Enabled    aigateway    modelsAsAService    ${DSC_NAME}
   IF    "${modelsasservice}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app.kubernetes.io/part-of=modelsasservice
@@ -840,6 +843,17 @@ Create DataScienceCluster CustomResource Using Test Variables
     ${file_path} =    Set Variable    tasks/Resources/Files/
     Copy File    source=${file_path}${dsc_template}    destination=${file_path}dsc_apply.yml
     Run    sed -i'' -e 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
+    # modelsAsAService requires parent aigateway Managed (operator #3723).
+    # If callers only enable modelsasservice, promote aigateway so DSC apply + verification stay consistent.
+    ${maas_configured}=    Run Keyword And Return Status
+    ...    Dictionary Should Contain Key    ${COMPONENTS}    modelsasservice
+    ${aigateway_configured}=    Run Keyword And Return Status
+    ...    Dictionary Should Contain Key    ${COMPONENTS}    aigateway
+    IF    ${maas_configured} and not ${aigateway_configured} and '${COMPONENTS.modelsasservice}' == 'Managed'
+        Set To Dictionary    ${COMPONENTS}    aigateway=Managed
+        Set Global Variable    ${COMPONENTS}
+        Log To Console    modelsasservice=Managed implies aigateway=Managed; updated COMPONENTS
+    END
     FOR    ${cmp}    IN    @{COMPONENT_LIST}
             IF    $cmp not in $COMPONENTS
                 Run    sed -i'' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
@@ -1426,7 +1440,7 @@ Set Component State
     Log To Console    Component ${component} state was set to ${state}
 
 Set Nested Component State
-    [Documentation]    Set nested component state in Data Science Cluster (e.g., kserve.modelsAsService)
+    [Documentation]    Set nested component state in Data Science Cluster (e.g., aigateway.modelsAsAService)
     [Arguments]    ${parent_component}    ${nested_component}    ${state}
     ${result} =    Run Process    oc get datascienceclusters.datasciencecluster.opendatahub.io -o name
     ...    shell=true    stderr=STDOUT
@@ -1453,7 +1467,7 @@ Get DSC Component State
     RETURN    ${state}
 
 Get DSC Nested Component State
-    [Documentation]    Get nested component management state (e.g., kserve.modelsAsService)
+    [Documentation]    Get nested component management state (e.g., aigateway.modelsAsAService)
     [Arguments]    ${dsc}    ${parent_component}    ${nested_component}    ${namespace}
 
     ${rc}   ${state}=    Run And Return Rc And Output

@@ -12,7 +12,9 @@ spec:
       managementState: <aipipelines_value>
     kserve:
       managementState: <kserve_value>
-      modelsAsService:
+    aigateway:
+      managementState: <aigateway_value>
+      modelsAsAService:
         managementState: <modelsasservice_value>
     kueue:
       managementState: <kueue_value>

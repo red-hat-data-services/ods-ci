@@ -41,6 +41,8 @@ ${MLFLOWOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}         app.kubernetes.io/na
 ${MLFLOWOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}        mlflow-operator-controller-manager
 ${MODELSASSERVICE_CONTROLLER_MANAGER_LABEL_SELECTOR}        app.kubernetes.io/part-of=modelsasservice
 ${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}       maas-api
+${AIGATEWAY_CONTROLLER_MANAGER_LABEL_SELECTOR}              app.kubernetes.io/name=ai-gateway-operator
+${AIGATEWAY_CONTROLLER_MANAGER_DEPLOYMENT_NAME}             ai-gateway-operator
 ${SPARKOPERATOR_LABEL_SELECTOR}                             app.kubernetes.io/name=spark-operator
 ${SPARKOPERATOR_DEPLOYMENT_NAME}                            spark-operator-controller
 ${NOTEBOOK_CONTROLLER_DEPLOYMENT_LABEL_SELECTOR}            component.opendatahub.io/name=kf-notebook-controller
@@ -56,6 +58,7 @@ ${IS_NOT_PRESENT}                                           1
 ...                                                         AIPIPELINES=${EMPTY}
 ...                                                         MODELREGISTRY=${EMPTY}
 ...                                                         KSERVE=${EMPTY}
+...                                                         AIGATEWAY=${EMPTY}
 ...                                                         TRUSTYAI=${EMPTY}
 ...                                                         WORKBENCHES=${EMPTY}
 ...                                                         FEASTOPERATOR=${EMPTY}
@@ -602,7 +605,7 @@ Validate Spark Removed State
 
 Validate Modelsasservice Managed State
     [Documentation]    Validate that the DSC Modelsasservice component Managed state creates the expected resources,
-    ...    check that ModelsAsService deployment is created and pod is in Ready state
+    ...    check that ModelsAsAService deployment is created and pod is in Ready state
     [Tags]
     ...    Operator
     ...    modelsasservice-managed
@@ -610,8 +613,8 @@ Validate Modelsasservice Managed State
     ...    Smoke
 
     Set DSC Nested Component Managed State And Wait For Completion
-    ...    kserve
-    ...    modelsAsService
+    ...    aigateway
+    ...    modelsAsAService
     ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
     ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_LABEL_SELECTOR}
     Check That Image Pull Path Is Correct
@@ -619,13 +622,13 @@ Validate Modelsasservice Managed State
     ...    ${IMAGE_PULL_PATH}
 
     [Teardown]      Restore Nested Component And Parent State
-    ...    kserve    modelsAsService
+    ...    aigateway    modelsAsAService
     ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${MODELSASSERVICE_CONTROLLER_MANAGER_LABEL_SELECTOR}
-    ...    ${KSERVE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${KSERVE_CONTROLLER_MANAGER_LABEL_SELECTOR}
-    ...    ${SAVED_MANAGEMENT_STATES.MODELSASSERVICE}    ${SAVED_MANAGEMENT_STATES.KSERVE}
+    ...    ${AIGATEWAY_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${AIGATEWAY_CONTROLLER_MANAGER_LABEL_SELECTOR}
+    ...    ${SAVED_MANAGEMENT_STATES.MODELSASSERVICE}    ${SAVED_MANAGEMENT_STATES.AIGATEWAY}
 
 Validate Modelsasservice Removed State
-    [Documentation]    Validate that ModelsAsService management state Removed does remove relevant resources.
+    [Documentation]    Validate that ModelsAsAService management state Removed does remove relevant resources.
     [Tags]
     ...    Operator
     ...    Tier1
@@ -633,16 +636,16 @@ Validate Modelsasservice Removed State
     ...    Integration
 
     Set DSC Nested Component Removed State And Wait For Completion
-    ...    kserve
-    ...    modelsAsService
+    ...    aigateway
+    ...    modelsAsAService
     ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
     ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_LABEL_SELECTOR}
 
     [Teardown]      Restore Nested Component And Parent State
-    ...    kserve    modelsAsService
+    ...    aigateway    modelsAsAService
     ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${MODELSASSERVICE_CONTROLLER_MANAGER_LABEL_SELECTOR}
-    ...    ${KSERVE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${KSERVE_CONTROLLER_MANAGER_LABEL_SELECTOR}
-    ...    ${SAVED_MANAGEMENT_STATES.MODELSASSERVICE}    ${SAVED_MANAGEMENT_STATES.KSERVE}
+    ...    ${AIGATEWAY_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${AIGATEWAY_CONTROLLER_MANAGER_LABEL_SELECTOR}
+    ...    ${SAVED_MANAGEMENT_STATES.MODELSASSERVICE}    ${SAVED_MANAGEMENT_STATES.AIGATEWAY}
 
 Validate Support For Configuration Of Controller Resources
     [Documentation]    Validate support for configuration of controller resources in component deployments
@@ -712,6 +715,7 @@ Suite Setup
     ${SAVED_MANAGEMENT_STATES.AIPIPELINES}=     Get DSC Component State    ${DSC_NAME}    aipipelines    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.MODELREGISTRY}=     Get DSC Component State    ${DSC_NAME}    modelregistry    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.KSERVE}=     Get DSC Component State    ${DSC_NAME}    kserve    ${OPERATOR_NS}
+    ${SAVED_MANAGEMENT_STATES.AIGATEWAY}=    Get DSC Component State    ${DSC_NAME}    aigateway    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.TRUSTYAI}=     Get DSC Component State    ${DSC_NAME}    trustyai    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.WORKBENCHES}=    Get DSC Component State    ${DSC_NAME}    workbenches    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.FEASTOPERATOR}=    Get DSC Component State    ${DSC_NAME}    feastoperator    ${OPERATOR_NS}
@@ -719,7 +723,7 @@ Suite Setup
     ${SAVED_MANAGEMENT_STATES.MLFLOWOPERATOR}=    Get DSC Component State    ${DSC_NAME}    mlflowoperator    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.SPARKOPERATOR}=    Get DSC Component State    ${DSC_NAME}    sparkoperator
     ...    ${OPERATOR_NS}
-    ${SAVED_MANAGEMENT_STATES.MODELSASSERVICE}=    Get DSC Nested Component State    ${DSC_NAME}    kserve    modelsAsService    ${OPERATOR_NS}
+    ${SAVED_MANAGEMENT_STATES.MODELSASSERVICE}=    Get DSC Nested Component State    ${DSC_NAME}    aigateway    modelsAsAService    ${OPERATOR_NS}
     Set Suite Variable    ${SAVED_MANAGEMENT_STATES}
     Append To List  ${CONTROLLERS_LIST}    ${DASHBOARD_DEPLOYMENT_NAME}
 

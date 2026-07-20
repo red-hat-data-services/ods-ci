@@ -45,8 +45,6 @@ ${MODELSASSERVICE_CONTROLLER_MANAGER_LABEL_SELECTOR}        app.kubernetes.io/pa
 ${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}       maas-api
 ${SPARKOPERATOR_LABEL_SELECTOR}                             app.kubernetes.io/name=spark-operator
 ${SPARKOPERATOR_DEPLOYMENT_NAME}                            spark-operator-controller
-${AIGATEWAY_CONTROLLER_MANAGER_LABEL_SELECTOR}              app.kubernetes.io/name=ai-gateway-operator
-${AIGATEWAY_CONTROLLER_MANAGER_DEPLOYMENT_NAME}             ai-gateway-operator
 ${BATCHGATEWAY_CONTROLLER_MANAGER_LABEL_SELECTOR}           app.kubernetes.io/name=llm-d-batch-gateway-operator
 ${BATCHGATEWAY_CONTROLLER_MANAGER_DEPLOYMENT_NAME}          llm-d-batch-gateway-operator
 ${NOTEBOOK_CONTROLLER_DEPLOYMENT_LABEL_SELECTOR}            component.opendatahub.io/name=kf-notebook-controller
@@ -70,7 +68,6 @@ ${IS_NOT_PRESENT}                                           1
 ...                                                         AIGATEWAY=${EMPTY}
 ...                                                         MODELSASSERVICE=${EMPTY}
 ...                                                         SPARKOPERATOR=${EMPTY}
-...                                                         AIGATEWAY=${EMPTY}
 ...                                                         BATCHGATEWAY=${EMPTY}
 
 @{CONTROLLERS_LIST}                                     # dashboard added in Suite Setup, since it's different in RHOAI vs ODH

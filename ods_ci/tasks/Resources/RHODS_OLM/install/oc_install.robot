@@ -462,10 +462,18 @@ Verify RHODS Installation
     ...    label_selector=app.kubernetes.io/name=spark-operator
   END
 
+  # AIGateway parent must be ready before MaaS (AGO deploys maas-controller).
+  ${aigateway} =    Is Component Enabled    aigateway    ${DSC_NAME}
+  IF    "${aigateway}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/name=ai-gateway-operator
+  END
+
   ${modelsasservice} =    Is Nested Component Enabled    aigateway    modelsAsAService    ${DSC_NAME}
   IF    "${modelsasservice}" == "true"
+    # AGO kustomize labels: app.kubernetes.io/part-of=models-as-a-service (not modelsasservice)
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/part-of=modelsasservice
+    ...    label_selector=app.kubernetes.io/part-of=models-as-a-service
   END
 
   ${dashboard} =    Is Component Enabled    dashboard    ${DSC_NAME}

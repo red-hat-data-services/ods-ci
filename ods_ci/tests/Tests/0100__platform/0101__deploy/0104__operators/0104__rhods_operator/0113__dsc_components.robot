@@ -39,8 +39,9 @@ ${OGX_CONTROLLER_MANAGER_LABEL_SELECTOR}                    app.kubernetes.io/pa
 ${OGX_CONTROLLER_MANAGER_DEPLOYMENT_NAME}                   ogx-k8s-operator-controller-manager
 ${MLFLOWOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}         app.kubernetes.io/name=mlflow-operator
 ${MLFLOWOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}        mlflow-operator-controller-manager
-${MODELSASSERVICE_CONTROLLER_MANAGER_LABEL_SELECTOR}        app.kubernetes.io/part-of=modelsasservice
-${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}       maas-api
+# AGO deploys maas-controller with part-of=models-as-a-service (see ai-gateway-operator manifests)
+${MODELSASSERVICE_CONTROLLER_MANAGER_LABEL_SELECTOR}        app.kubernetes.io/part-of=models-as-a-service
+${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}       maas-controller
 ${AIGATEWAY_CONTROLLER_MANAGER_LABEL_SELECTOR}              app.kubernetes.io/name=ai-gateway-operator
 ${AIGATEWAY_CONTROLLER_MANAGER_DEPLOYMENT_NAME}             ai-gateway-operator
 ${SPARKOPERATOR_LABEL_SELECTOR}                             app.kubernetes.io/name=spark-operator

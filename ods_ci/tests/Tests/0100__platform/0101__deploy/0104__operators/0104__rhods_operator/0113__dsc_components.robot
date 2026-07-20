@@ -39,6 +39,8 @@ ${OGX_CONTROLLER_MANAGER_LABEL_SELECTOR}                    app.kubernetes.io/pa
 ${OGX_CONTROLLER_MANAGER_DEPLOYMENT_NAME}                   ogx-k8s-operator-controller-manager
 ${MLFLOWOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}         app.kubernetes.io/name=mlflow-operator
 ${MLFLOWOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}        mlflow-operator-controller-manager
+${AIGATEWAY_CONTROLLER_MANAGER_LABEL_SELECTOR}              app.kubernetes.io/name=ai-gateway-operator
+${AIGATEWAY_CONTROLLER_MANAGER_DEPLOYMENT_NAME}             ai-gateway-operator
 ${MODELSASSERVICE_CONTROLLER_MANAGER_LABEL_SELECTOR}        app.kubernetes.io/part-of=modelsasservice
 ${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}       maas-api
 ${SPARKOPERATOR_LABEL_SELECTOR}                             app.kubernetes.io/name=spark-operator
@@ -65,6 +67,7 @@ ${IS_NOT_PRESENT}                                           1
 ...                                                         FEASTOPERATOR=${EMPTY}
 ...                                                         OGX=${EMPTY}
 ...                                                         MLFLOWOPERATOR=${EMPTY}
+...                                                         AIGATEWAY=${EMPTY}
 ...                                                         MODELSASSERVICE=${EMPTY}
 ...                                                         SPARKOPERATOR=${EMPTY}
 ...                                                         AIGATEWAY=${EMPTY}
@@ -704,8 +707,8 @@ Validate Modelsasservice Managed State
     ...    Smoke
 
     Set DSC Nested Component Managed State And Wait For Completion
-    ...    kserve
-    ...    modelsAsService
+    ...    aigateway
+    ...    modelsAsAService
     ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
     ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_LABEL_SELECTOR}
     Check That Image Pull Path Is Correct
@@ -713,13 +716,13 @@ Validate Modelsasservice Managed State
     ...    ${IMAGE_PULL_PATH}
 
     [Teardown]      Restore Nested Component And Parent State
-    ...    kserve    modelsAsService
+    ...    aigateway    modelsAsAService
     ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${MODELSASSERVICE_CONTROLLER_MANAGER_LABEL_SELECTOR}
-    ...    ${KSERVE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${KSERVE_CONTROLLER_MANAGER_LABEL_SELECTOR}
-    ...    ${SAVED_MANAGEMENT_STATES.MODELSASSERVICE}    ${SAVED_MANAGEMENT_STATES.KSERVE}
+    ...    ${AIGATEWAY_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${AIGATEWAY_CONTROLLER_MANAGER_LABEL_SELECTOR}
+    ...    ${SAVED_MANAGEMENT_STATES.MODELSASSERVICE}    ${SAVED_MANAGEMENT_STATES.AIGATEWAY}
 
 Validate Modelsasservice Removed State
-    [Documentation]    Validate that ModelsAsService management state Removed does remove relevant resources.
+    [Documentation]    Validate that ModelsAsAService management state Removed does remove relevant resources.
     [Tags]
     ...    Operator
     ...    Tier1
@@ -727,16 +730,16 @@ Validate Modelsasservice Removed State
     ...    Integration
 
     Set DSC Nested Component Removed State And Wait For Completion
-    ...    kserve
-    ...    modelsAsService
+    ...    aigateway
+    ...    modelsAsAService
     ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
     ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_LABEL_SELECTOR}
 
     [Teardown]      Restore Nested Component And Parent State
-    ...    kserve    modelsAsService
+    ...    aigateway    modelsAsAService
     ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${MODELSASSERVICE_CONTROLLER_MANAGER_LABEL_SELECTOR}
-    ...    ${KSERVE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${KSERVE_CONTROLLER_MANAGER_LABEL_SELECTOR}
-    ...    ${SAVED_MANAGEMENT_STATES.MODELSASSERVICE}    ${SAVED_MANAGEMENT_STATES.KSERVE}
+    ...    ${AIGATEWAY_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${AIGATEWAY_CONTROLLER_MANAGER_LABEL_SELECTOR}
+    ...    ${SAVED_MANAGEMENT_STATES.MODELSASSERVICE}    ${SAVED_MANAGEMENT_STATES.AIGATEWAY}
 
 Validate Support For Configuration Of Controller Resources
     [Documentation]    Validate support for configuration of controller resources in component deployments
@@ -817,7 +820,8 @@ Suite Setup
     ...    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.BATCHGATEWAY}=    Get DSC Nested Component State    ${DSC_NAME}
     ...    aigateway    batchGateway    ${OPERATOR_NS}
-    ${SAVED_MANAGEMENT_STATES.MODELSASSERVICE}=    Get DSC Nested Component State    ${DSC_NAME}    kserve    modelsAsService    ${OPERATOR_NS}
+    ${SAVED_MANAGEMENT_STATES.MODELSASSERVICE}=    Get DSC Nested Component State    ${DSC_NAME}
+    ...    aigateway    modelsAsAService    ${OPERATOR_NS}
     Set Suite Variable    ${SAVED_MANAGEMENT_STATES}
     Append To List  ${CONTROLLERS_LIST}    ${DASHBOARD_DEPLOYMENT_NAME}
 

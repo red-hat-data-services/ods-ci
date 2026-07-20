@@ -24,12 +24,12 @@ ${DSCI_NAME} =    default-dsci
 ...    llamastackoperator
 ...    ogx
 ...    mlflowoperator
+...    aigateway
 ...    modelsasservice
 ...    sparkoperator
-...    aigateway
 ...    batchgateway
-&{NESTED_COMPONENT_TO_PARENT_COMPONENT} =    modelsasservice=kserve    batchgateway=aigateway
-&{COMPONENT_TO_COMPONENT_NAME_IN_DSC} =   modelsasservice=modelsAsService    batchgateway=batchGateway
+&{NESTED_COMPONENT_TO_PARENT_COMPONENT}=    modelsasservice=aigateway    batchgateway=aigateway
+&{COMPONENT_TO_COMPONENT_NAME_IN_DSC}=    modelsasservice=modelsAsAService    batchgateway=batchGateway
 ${LWS_OP_NAME}=    leader-worker-set
 ${LWS_OP_NS}=    openshift-lws-operator
 ${LWS_SUB_NAME}=    leader-worker-set
@@ -276,9 +276,9 @@ Get Helm Path For Component
     [Arguments]    ${component}
 
     # Handling of special component cases:
-    # 1. modelsasservice is nested under kserve
+    # 1. modelsasservice is nested under aigateway
     IF    "${component}" == "modelsasservice"
-        RETURN    components.kserve.dsc.modelsAsService.managementState
+        RETURN    components.aigateway.dsc.modelsAsAService.managementState
     END
     # 2. batchgateway is nested under aigateway
     IF    "${component}" == "batchgateway"
@@ -465,7 +465,13 @@ Verify RHODS Installation
     ...    label_selector=app.kubernetes.io/name=spark-operator
   END
 
-  ${modelsasservice} =    Is Nested Component Enabled    kserve    modelsAsService    ${DSC_NAME}
+  ${aigateway} =    Is Component Enabled    aigateway    ${DSC_NAME}
+  IF    "${aigateway}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/name=ai-gateway-operator
+  END
+
+  ${modelsasservice} =    Is Nested Component Enabled    aigateway    modelsAsAService    ${DSC_NAME}
   IF    "${modelsasservice}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app.kubernetes.io/part-of=modelsasservice
@@ -1444,7 +1450,7 @@ Set Component State
     Log To Console    Component ${component} state was set to ${state}
 
 Set Nested Component State
-    [Documentation]    Set nested component state in Data Science Cluster (e.g., kserve.modelsAsService)
+    [Documentation]    Set nested component state in Data Science Cluster (e.g., aigateway.modelsAsAService)
     [Arguments]    ${parent_component}    ${nested_component}    ${state}
     ${result} =    Run Process    oc get datascienceclusters.datasciencecluster.opendatahub.io -o name
     ...    shell=true    stderr=STDOUT
@@ -1471,7 +1477,7 @@ Get DSC Component State
     RETURN    ${state}
 
 Get DSC Nested Component State
-    [Documentation]    Get nested component management state (e.g., kserve.modelsAsService)
+    [Documentation]    Get nested component management state (e.g., aigateway.modelsAsAService)
     [Arguments]    ${dsc}    ${parent_component}    ${nested_component}    ${namespace}
 
     ${rc}   ${state}=    Run And Return Rc And Output

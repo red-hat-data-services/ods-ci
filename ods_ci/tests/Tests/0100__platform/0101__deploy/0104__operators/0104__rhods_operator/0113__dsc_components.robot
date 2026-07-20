@@ -723,7 +723,8 @@ Suite Setup
     ${SAVED_MANAGEMENT_STATES.MLFLOWOPERATOR}=    Get DSC Component State    ${DSC_NAME}    mlflowoperator    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.SPARKOPERATOR}=    Get DSC Component State    ${DSC_NAME}    sparkoperator
     ...    ${OPERATOR_NS}
-    ${SAVED_MANAGEMENT_STATES.MODELSASSERVICE}=    Get DSC Nested Component State    ${DSC_NAME}    aigateway    modelsAsAService    ${OPERATOR_NS}
+    ${SAVED_MANAGEMENT_STATES.MODELSASSERVICE}=    Get DSC Nested Component State
+    ...    ${DSC_NAME}    aigateway    modelsAsAService    ${OPERATOR_NS}
     Set Suite Variable    ${SAVED_MANAGEMENT_STATES}
     Append To List  ${CONTROLLERS_LIST}    ${DASHBOARD_DEPLOYMENT_NAME}
 

@@ -1,8 +1,8 @@
 *** Settings ***
 Library    String
+Library    Collections
 Library    OpenShiftLibrary
 Library    OperatingSystem
-Library    Collections
 Resource   ../../../../tests/Resources/Page/Operators/ISVs.resource
 Resource   ../../../../tests/Resources/Page/OCPDashboard/UserManagement/Groups.robot
 Resource   ../../../../tests/Resources/OCP.resource
@@ -29,8 +29,8 @@ ${DSCI_NAME} =    default-dsci
 ...    modelsasservice
 ...    sparkoperator
 # MaaS moved from kserve.modelsAsService to aigateway.modelsAsAService (ODH operator #3723)
-&{NESTED_COMPONENT_TO_PARENT_COMPONENT} =    modelsasservice=aigateway
-&{COMPONENT_TO_COMPONENT_NAME_IN_DSC} =   modelsasservice=modelsAsAService
+&{NESTED_COMPONENT_TO_PARENT_COMPONENT}=    modelsasservice=aigateway
+&{COMPONENT_TO_COMPONENT_NAME_IN_DSC}=    modelsasservice=modelsAsAService
 ${LWS_OP_NAME}=    leader-worker-set
 ${LWS_OP_NS}=    openshift-lws-operator
 ${LWS_SUB_NAME}=    leader-worker-set
@@ -844,15 +844,22 @@ Create DataScienceCluster CustomResource Using Test Variables
     Copy File    source=${file_path}${dsc_template}    destination=${file_path}dsc_apply.yml
     Run    sed -i'' -e 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
     # modelsAsAService requires parent aigateway Managed (operator #3723).
-    # If callers only enable modelsasservice, promote aigateway so DSC apply + verification stay consistent.
-    ${maas_configured}=    Run Keyword And Return Status
+    # Force aigateway=Managed whenever modelsasservice is Managed, even if callers
+    # explicitly set aigateway=Removed (invalid combo that left MaaS Managed alone).
+    ${maas_configured} =    Run Keyword And Return Status
     ...    Dictionary Should Contain Key    ${COMPONENTS}    modelsasservice
-    ${aigateway_configured}=    Run Keyword And Return Status
-    ...    Dictionary Should Contain Key    ${COMPONENTS}    aigateway
-    IF    ${maas_configured} and not ${aigateway_configured} and '${COMPONENTS.modelsasservice}' == 'Managed'
-        Set To Dictionary    ${COMPONENTS}    aigateway=Managed
-        Set Global Variable    ${COMPONENTS}
-        Log To Console    modelsasservice=Managed implies aigateway=Managed; updated COMPONENTS
+    IF    ${maas_configured} and '${COMPONENTS.modelsasservice}' == 'Managed'
+        ${aigateway_present} =    Run Keyword And Return Status
+        ...    Dictionary Should Contain Key    ${COMPONENTS}    aigateway
+        ${aigateway_already_managed} =    Set Variable    ${FALSE}
+        IF    ${aigateway_present}
+            ${aigateway_already_managed} =    Evaluate    '${COMPONENTS.aigateway}' == 'Managed'
+        END
+        IF    not ${aigateway_already_managed}
+            Set To Dictionary    ${COMPONENTS}    aigateway=Managed
+            Set Global Variable    ${COMPONENTS}
+            Log To Console    modelsasservice=Managed requires aigateway=Managed; updated COMPONENTS
+        END
     END
     FOR    ${cmp}    IN    @{COMPONENT_LIST}
             IF    $cmp not in $COMPONENTS
@@ -1440,7 +1447,9 @@ Set Component State
     Log To Console    Component ${component} state was set to ${state}
 
 Set Nested Component State
-    [Documentation]    Set nested component state in Data Science Cluster (e.g., aigateway.modelsAsAService)
+    [Documentation]    Set nested component state in Data Science Cluster (e.g., aigateway.modelsAsAService).
+    ...                When enabling (Managed), also sets the parent managementState to Managed in the same
+    ...                patch so MaaS cannot be Managed while aigateway is Removed/unset.
     [Arguments]    ${parent_component}    ${nested_component}    ${state}
     ${result} =    Run Process    oc get datascienceclusters.datasciencecluster.opendatahub.io -o name
     ...    shell=true    stderr=STDOUT
@@ -1448,12 +1457,20 @@ Set Nested Component State
         FAIL    Can not find datasciencecluster
     END
     ${cluster_name} =    Set Variable    ${result.stdout}
-    ${result} =    Run Process    oc patch ${cluster_name} --type merge -p '{"spec":{"components":{"${parent_component}":{"${nested_component}":{"managementState":"${state}"}}}}}'
-    ...    shell=true    stderr=STDOUT
+    IF    "${state}" == "Managed"
+        ${result} =    Run Process    oc patch ${cluster_name} --type merge -p '{"spec":{"components":{"${parent_component}":{"managementState":"Managed","${nested_component}":{"managementState":"Managed"}}}}}'
+        ...    shell=true    stderr=STDOUT
+    ELSE
+        ${result} =    Run Process    oc patch ${cluster_name} --type merge -p '{"spec":{"components":{"${parent_component}":{"${nested_component}":{"managementState":"${state}"}}}}}'
+        ...    shell=true    stderr=STDOUT
+    END
     IF    $result.rc != 0
         FAIL    Can not set ${parent_component}.${nested_component} to ${state}: ${result.stdout}
     END
     Log To Console    Nested component ${parent_component}.${nested_component} state was set to ${state}
+    IF    "${state}" == "Managed"
+        Log To Console    Parent component ${parent_component} managementState was set to Managed
+    END
 
 Get DSC Component State
     [Documentation]    Get component management state

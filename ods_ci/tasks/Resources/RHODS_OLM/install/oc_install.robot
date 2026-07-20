@@ -471,9 +471,9 @@ Verify RHODS Installation
 
   ${modelsasservice} =    Is Nested Component Enabled    aigateway    modelsAsAService    ${DSC_NAME}
   IF    "${modelsasservice}" == "true"
-    # AGO kustomize labels: app.kubernetes.io/part-of=models-as-a-service (not modelsasservice)
+    # Prefer control-plane=maas-controller (AGO manager.yaml); part-of varies by platform overlay
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/part-of=models-as-a-service
+    ...    label_selector=control-plane=maas-controller
   END
 
   ${dashboard} =    Is Component Enabled    dashboard    ${DSC_NAME}
@@ -865,7 +865,8 @@ Create DataScienceCluster CustomResource Using Test Variables
         END
         IF    not ${aigateway_already_managed}
             Set To Dictionary    ${COMPONENTS}    aigateway=Managed
-            Set Global Variable    ${COMPONENTS}
+            # Keep COMPONENTS visible to Apply DataScienceCluster verification/logging
+            Set Global Variable    ${COMPONENTS}    # robocop: disable:replace-set-variable-with-var
             Log To Console    modelsasservice=Managed requires aigateway=Managed; updated COMPONENTS
         END
     END
@@ -1466,10 +1467,14 @@ Set Nested Component State
     END
     ${cluster_name} =    Set Variable    ${result.stdout}
     IF    "${state}" == "Managed"
-        ${result} =    Run Process    oc patch ${cluster_name} --type merge -p '{"spec":{"components":{"${parent_component}":{"managementState":"Managed","${nested_component}":{"managementState":"Managed"}}}}}'
+        ${patch} =    Set Variable
+        ...    {"spec":{"components":{"${parent_component}":{"managementState":"Managed","${nested_component}":{"managementState":"Managed"}}}}}
+        ${result} =    Run Process    oc patch ${cluster_name} --type merge -p '${patch}'
         ...    shell=true    stderr=STDOUT
     ELSE
-        ${result} =    Run Process    oc patch ${cluster_name} --type merge -p '{"spec":{"components":{"${parent_component}":{"${nested_component}":{"managementState":"${state}"}}}}}'
+        ${patch} =    Set Variable
+        ...    {"spec":{"components":{"${parent_component}":{"${nested_component}":{"managementState":"${state}"}}}}}
+        ${result} =    Run Process    oc patch ${cluster_name} --type merge -p '${patch}'
         ...    shell=true    stderr=STDOUT
     END
     IF    $result.rc != 0

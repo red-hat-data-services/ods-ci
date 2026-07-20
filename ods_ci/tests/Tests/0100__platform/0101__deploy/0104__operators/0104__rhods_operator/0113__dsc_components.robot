@@ -630,16 +630,26 @@ Validate Modelsasservice Managed State
     ...    ${SAVED_MANAGEMENT_STATES.MODELSASSERVICE}    ${SAVED_MANAGEMENT_STATES.AIGATEWAY}
 
 Validate Modelsasservice Removed State
-    [Documentation]    Validate that ModelsAsAService management state Removed does remove relevant resources.
+    [Documentation]    Validate that disabling MaaS removes the maas-controller deployment.
+    ...    Nested modelsAsAService=Removed alone does not reliably tear down maas-controller
+    ...    while aigateway stays Managed on current RHOAI builds (AGO/maas self-teardown gap).
+    ...    Disable the AIGateway parent as well so the module (and MaaS) are fully removed.
     [Tags]
     ...    Operator
     ...    Tier1
     ...    modelsasservice-removed
     ...    Integration
 
-    Set DSC Nested Component Removed State And Wait For Completion
+    # Ensure MaaS is present so removal is meaningful
+    Set DSC Nested Component Managed State And Wait For Completion
     ...    aigateway
     ...    modelsAsAService
+    ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_LABEL_SELECTOR}
+
+    Set Nested Component State    aigateway    modelsAsAService    Removed
+    Set Component State    aigateway    Removed
+    Wait For Resources To Be Removed
     ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
     ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_LABEL_SELECTOR}
 

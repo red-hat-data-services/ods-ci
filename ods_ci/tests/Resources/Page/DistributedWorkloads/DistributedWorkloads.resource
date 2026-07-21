@@ -6,9 +6,6 @@ Resource          ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 
 
 *** Variables ***
-${CODEFLARE-SDK-RELEASE-TAG}             v0.33.0
-${CODEFLARE-SDK_DIR}                     codeflare-sdk
-${CODEFLARE-SDK_REPO_URL}                %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
 ${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}  https://github.com/opendatahub-io/distributed-workloads/releases/latest/download
 # Corresponds to quay.io/modh/ray:2.52.1-py312-cu128
 ${RAY_CUDA_IMAGE_3.12}                   quay.io/modh/ray@sha256:6b135421b6e756593a58b4df6664f82fc4b55237ca81475f2867518f15fe6d84
@@ -52,94 +49,6 @@ ${KUBECONFIGPATH}                        %{HOME}/.kube/config
 
 
 *** Keywords ***
-Clone Git Repository
-    [Documentation]   Clone Git repository
-    [Arguments]    ${DW_REPO_URL}    ${DW_REPO_BRANCH}    ${DW_DIR}
-    ${result} =    Run Process    git clone -b ${DW_REPO_BRANCH} ${DW_REPO_URL} ${DW_DIR}
-    ...    shell=true    stderr=STDOUT
-    Log To Console    ${result.stdout}
-    IF    ${result.rc} != 0
-        FAIL    Unable to clone DW repo ${DW_REPO_URL}:${DW_REPO_BRANCH}:${DW_DIR}
-    END
-
-Prepare Codeflare-SDK Test Setup
-    [Documentation]   Prepare codeflare-sdk tests by cloning codeflare-sdk repo and python virtual environment
-
-    Clone Git Repository    ${CODEFLARE-SDK_REPO_URL}    ${CODEFLARE-SDK-RELEASE-TAG}    ${CODEFLARE-SDK_DIR}
-
-    Log To Console    "Log in as cluster admin"
-    Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
-
-    # Setup Kueue RBAC permissions as admin before switching to test user
-    Setup RBAC for codeflare-sdk
-
-    # Set Kueue component to Unmanaged state as admin
-    Log To Console    "Setting Kueue component to Unmanaged state"
-    Set Component State    kueue    Unmanaged
-    Wait For DataScienceCluster CustomResource To Be Ready    timeout=600
-
-    # Perform oc login with Test User
-    Login To OCP Using API    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}
-
-Run Codeflare-SDK Test
-    [Documentation]   Run codeflare-sdk Test
-    [Arguments]    ${TEST_TYPE}    ${TEST_NAME}    ${PYTHON_VERSION}    ${RAY_IMAGE}    ${RELEASE_BRANCH}
-    Log To Console    "Running codeflare-sdk test: ${TEST_NAME}"
-    ${result} =    Run Process  cd ${CODEFLARE-SDK_DIR} && git fetch origin && git checkout ${RELEASE_BRANCH} && git branch && poetry env use ${PYTHON_VERSION} && poetry install --with test,docs && poetry run pytest -v -s ./tests/${TEST_TYPE}/${TEST_NAME} --timeout\=900
-    ...    env:RAY_IMAGE=${RAY_IMAGE}
-    ...    env:AWS_DEFAULT_ENDPOINT=${AWS_DEFAULT_ENDPOINT}
-    ...    env:AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-    ...    env:AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-    ...    env:AWS_STORAGE_BUCKET=${AWS_STORAGE_BUCKET}
-    ...    env:AWS_STORAGE_BUCKET_MNIST_DIR=${AWS_STORAGE_BUCKET_MNIST_DIR}
-    ...    env:PIP_INDEX_URL=${PIP_INDEX_URL}
-    ...    env:PIP_TRUSTED_HOST=${PIP_TRUSTED_HOST}
-    ...    env:CONTROL_LABEL=node-role.kubernetes.io/control-plane=
-    ...    env:WORKER_LABEL=node-role.kubernetes.io/worker=
-    ...    env:TOLERATION_KEY=node-role.kubernetes.io/master
-    ...    shell=true
-    ...    stderr=STDOUT
-    ...    timeout=20 min
-    Log To Console    ${result.stdout}
-    IF    ${result.rc} != 0
-        FAIL    Running test ${TEST_NAME} failed
-    END
-
-Codeflare Upgrade Tests Teardown
-    [Documentation]   cleanup codeflare-SDK upgrade tests resources created
-    [Arguments]    ${project_name}    ${project_created}
-    IF    ${project_created} == True    Run Keywords
-    ...    Run   oc delete project ${project_name}    AND
-    ...    Run Process    oc delete LocalQueue local-queue-mnist -n ${project_name} &
-    ...    oc delete ClusterQueue cluster-queue-mnist &
-    ...    oc delete ResourceFlavor default-flavor-mnist    shell=True
-
-Cleanup Codeflare-SDK Setup
-    [Documentation]   cleanup codeflare repository cloned and python setup
-
-    Log To Console     "Removing directory ${CODEFLARE-SDK_DIR}"
-    Remove Directory        ${CODEFLARE-SDK_DIR}    recursive=True
-
-    Log To Console    "Log back as cluster admin"
-    Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
-
-    # Set Kueue component back to Removed state
-    Log To Console    "Setting Kueue component to Removed state"
-    Set Component State    kueue    Removed
-    Wait For DataScienceCluster CustomResource To Be Ready    timeout=600
-
-    # Cleanup Kueue RBAC resources
-    Teardown RBAC for codeflare-sdk
-
-Create Test Namespace For Codeflare Test
-    [Documentation]    Create the test namespace as admin for codeflare tests
-    Log To Console    "Creating test namespace test-ns-rayupgrade as admin"
-    ${rc}=    Run And Return Rc    oc create namespace test-ns-rayupgrade
-
-    IF    ${rc} != 0
-        Log To Console    "Warning: Unable to create namespace test-ns-rayupgrade (may already exist)"
-    END
-
 Prepare Training Operator KFTO E2E Test Suite
     [Documentation]    Prepare Training Operator KFTO E2E Test Suite
     Prepare Training Operator E2E Test Suite    ${KFTO_BINARY_NAME}

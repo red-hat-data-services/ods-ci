@@ -52,8 +52,9 @@ function wait_until_pod_ready_status() {
   local pod_label=$1
   local namespace=nvidia-gpu-operator
   local timeout=${2:-600}
-  local start_time=$(date +%s)
-  while [ $(($(date +%s) - start_time)) -lt $timeout ]; do
+  local start_time
+  start_time=$(date +%s)
+  while [ $(($(date +%s) - start_time)) -lt "$timeout" ]; do
      pod_status="$(oc get pod -l app="$pod_label" -n "$namespace" --no-headers=true 2>/dev/null)"
      daemon_status="$(oc get daemonset -l app="$pod_label" -n "$namespace" --no-headers=true 2>/dev/null)"
      if [[ -n "$daemon_status" || -n "$pod_status" ]] ; then
@@ -85,7 +86,7 @@ function rerun_accelerator_migration() {
   # Context: https://github.com/opendatahub-io/odh-dashboard/issues/1938
   echo "Creating NVIDIA Accelerator Profile via RHOAI Dashboard deployment rollout"
   configmap=$(oc get configmap migration-gpu-status --ignore-not-found -n redhat-ods-applications -oname)
-  if [ -z $configmap ];
+  if [ -z "$configmap" ];
     then
       echo "migration-gpu-status not found. Is RHOAI Installed? NVIDIA Accelerator Profile creation SKIPPED."
       return 0

@@ -419,6 +419,7 @@ Verify RHODS Installation
 
   ${trustyai} =    Is Component Enabled    trustyai    ${DSC_NAME}
   IF    "${trustyai}" == "true"
+    Apply TrustyAI Reconciliation Workaround
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app.kubernetes.io/part-of=trustyai
   END
@@ -1615,3 +1616,15 @@ Configure MaaS Database
     ...    bash tasks/Resources/Database/configure_maas_postgres.sh --namespace ${APPLICATIONS_NAMESPACE}
     Log To Console    ${output}
     Should Be Equal As Integers    ${rc}    0    msg=Error provisioning MaaS PostgreSQL prerequisites
+
+Apply TrustyAI Reconciliation Workaround
+    [Documentation]    Workaround for RHOAIENG-77786: TrustyAI controller does not self-heal
+    ...    after InferenceServices CRD becomes available. Forces re-reconciliation via annotation.
+    ...    https://issues.redhat.com/browse/RHOAIENG-77786
+    Log To Console    Applying workaround for RHOAIENG-77786: forcing TrustyAI re-reconciliation
+    ${rc}    ${output} =    Run And Return Rc And Output
+    ...    oc annotate trustyai default-trustyai -n ${APPLICATIONS_NAMESPACE} reconcile-trigger="$(date +%%s)" --overwrite
+    Log To Console    ${output}
+    IF    ${rc} != 0
+        Log To Console    WARNING: TrustyAI workaround annotation failed (rc=${rc}), continuing anyway
+    END

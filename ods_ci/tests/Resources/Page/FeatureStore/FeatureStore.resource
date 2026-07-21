@@ -65,7 +65,6 @@ Run Feast Notebook Test
     ...    env:NOTEBOOK_IMAGE=${NOTEBOOK_IMAGE}
     ...    env:FEAST_VERSION=${FEAST_VERSION}
     ...    env:APPLICATIONS_NAMESPACE=${APPLICATIONS_NAMESPACE}
-    ...    env:OPENAI_API_KEY=${OPENAI_API_KEY}
     ...    env:PIP_INDEX_URL=${PIP_INDEX_URL}
     ...    env:PIP_TRUSTED_HOST=${PIP_TRUSTED_HOST}
     Log To Console    ${result.stdout}

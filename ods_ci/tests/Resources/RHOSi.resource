@@ -17,7 +17,6 @@ Resource            OCP.resource
 ...                         Login to Openshift
 ...                         Login to Jupyterhub
 ...                         Verify Username Displayed On RHODS Dashboard
-...                         Create Pachyderm AWS-Secret
 ...                         Push Changes To Remote
 ...                         Commit Changes
 ...                         Push Some Changes To Repo

@@ -8,10 +8,7 @@ Library             ../../../../../libs/Helpers.py
 Resource            ../../../../Resources/RHOSi.resource
 Resource            ../../../../Resources/OCP.resource
 Resource            ../../../../Resources/Page/OCPDashboard/OCPDashboard.resource
-Resource            ../../../../Resources/Page/ODH/Prometheus/Prometheus.robot
-Resource            ../../../../Resources/Page/ODH/Prometheus/Alerts.resource
 Resource            ../../../../Resources/ODS.robot
-Resource            ../../../../Resources/Page/ODH/Grafana/Grafana.resource
 Resource            ../../../../Resources/Page/HybridCloudConsole/HCCLogin.robot
 Resource            ../../../../Resources/Common.robot
 Resource            ../../../../Resources/Page/NetworkPolicies/NetworkPolicies.resource
@@ -273,42 +270,6 @@ Verify Errors In Jupyterhub Logs
         ...    container=${pod['spec']['containers'][0]['name']}
         Should Not Contain    ${logs}    ModuleNotFoundError: No module named 'distutils.util'
     END
-
-Verify Grafana Datasources Have TLS Enabled
-    [Documentation]    Verifies TLS Is Enabled in Grafana Datasources
-    ${secret} =  Oc Get  kind=Secret  name=grafana-datasources  namespace=${MONITORING_NAMESPACE}
-    ${secret} =  Evaluate  base64.b64decode("${secret[0]['data']['datasources.yaml']}").decode('utf-8')  modules=base64
-    ${secret} =  Evaluate  json.loads('''${secret}''')  json
-    IF  'tlsSkipVerify' in ${secret['datasources'][0]['jsonData']}
-    ...  Should Be Equal As Strings  ${secret['datasources'][0]['jsonData']['tlsSkipVerify']}  False
-
-Verify Grafana Can Obtain Data From Prometheus Datasource
-    [Documentation]   Verifies Grafana Can Obtain Data From Prometheus Datasource
-    ${grafana_url} =  Get Grafana URL
-    Launch Grafana    ocp_user_name=${OCP_ADMIN_USER.USERNAME}    ocp_user_pw=${OCP_ADMIN_USER.PASSWORD}    ocp_user_auth_type=${OCP_ADMIN_USER.AUTH_TYPE}    grafana_url=https://${grafana_url}   browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
-    Select Explore
-    Select Data Source  datasource_name=Monitoring
-    Run Promql Query  query=traefik_backend_server_up
-    Page Should Contain  text=Graph
-
-Wait Until Operator Reverts "Grafana" To "Prometheus" In Rhods-Monitor-Federation
-    [Documentation]     Waits until rhods-operator reverts the configuration of rhods-monitor-federation,
-    ...    verifiying it has the default value ("prometheus")
-    Sleep    10m    msg=Waits until rhods-operator reverts the configuration of rhods-monitor-federation
-    Wait Until Keyword Succeeds    15m    1m    Verify In Rhods-Monitor-Federation App Is    expected_app_name=prometheus
-
-Verify In Rhods-Monitor-Federation App Is
-    [Documentation]     Verifies in rhods-monitor-federation, app is showing ${expected_app_name}
-    [Arguments]         ${expected_app_name}
-    ${data} =    OpenShiftLibrary.Oc Get    kind=ServiceMonitor   namespace=${MONITORING_NAMESPACE}    field_selector=metadata.name==rhods-monitor-federation
-    ${app_name} =    Set Variable    ${data[0]['spec']['selector']['matchLabels']['app']}
-    Should Be Equal    ${expected_app_name}    ${app_name}
-
-Replace "Prometheus" With "Grafana" In Rhods-Monitor-Federation
-    [Documentation]     Replace app to "Prometheus" with "Grafana" in Rhods-Monirot-Federation
-    OpenShiftLibrary.Oc Patch    kind=ServiceMonitor
-    ...                   src={"spec":{"selector":{"matchLabels": {"app":"grafana"}}}}
-    ...                   name=rhods-monitor-federation   namespace=${MONITORING_NAMESPACE}  type=merge
 
 CUDA Teardown
     [Documentation]    Ensures spawner is cleaned up if spawn fails

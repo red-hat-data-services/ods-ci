@@ -1623,8 +1623,8 @@ Apply TrustyAI Reconciliation Workaround
     ...    https://issues.redhat.com/browse/RHOAIENG-77786
     Log To Console    Applying workaround for RHOAIENG-77786: forcing TrustyAI re-reconciliation
     ${rc}    ${output} =    Run And Return Rc And Output
-    ...    oc annotate trustyai default-trustyai -n ${APPLICATIONS_NAMESPACE} reconcile-trigger="$(date +%%s)" --overwrite
+    ...    oc annotate trustyai default-trustyai -n ${APPLICATIONS_NAMESPACE} reconcile-trigger="$(date +%s)" --overwrite    # robocop: disable=LineTooLong
     Log To Console    ${output}
-    IF    ${rc} != 0
+    IF    ${rc}
         Log To Console    WARNING: TrustyAI workaround annotation failed (rc=${rc}), continuing anyway
     END

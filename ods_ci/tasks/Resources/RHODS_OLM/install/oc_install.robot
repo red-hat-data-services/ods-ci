@@ -71,7 +71,7 @@ ${CERT_MANAGER_NS}=  cert-manager-operator
 ${CONNECTIVITY_LINK_OP_NAME}=  rhcl-operator
 ${CONNECTIVITY_LINK_SUB_NAME}=  rhcl-operator
 ${CONNECTIVITY_LINK_CHANNEL_NAME}=  stable
-${CONNECTIVITY_LINK_STARTING_CSV}=  ${CONNECTIVITY_LINK_OP_NAME}.v1.3.4
+${CONNECTIVITY_LINK_STARTING_CSV}=  ${CONNECTIVITY_LINK_OP_NAME}.v1.4.1
 ${CONNECTIVITY_LINK_NS}=  kuadrant-system
 ${AUTHORINO_CSV_NAME}=  Authorino Operator
 ${RHODS_CSV_DISPLAY}=    Red Hat OpenShift AI
@@ -94,7 +94,8 @@ ${NFS_OP_NS}=    openshift-operators
 ${NFS_SUB_NAME}=    nfs-provisioner-operator-sub
 ${NFS_CHANNEL_NAME}=    alpha
 ${RESOURCES_DIRPATH}=    tasks/Resources/Files
-${RHODS_OSD_INSTALL_REPO}=      ${EMPTY}
+${OLM_INSTALL_GIT_REPO}=      ${EMPTY}
+${OLM_INSTALL_GIT_REPO_BRANCH}=    main
 ${OLM_DIR}=                     rhodsolm
 @{SUPPORTED_TEST_ENV}=          AWS   AWS_DIS   GCP   GCP_DIS   PSI   PSI_DIS   ROSA   IBM_CLOUD   CRC    AZURE	ROSA_HCP
 ${install_plan_approval}=       Manual
@@ -522,15 +523,16 @@ Verify Builds In Application Namespace
   Log  Builds Verified  console=yes
 
 Clone OLM Install Repo
-  [Documentation]   Clone OLM git repo
+  [Documentation]   Clone OLM git repo and checkout ${OLM_INSTALL_GIT_REPO_BRANCH}
   ${status} =   Run Keyword And Return Status    Directory Should Exist   ${EXECDIR}/${OLM_DIR}
   IF    ${status}
-      Log    "The directory ${EXECDIR}/${OLM_DIR} already exist, skipping clone of the repo."    console=yes
-  ELSE
-      ${return_code}    ${output} =    Run And Return Rc And Output    git clone ${RHODS_OSD_INSTALL_REPO} ${EXECDIR}/${OLM_DIR}    #robocop:disable
+      Log    The directory ${EXECDIR}/${OLM_DIR} already exists, checking out branch ${OLM_INSTALL_GIT_REPO_BRANCH}.    console=yes    #robocop:disable
+      ${return_code}    ${output} =    Run And Return Rc And Output    cd ${EXECDIR}/${OLM_DIR} && (git checkout ${OLM_INSTALL_GIT_REPO_BRANCH} || git checkout -B ${OLM_INSTALL_GIT_REPO_BRANCH} origin/${OLM_INSTALL_GIT_REPO_BRANCH})    #robocop:disable
       Log    ${output}    console=yes
       Should Be Equal As Integers   ${return_code}   0
-      ${return_code}    ${output} =    Run And Return Rc And Output    cd ${EXECDIR}/${OLM_DIR} && git checkout main    #robocop:disable
+  ELSE
+      Log    Cloning OLM git repo and checking out branch ${OLM_INSTALL_GIT_REPO_BRANCH}.    console=yes
+      ${return_code}    ${output} =    Run And Return Rc And Output    git clone --branch ${OLM_INSTALL_GIT_REPO_BRANCH} ${OLM_INSTALL_GIT_REPO} ${EXECDIR}/${OLM_DIR}    #robocop:disable
       Log    ${output}    console=yes
       Should Be Equal As Integers   ${return_code}   0
   END

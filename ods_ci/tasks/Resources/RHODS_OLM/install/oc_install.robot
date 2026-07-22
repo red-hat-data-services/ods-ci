@@ -26,8 +26,10 @@ ${DSCI_NAME} =    default-dsci
 ...    mlflowoperator
 ...    modelsasservice
 ...    sparkoperator
-&{NESTED_COMPONENT_TO_PARENT_COMPONENT} =    modelsasservice=kserve
-&{COMPONENT_TO_COMPONENT_NAME_IN_DSC} =   modelsasservice=modelsAsService
+...    aigateway
+...    batchgateway
+&{NESTED_COMPONENT_TO_PARENT_COMPONENT} =    modelsasservice=kserve    batchgateway=aigateway
+&{COMPONENT_TO_COMPONENT_NAME_IN_DSC} =   modelsasservice=modelsAsService    batchgateway=batchGateway
 ${LWS_OP_NAME}=    leader-worker-set
 ${LWS_OP_NS}=    openshift-lws-operator
 ${LWS_SUB_NAME}=    leader-worker-set
@@ -278,6 +280,10 @@ Get Helm Path For Component
     IF    "${component}" == "modelsasservice"
         RETURN    components.kserve.dsc.modelsAsService.managementState
     END
+    # 2. batchgateway is nested under aigateway
+    IF    "${component}" == "batchgateway"
+        RETURN    components.aigateway.dsc.batchGateway.managementState
+    END
 
     # Handling of standard component cases:
     ${is_known} =    Evaluate    "${component}" in ${COMPONENT_LIST}
@@ -413,6 +419,7 @@ Verify RHODS Installation
 
   ${trustyai} =    Is Component Enabled    trustyai    ${DSC_NAME}
   IF    "${trustyai}" == "true"
+    Apply TrustyAI Reconciliation Workaround
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app.kubernetes.io/part-of=trustyai
   END
@@ -465,6 +472,18 @@ Verify RHODS Installation
     ...    label_selector=app.kubernetes.io/part-of=modelsasservice
   END
 
+  ${aigateway} =    Is Component Enabled    aigateway    ${DSC_NAME}
+  IF    "${aigateway}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/name=ai-gateway-operator
+  END
+
+  ${batchgateway} =    Is Nested Component Enabled    aigateway    batchGateway    ${DSC_NAME}
+  IF    "${batchgateway}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/name=llm-d-batch-gateway-operator
+  END
+
   ${dashboard} =    Is Component Enabled    dashboard    ${DSC_NAME}
   IF    "${dashboard}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
@@ -478,7 +497,7 @@ Verify RHODS Installation
     END
   END
 
-  IF    "${dashboard}" == "true" or "${workbenches}" == "true" or "${aipipelines}" == "true" or "${kserve}" == "true" or "${kueue}" == "true" or "${ray}" == "true" or "${trustyai}" == "true" or "${modelregistry}" == "true" or "${trainingoperator}" == "true" or "${sparkoperator}" == "true"    # robocop: disable
+  IF    "${dashboard}" == "true" or "${workbenches}" == "true" or "${aipipelines}" == "true" or "${kserve}" == "true" or "${kueue}" == "true" or "${ray}" == "true" or "${trustyai}" == "true" or "${modelregistry}" == "true" or "${trainingoperator}" == "true" or "${sparkoperator}" == "true" or "${aigateway}" == "true" or "${batchgateway}" == "true"    # robocop: disable
       Log To Console    Waiting for pod status in ${APPLICATIONS_NAMESPACE}
       Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=600
       Log  Verified Applications NS: ${APPLICATIONS_NAMESPACE}  console=yes
@@ -1597,3 +1616,15 @@ Configure MaaS Database
     ...    bash tasks/Resources/Database/configure_maas_postgres.sh --namespace ${APPLICATIONS_NAMESPACE}
     Log To Console    ${output}
     Should Be Equal As Integers    ${rc}    0    msg=Error provisioning MaaS PostgreSQL prerequisites
+
+Apply TrustyAI Reconciliation Workaround
+    [Documentation]    Workaround for RHOAIENG-77786: TrustyAI controller does not self-heal
+    ...    after InferenceServices CRD becomes available. Forces re-reconciliation via annotation.
+    ...    https://issues.redhat.com/browse/RHOAIENG-77786
+    Log To Console    Applying workaround for RHOAIENG-77786: forcing TrustyAI re-reconciliation
+    ${rc}    ${output} =    Run And Return Rc And Output
+    ...    oc annotate trustyai default-trustyai -n ${APPLICATIONS_NAMESPACE} reconcile-trigger="$(date +%s)" --overwrite    # robocop: disable=LineTooLong
+    Log To Console    ${output}
+    IF    ${rc}
+        Log To Console    WARNING: TrustyAI workaround annotation failed (rc=${rc}), continuing anyway
+    END

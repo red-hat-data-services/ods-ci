@@ -31,17 +31,25 @@ derive_infra_namespace() {
 
 detect_infra_namespace() {
     local apps_ns="$1"
+    local oc_stderr oc_rc infra_val
+    oc_stderr=$(mktemp)
+    infra_val=$(oc get deployment maas-controller -n "${apps_ns}" \
+        -o jsonpath='{.spec.template.spec.containers[0].env[?(@.name=="INFRA_NAMESPACE")].value}' \
+        2>"${oc_stderr}") && oc_rc=0 || oc_rc=$?
 
-    # If maas-controller is already deployed, read INFRA_NAMESPACE from it.
-    # Otherwise fall back to derive_infra_namespace which matches the
-    # operator's AUTO default (RHOAIENG-78410: the old 90×10s polling loop
-    # always timed out when called before the operator was installed).
-    if oc get deployment maas-controller -n "${apps_ns}" &>/dev/null; then
-        local infra_val
-        infra_val=$(oc get deployment maas-controller -n "${apps_ns}" \
-            -o jsonpath='{.spec.template.spec.containers[0].env[?(@.name=="INFRA_NAMESPACE")].value}' \
-            2>/dev/null)
-
+    if [[ $oc_rc -ne 0 ]]; then
+        local err_msg
+        err_msg=$(<"${oc_stderr}")
+        rm -f "${oc_stderr}"
+        if [[ "${err_msg}" == *"NotFound"* ]]; then
+            echo "maas-controller not found in ${apps_ns}; using derived infra namespace" >&2
+            derive_infra_namespace "${apps_ns}"
+        else
+            echo "ERROR: unexpected failure querying maas-controller in ${apps_ns}: ${err_msg}" >&2
+            return 1
+        fi
+    else
+        rm -f "${oc_stderr}"
         if [[ "${infra_val}" == "AUTO" ]]; then
             derive_infra_namespace "${apps_ns}"
         elif [[ -n "${infra_val}" ]]; then
@@ -49,9 +57,6 @@ detect_infra_namespace() {
         else
             derive_infra_namespace "${apps_ns}"
         fi
-    else
-        echo "maas-controller not found in ${apps_ns}; using derived infra namespace" >&2
-        derive_infra_namespace "${apps_ns}"
     fi
 }
 

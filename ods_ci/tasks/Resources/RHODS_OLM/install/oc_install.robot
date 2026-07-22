@@ -524,7 +524,16 @@ Apply DataScienceCluster CustomResource
         #Remove File    ${file_path}dsc_apply.yml
         Wait For DSC Ready State    ${OPERATOR_NAMESPACE}     ${DSC_NAME}
     ELSE
-        Log to Console    Requested Configuration:
+        ${components_defined} =    Run Keyword And Return Status    Variable Should Exist    ${COMPONENTS}
+        IF    not ${components_defined}
+            Log To Console    COMPONENTS variable not found, defaulting all components to Managed
+            VAR    &{COMPONENTS}    &{EMPTY}
+            FOR    ${cmp}    IN    @{COMPONENT_LIST}
+                Set To Dictionary    ${COMPONENTS}    ${cmp}    Managed
+            END
+            VAR    &{COMPONENTS}    &{COMPONENTS}    scope=SUITE
+        END
+        Log To Console    Requested Configuration:
         FOR    ${cmp}    IN    @{COMPONENT_LIST}
             TRY
                 Log To Console    ${cmp} - ${COMPONENTS.${cmp}}
@@ -574,6 +583,15 @@ Create DataScienceCluster CustomResource Using Test Variables
     [Documentation]
     [Arguments]    ${dsc_name}=${DSC_NAME}    ${dsc_template}=${DSC_TEMPLATE}
     ${file_path} =    Set Variable    tasks/Resources/Files/
+    ${components_defined} =    Run Keyword And Return Status    Variable Should Exist    ${COMPONENTS}
+    IF    not ${components_defined}
+        Log To Console    COMPONENTS variable not found in keyword, defaulting all components to Managed
+        VAR    &{COMPONENTS}    &{EMPTY}
+        FOR    ${cmp}    IN    @{COMPONENT_LIST}
+            Set To Dictionary    ${COMPONENTS}    ${cmp}    Managed
+        END
+        VAR    &{COMPONENTS}    &{COMPONENTS}    scope=SUITE
+    END
     Copy File    source=${file_path}${dsc_template}    destination=${file_path}dsc_apply.yml
     Run    sed -i'' -e 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
     Run    sed -i'' -e 's/<operator_yaml_label>/${OPERATOR_YAML_LABEL}/' ${file_path}dsc_apply.yml

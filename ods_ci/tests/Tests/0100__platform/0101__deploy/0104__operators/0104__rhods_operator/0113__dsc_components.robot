@@ -45,6 +45,8 @@ ${MODELSASSERVICE_CONTROLLER_MANAGER_LABEL_SELECTOR}        control-plane=maas-c
 ${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}       maas-controller
 ${AIGATEWAY_CONTROLLER_MANAGER_LABEL_SELECTOR}              app.kubernetes.io/name=ai-gateway-operator
 ${AIGATEWAY_CONTROLLER_MANAGER_DEPLOYMENT_NAME}             ai-gateway-operator
+${BATCHGATEWAY_CONTROLLER_MANAGER_LABEL_SELECTOR}           app.kubernetes.io/name=llm-d-batch-gateway-operator
+${BATCHGATEWAY_CONTROLLER_MANAGER_DEPLOYMENT_NAME}          llm-d-batch-gateway-operator
 ${SPARKOPERATOR_LABEL_SELECTOR}                             app.kubernetes.io/name=spark-operator
 ${SPARKOPERATOR_DEPLOYMENT_NAME}                            spark-operator-controller
 ${NOTEBOOK_CONTROLLER_DEPLOYMENT_LABEL_SELECTOR}            component.opendatahub.io/name=kf-notebook-controller
@@ -68,6 +70,7 @@ ${IS_NOT_PRESENT}                                           1
 ...                                                         MLFLOWOPERATOR=${EMPTY}
 ...                                                         MODELSASSERVICE=${EMPTY}
 ...                                                         SPARKOPERATOR=${EMPTY}
+...                                                         BATCHGATEWAY=${EMPTY}
 
 @{CONTROLLERS_LIST}                                     # dashboard added in Suite Setup, since it's different in RHOAI vs ODH
 ...                                                     data-science-pipelines-operator-controller-manager
@@ -605,6 +608,94 @@ Validate Spark Removed State
     ...    ${SPARKOPERATOR_DEPLOYMENT_NAME}      ${SPARKOPERATOR_LABEL_SELECTOR}
     ...    ${SAVED_MANAGEMENT_STATES.SPARKOPERATOR}
 
+Validate AIGateway Managed State
+    [Documentation]    Validate that the DSC AIGateway component Managed state creates the expected resources,
+    ...    check that AIGateway deployment is created and pod is in Ready state
+    [Tags]
+    ...    Operator
+    ...    Smoke
+    ...    aigateway-managed
+    ...    Integration
+
+    Set DSC Component Managed State And Wait For Completion
+    ...    aigateway
+    ...    ${AIGATEWAY_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${AIGATEWAY_CONTROLLER_MANAGER_LABEL_SELECTOR}
+    Check That Image Pull Path Is Correct       ${AIGATEWAY_CONTROLLER_MANAGER_DEPLOYMENT_NAME}      ${IMAGE_PULL_PATH}
+
+    [Teardown]      Restore DSC Component State     aigateway
+    ...    ${AIGATEWAY_CONTROLLER_MANAGER_DEPLOYMENT_NAME}      ${AIGATEWAY_CONTROLLER_MANAGER_LABEL_SELECTOR}
+    ...    ${SAVED_MANAGEMENT_STATES.AIGATEWAY}
+
+Validate AIGateway Removed State
+    [Documentation]    Validate that AIGateway management state Removed does remove relevant resources.
+    ...                Since aigateway defaults to Removed state, first set it to Managed
+    ...                to ensure resources exist before testing removal.
+    [Tags]
+    ...    Operator
+    ...    Tier1
+    ...    aigateway-removed
+    ...    Integration
+
+    [Setup]     Set DSC Component Managed State And Wait For Completion     aigateway
+    ...    ${AIGATEWAY_CONTROLLER_MANAGER_DEPLOYMENT_NAME}        ${AIGATEWAY_CONTROLLER_MANAGER_LABEL_SELECTOR}
+
+    Set DSC Component Removed State And Wait For Completion
+    ...    aigateway
+    ...    ${AIGATEWAY_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${AIGATEWAY_CONTROLLER_MANAGER_LABEL_SELECTOR}
+
+    [Teardown]      Restore DSC Component State     aigateway
+    ...    ${AIGATEWAY_CONTROLLER_MANAGER_DEPLOYMENT_NAME}      ${AIGATEWAY_CONTROLLER_MANAGER_LABEL_SELECTOR}
+    ...    ${SAVED_MANAGEMENT_STATES.AIGATEWAY}
+
+Validate BatchGateway Managed State
+    [Documentation]    Validate that the DSC BatchGateway nested component Managed state
+    ...    creates the expected resources
+    [Tags]
+    ...    Operator
+    ...    batchgateway-managed
+    ...    Integration
+    ...    Smoke
+
+    Set DSC Nested Component Managed State And Wait For Completion
+    ...    aigateway
+    ...    batchGateway
+    ...    ${BATCHGATEWAY_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${BATCHGATEWAY_CONTROLLER_MANAGER_LABEL_SELECTOR}
+
+    [Teardown]      Restore Nested Component And Parent State
+    ...    aigateway    batchGateway
+    ...    ${BATCHGATEWAY_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${BATCHGATEWAY_CONTROLLER_MANAGER_LABEL_SELECTOR}
+    ...    ${AIGATEWAY_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${AIGATEWAY_CONTROLLER_MANAGER_LABEL_SELECTOR}
+    ...    ${SAVED_MANAGEMENT_STATES.BATCHGATEWAY}    ${SAVED_MANAGEMENT_STATES.AIGATEWAY}
+
+Validate BatchGateway Removed State
+    [Documentation]    Validate that BatchGateway management state Removed does remove
+    ...    relevant resources.
+    [Tags]
+    ...    Operator
+    ...    Tier1
+    ...    batchgateway-removed
+    ...    Integration
+
+    [Setup]     Set DSC Nested Component Managed State And Wait For Completion
+    ...    aigateway    batchGateway
+    ...    ${BATCHGATEWAY_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${BATCHGATEWAY_CONTROLLER_MANAGER_LABEL_SELECTOR}
+
+    Set DSC Nested Component Removed State And Wait For Completion
+    ...    aigateway
+    ...    batchGateway
+    ...    ${BATCHGATEWAY_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${BATCHGATEWAY_CONTROLLER_MANAGER_LABEL_SELECTOR}
+
+    [Teardown]      Restore Nested Component And Parent State
+    ...    aigateway    batchGateway
+    ...    ${BATCHGATEWAY_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${BATCHGATEWAY_CONTROLLER_MANAGER_LABEL_SELECTOR}
+    ...    ${AIGATEWAY_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${AIGATEWAY_CONTROLLER_MANAGER_LABEL_SELECTOR}
+    ...    ${SAVED_MANAGEMENT_STATES.BATCHGATEWAY}    ${SAVED_MANAGEMENT_STATES.AIGATEWAY}
+
 Validate Modelsasservice Managed State
     [Documentation]    Validate that the DSC Modelsasservice component Managed state creates the expected resources,
     ...    check that ModelsAsAService deployment is created and pod is in Ready state
@@ -735,6 +826,8 @@ Suite Setup
     ${SAVED_MANAGEMENT_STATES.MLFLOWOPERATOR}=    Get DSC Component State    ${DSC_NAME}    mlflowoperator    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.SPARKOPERATOR}=    Get DSC Component State    ${DSC_NAME}    sparkoperator
     ...    ${OPERATOR_NS}
+    ${SAVED_MANAGEMENT_STATES.BATCHGATEWAY}=    Get DSC Nested Component State    ${DSC_NAME}
+    ...    aigateway    batchGateway    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.MODELSASSERVICE}=    Get DSC Nested Component State
     ...    ${DSC_NAME}    aigateway    modelsAsAService    ${OPERATOR_NS}
     Set Suite Variable    ${SAVED_MANAGEMENT_STATES}

@@ -1352,8 +1352,11 @@ Install RHOAI Dependencies With CLI
     Install Leader Worker Set Operator Via Cli
     Install Connectivity Link Operator Via Cli
     Install JobSet Dependencies
-    Configure MaaS Database
-    Configure MaaS Gateway API
+    ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
+    IF    '${arch_type}' != 's390x'
+        Configure MaaS Database
+        Configure MaaS Gateway API
+    END
 
 Install Observability Dependencies
     [Documentation]    Install dependent operators related to Observability

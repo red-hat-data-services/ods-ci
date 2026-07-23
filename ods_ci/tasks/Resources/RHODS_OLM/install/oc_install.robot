@@ -565,11 +565,11 @@ Apply DataScienceCluster CustomResource
         ${components_defined} =    Run Keyword And Return Status    Variable Should Exist    ${COMPONENTS}
         IF    not ${components_defined}
             Log To Console    COMPONENTS variable not found, defaulting all components to Managed
-            VAR    &{COMPONENTS}    &{EMPTY}
+            &{COMPONENTS} =    Create Dictionary
             FOR    ${cmp}    IN    @{COMPONENT_LIST}
                 Set To Dictionary    ${COMPONENTS}    ${cmp}    Managed
             END
-            VAR    &{COMPONENTS}    &{COMPONENTS}    scope=SUITE
+            Set Suite Variable    &{COMPONENTS}
         END
         Log to Console    Requested Configuration:
         FOR    ${cmp}    IN    @{COMPONENT_LIST}
@@ -612,11 +612,11 @@ Create DataScienceCluster CustomResource Using Test Variables
     ${components_defined} =    Run Keyword And Return Status    Variable Should Exist    ${COMPONENTS}
     IF    not ${components_defined}
         Log To Console    COMPONENTS variable not found, defaulting all components to Managed
-        VAR    &{COMPONENTS}    &{EMPTY}
+        &{COMPONENTS} =    Create Dictionary
         FOR    ${cmp}    IN    @{COMPONENT_LIST}
             Set To Dictionary    ${COMPONENTS}    ${cmp}    Managed
         END
-        VAR    &{COMPONENTS}    &{COMPONENTS}    scope=SUITE
+        Set Suite Variable    &{COMPONENTS}
     END
     FOR    ${cmp}    IN    @{COMPONENT_LIST}
             IF    $cmp not in $COMPONENTS

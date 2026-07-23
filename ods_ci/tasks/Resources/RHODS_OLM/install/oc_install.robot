@@ -196,7 +196,10 @@ Install RHODS
           FAIL    Provided test environment is not supported
       END
   END
+  ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
+  ${csv_timeout} =    Set Variable If    '${arch_type}' == 's390x'    20m    10m
   Wait Until Csv Is Ready    display_name=${csv_display_name}    operators_namespace=${OPERATOR_NAMESPACE}
+  ...    timeout=${csv_timeout}
   # Approve any pending installplans for transitive OLM dependencies (e.g. ServiceMesh)
   Approve All Pending Installplans    openshift-operators
   IF  "${is_upgrade}" == "False"

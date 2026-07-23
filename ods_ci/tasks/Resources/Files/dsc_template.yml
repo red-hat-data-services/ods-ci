@@ -12,8 +12,12 @@ spec:
       managementState: <aipipelines_value>
     kserve:
       managementState: <kserve_value>
-      modelsAsService:
+    aigateway:
+      managementState: <aigateway_value>
+      modelsAsAService:
         managementState: <modelsasservice_value>
+      batchGateway:
+        managementState: <batchgateway_value>
     kueue:
       managementState: <kueue_value>
     ray:
@@ -40,7 +44,3 @@ spec:
       managementState: <mlflowoperator_value>
     sparkoperator:
       managementState: <sparkoperator_value>
-    aigateway:
-      managementState: <aigateway_value>
-      batchGateway:
-        managementState: <batchgateway_value>

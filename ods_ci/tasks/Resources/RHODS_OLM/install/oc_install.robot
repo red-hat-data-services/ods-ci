@@ -1,5 +1,6 @@
 *** Settings ***
 Library    String
+Library    Collections
 Library    OpenShiftLibrary
 Library    OperatingSystem
 Resource   ../../../../tests/Resources/Page/Operators/ISVs.resource
@@ -13,6 +14,7 @@ ${DSCI_NAME} =    default-dsci
 @{COMPONENT_LIST} =    dashboard
 ...    aipipelines
 ...    kserve
+...    aigateway
 ...    kueue
 ...    ray
 ...    trainingoperator
@@ -26,10 +28,10 @@ ${DSCI_NAME} =    default-dsci
 ...    mlflowoperator
 ...    modelsasservice
 ...    sparkoperator
-...    aigateway
 ...    batchgateway
-&{NESTED_COMPONENT_TO_PARENT_COMPONENT} =    modelsasservice=kserve    batchgateway=aigateway
-&{COMPONENT_TO_COMPONENT_NAME_IN_DSC} =   modelsasservice=modelsAsService    batchgateway=batchGateway
+# MaaS moved from kserve.modelsAsService to aigateway.modelsAsAService (ODH operator #3723)
+&{NESTED_COMPONENT_TO_PARENT_COMPONENT}=    modelsasservice=aigateway    batchgateway=aigateway
+&{COMPONENT_TO_COMPONENT_NAME_IN_DSC}=    modelsasservice=modelsAsAService    batchgateway=batchGateway
 ${LWS_OP_NAME}=    leader-worker-set
 ${LWS_OP_NS}=    openshift-lws-operator
 ${LWS_SUB_NAME}=    leader-worker-set
@@ -276,9 +278,9 @@ Get Helm Path For Component
     [Arguments]    ${component}
 
     # Handling of special component cases:
-    # 1. modelsasservice is nested under kserve
+    # 1. modelsasservice is nested under aigateway (was kserve prior to ODH 3.5 / operator #3723)
     IF    "${component}" == "modelsasservice"
-        RETURN    components.kserve.dsc.modelsAsService.managementState
+        RETURN    components.aigateway.dsc.modelsAsAService.managementState
     END
     # 2. batchgateway is nested under aigateway
     IF    "${component}" == "batchgateway"
@@ -419,6 +421,7 @@ Verify RHODS Installation
 
   ${trustyai} =    Is Component Enabled    trustyai    ${DSC_NAME}
   IF    "${trustyai}" == "true"
+    Apply TrustyAI Reconciliation Workaround
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app.kubernetes.io/part-of=trustyai
   END
@@ -465,16 +468,18 @@ Verify RHODS Installation
     ...    label_selector=app.kubernetes.io/name=spark-operator
   END
 
-  ${modelsasservice} =    Is Nested Component Enabled    kserve    modelsAsService    ${DSC_NAME}
-  IF    "${modelsasservice}" == "true"
-    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/part-of=modelsasservice
-  END
-
+  # AIGateway parent must be ready before nested MaaS / BatchGateway (AGO deploys them).
   ${aigateway} =    Is Component Enabled    aigateway    ${DSC_NAME}
   IF    "${aigateway}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app.kubernetes.io/name=ai-gateway-operator
+  END
+
+  ${modelsasservice} =    Is Nested Component Enabled    aigateway    modelsAsAService    ${DSC_NAME}
+  IF    "${modelsasservice}" == "true"
+    # Prefer control-plane=maas-controller (AGO manager.yaml); part-of varies by platform overlay
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=control-plane=maas-controller
   END
 
   ${batchgateway} =    Is Nested Component Enabled    aigateway    batchGateway    ${DSC_NAME}
@@ -858,6 +863,25 @@ Create DataScienceCluster CustomResource Using Test Variables
     ${file_path} =    Set Variable    tasks/Resources/Files/
     Copy File    source=${file_path}${dsc_template}    destination=${file_path}dsc_apply.yml
     Run    sed -i'' -e 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
+    # modelsAsAService requires parent aigateway Managed (operator #3723).
+    # Force aigateway=Managed whenever modelsasservice is Managed, even if callers
+    # explicitly set aigateway=Removed (invalid combo that left MaaS Managed alone).
+    ${maas_configured} =    Run Keyword And Return Status
+    ...    Dictionary Should Contain Key    ${COMPONENTS}    modelsasservice
+    IF    ${maas_configured} and '${COMPONENTS.modelsasservice}' == 'Managed'
+        ${aigateway_present} =    Run Keyword And Return Status
+        ...    Dictionary Should Contain Key    ${COMPONENTS}    aigateway
+        ${aigateway_already_managed} =    Set Variable    ${FALSE}
+        IF    ${aigateway_present}
+            ${aigateway_already_managed} =    Evaluate    '${COMPONENTS.aigateway}' == 'Managed'
+        END
+        IF    not ${aigateway_already_managed}
+            Set To Dictionary    ${COMPONENTS}    aigateway=Managed
+            # Keep COMPONENTS visible to Apply DataScienceCluster verification/logging
+            Set Global Variable    ${COMPONENTS}    # robocop: disable:replace-set-variable-with-var
+            Log To Console    modelsasservice=Managed requires aigateway=Managed; updated COMPONENTS
+        END
+    END
     FOR    ${cmp}    IN    @{COMPONENT_LIST}
             IF    $cmp not in $COMPONENTS
                 Run    sed -i'' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
@@ -1447,7 +1471,9 @@ Set Component State
     Log To Console    Component ${component} state was set to ${state}
 
 Set Nested Component State
-    [Documentation]    Set nested component state in Data Science Cluster (e.g., kserve.modelsAsService)
+    [Documentation]    Set nested component state in Data Science Cluster (e.g., aigateway.modelsAsAService).
+    ...                When enabling (Managed), also sets the parent managementState to Managed in the same
+    ...                patch so MaaS cannot be Managed while aigateway is Removed/unset.
     [Arguments]    ${parent_component}    ${nested_component}    ${state}
     ${result} =    Run Process    oc get datascienceclusters.datasciencecluster.opendatahub.io -o name
     ...    shell=true    stderr=STDOUT
@@ -1455,12 +1481,24 @@ Set Nested Component State
         FAIL    Can not find datasciencecluster
     END
     ${cluster_name} =    Set Variable    ${result.stdout}
-    ${result} =    Run Process    oc patch ${cluster_name} --type merge -p '{"spec":{"components":{"${parent_component}":{"${nested_component}":{"managementState":"${state}"}}}}}'
-    ...    shell=true    stderr=STDOUT
+    IF    "${state}" == "Managed"
+        ${patch} =    Set Variable
+        ...    {"spec":{"components":{"${parent_component}":{"managementState":"Managed","${nested_component}":{"managementState":"Managed"}}}}}
+        ${result} =    Run Process    oc patch ${cluster_name} --type merge -p '${patch}'
+        ...    shell=true    stderr=STDOUT
+    ELSE
+        ${patch} =    Set Variable
+        ...    {"spec":{"components":{"${parent_component}":{"${nested_component}":{"managementState":"${state}"}}}}}
+        ${result} =    Run Process    oc patch ${cluster_name} --type merge -p '${patch}'
+        ...    shell=true    stderr=STDOUT
+    END
     IF    $result.rc != 0
         FAIL    Can not set ${parent_component}.${nested_component} to ${state}: ${result.stdout}
     END
     Log To Console    Nested component ${parent_component}.${nested_component} state was set to ${state}
+    IF    "${state}" == "Managed"
+        Log To Console    Parent component ${parent_component} managementState was set to Managed
+    END
 
 Get DSC Component State
     [Documentation]    Get component management state
@@ -1474,7 +1512,7 @@ Get DSC Component State
     RETURN    ${state}
 
 Get DSC Nested Component State
-    [Documentation]    Get nested component management state (e.g., kserve.modelsAsService)
+    [Documentation]    Get nested component management state (e.g., aigateway.modelsAsAService)
     [Arguments]    ${dsc}    ${parent_component}    ${nested_component}    ${namespace}
 
     ${rc}   ${state}=    Run And Return Rc And Output
@@ -1618,3 +1656,15 @@ Configure MaaS Database
     ...    bash tasks/Resources/Database/configure_maas_postgres.sh --namespace ${APPLICATIONS_NAMESPACE}
     Log To Console    ${output}
     Should Be Equal As Integers    ${rc}    0    msg=Error provisioning MaaS PostgreSQL prerequisites
+
+Apply TrustyAI Reconciliation Workaround
+    [Documentation]    Workaround for RHOAIENG-77786: TrustyAI controller does not self-heal
+    ...    after InferenceServices CRD becomes available. Forces re-reconciliation via annotation.
+    ...    https://issues.redhat.com/browse/RHOAIENG-77786
+    Log To Console    Applying workaround for RHOAIENG-77786: forcing TrustyAI re-reconciliation
+    ${rc}    ${output} =    Run And Return Rc And Output
+    ...    oc annotate trustyai default-trustyai -n ${APPLICATIONS_NAMESPACE} reconcile-trigger="$(date +%s)" --overwrite    # robocop: disable=LineTooLong
+    Log To Console    ${output}
+    IF    ${rc}
+        Log To Console    WARNING: TrustyAI workaround annotation failed (rc=${rc}), continuing anyway
+    END

@@ -39,14 +39,16 @@ ${OGX_CONTROLLER_MANAGER_LABEL_SELECTOR}                    app.kubernetes.io/pa
 ${OGX_CONTROLLER_MANAGER_DEPLOYMENT_NAME}                   ogx-k8s-operator-controller-manager
 ${MLFLOWOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}         app.kubernetes.io/name=mlflow-operator
 ${MLFLOWOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}        mlflow-operator-controller-manager
-${MODELSASSERVICE_CONTROLLER_MANAGER_LABEL_SELECTOR}        app.kubernetes.io/part-of=modelsasservice
-${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}       maas-api
-${SPARKOPERATOR_LABEL_SELECTOR}                             app.kubernetes.io/name=spark-operator
-${SPARKOPERATOR_DEPLOYMENT_NAME}                            spark-operator-controller
+# maas-controller pod/deployment labels from AGO manager.yaml (stable across ODH/RHOAI;
+# part-of may be models-as-a-service or aigateway depending on platform overlay)
+${MODELSASSERVICE_CONTROLLER_MANAGER_LABEL_SELECTOR}        control-plane=maas-controller
+${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}       maas-controller
 ${AIGATEWAY_CONTROLLER_MANAGER_LABEL_SELECTOR}              app.kubernetes.io/name=ai-gateway-operator
 ${AIGATEWAY_CONTROLLER_MANAGER_DEPLOYMENT_NAME}             ai-gateway-operator
 ${BATCHGATEWAY_CONTROLLER_MANAGER_LABEL_SELECTOR}           app.kubernetes.io/name=llm-d-batch-gateway-operator
 ${BATCHGATEWAY_CONTROLLER_MANAGER_DEPLOYMENT_NAME}          llm-d-batch-gateway-operator
+${SPARKOPERATOR_LABEL_SELECTOR}                             app.kubernetes.io/name=spark-operator
+${SPARKOPERATOR_DEPLOYMENT_NAME}                            spark-operator-controller
 ${NOTEBOOK_CONTROLLER_DEPLOYMENT_LABEL_SELECTOR}            component.opendatahub.io/name=kf-notebook-controller
 ${NOTEBOOK_CONTROLLER_MANAGER_LABEL_SELECTOR}               component.opendatahub.io/name=odh-notebook-controller
 ${NOTEBOOK_DEPLOYMENT_NAME}                                 notebook-controller-deployment
@@ -60,6 +62,7 @@ ${IS_NOT_PRESENT}                                           1
 ...                                                         AIPIPELINES=${EMPTY}
 ...                                                         MODELREGISTRY=${EMPTY}
 ...                                                         KSERVE=${EMPTY}
+...                                                         AIGATEWAY=${EMPTY}
 ...                                                         TRUSTYAI=${EMPTY}
 ...                                                         WORKBENCHES=${EMPTY}
 ...                                                         FEASTOPERATOR=${EMPTY}
@@ -67,7 +70,6 @@ ${IS_NOT_PRESENT}                                           1
 ...                                                         MLFLOWOPERATOR=${EMPTY}
 ...                                                         MODELSASSERVICE=${EMPTY}
 ...                                                         SPARKOPERATOR=${EMPTY}
-...                                                         AIGATEWAY=${EMPTY}
 ...                                                         BATCHGATEWAY=${EMPTY}
 
 @{CONTROLLERS_LIST}                                     # dashboard added in Suite Setup, since it's different in RHOAI vs ODH
@@ -696,7 +698,7 @@ Validate BatchGateway Removed State
 
 Validate Modelsasservice Managed State
     [Documentation]    Validate that the DSC Modelsasservice component Managed state creates the expected resources,
-    ...    check that ModelsAsService deployment is created and pod is in Ready state
+    ...    check that ModelsAsAService deployment is created and pod is in Ready state
     [Tags]
     ...    Operator
     ...    modelsasservice-managed
@@ -704,8 +706,8 @@ Validate Modelsasservice Managed State
     ...    Smoke
 
     Set DSC Nested Component Managed State And Wait For Completion
-    ...    kserve
-    ...    modelsAsService
+    ...    aigateway
+    ...    modelsAsAService
     ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
     ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_LABEL_SELECTOR}
     Check That Image Pull Path Is Correct
@@ -713,30 +715,40 @@ Validate Modelsasservice Managed State
     ...    ${IMAGE_PULL_PATH}
 
     [Teardown]      Restore Nested Component And Parent State
-    ...    kserve    modelsAsService
+    ...    aigateway    modelsAsAService
     ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${MODELSASSERVICE_CONTROLLER_MANAGER_LABEL_SELECTOR}
-    ...    ${KSERVE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${KSERVE_CONTROLLER_MANAGER_LABEL_SELECTOR}
-    ...    ${SAVED_MANAGEMENT_STATES.MODELSASSERVICE}    ${SAVED_MANAGEMENT_STATES.KSERVE}
+    ...    ${AIGATEWAY_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${AIGATEWAY_CONTROLLER_MANAGER_LABEL_SELECTOR}
+    ...    ${SAVED_MANAGEMENT_STATES.MODELSASSERVICE}    ${SAVED_MANAGEMENT_STATES.AIGATEWAY}
 
 Validate Modelsasservice Removed State
-    [Documentation]    Validate that ModelsAsService management state Removed does remove relevant resources.
+    [Documentation]    Validate that disabling MaaS removes the maas-controller deployment.
+    ...    Nested modelsAsAService=Removed alone does not reliably tear down maas-controller
+    ...    while aigateway stays Managed on current RHOAI builds (AGO/maas self-teardown gap).
+    ...    Disable the AIGateway parent as well so the module (and MaaS) are fully removed.
     [Tags]
     ...    Operator
     ...    Tier1
     ...    modelsasservice-removed
     ...    Integration
 
-    Set DSC Nested Component Removed State And Wait For Completion
-    ...    kserve
-    ...    modelsAsService
+    # Ensure MaaS is present so removal is meaningful
+    Set DSC Nested Component Managed State And Wait For Completion
+    ...    aigateway
+    ...    modelsAsAService
+    ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_LABEL_SELECTOR}
+
+    Set Nested Component State    aigateway    modelsAsAService    Removed
+    Set Component State    aigateway    Removed
+    Wait For Resources To Be Removed
     ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
     ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_LABEL_SELECTOR}
 
     [Teardown]      Restore Nested Component And Parent State
-    ...    kserve    modelsAsService
+    ...    aigateway    modelsAsAService
     ...    ${MODELSASSERVICE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${MODELSASSERVICE_CONTROLLER_MANAGER_LABEL_SELECTOR}
-    ...    ${KSERVE_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${KSERVE_CONTROLLER_MANAGER_LABEL_SELECTOR}
-    ...    ${SAVED_MANAGEMENT_STATES.MODELSASSERVICE}    ${SAVED_MANAGEMENT_STATES.KSERVE}
+    ...    ${AIGATEWAY_CONTROLLER_MANAGER_DEPLOYMENT_NAME}    ${AIGATEWAY_CONTROLLER_MANAGER_LABEL_SELECTOR}
+    ...    ${SAVED_MANAGEMENT_STATES.MODELSASSERVICE}    ${SAVED_MANAGEMENT_STATES.AIGATEWAY}
 
 Validate Support For Configuration Of Controller Resources
     [Documentation]    Validate support for configuration of controller resources in component deployments
@@ -806,6 +818,7 @@ Suite Setup
     ${SAVED_MANAGEMENT_STATES.AIPIPELINES}=     Get DSC Component State    ${DSC_NAME}    aipipelines    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.MODELREGISTRY}=     Get DSC Component State    ${DSC_NAME}    modelregistry    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.KSERVE}=     Get DSC Component State    ${DSC_NAME}    kserve    ${OPERATOR_NS}
+    ${SAVED_MANAGEMENT_STATES.AIGATEWAY}=    Get DSC Component State    ${DSC_NAME}    aigateway    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.TRUSTYAI}=     Get DSC Component State    ${DSC_NAME}    trustyai    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.WORKBENCHES}=    Get DSC Component State    ${DSC_NAME}    workbenches    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.FEASTOPERATOR}=    Get DSC Component State    ${DSC_NAME}    feastoperator    ${OPERATOR_NS}
@@ -813,11 +826,10 @@ Suite Setup
     ${SAVED_MANAGEMENT_STATES.MLFLOWOPERATOR}=    Get DSC Component State    ${DSC_NAME}    mlflowoperator    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.SPARKOPERATOR}=    Get DSC Component State    ${DSC_NAME}    sparkoperator
     ...    ${OPERATOR_NS}
-    ${SAVED_MANAGEMENT_STATES.AIGATEWAY}=    Get DSC Component State    ${DSC_NAME}    aigateway
-    ...    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.BATCHGATEWAY}=    Get DSC Nested Component State    ${DSC_NAME}
     ...    aigateway    batchGateway    ${OPERATOR_NS}
-    ${SAVED_MANAGEMENT_STATES.MODELSASSERVICE}=    Get DSC Nested Component State    ${DSC_NAME}    kserve    modelsAsService    ${OPERATOR_NS}
+    ${SAVED_MANAGEMENT_STATES.MODELSASSERVICE}=    Get DSC Nested Component State
+    ...    ${DSC_NAME}    aigateway    modelsAsAService    ${OPERATOR_NS}
     Set Suite Variable    ${SAVED_MANAGEMENT_STATES}
     Append To List  ${CONTROLLERS_LIST}    ${DASHBOARD_DEPLOYMENT_NAME}
 

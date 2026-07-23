@@ -31,31 +31,32 @@ derive_infra_namespace() {
 
 detect_infra_namespace() {
     local apps_ns="$1"
-    
-    # MaaS provisioning may run before the RHOAI operator has fully deployed
-    # the maas-controller (CRD registration, reconciliation, and pod scheduling
-    # can take 10+ minutes after the CSV is ready). Without waiting, detect
-    # would see no controller and fall back to the apps namespace — then when
-    # the operator deploys a controller with INFRA_NAMESPACE=AUTO it looks in
-    # the infra namespace where the secret doesn't exist, and maas-api never
-    # starts. Wait up to 15 minutes to cover slow clusters.
-    echo "Waiting for maas-controller deployment in ${apps_ns}..." >&2
-    for i in $(seq 1 90); do
-        oc get deployment maas-controller -n "${apps_ns}" &>/dev/null && break
-        sleep 10
-    done
-
-    local infra_val
+    local oc_stderr oc_rc infra_val
+    oc_stderr=$(mktemp)
     infra_val=$(oc get deployment maas-controller -n "${apps_ns}" \
         -o jsonpath='{.spec.template.spec.containers[0].env[?(@.name=="INFRA_NAMESPACE")].value}' \
-        2>/dev/null)
+        2>"${oc_stderr}") && oc_rc=0 || oc_rc=$?
 
-    if [[ "${infra_val}" == "AUTO" ]]; then
-        derive_infra_namespace "${apps_ns}"
-    elif [[ -n "${infra_val}" ]]; then
-        echo "${infra_val}"
+    if [[ $oc_rc -ne 0 ]]; then
+        local err_msg
+        err_msg=$(<"${oc_stderr}")
+        rm -f "${oc_stderr}"
+        if [[ "${err_msg}" == *"NotFound"* ]]; then
+            echo "maas-controller not found in ${apps_ns}; using derived infra namespace" >&2
+            derive_infra_namespace "${apps_ns}"
+        else
+            echo "ERROR: unexpected failure querying maas-controller in ${apps_ns}: ${err_msg}" >&2
+            return 1
+        fi
     else
-        echo "${apps_ns}"
+        rm -f "${oc_stderr}"
+        if [[ "${infra_val}" == "AUTO" ]]; then
+            derive_infra_namespace "${apps_ns}"
+        elif [[ -n "${infra_val}" ]]; then
+            echo "${infra_val}"
+        else
+            derive_infra_namespace "${apps_ns}"
+        fi
     fi
 }
 

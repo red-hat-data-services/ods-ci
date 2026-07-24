@@ -145,7 +145,7 @@ Install RHODS
               Oc Apply   kind=List   src=${destination_file}
               Remove File    ${destination_file}
           ELSE
-              Set Subscription Update Channel    ${OPERATOR_NAMESPACE}    ${UPDATE_CHANNEL}    ${OPERATOR_NAME}
+              Set Subscription Update Channel    ${OPERATOR_NAMESPACE}    ${UPDATE_CHANNEL}    ${OPERATOR_SUBSCRIPTION_NAME}
           END
           Wait For Installplan And Approve It    ${OPERATOR_NAMESPACE}    ${OPERATOR_NAME}    ${OPERATOR_SUBSCRIPTION_NAME}    ${rhoai_version}    #robocop:disable
       ELSE
@@ -378,23 +378,38 @@ Install RHODS In Self Managed Cluster Using CLI
   ...    timeout=20 min
   Should Be Equal As Integers   ${return_code}   0   msg=Error detected while installing RHODS
 
+Get RHOAI Operator Subscription Name
+  [Documentation]    Returns the Subscription CR name for the RHOAI operator on the cluster.
+  ...                Prefers OPERATOR_SUBSCRIPTION_NAME (e.g. rhoai-operator-dev for Cli installs);
+  ...                falls back to OPERATOR_NAME (e.g. rhods-operator) for legacy or reused clusters.
+  FOR    ${candidate}    IN    ${OPERATOR_SUBSCRIPTION_NAME}    ${OPERATOR_NAME}
+      ${rc} =    Run And Return Rc    oc get subscription ${candidate} -n ${OPERATOR_NAMESPACE}
+      IF    ${rc} == 0
+          Log    Found RHOAI operator subscription: ${candidate}    console=yes
+          RETURN    ${candidate}
+      END
+  END
+  FAIL    No RHOAI operator subscription found in ${OPERATOR_NAMESPACE}. Tried: ${OPERATOR_SUBSCRIPTION_NAME}, ${OPERATOR_NAME}
+
 Upgrade RHODS In Self Managed Cluster Using CLI
   [Documentation]   Upgrade RHODS on self managed cluster using CLI by updating catalog source and subscription.
-  ...              Uses OPERATOR_NAME as the subscription name since setup.sh creates the subscription
-  ...              with that name (not OPERATOR_SUBSCRIPTION_NAME which differs for Cli installs).
+  ...              Uses OPERATOR_SUBSCRIPTION_NAME for Subscription CR operations (e.g. rhoai-operator-dev
+  ...              for Cli dev-catalog installs) and OPERATOR_NAME for CSV naming (e.g. rhods-operator.2.25.9).
   ...              When a catalog source image is provided, creates/updates the catalog and points
   ...              the subscription to it. Approves any intermediate install plans before the target.
   [Arguments]     ${image_url}     ${rhoai_version}
+  ${subscription_name} =    Get RHOAI Operator Subscription Name
   Log    Starting RHODS upgrade with image: ${image_url}    console=yes
   Log    Update channel: ${UPDATE_CHANNEL}    console=yes
-  Log    Using subscription name: ${OPERATOR_NAME} (from setup.sh -n flag)    console=yes
-  Set Subscription Install Plan Approval    ${OPERATOR_NAMESPACE}    Manual    ${OPERATOR_NAME}
-  Set Subscription Update Channel    ${OPERATOR_NAMESPACE}    ${UPDATE_CHANNEL}    ${OPERATOR_NAME}
+  Log    Using subscription name: ${subscription_name} (operator package: ${OPERATOR_NAME})    console=yes
+  Set Subscription Install Plan Approval    ${OPERATOR_NAMESPACE}    Manual    ${subscription_name}
+  Set Subscription Update Channel    ${OPERATOR_NAMESPACE}    ${UPDATE_CHANNEL}    ${subscription_name}
   IF    "${image_url}" != "${EMPTY}"
       Set Catalog Source Image    ${image_url}    cs_name=${CATALOG_SOURCE}
-      Update Subscription Source    ${OPERATOR_NAMESPACE}    ${OPERATOR_NAME}    ${CATALOG_SOURCE}
+      Update Subscription Source    ${OPERATOR_NAMESPACE}    ${subscription_name}    ${CATALOG_SOURCE}
   END
-  Approve Intermediate Installplans    ${OPERATOR_NAMESPACE}    ${OPERATOR_NAME}    ${rhoai_version}
+  Approve Intermediate Installplans
+  ...    ${OPERATOR_NAMESPACE}    ${subscription_name}    ${OPERATOR_NAME}    ${rhoai_version}
   Wait For Target CSV    ${OPERATOR_NAMESPACE}    ${OPERATOR_NAME}    ${rhoai_version}
 
 Update Subscription Source
@@ -410,12 +425,12 @@ Update Subscription Source
 Approve Intermediate Installplans
   [Documentation]   Approves pending install plans until the target version's plan appears.
   ...              OLM may require intermediate upgrades (e.g. 2.25.0 -> 2.25.2 -> 2.25.3).
-  [Arguments]    ${namespace}    ${sub_name}    ${target_version}
-  ${target_csv} =    Set Variable    ${sub_name}.${target_version}
+  [Arguments]    ${namespace}    ${subscription_name}    ${operator_name}    ${target_version}
+  ${target_csv} =    Set Variable    ${operator_name}.${target_version}
   Log    Waiting for target CSV ${target_csv}, approving intermediate install plans    console=yes
   FOR    ${_}    IN RANGE    20
       ${ip_csv}    ${ip_name}    ${ip_approved} =    Get Current Installplan Info
-      ...    ${namespace}    ${sub_name}
+      ...    ${namespace}    ${subscription_name}
       IF    "${ip_name}" == ""
           Sleep    30s
           CONTINUE

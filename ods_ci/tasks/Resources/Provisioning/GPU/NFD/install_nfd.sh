@@ -20,6 +20,7 @@ declare -A images=(
     ["4.19"]="registry.redhat.io\/openshift4\/ose-node-feature-discovery-rhel9@sha256:d23fe6bcb36bdbe0e61a30f8ab7cb90e6dea25a399d87c3ba3d94415a61735b8"
     ["4.20"]="registry.redhat.io\/openshift4\/ose-node-feature-discovery-rhel9@sha256:fbd8db340dd4e4cda793b1f0453d42988bb8102d1061388827777bb848b067f2"
     ["4.21"]="registry.redhat.io\/openshift4\/ose-node-feature-discovery-rhel9@sha256:76a161a255a255eafcef4dc036adb8c0c8aadab2f0c57c3d3e19d5eea0ac5961"
+    ["4.22"]="registry.redhat.io\/openshift4\/ose-node-feature-discovery-rhel9@sha256:ec0f732495473310dc9faaff27960da877d8b4ced76259fd48a14f9f456b16ea"
     )
 if [ "${images[$xyVersion]}" ]; then
     imageUrl="${images[$xyVersion]}"

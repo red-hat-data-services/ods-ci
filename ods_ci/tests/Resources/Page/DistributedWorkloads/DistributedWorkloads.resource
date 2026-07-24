@@ -6,7 +6,7 @@ Resource          ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 
 
 *** Variables ***
-${CODEFLARE-SDK-RELEASE-TAG}             v0.31.3
+${CODEFLARE-SDK-RELEASE-TAG}             v0.31.6-sdk-test-fix
 ${CODEFLARE-SDK_DIR}                     codeflare-sdk
 ${CODEFLARE-SDK_REPO_URL}                %{CODEFLARE-SDK_REPO_URL=https://github.com/project-codeflare/codeflare-sdk.git}
 ${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}  https://github.com/opendatahub-io/distributed-workloads/releases/latest/download
@@ -65,15 +65,27 @@ Prepare Codeflare-SDK Test Setup
     # Perform oc login with Test User
     Login To OCP Using API    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}
 
+Skip Codeflare-SDK Pre Upgrade If Upgrade Target Is 3x
+    [Documentation]    Skips codeflare-sdk pre-upgrade when UPGRADE_TO_VERSION targets RHOAI 3.x or greater. That path is covered by shift-left container tests (pre on 2.25 image).
+    ${upgrade_to_version}=    Get Variable Value    ${UPGRADE_TO_VERSION}    ${EMPTY}
+    IF    '${upgrade_to_version}' == '${EMPTY}'
+        RETURN
+    END
+    ${is_upgrade_to_3x_or_greater}=    Evaluate    int("${upgrade_to_version}".split(".")[0]) >= 3
+    Skip If    ${is_upgrade_to_3x_or_greater}
+    ...    msg=Skipping codeflare-sdk pre-upgrade: UPGRADE_TO_VERSION is ${upgrade_to_version} (shift-left covers 2.25->3.x pre-upgrade)
+
+Prepare Codeflare-SDK Pre Upgrade Test Setup
+    [Documentation]   Prepare codeflare-sdk pre-upgrade tests; skip when upgrade target is 3.x
+    Skip Codeflare-SDK Pre Upgrade If Upgrade Target Is 3x
+    Prepare Codeflare-SDK Upgrade Test Setup
+
 Prepare Codeflare-SDK Upgrade Test Setup
-    [Documentation]   Prepare codeflare-sdk upgrade tests with RBAC setup and namespace creation
+    [Documentation]   Prepare codeflare-sdk upgrade tests with RBAC setup
     Clone Git Repository    ${CODEFLARE-SDK_REPO_URL}    ${CODEFLARE-SDK-RELEASE-TAG}    ${CODEFLARE-SDK_DIR}
 
     # Setup Kueue RBAC permissions as admin before switching to test user
     Setup Kueue Batch User RoleBinding
-
-    # Create the test namespace as admin
-    Create Test Namespace For Codeflare Test
 
     # Perform oc login with Test User
     Login To OCP Using API    ${TEST_USER.USERNAME}    ${TEST_USER.PASSWORD}
@@ -123,15 +135,6 @@ Cleanup Codeflare-SDK Setup
 
     # Cleanup Kueue RBAC resources
     Teardown Kueue Batch User RoleBinding
-
-Create Test Namespace For Codeflare Test
-    [Documentation]    Create the test namespace as admin for codeflare tests
-    Log To Console    "Creating test namespace test-ns-rayupgrade as admin"
-    ${rc}=    Run And Return Rc    oc create namespace test-ns-rayupgrade
-
-    IF    ${rc} != 0
-        Log To Console    "Warning: Unable to create namespace test-ns-rayupgrade (may already exist)"
-    END
 
 Prepare Training Operator KFTO E2E Test Suite
     [Documentation]    Prepare Training Operator KFTO E2E Test Suite

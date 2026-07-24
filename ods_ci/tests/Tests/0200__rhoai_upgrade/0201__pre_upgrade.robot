@@ -17,8 +17,6 @@ Resource            ../../Resources/Common.robot
 Resource            ../../Resources/Page/OCPDashboard/Pods/Pods.robot
 Resource            ../../Resources/Page/OCPDashboard/Builds/Builds.robot
 Resource            ../../Resources/Page/HybridCloudConsole/OCM.robot
-Resource            ../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
-Resource            ../../Resources/Page/DistributedWorkloads/WorkloadMetricsUI.resource
 Resource            ../../Resources/Page/FeatureStore/FeatureStore.resource
 
 Suite Setup         Upgrade Suite Setup
@@ -27,9 +25,6 @@ Test Tags           PreUpgrade
 
 
 *** Variables ***
-${CUSTOM_CULLER_TIMEOUT}    60000
-${S_SIZE}                   25
-${DW_PROJECT_CREATED}       False
 ${CODE}     while True: import time ; time.sleep(10); print ("Hello")
 ${UPGRADE_NS}    upgrade
 ${UPGRADE_CONFIG_MAP}    upgrade-config-map
@@ -37,30 +32,6 @@ ${USERGROUPS_CONFIG_MAP}    usergroups-config-map
 
 
 *** Test Cases ***
-Set PVC Size Via UI
-    [Documentation]    Sets a Pod toleration via the admin UI
-    [Tags]      Upgrade    Dashboard    deprecatedTest
-    [Setup]     Begin Web Test
-    Set PVC Value In RHODS Dashboard        ${S_SIZE}
-    [Teardown]      Dashboard Test Teardown
-
-Set Culler Timeout
-    [Documentation]     Sets a culler timeout via the admin UI
-    [Tags]      Upgrade    Dashboard    deprecatedTest
-    [Setup]     Begin Web Test
-    Modify Notebook Culler Timeout      ${CUSTOM_CULLER_TIMEOUT}
-    [Teardown]      Dashboard Test Teardown
-
-Setting Pod Toleration Via UI
-    [Documentation]    Sets a Pod toleration via the admin UI
-    [Tags]      Upgrade    Dashboard    deprecatedTest
-    [Setup]     Begin Web Test
-    Menu.Navigate To Page       Settings        Cluster settings
-    Wait Until Page Contains        Notebook pod tolerations
-    Set Pod Toleration Via UI       TestToleration
-    Disable "Usage Data Collection"
-    [Teardown]      Dashboard Test Teardown
-
 Verify RHODS Accept Multiple Admin Groups And CRD Gets Updates
     [Documentation]    Verify that users can set multiple admin groups and
     ...    check OdhDashboardConfig CRD gets updated according to Admin UI
@@ -86,64 +57,6 @@ Verify Custom Image Can Be Added
     [Documentation]    Create Custome notebook using Cli
     [Tags]      Upgrade    IDE
     Oc Apply        kind=ImageStream        src=tests/Tests/0200__rhoai_upgrade/custome_image.yaml
-
-Verify Distributed Workload Metrics Resources By Creating Ray Cluster Workload
-    # robocop: off=too-long-test-case
-    # robocop: off=too-many-calls-in-test-case
-    [Documentation]    Creates the Ray Cluster and verify resource usage
-    [Tags]      deprecatedTest    WorkloadOrchestration
-    [Setup]     Prepare Codeflare-SDK Test Setup
-    ${PRJ_UPGRADE}=     Set Variable        test-ns-rayupgrade
-    ${JOB_NAME}=        Set Variable        mnist
-    Run Codeflare-SDK Test
-    ...    upgrade
-    ...    raycluster_sdk_upgrade_test.py::TestMNISTRayClusterUp
-    ...    3.11
-    ...    ${RAY_CUDA_IMAGE_3.11}
-    ...    ${CODEFLARE-SDK-RELEASE-TAG}
-    Set Library Search Order        SeleniumLibrary
-    RHOSi Setup
-    Launch Dashboard
-    ...    ${TEST_USER.USERNAME}
-    ...    ${TEST_USER.PASSWORD}
-    ...    ${TEST_USER.AUTH_TYPE}
-    ...    ${ODH_DASHBOARD_URL}
-    ...    ${BROWSER.NAME}
-    ...    ${BROWSER.OPTIONS}
-    Open Distributed Workload Metrics Home Page
-    Select Distributed Workload Project By Name     ${PRJ_UPGRADE}
-    Set Global Variable     ${DW_PROJECT_CREATED}       True        # robocop: disable:replace-set-variable-with-var
-    Select Refresh Interval     15 seconds
-    Click Button    ${PROJECT_METRICS_TAB_XP}
-    Wait Until Element Is Visible
-    ...    ${DISTRIBUITED_WORKLOAD_RESOURCE_METRICS_TITLE_XP}
-    ...    timeout=20
-    Wait Until Element Is Visible       xpath=//*[text()="Running"]     timeout=30
-
-    ${cpu_requested}=       Get CPU Requested       ${PRJ_UPGRADE}      local-queue-mnist
-    ${memory_requested}=    Get Memory Requested    ${PRJ_UPGRADE}      local-queue-mnist       RayCluster
-    Check Requested Resources Chart     ${PRJ_UPGRADE}      ${cpu_requested}        ${memory_requested}
-    Check Requested Resources
-    ...    ${PRJ_UPGRADE}
-    ...    ${CPU_SHARED_QUOTA}
-    ...    ${MEMEORY_SHARED_QUOTA}
-    ...    ${cpu_requested}
-    ...    ${memory_requested}
-    ...    RayCluster
-
-    Click Button    ${WORKLOAD_STATUS_TAB_XP}
-    Check Distributed Workload Resource Metrics Status      ${JOB_NAME}     Running
-    Check Distributed Worklaod Status Overview      ${JOB_NAME}     Running
-    ...     All pods reached readiness and the workload is running
-
-    Click Button    ${PROJECT_METRICS_TAB_XP}
-    Check Distributed Workload Resource Metrics Chart       ${PRJ_UPGRADE}      ${cpu_requested}
-    ...     ${memory_requested}     RayCluster      ${JOB_NAME}
-
-    [Teardown]      Run Keywords        Cleanup Codeflare-SDK Setup     AND
-    ...     Run Keyword If Test Failed      Codeflare Upgrade Tests Teardown        ${PRJ_UPGRADE}      ${DW_PROJECT_CREATED}       # robocop: disable:line-too-long
-
-
 
 Long Running Jupyter Notebook
     [Documentation]    Launch a long running notebook before the upgrade

@@ -49,6 +49,8 @@ ${BATCHGATEWAY_CONTROLLER_MANAGER_LABEL_SELECTOR}           app.kubernetes.io/na
 ${BATCHGATEWAY_CONTROLLER_MANAGER_DEPLOYMENT_NAME}          llm-d-batch-gateway-operator
 ${SPARKOPERATOR_LABEL_SELECTOR}                             app.kubernetes.io/name=spark-operator
 ${SPARKOPERATOR_DEPLOYMENT_NAME}                            spark-operator-controller
+${MCPLIFECYCLEOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}   app.kubernetes.io/name=mcp-lifecycle-module-operator
+${MCPLIFECYCLEOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}  mcp-lifecycle-module-operator-controller-manager
 ${NOTEBOOK_CONTROLLER_DEPLOYMENT_LABEL_SELECTOR}            component.opendatahub.io/name=kf-notebook-controller
 ${NOTEBOOK_CONTROLLER_MANAGER_LABEL_SELECTOR}               component.opendatahub.io/name=odh-notebook-controller
 ${NOTEBOOK_DEPLOYMENT_NAME}                                 notebook-controller-deployment
@@ -71,6 +73,7 @@ ${IS_NOT_PRESENT}                                           1
 ...                                                         MODELSASSERVICE=${EMPTY}
 ...                                                         SPARKOPERATOR=${EMPTY}
 ...                                                         BATCHGATEWAY=${EMPTY}
+...                                                         MCPLIFECYCLEOPERATOR=${EMPTY}
 
 @{CONTROLLERS_LIST}                                     # dashboard added in Suite Setup, since it's different in RHOAI vs ODH
 ...                                                     data-science-pipelines-operator-controller-manager
@@ -608,6 +611,52 @@ Validate Spark Removed State
     ...    ${SPARKOPERATOR_DEPLOYMENT_NAME}      ${SPARKOPERATOR_LABEL_SELECTOR}
     ...    ${SAVED_MANAGEMENT_STATES.SPARKOPERATOR}
 
+Validate Mcplifecycleoperator Managed State
+    [Documentation]    Validate that the DSC Mcplifecycleoperator component Managed state creates the expected resources,
+    ...    check that MCP Lifecycle Module Operator deployment is created and pod is in Ready state
+    [Tags]
+    ...    Operator
+    ...    Smoke
+    ...    mcplifecycleoperator-managed
+    ...    Integration
+
+    Set DSC Component Managed State And Wait For Completion
+    ...    mcplifecycleoperator
+    ...    ${MCPLIFECYCLEOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${MCPLIFECYCLEOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
+    Check That Image Pull Path Is Correct
+    ...    ${MCPLIFECYCLEOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${IMAGE_PULL_PATH}
+
+    [Teardown]      Restore DSC Component State     mcplifecycleoperator
+    ...    ${MCPLIFECYCLEOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${MCPLIFECYCLEOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
+    ...    ${SAVED_MANAGEMENT_STATES.MCPLIFECYCLEOPERATOR}
+
+Validate Mcplifecycleoperator Removed State
+    [Documentation]    Validate that Mcplifecycleoperator management state Removed does remove relevant resources.
+    ...                Since mcplifecycleoperator is in tech preview and defaults to Removed state, first set it to Managed
+    ...                to ensure resources exist before testing removal.
+    [Tags]
+    ...    Operator
+    ...    Tier1
+    ...    mcplifecycleoperator-removed
+    ...    Integration
+
+    [Setup]     Set DSC Component Managed State And Wait For Completion     mcplifecycleoperator
+    ...    ${MCPLIFECYCLEOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${MCPLIFECYCLEOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
+
+    Set DSC Component Removed State And Wait For Completion
+    ...    mcplifecycleoperator
+    ...    ${MCPLIFECYCLEOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${MCPLIFECYCLEOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
+
+    [Teardown]      Restore DSC Component State     mcplifecycleoperator
+    ...    ${MCPLIFECYCLEOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${MCPLIFECYCLEOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
+    ...    ${SAVED_MANAGEMENT_STATES.MCPLIFECYCLEOPERATOR}
+
 Validate AIGateway Managed State
     [Documentation]    Validate that the DSC AIGateway component Managed state creates the expected resources,
     ...    check that AIGateway deployment is created and pod is in Ready state
@@ -825,6 +874,8 @@ Suite Setup
     ${SAVED_MANAGEMENT_STATES.OGX}=    Get DSC Component State    ${DSC_NAME}    ogx    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.MLFLOWOPERATOR}=    Get DSC Component State    ${DSC_NAME}    mlflowoperator    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.SPARKOPERATOR}=    Get DSC Component State    ${DSC_NAME}    sparkoperator
+    ...    ${OPERATOR_NS}
+    ${SAVED_MANAGEMENT_STATES.MCPLIFECYCLEOPERATOR}=    Get DSC Component State    ${DSC_NAME}    mcplifecycleoperator
     ...    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.BATCHGATEWAY}=    Get DSC Nested Component State    ${DSC_NAME}
     ...    aigateway    batchGateway    ${OPERATOR_NS}

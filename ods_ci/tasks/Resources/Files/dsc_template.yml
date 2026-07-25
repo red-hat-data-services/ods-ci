@@ -44,3 +44,5 @@ spec:
       managementState: <mlflowoperator_value>
     sparkoperator:
       managementState: <sparkoperator_value>
+    mcplifecycleoperator:
+      managementState: <mcplifecycleoperator_value>

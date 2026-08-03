@@ -92,6 +92,7 @@ Login To RHODS Dashboard
    END
    ${authorize_service_account}=  Is rhods-dashboard Service Account Authorization Required
    IF  ${authorize_service_account}  Authorize rhods-dashboard service account
+   Maybe Close Whats New Modal
 
 Logout From RHODS Dashboard
     [Documentation]  Logs out from the current user in the RHODS dashboard
@@ -109,6 +110,7 @@ Wait For RHODS Dashboard To Load
     ${half_timeout}=   Evaluate    int(${timeout}) / 2
     Wait For Condition    return document.title == ${dashboard_title}    timeout=${half_timeout}
     Wait Until Page Contains Element    xpath:${RHODS_LOGO_XPATH}    timeout=${timeout}
+    Maybe Close Whats New Modal
     IF    "${expected_page}" == "${NONE}"
         Wait Until Page Contains Element    //div[@data-testid="home-page"]    timeout=${timeout}
     ELSE
@@ -117,6 +119,15 @@ Wait For RHODS Dashboard To Load
     END
     IF    ${wait_for_cards} == ${TRUE}
         Wait Until Keyword Succeeds    3 times   5 seconds    Wait Until Cards Are Loaded
+    END
+
+Maybe Close Whats New Modal
+    [Documentation]    Closes the "What's New" modal if it appears after dashboard login
+    ${is_modal}=    Run Keyword And Return Status
+    ...    Wait Until Page Contains Element    xpath://div[@data-testid="whats-new-modal"]    timeout=5s
+    IF    ${is_modal}
+        Click Element    xpath://button[@data-testid="whats-new-skip-tour"]
+        Wait Until Page Does Not Contain Element    xpath://div[@data-testid="whats-new-modal"]    timeout=10s
     END
 
 Wait For Dashboard Page Title

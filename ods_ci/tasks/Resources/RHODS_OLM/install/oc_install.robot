@@ -454,7 +454,7 @@ Verify RHODS Installation
   ${ogx} =     Is Component Enabled    ogx    ${DSC_NAME}
   IF    "${ogx}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=platform.opendatahub.io/part-of=ogx
+    ...    label_selector=app.kubernetes.io/name=ogx-k8s-operator
   END
 
   ${mlflowoperator} =    Is Component Enabled    mlflowoperator    ${DSC_NAME}

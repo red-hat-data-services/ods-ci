@@ -72,7 +72,7 @@ ${CERT_MANAGER_NS}=  cert-manager-operator
 ${CONNECTIVITY_LINK_OP_NAME}=  rhcl-operator
 ${CONNECTIVITY_LINK_SUB_NAME}=  rhcl-operator
 ${CONNECTIVITY_LINK_CHANNEL_NAME}=  stable
-${CONNECTIVITY_LINK_STARTING_CSV}=  ${CONNECTIVITY_LINK_OP_NAME}.v1.4.1
+${CONNECTIVITY_LINK_STARTING_CSV}=  ${CONNECTIVITY_LINK_OP_NAME}.v1.4.2
 ${CONNECTIVITY_LINK_NS}=  kuadrant-system
 ${AUTHORINO_CSV_NAME}=  Authorino Operator
 ${RHODS_CSV_DISPLAY}=    Red Hat OpenShift AI
@@ -454,7 +454,7 @@ Verify RHODS Installation
   ${ogx} =     Is Component Enabled    ogx    ${DSC_NAME}
   IF    "${ogx}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/part-of=ogx
+    ...    label_selector=app.kubernetes.io/name=ogx-k8s-operator
   END
 
   ${mlflowoperator} =    Is Component Enabled    mlflowoperator    ${DSC_NAME}

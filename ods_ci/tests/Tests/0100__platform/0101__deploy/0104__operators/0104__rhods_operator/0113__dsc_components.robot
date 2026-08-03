@@ -35,7 +35,7 @@ ${TRUSTYAI_CONTROLLER_MANAGER_LABEL_SELECTOR}               app.kubernetes.io/pa
 ${TRUSTYAI_CONTROLLER_MANAGER_DEPLOYMENT_NAME}              trustyai-service-operator-controller-manager
 ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}          app.kubernetes.io/part-of=feastoperator
 ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}         feast-operator-controller-manager
-${OGX_CONTROLLER_MANAGER_LABEL_SELECTOR}                    app.kubernetes.io/part-of=ogx
+${OGX_CONTROLLER_MANAGER_LABEL_SELECTOR}                    app.kubernetes.io/name=ogx-k8s-operator
 ${OGX_CONTROLLER_MANAGER_DEPLOYMENT_NAME}                   ogx-k8s-operator-controller-manager
 ${MLFLOWOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}         app.kubernetes.io/name=mlflow-operator
 ${MLFLOWOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}        mlflow-operator-controller-manager

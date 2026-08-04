@@ -107,7 +107,7 @@ Select Runtime Config
 
 Get Pipeline Run Name
     [Documentation]    Gets the run ID after a pipeline is successfully submitted
-    ${job_id} =    Get Text    xpath=//a[.="Run Details."]/../p
+    ${job_id} =    Get Text    xpath=//a[.="Run Details."]/../following-sibling::p
     ${job_id} =    Fetch From Right    ${job_id}    /
     ${job_id} =    Fetch From Left    ${job_id}    working directory
     ${job_id} =    Strip String    ${job_id}

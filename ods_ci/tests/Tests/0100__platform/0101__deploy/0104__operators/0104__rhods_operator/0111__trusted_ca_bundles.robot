@@ -13,7 +13,8 @@ ${OPERATOR_NS}    ${OPERATOR_NAMESPACE}
 ${TEST_NS}    test-trustedcabundle
 ${DSCI_NAME}    default-dsci
 ${TRUSTED_CA_BUNDLE_CONFIGMAP}    odh-trusted-ca-bundle
-${CUSTOM_CA_BUNDLE}    test-example-custom-ca-bundle
+${CUSTOM_CA_BUNDLE_FILE}    tests/Resources/Files/test-ca-bundle.pem
+${CUSTOM_CA_BUNDLE}    ${EMPTY}
 ${IS_PRESENT}    0
 ${IS_NOT_PRESENT}    1
 ${SAVED_CUSTOM_CA_BUNDLE}    ${EMPTY}
@@ -37,12 +38,6 @@ Validate Trusted CA Bundles State Managed
     ...    Check ConfigMap Contains CA Bundle Key    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    ca-bundle.crt    ${TEST_NS}
 
     Set Custom CA Bundle Value In DSCI    ${DSCI_NAME}   ${CUSTOM_CA_BUNDLE}    ${OPERATOR_NS}
-    ${rc}   ${output}=    Run And Return Rc And Output
-    ...    oc get project test-trustedcabundle -o yaml
-    Log To Console          ${output}
-    ${rc}   ${output}=    Run And Return Rc And Output
-    ...    oc get configmap ${TRUSTED_CA_BUNDLE_CONFIGMAP} -n ${TEST_NS} -o yaml | grep ${CUSTOM_CA_BUNDLE}
-    Log To Console          ${output}
     Wait Until Keyword Succeeds    5 min    0 sec
     ...    Is CA Bundle Value Present    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    ${CUSTOM_CA_BUNDLE}    ${TEST_NS}    ${IS_PRESENT}
 
@@ -58,12 +53,6 @@ Validate Trusted CA Bundles State Unmanaged
     # Trusted CA Bundle managementStatus 'Unmanaged' should NOT result in bundle being overwirtten by operator
     Set Custom CA Bundle Value On ConfigMap
     ...    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    random-ca-bundle-value    ${TEST_NS}    5s
-    ${rc}   ${output}=    Run And Return Rc And Output
-    ...    oc get project test-trustedcabundle -o yaml
-    Log To Console          ${output}
-    ${rc}   ${output}=    Run And Return Rc And Output
-    ...    oc get configmap ${TRUSTED_CA_BUNDLE_CONFIGMAP} -n ${TEST_NS} -o yaml | grep ${CUSTOM_CA_BUNDLE}
-    Log To Console          ${output}
     Wait Until Keyword Succeeds    5 min    0 sec
     ...    Is CA Bundle Value Present    ${TRUSTED_CA_BUNDLE_CONFIGMAP}    random-ca-bundle-value    ${TEST_NS}    ${IS_PRESENT}
 
@@ -116,6 +105,8 @@ Suite Setup
     Create Namespace In Openshift    ${TEST_NS}
     ${SAVED_CUSTOM_CA_BUNDLE}=    Get Custom CA Bundle Value In DSCI    ${DSCI_NAME}    ${OPERATOR_NAMESPACE}
     Set Suite Variable    ${SAVED_CUSTOM_CA_BUNDLE}
+    ${cert_content}=    Get File    ${CUSTOM_CA_BUNDLE_FILE}
+    Set Suite Variable    ${CUSTOM_CA_BUNDLE}    ${cert_content}
 
 Suite Teardown
     [Documentation]    Suite Teardown
@@ -129,18 +120,23 @@ Restore DSCI Trusted CA Bundle Settings
     Set Custom CA Bundle Value In DSCI    ${DSCI_NAME}    ${custom_ca_value}    ${OPERATOR_NS}
 
 Is CA Bundle Value Present
-    [Documentation]    Check if the ConfigtMap contains Custom CA Bundle value
-    [Arguments]    ${config_map}    ${custom_ca_bundle_value}    ${namespace}        ${expected_result}
-    ${rc}   ${output}=    Run And Return Rc And Output
-    ...    oc get configmap ${config_map} -n ${namespace} -o yaml | grep ${custom_ca_bundle_value}
-    Should Be Equal    "${rc}"    "${expected_result}"    msg=${output}
+    [Documentation]    Check if the ConfigMap contains Custom CA Bundle value in the odh-ca-bundle.crt key
+    [Arguments]    ${config_map}    ${custom_ca_bundle_value}    ${namespace}    ${expected_result}
+    ${rc}    ${actual_value}=    Run And Return Rc And Output
+    ...    oc get configmap ${config_map} -n ${namespace} -o json | jq -r '.data["odh-ca-bundle.crt"]'
+    Should Be Equal    "${rc}"    "0"    msg=${actual_value}
+    IF    "${expected_result}" == "${IS_PRESENT}"
+        Should Contain    ${actual_value}    ${custom_ca_bundle_value}
+    ELSE
+        Should Not Contain    ${actual_value}    ${custom_ca_bundle_value}
+    END
 
 Check ConfigMap Contains CA Bundle Key
-    [Documentation]    Checks that ConfigMap contains CA Bundle
+    [Documentation]    Checks that ConfigMap contains the specified data key
     [Arguments]    ${config_map}    ${ca_bundle_name}    ${namespace}
-    ${rc}   ${output}=    Run And Return Rc And Output
-    ...    oc get configmap ${config_map} -n ${namespace} -o yaml | grep ${ca_bundle_name}
-    Should Be Equal    "${rc}"    "0"     msg=${output}
+    ${rc}    ${output}=    Run And Return Rc And Output
+    ...    oc get configmap ${config_map} -n ${namespace} -o json | jq -e '.data | has("${ca_bundle_name}")'
+    Should Be Equal    "${rc}"    "0"    msg=Key "${ca_bundle_name}" not found in ConfigMap ${config_map}: ${output}
 
 Set Custom CA Bundle Value In DSCI
     [Documentation]    Set Custom CA Bundle value in DSCI

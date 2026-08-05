@@ -341,6 +341,7 @@ Verify RHODS Installation
             Wait Until Keyword Succeeds    3 min    0 sec
             ...    Is Resource Present    DataScienceCluster    ${DSC_NAME}
             ...    ${OPERATOR_NAMESPACE}      ${IS_PRESENT}
+            Patch DSC With Model Cache Config
 
        END
   ELSE
@@ -397,8 +398,6 @@ Verify RHODS Installation
   ${kserve} =    Is Component Enabled    kserve    ${DSC_NAME}
   IF    "${kserve}" == "true"
     Configure Gateway API
-    ${enable_model_cache} =    Is Model Cache Enabled
-    IF    ${enable_model_cache}    Patch DSC With Model Cache Config
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app=odh-model-controller    timeout=400s
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
@@ -909,6 +908,7 @@ Create DataScienceCluster CustomResource Using Test Variables
                 Run    sed -i'' -e 's/<workbenches_namespace>/${NOTEBOOKS_NAMESPACE}/' ${file_path}dsc_apply.yml
             END
     END
+    Add Model Cache Config To DSC Yaml    ${file_path}dsc_apply.yml
 
 
 Wait For DataScienceCluster CustomResource To Be Ready
@@ -1624,28 +1624,53 @@ Configure Gateway API
     Log To Console    ${output}
     Should Be Equal As Integers    ${rc}    0    msg=Error configuring Gateway for KServe
 
-Patch DSC With Model Cache Config    #robocop:disable=TooManyKeywords
-    [Documentation]    Patch the DataScienceCluster with modelCache config.
-    ...    Uses MODEL_CACHE_NODE_COUNT (default 2) to decide how many worker nodes to include.
-    ...    If 0, sets managementState to Removed. If >= 1, sets Managed with that many nodes.
-    [Arguments]    ${dsc_name}=${DSC_NAME}
-    ${node_count} =    Get Variable Value    ${MODEL_CACHE_NODE_COUNT}    2
-    ${node_count} =    Convert To Integer    ${node_count}
-    IF    ${node_count} == ${0}
-        Log To Console    MODEL_CACHE_NODE_COUNT is 0, setting modelCache managementState to Removed
-        ${rc}    ${output} =    Run And Return Rc And Output
-        ...    oc patch DataScienceCluster/${dsc_name} --type merge -p '{"spec":{"components":{"kserve":{"modelCache":{"managementState":"Removed"}}}}}'    #robocop:disable
-    ELSE
-        ${cmd} =    Set Variable
-        ...    oc get nodes -l node-role.kubernetes.io/worker= --no-headers -o custom-columns=":metadata.name" | head -${node_count} | jq -R . | jq -sc .    #robocop:disable
-        ${rc}    ${node_names_json} =    Run And Return Rc And Output    ${cmd}
-        Should Be Equal As Integers    ${rc}    0    msg=Failed to fetch worker node names
-        Should Not Be Empty    ${node_names_json}    msg=No worker nodes found in the cluster
-        Should Not Be Equal    ${node_names_json}    []    msg=No worker nodes found in the cluster
-        Log To Console    Patching DSC with modelCache (nodes: ${node_names_json}, count: ${node_count})
-        ${rc}    ${output} =    Run And Return Rc And Output
-        ...    oc patch DataScienceCluster/${dsc_name} --type merge -p '{"spec":{"components":{"kserve":{"modelCache":{"cacheSize":"10Gi","managementState":"Managed","nodeNames":${node_names_json}}}}}}'    #robocop:disable
+Get Worker Node Names For Model Cache
+    [Documentation]    Fetch first 2 worker node names for modelCache.
+    ${cmd} =    Set Variable
+    ...    oc get nodes -l node-role.kubernetes.io/worker= --no-headers -o custom-columns=":metadata.name" | head -2    #robocop:disable
+    ${rc}    ${output} =    Run And Return Rc And Output    ${cmd}
+    Should Be Equal As Integers    ${rc}    0    msg=Failed to fetch worker node names
+    Should Not Be Empty    ${output}    msg=No worker nodes found in the cluster
+    Log To Console    Fetched worker node names for modelCache: ${output}
+    RETURN    ${output}
+
+Add Model Cache Config To DSC Yaml
+    [Documentation]    Inject modelCache into DSC YAML at create time (2 nodes, 1Gi).
+    [Arguments]    ${dsc_yaml_path}
+    ${node_names} =    Get Worker Node Names For Model Cache
+    Log To Console    Adding modelCache config with worker nodes: ${node_names}
+    ${rc}    ${output} =    Run And Return Rc And Output
+    ...    yq -i '.spec.components.kserve.modelCache.cacheSize = "1Gi" | .spec.components.kserve.modelCache.managementState = "Managed"' ${dsc_yaml_path}    #robocop:disable
+    Should Be Equal As Integers    ${rc}    0    msg=Failed to add modelCache config: ${output}
+    Add Node Names To Model Cache Yaml    ${dsc_yaml_path}    ${node_names}
+
+Add Node Names To Model Cache Yaml
+    [Documentation]    Add worker node names to modelCache.nodeNames in DSC YAML
+    [Arguments]    ${dsc_yaml_path}    ${node_names}
+    ${rc}    ${output} =    Run And Return Rc And Output
+    ...    yq -i '.spec.components.kserve.modelCache.nodeNames = []' ${dsc_yaml_path}
+    Should Be Equal As Integers    ${rc}    0    msg=Failed to initialize nodeNames: ${output}
+    @{nodes} =    Split String    ${node_names}    \n
+    FOR    ${node}    IN    @{nodes}
+        ${node} =    Strip String    ${node}
+        IF    "${node}" != "${EMPTY}"
+            ${rc}    ${output} =    Run And Return Rc And Output
+            ...    yq -i '.spec.components.kserve.modelCache.nodeNames += ["${node}"]' ${dsc_yaml_path}
+            Should Be Equal As Integers    ${rc}    0    msg=Failed to add node ${node}: ${output}
+        END
     END
+
+Patch DSC With Model Cache Config
+    [Documentation]    Patch existing DSC with modelCache (2 nodes, 1Gi). Used when DSC is
+    ...    created by the operator (managed) rather than via dsc_template.yml.
+    [Arguments]    ${dsc_name}=${DSC_NAME}
+    ${node_names} =    Get Worker Node Names For Model Cache
+    ${node_names_json} =    Evaluate
+    ...    json.dumps([n.strip() for n in """${node_names}""".splitlines() if n.strip()])    modules=json
+    Should Not Be Equal    ${node_names_json}    []    msg=No worker nodes found in the cluster
+    Log To Console    Patching DSC with modelCache (nodes: ${node_names_json})
+    ${rc}    ${output} =    Run And Return Rc And Output
+    ...    oc patch DataScienceCluster/${dsc_name} --type merge -p '{"spec":{"components":{"kserve":{"modelCache":{"cacheSize":"1Gi","managementState":"Managed","nodeNames":${node_names_json}}}}}}'    #robocop:disable
     Log To Console    ${output}
     Should Be Equal As Integers    ${rc}    0    msg=Error patching DSC with modelCache config: ${output}
 

@@ -8,9 +8,13 @@ Resource         ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 *** Variables ***
 ${FEATURE-STORE-RELEASE-TAG}             release-3.5
 ${FEATURE-STORE_DIR}                     feature-store
+${FEAST-MODULE-OPERATOR_DIR}             feast-modular-operator
 ${FEATURE-STORE_REPO_URL}                %{FEATURE-STORE_REPO_URL=https://github.com/opendatahub-io/feast.git}
 ${NOTEBOOK_IMAGE}                        quay.io/rhoai/odh-workbench-jupyter-datascience-cpu-py312-rhel9@sha256:84091ed67cf7bcad9058820cd848d42c1168eef69841072af29392089c6a4f99
 ${FEAST_VERSION}                         0.65.0
+${FEAST_NOTEBOOK_VERSION}                0.64.0
+${FEAST-MODULE-OPERATOR_REPO_URL}        %{FEAST-MODULE-OPERATOR_REPO_URL=https://github.com/opendatahub-io/feast-module-operator.git}
+${FEAST_PLATFORM_VERSION}                3.5.0
 ${DSC_NAME}                              default-dsc
 
 
@@ -36,6 +40,19 @@ Teardown Feast E2E Test Suite
     [Documentation]   Cleanup directory and Feast E2E Test Suite
     Log To Console     "Removing directory ${FEATURE-STORE_DIR}"
     Remove Directory        ${FEATURE-STORE_DIR}    recursive=True
+
+Prepare Feast Modular Operator E2E Test Suite
+    [Documentation]    Prepare Feast E2E Test Suite
+    Log To Console    Preparing Feast E2E Test Suite
+    Log To Console    "Cloning Git reposiotory ${FEAST-MODULE-OPERATOR_REPO_URL}"
+    Common.Clone Git Repository    ${FEAST-MODULE-OPERATOR_REPO_URL}    main    ${FEAST-MODULE-OPERATOR_DIR}
+    Prepare Feature Store Test Suite
+    Skip If Component Is Not Enabled     feastoperator
+
+Teardown Feast Modular Operator E2E Test Suite
+    [Documentation]   Cleanup directory and Feast E2E Test Suite
+    Log To Console     "Removing directory ${FEAST-MODULE-OPERATOR_DIR}"
+    Remove Directory        ${FEAST-MODULE-OPERATOR_DIR}    recursive=True
 
 Ensure Kueue Unmanaged For Feast Ray Offline Store Test
     [Documentation]    Ensure Kueue is Unmanaged for Feast tests
@@ -108,7 +125,7 @@ Run Feast Notebook Test
     ...    timeout=10 min
     ...    env:RUN_ON_OPENSHIFT_CI=true
     ...    env:NOTEBOOK_IMAGE=${NOTEBOOK_IMAGE}
-    ...    env:FEAST_VERSION=${FEAST_VERSION}
+    ...    env:FEAST_VERSION=${FEAST_NOTEBOOK_VERSION}
     ...    env:APPLICATIONS_NAMESPACE=${APPLICATIONS_NAMESPACE}
     ...    env:PIP_INDEX_URL=${PIP_INDEX_URL}
     ...    env:PIP_TRUSTED_HOST=${PIP_TRUSTED_HOST}
@@ -168,4 +185,21 @@ Check Feast Instance Pod Images Pull Path Is Correct
             Run Keyword And Continue On Failure
             ...    Should Be Equal As Strings    ${featureServerImage}    ${image}
         END
+    END
+
+Run Feast Module Operator E2E Upgrade Test
+    [Documentation]   Run feast modular operator upgrade test
+    [Arguments]   ${TEST_TYPE}
+    Log To Console    "Running feast modular operator ${TEST_TYPE} upgrade test"
+    ${command}=    Set Variable    cd ${FEAST-MODULE-OPERATOR_DIR} && go test ./test/e2e/upgrade/${TEST_TYPE}/ -v -tags=e2e -timeout 3m
+    ${result}=    Run Process    ${command}
+    ...    shell=true
+    ...    timeout=10 min
+    ...    env:FEAST_VERSION=${FEAST_VERSION}
+    ...    env:FEAST_OPERATOR_PLATFORM_VERSION=${FEAST_PLATFORM_VERSION}
+    ...    env:APPLICATIONS_NAMESPACE=${APPLICATIONS_NAMESPACE}
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Running feast modular operator ${TEST_TYPE} upgrade test failed
     END

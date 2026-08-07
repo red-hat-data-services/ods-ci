@@ -252,6 +252,25 @@ JupyterLab Is Visible
   ${jupyterlab_visible} =  Run Keyword and Return Status  Wait Until Element Is Visible  xpath:${JL_TABBAR_CONTENT_XPATH}  timeout=30
   RETURN  ${jupyterlab_visible}
 
+Page Contains Text Or Visible Element
+    [Documentation]    Returns "text" if ${text} is present on the page, or "element" if the
+    ...    element at ${element_xpath} is visible. Fails if neither is true.
+    [Arguments]    ${text}    ${element_xpath}
+    ${text_found} =    Run Keyword And Return Status    Page Should Contain    ${text}
+    IF    ${text_found}    RETURN    text
+    ${element_found} =    Run Keyword And Return Status
+    ...    Element Should Be Visible    xpath:${element_xpath}
+    IF    ${element_found}    RETURN    element
+    Fail    Neither '${text}' nor visible element '${element_xpath}' found on page
+
+Wait Until Page Contains Text Or Visible Element
+    [Documentation]    Waits until the page contains the given text OR the given element is visible.
+    ...    Returns "text" or "element" depending on which matched first.
+    [Arguments]    ${text}    ${element_xpath}    ${retry}=15x    ${retry_interval}=1s
+    ${matched} =    Wait Until Keyword Succeeds    ${retry}    ${retry_interval}
+    ...    Page Contains Text Or Visible Element    ${text}    ${element_xpath}
+    RETURN    ${matched}
+
 Wait Until JupyterLab Is Loaded
   [Arguments]   ${timeout}=60
   Wait Until Element Is Visible  xpath:${JL_TABBAR_CONTENT_XPATH}  timeout=${timeout}

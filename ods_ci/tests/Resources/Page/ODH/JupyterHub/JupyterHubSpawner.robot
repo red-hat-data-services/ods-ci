@@ -350,11 +350,15 @@ Spawn Notebook With Arguments  # robocop: disable
                 END
             END
             Spawn Notebook    ${spawner_timeout}    ${same_tab}
-            Run Keyword And Warn On Failure    Wait Until Page Contains    Log in with    timeout=15s
-            ${oauth_prompt_visible} =    Is OpenShift OAuth Login Prompt Visible
-            IF  ${oauth_prompt_visible}    Click Button     Log in with OpenShift
-            Run Keyword And Warn On Failure   Login To Openshift  ${username}  ${password}  ${auth_type}
-            Verify Service Account Authorization Not Required
+            ${status}    ${matched} =    Run Keyword And Warn On Failure
+            ...    Wait Until Page Contains Text Or Visible Element
+            ...    Log in with    ${JL_TABBAR_CONTENT_XPATH}    retry=15x    retry_interval=1s
+            IF    "${status}" == "FAIL" or "${matched}" != "element"
+                ${oauth_prompt_visible} =    Is OpenShift OAuth Login Prompt Visible
+                IF  ${oauth_prompt_visible}    Click Button     Log in with OpenShift
+                Run Keyword And Warn On Failure   Login To Openshift  ${username}  ${password}  ${auth_type}
+                Verify Service Account Authorization Not Required
+            END
 
             Wait Notebook To Be Loaded  ${image}    ${version}
             ${spawn_fail} =  Has Spawn Failed

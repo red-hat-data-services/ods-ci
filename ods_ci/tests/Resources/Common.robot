@@ -168,7 +168,7 @@ Wait Until Page Contains A String In List
     ...    Returns the first matching string in list order (see
     ...    Page Should Contain A String In List for precedence semantics).
     [Arguments]    ${text_list}    ${retry}=12x    ${retry_interval}=5s
-    ${matched} =    Wait Until Keyword Succeeds    ${retry}   ${retry_interval}
+    ${matched}=    Wait Until Keyword Succeeds    ${retry}   ${retry_interval}
     ...    Page Should Contain A String In List     ${text_list}
     RETURN    ${matched}
 

@@ -617,11 +617,22 @@ Clone Repo
 
 
 Clone Repo and Return Error Message
-    [Documentation]    Clones the github repository and returns the error
+    [Documentation]    Clones the github repository and returns the error.
     [Tags]    Private Keyword
     [Arguments]    ${repo_url}
     Clone Repo    ${repo_url}
-    Run Keyword And Warn On Failure    Wait Until Page Contains    Cloning...    timeout=5s
+    ${matched} =    Wait Until Page Contains A String In List
+    ...    ${{["Successfully cloned", "Failed to clone", "Cloning..."]}}
+    ...    retry=5x    retry_interval=1s
+    IF    "${matched}" == "Cloning..."
+        Log    Clone still in progress, extending wait    console=yes
+        ${matched} =    Wait Until Page Contains A String In List
+        ...    ${{["Successfully cloned", "Failed to clone"]}}
+        ...    retry=30x    retry_interval=1s
+    END
+    IF    "${matched}" == "Successfully cloned"
+        Fail    msg=Clone succeeded, no error to report
+    END
     ${err_msg} =    Get Git Clone Error Message
     RETURN    ${err_msg}
 

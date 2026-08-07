@@ -153,19 +153,24 @@ Lists Size Should Be Equal
     Should Be Equal As Integers  ${length_one}  ${length_two}
 
 Page Should Contain A String In List
-    [Documentation]    Verifies that page contains at least one of the strings in text_list
+    [Documentation]    Verifies that page contains at least one of the strings in text_list.
+    ...    Returns the first matching string in list order (list order defines
+    ...    precedence when more than one candidate is simultaneously present).
     [Arguments]  ${text_list}
     FOR    ${text}    IN    @{text_list}
         ${text_found}=    Run Keyword And Return Status    Page Should Contain   ${text}
-        IF  ${text_found}    RETURN
+        IF  ${text_found}    RETURN    ${text}
     END
     Fail    Current page doesn't contain any of the strings in: @{text_list}
 
 Wait Until Page Contains A String In List
-    [Documentation]    Waits until page contains at least one of the strings in text_list
+    [Documentation]    Waits until page contains at least one of the strings in text_list.
+    ...    Returns the first matching string in list order (see
+    ...    Page Should Contain A String In List for precedence semantics).
     [Arguments]    ${text_list}    ${retry}=12x    ${retry_interval}=5s
-    Wait Until Keyword Succeeds    ${retry}   ${retry_interval}
+    ${matched} =    Wait Until Keyword Succeeds    ${retry}   ${retry_interval}
     ...    Page Should Contain A String In List     ${text_list}
+    RETURN    ${matched}
 
 #robocop: disable: line-too-long
 Get RHODS Version

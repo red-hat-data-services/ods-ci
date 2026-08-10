@@ -870,14 +870,15 @@ Create DataScienceCluster CustomResource Using Test Variables
     ${file_path} =    Set Variable    tasks/Resources/Files/
     Copy File    source=${file_path}${dsc_template}    destination=${file_path}dsc_apply.yml
     Run    sed -i'' -e 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
-    # Detect installed RHOAI version to select the correct MaaS DSC field.
+    # Detect whether this cluster uses the 3.5+ MaaS DSC field (aigateway.modelsAsAService)
+    # or the legacy 3.4 field (kserve.modelsAsService). Check the installed CRD schema
+    # directly — this works for both ODH and RHOAI and is version-string-independent.
     # In 3.5+, MaaS moved from kserve.modelsAsService → aigateway.modelsAsAService (operator #3723).
-    # On 3.4.x clusters the aigateway.* fields are unknown and silently dropped, so we must
-    # populate kserve.modelsAsService instead and leave aigateway out of the MaaS config.
-    ${_csv_version} =    Run
-    ...    oc get csv -n ${OPERATOR_NAMESPACE} -o jsonpath='{.items[?(@.spec.displayName=="Red Hat OpenShift AI")].spec.version}' 2>/dev/null || echo "0.0.0"
-    ${_is_pre_35} =    Evaluate    '${_csv_version}'.startswith('3.4') or ('${_csv_version}' != '0.0.0' and '${_csv_version}' < '3.5')
-    Log To Console    Detected RHOAI version: ${_csv_version} — pre-3.5 MaaS path: ${_is_pre_35}
+    # On 3.4.x clusters, aigateway.* fields are unknown and silently dropped by the API server.
+    ${_aigateway_in_schema} =    Run
+    ...    oc get crd datascienceclusters.datasciencecluster.opendatahub.io -o jsonpath='{.spec.versions[0].schema.openAPIV3Schema.properties.spec.properties.components.properties.aigateway.properties.modelsAsAService}' 2>/dev/null
+    ${_is_pre_35} =    Evaluate    '${_aigateway_in_schema}' == ''
+    Log To Console    aigateway.modelsAsAService in DSC CRD schema: ${_aigateway_in_schema != ''} — pre-3.5 MaaS path: ${_is_pre_35}
     ${maas_configured} =    Run Keyword And Return Status
     ...    Dictionary Should Contain Key    ${COMPONENTS}    modelsasservice
     IF    ${maas_configured} and '${COMPONENTS.modelsasservice}' == 'Managed'

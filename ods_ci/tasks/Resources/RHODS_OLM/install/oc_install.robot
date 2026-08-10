@@ -875,10 +875,20 @@ Create DataScienceCluster CustomResource Using Test Variables
     # directly — this works for both ODH and RHOAI and is version-string-independent.
     # In 3.5+, MaaS moved from kserve.modelsAsService → aigateway.modelsAsAService (operator #3723).
     # On 3.4.x clusters, aigateway.* fields are unknown and silently dropped by the API server.
-    ${_aigateway_in_schema} =    Run
-    ...    oc get crd datascienceclusters.datasciencecluster.opendatahub.io -o jsonpath='{.spec.versions[0].schema.openAPIV3Schema.properties.spec.properties.components.properties.aigateway.properties.modelsAsAService}' 2>/dev/null
-    ${_is_pre_35} =    Evaluate    '${_aigateway_in_schema}' == ''
-    Log To Console    aigateway.modelsAsAService in DSC CRD schema: ${_aigateway_in_schema != ''} — pre-3.5 MaaS path: ${_is_pre_35}
+    # Use the storage version to avoid hardcoding version index.
+    # Empty output on non-zero rc → legacy path; non-zero exit treated as unknown (safe default).
+    ${_crd_jsonpath} =    Set Variable
+    ...    {.spec.versions[?(@.storage==true)].schema.openAPIV3Schema
+    ...    .properties.spec.properties.components
+    ...    .properties.aigateway.properties.modelsAsAService}
+    ${_crd_rc}    ${_aigateway_in_schema} =    Run And Return Rc And Output
+    ...    oc get crd datascienceclusters.datasciencecluster.opendatahub.io
+    ...    -o jsonpath='${_crd_jsonpath}' 2>/dev/null
+    IF    ${_crd_rc} != 0
+        Log To Console    WARNING: CRD query failed (rc=${_crd_rc}); defaulting to 3.5+ MaaS path
+    END
+    ${_is_pre_35} =    Evaluate    ${_crd_rc} == 0 and '${_aigateway_in_schema}' == ''
+    Log To Console    DSC CRD aigateway.modelsAsAService present: ${not ${_is_pre_35}}
     ${maas_configured} =    Run Keyword And Return Status
     ...    Dictionary Should Contain Key    ${COMPONENTS}    modelsasservice
     IF    ${maas_configured} and '${COMPONENTS.modelsasservice}' == 'Managed'

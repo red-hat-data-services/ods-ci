@@ -884,11 +884,8 @@ Create DataScienceCluster CustomResource Using Test Variables
     ${_crd_rc}    ${_aigateway_in_schema} =    Run And Return Rc And Output
     ...    oc get crd datascienceclusters.datasciencecluster.opendatahub.io
     ...    -o jsonpath='${_crd_jsonpath}' 2>/dev/null
-    IF    ${_crd_rc} != 0
-        Log To Console    WARNING: CRD query failed (rc=${_crd_rc}); defaulting to 3.5+ MaaS path
-    END
     ${_is_pre_35} =    Evaluate    ${_crd_rc} == 0 and '${_aigateway_in_schema}' == ''
-    Log To Console    DSC CRD aigateway.modelsAsAService present: ${not ${_is_pre_35}}
+    Log To Console    DSC CRD rc=${_crd_rc} aigateway.modelsAsAService present: ${not ${_is_pre_35}}
     ${maas_configured} =    Run Keyword And Return Status
     ...    Dictionary Should Contain Key    ${COMPONENTS}    modelsasservice
     IF    ${maas_configured} and '${COMPONENTS.modelsasservice}' == 'Managed'

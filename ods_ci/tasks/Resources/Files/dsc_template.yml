@@ -12,6 +12,8 @@ spec:
       managementState: <aipipelines_value>
     kserve:
       managementState: <kserve_value>
+      modelsAsService:
+        managementState: <modelsasservice_legacy_value>
     aigateway:
       managementState: <aigateway_value>
       modelsAsAService:

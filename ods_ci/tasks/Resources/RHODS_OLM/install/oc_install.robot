@@ -870,25 +870,40 @@ Create DataScienceCluster CustomResource Using Test Variables
     ${file_path} =    Set Variable    tasks/Resources/Files/
     Copy File    source=${file_path}${dsc_template}    destination=${file_path}dsc_apply.yml
     Run    sed -i'' -e 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
-    # modelsAsAService requires parent aigateway Managed (operator #3723).
-    # Force aigateway=Managed whenever modelsasservice is Managed, even if callers
-    # explicitly set aigateway=Removed (invalid combo that left MaaS Managed alone).
+    # Detect installed RHOAI version to select the correct MaaS DSC field.
+    # In 3.5+, MaaS moved from kserve.modelsAsService → aigateway.modelsAsAService (operator #3723).
+    # On 3.4.x clusters the aigateway.* fields are unknown and silently dropped, so we must
+    # populate kserve.modelsAsService instead and leave aigateway out of the MaaS config.
+    ${_csv_version} =    Run
+    ...    oc get csv -n ${OPERATOR_NAMESPACE} -o jsonpath='{.items[?(@.spec.displayName=="Red Hat OpenShift AI")].spec.version}' 2>/dev/null || echo "0.0.0"
+    ${_is_pre_35} =    Evaluate    '${_csv_version}'.startswith('3.4') or ('${_csv_version}' != '0.0.0' and '${_csv_version}' < '3.5')
+    Log To Console    Detected RHOAI version: ${_csv_version} — pre-3.5 MaaS path: ${_is_pre_35}
     ${maas_configured} =    Run Keyword And Return Status
     ...    Dictionary Should Contain Key    ${COMPONENTS}    modelsasservice
     IF    ${maas_configured} and '${COMPONENTS.modelsasservice}' == 'Managed'
-        ${aigateway_present} =    Run Keyword And Return Status
-        ...    Dictionary Should Contain Key    ${COMPONENTS}    aigateway
-        ${aigateway_already_managed} =    Set Variable    ${FALSE}
-        IF    ${aigateway_present}
-            ${aigateway_already_managed} =    Evaluate    '${COMPONENTS.aigateway}' == 'Managed'
-        END
-        IF    not ${aigateway_already_managed}
-            Set To Dictionary    ${COMPONENTS}    aigateway=Managed
-            # Keep COMPONENTS visible to Apply DataScienceCluster verification/logging
-            Set Global Variable    ${COMPONENTS}    # robocop: disable:replace-set-variable-with-var
-            Log To Console    modelsasservice=Managed requires aigateway=Managed; updated COMPONENTS
+        IF    ${_is_pre_35}
+            # 3.4.x: populate kserve.modelsAsService (legacy field); aigateway section not understood.
+            Run    sed -i'' -e 's/<modelsasservice_legacy_value>/Managed/' ${file_path}dsc_apply.yml
+            Log To Console    3.4 cluster: using kserve.modelsAsService=Managed for MaaS
+        ELSE
+            # 3.5+: modelsAsAService requires parent aigateway Managed (operator #3723).
+            # Force aigateway=Managed when callers only set modelsasservice=Managed.
+            ${aigateway_present} =    Run Keyword And Return Status
+            ...    Dictionary Should Contain Key    ${COMPONENTS}    aigateway
+            ${aigateway_already_managed} =    Set Variable    ${FALSE}
+            IF    ${aigateway_present}
+                ${aigateway_already_managed} =    Evaluate    '${COMPONENTS.aigateway}' == 'Managed'
+            END
+            IF    not ${aigateway_already_managed}
+                Set To Dictionary    ${COMPONENTS}    aigateway=Managed
+                # Keep COMPONENTS visible to Apply DataScienceCluster verification/logging
+                Set Global Variable    ${COMPONENTS}    # robocop: disable:replace-set-variable-with-var
+                Log To Console    modelsasservice=Managed requires aigateway=Managed; updated COMPONENTS
+            END
         END
     END
+    # Fill legacy placeholder with Removed when not on 3.4 or MaaS not Managed
+    Run    sed -i'' -e 's/<modelsasservice_legacy_value>/Removed/' ${file_path}dsc_apply.yml
     FOR    ${cmp}    IN    @{COMPONENT_LIST}
             IF    $cmp not in $COMPONENTS
                 Run    sed -i'' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml

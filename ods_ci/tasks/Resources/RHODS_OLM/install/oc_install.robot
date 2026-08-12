@@ -836,6 +836,21 @@ Create DataScienceCluster CustomResource Using Test Variables
     ${file_path} =    Set Variable    tasks/Resources/Files/
     Copy File    source=${file_path}${dsc_template}    destination=${file_path}dsc_apply.yml
     Run    sed -i'' -e 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
+    # On 3.4, MaaS is configured via kserve.modelsAsService. The upgrade pipeline's
+    # migration script may inject aigateway=Managed (3.5 notation) without including
+    # modelsasservice in COMPONENTS. Restore modelsasservice=Managed so the FOR loop
+    # below correctly populates <modelsasservice_value> in the 3.4 DSC template.
+    ${_aigateway_managed} =    Run Keyword And Return Status
+    ...    Variable Should Exist    ${COMPONENTS.aigateway}
+    IF    ${_aigateway_managed} and '${COMPONENTS.aigateway}' == 'Managed'
+        ${_maas_present} =    Run Keyword And Return Status
+        ...    Dictionary Should Contain Key    ${COMPONENTS}    modelsasservice
+        IF    not ${_maas_present}
+            Set To Dictionary    ${COMPONENTS}    modelsasservice=Managed
+            Set Global Variable    ${COMPONENTS}    # robocop: disable:replace-set-variable-with-var
+            Log To Console    aigateway=Managed on 3.4: restored modelsasservice=Managed for kserve.modelsAsService
+        END
+    END
     FOR    ${cmp}    IN    @{COMPONENT_LIST}
             IF    $cmp not in $COMPONENTS
                 Run    sed -i'' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml

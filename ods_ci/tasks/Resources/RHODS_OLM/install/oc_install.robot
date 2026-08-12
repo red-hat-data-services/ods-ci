@@ -840,15 +840,18 @@ Create DataScienceCluster CustomResource Using Test Variables
     # migration script may inject aigateway=Managed (3.5 notation) without including
     # modelsasservice in COMPONENTS. Restore modelsasservice=Managed so the FOR loop
     # below correctly populates <modelsasservice_value> in the 3.4 DSC template.
-    ${_aigateway_managed} =    Run Keyword And Return Status
-    ...    Variable Should Exist    ${COMPONENTS.aigateway}
-    IF    ${_aigateway_managed} and '${COMPONENTS.aigateway}' == 'Managed'
-        ${_maas_present} =    Run Keyword And Return Status
-        ...    Dictionary Should Contain Key    ${COMPONENTS}    modelsasservice
-        IF    not ${_maas_present}
-            Set To Dictionary    ${COMPONENTS}    modelsasservice=Managed
-            Set Global Variable    ${COMPONENTS}    # robocop: disable:replace-set-variable-with-var
-            Log To Console    aigateway=Managed on 3.4: restored modelsasservice=Managed for kserve.modelsAsService
+    ${_aigateway_present} =    Run Keyword And Return Status
+    ...    Dictionary Should Contain Key    ${COMPONENTS}    aigateway
+    IF    ${_aigateway_present}
+        # Read the value only after confirming the key exists to avoid RF variable resolution errors
+        IF    '${COMPONENTS.aigateway}' == 'Managed'
+            ${_maas_present} =    Run Keyword And Return Status
+            ...    Dictionary Should Contain Key    ${COMPONENTS}    modelsasservice
+            IF    not ${_maas_present}
+                Set To Dictionary    ${COMPONENTS}    modelsasservice=Managed
+                Set Global Variable    ${COMPONENTS}    # robocop: disable:replace-set-variable-with-var
+                Log To Console    aigateway=Managed on 3.4: restored modelsasservice=Managed for kserve.modelsAsService
+            END
         END
     END
     FOR    ${cmp}    IN    @{COMPONENT_LIST}

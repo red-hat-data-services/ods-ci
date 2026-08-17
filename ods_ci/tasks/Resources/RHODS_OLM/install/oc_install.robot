@@ -882,8 +882,7 @@ Create DataScienceCluster CustomResource Using Test Variables
     ...    .properties.spec.properties.components
     ...    .properties.aigateway.properties.modelsAsAService}
     ${_crd_rc}    ${_aigateway_in_schema} =    Run And Return Rc And Output
-    ...    oc get crd datascienceclusters.datasciencecluster.opendatahub.io
-    ...    -o jsonpath='${_crd_jsonpath}' 2>/dev/null
+    ...    oc get crd datascienceclusters.datasciencecluster.opendatahub.io -o jsonpath='${_crd_jsonpath}' 2>/dev/null    #robocop:disable
     ${_is_pre_35} =    Evaluate    ${_crd_rc} == 0 and '${_aigateway_in_schema}' == ''
     Log To Console    DSC CRD rc=${_crd_rc} aigateway.modelsAsAService present: ${not ${_is_pre_35}}
     ${maas_configured} =    Run Keyword And Return Status

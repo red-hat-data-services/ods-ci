@@ -133,7 +133,7 @@ Verify RHODS Display Name and Version
     [Tags]    Smoke
     ...       Tier1
     ...       ODS-1862
-    IF  "${PRODUCT}" == "${None}" or "${PRODUCT}" == "RHODS"
+    IF  "${PRODUCT}" == "${None}" or "${PRODUCT}" == "RHODS" or "${UPDATE_CHANNEL}" == "odh-stable"
         ${CSV_DISPLAY} =    Set Variable     Red Hat OpenShift AI
     ELSE
         ${CSV_DISPLAY} =    Set Variable     Open Data Hub Operator

@@ -94,21 +94,11 @@ Verify Pipelines Integration With Kale Running Candies Pipeline Test     # roboc
     [Documentation]    Creates and starts a workbench using ${img}, opens the candies_sharing Kale sample notebook,
     ...    compiles and runs the pipeline, then verifies the run completes in the dashboard
     [Arguments]    ${img}    ${pipeline_name}    ${workbench_timeout}=600s
-    ${skip_workbench_version_check}=    Get Variable Value    ${SKIP_WORKBENCH_VERSION_CHECK}    ${FALSE}
-    ${kale_workbench_image_version}=    Get Variable Value    ${KALE_WORKBENCH_IMAGE_VERSION}    ${NONE}
-    # SKIP_WORKBENCH_VERSION_CHECK=${TRUE} skips the default/previous version dropdown assert
-    # (needed when the UI only lists a single tag, e.g. latest-only clusters).
-    ${workbench_image_version}=    Set Variable If    ${skip_workbench_version_check}    ${NONE}    default
-    Create Kale Workbench    workbench_title=kale_${img}    workbench_description=Kale test
+    Create Workbench    workbench_title=kale_${img}    workbench_description=Kale test
     ...                 prj_title=${PRJ_TITLE}    image_name=${img}    hardware_profile=default-profile
-    ...                 storage=Persistent  pv_existent=${FALSE}    version=${workbench_image_version}
+    ...                 storage=Persistent  pv_existent=${FALSE}
     ...                 pv_name=${PV_NAME}_${img}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
     ...                 envs=${ENVS_LIST}
-    # Patch before Start so the first pull uses the Kale tag (UI version picker may not list it).
-    IF    '${kale_workbench_image_version}' != '${NONE}'
-        Patch Workbench Notebook Image Tag Via CLI    workbench_title=kale_${img}
-        ...    project_title=${PRJ_TITLE}    image_tag=${kale_workbench_image_version}
-    END
     Start Workbench     workbench_title=kale_${img}    timeout=${workbench_timeout}
     ${dashboard_window}=    Launch And Access Workbench    workbench_title=kale_${img}
     Clone Git Repository And Open    ${NOTEBOOKS_REPO_URL}    ${KALE_NOTEBOOK_PATH}  # robocop: disable

@@ -12,16 +12,12 @@ Library          Collections
 
 *** Variables ***
 ${KALE_EXTENSION_NAME} =    jupyterlab-kubeflow-kale
-${KALE_PANEL_ID} =    jupyterlab-kubeflow-kale/kubeflowDeployment
 ${KALE_SIDEBAR_ICON_XP} =    //li[@data-id="jupyterlab-kubeflow-kale/kubeflowDeployment"] | //div[contains(@class,"jp-ActivityBar")]//li[contains(@title,"Kubeflow") or contains(@title,"Kale") or contains(@title,"Deployment")] | //div[contains(@class,"jp-ActivityBar")]//button[contains(@aria-label,"Kale") or contains(@aria-label,"Kubeflow")]
 ${KALE_PANEL_XP} =    //div[contains(@class, "kale-panel")]
 ${KALE_ENABLE_SWITCH_XP} =    ${KALE_PANEL_XP}//input[@name="enableKale" and @type="checkbox"]
-# Visible control wrapping the (often hidden) enableKale checkbox input
-${KALE_ENABLE_SWITCH_CLICK_XP} =    ${KALE_ENABLE_SWITCH_XP}/ancestor::label[1] | ${KALE_ENABLE_SWITCH_XP}/..
-${KALE_PIPELINE_NAME_INPUT_XP} =    ${KALE_PANEL_XP}//label[contains(translate(., "PIPELINE NAME", "pipeline name"), "pipeline name")]/..//input | ${KALE_PANEL_XP}//input[contains(@name,"pipeline") or contains(@id,"pipeline") or contains(@placeholder,"ipeline")]
 ${KALE_COMPILE_AND_RUN_BTN_XP} =    ${KALE_PANEL_XP}//button[contains(., "Compile and Run")]
-${KALE_UNSAVED_CHANGES_DIALOG_XP} =    //dialog[contains(@class, "jp-Dialog")]//*[contains(@class, "jp-Dialog-header")][contains(., "Unsaved Changes")]
-${KALE_UNSAVED_CHANGES_YES_BTN_XP} =    //dialog[contains(@class, "jp-Dialog")]//button[contains(@class, "jp-mod-accept")]
+${KALE_UNSAVED_CHANGES_DIALOG_XP} =    //*[contains(@class, "jp-Dialog")]//*[contains(@class, "jp-Dialog-header")][contains(., "Unsaved Changes")]
+${KALE_UNSAVED_CHANGES_YES_BTN_XP} =    //*[contains(@class, "jp-Dialog")]//button[contains(@class, "jp-mod-accept")]
 ${KALE_NOTEBOOK_TAB} =    candies_sharing.ipynb
 
 
@@ -140,77 +136,6 @@ Maybe Patch Kale Pipeline Server Images
     ...    Run And Verify Command    oc patch dspa dspa -n ${namespace} --type=merge -p '${patch}'
     Sleep    10s    reason=Allow DSPA operator to reconcile image overrides
 
-Dismiss Open Patternfly Menus
-    [Documentation]    Closes leftover PatternFly listboxes that intercept later clicks
-    ...    (common after selecting a workbench image on PF6).
-    Press Keys    None    ESCAPE
-    Run Keyword And Ignore Error
-    ...    Wait Until Page Does Not Contain Element
-    ...    xpath=//ul[@role='listbox' and contains(@class,'menu__list')]
-    ...    timeout=5s
-
-Create Kale Workbench
-    [Documentation]    Same flow as Create Workbench, but dismisses open PF menus after image
-    ...    selection and clicks the hardware profile via JS so shared Workbenches/Spawner
-    ...    keywords do not need PF6 menu fixes.
-    [Arguments]    ${workbench_title}    ${workbench_description}    ${prj_title}    ${image_name}
-    ...    ${hardware_profile}    ${storage}    ${pv_existent}    ${pv_name}    ${pv_description}
-    ...    ${pv_size}    ${version}=${NONE}    ${envs}=${NONE}
-    Open Data Science Project Details Page    project_title=${prj_title}    tab_id=workbenches
-    Wait Until Element Is Enabled    ${WORKBENCH_CREATE_BTN_XP}
-    Click Element    ${WORKBENCH_CREATE_BTN_XP}
-    Wait Until Page Contains Element    ${WORKBENCH_NAME_INPUT_XP}
-    Input Text    ${WORKBENCH_NAME_INPUT_XP}    ${workbench_title}
-    Input Text    ${WORKBENCH_DESCR_TXT_XP}    ${workbench_description}
-    Select Workbench Image    image_name=${image_name}    version=${version}
-    Dismiss Open Patternfly Menus
-    IF    "${hardware_profile}" != "${NONE}"
-        Wait Until Page Contains Element    ${WORKBENCH_SIZE_SIDE_MENU_BTN}
-        Click Element    ${WORKBENCH_SIZE_SIDE_MENU_BTN}
-        Dismiss Open Patternfly Menus
-        Select Kale Hardware Profile    ${hardware_profile}
-    END
-    IF    "${envs}" != "${NONE}"
-        ${envs_copy}=    Copy List    ${envs}    deepcopy=${TRUE}
-        Add Environment Variables In Workbench    env_variables=${envs_copy}
-    END
-    IF    "${storage}" == "Persistent"
-        IF    ${pv_existent} == ${FALSE}
-            Delete PVC In Project From CLI    pvc_title=${pv_name}    project_title=${prj_title}
-            Click Element    //a[@href="#cluster-storage"]
-            Click Element    //*[@data-testid="create-storage-button"]
-            Fill In New PV Data    name=${pv_name}    size=${pv_size}    description=${pv_description}
-            Click Button    ${STORAGE_SUBMIT_BTN_XP}
-        END
-    END
-    Wait Until Element Is Enabled    ${WORKBENCH_CREATE_BTN_2_XP}
-    Click Button    ${WORKBENCH_CREATE_BTN_2_XP}
-    Wait Until Element Is Not Visible    //form    10s
-    Open Data Science Project Details Page    project_title=${prj_title}    tab_id=workbenches
-
-Select Kale Hardware Profile
-    [Documentation]    Selects a hardware profile via JS click (avoids PF listbox interception)
-    [Arguments]    ${hardware_profile}
-    ${dropdown_xpath}=    Set Variable    xpath://button[@data-testid="hardware-profile-select"]
-    Wait Until Page Contains Element    ${dropdown_xpath}    timeout=10s
-    Click Element    ${dropdown_xpath}
-    ${profile_option_xpath}=    Set Variable
-    ...    xpath://ul[@role='listbox']//span[normalize-space()="${hardware_profile}"]/ancestor::button[1]
-    Wait Until Page Contains Element    ${profile_option_xpath}    timeout=10s
-    ${profile_option}=    Get WebElement    ${profile_option_xpath}
-    Execute Javascript    arguments[0].click();    ARGUMENTS    ${profile_option}
-    Dismiss Open Patternfly Menus
-
-Patch Workbench Notebook Image Tag Via CLI
-    [Documentation]    Switches a workbench to a specific notebook image tag via oc patch.
-    ...    Kale requires a 3.5+ Data Science image, but some clusters only expose older tags in the UI dropdown.
-    [Arguments]    ${workbench_title}    ${project_title}    ${image_tag}
-    ${ns_name}=    Get Openshift Namespace From Data Science Project    project_title=${project_title}
-    ${_}    ${cr_name}=    Get Openshift Notebook CR From Workbench
-    ...    workbench_title=${workbench_title}    namespace=${ns_name}
-    ${image}=    Run    oc get imagestream s2i-generic-data-science-notebook -n ${APPLICATIONS_NAMESPACE} -o jsonpath='{.status.dockerImageRepository}:${image_tag}' 2>&1
-    Run And Verify Command    oc patch notebook ${cr_name} -n ${ns_name} --type=json -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/image", "value": "${image}"}]' 2>&1
-
 Enable Kale Extension Via Oc Exec
     [Documentation]    Enables the Kale labextension inside the running workbench pod and restarts it.
     ...    The 3.5+ Data Science image ships Kale disabled in sys-prefix page_config.json.
@@ -282,13 +207,13 @@ Verify Kale Notebook Elements
     Page Should Contain    Let's put in a bag
 
 Open Kale Panel
-    [Documentation]    Opens the Kale sidebar panel in JupyterLab
+    [Documentation]    Opens the Kale sidebar panel in JupyterLab.
     ${panel_visible} =    Run Keyword And Return Status
-    ...    Page Should Contain Element    xpath=${KALE_PANEL_XP}
+    ...    Element Should Be Visible    xpath=${KALE_PANEL_XP}
     IF    not ${panel_visible}
         Click Element    xpath=${KALE_SIDEBAR_ICON_XP}
     END
-    Wait Until Page Contains Element    xpath=${KALE_PANEL_XP}    timeout=30s
+    Wait Until Element Is Visible    xpath=${KALE_PANEL_XP}    timeout=30s
     Wait Until Page Contains    Pipeline Metadata    timeout=30s
 
 Enable Kale
@@ -425,18 +350,10 @@ Kale Compile And Run Button Should Be Enabled
     Should Be True    ${enabled}
 
 Click Kale Compile And Run
-    [Documentation]    Clicks Compile and Run via JS (avoids Selenium interactability issues)
-    Execute Javascript
-    ...    (function(){
-    ...      var panel=document.querySelector('div.kale-panel');
-    ...      if(!panel){throw new Error('kale panel not found');}
-    ...      var btn=Array.from(panel.querySelectorAll('button')).find(function(b){
-    ...        return (b.textContent||'').indexOf('Compile and Run')!==-1;
-    ...      });
-    ...      if(!btn){throw new Error('Compile and Run button not found');}
-    ...      if(btn.disabled){throw new Error('Compile and Run button is disabled');}
-    ...      btn.click();
-    ...    })();
+    [Documentation]    Clicks Compile and Run using a real (trusted) mouse click.
+    Wait Until Element Is Visible    xpath=${KALE_COMPILE_AND_RUN_BTN_XP}    timeout=10s
+    Scroll Element Into View    xpath=${KALE_COMPILE_AND_RUN_BTN_XP}
+    Click Element    xpath=${KALE_COMPILE_AND_RUN_BTN_XP}
 
 Maybe Confirm Kale Unsaved Changes Dialog
     [Documentation]    Kale prompts to save the notebook when compile/run is triggered on unsaved changes.

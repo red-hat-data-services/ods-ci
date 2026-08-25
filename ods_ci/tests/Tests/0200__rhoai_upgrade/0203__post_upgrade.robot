@@ -217,6 +217,7 @@ Verify Ray Cluster Exists And Monitor Workload Metrics By Submitting Ray Job Aft
 Verify that the must-gather image provides RHODS logs and info
     [Documentation]    Tests the must-gather image for ODH/RHOAI after upgrading
     [Tags]      Upgrade    ODS-505    ExcludeOnDisconnected    Platform
+    [Timeout]    20 minutes
     Get Must-Gather Logs
     Verify Logs For ${APPLICATIONS_NAMESPACE}
     IF    "${PRODUCT}" == "RHODS"

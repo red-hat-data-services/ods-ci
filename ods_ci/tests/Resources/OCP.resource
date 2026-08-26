@@ -169,7 +169,7 @@ Wait For Deployment Replica If Present
     [Arguments]    ${label_selector}    ${namespace}    ${timeout}=400s
     ${rc}    ${name}=    Run And Return Rc And Output
     ...    oc get deployment -l ${label_selector} -n ${namespace} -o jsonpath='{.items[0].metadata.name}'
-    IF    "${name}" == "${EMPTY}"
+    IF    ${rc} != ${0} or "${name}" == "${EMPTY}"
         Log To Console    No Deployment with label "${label_selector}" in "${namespace}", skipping wait
         RETURN    ${FALSE}
     END
@@ -187,11 +187,9 @@ Get Model Registry Controller Label Selector
     ...    control-plane=model-registry-operator
         ${rc}    ${name}=    Run And Return Rc And Output
         ...    oc get deployment -l ${selector} -n ${namespace} -o jsonpath='{.items[0].metadata.name}'
-        IF    "${name}" != "${EMPTY}"
-            RETURN    ${selector}
-        END
+        IF    ${rc} == ${0} and "${name}" != "${EMPTY}"    RETURN    ${selector}
     END
-    Fail    msg=No model-registry-operator, aihub-controller-manager, or catalog-controller-manager Deployment was found in ${namespace}
+    Fail    msg=No Model Registry, AI Hub, or catalog controller Deployment was found in ${namespace}
 
 Wait For Pods To Succeed
     [Arguments]    ${label_selector}    ${namespace}    ${timeout}=300s    ${exp_replicas}=${NONE}

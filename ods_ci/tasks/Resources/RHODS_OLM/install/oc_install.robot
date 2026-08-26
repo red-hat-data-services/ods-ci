@@ -428,8 +428,10 @@ Verify RHODS Installation
 
   ${modelregistry} =    Is Component Enabled    modelregistry    ${DSC_NAME}
   IF    "${modelregistry}" == "true"
+    # Prefer control-plane=model-registry-operator (ODH overlay includeSelectors).
+    # part-of is on Deployment metadata only and is not present on pods in 3.6+.
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/part-of=model-registry-operator    timeout=400s
+    ...    label_selector=control-plane=model-registry-operator    timeout=400s
   END
 
   ${trainingoperator} =    Is Component Enabled    trainingoperator    ${DSC_NAME}

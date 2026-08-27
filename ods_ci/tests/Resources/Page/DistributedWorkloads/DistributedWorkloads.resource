@@ -138,6 +138,7 @@ Run Training Operator KFTO SDK Test
 
 Prepare DistributedWorkloads Integration Test Suite
     [Documentation]    Prepare DistributedWorkloads Integration Test Suite
+    [Arguments]    ${enable_kueue}=${TRUE}
     Log To Console    "Downloading compiled test binary ${ODH_BINARY_NAME}"
 
     ${result} =    Run Process    curl --location --silent --output ${ODH_BINARY_NAME} ${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}/${ODH_BINARY_NAME} && chmod +x ${ODH_BINARY_NAME}
@@ -151,33 +152,37 @@ Prepare DistributedWorkloads Integration Test Suite
     Log To Console    "Retrieving user tokens"
     ${common_user_token} =    Generate User Token    ${NOTEBOOK_USER_NAME}    ${NOTEBOOK_USER_PASSWORD}
     Set Suite Variable    ${NOTEBOOK_USER_TOKEN}   ${common_user_token}
-    Log To Console    "Log back as cluster admin"
-    Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
     RHOSi Setup
-    Setup RBAC for codeflare-sdk
-    # Set Kueue component to Unmanaged state as admin
-    Log To Console    "Setting Kueue component to Unmanaged state"
-    Set Component State    kueue    Unmanaged
-    Wait For DataScienceCluster CustomResource To Be Ready    timeout=600
+    IF    ${enable_kueue}
+        Setup RBAC for codeflare-sdk
+        # Set Kueue component to Unmanaged state as admin
+        Log To Console    "Setting Kueue component to Unmanaged state"
+        Set Component State    kueue    Unmanaged
+        Wait For DataScienceCluster CustomResource To Be Ready    timeout=600
+    END
 
 Teardown DistributedWorkloads Integration Test Suite
     [Documentation]    Teardown DistributedWorkloads Integration Test Suite
-    Log To Console    "Log back as cluster admin"
-    Login To OCP Using API    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}
+    [Arguments]    ${enable_kueue}=${TRUE}
     Log To Console    "Removing test binaries"
     Remove File        ${ODH_BINARY_NAME}
-    # Set Kueue component back to Removed state
-    Log To Console    "Setting Kueue component to Removed state"
-    Set Component State    kueue    Removed
-    Wait For DataScienceCluster CustomResource To Be Ready    timeout=600
-    Teardown RBAC for codeflare-sdk
+    IF    ${enable_kueue}
+        # Set Kueue component back to Removed state
+        Log To Console    "Setting Kueue component to Removed state"
+        Set Component State    kueue    Removed
+        Wait For DataScienceCluster CustomResource To Be Ready    timeout=600
+        Teardown RBAC for codeflare-sdk
+    END
 
 Generate User Token
     [Documentation]    Authenticate as a user and return user token.
+    ...    Uses a temporary kubeconfig to avoid clobbering the admin context.
     [Arguments]    ${username}    ${password}
-    Login To OCP Using API    ${username}    ${password}
-    ${rc}    ${out} =    Run And Return Rc And Output    oc whoami -t
+    ${temp_kubeconfig} =    Set Variable    /tmp/ods-ci-user-kubeconfig
+    Login To OCP Using API And Kubeconfig    ${username}    ${password}    ${temp_kubeconfig}
+    ${rc}    ${out} =    Run And Return Rc And Output    oc whoami -t --kubeconfig=${temp_kubeconfig}
     Should Be Equal As Integers    ${rc}    ${0}
+    Remove File    ${temp_kubeconfig}
     RETURN    ${out}
 
 Run DistributedWorkloads ODH Test

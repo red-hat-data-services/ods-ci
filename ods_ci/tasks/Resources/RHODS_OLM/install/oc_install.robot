@@ -813,6 +813,15 @@ Wait For DSCInitialization CustomResource To Be Ready
 Apply DataScienceCluster CustomResource
     [Documentation]
     [Arguments]        ${dsc_name}=${DSC_NAME}    ${dsc_template}=${DSC_TEMPLATE}
+    ${components_defined} =    Run Keyword And Return Status    Variable Should Exist    ${COMPONENTS}
+    IF    not ${components_defined}
+        Log To Console    COMPONENTS variable not found, defaulting all components to Managed
+        VAR    &{COMPONENTS}    &{EMPTY}
+        FOR    ${cmp}    IN    @{COMPONENT_LIST}
+            Set To Dictionary    ${COMPONENTS}    ${cmp}    Managed
+        END
+        VAR    &{COMPONENTS}    &{COMPONENTS}    scope=SUITE
+    END
     ${file_path} =    Set Variable    tasks/Resources/Files/
     Log to Console    Requested Configuration:
     FOR    ${cmp}    IN    @{COMPONENT_LIST}
@@ -886,6 +895,15 @@ Create DataScienceCluster CustomResource Using Test Variables
     ${_is_pre_35} =    Evaluate    ${_crd_rc} == 0 and '${_aigateway_in_schema}' == ''
     ${_aigateway_present} =    Evaluate    not ${_is_pre_35}
     Log To Console    DSC CRD rc=${_crd_rc} aigateway.modelsAsAService present: ${_aigateway_present}
+    ${components_defined} =    Run Keyword And Return Status    Variable Should Exist    ${COMPONENTS}
+    IF    not ${components_defined}
+        Log To Console    COMPONENTS variable not found in DSC creation, defaulting all components to Managed
+        VAR    &{COMPONENTS}    &{EMPTY}
+        FOR    ${cmp}    IN    @{COMPONENT_LIST}
+            Set To Dictionary    ${COMPONENTS}    ${cmp}    Managed
+        END
+        VAR    &{COMPONENTS}    &{COMPONENTS}    scope=SUITE
+    END
     ${maas_configured} =    Run Keyword And Return Status
     ...    Dictionary Should Contain Key    ${COMPONENTS}    modelsasservice
     IF    ${maas_configured} and '${COMPONENTS.modelsasservice}' == 'Managed'

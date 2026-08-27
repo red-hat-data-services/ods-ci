@@ -1,7 +1,7 @@
 *** Settings ***
 Documentation     Training Hub RayJob Integration tests - https://github.com/opendatahub-io/distributed-workloads/tree/main/tests/odh
-Suite Setup       Prepare DistributedWorkloads Integration Test Suite
-Suite Teardown    Teardown DistributedWorkloads Integration Test Suite
+Suite Setup       Prepare DistributedWorkloads Integration Test Suite    enable_kueue=${FALSE}
+Suite Teardown    Teardown DistributedWorkloads Integration Test Suite    enable_kueue=${FALSE}
 Library           OperatingSystem
 Library           Process
 Resource          ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot

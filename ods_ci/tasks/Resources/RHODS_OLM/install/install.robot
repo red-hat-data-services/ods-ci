@@ -12,7 +12,8 @@ Installing RHODS Operator
   IF  not ${is_operator_installed}  Run Keywords
   ...  Log  Installing RHODS operator in ${cluster_type}  console=yes  AND
   ...  Set Suite Variable  ${image_url}  AND
-  ...  Set Test Variable  ${RHODS_OSD_INSTALL_REPO}  AND
+  ...  Set Test Variable  ${OLM_INSTALL_GIT_REPO}  AND
+  ...  Set Test Variable  ${OLM_INSTALL_GIT_REPO_BRANCH}  AND
   ...  Install RHODS   ${cluster_type}    ${image_url}    ${install_plan_approval}    ${rhoai_version}
 
 RHODS Operator Should Be installed

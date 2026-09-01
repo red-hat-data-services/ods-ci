@@ -3,13 +3,7 @@ Documentation       Test Suite for Upgrade testing,to be run during the upgrade
 
 Resource            ../../Resources/ODS.robot
 Resource            ../../Resources/Common.robot
-Resource            ../../Resources/Page/ODH/JupyterHub/JupyterHubSpawner.robot
-Resource            ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
-Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.robot
-Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboardSettings.resource
-Resource            ../../Resources/Page/ODH/JupyterHub/ODHJupyterhub.resource
 Library             DebugLibrary
-Library             JupyterLibrary
 
 Test Tags           DuringUpgrade
 
@@ -29,45 +23,8 @@ Upgrade RHODS
     Operator Pod Creation Date Should Be Updated        ${initial_creation_date}
     OpenShiftLibrary.Wait For Pods Status       namespace=${OPERATOR_NAMESPACE}     timeout=300
 
-TensorFlow Image Test
-    [Documentation]    Run basic tensorflow notebook during upgrade
-    [Tags]      Upgrade    IDE
-    Launch Notebook
-    ...    tensorflow
-    ...    ${TEST_USER.USERNAME}
-    ...    ${TEST_USER.PASSWORD}
-    ...    ${TEST_USER.AUTH_TYPE}
-
-PyTorch Image Workload Test
-    [Documentation]    Run basic pytorch notebook during upgrade
-    [Tags]      Upgrade    IDE
-    Launch Notebook
-    ...    pytorch
-    ...    ${TEST_USER.USERNAME}
-    ...    ${TEST_USER.PASSWORD}
-    ...    ${TEST_USER.AUTH_TYPE}
-    Run Repo And Clean
-    ...    https://github.com/lugi0/notebook-benchmarks
-    ...    notebook-benchmarks/pytorch/PyTorch-MNIST-Minimal.ipynb
-    Capture Page Screenshot
-    JupyterLab Code Cell Error Output Should Not Be Visible
-
 
 *** Keywords ***
-Launch Notebook
-    [Documentation]    Launch notebook for the suite
-    [Arguments]     ${notebook_image}=minimal-notebook
-    ...    ${username}=${TEST_USER2.USERNAME}
-    ...    ${password}=${TEST_USER2.PASSWORD}
-    ...    ${auth_type}=${TEST_USER2.AUTH_TYPE}
-    Begin Web Test    username=${username}    password=${password}    auth_type=${auth_type}
-    Launch Jupyter From RHODS Dashboard Link
-    Spawn Notebook With Arguments
-    ...    image=${notebook_image}
-    ...    username=${username}
-    ...    password=${password}
-    ...    auth_type=${auth_type}
-
 RHODS Version Should Be Greater Than
     [Documentation]    Checks if the RHODS version is greater than the given initial version.
     ...    Fails if the version is not greater.

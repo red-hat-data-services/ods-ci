@@ -387,8 +387,8 @@ Wait For Installplan And Approve It
     Wait Until Keyword Succeeds    10m    5s    Search Install Plan    ${csv}    ${subscription_name}    ${namespace}
     ${installplan_name}=    Run   oc get subscription ${subscription_name} -n ${namespace} -o json | jq '.status.installplan.name'    #robocop:disable
     IF    "${operator_version}" != "${EMPTY}"
-        ${installplan_version_exist}=    Run And Return Rc   oc get installplan ${installplan_name} -n ${namespace} | grep "${operator_version}"    #robocop:disable
-        IF    ${installplan_version_exist} != 0
+        ${rc}    ${installplan_version_exist}=    Run and Return Rc and Output   oc get installplan ${installplan_name} -n ${namespace} -ojson | jq '.spec.clusterServiceVersionNames[] | select(. == "${csv}")' | tr -d '"'    #robocop:disable
+        IF     "${installplan_version_exist}" == "${EMPTY}"
             ${installplans}=    Run   oc get installplan -n ${namespace}
             FAIL    The install plan ${installplan_name} used in sub ${subscription_name} does not match the version: ${operator_version}\nExisting installplans:\n${installplans}    #robocop:disable
         ELSE

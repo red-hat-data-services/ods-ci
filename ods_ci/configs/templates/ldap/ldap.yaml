@@ -49,8 +49,7 @@ spec:
     spec:
       containers:
         - name: openldap
-          # Temporary solution until the image is automated and pushed to quay.io/modh
-          image: quay.io/rh-ee-jstetina/openldap-ocp@sha256:10233fef19f10b1b7d48f85e71faa064b98f422a984c522a86607ab35e56d21c
+          image: quay.io/rhods-qe-tools/openldap-ocp@sha256:3af9eec9f684c3aff263f56e6ee205973f3f73cb83c521f663fcb829d656680b
           imagePullPolicy: "Always"
           env:
             - name: LDAP_ADMIN_USERNAME

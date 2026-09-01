@@ -8,10 +8,7 @@ Library             ../../../../../libs/Helpers.py
 Resource            ../../../../Resources/RHOSi.resource
 Resource            ../../../../Resources/OCP.resource
 Resource            ../../../../Resources/Page/OCPDashboard/OCPDashboard.resource
-Resource            ../../../../Resources/Page/ODH/Prometheus/Prometheus.robot
-Resource            ../../../../Resources/Page/ODH/Prometheus/Alerts.resource
 Resource            ../../../../Resources/ODS.robot
-Resource            ../../../../Resources/Page/ODH/Grafana/Grafana.resource
 Resource            ../../../../Resources/Page/HybridCloudConsole/HCCLogin.robot
 Resource            ../../../../Resources/Common.robot
 Resource            ../../../../Resources/Page/NetworkPolicies/NetworkPolicies.resource
@@ -40,14 +37,6 @@ Verify Dashbord has no message with NO Component Found
     Page Should Not Contain    No Components Found
     Capture Page Screenshot
     [Teardown]  Close All Browsers
-
-Verify Traefik Deployment
-    [Documentation]  Verifies RHODS Traefik deployment
-    [Tags]    Sanity
-    ...       Tier1
-    ...       ODS-546
-    ...       ODS-552
-    Skip      msg=Traefik proxy is removed after KFNBC migration
 
 Verify GPU Operator Deployment  # robocop: disable
     [Documentation]  Verifies Nvidia GPU Operator is correctly installed
@@ -119,30 +108,6 @@ Verify RHOAI Release Version Number
     ${version} =  Get RHODS Version
     Should Match Regexp    ${version}    ^[0-9]+\\.[0-9]+\\.[0-9]+(-[a-zA-Z0-9.]+)*$
 
-Verify JupyterHub Pod Logs Dont Have Errors About Distutil Library
-    [Documentation]    Verifies that there are no errors related to DistUtil Library in Jupyterhub Pod logs
-    [Tags]    Tier2
-    ...       ODS-586
-    Skip      msg=JupyterHub Pod is removed after KFNBC migration
-
-Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In All ODS Projects
-    [Documentation]    Verifies that CPU and Memory requests and limits are defined
-    ...                for all containers in all pods for all ODS projects
-    [Tags]    Sanity
-    ...       Tier1
-    ...       ProductBug
-    ...       ODS-385
-    ...       ODS-554
-    ...       ODS-556
-    ...       ODS-313
-    Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project    ${APPLICATIONS_NAMESPACE}
-    ${enable_new_observability_stack} =    Is New Observability Stack Enabled
-    IF  ${enable_new_observability_stack}
-        Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project
-        ...    ${MONITORING_NAMESPACE}
-    END
-    Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project    ${OPERATOR_NAMESPACE}
-
 Verify RHODS Dashboard Explore And Enabled Page Has No Message With No Component Found
     [Documentation]   Verify "NO Component Found" message dosen't display
     ...     on Rhods Dashbord page with data value empty for odh-enabled-applications-config
@@ -168,7 +133,7 @@ Verify RHODS Display Name and Version
     [Tags]    Smoke
     ...       Tier1
     ...       ODS-1862
-    IF  "${PRODUCT}" == "${None}" or "${PRODUCT}" == "RHODS"
+    IF  "${PRODUCT}" == "${None}" or "${PRODUCT}" == "RHODS" or "${UPDATE_CHANNEL}" == "odh-stable"
         ${CSV_DISPLAY} =    Set Variable     Red Hat OpenShift AI
     ELSE
         ${CSV_DISPLAY} =    Set Variable     Open Data Hub Operator
@@ -305,67 +270,6 @@ Verify Errors In Jupyterhub Logs
         ...    container=${pod['spec']['containers'][0]['name']}
         Should Not Contain    ${logs}    ModuleNotFoundError: No module named 'distutils.util'
     END
-
-Verify Grafana Datasources Have TLS Enabled
-    [Documentation]    Verifies TLS Is Enabled in Grafana Datasources
-    ${secret} =  Oc Get  kind=Secret  name=grafana-datasources  namespace=${MONITORING_NAMESPACE}
-    ${secret} =  Evaluate  base64.b64decode("${secret[0]['data']['datasources.yaml']}").decode('utf-8')  modules=base64
-    ${secret} =  Evaluate  json.loads('''${secret}''')  json
-    IF  'tlsSkipVerify' in ${secret['datasources'][0]['jsonData']}
-    ...  Should Be Equal As Strings  ${secret['datasources'][0]['jsonData']['tlsSkipVerify']}  False
-
-Verify Grafana Can Obtain Data From Prometheus Datasource
-    [Documentation]   Verifies Grafana Can Obtain Data From Prometheus Datasource
-    ${grafana_url} =  Get Grafana URL
-    Launch Grafana    ocp_user_name=${OCP_ADMIN_USER.USERNAME}    ocp_user_pw=${OCP_ADMIN_USER.PASSWORD}    ocp_user_auth_type=${OCP_ADMIN_USER.AUTH_TYPE}    grafana_url=https://${grafana_url}   browser=${BROWSER.NAME}   browser_options=${BROWSER.OPTIONS}
-    Select Explore
-    Select Data Source  datasource_name=Monitoring
-    Run Promql Query  query=traefik_backend_server_up
-    Page Should Contain  text=Graph
-
-Verify CPU And Memory Requests And Limits Are Defined For All Containers In All Pods In Project
-    [Documentation]    Verifies that CPU and Memory requests and limits are defined
-    ...                for all containers in all pods for the specified project
-    ...    Args:
-    ...        project: Project name
-    ...    Returns:
-    ...        None
-    [Arguments]    ${project}
-    ${project_pods_info} =    Fetch Project Pods Info    ${project}
-    FOR    ${pod_info}    IN    @{project_pods_info}
-        Verify CPU And Memory Requests And Limits Are Defined For Pod    ${pod_info}
-        IF    "${project}" == "${APPLICATIONS_NAMESPACE}"
-            IF    "cuda-s2i" in "${pod_info['metadata']['name']}"
-            ...    Verify Requests Contains Expected Values  cpu=2  memory=4Gi  requests=${pod_info['spec']['containers'][0]['resources']['requests']}
-            IF    "minimal-gpu" in "${pod_info['metadata']['name']}" or "pytorch" in "${pod_info['metadata']['name']}" or "tensorflow" in "${pod_info['metadata']['name']}"
-            ...    Verify Requests Contains Expected Values  cpu=4  memory=8Gi  requests=${pod_info['spec']['containers'][0]['resources']['requests']}
-        END
-    END
-
-Wait Until Operator Reverts "Grafana" To "Prometheus" In Rhods-Monitor-Federation
-    [Documentation]     Waits until rhods-operator reverts the configuration of rhods-monitor-federation,
-    ...    verifiying it has the default value ("prometheus")
-    Sleep    10m    msg=Waits until rhods-operator reverts the configuration of rhods-monitor-federation
-    Wait Until Keyword Succeeds    15m    1m    Verify In Rhods-Monitor-Federation App Is    expected_app_name=prometheus
-
-Verify In Rhods-Monitor-Federation App Is
-    [Documentation]     Verifies in rhods-monitor-federation, app is showing ${expected_app_name}
-    [Arguments]         ${expected_app_name}
-    ${data} =    OpenShiftLibrary.Oc Get    kind=ServiceMonitor   namespace=${MONITORING_NAMESPACE}    field_selector=metadata.name==rhods-monitor-federation
-    ${app_name} =    Set Variable    ${data[0]['spec']['selector']['matchLabels']['app']}
-    Should Be Equal    ${expected_app_name}    ${app_name}
-
-Replace "Prometheus" With "Grafana" In Rhods-Monitor-Federation
-    [Documentation]     Replace app to "Prometheus" with "Grafana" in Rhods-Monirot-Federation
-    OpenShiftLibrary.Oc Patch    kind=ServiceMonitor
-    ...                   src={"spec":{"selector":{"matchLabels": {"app":"grafana"}}}}
-    ...                   name=rhods-monitor-federation   namespace=${MONITORING_NAMESPACE}  type=merge
-
-Verify Requests Contains Expected Values
-    [Documentation]     Verifies cpu and memory requests contain expected values
-    [Arguments]   ${cpu}  ${memory}  ${requests}
-    Should Be Equal As Strings    ${requests['cpu']}  ${cpu}
-    Should Be Equal As Strings    ${requests['memory']}  ${memory}
 
 CUDA Teardown
     [Documentation]    Ensures spawner is cleaned up if spawn fails

@@ -185,6 +185,13 @@ def get_dashboard_url():
     return dashboard_url.strip('"').strip("\n")
 
 
+def copy_optional_keys(data, config_data, keys):
+    """Copy keys from config_data into data when the source value is present."""
+    for key in keys:
+        if config_data.get(key):
+            data[key] = config_data[key]
+
+
 def generate_test_config_file(
     config_template,
     config_data,
@@ -306,7 +313,6 @@ def generate_test_config_file(
         data["UPGRADE_TO_VERSION"] = config_data["UPGRADE_TO_VERSION"]
     if config_data.get("UPGRADE_ODS_BUILD_URL"):
         data["UPGRADE_ODS_BUILD_URL"] = config_data["UPGRADE_ODS_BUILD_URL"]
-    data["RHODS_OSD_INSTALL_REPO"] = config_data["RHODS_OSD_INSTALL_REPO"]
     data["ENABLE_NEW_OBSERVABILITY_STACK"] = config_data["ENABLE_NEW_OBSERVABILITY_STACK"]
     if config_data.get("NGC_API_KEY"):
         data["NGC_API_KEY"] = config_data["NGC_API_KEY"]
@@ -316,8 +322,8 @@ def generate_test_config_file(
         data["PIP_TRUSTED_HOST"] = config_data["PIP_TRUSTED_HOST"]
     if config_data.get("PIP_CA_BUNDLE"):
         data["PIP_CA_BUNDLE"] = config_data["PIP_CA_BUNDLE"]
-    if config_data.get("OPENAI_API_KEY"):
-        data["OPENAI_API_KEY"] = config_data["OPENAI_API_KEY"]
+    if config_data.get("GEMINI_API_KEY"):
+        data["GEMINI_API_KEY"] = config_data["GEMINI_API_KEY"]
 
     # Git mirror details (optional)
     if config_data.get("GIT_HTTP_URL"):
@@ -340,6 +346,14 @@ def generate_test_config_file(
         data["MARIADB_DATABASE"] = config_data["MARIADB_DATABASE"]
     if config_data.get("MARIADB_CA_BUNDLE"):
         data["MARIADB_CA_BUNDLE"] = config_data["MARIADB_CA_BUNDLE"]
+    copy_optional_keys(
+        data,
+        config_data,
+        (
+            "OLM_INSTALL_GIT_REPO",
+            "OLM_INSTALL_GIT_REPO_BRANCH",
+        ),
+    )
 
     # External cluster auth (optional)
     if config_data["TEST_CLUSTERS"][test_cluster].get("EXTERNAL_AUTH"):

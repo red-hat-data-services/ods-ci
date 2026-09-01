@@ -17,7 +17,6 @@ Resource            OCP.resource
 ...                         Login to Openshift
 ...                         Login to Jupyterhub
 ...                         Verify Username Displayed On RHODS Dashboard
-...                         Create Pachyderm AWS-Secret
 ...                         Push Changes To Remote
 ...                         Commit Changes
 ...                         Push Some Changes To Repo
@@ -136,7 +135,7 @@ Assign Vars According To Product
         Log    PRODUCT=${PRODUCT} OPERATOR_NAME=${OPERATOR_NAME} - no matching branch in Assign Vars According To Product    console=yes
     END
     # Set image registry paths based on product
-    IF    "${PRODUCT}" == "RHODS"
+    IF    "${PRODUCT}" == "RHODS" and "${UPDATE_CHANNEL}" != "odh-stable"
         Set Suite Variable    ${IMAGE_PULL_PATH}        registry.redhat.io
     ELSE
         Set Suite Variable    ${IMAGE_PULL_PATH}        quay.io

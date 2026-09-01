@@ -1,5 +1,6 @@
 *** Settings ***
 Library    String
+Library    Collections
 Library    OpenShiftLibrary
 Library    OperatingSystem
 Resource   ../../../../tests/Resources/Page/Operators/ISVs.resource
@@ -13,6 +14,7 @@ ${DSCI_NAME} =    default-dsci
 @{COMPONENT_LIST} =    dashboard
 ...    aipipelines
 ...    kserve
+...    aigateway
 ...    kueue
 ...    ray
 ...    trainingoperator
@@ -26,8 +28,11 @@ ${DSCI_NAME} =    default-dsci
 ...    mlflowoperator
 ...    modelsasservice
 ...    sparkoperator
-&{NESTED_COMPONENT_TO_PARENT_COMPONENT} =    modelsasservice=kserve
-&{COMPONENT_TO_COMPONENT_NAME_IN_DSC} =   modelsasservice=modelsAsService
+...    batchgateway
+...    mcplifecycleoperator
+# MaaS moved from kserve.modelsAsService to aigateway.modelsAsAService (ODH operator #3723)
+&{NESTED_COMPONENT_TO_PARENT_COMPONENT}=    modelsasservice=aigateway    batchgateway=aigateway
+&{COMPONENT_TO_COMPONENT_NAME_IN_DSC}=    modelsasservice=modelsAsAService    batchgateway=batchGateway
 ${LWS_OP_NAME}=    leader-worker-set
 ${LWS_OP_NS}=    openshift-lws-operator
 ${LWS_SUB_NAME}=    leader-worker-set
@@ -53,7 +58,7 @@ ${TELEMETRY_CHANNEL_NAME}=  stable
 ${TELEMETRY_NS}=  openshift-opentelemetry-operator
 ${KUEUE_OP_NAME}=  kueue-operator
 ${KUEUE_SUB_NAME}=  kueue-operator
-${KUEUE_CHANNEL_NAME}=  stable-v1.3
+${KUEUE_CHANNEL_NAME}=  stable-v1.4
 ${KUEUE_NS}=  openshift-kueue-operator
 ${JOBSET_OP_NAME}=  job-set
 ${JOBSET_SUB_NAME}=  job-set
@@ -67,6 +72,7 @@ ${CERT_MANAGER_NS}=  cert-manager-operator
 ${CONNECTIVITY_LINK_OP_NAME}=  rhcl-operator
 ${CONNECTIVITY_LINK_SUB_NAME}=  rhcl-operator
 ${CONNECTIVITY_LINK_CHANNEL_NAME}=  stable
+${CONNECTIVITY_LINK_STARTING_CSV}=  ${CONNECTIVITY_LINK_OP_NAME}.v1.4.2
 ${CONNECTIVITY_LINK_NS}=  kuadrant-system
 ${AUTHORINO_CSV_NAME}=  Authorino Operator
 ${RHODS_CSV_DISPLAY}=    Red Hat OpenShift AI
@@ -89,7 +95,8 @@ ${NFS_OP_NS}=    openshift-operators
 ${NFS_SUB_NAME}=    nfs-provisioner-operator-sub
 ${NFS_CHANNEL_NAME}=    alpha
 ${RESOURCES_DIRPATH}=    tasks/Resources/Files
-${RHODS_OSD_INSTALL_REPO}=      ${EMPTY}
+${OLM_INSTALL_GIT_REPO}=      ${EMPTY}
+${OLM_INSTALL_GIT_REPO_BRANCH}=    main
 ${OLM_DIR}=                     rhodsolm
 @{SUPPORTED_TEST_ENV}=          AWS   AWS_DIS   GCP   GCP_DIS   PSI   PSI_DIS   ROSA   IBM_CLOUD   CRC    AZURE	ROSA_HCP
 ${install_plan_approval}=       Manual
@@ -273,9 +280,13 @@ Get Helm Path For Component
     [Arguments]    ${component}
 
     # Handling of special component cases:
-    # 1. modelsasservice is nested under kserve
+    # 1. modelsasservice is nested under aigateway (was kserve prior to ODH 3.5 / operator #3723)
     IF    "${component}" == "modelsasservice"
-        RETURN    components.kserve.dsc.modelsAsService.managementState
+        RETURN    components.aigateway.dsc.modelsAsAService.managementState
+    END
+    # 2. batchgateway is nested under aigateway
+    IF    "${component}" == "batchgateway"
+        RETURN    components.aigateway.dsc.batchGateway.managementState
     END
 
     # Handling of standard component cases:
@@ -330,6 +341,7 @@ Verify RHODS Installation
             Wait Until Keyword Succeeds    3 min    0 sec
             ...    Is Resource Present    DataScienceCluster    ${DSC_NAME}
             ...    ${OPERATOR_NAMESPACE}      ${IS_PRESENT}
+            Patch DSC With Model Cache Config
 
        END
   ELSE
@@ -386,8 +398,6 @@ Verify RHODS Installation
   ${kserve} =    Is Component Enabled    kserve    ${DSC_NAME}
   IF    "${kserve}" == "true"
     Configure Gateway API
-    ${enable_model_cache} =    Is Model Cache Enabled
-    IF    ${enable_model_cache}    Patch DSC With Model Cache Config
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app=odh-model-controller    timeout=400s
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
@@ -443,7 +453,7 @@ Verify RHODS Installation
   ${ogx} =     Is Component Enabled    ogx    ${DSC_NAME}
   IF    "${ogx}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/part-of=ogx
+    ...    label_selector=app.kubernetes.io/name=ogx-k8s-operator
   END
 
   ${mlflowoperator} =    Is Component Enabled    mlflowoperator    ${DSC_NAME}
@@ -458,10 +468,30 @@ Verify RHODS Installation
     ...    label_selector=app.kubernetes.io/name=spark-operator
   END
 
-  ${modelsasservice} =    Is Nested Component Enabled    kserve    modelsAsService    ${DSC_NAME}
-  IF    "${modelsasservice}" == "true"
+  ${mcplifecycleoperator} =    Is Component Enabled    mcplifecycleoperator    ${DSC_NAME}
+  IF    "${mcplifecycleoperator}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/part-of=modelsasservice
+    ...    label_selector=app.kubernetes.io/name=mcp-lifecycle-module-operator
+  END
+
+  # AIGateway parent must be ready before nested MaaS / BatchGateway (AGO deploys them).
+  ${aigateway} =    Is Component Enabled    aigateway    ${DSC_NAME}
+  IF    "${aigateway}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/name=ai-gateway-operator
+  END
+
+  ${modelsasservice} =    Is Nested Component Enabled    aigateway    modelsAsAService    ${DSC_NAME}
+  IF    "${modelsasservice}" == "true"
+    # Prefer control-plane=maas-controller (AGO manager.yaml); part-of varies by platform overlay
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=control-plane=maas-controller
+  END
+
+  ${batchgateway} =    Is Nested Component Enabled    aigateway    batchGateway    ${DSC_NAME}
+  IF    "${batchgateway}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/name=llm-d-batch-gateway-operator
   END
 
   ${dashboard} =    Is Component Enabled    dashboard    ${DSC_NAME}
@@ -477,7 +507,7 @@ Verify RHODS Installation
     END
   END
 
-  IF    "${dashboard}" == "true" or "${workbenches}" == "true" or "${aipipelines}" == "true" or "${kserve}" == "true" or "${kueue}" == "true" or "${ray}" == "true" or "${trustyai}" == "true" or "${modelregistry}" == "true" or "${trainingoperator}" == "true" or "${sparkoperator}" == "true"    # robocop: disable
+  IF    "${dashboard}" == "true" or "${workbenches}" == "true" or "${aipipelines}" == "true" or "${kserve}" == "true" or "${kueue}" == "true" or "${ray}" == "true" or "${trustyai}" == "true" or "${modelregistry}" == "true" or "${trainingoperator}" == "true" or "${sparkoperator}" == "true" or "${aigateway}" == "true" or "${batchgateway}" == "true" or "${mcplifecycleoperator}" == "true"    # robocop: disable
       Log To Console    Waiting for pod status in ${APPLICATIONS_NAMESPACE}
       Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=600
       Log  Verified Applications NS: ${APPLICATIONS_NAMESPACE}  console=yes
@@ -498,15 +528,16 @@ Verify Builds In Application Namespace
   Log  Builds Verified  console=yes
 
 Clone OLM Install Repo
-  [Documentation]   Clone OLM git repo
+  [Documentation]   Clone OLM git repo and checkout ${OLM_INSTALL_GIT_REPO_BRANCH}
   ${status} =   Run Keyword And Return Status    Directory Should Exist   ${EXECDIR}/${OLM_DIR}
   IF    ${status}
-      Log    "The directory ${EXECDIR}/${OLM_DIR} already exist, skipping clone of the repo."    console=yes
-  ELSE
-      ${return_code}    ${output} =    Run And Return Rc And Output    git clone ${RHODS_OSD_INSTALL_REPO} ${EXECDIR}/${OLM_DIR}    #robocop:disable
+      Log    The directory ${EXECDIR}/${OLM_DIR} already exists, checking out branch ${OLM_INSTALL_GIT_REPO_BRANCH}.    console=yes    #robocop:disable
+      ${return_code}    ${output} =    Run And Return Rc And Output    cd ${EXECDIR}/${OLM_DIR} && (git checkout ${OLM_INSTALL_GIT_REPO_BRANCH} || git checkout -B ${OLM_INSTALL_GIT_REPO_BRANCH} origin/${OLM_INSTALL_GIT_REPO_BRANCH})    #robocop:disable
       Log    ${output}    console=yes
       Should Be Equal As Integers   ${return_code}   0
-      ${return_code}    ${output} =    Run And Return Rc And Output    cd ${EXECDIR}/${OLM_DIR} && git checkout main    #robocop:disable
+  ELSE
+      Log    Cloning OLM git repo and checking out branch ${OLM_INSTALL_GIT_REPO_BRANCH}.    console=yes
+      ${return_code}    ${output} =    Run And Return Rc And Output    git clone --branch ${OLM_INSTALL_GIT_REPO_BRANCH} ${OLM_INSTALL_GIT_REPO} ${EXECDIR}/${OLM_DIR}    #robocop:disable
       Log    ${output}    console=yes
       Should Be Equal As Integers   ${return_code}   0
   END
@@ -839,6 +870,48 @@ Create DataScienceCluster CustomResource Using Test Variables
     ${file_path} =    Set Variable    tasks/Resources/Files/
     Copy File    source=${file_path}${dsc_template}    destination=${file_path}dsc_apply.yml
     Run    sed -i'' -e 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
+    # Detect whether this cluster uses the 3.5+ MaaS DSC field (aigateway.modelsAsAService)
+    # or the legacy 3.4 field (kserve.modelsAsService). Check the installed CRD schema
+    # directly — this works for both ODH and RHOAI and is version-string-independent.
+    # In 3.5+, MaaS moved from kserve.modelsAsService → aigateway.modelsAsAService (operator #3723).
+    # On 3.4.x clusters, aigateway.* fields are unknown and silently dropped by the API server.
+    # Use the storage version to avoid hardcoding version index.
+    # Empty output on non-zero rc → legacy path; non-zero exit treated as unknown (safe default).
+    ${_crd_jsonpath} =    Catenate    SEPARATOR=
+    ...    {.spec.versions[?(@.storage==true)].schema.openAPIV3Schema
+    ...    .properties.spec.properties.components
+    ...    .properties.aigateway.properties.modelsAsAService}
+    ${_crd_rc}    ${_aigateway_in_schema} =    Run And Return Rc And Output
+    ...    oc get crd datascienceclusters.datasciencecluster.opendatahub.io -o jsonpath='${_crd_jsonpath}' 2>/dev/null    #robocop:disable
+    ${_is_pre_35} =    Evaluate    ${_crd_rc} == 0 and '${_aigateway_in_schema}' == ''
+    ${_aigateway_present} =    Evaluate    not ${_is_pre_35}
+    Log To Console    DSC CRD rc=${_crd_rc} aigateway.modelsAsAService present: ${_aigateway_present}
+    ${maas_configured} =    Run Keyword And Return Status
+    ...    Dictionary Should Contain Key    ${COMPONENTS}    modelsasservice
+    IF    ${maas_configured} and '${COMPONENTS.modelsasservice}' == 'Managed'
+        IF    ${_is_pre_35}
+            # 3.4.x: populate kserve.modelsAsService (legacy field); aigateway section not understood.
+            Run    sed -i'' -e 's/<modelsasservice_legacy_value>/Managed/' ${file_path}dsc_apply.yml
+            Log To Console    3.4 cluster: using kserve.modelsAsService=Managed for MaaS
+        ELSE
+            # 3.5+: modelsAsAService requires parent aigateway Managed (operator #3723).
+            # Force aigateway=Managed when callers only set modelsasservice=Managed.
+            ${aigateway_present} =    Run Keyword And Return Status
+            ...    Dictionary Should Contain Key    ${COMPONENTS}    aigateway
+            ${aigateway_already_managed} =    Set Variable    ${FALSE}
+            IF    ${aigateway_present}
+                ${aigateway_already_managed} =    Evaluate    '${COMPONENTS.aigateway}' == 'Managed'
+            END
+            IF    not ${aigateway_already_managed}
+                Set To Dictionary    ${COMPONENTS}    aigateway=Managed
+                # Keep COMPONENTS visible to Apply DataScienceCluster verification/logging
+                Set Global Variable    ${COMPONENTS}    # robocop: disable:replace-set-variable-with-var
+                Log To Console    modelsasservice=Managed requires aigateway=Managed; updated COMPONENTS
+            END
+        END
+    END
+    # Fill legacy placeholder with Removed when not on 3.4 or MaaS not Managed
+    Run    sed -i'' -e 's/<modelsasservice_legacy_value>/Removed/' ${file_path}dsc_apply.yml
     FOR    ${cmp}    IN    @{COMPONENT_LIST}
             IF    $cmp not in $COMPONENTS
                 Run    sed -i'' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
@@ -858,6 +931,7 @@ Create DataScienceCluster CustomResource Using Test Variables
                 Run    sed -i'' -e 's/<workbenches_namespace>/${NOTEBOOKS_NAMESPACE}/' ${file_path}dsc_apply.yml
             END
     END
+    Add Model Cache Config To DSC Yaml    ${file_path}dsc_apply.yml
 
 
 Wait For DataScienceCluster CustomResource To Be Ready
@@ -1043,6 +1117,12 @@ Install Connectivity Link Operator Via Cli
     [Documentation]    Install Red Hat Connectivity Link Operator Via CLI
     ...                Installing in ${CONNECTIVITY_LINK_NS} namespace with operator group
     ...                ensures all resources are created in ${CONNECTIVITY_LINK_NS}.
+    ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
+    IF    '${arch_type}' == 's390x' or '${arch_type}' == 'ppc64le'
+        Log    Skipping Red Hat Connectivity Link Operator installation for s390x/ppc64le architecture    console=yes
+        Log    Skipping Authorino Operator installation for s390x/ppc64le architecture    console=yes
+        RETURN
+    END
     ${is_installed} =   Check If Operator Is Installed Via CLI   ${CONNECTIVITY_LINK_OP_NAME}
     IF    ${is_installed}
         Log To Console    message=Red Hat Connectivity Link Operator is already installed
@@ -1058,6 +1138,8 @@ Install Connectivity Link Operator Via Cli
              ...    operator_group_name=${CONNECTIVITY_LINK_OP_NAME}
              ...    operator_group_ns=${CONNECTIVITY_LINK_NS}
              ...    operator_group_target_ns=${NONE}
+             ...    starting_csv=${CONNECTIVITY_LINK_STARTING_CSV}
+             ...    approval=Manual
         Wait Until Operator Subscription Last Condition Is
              ...    type=CatalogSourcesUnhealthy    status=False
              ...    reason=AllCatalogSourcesHealthy    subscription_name=${CONNECTIVITY_LINK_SUB_NAME}
@@ -1069,14 +1151,21 @@ Install Connectivity Link Operator Via Cli
         # Wait for authorino-operator to be ready (installed by rhcl-operator as OLM dependency)
         Wait Until Csv Is Ready    display_name=${AUTHORINO_CSV_NAME}
              ...    operators_namespace=${CONNECTIVITY_LINK_NS}    timeout=5m
-        ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/configure_connectivity_link_operator.sh
-        Log    ${output}    console=yes
-        IF    ${rc} != ${0}
-            Log    Unable to configure Connectivity Link.\nCheck the cluster please    console=yes
-            ...    level=ERROR
-            FAIL    Unable to configure Connectivity Link
+        # Skip configure_connectivity_link_operator.sh for s390x architecture
+        ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
+        IF    '${arch_type}' != 's390x'
+            ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/configure_connectivity_link_operator.sh
+            Log    ${output}    console=yes
+            IF    ${rc} != ${0}
+                Log    Unable to configure Connectivity Link.\nCheck the cluster please    console=yes
+                ...    level=ERROR
+                FAIL    Unable to configure Connectivity Link
+            END
+            Configure Authorino
+        ELSE
+            Log    Skipping configure_connectivity_link_operator.sh for s390x architecture    console=yes
+            Log    Skipping Authorino configuration for s390x architecture    console=yes
         END
-        Configure Authorino
     END
 
 Configure Authorino
@@ -1292,8 +1381,11 @@ Install RHOAI Dependencies With CLI
     Install Leader Worker Set Operator Via Cli
     Install Connectivity Link Operator Via Cli
     Install JobSet Dependencies
-    Configure MaaS Database
-    Configure MaaS Gateway API
+    ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
+    IF    '${arch_type}' != 's390x'
+        Configure MaaS Database
+        Configure MaaS Gateway API
+    END
 
 Install Observability Dependencies
     [Documentation]    Install dependent operators related to Observability
@@ -1402,7 +1494,7 @@ Set Component State
         FAIL    Can not find datasciencecluster
     END
     ${cluster_name} =    Set Variable    ${result.stdout}
-    ${result} =    Run Process    oc patch ${cluster_name} --type 'json' -p '[{"op" : "replace" ,"path" : "/spec/components/${component}/managementState" ,"value" : "${state}"}]'
+    ${result} =    Run Process    oc patch ${cluster_name} --type merge -p '{"spec":{"components":{"${component}":{"managementState":"${state}"}}}}'
     ...    shell=true    stderr=STDOUT
     IF    $result.rc != 0
         FAIL    Can not enable ${component}: ${result.stdout}
@@ -1410,7 +1502,9 @@ Set Component State
     Log To Console    Component ${component} state was set to ${state}
 
 Set Nested Component State
-    [Documentation]    Set nested component state in Data Science Cluster (e.g., kserve.modelsAsService)
+    [Documentation]    Set nested component state in Data Science Cluster (e.g., aigateway.modelsAsAService).
+    ...                When enabling (Managed), also sets the parent managementState to Managed in the same
+    ...                patch so MaaS cannot be Managed while aigateway is Removed/unset.
     [Arguments]    ${parent_component}    ${nested_component}    ${state}
     ${result} =    Run Process    oc get datascienceclusters.datasciencecluster.opendatahub.io -o name
     ...    shell=true    stderr=STDOUT
@@ -1418,12 +1512,24 @@ Set Nested Component State
         FAIL    Can not find datasciencecluster
     END
     ${cluster_name} =    Set Variable    ${result.stdout}
-    ${result} =    Run Process    oc patch ${cluster_name} --type 'json' -p '[{"op" : "replace" ,"path" : "/spec/components/${parent_component}/${nested_component}/managementState" ,"value" : "${state}"}]'
-    ...    shell=true    stderr=STDOUT
+    IF    "${state}" == "Managed"
+        ${patch} =    Set Variable
+        ...    {"spec":{"components":{"${parent_component}":{"managementState":"Managed","${nested_component}":{"managementState":"Managed"}}}}}
+        ${result} =    Run Process    oc patch ${cluster_name} --type merge -p '${patch}'
+        ...    shell=true    stderr=STDOUT
+    ELSE
+        ${patch} =    Set Variable
+        ...    {"spec":{"components":{"${parent_component}":{"${nested_component}":{"managementState":"${state}"}}}}}
+        ${result} =    Run Process    oc patch ${cluster_name} --type merge -p '${patch}'
+        ...    shell=true    stderr=STDOUT
+    END
     IF    $result.rc != 0
         FAIL    Can not set ${parent_component}.${nested_component} to ${state}: ${result.stdout}
     END
     Log To Console    Nested component ${parent_component}.${nested_component} state was set to ${state}
+    IF    "${state}" == "Managed"
+        Log To Console    Parent component ${parent_component} managementState was set to Managed
+    END
 
 Get DSC Component State
     [Documentation]    Get component management state
@@ -1437,7 +1543,7 @@ Get DSC Component State
     RETURN    ${state}
 
 Get DSC Nested Component State
-    [Documentation]    Get nested component management state (e.g., kserve.modelsAsService)
+    [Documentation]    Get nested component management state (e.g., aigateway.modelsAsAService)
     [Arguments]    ${dsc}    ${parent_component}    ${nested_component}    ${namespace}
 
     ${rc}   ${state}=    Run And Return Rc And Output
@@ -1541,33 +1647,63 @@ Configure Gateway API
     Log To Console    ${output}
     Should Be Equal As Integers    ${rc}    0    msg=Error configuring Gateway for KServe
 
-Patch DSC With Model Cache Config    #robocop:disable=TooManyKeywords
-    [Documentation]    Patch the DataScienceCluster with modelCache config.
-    ...    Uses MODEL_CACHE_NODE_COUNT (default 2) to decide how many worker nodes to include.
-    ...    If 0, sets managementState to Removed. If >= 1, sets Managed with that many nodes.
-    [Arguments]    ${dsc_name}=${DSC_NAME}
-    ${node_count} =    Get Variable Value    ${MODEL_CACHE_NODE_COUNT}    2
-    ${node_count} =    Convert To Integer    ${node_count}
-    IF    ${node_count} == ${0}
-        Log To Console    MODEL_CACHE_NODE_COUNT is 0, setting modelCache managementState to Removed
-        ${rc}    ${output} =    Run And Return Rc And Output
-        ...    oc patch DataScienceCluster/${dsc_name} --type merge -p '{"spec":{"components":{"kserve":{"modelCache":{"managementState":"Removed"}}}}}'    #robocop:disable
-    ELSE
-        ${cmd} =    Set Variable
-        ...    oc get nodes -l node-role.kubernetes.io/worker= --no-headers -o custom-columns=":metadata.name" | head -${node_count} | jq -R . | jq -sc .    #robocop:disable
-        ${rc}    ${node_names_json} =    Run And Return Rc And Output    ${cmd}
-        Should Be Equal As Integers    ${rc}    0    msg=Failed to fetch worker node names
-        Should Not Be Empty    ${node_names_json}    msg=No worker nodes found in the cluster
-        Should Not Be Equal    ${node_names_json}    []    msg=No worker nodes found in the cluster
-        Log To Console    Patching DSC with modelCache (nodes: ${node_names_json}, count: ${node_count})
-        ${rc}    ${output} =    Run And Return Rc And Output
-        ...    oc patch DataScienceCluster/${dsc_name} --type merge -p '{"spec":{"components":{"kserve":{"modelCache":{"cacheSize":"10Gi","managementState":"Managed","nodeNames":${node_names_json}}}}}}'    #robocop:disable
+Get Worker Node Names For Model Cache
+    [Documentation]    Fetch first 2 worker node names for modelCache.
+    ${cmd} =    Set Variable
+    ...    oc get nodes -l node-role.kubernetes.io/worker= --no-headers -o custom-columns=":metadata.name" | head -2    #robocop:disable
+    ${rc}    ${output} =    Run And Return Rc And Output    ${cmd}
+    Should Be Equal As Integers    ${rc}    0    msg=Failed to fetch worker node names
+    Should Not Be Empty    ${output}    msg=No worker nodes found in the cluster
+    Log To Console    Fetched worker node names for modelCache: ${output}
+    RETURN    ${output}
+
+Add Model Cache Config To DSC Yaml
+    [Documentation]    Inject modelCache into DSC YAML at create time (2 nodes, 1Gi).
+    [Arguments]    ${dsc_yaml_path}
+    ${node_names} =    Get Worker Node Names For Model Cache
+    Log To Console    Adding modelCache config with worker nodes: ${node_names}
+    ${rc}    ${output} =    Run And Return Rc And Output
+    ...    yq -i '.spec.components.kserve.modelCache.cacheSize = "1Gi" | .spec.components.kserve.modelCache.managementState = "Managed"' ${dsc_yaml_path}    #robocop:disable
+    Should Be Equal As Integers    ${rc}    0    msg=Failed to add modelCache config: ${output}
+    Add Node Names To Model Cache Yaml    ${dsc_yaml_path}    ${node_names}
+
+Add Node Names To Model Cache Yaml
+    [Documentation]    Add worker node names to modelCache.nodeNames in DSC YAML
+    [Arguments]    ${dsc_yaml_path}    ${node_names}
+    ${rc}    ${output} =    Run And Return Rc And Output
+    ...    yq -i '.spec.components.kserve.modelCache.nodeNames = []' ${dsc_yaml_path}
+    Should Be Equal As Integers    ${rc}    0    msg=Failed to initialize nodeNames: ${output}
+    @{nodes} =    Split String    ${node_names}    \n
+    FOR    ${node}    IN    @{nodes}
+        ${node} =    Strip String    ${node}
+        IF    "${node}" != "${EMPTY}"
+            ${rc}    ${output} =    Run And Return Rc And Output
+            ...    yq -i '.spec.components.kserve.modelCache.nodeNames += ["${node}"]' ${dsc_yaml_path}
+            Should Be Equal As Integers    ${rc}    0    msg=Failed to add node ${node}: ${output}
+        END
     END
+
+Patch DSC With Model Cache Config
+    [Documentation]    Patch existing DSC with modelCache (2 nodes, 1Gi). Used when DSC is
+    ...    created by the operator (managed) rather than via dsc_template.yml.
+    [Arguments]    ${dsc_name}=${DSC_NAME}
+    ${node_names} =    Get Worker Node Names For Model Cache
+    ${node_names_json} =    Evaluate
+    ...    json.dumps([n.strip() for n in """${node_names}""".splitlines() if n.strip()])    modules=json
+    Should Not Be Equal    ${node_names_json}    []    msg=No worker nodes found in the cluster
+    Log To Console    Patching DSC with modelCache (nodes: ${node_names_json})
+    ${rc}    ${output} =    Run And Return Rc And Output
+    ...    oc patch DataScienceCluster/${dsc_name} --type merge -p '{"spec":{"components":{"kserve":{"modelCache":{"cacheSize":"1Gi","managementState":"Managed","nodeNames":${node_names_json}}}}}}'    #robocop:disable
     Log To Console    ${output}
     Should Be Equal As Integers    ${rc}    0    msg=Error patching DSC with modelCache config: ${output}
 
 Configure MaaS Gateway API
     [Documentation]    Configure Gateway API for MaaS traffic routing
+    ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
+    IF    '${arch_type}' == 'ppc64le'
+        Log    Skipping MaaS Gateway API installation for ppc64le architecture    console=yes
+        RETURN
+    END
     Log To Console    Configuring Gateway API for MaaS
     ${rc}    ${output} =    Run And Return Rc And Output
     ...    bash tasks/Resources/Gateway/configure_maas_gateway.sh
@@ -1576,6 +1712,11 @@ Configure MaaS Gateway API
 
 Configure MaaS Database
     [Documentation]    Provision PostgreSQL and maas-db-config secret required by maas-api
+    ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
+    IF    '${arch_type}' == 'ppc64le'
+        Log    Skipping MaaS Database installation for ppc64le architecture    console=yes
+        RETURN
+    END
     Log To Console    Provisioning MaaS PostgreSQL prerequisites
     ${rc}    ${output} =    Run And Return Rc And Output
     ...    bash tasks/Resources/Database/configure_maas_postgres.sh --namespace ${APPLICATIONS_NAMESPACE}

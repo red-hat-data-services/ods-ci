@@ -16,6 +16,7 @@ ${UPDATE_CHANNEL}               odh-nightlies
 ${RHODS_VERSION}                None
 ${CATALOG_SOURCE}               redhat-operators
 ${RHOAI_VERSION}                ${EMPTY}
+${ARCH_TYPE}                    amd64
 
 *** Tasks ***
 Can Install RHODS Operator

@@ -112,6 +112,7 @@ Set DSC Nested Component Removed State And Wait For Completion
 Set DSC Nested Component Managed State And Wait For Completion
     [Documentation]    Set nested component management state to 'Managed', and wait for deployment and pod to be available.
     ...                Also ensures parent component is Managed, as nested components require their parent to be enabled.
+    ...                Parent may be a standard component or a module (e.g. aigateway for modelsAsAService).
     [Arguments]    ${parent_component}    ${nested_component}    ${deployment_name}    ${label_selector}
     ...            ${namespace}=${APPLICATIONS_NS}      ${wait_for_completion}=True
 

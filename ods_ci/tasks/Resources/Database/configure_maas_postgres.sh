@@ -17,34 +17,144 @@ done
 APPS_NS="${APPS_NS:-redhat-ods-applications}"
 POSTGRES_IMAGE="registry.redhat.io/rhel9/postgresql-15@sha256:90ec347a35ab8a5d530c8d09f5347b13cc71df04f3b994bfa8b1a409b1171d59"
 
-# Ensure namespace exists
-oc create namespace "${APPS_NS}" --dry-run=client -o yaml | oc apply -f -
+# Derive MaaS infrastructure namespace (matches MaaS controller logic from PR #1051).
+# When INFRA_NAMESPACE=AUTO (default since 3.5), the controller expects maas-db-config
+# in a separate infra namespace. Postgres stays in APPS_NS; maas-db-config is always
+# refreshed from postgres-creds and applied to INFRA_NS (and APPS_NS when they differ).
+derive_infra_namespace() {
+    case "$1" in
+        redhat-ods-applications) echo "redhat-ai-gateway-infra" ;;
+        opendatahub)             echo "odh-ai-gateway-infra" ;;
+        *)                       echo "$1" ;;
+    esac
+}
 
-# Skip if all resources already exist and deployment is ready
-if oc get secret maas-db-config -n "${APPS_NS}" &>/dev/null \
-   && oc get secret postgres-creds -n "${APPS_NS}" &>/dev/null \
+detect_infra_namespace() {
+    local apps_ns="$1"
+    local oc_stderr oc_rc infra_val
+    oc_stderr=$(mktemp)
+    infra_val=$(oc get deployment maas-controller -n "${apps_ns}" \
+        -o jsonpath='{.spec.template.spec.containers[0].env[?(@.name=="INFRA_NAMESPACE")].value}' \
+        2>"${oc_stderr}") && oc_rc=0 || oc_rc=$?
+
+    if [[ $oc_rc -ne 0 ]]; then
+        local err_msg
+        err_msg=$(<"${oc_stderr}")
+        rm -f "${oc_stderr}"
+        if [[ "${err_msg}" == *"NotFound"* ]]; then
+            echo "maas-controller not found in ${apps_ns}; using derived infra namespace" >&2
+            derive_infra_namespace "${apps_ns}"
+        else
+            echo "ERROR: unexpected failure querying maas-controller in ${apps_ns}: ${err_msg}" >&2
+            return 1
+        fi
+    else
+        rm -f "${oc_stderr}"
+        if [[ "${infra_val}" == "AUTO" ]]; then
+            derive_infra_namespace "${apps_ns}"
+        elif [[ -n "${infra_val}" ]]; then
+            echo "${infra_val}"
+        else
+            derive_infra_namespace "${apps_ns}"
+        fi
+    fi
+}
+
+# Always (re)apply maas-db-config from current credentials so namespaces cannot drift.
+apply_maas_db_config() {
+    local target_ns="$1"
+    local pg_host="$2"
+    local db_url="postgresql://${PG_USER}:${PG_PASS}@${pg_host}:5432/${PG_DB}?sslmode=disable"
+
+    oc apply -f - <<EOF
+apiVersion: v1
+kind: Secret
+metadata:
+  name: maas-db-config
+  namespace: ${target_ns}
+  labels:
+    app: maas-api
+    purpose: poc
+type: Opaque
+stringData:
+  DB_CONNECTION_URL: "${db_url}"
+EOF
+}
+
+refresh_maas_db_config_secrets() {
+    # FQDN works from both namespaces; prefer it whenever infra is separate.
+    local pg_host
+    if [[ "${INFRA_NS}" != "${APPS_NS}" ]]; then
+        pg_host="postgres.${APPS_NS}.svc"
+    else
+        pg_host="postgres"
+    fi
+
+    apply_maas_db_config "${INFRA_NS}" "${pg_host}"
+    if [[ "${INFRA_NS}" != "${APPS_NS}" ]]; then
+        # Keep apps namespace in sync for consumers/tools that still look there.
+        apply_maas_db_config "${APPS_NS}" "${pg_host}"
+    fi
+}
+
+# Restart maas-api so it reloads DB_CONNECTION_URL after secret refresh.
+# No-op if the deployment is not present yet (e.g. first-time install before DSC).
+restart_maas_api_in_ns() {
+    local ns="$1"
+    if oc get deployment maas-api -n "${ns}" &>/dev/null; then
+        echo "Restarting maas-api in ${ns} to pick up refreshed maas-db-config"
+        oc rollout restart deployment/maas-api -n "${ns}"
+        oc rollout status deployment/maas-api -n "${ns}" --timeout=5m
+    fi
+}
+
+restart_maas_api_if_present() {
+    restart_maas_api_in_ns "${INFRA_NS}"
+    if [[ "${INFRA_NS}" != "${APPS_NS}" ]]; then
+        restart_maas_api_in_ns "${APPS_NS}"
+    fi
+}
+
+load_or_generate_postgres_creds() {
+    if oc get secret postgres-creds -n "${APPS_NS}" &>/dev/null; then
+        PG_USER="$(oc get secret postgres-creds -n "${APPS_NS}" -o jsonpath='{.data.POSTGRES_USER}' | base64 -d)"
+        PG_PASS="$(oc get secret postgres-creds -n "${APPS_NS}" -o jsonpath='{.data.POSTGRES_PASSWORD}' | base64 -d)"
+        PG_DB="$(oc get secret postgres-creds -n "${APPS_NS}" -o jsonpath='{.data.POSTGRES_DB}' | base64 -d)"
+        if [[ -z "${PG_USER}" || -z "${PG_PASS}" || -z "${PG_DB}" ]]; then
+            echo "postgres-creds in ${APPS_NS} is missing required keys/values" >&2
+            exit 1
+        fi
+        echo "Reusing existing postgres-creds in ${APPS_NS}"
+    else
+        PG_USER="maas-$(cat /dev/urandom | tr -dc a-z0-9 | head -c 8)"
+        PG_PASS="$(cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 32)"
+        PG_DB="maas-$(cat /dev/urandom | tr -dc a-z0-9 | head -c 8)"
+    fi
+}
+
+INFRA_NS=$(detect_infra_namespace "${APPS_NS}")
+
+# Ensure namespaces exist
+oc create namespace "${APPS_NS}" --dry-run=client -o yaml | oc apply -f -
+if [[ "${INFRA_NS}" != "${APPS_NS}" ]]; then
+    oc create namespace "${INFRA_NS}" --dry-run=client -o yaml | oc apply -f -
+fi
+
+# If postgres is already provisioned, still refresh maas-db-config every run so
+# INFRA_NS (and APPS_NS when separate) cannot keep a stale connection URL.
+if oc get secret postgres-creds -n "${APPS_NS}" &>/dev/null \
    && oc get service postgres -n "${APPS_NS}" &>/dev/null \
    && oc get deployment postgres -n "${APPS_NS}" &>/dev/null; then
     oc wait deployment/postgres -n "${APPS_NS}" --for=condition=Available --timeout=5m
-    echo "MaaS PostgreSQL prerequisites already exist in ${APPS_NS}, skipping."
+    load_or_generate_postgres_creds
+    refresh_maas_db_config_secrets
+    restart_maas_api_if_present
+    echo "MaaS PostgreSQL already provisioned in ${APPS_NS}; refreshed maas-db-config in ${INFRA_NS}$([[ "${INFRA_NS}" != "${APPS_NS}" ]] && echo " and ${APPS_NS}")."
     exit 0
 fi
 
 # Reuse existing credentials if postgres-creds secret is present, otherwise generate new ones
-if oc get secret postgres-creds -n "${APPS_NS}" &>/dev/null; then
-    PG_USER="$(oc get secret postgres-creds -n "${APPS_NS}" -o jsonpath='{.data.POSTGRES_USER}' | base64 -d)"
-    PG_PASS="$(oc get secret postgres-creds -n "${APPS_NS}" -o jsonpath='{.data.POSTGRES_PASSWORD}' | base64 -d)"
-    PG_DB="$(oc get secret postgres-creds -n "${APPS_NS}" -o jsonpath='{.data.POSTGRES_DB}' | base64 -d)"
-    if [[ -z "${PG_USER}" || -z "${PG_PASS}" || -z "${PG_DB}" ]]; then
-        echo "postgres-creds in ${APPS_NS} is missing required keys/values" >&2
-        exit 1
-    fi
-    echo "Reusing existing postgres-creds in ${APPS_NS}"
-else
-    PG_USER="maas-$(cat /dev/urandom | tr -dc a-z0-9 | head -c 8)"
-    PG_PASS="$(cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 32)"
-    PG_DB="maas-$(cat /dev/urandom | tr -dc a-z0-9 | head -c 8)"
-fi
+load_or_generate_postgres_creds
 
 # 1. postgres-creds secret
 oc apply -f - <<EOF
@@ -63,21 +173,8 @@ stringData:
   POSTGRES_DB: "${PG_DB}"
 EOF
 
-# 2. maas-db-config secret (DB_CONNECTION_URL key)
-DB_URL="postgresql://${PG_USER}:${PG_PASS}@postgres:5432/${PG_DB}?sslmode=disable"
-oc apply -f - <<EOF
-apiVersion: v1
-kind: Secret
-metadata:
-  name: maas-db-config
-  namespace: ${APPS_NS}
-  labels:
-    app: maas-api
-    purpose: poc
-type: Opaque
-stringData:
-  DB_CONNECTION_URL: "${DB_URL}"
-EOF
+# 2. maas-db-config secret (always applied; both namespaces when infra is separate)
+refresh_maas_db_config_secrets
 
 # 3. postgres Service
 oc apply -f - <<EOF
@@ -167,4 +264,10 @@ if ! oc wait deployment/postgres -n "${APPS_NS}" --for=condition=Available --tim
     exit 1
 fi
 
-echo "MaaS PostgreSQL prerequisites provisioned in ${APPS_NS}"
+restart_maas_api_if_present
+
+if [[ "${INFRA_NS}" != "${APPS_NS}" ]]; then
+    echo "MaaS PostgreSQL prerequisites provisioned (postgres in ${APPS_NS}, maas-db-config in ${INFRA_NS} and ${APPS_NS})"
+else
+    echo "MaaS PostgreSQL prerequisites provisioned in ${APPS_NS}"
+fi

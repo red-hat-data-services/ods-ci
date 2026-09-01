@@ -44,7 +44,7 @@ Verify Pipelines Integration With Elyra When Using Standard Data Science Image
     [Timeout]    10m
     Verify Pipelines Integration With Elyra Running Hello World Pipeline Test
     ...    img=Jupyter | Data Science | CPU | Python 3.12
-    ...    runtime_image=Runtime | Datascience | CPU | Python 3.12
+    ...    runtime_image=Runtime | Datascience | CPU | Python 3.12 | Latest
     ...    pipeline_name=standard-data-science-pipeline
 
 Verify Pipelines Integration With Elyra When Using Standard Data Science Based Images
@@ -55,9 +55,9 @@ Verify Pipelines Integration With Elyra When Using Standard Data Science Based I
     [Template]    Verify Pipelines Integration With Elyra Running Hello World Pipeline Test
     [Tags]        Tier1    ODS-2271
     [Timeout]     40m
-    Jupyter | PyTorch | CUDA | Python 3.12       Runtime | Datascience | CPU | Python 3.12    pytorch-pipeline      600s
-    Jupyter | TensorFlow | CUDA | Python 3.12    Runtime | Datascience | CPU | Python 3.12    tensorflow-pipeline   600s
-    Jupyter | TrustyAI | CPU | Python 3.12       Runtime | Datascience | CPU | Python 3.12    trustyai-pipeline     600s
+    Jupyter | PyTorch | CUDA | Python 3.12       Runtime | Datascience | CPU | Python 3.12 | Latest    pytorch-pipeline      600s
+    Jupyter | TensorFlow | CUDA | Python 3.12    Runtime | Datascience | CPU | Python 3.12 | Latest    tensorflow-pipeline   600s
+    Jupyter | TrustyAI | CPU | Python 3.12       Runtime | Datascience | CPU | Python 3.12 | Latest    trustyai-pipeline     600s
 
 
 *** Keywords ***
@@ -129,10 +129,10 @@ Verify Hello World Pipeline Elements
     [Documentation]    Verifies that the example pipeline is displayed correctly by Elyra
     Wait Until Page Contains Element    xpath=${SVG_CANVAS}     timeout=10s
     Maybe Migrate Pipeline
-    Page Should Contain Element    xpath=${SVG_CANVAS}${SVG_INTERACTABLE}${SVG_PIPELINE_NODES}${SVG_SINGLE_NODE}//span[.="Load weather data"]  # robocop: disable
-    Page Should Contain Element    xpath=${SVG_CANVAS}${SVG_INTERACTABLE}${SVG_PIPELINE_NODES}${SVG_SINGLE_NODE}//span[.="Part 1 - Data Cleaning.ipynb"]  # robocop: disable
-    Page Should Contain Element    xpath=${SVG_CANVAS}${SVG_INTERACTABLE}${SVG_PIPELINE_NODES}${SVG_SINGLE_NODE}//span[.="Part 2 - Data Analysis.ipynb"]  # robocop: disable
-    Page Should Contain Element    xpath=${SVG_CANVAS}${SVG_INTERACTABLE}${SVG_PIPELINE_NODES}${SVG_SINGLE_NODE}//span[.="Part 3 - Time Series Forecasting.ipynb"]  # robocop: disable
+    Page Should Contain Element    xpath=${SVG_CANVAS}${SVG_INTERACTABLE}${SVG_PIPELINE_NODES}${SVG_SINGLE_NODE}//span[.="load-weather-data"]  # robocop: disable
+    Page Should Contain Element    xpath=${SVG_CANVAS}${SVG_INTERACTABLE}${SVG_PIPELINE_NODES}${SVG_SINGLE_NODE}//span[.="part-1---data-cleaning.ipynb"]  # robocop: disable
+    Page Should Contain Element    xpath=${SVG_CANVAS}${SVG_INTERACTABLE}${SVG_PIPELINE_NODES}${SVG_SINGLE_NODE}//span[.="part-2---data-analysis.ipynb"]  # robocop: disable
+    Page Should Contain Element    xpath=${SVG_CANVAS}${SVG_INTERACTABLE}${SVG_PIPELINE_NODES}${SVG_SINGLE_NODE}//span[.="part-3---time-series-forecasting.ipynb"]  # robocop: disable
 
 Select Pipeline Project By Name
     [Documentation]    Select the project by project name

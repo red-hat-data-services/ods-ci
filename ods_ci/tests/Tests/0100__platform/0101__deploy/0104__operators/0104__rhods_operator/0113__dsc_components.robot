@@ -168,20 +168,26 @@ Validate Ray Removed State
     [Teardown]      Restore DSC Component State     ray     ${RAY_DEPLOYMENT_NAME}      ${RAY_LABEL_SELECTOR}       ${SAVED_MANAGEMENT_STATES.RAY}
 
 Validate Training Operator Managed State
-    [Documentation]    Validate that the DSC Training Operator component Managed state creates the expected resources,
-    ...    check that Training deployment is created and pod is in Ready state
+    [Documentation]    Validate that setting TrainingOperator to Managed is correctly rejected in 3.6+.
+    ...    TrainingOperator v1 is obsolete; the webhook must block enabling it.
     [Tags]
     ...    Operator
     ...    RHOAIENG-6627
+    ...    RHOAIENG-84752
     ...    training-managed
     ...    Integration
     ...    Smoke
 
-    Set DSC Component Managed State And Wait For Completion
+    Set DSC Component Removed State And Wait For Completion
     ...    trainingoperator
     ...    ${TRAINING_DEPLOYMENT_NAME}
     ...    ${TRAINING_LABEL_SELECTOR}
-    Check That Image Pull Path Is Correct       ${TRAINING_DEPLOYMENT_NAME}     ${IMAGE_PULL_PATH}
+    ${error}=    Run Keyword And Expect Error    *
+    ...    Set DSC Component Managed State And Wait For Completion
+    ...    trainingoperator
+    ...    ${TRAINING_DEPLOYMENT_NAME}
+    ...    ${TRAINING_LABEL_SELECTOR}
+    Should Contain    ${error}    TrainingOperator v1 is obsolete
 
     [Teardown]      Restore DSC Component State     trainingoperator        ${TRAINING_DEPLOYMENT_NAME}     ${TRAINING_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.TRAINING}
 
@@ -208,7 +214,6 @@ Validate Trainer Managed State
     ...    Operator
     ...    trainer-managed
     ...    Integration
-    ...    ExcludeOnODH
     ...    Smoke
 
     Set DSC Component Managed State And Wait For Completion

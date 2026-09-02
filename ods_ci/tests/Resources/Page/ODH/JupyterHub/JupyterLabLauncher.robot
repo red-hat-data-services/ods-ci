@@ -609,7 +609,7 @@ Get Git Clone Error Message
     [Documentation]    Returns expected error after a git clone operation. Fails if error didn't occur
     ${err_msg} =    Set Variable    No error
     Wait Until Page Contains    Failed to clone    timeout=5s
-    Click Button    xpath://button[contains(@class,"jp-toast-button") and @title="Show"]    #click show
+    Click Button    xpath://button[contains(@class,"jp-toast-button") and @title="Show"]    # click show
     ${err_msg} =    Get Text    //div[contains(@class,"jp-Dialog-body")]    # get error text
     #dismiss button
     Click Button

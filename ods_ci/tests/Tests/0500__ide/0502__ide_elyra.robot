@@ -96,8 +96,13 @@ Verify Pipelines Integration With Elyra Running Hello World Pipeline Test     # 
     ...                 envs=${ENVS_LIST}
     Start Workbench     workbench_title=elyra_${img}    timeout=${workbench_timeout}
     Launch And Access Workbench    workbench_title=elyra_${img}
-    ${git_base_url}=    Set Variable If    '${GIT_HTTPS_URL}' != '${EMPTY}'    ${GIT_HTTPS_URL}    https://github.com
-    Clone Git Repository And Open    ${git_base_url}/redhat-rhods-qe/ods-ci-notebooks-main
+    ${repo_url}=    Get Variable Value    ${GIT_HTTP_URL}
+    IF    '${repo_url}' == '${EMPTY}'
+        ${repo_url}=    Set Variable    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main
+    ELSE
+        ${repo_url}=    Set Variable    ${repo_url}ods-ci-notebooks-main.git
+    END
+    Clone Git Repository And Open    ${repo_url}
     ...    ods-ci-notebooks-main/notebooks/500__jupyterhub/pipelines/v2/elyra/run-pipelines-on-data-science-pipelines/hello-generic-world.pipeline  # robocop: disable
     Verify Hello World Pipeline Elements
     Set Runtime Image In All Nodes    runtime_image=${runtime_image}

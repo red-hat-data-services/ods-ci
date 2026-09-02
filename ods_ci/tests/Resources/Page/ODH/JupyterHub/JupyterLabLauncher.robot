@@ -608,12 +608,12 @@ Get Directory Name From Git Repo URL
 Get Git Clone Error Message
     [Documentation]    Returns expected error after a git clone operation. Fails if error didn't occur
     ${err_msg} =    Set Variable    No error
-    Wait Until Page Contains    Failed to clone    timeout=3s
-    Click Button    //div[@class="MuiSnackbar-root MuiSnackbar-anchorOriginBottomRight"]/div/div/button    #click show
-    ${err_msg} =    Get Text    //div/div/span[@class="lm-Widget p-Widget jp-Dialog-body"]    #get error text
+    Wait Until Page Contains    Failed to clone    timeout=5s
+    Click Button    xpath://button[contains(@class,"jp-toast-button") and @title="Show"]    #click show
+    ${err_msg} =    Get Text    //div[contains(@class,"jp-Dialog-body")]    #get error text
     #dismiss button
     Click Button
-    ...    //div/div/button[@class="jp-Dialog-button jp-mod-accept jp-mod-warn jp-mod-styled"]
+    ...    //div/div/button[@class="jp-Dialog-button jp-mod-accept jp-mod-warn jp-mod-styled"]/div[@class="jp-Dialog-buttonLabel"]
     RETURN    ${err_msg}
 
 Verify Git Plugin

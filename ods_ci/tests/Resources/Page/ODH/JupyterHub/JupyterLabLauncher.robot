@@ -610,10 +610,10 @@ Get Git Clone Error Message
     ${err_msg} =    Set Variable    No error
     Wait Until Page Contains    Failed to clone    timeout=5s
     Click Button    xpath://button[contains(@class,"jp-toast-button") and @title="Show"]    #click show
-    ${err_msg} =    Get Text    //div[contains(@class,"jp-Dialog-body")]    #get error text
+    ${err_msg} =    Get Text    //div[contains(@class,"jp-Dialog-body")]    # get error text
     #dismiss button
     Click Button
-    ...    //div/div/button[@class="jp-Dialog-button jp-mod-accept jp-mod-warn jp-mod-styled"]/div[@class="jp-Dialog-buttonLabel"]
+    ...    //div/div/button[@class="jp-Dialog-button jp-mod-accept jp-mod-warn jp-mod-styled"]/div[@class="jp-Dialog-buttonLabel"] # robocop: disable
     RETURN    ${err_msg}
 
 Verify Git Plugin

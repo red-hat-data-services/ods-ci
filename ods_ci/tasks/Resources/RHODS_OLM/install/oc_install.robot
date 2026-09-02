@@ -428,8 +428,17 @@ Verify RHODS Installation
 
   ${modelregistry} =    Is Component Enabled    modelregistry    ${DSC_NAME}
   IF    "${modelregistry}" == "true"
-    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/part-of=model-registry-operator    timeout=400s
+    # 3.6+ deploys AI Hub (and catalog on some overlays) instead of model-registry-operator.
+    # Wait for whichever controllers the operator actually created.
+    ${legacy_mr} =    Wait For Deployment Replica If Present    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=control-plane=model-registry-operator    timeout=400s
+    ${aihub} =    Wait For Deployment Replica If Present    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=control-plane=aihub-controller-manager    timeout=400s
+    ${catalog} =    Wait For Deployment Replica If Present    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=control-plane=catalog-controller-manager    timeout=400s
+    IF    not ${legacy_mr} and not ${aihub} and not ${catalog}
+        Fail    msg=modelregistry is Managed but no MR/AIHub/catalog controller Deployment was found
+    END
   END
 
   ${trainingoperator} =    Is Component Enabled    trainingoperator    ${DSC_NAME}

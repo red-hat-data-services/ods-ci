@@ -209,7 +209,7 @@ Verify DSC Contains Correct Component Versions  # robocop: disable:too-long-test
     END
     Common.Clone Git Repository  ${RHODS_OPERATOR_GIT_REPO}  rhoai-${rhods_operator_branch}  ${RHODS_OPERATOR_GIT_DIR}
     ${component_versions} =  Run
-    ...    oc get dsc default-dsc -o json | jq '.status.components'
+    ...    oc get dsc default-dsc -o json | jq '.status.components | with_entries(select(.value.releases != null)) | map_values(.releases |= map(select(.name != "platform")))'   # filter out components without releases and remove "platform" key
     ${component_versions_json} =    Evaluate     json.loads("""${component_versions}""")    json
     ${components} =  List Directories In Directory    ${RHODS_OPERATOR_GIT_DIR}/prefetched-manifests
     FOR  ${c}  IN  @{components}
@@ -232,7 +232,13 @@ Verify DSC Contains Correct Component Versions  # robocop: disable:too-long-test
             END
             ${component_metadata_content} =  Get File  ${component_metadata_file}
             ${component_metadata} =    Evaluate     yaml.safe_load("""${component_metadata_content}""")    yaml
-            Lists Should Be Equal    ${component_versions_json}[${cmp}][releases]   ${component_metadata}[releases]
+            ${dsc_releases} =    Set Variable    ${component_versions_json}[${cmp}][releases]
+            ${repo_releases} =    Set Variable    ${component_metadata}[releases]
+            ${component_versions_releases} =    Evaluate
+            ...    [dict(r, version=r["version"].removeprefix("v")) for r in $dsc_releases]
+            ${component_metadata_releases} =    Evaluate
+            ...    [dict(r, version=r["version"].removeprefix("v")) for r in $repo_releases]
+            Lists Should Be Equal    ${component_versions_releases}   ${component_metadata_releases}
             ...    msg=Component versions in DSC don't match component metadata in repo
         ELSE
             Log  ${c} does not provide component_metadata.yaml

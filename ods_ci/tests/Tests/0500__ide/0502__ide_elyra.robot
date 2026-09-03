@@ -103,7 +103,7 @@ Verify Pipelines Integration With Elyra Running Hello World Pipeline Test     # 
         ${repo_url}=    Set Variable    ${repo_url}ods-ci-notebooks-main.git
     END
     Clone Git Repository And Open    ${repo_url}
-    ...    ods-ci-notebooks-main/notebooks/500__jupyterhub/pipelines/v2/elyra/run-pipelines-on-data-science-pipelines/hello-generic-world.pipeline  # robocop: disable
+    ...    ods-ci-notebooks-main/notebooks/500__jupyterhub/pipelines/v2/elyra/disconnected/run-pipelines-on-data-science-pipelines/hello-generic-world.pipeline # robocop: disable
     Verify Hello World Pipeline Elements
     Set Runtime Image In All Nodes    runtime_image=${runtime_image}
     Run Pipeline    pipeline_name=${pipeline_name}

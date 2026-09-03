@@ -613,7 +613,7 @@ Get Git Clone Error Message
     ${err_msg} =    Get Text    //div[contains(@class,"jp-Dialog-body")]    # get error text
     #dismiss button
     Click Button
-    ...    //div/div/button[@class="jp-Dialog-button jp-mod-accept jp-mod-warn jp-mod-styled"]/div[@class="jp-Dialog-buttonLabel"] # robocop: disable
+    ...    //div/div/button[@class="jp-Dialog-button jp-mod-accept jp-mod-warn jp-mod-styled"] # robocop: disable
     RETURN    ${err_msg}
 
 Verify Git Plugin

@@ -6,15 +6,15 @@ Resource         ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 
 
 *** Variables ***
-${FEATURE-STORE-RELEASE-TAG}             release-3.5
+${FEATURE-STORE-RELEASE-TAG}             release-3.6-ea.1
 ${FEATURE-STORE_DIR}                     feature-store
 ${FEAST-MODULE-OPERATOR_DIR}             feast-modular-operator
 ${FEATURE-STORE_REPO_URL}                %{FEATURE-STORE_REPO_URL=https://github.com/opendatahub-io/feast.git}
-${NOTEBOOK_IMAGE}                        quay.io/rhoai/odh-workbench-jupyter-datascience-cpu-py312-rhel9@sha256:84091ed67cf7bcad9058820cd848d42c1168eef69841072af29392089c6a4f99
-${FEAST_VERSION}                         0.65.0
-${FEAST_NOTEBOOK_VERSION}                0.64.0
+${NOTEBOOK_IMAGE}                        quay.io/rhoai/odh-workbench-jupyter-datascience-cpu-py312-rhel9@sha256:2d46b44ddf381cfb8c013d486dfa8a58ac2641713e9ecc096b4171360fcd58f6
+${FEAST_VERSION}                         0.66.0
+${FEAST_NOTEBOOK_VERSION}                0.65.0
 ${FEAST-MODULE-OPERATOR_REPO_URL}        %{FEAST-MODULE-OPERATOR_REPO_URL=https://github.com/opendatahub-io/feast-module-operator.git}
-${FEAST_PLATFORM_VERSION}                3.5.0
+${FEAST_PLATFORM_VERSION}                3.6.0-ea.1
 ${DSC_NAME}                              default-dsc
 
 
@@ -74,7 +74,7 @@ Run Feast Operator E2E Test
     [Documentation]   Run feast operator e2e test
     [Arguments]   ${TEST_NAME}    ${TEST_TYPE}
     Log To Console    "Running feature-store operator e2e test: ${TEST_NAME}"
-    ${command}=    Set Variable    cd ${FEATURE-STORE_DIR}/infra/feast-operator && git fetch origin && git checkout ${FEATURE-STORE-RELEASE-TAG} && git branch && go test -timeout 10m ./test/${TEST_TYPE}/ -v -ginkgo.focus=${TEST_NAME}
+    ${command}=    Set Variable    cd ${FEATURE-STORE_DIR}/infra/feast-operator && git checkout ${FEATURE-STORE-RELEASE-TAG} && git branch && go test -timeout 10m ./test/${TEST_TYPE}/ -v -ginkgo.focus=${TEST_NAME}
     ${result}=    Run Process    ${command}
     ...    shell=true
     ...    timeout=10 min
@@ -94,8 +94,8 @@ Run Feast Operator Upgrade Test
     ...    shell=true
     ...    timeout=10 min
     ...    env:RUN_ON_OPENSHIFT_CI=true
-    ...    env:AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-    ...    env:AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    ...    env:AWS_ACCESS_KEY_ID=${S3.AWS_ACCESS_KEY_ID}
+    ...    env:AWS_SECRET_ACCESS_KEY=${S3.AWS_SECRET_ACCESS_KEY}
     ...    env:AWS_DEFAULT_REGION=${S3.BUCKET_1.REGION}
     ...    env:AWS_S3_BUCKET=${S3.BUCKET_1.NAME}
     ...    stderr=STDOUT
@@ -185,6 +185,24 @@ Check Feast Instance Pod Images Pull Path Is Correct
             Run Keyword And Continue On Failure
             ...    Should Be Equal As Strings    ${featureServerImage}    ${image}
         END
+    END
+
+Run Feast Module Operator Test
+    [Documentation]   Run feast modular operator Go test against the cluster
+    [Arguments]   ${TEST_NAME}    ${TEST_TYPE}
+    Log To Console    "Running feast modular operator ${TEST_TYPE} test: ${TEST_NAME}"
+    ${command}=    Set Variable    cd ${FEAST-MODULE-OPERATOR_DIR} && git fetch origin && git checkout ${FEATURE-STORE-RELEASE-TAG} && git branch && go test -tags=${TEST_TYPE} -timeout 10m ./test/${TEST_TYPE}/ -v -run ${TEST_NAME}
+    ${result}=    Run Process    ${command}
+    ...    shell=true
+    ...    timeout=10 min
+    ...    env:OPERATOR_NAMESPACE=${APPLICATIONS_NAMESPACE}
+    ...    env:APPLICATIONS_NAMESPACE=${APPLICATIONS_NAMESPACE}
+    ...    env:FEAST_VERSION=${FEAST_VERSION}
+    ...    env:FEAST_OPERATOR_PLATFORM_VERSION=${FEAST_PLATFORM_VERSION}
+    ...    stderr=STDOUT
+    Log To Console    ${result.stdout}
+    IF    ${result.rc} != 0
+        FAIL    Running feast modular operator test ${TEST_NAME} failed
     END
 
 Run Feast Module Operator E2E Upgrade Test

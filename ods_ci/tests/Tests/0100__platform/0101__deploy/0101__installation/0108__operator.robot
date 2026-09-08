@@ -40,7 +40,7 @@ Verify That DSC And DSCI Release.Version Attribute matches the value in the subs
 
 Verify That The Operator Pod Does Not Get Stuck After Upgrade
     [Documentation]    Verifies that the operator pod doesn't get stuck after an upgrade
-    [Tags]    Sanity
+    [Tags]    Smoke
     ...       ODS-818
     ...       Operator
     ${operator_pod_info}=    Fetch operator Pod Info

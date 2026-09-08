@@ -80,7 +80,6 @@ Verify That CUDA Build Chain Succeeds
 Verify That "Usage Data Collection" Is Enabled By Default
     [Documentation]    Verify that "Usage Data Collection" is enabled by default when installing ODS
     [Tags]    Tier1
-    ...       Sanity
     ...       ODS-1234
 
     ${version_check} =    Is RHODS Version Greater Or Equal Than    1.8.0
@@ -95,7 +94,6 @@ Verify That "Usage Data Collection" Is Enabled By Default
 Verify Tracking Key Used For "Usage Data Collection"
     [Documentation]    Verify that "Usage Data Collection" is enabled by default when installing ODS
     [Tags]    Tier1
-    ...       Sanity
     ...       ODS-1235
 
     ODS.Verify "Usage Data Collection" Key

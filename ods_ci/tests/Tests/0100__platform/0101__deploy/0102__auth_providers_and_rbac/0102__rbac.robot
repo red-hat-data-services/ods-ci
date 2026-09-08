@@ -8,8 +8,7 @@ Suite Setup         Rbac Suite Setup
 *** Test Cases ***
 Verify RHODS Has The Expected Default Access Groups Settings
     [Documentation]    Verify that RHODS is installed with the expected default user groups configuration
-    [Tags]    Sanity
-    ...       Tier1
+    [Tags]    Tier1
     ...       ODS-1164
     [Setup]    Set Standard RHODS Groups Variables
     Verify Default Access Groups Settings

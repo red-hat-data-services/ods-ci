@@ -23,7 +23,6 @@ Suite Teardown   Kale Pipelines Suite Teardown
 
 
 *** Variables ***
-${NOTEBOOKS_REPO_URL} =    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main
 ${KALE_NOTEBOOK_PATH} =    ods-ci-notebooks-main/notebooks/500__jupyterhub/pipelines/v2/kale/candies_sharing.ipynb
 ${PRJ_TITLE} =    kale-test
 ${PRJ_DESCRIPTION} =    testing Kale pipeline functionality
@@ -101,7 +100,13 @@ Verify Pipelines Integration With Kale Running Candies Pipeline Test     # roboc
     ...                 envs=${ENVS_LIST}
     Start Workbench     workbench_title=kale_${img}    timeout=${workbench_timeout}
     ${dashboard_window}=    Launch And Access Workbench    workbench_title=kale_${img}
-    Clone Git Repository And Open    ${NOTEBOOKS_REPO_URL}    ${KALE_NOTEBOOK_PATH}  # robocop: disable
+    ${repo_url}=    Get Variable Value    ${GIT_HTTPS_URL}    ${EMPTY}
+    IF    '${repo_url}' == '${EMPTY}'
+        ${repo_url}=    Set Variable    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main
+    ELSE
+        ${repo_url}=    Set Variable    ${repo_url}ods-ci-notebooks-main.git
+    END
+    Clone Git Repository And Open    ${repo_url}    ${KALE_NOTEBOOK_PATH}  # robocop: disable
     # Some images have Kale installed but its JupyterLab extension disabled by default
     Enable Kale Extension    notebook_path=${KALE_NOTEBOOK_PATH}
     ...    workbench_title=kale_${img}    project_title=${PRJ_TITLE}

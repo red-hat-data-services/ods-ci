@@ -200,11 +200,15 @@ Open Notebook From Path
 Verify Kale Notebook Elements
     [Documentation]    Verifies that the Kale candies_sharing sample notebook is open and contains
     ...    the expected annotated cells before pipeline compilation
+    [Arguments]    ${timeout}=30s
     Wait Until ${KALE_NOTEBOOK_TAB} JupyterLab Tab Is Selected
-    Wait Until Page Contains    Kale base example    timeout=30s
-    Page Should Contain    CANDIES = 20
-    Page Should Contain    def get_handful
-    Page Should Contain    Let's put in a bag
+    Wait Until Page Contains Element
+    ...    xpath://div[contains(@class,"jp-CodeCell")]//div[contains(@class,"cm-content")]
+    ...    timeout=${timeout}
+    Wait Until Page Contains    Kale base example     timeout=${timeout}
+    Wait Until Page Contains    CANDIES = 20          timeout=${timeout}
+    Wait Until Page Contains    def get_handful       timeout=${timeout}
+    Wait Until Page Contains    Let's put in a bag    timeout=${timeout}
 
 Open Kale Panel
     [Documentation]    Opens the Kale sidebar panel in JupyterLab.

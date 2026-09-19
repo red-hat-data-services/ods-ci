@@ -409,13 +409,16 @@ Verify Kale Pipeline Run Is Completed
     ...    and reaches a successful end state. Kept in Kale.resource so shared Pipelines keywords
     ...    (still used by other suites) do not need UI-selector changes for the current Runs table.
     [Arguments]    ${pipeline_name}    ${timeout}=10m
+    ${run_row}=    Set Variable
+    ...    xpath://td[@data-label="Name" or @data-label="Run"]//*[contains(text(), "${pipeline_name}")]/ancestor::tr
     Maybe Wait For Dashboard Loading Spinner Page    timeout=30s
     Wait Until Page Contains Element
     ...    xpath://td[@data-label="Name" or @data-label="Run"]//*[contains(text(), "${pipeline_name}")]
     ...    timeout=120s
     Wait Until Page Does Not Contain Element
-    ...    xpath://td[@data-label="Name" or @data-label="Run"]//*[contains(text(), "${pipeline_name}")]/ancestor::tr//td[@data-label="Duration" and (normalize-space(.)="-" or normalize-space(.)="")]
+    ...    ${run_row}//td[@data-label="Duration" and (normalize-space(.)="-" or normalize-space(.)="")]
     ...    timeout=${timeout}
-    Page Should Contain Element
-    ...    xpath://td[@data-label="Name" or @data-label="Run"]//*[contains(text(), "${pipeline_name}")]/ancestor::tr//td[@data-label="Status"]//*[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "succeed") or contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "complete") or contains(translate(@class, "SUCCESS", "success"), "success")]
+    ${status}=    Get Text    ${run_row}//td[@data-label="Status"]
     Capture Page Screenshot
+    Should Contain Any    ${status}    Succeeded    Completed    ignore_case=${TRUE}    values=${FALSE}
+    ...    msg=Kale pipeline run "${pipeline_name}" reached terminal state "${status}" instead of succeeding

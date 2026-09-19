@@ -130,4 +130,6 @@ Verify Pipelines Integration With Kale Teardown
     Close All Browsers
     Launch Data Science Project Main Page
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=workbenches
-    Stop Workbench    workbench_title=kale_${img}
+    # Warn only: an early test failure can leave the workbench missing or never started, and the
+    # suite teardown deletes the whole project anyway. A hard failure here would mask the real one.
+    Run Keyword And Warn On Failure    Stop Workbench    workbench_title=kale_${img}

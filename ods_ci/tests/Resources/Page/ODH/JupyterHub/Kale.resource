@@ -420,5 +420,5 @@ Verify Kale Pipeline Run Is Completed
     ...    timeout=${timeout}
     ${status}=    Get Text    ${run_row}//td[@data-label="Status"]
     Capture Page Screenshot
-    Should Contain Any    ${status}    Succeeded    Completed    ignore_case=${TRUE}    values=${FALSE}
+    Should Contain Any    ${status}    Succeeded    Complete    ignore_case=${TRUE}    values=${FALSE}
     ...    msg=Kale pipeline run "${pipeline_name}" reached terminal state "${status}" instead of succeeding

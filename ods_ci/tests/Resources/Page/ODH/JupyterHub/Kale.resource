@@ -244,9 +244,9 @@ Kale Enable Switch Should Not Be Greyed Out
     ...    is on or off. Kale greys the switch out until the notebook kernel has connected.
     ${state}=    Execute Javascript
     ...    return (function(){
-    ...      var el = document.querySelector('div.kale-panel input[name="enableKale"]');
-    ...      if (!el) { return 'missing'; }
-    ...      return el.disabled ? 'greyed out' : 'ok';
+    ...    var el = document.querySelector('div.kale-panel input[name="enableKale"]');
+    ...    if (!el) { return 'missing'; }
+    ...    return el.disabled ? 'greyed out' : 'ok';
     ...    })()
     Should Be Equal    ${state}    ok
     ...    msg=Kale enable switch is ${state}; Kale greys it out until the notebook kernel has connected
@@ -257,9 +257,9 @@ Kale Enable Switch Should Be On
     ...    greyed-out input ignores clicks silently.
     ${state}=    Execute Javascript
     ...    return (function(){
-    ...      var el = document.querySelector('div.kale-panel input[name="enableKale"]');
-    ...      if (!el) { return 'missing'; }
-    ...      return (el.checked ? 'on' : 'off') + (el.disabled ? ' (greyed out)' : '');
+    ...    var el = document.querySelector('div.kale-panel input[name="enableKale"]');
+    ...    if (!el) { return 'missing'; }
+    ...    return (el.checked ? 'on' : 'off') + (el.disabled ? ' (greyed out)' : '');
     ...    })()
     Should Be Equal    ${state}    on
     ...    msg=Kale enable switch did not turn on (state: "${state}")

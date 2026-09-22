@@ -418,6 +418,7 @@ Verify RHODS Installation
   IF    "${ray}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=platform.opendatahub.io/part-of=ray
+    ...    timeout=1800s
   END
 
   ${trustyai} =    Is Component Enabled    trustyai    ${DSC_NAME}

@@ -417,8 +417,7 @@ Verify RHODS Installation
   ${ray} =     Is Component Enabled     ray    ${DSC_NAME}
   IF    "${ray}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/part-of=ray
-    ...    timeout=1800s
+    ...    label_selector=app.kubernetes.io/name=kuberay
   END
 
   ${trustyai} =    Is Component Enabled    trustyai    ${DSC_NAME}

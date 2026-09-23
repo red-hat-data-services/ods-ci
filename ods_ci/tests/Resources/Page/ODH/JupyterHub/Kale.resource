@@ -224,8 +224,10 @@ Enable Kale
     [Documentation]    Enables Kale pipeline mode in the Kale sidebar.
     ...    The enable control is a styled switch; the checkbox input itself is often
     ...    not interactable, so toggle it via JavaScript.
+    [Arguments]    ${timeout}=180s
     Open Kale Panel
     Wait Until Page Contains Element    xpath=${KALE_ENABLE_SWITCH_XP}    timeout=30s
+    Wait Until Keyword Succeeds    ${timeout}    2s    Kale Enable Switch Should Not Be Greyed Out
     ${is_enabled} =    Execute Javascript
     ...    return !!(document.querySelector('div.kale-panel input[name="enableKale"]')||{}).checked
     IF    not ${is_enabled}
@@ -236,11 +238,31 @@ Enable Kale
     END
     Wait Until Element Is Enabled    xpath=${KALE_COMPILE_AND_RUN_BTN_XP}    timeout=60s
 
+Kale Enable Switch Should Not Be Greyed Out
+    [Documentation]    Fails while the Kale enable checkbox carries the HTML disabled property.
+    ...    This is about whether the control accepts a click at all, not about whether the toggle
+    ...    is on or off. Kale greys the switch out until the notebook kernel has connected.
+    ${state}=    Execute Javascript
+    ...    return (function(){
+    ...    var el = document.querySelector('div.kale-panel input[name="enableKale"]');
+    ...    if (!el) { return 'missing'; }
+    ...    return el.disabled ? 'greyed out' : 'ok';
+    ...    })()
+    Should Be Equal    ${state}    ok
+    ...    msg=Kale enable switch is ${state}; Kale greys it out until the notebook kernel has connected
+
 Kale Enable Switch Should Be On
-    [Documentation]    Asserts the Kale enable checkbox is checked (via JS; avoids Selenium interactability issues)
-    ${is_enabled} =    Execute Javascript
-    ...    return !!(document.querySelector('div.kale-panel input[name="enableKale"]')||{}).checked
-    Should Be True    ${is_enabled}
+    [Documentation]    Asserts the Kale enable checkbox is checked (via JS; avoids Selenium
+    ...    interactability issues). Also reports whether the switch is greyed out, since a
+    ...    greyed-out input ignores clicks silently.
+    ${state}=    Execute Javascript
+    ...    return (function(){
+    ...    var el = document.querySelector('div.kale-panel input[name="enableKale"]');
+    ...    if (!el) { return 'missing'; }
+    ...    return (el.checked ? 'on' : 'off') + (el.disabled ? ' (greyed out)' : '');
+    ...    })()
+    Should Be Equal    ${state}    on
+    ...    msg=Kale enable switch did not turn on (state: "${state}")
 
 Set Kale Pipeline Name
     [Documentation]    Sets the pipeline name in the Kale sidebar before compile/run.
@@ -409,13 +431,16 @@ Verify Kale Pipeline Run Is Completed
     ...    and reaches a successful end state. Kept in Kale.resource so shared Pipelines keywords
     ...    (still used by other suites) do not need UI-selector changes for the current Runs table.
     [Arguments]    ${pipeline_name}    ${timeout}=10m
+    ${run_row}=    Set Variable
+    ...    xpath://td[@data-label="Name" or @data-label="Run"]//*[contains(text(), "${pipeline_name}")]/ancestor::tr
     Maybe Wait For Dashboard Loading Spinner Page    timeout=30s
     Wait Until Page Contains Element
     ...    xpath://td[@data-label="Name" or @data-label="Run"]//*[contains(text(), "${pipeline_name}")]
     ...    timeout=120s
     Wait Until Page Does Not Contain Element
-    ...    xpath://td[@data-label="Name" or @data-label="Run"]//*[contains(text(), "${pipeline_name}")]/ancestor::tr//td[@data-label="Duration" and (normalize-space(.)="-" or normalize-space(.)="")]
+    ...    ${run_row}//td[@data-label="Duration" and (normalize-space(.)="-" or normalize-space(.)="")]
     ...    timeout=${timeout}
-    Page Should Contain Element
-    ...    xpath://td[@data-label="Name" or @data-label="Run"]//*[contains(text(), "${pipeline_name}")]/ancestor::tr//td[@data-label="Status"]//*[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "succeed") or contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "complete") or contains(translate(@class, "SUCCESS", "success"), "success")]
+    ${status}=    Get Text    ${run_row}//td[@data-label="Status"]
     Capture Page Screenshot
+    Should Contain Any    ${status}    Succeeded    Complete    ignore_case=${TRUE}    values=${FALSE}
+    ...    msg=Kale pipeline run "${pipeline_name}" reached terminal state "${status}" instead of succeeding

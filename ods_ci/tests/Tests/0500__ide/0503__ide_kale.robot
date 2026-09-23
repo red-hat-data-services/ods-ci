@@ -93,8 +93,10 @@ Verify Pipelines Integration With Kale Running Candies Pipeline Test     # roboc
     [Documentation]    Creates and starts a workbench using ${img}, opens the candies_sharing Kale sample notebook,
     ...    compiles and runs the pipeline, then verifies the run completes in the dashboard
     [Arguments]    ${img}    ${pipeline_name}    ${workbench_timeout}=600s
+    # version=${NONE} skips the image version dropdown check; not in scope for a pipelines test
     Create Workbench    workbench_title=kale_${img}    workbench_description=Kale test
     ...                 prj_title=${PRJ_TITLE}    image_name=${img}    hardware_profile=default-profile
+    ...                 version=${NONE}
     ...                 storage=Persistent  pv_existent=${FALSE}
     ...                 pv_name=${PV_NAME}_${img}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
     ...                 envs=${ENVS_LIST}
@@ -128,4 +130,6 @@ Verify Pipelines Integration With Kale Teardown
     Close All Browsers
     Launch Data Science Project Main Page
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=workbenches
-    Stop Workbench    workbench_title=kale_${img}
+    # Warn only: an early test failure can leave the workbench missing or never started, and the
+    # suite teardown deletes the whole project anyway. A hard failure here would mask the real one.
+    Run Keyword And Warn On Failure    Stop Workbench    workbench_title=kale_${img}

@@ -64,7 +64,8 @@ Create Workbench
     ...             ${data_connection}=${NONE}
     Open Data Science Project Details Page       project_title=${prj_title}    tab_id=workbenches
     Wait Until Element Is Enabled    ${WORKBENCH_CREATE_BTN_XP}
-    Click Element    ${WORKBENCH_CREATE_BTN_XP}
+    # Retry: the project details page can re-render between finding the button and clicking it
+    Retry To Click Element    ${WORKBENCH_CREATE_BTN_XP}
     Wait Until Page Contains Element    ${WORKBENCH_NAME_INPUT_XP}
     Run Keyword And Continue On Failure     Element Should Be Disabled    ${WORKBENCH_CREATE_BTN_2_XP}
     Input Text    ${WORKBENCH_NAME_INPUT_XP}    ${workbench_title}

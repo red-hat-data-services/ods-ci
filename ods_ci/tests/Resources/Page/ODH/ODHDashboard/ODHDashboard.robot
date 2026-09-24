@@ -577,7 +577,10 @@ Open Notebook Images Page
     [Documentation]    Opens the RHODS dashboard and navigates to the Notebook Image Settings page
     Wait Until Page Contains    Settings
     Page Should Contain    Settings
-    Menu.Navigate To Page    Settings    Workbench images
+    # Workbench images is nested under the "Environment setup" group, not a direct child of
+    # Settings - a 2-level Navigate To Page call leaves it hidden inside a collapsed accordion,
+    # causing an ElementNotInteractableException when the click is attempted.
+    Menu.Navigate To Page    Settings    Environment setup    Workbench images
     Wait Until Page Contains    Workbench images
     Wait Until Page Contains    Import new image    # This should assure us that the page content is ready
 

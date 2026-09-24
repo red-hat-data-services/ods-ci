@@ -72,8 +72,12 @@ Test Duplicate Image
     ...    software=${IMG_SOFTWARE}
     ...    packages=${IMG_PACKAGES}
     # Assure that the expected error message is shown in the modal window
-    ${image_name_id}=  Replace String  ${IMG_NAME}  ${SPACE}  -
-    Wait Until Page Contains    Unable to add notebook image: imagestreams.image.openshift.io "${image_name_id}" already exists
+    # The dashboard builds this text itself from kindApiVersion(ImageStreamModel) + the raw
+    # display name (frontend/src/utilities/imageStreamUtils.ts byonDuplicatedErrorMessage) -
+    # it does not surface the k8s API's own "imagestreams.image.openshift.io ... already
+    # exists" conflict message, so the expected text here must match the dashboard's format,
+    # not the k8s one.
+    Wait Until Page Contains    Unable to add notebook image: image.openshift.io/v1 "${IMG_NAME}" already exists
     # Since the image cannot be created, we need to cancel the modal window now
     Click Button    ${GENERIC_CANCEL_BTN_XP}
     [Teardown]  Duplicate Image Teardown

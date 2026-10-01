@@ -11,6 +11,9 @@ set -e
 #   $2 PROVIDER       - Cloud provider (AWS/GCP/AZURE/IBM) (default: AWS)
 #   $3 GPU_NODE_COUNT - Number of GPU nodes (default: 1)
 #   $4 GPU_COUNT      - GPUs per node (for GCP nvidia-* only) (default: 1)
+# Environment:
+#   GPU_AVAILABILITY_ZONE - Optional AWS zone. The GPU MachineSet inherits the
+#                           matching worker MachineSet's placement and subnet.
 #
 # Parameter Logic:
 #   For GCP nvidia-* flavors: $3=GPU_NODE_COUNT, $4=GPU_COUNT
@@ -27,6 +30,12 @@ set -e
 INSTANCE_TYPE=${1:-"g4dn.xlarge"}
 PROVIDER=${2:-"AWS"}
 GPU_NODE_COUNT=${3:-"1"}
+GPU_AVAILABILITY_ZONE=${GPU_AVAILABILITY_ZONE:-}
+
+if [[ "$PROVIDER" == "AWS" && -n "$GPU_AVAILABILITY_ZONE" && ! "$GPU_AVAILABILITY_ZONE" =~ ^[a-z0-9-]+$ ]]; then
+  echo "Invalid GPU_AVAILABILITY_ZONE: $GPU_AVAILABILITY_ZONE"
+  exit 1
+fi
 
 # Special case for GCP with nvidia-* flavors: $4=GPU_COUNT (GPUs per node)
 # For all other cases: GPU_COUNT=1
@@ -42,6 +51,9 @@ echo "Instance Type/GPU Flavor: $INSTANCE_TYPE"
 echo "Provider: $PROVIDER"
 echo "GPU Node Count: $GPU_NODE_COUNT"
 echo "GPU Count: $GPU_COUNT"
+if [[ "$PROVIDER" == "AWS" ]]; then
+  echo "GPU Availability Zone: ${GPU_AVAILABILITY_ZONE:-automatic}"
+fi
 
 echo "========================================"
 
@@ -52,13 +64,46 @@ MACHINE_WAIT_TIMEOUT=10m
 # Check if existing machineset GPU already exists
 EXISTING_GPU_MACHINESET="$(oc get machinesets.machine.openshift.io -n openshift-machine-api -o jsonpath="{.items[?(@.metadata.annotations['machine\.openshift\.io/GPU']>'0')].metadata.name}")"
 if [[ -n "$EXISTING_GPU_MACHINESET" ]] ; then
+  if [[ "$PROVIDER" == "AWS" && -n "$GPU_AVAILABILITY_ZONE" ]]; then
+    EXISTING_GPU_MACHINESET_ZONE=$(oc get machinesets.machine.openshift.io \
+      -n openshift-machine-api "$EXISTING_GPU_MACHINESET" \
+      -o jsonpath='{.spec.template.spec.providerSpec.value.placement.availabilityZone}')
+    if [[ "$EXISTING_GPU_MACHINESET_ZONE" != "$GPU_AVAILABILITY_ZONE" ]]; then
+      echo "Existing GPU MachineSet $EXISTING_GPU_MACHINESET is in availability zone" \
+        "$EXISTING_GPU_MACHINESET_ZONE, not requested zone $GPU_AVAILABILITY_ZONE"
+      exit 1
+    fi
+  fi
   echo "Machine-set for GPU already exists: $EXISTING_GPU_MACHINESET"
   exit 0
 fi
 
-# Select the first machineset as a template for the GPU machineset
-SOURCE_MACHINESET=$(oc get machinesets.machine.openshift.io -n openshift-machine-api -o name | head -n1)
-oc get -o yaml -n openshift-machine-api $SOURCE_MACHINESET  > $MACHINESET_PATH
+# Select a worker MachineSet in the requested AWS zone so its subnet and
+# placement stay consistent. Without an explicit zone, preserve the existing
+# behavior and use the first MachineSet.
+SOURCE_MACHINESET=""
+if [[ "$PROVIDER" == "AWS" && -n "$GPU_AVAILABILITY_ZONE" ]]; then
+  while IFS= read -r candidate_machineset; do
+    candidate_zone=$(oc get -n openshift-machine-api "$candidate_machineset" \
+      -o jsonpath='{.spec.template.spec.providerSpec.value.placement.availabilityZone}')
+    if [[ "$candidate_zone" == "$GPU_AVAILABILITY_ZONE" ]]; then
+      SOURCE_MACHINESET=$candidate_machineset
+      break
+    fi
+  done < <(oc get machinesets.machine.openshift.io -n openshift-machine-api -o name)
+
+  if [[ -z "$SOURCE_MACHINESET" ]]; then
+    echo "No worker MachineSet found in requested availability zone: $GPU_AVAILABILITY_ZONE"
+    echo "Available MachineSet zones:"
+    oc get machinesets.machine.openshift.io -n openshift-machine-api \
+      -o custom-columns='NAME:.metadata.name,ZONE:.spec.template.spec.providerSpec.value.placement.availabilityZone'
+    exit 1
+  fi
+  echo "Using source MachineSet $SOURCE_MACHINESET from availability zone $GPU_AVAILABILITY_ZONE"
+else
+  SOURCE_MACHINESET=$(oc get machinesets.machine.openshift.io -n openshift-machine-api -o name | head -n1)
+fi
+oc get -o yaml -n openshift-machine-api "$SOURCE_MACHINESET" > "$MACHINESET_PATH"
 
 # rename machine set in the template file
 OLD_MACHINESET_NAME=$(yq '.metadata.name' $MACHINESET_PATH )

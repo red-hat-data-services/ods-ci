@@ -18,6 +18,13 @@ from ods_ci.utils.scripts.util import compare_dicts, execute_command, read_data_
 
 dir_path = os.path.dirname(os.path.abspath(__file__))
 
+
+def _resolve_ocm_config_path(config_path, config_dir):
+    if os.path.isabs(config_path):
+        return os.path.abspath(config_path)
+    return os.path.abspath(os.path.join(config_dir, config_path))
+
+
 """
 Class for Openshift Cluster Manager
 """
@@ -76,12 +83,34 @@ class OpenshiftClusterManager:
         self.update_policies_json = args.get("update_policies_json")
         self.service_account_file = "create_gcp_sa_json.json"
         self.cluster_id = ""
-        ocm_env = glob.glob(dir_path + "/../../../ocm.json.*")
-        if ocm_env != []:
-            os.environ["OCM_CONFIG"] = ocm_env[0]
-            match = re.search(r".*\.(\S+)", (os.path.basename(ocm_env[0])))
-            if match is not None:
-                self.testing_platform = match.group(1)
+        ocm_env = sorted(glob.glob(os.path.join(dir_path, "../../../ocm.json.*")))
+        ocm_config_dir = os.path.dirname(os.path.abspath(ocm_env[0])) if ocm_env else None
+        if ocm_config_dir:
+            self._ocm_config_dir = ocm_config_dir
+
+        existing_config = os.environ.get("OCM_CONFIG")
+        config_path = None
+        if existing_config:
+            if ocm_config_dir:
+                config_path = _resolve_ocm_config_path(existing_config, ocm_config_dir)
+            else:
+                config_path = os.path.abspath(existing_config)
+            if not os.path.isfile(config_path):
+                log.error(
+                    "OCM_CONFIG is set to %r but the config file does not exist (resolved: %s)",
+                    existing_config,
+                    config_path,
+                )
+        elif ocm_env:
+            config_path = os.path.abspath(ocm_env[0])
+
+        if config_path:
+            self._ocm_config_path = config_path
+            os.environ["OCM_CONFIG"] = config_path
+            config_basename = os.path.basename(config_path)
+            platform_suffix = "ocm.json."
+            if config_basename.startswith(platform_suffix):
+                self.testing_platform = config_basename[len(platform_suffix) :]
 
     def _is_ocmcli_installed(self):
         """Checks if ocm cli is installed"""
@@ -231,9 +260,10 @@ class OpenshiftClusterManager:
         # "external_id": "feb5a50a-b9ce-40ad-99a7-69159f0ca957", --- ID of the cluster itself (we provide in self.cluster_name)
 
         if not self.cluster_id:
-            cmd = "ocm list clusters -p search=\"name = '{}' or id = '{}' or external_id = '{}'\" --columns id --no-headers".format(
-                self.cluster_name, self.cluster_name, self.cluster_name
-            )
+            cluster = self.cluster_name
+            cmd = (
+                "ocm list clusters -p search=\"name='{0}' or id='{0}' or external_id='{0}'\" --columns id --no-headers"
+            ).format(cluster)
             cluster_id = execute_command(cmd)
             if cluster_id in [None, ""]:
                 log.error(f"Unable to retrieve cluster ID for cluster name {self.cluster_name}. EXITING")
@@ -916,12 +946,24 @@ class OpenshiftClusterManager:
         if self.testing_platform == "stage":
             cmd += "--url=staging"
 
-        cmd = f"OCM_CONFIG=ocm.json.{self.testing_platform} {cmd}"
+        ocm_config = getattr(self, "_ocm_config_path", None) or os.environ.get("OCM_CONFIG")
+        if not ocm_config:
+            ocm_config_dir = getattr(self, "_ocm_config_dir", None)
+            if not ocm_config_dir:
+                discovered = sorted(glob.glob(os.path.join(dir_path, "../../../ocm.json.*")))
+                if discovered:
+                    ocm_config_dir = os.path.dirname(os.path.abspath(discovered[0]))
+            if ocm_config_dir:
+                ocm_config = os.path.join(ocm_config_dir, f"ocm.json.{self.testing_platform}")
+            else:
+                ocm_config = f"ocm.json.{self.testing_platform}"
+        else:
+            ocm_config = os.path.abspath(ocm_config)
+        os.environ["OCM_CONFIG"] = ocm_config
         ret = execute_command(cmd)
         if ret is None:
             log.error("Failed to login to aws openshift platform using token")
             sys.exit(1)
-        os.environ["OCM_CONFIG"] = f"ocm.json.{self.testing_platform}"
 
     def delete_cluster(self):
         """Delete OSD Cluster"""

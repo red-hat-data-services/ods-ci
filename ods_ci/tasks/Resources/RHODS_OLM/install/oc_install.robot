@@ -65,6 +65,10 @@ ${JOBSET_SUB_NAME}=  job-set
 ${JOBSET_CHANNEL_NAME}=  stable-v1.0
 ${JOBSET_NS}=  openshift-jobset-operator
 ${JOBSETOPERATOR_NAME}=  cluster
+${AGENT_SANDBOX_OP_NAME}=  agent-sandbox-operator
+${AGENT_SANDBOX_SUB_NAME}=  agent-sandbox-operator
+${AGENT_SANDBOX_CHANNEL_NAME}=  preview-0.9
+${AGENT_SANDBOX_NS}=  agent-sandbox-system
 ${CERT_MANAGER_OP_NAME}=  openshift-cert-manager-operator
 ${CERT_MANAGER_SUB_NAME}=  openshift-cert-manager-operator
 ${CERT_MANAGER_CHANNEL_NAME}=  stable-v1
@@ -1278,6 +1282,33 @@ Install JobSet Dependencies
     Install JobSet Operator Via Cli
     Create JobSetOperator CR
 
+Install Agent Sandbox Operator Via Cli
+    [Documentation]    Install Red Hat build of Agent Sandbox Operator via CLI
+    ${is_installed} =    Check If Operator Is Installed Via CLI    ${AGENT_SANDBOX_OP_NAME}
+    IF    ${is_installed}
+        Log To Console    message=Agent Sandbox Operator is already installed
+    ELSE
+        ${rc}    ${out} =    Run And Return Rc And Output
+        ...    oc create namespace ${AGENT_SANDBOX_NS} --dry-run=client -o yaml | oc apply -f -
+        Should Be Equal As Integers    ${rc}    ${0}    msg=Failed to create namespace ${AGENT_SANDBOX_NS}: ${out}
+        Install ISV Operator From OperatorHub Via CLI    operator_name=${AGENT_SANDBOX_OP_NAME}
+        ...    namespace=${AGENT_SANDBOX_NS}
+        ...    subscription_name=${AGENT_SANDBOX_SUB_NAME}
+        ...    catalog_source_name=redhat-operators
+        ...    operator_group_name=${AGENT_SANDBOX_NS}
+        ...    operator_group_ns=${AGENT_SANDBOX_NS}
+        ...    operator_group_target_ns=${NONE}
+        ...    channel=${AGENT_SANDBOX_CHANNEL_NAME}
+        ...    approval=Automatic
+        Wait Until Operator Subscription Last Condition Is
+        ...    type=CatalogSourcesUnhealthy    status=False
+        ...    reason=AllCatalogSourcesHealthy    subscription_name=${AGENT_SANDBOX_SUB_NAME}
+        ...    namespace=${AGENT_SANDBOX_NS}
+        ...    retry=150
+        Wait For Pods To Be Ready    label_selector=app=agent-sandbox-controller
+        ...    namespace=${AGENT_SANDBOX_NS}
+    END
+
 Install Cluster Observability Operator Via Cli
     [Documentation]    Install Cluster Observability Operator Via CLI
     ${is_installed} =   Check If Operator Is Installed Via CLI   ${CLUSTER_OBS_OP_NAME}
@@ -1390,6 +1421,7 @@ Install RHOAI Dependencies With CLI
     Install Leader Worker Set Operator Via Cli
     Install Connectivity Link Operator Via Cli
     Install JobSet Dependencies
+    Install Agent Sandbox Operator Via Cli
     ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
     IF    '${arch_type}' != 's390x'
         Configure MaaS Database

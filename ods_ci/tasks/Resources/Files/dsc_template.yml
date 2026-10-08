@@ -1,4 +1,4 @@
-apiVersion: datasciencecluster.opendatahub.io/v2
+apiVersion: datasciencecluster.opendatahub.io/v3
 kind: DataScienceCluster
 metadata:
   name: <dsc_name>
@@ -7,13 +7,12 @@ metadata:
 spec:
   components:
     dashboard:
-      managementState: <dashboard_value>
+      standard:
+        managementState: <dashboard_value>
     aipipelines:
       managementState: <aipipelines_value>
     kserve:
       managementState: <kserve_value>
-      modelsAsService:
-        managementState: <modelsasservice_legacy_value>
     aigateway:
       managementState: <aigateway_value>
       modelsAsAService:
@@ -24,8 +23,6 @@ spec:
       managementState: <kueue_value>
     ray:
       managementState: <ray_value>
-    trainingoperator:
-      managementState: <trainingoperator_value>
     trainer:
       managementState: <trainer_value>
     trustyai:
@@ -33,13 +30,12 @@ spec:
     workbenches:
       managementState: <workbenches_value>
       workbenchNamespace: <workbenches_namespace>
-    modelregistry:
+    aiHub:
       managementState: <modelregistry_value>
-      registriesNamespace: <modelregistry_namespace>
-    feastoperator:
-      managementState: <feastoperator_value>
-    llamastackoperator:
-      managementState: <llamastackoperator_value>
+      instancesNamespace: <modelregistry_namespace>
+    data:
+      featureStore:
+        managementState: <feastoperator_value>
     ogx:
       managementState: <ogx_value>
     mlflowoperator:

@@ -17,13 +17,11 @@ ${DSCI_NAME} =    default-dsci
 ...    aigateway
 ...    kueue
 ...    ray
-...    trainingoperator
 ...    trainer
 ...    trustyai
 ...    workbenches
 ...    modelregistry
 ...    feastoperator
-...    llamastackoperator
 ...    ogx
 ...    mlflowoperator
 ...    modelsasservice
@@ -441,12 +439,6 @@ Verify RHODS Installation
     END
   END
 
-  ${trainingoperator} =    Is Component Enabled    trainingoperator    ${DSC_NAME}
-  IF    "${trainingoperator}" == "true"
-    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/part-of=trainingoperator
-  END
-
   ${trainer} =     Is Component Enabled    trainer    ${DSC_NAME}
   IF     "${trainer}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
@@ -516,7 +508,7 @@ Verify RHODS Installation
     END
   END
 
-  IF    "${dashboard}" == "true" or "${workbenches}" == "true" or "${aipipelines}" == "true" or "${kserve}" == "true" or "${kueue}" == "true" or "${ray}" == "true" or "${trustyai}" == "true" or "${modelregistry}" == "true" or "${trainingoperator}" == "true" or "${sparkoperator}" == "true" or "${aigateway}" == "true" or "${batchgateway}" == "true" or "${mcplifecycleoperator}" == "true"    # robocop: disable
+  IF    "${dashboard}" == "true" or "${workbenches}" == "true" or "${aipipelines}" == "true" or "${kserve}" == "true" or "${kueue}" == "true" or "${ray}" == "true" or "${trustyai}" == "true" or "${modelregistry}" == "true" or "${sparkoperator}" == "true" or "${aigateway}" == "true" or "${batchgateway}" == "true" or "${mcplifecycleoperator}" == "true"    # robocop: disable
       Log To Console    Waiting for pod status in ${APPLICATIONS_NAMESPACE}
       Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=600
       Log  Verified Applications NS: ${APPLICATIONS_NAMESPACE}  console=yes

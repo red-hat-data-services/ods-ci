@@ -50,3 +50,14 @@ Separate parts of work should be either in a separate PRs, or in a separate comm
 - Test your PR executing the changed code and other relevant parts which make sense to assure your changes work as expected.
 
 - Participate in the feedback of your PR until it is merged
+
+## Operator dependencies
+
+`INSTALL_TYPE` selects how RHOAI/ODH dependencies are installed in
+[`oc_install.robot`](tasks/Resources/RHODS_OLM/install/oc_install.robot):
+
+- `Cli` and `OperatorHub` run `Install RHOAI Dependencies With CLI`, which installs dependency operators through OLM using Robot keywords. Optional observability operators use `Install Observability Dependencies`.
+- `Kustomize` runs `setup-dependencies.sh` from the configured OLM install repo to apply dependencies from the selected [odh-gitops](https://github.com/opendatahub-io/odh-gitops) branch. It installs the RHOAI/ODH operator through the CLI path afterward.
+- `Helm` runs `setup-helm.sh` from the OLM install repo; the odh-gitops Helm chart installs both the operator and its dependencies.
+
+To add a dependency, add a CLI keyword and call it from the appropriate dependency group in `oc_install.robot`. Add its Kustomize manifests and Helm chart configuration in odh-gitops for those install methods. A change to one path does not update the others.

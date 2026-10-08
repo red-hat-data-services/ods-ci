@@ -17,11 +17,13 @@ ${DSCI_NAME} =    default-dsci
 ...    aigateway
 ...    kueue
 ...    ray
+...    trainingoperator
 ...    trainer
 ...    trustyai
 ...    workbenches
 ...    modelregistry
 ...    feastoperator
+...    llamastackoperator
 ...    ogx
 ...    mlflowoperator
 ...    modelsasservice
@@ -439,6 +441,12 @@ Verify RHODS Installation
     END
   END
 
+  ${trainingoperator} =    Is Component Enabled    trainingoperator    ${DSC_NAME}
+  IF    "${trainingoperator}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app.kubernetes.io/part-of=trainingoperator
+  END
+
   ${trainer} =     Is Component Enabled    trainer    ${DSC_NAME}
   IF     "${trainer}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
@@ -508,7 +516,7 @@ Verify RHODS Installation
     END
   END
 
-  IF    "${dashboard}" == "true" or "${workbenches}" == "true" or "${aipipelines}" == "true" or "${kserve}" == "true" or "${kueue}" == "true" or "${ray}" == "true" or "${trustyai}" == "true" or "${modelregistry}" == "true" or "${sparkoperator}" == "true" or "${aigateway}" == "true" or "${batchgateway}" == "true" or "${mcplifecycleoperator}" == "true"    # robocop: disable
+  IF    "${dashboard}" == "true" or "${workbenches}" == "true" or "${aipipelines}" == "true" or "${kserve}" == "true" or "${kueue}" == "true" or "${ray}" == "true" or "${trustyai}" == "true" or "${modelregistry}" == "true" or "${trainingoperator}" == "true" or "${sparkoperator}" == "true" or "${aigateway}" == "true" or "${batchgateway}" == "true" or "${mcplifecycleoperator}" == "true"    # robocop: disable
       Log To Console    Waiting for pod status in ${APPLICATIONS_NAMESPACE}
       Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=600
       Log  Verified Applications NS: ${APPLICATIONS_NAMESPACE}  console=yes
@@ -1020,29 +1028,10 @@ Nested Component Should Not Be Enabled
         IF    '${status}' == 'false'    BREAK
     END
 
-Get DSC V3 Component Path
-    [Documentation]    Maps a suite component name to its v3 .spec.components jq/jsonpath (leading dot).
-    ...                v3 (the served/storage DSC since opendatahub-operator #4137) reorganized several
-    ...                components: modelregistry->aiHub, feastoperator->data.featureStore,
-    ...                dashboard->dashboard.standard. All other components keep their flat path.
-    [Arguments]    ${component}
-    IF    "${component}" == "modelregistry"
-        RETURN    .spec.components.aiHub.managementState
-    ELSE IF    "${component}" == "feastoperator"
-        RETURN    .spec.components.data.featureStore.managementState
-    ELSE IF    "${component}" == "dashboard"
-        RETURN    .spec.components.dashboard.standard.managementState
-    END
-    RETURN    .spec.components.${component}.managementState
-
 Is Component Enabled
-    [Documentation]    Returns the enabled status of a single component (true/false).
-    ...                Reads the DSC via the default (v3) API — the served/storage version since
-    ...                opendatahub-operator #4137 — and maps the suite's v2-era component names to their
-    ...                v3 .spec.components paths via Get DSC V3 Component Path.
+    [Documentation]    Returns the enabled status of a single component (true/false)
     [Arguments]    ${component}    ${dsc_name}=${DSC_NAME}
-    ${jq_path} =    Get DSC V3 Component Path    ${component}
-    ${return_code}    ${output} =    Run And Return Rc And Output    oc get datasciencecluster ${dsc_name} -o json | jq '${jq_path} // "Removed"'  #robocop:disable
+    ${return_code}    ${output} =    Run And Return Rc And Output    oc get datasciencecluster ${dsc_name} -o json | jq '.spec.components.${component}.managementState // "Removed"'  #robocop:disable
     Log    ${output}
     Should Be Equal As Integers  ${return_code}  0  msg=Error detected while getting component status
     ${n_output} =    Evaluate    '${output}' == ''
@@ -1057,9 +1046,7 @@ Is Component Enabled
     END
 
 Is Nested Component Enabled
-    [Documentation]    Returns the enabled status of a nested component (true/false).
-    ...                Reads the DSC via the default (v3) API. The nested MaaS components live under
-    ...                aigateway (modelsAsAService, batchGateway) in v3, matching the submitted v3 DSC.
+    [Documentation]    Returns the enabled status of a nested component (true/false)
     [Arguments]    ${parent_component}    ${nested_component}    ${dsc_name}=${DSC_NAME}
     ${return_code}    ${output} =    Run And Return Rc And Output    oc get datasciencecluster ${dsc_name} -o json | jq '.spec.components.${parent_component}.${nested_component}.managementState // "Removed"'  #robocop:disable
     Log    ${output}
@@ -1575,9 +1562,8 @@ Get DSC Component State
     [Documentation]    Get component management state
     [Arguments]    ${dsc}    ${component}    ${namespace}
 
-    ${path} =    Get DSC V3 Component Path    ${component}
     ${rc}   ${state}=    Run And Return Rc And Output
-    ...    oc get datasciencecluster/${dsc} -n ${namespace} -o 'jsonpath={${path}}'
+    ...    oc get DataScienceCluster/${dsc} -n ${namespace} -o 'jsonpath={.spec.components.${component}.managementState}'
     Should Be Equal    "${rc}"    "0"    msg=${state}
     Log To Console    Component ${component} state ${state}
 
@@ -1588,7 +1574,7 @@ Get DSC Nested Component State
     [Arguments]    ${dsc}    ${parent_component}    ${nested_component}    ${namespace}
 
     ${rc}   ${state}=    Run And Return Rc And Output
-    ...    oc get datasciencecluster/${dsc} -n ${namespace} -o 'jsonpath={.spec.components.${parent_component}.${nested_component}.managementState}'
+    ...    oc get DataScienceCluster/${dsc} -n ${namespace} -o 'jsonpath={.spec.components.${parent_component}.${nested_component}.managementState}'
     Should Be Equal    "${rc}"    "0"    msg=${state}
     Log To Console    Nested component ${parent_component}.${nested_component} state ${state}
 

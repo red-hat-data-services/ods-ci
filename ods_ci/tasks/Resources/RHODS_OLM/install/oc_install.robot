@@ -865,11 +865,34 @@ Apply DataScienceCluster CustomResource
         END
     END
 
+Get Served DSC API Version
+    [Documentation]    Return v3 when the installed DataScienceCluster CRD serves v3, otherwise v2.
+    ...                rhods-operator.3.6.0 serves v3. Builds such as rhods-operator.3.6.0-ea.2 serve v2
+    ...                only. Presence of aigateway.modelsAsAService is not a version check.
+    ${already_set} =    Run Keyword And Return Status    Variable Should Exist    ${DSC_SERVED_API_VERSION}
+    IF    ${already_set}
+        RETURN    ${DSC_SERVED_API_VERSION}
+    END
+    ${rc}    ${versions} =    Run And Return Rc And Output
+    ...    oc get crd datascienceclusters.datasciencecluster.opendatahub.io -o jsonpath='{range .spec.versions[?(@.served==true)]}{.name}{" "}{end}'    #robocop:disable
+    Should Be Equal As Integers    ${rc}    0    msg=Cannot read served DataScienceCluster CRD versions: ${versions}
+    ${serves_v3} =    Evaluate    "v3" in """${versions}""".split()
+    ${version} =    Set Variable If    ${serves_v3}    v3    v2
+    Set Suite Variable    ${DSC_SERVED_API_VERSION}    ${version}
+    Log To Console    DataScienceCluster served versions: ${versions}; selected ${version}
+    RETURN    ${version}
+
 Create DataScienceCluster CustomResource Using Test Variables
     [Documentation]
     [Arguments]    ${dsc_name}=${DSC_NAME}    ${dsc_template}=${DSC_TEMPLATE}
     ${file_path} =    Set Variable    tasks/Resources/Files/
-    Copy File    source=${file_path}${dsc_template}    destination=${file_path}dsc_apply.yml
+    ${template_to_apply} =    Set Variable    ${dsc_template}
+    ${api_version} =    Get Served DSC API Version
+    IF    '${dsc_template}' == '${DSC_TEMPLATE}' and '${api_version}' != 'v3'
+        ${template_to_apply} =    Set Variable    dsc_template_v2.yml
+    END
+    Log To Console    Applying DataScienceCluster from ${template_to_apply} (served API ${api_version})
+    Copy File    source=${file_path}${template_to_apply}    destination=${file_path}dsc_apply.yml
     Run    sed -i'' -e 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
     # Detect whether this cluster uses the 3.5+ MaaS DSC field (aigateway.modelsAsAService)
     # or the legacy 3.4 field (kserve.modelsAsService). Check the installed CRD schema
@@ -913,7 +936,11 @@ Create DataScienceCluster CustomResource Using Test Variables
     END
     # Fill legacy placeholder with Removed when not on 3.4 or MaaS not Managed
     Run    sed -i'' -e 's/<modelsasservice_legacy_value>/Removed/' ${file_path}dsc_apply.yml
-    FOR    ${cmp}    IN    @{COMPONENT_LIST}
+    @{components_to_fill} =    Copy List    ${COMPONENT_LIST}
+    IF    '${template_to_apply}' == 'dsc_template_v2.yml'
+        Append To List    ${components_to_fill}    trainingoperator    llamastackoperator
+    END
+    FOR    ${cmp}    IN    @{components_to_fill}
             IF    $cmp not in $COMPONENTS
                 Run    sed -i'' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
             ELSE IF    '${COMPONENTS.${cmp}}' == 'Managed'
@@ -1002,28 +1029,29 @@ Nested Component Should Not Be Enabled
         IF    '${status}' == 'false'    BREAK
     END
 
-Get DSC V3 Component Path
-    [Documentation]    Maps a suite component name to its v3 .spec.components jq/jsonpath (leading dot).
-    ...                v3 (the served/storage DSC since opendatahub-operator #4137) reorganized several
-    ...                components: modelregistry->aiHub, feastoperator->data.featureStore,
-    ...                dashboard->dashboard.standard. All other components keep their flat path.
+Get DSC Component Path
+    [Documentation]    Maps a suite component name to its .spec.components jq/jsonpath (leading dot).
+    ...                When the CRD serves v3, modelregistry->aiHub, feastoperator->data.featureStore,
+    ...                and dashboard->dashboard.standard. v2 keeps the flat component names.
     [Arguments]    ${component}
-    IF    "${component}" == "modelregistry"
-        RETURN    .spec.components.aiHub.managementState
-    ELSE IF    "${component}" == "feastoperator"
-        RETURN    .spec.components.data.featureStore.managementState
-    ELSE IF    "${component}" == "dashboard"
-        RETURN    .spec.components.dashboard.standard.managementState
+    ${api_version} =    Get Served DSC API Version
+    IF    '${api_version}' == 'v3'
+        IF    "${component}" == "modelregistry"
+            RETURN    .spec.components.aiHub.managementState
+        ELSE IF    "${component}" == "feastoperator"
+            RETURN    .spec.components.data.featureStore.managementState
+        ELSE IF    "${component}" == "dashboard"
+            RETURN    .spec.components.dashboard.standard.managementState
+        END
     END
     RETURN    .spec.components.${component}.managementState
 
 Is Component Enabled
     [Documentation]    Returns the enabled status of a single component (true/false).
-    ...                Reads the DSC via the default (v3) API — the served/storage version since
-    ...                opendatahub-operator #4137 — and maps the suite's v2-era component names to their
-    ...                v3 .spec.components paths via Get DSC V3 Component Path.
+    ...                Reads the DSC using the served CRD version. v3 maps modelregistry, feastoperator,
+    ...                and dashboard onto their reorganized paths. v2 reads the flat component names.
     [Arguments]    ${component}    ${dsc_name}=${DSC_NAME}
-    ${jq_path} =    Get DSC V3 Component Path    ${component}
+    ${jq_path} =    Get DSC Component Path    ${component}
     ${return_code}    ${output} =    Run And Return Rc And Output    oc get datasciencecluster ${dsc_name} -o json | jq '${jq_path} // "Removed"'  #robocop:disable
     Log    ${output}
     Should Be Equal As Integers  ${return_code}  0  msg=Error detected while getting component status
@@ -1040,8 +1068,8 @@ Is Component Enabled
 
 Is Nested Component Enabled
     [Documentation]    Returns the enabled status of a nested component (true/false).
-    ...                Reads the DSC via the default (v3) API. The nested MaaS components live under
-    ...                aigateway (modelsAsAService, batchGateway) in v3, matching the submitted v3 DSC.
+    ...                Nested MaaS components live under aigateway (modelsAsAService, batchGateway)
+    ...                on both the v2 and v3 DataScienceCluster schemas.
     [Arguments]    ${parent_component}    ${nested_component}    ${dsc_name}=${DSC_NAME}
     ${return_code}    ${output} =    Run And Return Rc And Output    oc get datasciencecluster ${dsc_name} -o json | jq '.spec.components.${parent_component}.${nested_component}.managementState // "Removed"'  #robocop:disable
     Log    ${output}
@@ -1557,7 +1585,7 @@ Get DSC Component State
     [Documentation]    Get component management state
     [Arguments]    ${dsc}    ${component}    ${namespace}
 
-    ${path} =    Get DSC V3 Component Path    ${component}
+    ${path} =    Get DSC Component Path    ${component}
     ${rc}   ${state}=    Run And Return Rc And Output
     ...    oc get datasciencecluster/${dsc} -n ${namespace} -o 'jsonpath={${path}}'
     Should Be Equal    "${rc}"    "0"    msg=${state}

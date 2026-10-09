@@ -1,0 +1,50 @@
+apiVersion: datasciencecluster.opendatahub.io/v2
+kind: DataScienceCluster
+metadata:
+  name: <dsc_name>
+  labels:
+      app.kubernetes.io/name: datasciencecluster
+spec:
+  components:
+    dashboard:
+      managementState: <dashboard_value>
+    aipipelines:
+      managementState: <aipipelines_value>
+    kserve:
+      managementState: <kserve_value>
+      modelsAsService:
+        managementState: <modelsasservice_legacy_value>
+    aigateway:
+      managementState: <aigateway_value>
+      modelsAsAService:
+        managementState: <modelsasservice_value>
+      batchGateway:
+        managementState: <batchgateway_value>
+    kueue:
+      managementState: <kueue_value>
+    ray:
+      managementState: <ray_value>
+    trainingoperator:
+      managementState: <trainingoperator_value>
+    trainer:
+      managementState: <trainer_value>
+    trustyai:
+      managementState: <trustyai_value>
+    workbenches:
+      managementState: <workbenches_value>
+      workbenchNamespace: <workbenches_namespace>
+    modelregistry:
+      managementState: <modelregistry_value>
+      registriesNamespace: <modelregistry_namespace>
+    feastoperator:
+      managementState: <feastoperator_value>
+    llamastackoperator:
+      managementState: <llamastackoperator_value>
+    ogx:
+      managementState: <ogx_value>
+    mlflowoperator:
+      managementState: <mlflowoperator_value>
+    sparkoperator:
+      managementState: <sparkoperator_value>
+    mcplifecycleoperator:
+      managementState: <mcplifecycleoperator_value>

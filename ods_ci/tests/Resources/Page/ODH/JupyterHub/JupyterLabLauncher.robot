@@ -75,17 +75,6 @@ JupyterLab Code Cell Error Output Should Not Be Visible
       Fail    msg=A JupyterLab code cell output returned an error, see screenshot
   END
 
-Get JupyterLab Code Cell Error Text
-  ${error_txt} =  Get Text  //div[contains(@class,"jp-OutputArea-output") and @data-mime-type="application/vnd.jupyter.stderr"]
-  RETURN  ${error_txt}
-
-Run Git Repo And Return Last Cell Error Text
-  [Documentation]    It actually clones the git repo, runs it and then returns the error
-  [Arguments]    ${REPO_URL}  ${NOTEBOOK_TO_RUN}
-  Run Keyword And Ignore Error    Clone Git Repository And Run    ${LINK_OF_GITHUB}    ${PATH_TO_FILE}
-  ${output} =    Get JupyterLab Code Cell Error Text
-  RETURN    ${output}
-
 Wait Until JupyterLab Code Cell Is Not Active
   [Documentation]  Waits until the current cell no longer has an active prompt "[*]:". This assumes that there is only one cell currently active and it is the currently selected cell
   [Arguments]    ${timeout}=120seconds

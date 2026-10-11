@@ -1326,8 +1326,14 @@ Install Agent Sandbox Operator Via Cli
     ...                Architecture comes from the node, not ARCH_TYPE.
     ${rc}    ${node_arch} =    Run And Return Rc And Output
     ...    oc get nodes -o jsonpath='{.items[0].status.nodeInfo.architecture}'
+    IF    ${rc} != 0
+        Fail    msg=Failed to read node architecture: ${node_arch}
+    END
     ${node_arch} =    Strip String    ${node_arch}
-    IF    ${rc} == 0 and '${node_arch}' == 'arm64'
+    IF    '${node_arch}' == '${EMPTY}'
+        Fail    msg=Node architecture is empty
+    END
+    IF    '${node_arch}' == 'arm64'
         Log    Skipping agent-sandbox-operator on arm64    console=yes
         RETURN
     END

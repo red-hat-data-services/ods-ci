@@ -1321,7 +1321,16 @@ Install JobSet Dependencies
     Create JobSetOperator CR
 
 Install Agent Sandbox Operator Via Cli
-    [Documentation]    Install Red Hat build of Agent Sandbox Operator via CLI
+    [Documentation]    Install Red Hat build of Agent Sandbox Operator via CLI.
+    ...                Skips arm64 because the published controller is amd64-only.
+    ...                Architecture comes from the node, not ARCH_TYPE.
+    ${rc}    ${node_arch} =    Run And Return Rc And Output
+    ...    oc get nodes -o jsonpath='{.items[0].status.nodeInfo.architecture}'
+    ${node_arch} =    Strip String    ${node_arch}
+    IF    ${rc} == 0 and '${node_arch}' == 'arm64'
+        Log    Skipping agent-sandbox-operator on arm64    console=yes
+        RETURN
+    END
     ${is_installed} =    Check If Operator Is Installed Via CLI    ${AGENT_SANDBOX_OP_NAME}
     IF    ${is_installed}
         Log To Console    message=Agent Sandbox Operator is already installed

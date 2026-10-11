@@ -869,16 +869,13 @@ Get Served DSC API Version
     [Documentation]    Return v3 when the installed DataScienceCluster CRD serves v3, otherwise v2.
     ...                rhods-operator.3.6.0 serves v3. Builds such as rhods-operator.3.6.0-ea.2 serve v2
     ...                only. Presence of aigateway.modelsAsAService is not a version check.
-    ${already_set} =    Run Keyword And Return Status    Variable Should Exist    ${DSC_SERVED_API_VERSION}
-    IF    ${already_set}
-        RETURN    ${DSC_SERVED_API_VERSION}
-    END
+    ...                Always reads the CRD so an in-suite operator upgrade that starts serving v3
+    ...                is picked up on the next DSC create/read.
     ${rc}    ${versions} =    Run And Return Rc And Output
     ...    oc get crd datascienceclusters.datasciencecluster.opendatahub.io -o jsonpath='{range .spec.versions[?(@.served==true)]}{.name}{" "}{end}'    #robocop:disable
     Should Be Equal As Integers    ${rc}    0    msg=Cannot read served DataScienceCluster CRD versions: ${versions}
     ${serves_v3} =    Evaluate    "v3" in """${versions}""".split()
     ${version} =    Set Variable If    ${serves_v3}    v3    v2
-    Set Suite Variable    ${DSC_SERVED_API_VERSION}    ${version}
     Log To Console    DataScienceCluster served versions: ${versions}; selected ${version}
     RETURN    ${version}
 

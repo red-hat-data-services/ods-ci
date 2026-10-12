@@ -25,6 +25,7 @@ declare -A images=(
     ["4.19"]="registry.redhat.io\/openshift4\/ose-node-feature-discovery-rhel9@sha256:d23fe6bcb36bdbe0e61a30f8ab7cb90e6dea25a399d87c3ba3d94415a61735b8"
     ["4.20"]="registry.redhat.io\/openshift4\/ose-node-feature-discovery-rhel9@sha256:fbd8db340dd4e4cda793b1f0453d42988bb8102d1061388827777bb848b067f2"
     ["4.21"]="registry.redhat.io\/openshift4\/ose-node-feature-discovery-rhel9@sha256:76a161a255a255eafcef4dc036adb8c0c8aadab2f0c57c3d3e19d5eea0ac5961"
+    ["4.22"]="registry.redhat.io\/openshift4\/ose-node-feature-discovery-rhel9@sha256:c16c62f136039eaf535ef4e3f6e3a5cc278fa49538e82f8a37bff89f641c2596"
 
 )
 if [ "${images[$xyVersion]}" ]; then

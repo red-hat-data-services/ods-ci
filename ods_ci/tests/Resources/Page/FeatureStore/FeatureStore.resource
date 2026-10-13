@@ -94,8 +94,8 @@ Run Feast Operator Upgrade Test
     ...    shell=true
     ...    timeout=10 min
     ...    env:RUN_ON_OPENSHIFT_CI=true
-    ...    env:AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-    ...    env:AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    ...    env:AWS_ACCESS_KEY_ID=${S3.AWS_ACCESS_KEY_ID}
+    ...    env:AWS_SECRET_ACCESS_KEY=${S3.AWS_SECRET_ACCESS_KEY}
     ...    env:AWS_DEFAULT_REGION=${S3.BUCKET_1.REGION}
     ...    env:AWS_S3_BUCKET=${S3.BUCKET_1.NAME}
     ...    stderr=STDOUT

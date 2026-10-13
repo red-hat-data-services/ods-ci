@@ -44,8 +44,10 @@ Suite Setup
 Check Image On Csv And Deployment
     [Documentation]    Check Image On Csv And Deployment
     [Arguments]    ${component}     ${deployment_name}      ${label_selector}      ${image}
-    ${rc}    ${managementState}=    Run And Return Rc And Output
-        ...    oc get DataScienceCluster default-dsc -o jsonpath="{.spec.components['${component}'].managementState}"
+    # Use the shared, version-aware state reader so v3 component renames (modelregistry->aiHub,
+    # dashboard->dashboard.standard) resolve correctly. Reading the v2 .spec.components['${component}']
+    # path directly returns "" on a v3-served DSC and silently skips the image check. RHOAIENG-99717.
+    ${managementState}=    Get DSC Component State    default-dsc    ${component}    ${OPERATOR_NAMESPACE}
     IF    "${managementState}" == "Managed"
 
         ${rc}    ${csv_image}=    Run And Return Rc And Output

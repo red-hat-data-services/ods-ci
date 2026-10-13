@@ -210,8 +210,11 @@ Check Model Registry Namespace
     [Documentation]    Check that DSC modelregistry.registriesNamespace is correct for ODH/RHOAI
     ...    Validate that namespace exists.
 
+    # Read the current v3 field path: the operator serves v3, where modelregistry.registriesNamespace
+    # was renamed to aiHub.instancesNamespace. Reading the old v2 path on the v3 object returns ""
+    # (jsonpath on a missing field exits 0). See RHOAIENG-99541 / RHOAIENG-99717.
     ${rc}   ${namespace}=    Run And Return Rc And Output
-    ...    oc get DataScienceCluster/${DSC_NAME} -n ${OPERATOR_NS} -o "jsonpath={".spec.components.modelregistry.registriesNamespace"}"
+    ...    oc get DataScienceCluster/${DSC_NAME} -n ${OPERATOR_NS} -o "jsonpath={".spec.components.aiHub.instancesNamespace"}"
     Should Be Equal As Integers    ${rc}    0    msg=${namespace}
 
     Should Be Equal    ${namespace}    ${MODEL_REGISTRY_NAMESPACE}    msg=Model Registry Namespace: Actual "${namespace}" Expected: "${MODEL_REGISTRY_NAMESPACE}"

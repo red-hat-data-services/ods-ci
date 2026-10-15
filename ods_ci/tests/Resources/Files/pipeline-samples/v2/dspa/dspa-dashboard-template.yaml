@@ -1,0 +1,54 @@
+kind: Template
+apiVersion: template.openshift.io/v1
+metadata:
+  name: dspa-dashboard-template
+objects:
+  - apiVersion: datasciencepipelinesapplications.opendatahub.io/v1
+    kind: DataSciencePipelinesApplication
+    metadata:
+      name: dspa
+    spec:
+      apiServer:
+        artifactSignedURLExpirySeconds: 60
+        cacheEnabled: true
+        deploy: true
+        enableOauth: true
+        enableSamplePipeline: false
+        # Dashboard-created servers use the Kubernetes store. The CRD default is database.
+        pipelineStore: kubernetes
+      database:
+        disableHealthCheck: false
+        mariaDB:
+          deploy: true
+          pipelineDBName: mlpipeline
+          pvcSize: 10Gi
+          username: mlpipeline
+      dspVersion: v2
+      objectStorage:
+        disableHealthCheck: false
+        enableExternalRoute: false
+        externalStorage:
+          bucket: ${OBJECT_STORAGE_BUCKET}
+          host: ${OBJECT_STORAGE_HOST}
+          region: ${OBJECT_STORAGE_REGION}
+          s3CredentialsSecret:
+            accessKey: AWS_ACCESS_KEY_ID
+            secretKey: AWS_SECRET_ACCESS_KEY
+            secretName: dashboard-dspa-secret
+          scheme: ${OBJECT_STORAGE_SCHEME}
+      persistenceAgent:
+        deploy: true
+        numWorkers: 2
+      podToPodTLS: true
+      scheduledWorkflow:
+        cronScheduleTimezone: UTC
+        deploy: true
+parameters:
+  - name: OBJECT_STORAGE_BUCKET
+    value: test-bucket
+  - name: OBJECT_STORAGE_HOST
+    value: s3.amazonaws.com
+  - name: OBJECT_STORAGE_REGION
+    value: us-east-1
+  - name: OBJECT_STORAGE_SCHEME
+    value: https

@@ -30,10 +30,7 @@ Resource            OCP.resource
 ...                         Perform Dashboard API Endpoint POST Call
 ...                         Perform Dashboard API Endpoint DELETE Call
 ...                         Create RedHat Marketplace Secret
-...                         Create S3 Data Connection
 ...                         Create Starburst Enteprise License Secret
-...                         Get Data Connection Form Values
-...                         Fill Data Connection Form
 ...                         Create Secret For S3-Like Buckets
 ...                         Login To OCP Using API
 ...                         Generate Thanos Token
@@ -42,6 +39,7 @@ Resource            OCP.resource
 ...                         Get Minio Credentials
 ...                         Create Inference Access Token
 ...                         Create Secret With Pipelines Object Storage Information
+...                         Create Pipeline Server From CLI
 ${ODH_RELEASE_NAME}=     Open Data Hub
 ${RHOAI_SELFMANAGED_RELEASE_NAME}=      OpenShift AI Self-Managed
 ${RHOAI_MANAGED_RELEASE_NAME}=      OpenShift AI Cloud Service

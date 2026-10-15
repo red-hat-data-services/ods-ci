@@ -9,8 +9,6 @@ Resource         ../../Resources/Page/OCPDashboard/Builds/Builds.robot
 Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Workbenches.resource
 Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Storages.resource
-Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
-Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Pipelines.resource
 Resource         ../../Resources/CLI/DataSciencePipelines/DataSciencePipelinesBackend.resource
 Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipelines.resource
 Library          Screenshot
@@ -30,7 +28,6 @@ ${PV_NAME} =    ods-ci-pv-kale
 ${PV_DESCRIPTION} =    ods-ci-pv-kale is a PV created to test Kale in workbenches
 ${PV_SIZE} =    2
 ${ENVS_LIST} =    ${NONE}
-${DC_NAME} =    kale-s3
 
 
 *** Test Cases ***
@@ -60,7 +57,7 @@ Verify Pipelines Integration With Kale When Using Standard Data Science Based Im
 
 *** Keywords ***
 Kale Pipelines Suite Setup    # robocop: off=too-many-calls-in-keyword
-    [Documentation]    Suite Setup — mirrors Elyra (CLI project create + pipeline server)
+    [Documentation]    Suite Setup. The project and the pipeline server are created from the CLI.
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
     Set Suite Variable    ${USERNAME}    ${TEST_USER_3.USERNAME}
@@ -71,11 +68,9 @@ Kale Pipelines Suite Setup    # robocop: off=too-many-calls-in-keyword
     Set Suite Variable    ${PRJ_TITLE}            ${project_name_complete}
     Set Suite Variable    ${PROJECT_TO_DELETE}    ${project_name_complete}
     Ensure Kale Project Can Pull Red Hat Images    ${PRJ_TITLE}
-    Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_NAME}
-    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
-    ...            aws_bucket_name=ods-ci-ds-pipelines
-    Pipelines.Create Pipeline Server    dc_name=${DC_NAME}
-    ...    project_title=${PRJ_TITLE}
+    Create Pipeline Server From CLI    project_title=${PRJ_TITLE}
+    ...    aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
+    ...    aws_bucket_name=ods-ci-ds-pipelines
     # Optional: set KALE_PATCH_PIPELINE_IMAGES=${TRUE} plus PIPELINE_*_IMAGE vars to override DSPA images.
     ${patch_pipeline_images}=    Get Variable Value    ${KALE_PATCH_PIPELINE_IMAGES}    ${FALSE}
     IF    ${patch_pipeline_images}

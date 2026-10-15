@@ -339,9 +339,13 @@ Verify RHODS Installation
             ELSE
                 Log To Console    Skipping GatewayConfig presence check for s390x architecture    level=WARN
             END
-            Wait Until Keyword Succeeds    6 min    0 sec
-            ...    Is Resource Present    HardwareProfile    default-profile
-            ...    ${APPLICATIONS_NAMESPACE}      ${IS_PRESENT}
+            IF    '${arch_type}' != 's390x'
+                Wait Until Keyword Succeeds    6 min    0 sec
+                ...    Is Resource Present    HardwareProfile    default-profile
+                ...    ${APPLICATIONS_NAMESPACE}      ${IS_PRESENT}
+            ELSE
+                Log To Console    Skipping HardwareProfile presence check for s390x architecture    level=WARN
+            END
             IF    ${enable_new_observability_stack}
                     Patch DSCInitialization With Monitoring Info
             END
@@ -373,9 +377,13 @@ Verify RHODS Installation
       ELSE
           Log To Console    Skipping GatewayConfig presence check for s390x architecture    level=WARN
       END
-      Wait Until Keyword Succeeds    6 min    0 sec
-      ...    Is Resource Present    HardwareProfile    default-profile
-      ...    ${APPLICATIONS_NAMESPACE}      ${IS_PRESENT}
+      IF    '${arch_type}' != 's390x'
+          Wait Until Keyword Succeeds    6 min    0 sec
+          ...    Is Resource Present    HardwareProfile    default-profile
+          ...    ${APPLICATIONS_NAMESPACE}      ${IS_PRESENT}
+      ELSE
+          Log To Console    Skipping HardwareProfile presence check for s390x architecture    level=WARN
+      END
       IF    ${enable_new_observability_stack}
           Patch DSCInitialization With Monitoring Info
       END

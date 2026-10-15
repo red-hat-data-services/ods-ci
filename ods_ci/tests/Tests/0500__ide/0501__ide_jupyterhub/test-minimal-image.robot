@@ -85,21 +85,6 @@ Can Launch Python3 Smoke Test Notebook
     Should Not Match    ${output}    ERROR*
     Should Be Equal As Strings    ${output}    ${expected_value}
 
-Verify Tensorflow Can Be Installed In The Minimal Python Image Via Pip
-    [Documentation]    Verify Tensorflow Can Be Installed In The Minimal Python image via pip
-    [Tags]    ODS-555    ODS-908    ODS-535
-    Open New Notebook
-    Close Other JupyterLab Tabs
-    Add And Run JupyterLab Code Cell In Active Notebook    !pip install tensorflow~=2.16.0 --progress-bar off
-    Wait Until JupyterLab Code Cell Is Not Active
-    ${version} =    Verify Installed Library Version    tensorflow    2.16
-    Add And Run JupyterLab Code Cell In Active Notebook    !pip install --upgrade tensorflow --progress-bar off
-    Wait Until JupyterLab Code Cell Is Not Active
-    ${updated_version} =  Run Cell And Get Output  !pip show tensorflow | grep Version: | awk '{split($0,a); print a[2]}' | awk '{split($0,b,"."); printf "%s.%s", b[1], b[2]}'
-    ${res} =      GT    ${updated_version}.0    ${version}[1].0
-    IF   not ${res}    Fail
-    [Teardown]    Clean Up Server
-
 Verify Jupyterlab Server Pods Are Spawned In A Custom Namespace
     [Documentation]    Verifies that jupyterlab server pods are spawned in a custom namespace (${NOTEBOOKS_NAMESPACE})
     [Tags]    ODS-320

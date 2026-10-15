@@ -6,7 +6,6 @@ Resource            ../../Resources/RHOSi.resource
 Resource            ../../Resources/ODS.robot
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboardResources.resource
-Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Resource            ../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Resource            ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource

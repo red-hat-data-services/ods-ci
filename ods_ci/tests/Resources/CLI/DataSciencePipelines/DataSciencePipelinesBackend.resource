@@ -46,6 +46,39 @@ Create Pipeline Server
 
     IF  ${configure_pip_index}   Create Pipelines ConfigMap With Custom Pip Index Url And Trusted Host  ${namespace}
 
+Create Pipeline Server From CLI    # robocop: off=too-many-calls-in-keyword
+    [Documentation]    Creates the pipeline server Secret and DataSciencePipelinesApplication directly.
+    ...    AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY are stored in secret dashboard-dspa-secret,
+    ...    which is the Secret a dashboard-created pipeline server references.
+    ...    Bucket, region, and endpoint are DSPA spec fields. The pipeline server does not read them
+    ...    from a Connection Secret, so none is created.
+    ...    A scheme and a trailing slash on ${aws_s3_endpoint} are removed from the DSPA host.
+    [Arguments]    ${project_title}
+    ...    ${aws_access_key}
+    ...    ${aws_secret_access}
+    ...    ${aws_bucket_name}
+    ...    ${aws_s3_endpoint}=${S3.AWS_DEFAULT_ENDPOINT}
+    ...    ${aws_region}=${S3.AWS_DEFAULT_REGION}
+
+    Create Secret With Pipelines Object Storage Information    namespace=${project_title}
+    ...    object_storage_access_key=${aws_access_key}
+    ...    object_storage_secret_key=${aws_secret_access}
+
+    ${scheme}=    Set Variable    https
+    ${is_http}=    Run Keyword And Return Status    Should Start With    ${aws_s3_endpoint}    http://
+    IF    ${is_http}
+        ${scheme}=    Set Variable    http
+    END
+    ${host}=    Remove String    ${aws_s3_endpoint}    https://    http://
+    ${host}=    Strip String    ${host}    characters=/
+
+    ${template_parameters}=    Catenate
+    ...    -p OBJECT_STORAGE_HOST=${host}
+    ...    -p OBJECT_STORAGE_REGION=${aws_region}
+    ...    -p OBJECT_STORAGE_BUCKET=${aws_bucket_name}
+    ...    -p OBJECT_STORAGE_SCHEME=${scheme}
+    Run And Verify Command    oc process -f ${DSPA_PATH}/dspa-dashboard-template.yaml ${template_parameters} | oc apply -n ${project_title} -f -    # robocop: off=line-too-long
+
 # robocop: disable:line-too-long
 Create PipelineServer Using Custom DSPA
     [Documentation]    Install and verifies that DataSciencePipelinesApplication CRD is installed and working

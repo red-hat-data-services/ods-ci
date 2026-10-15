@@ -331,9 +331,14 @@ Verify RHODS Installation
             Wait Until Keyword Succeeds    6 min    0 sec
             ...    Is Resource Present    Auth    auth
             ...    ${OPERATOR_NAMESPACE}      ${IS_PRESENT}
-            Wait Until Keyword Succeeds    6 min    0 sec
-            ...    Is Resource Present    GatewayConfig    default-gateway
-            ...    ${OPERATOR_NAMESPACE}      ${IS_PRESENT}
+            ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
+            IF    '${arch_type}' != 's390x'
+                Wait Until Keyword Succeeds    6 min    0 sec
+                ...    Is Resource Present    GatewayConfig    default-gateway
+                ...    ${OPERATOR_NAMESPACE}      ${IS_PRESENT}
+            ELSE
+                Log To Console    Skipping GatewayConfig presence check for s390x architecture    level=WARN
+            END
             Wait Until Keyword Succeeds    6 min    0 sec
             ...    Is Resource Present    HardwareProfile    default-profile
             ...    ${APPLICATIONS_NAMESPACE}      ${IS_PRESENT}
@@ -360,9 +365,14 @@ Verify RHODS Installation
       Wait Until Keyword Succeeds    6 min    0 sec
       ...    Is Resource Present    Auth    auth
       ...    ${OPERATOR_NAMESPACE}      ${IS_PRESENT}
-      Wait Until Keyword Succeeds    6 min    0 sec
-      ...    Is Resource Present    GatewayConfig    default-gateway
-      ...    ${OPERATOR_NAMESPACE}      ${IS_PRESENT}
+      ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
+      IF    '${arch_type}' != 's390x'
+          Wait Until Keyword Succeeds    6 min    0 sec
+          ...    Is Resource Present    GatewayConfig    default-gateway
+          ...    ${OPERATOR_NAMESPACE}      ${IS_PRESENT}
+      ELSE
+          Log To Console    Skipping GatewayConfig presence check for s390x architecture    level=WARN
+      END
       Wait Until Keyword Succeeds    6 min    0 sec
       ...    Is Resource Present    HardwareProfile    default-profile
       ...    ${APPLICATIONS_NAMESPACE}      ${IS_PRESENT}

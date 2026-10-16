@@ -80,7 +80,11 @@ Kale Pipelines Suite Setup    # robocop: off=too-many-calls-in-keyword
     Sleep    15s    reason=Wait until pipeline server is detected by dashboard
 
 Kale Pipelines Suite Teardown
-    [Documentation]    Closes the browser and deletes the test project
+    [Documentation]    If anything in the suite fails, this collects pipeline diagnostics,
+    ...    and then it closes the browser and deletes the test project.
+    IF    '${SUITE_STATUS}' == 'FAIL'
+        Log Pipeline Diagnostics    ${PRJ_TITLE}
+    END
     Delete Project Via CLI By Display Name    displayed_name=${PROJECT_TO_DELETE}
     Close All Browsers
 

@@ -238,22 +238,47 @@ Wait Until JupyterLab Is Loaded
   Wait Until Element Is Visible  xpath:${JL_TABBAR_CONTENT_XPATH}  timeout=${timeout}
 
 Clone Git Repository
-  [Documentation]    Clones git repository and logs error message if fails to clone
+  [Documentation]    Clones ${REPO_URL} into the workbench and asserts the repository directory
+  ...    actually appeared. One retry is attempted after removing any partial checkout.
+  ...    Fails with an [ENV] message naming the repository and the JupyterLab error text.
   [Arguments]  ${REPO_URL}
-  ${status}    ${err_msg} =    Run Keyword and Ignore Error    Clone Repo and Return Error Message    ${REPO_URL}
-  IF    "${status}" == "PASS"
-      ${dir_name} =    Get Directory Name From Git Repo URL    ${REPO_URL}
+  ${dir_name} =    Get Directory Name From Git Repo URL    ${REPO_URL}
+  ${error} =    Attempt Git Clone And Return Error    ${REPO_URL}    ${dir_name}
+  IF    '${error}' != '${EMPTY}'
+      Log    First clone of ${REPO_URL} failed (${error}), removing any partial checkout and retrying
+      ...    level=WARN
       ${current_user} =    Get Current User In JupyterLab
-      Delete Folder In User Notebook
+      Run Keyword And Warn On Failure    Delete Folder In User Notebook
       ...    admin_username=${OCP_ADMIN_USER.USERNAME}
       ...    username=${current_user}
       ...    folder=${dir_name}
-      ${status}    ${err_msg} =    Run Keyword and Ignore Error    Clone Repo and Return Error Message    ${REPO_URL}
-      IF    "${status}" == "PASS"
-          Log    Error Message : ${err_msg}
-          FAIL
-      END
+      ${error} =    Attempt Git Clone And Return Error    ${REPO_URL}    ${dir_name}
   END
+  # Not mergeable with the block above: ${error} is reassigned by the retry, so this has to be a
+  # fresh check on the new value rather than a continuation of the first one.
+  IF    '${error}' != '${EMPTY}'    # robocop: off=if-can-be-merged
+      Capture Page Screenshot
+      Fail    [ENV] Could not clone "${REPO_URL}" into the workbench: ${error}
+  END
+
+Attempt Git Clone And Return Error
+  [Documentation]    Runs a single clone attempt. Returns an empty string on success, otherwise a
+  ...    short description of what went wrong. Success is decided by the repository directory being
+  ...    present in the file browser.
+  ...    ${timeout} has to include cloning, not just the browser render.
+  [Arguments]    ${repo_url}    ${dir_name}    ${timeout}=60s
+  Clone Repo    ${repo_url}
+  Run Keyword And Warn On Failure    Wait Until Page Contains    Cloning...    timeout=5s
+  # A broken clone is usually reported straight away, so check first
+  ${err_msg} =    Get Git Clone Error If Displayed
+  IF    '${err_msg}' != '${EMPTY}'    RETURN    ${err_msg}
+  ${cloned} =    Run Keyword And Return Status
+  ...    Verify File Present In The File Explorer    ${dir_name}    timeout=${timeout}
+  IF    ${cloned}    RETURN    ${EMPTY}
+  # If the clone doesn't work, check for an error one more time
+  ${err_msg} =    Get Git Clone Error If Displayed
+  IF    '${err_msg}' != '${EMPTY}'    RETURN    ${err_msg}
+  RETURN    no error was reported but "${dir_name}" is not present in the file browser
 
 Clone Git Repository And Open
   [Documentation]  The ${NOTEBOOK_TO_RUN} argument should be of the form /path/relative/to/jlab/root.ipynb
@@ -263,6 +288,13 @@ Clone Git Repository And Open
   Open With JupyterLab Menu  File  Open from Path…
   Input Text  xpath=//input[@placeholder="/path/relative/to/jlab/root"]  ${NOTEBOOK_TO_RUN}
   Click Element  xpath://div[.="Open"]
+  ${file_name} =    Evaluate    "${NOTEBOOK_TO_RUN}".rstrip("/").split("/")[-1]
+  ${opened} =    Run Keyword And Return Status
+  ...    Wait Until ${file_name} JupyterLab Tab Is Selected
+  IF    not ${opened}
+      Capture Page Screenshot
+      Fail    [TEST] Cloned "${REPO_URL}" but "${NOTEBOOK_TO_RUN}" did not open in JupyterLab
+  END
 
 Clone Git Repository And Run
   [Documentation]  The ${NOTEBOOK_TO_RUN} argument should be of the form /path/relative/to/jlab/root.ipynb
@@ -277,9 +309,10 @@ Clone Git Repository And Run
   JupyterLab Code Cell Error Output Should Not Be Visible
 
 Verify File Present In The File Explorer
-  [Documentation]   It checks if the file presnt in the file explorer on sidebar of jupyterlab.
-  [Arguments]       ${filename}
-  Wait Until Page Contains Element      //div[contains(@class,"jp-FileBrowser-listing")]/ul/li[contains(@title,"Name: ${filename}")]    10
+  [Documentation]   Checks if file is present in the file explorer on sidebar of jupyterlab.
+  [Arguments]       ${filename}    ${timeout}=10
+  Wait Until Page Contains Element
+  ...    //div[contains(@class,"jp-FileBrowser-listing")]/ul/li[contains(@title,"Name: ${filename}")]    ${timeout}
 
 Handle Kernel Restarts
   #This section has to be slightly reworked still. Sometimes the pop-up is not in div[8] but in div[7]
@@ -578,15 +611,6 @@ Clone Repo
     Click Element    xpath://button/div[translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz') = 'clone']
 
 
-Clone Repo and Return Error Message
-    [Documentation]    Clones the github repository and returns the error
-    [Tags]    Private Keyword
-    [Arguments]    ${repo_url}
-    Clone Repo    ${repo_url}
-    Run Keyword And Warn On Failure    Wait Until Page Contains    Cloning...    timeout=5s
-    ${err_msg} =    Get Git Clone Error Message
-    RETURN    ${err_msg}
-
 Get Directory Name From Git Repo URL
     [Documentation]    Returns directory name from repo link
     [Arguments]    ${repo_url}
@@ -594,10 +618,21 @@ Get Directory Name From Git Repo URL
     ${ans} =    Remove String    ${ans}[1]    .git
     RETURN    ${ans}
 
-Get Git Clone Error Message
-    [Documentation]    Returns expected error after a git clone operation. Fails if error didn't occur
-    ${err_msg} =    Set Variable    No error
-    Wait Until Page Contains    Failed to clone    timeout=5s
+Get Git Clone Error If Displayed
+    [Documentation]    Returns the text of a "Failed to clone" notification, or an empty string
+    ...    when there is none. An empty return means no error appeared, but does not guaruntee
+    ...    clone success.
+    ${displayed} =    Run Keyword And Return Status
+    ...    Wait Until Page Contains    Failed to clone    timeout=5s
+    IF    not ${displayed}
+        RETURN    ${EMPTY}
+    END
+    ${err_msg} =    Get Git Clone Error Text
+    RETURN    ${err_msg}
+
+Get Git Clone Error Text
+    [Documentation]    Opens the "Failed to clone" notification, returns its text and dismisses it.
+    ...    Only call when the notification is known to be on screen.
     Click Button    xpath://button[contains(@class,"jp-toast-button") and @title="Show"]    # click show
     ${err_msg} =    Get Text    //div[contains(@class,"jp-Dialog-body")]    # get error text
     #dismiss button

@@ -1,6 +1,7 @@
 *** Settings ***
 Documentation       Post install test cases that verify OCP Dashboard resources and objects
 Library             Collections
+Library             OperatingSystem
 Library             OpenShiftLibrary
 Resource            ../../../../Resources/ODS.robot
 Resource            ../../../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
@@ -35,88 +36,26 @@ Verify Dashboard Is Shipped And Enabled Within ODS
     OpenShift Resource Field Value Should Match Regexp    spec.host    dashboard-${APPLICATIONS_NAMESPACE}.*    @{dashboard_routes_info}
 
 Verify rhods-dashboard ClusterRole Rules
-    [Documentation]    Verifies rhods-dashboard ClusterRole rules match expected values
+    [Documentation]    Verifies the rhods-dashboard ClusterRole grants exactly the expected set of
+    ...    rules, compared order-insensitively (rule order and verb/apiGroup/resource order are not
+    ...    significant). Missing and unexpected rules are reported separately. Expected rules live in
+    ...    Resources/Files/rhods-dashboard-clusterrole-rules.json; update it when the ClusterRole
+    ...    legitimately changes.
     [Tags]    Sanity
     ...       Tier1
     ...       ODS-644
-    ...       AutomationBug
     &{rhodsdashboard_clusterrole_info}=    Fetch rhods-dashboard ClusterRole Info
-    @{rhodsdashboard_clusterrole_rules}=    Set Variable    ${rhodsdashboard_clusterrole_info.rules}
-    &{rule_1} =    Set Variable    ${rhodsdashboard_clusterrole_rules}[0]
-    @{rule_1_expected_verbs}=    Create List    get    list
-    @{rule_1_expected_apigroups}=    Create List    machine.openshift.io    autoscaling.openshift.io
-    @{rule_1_expected_resources}=    Create List    machineautoscalers    machinesets
-    Verify rhods-dashboard ClusterRole Rule    ${rule_1}    ${rule_1_expected_verbs}    ${rule_1_expected_apigroups}    ${rule_1_expected_resources}
-    &{rule_2} =    Set Variable    ${rhodsdashboard_clusterrole_rules}[1]
-    @{rule_2_expected_verbs}=    Create List    get    watch    list
-    @{rule_2_expected_apigroups}=    Create List    ${EMPTY}    config.openshift.io
-    @{rule_2_expected_resources}=    Create List    clusterversions
-    Verify rhods-dashboard ClusterRole Rule    ${rule_2}    ${rule_2_expected_verbs}    ${rule_2_expected_apigroups}    ${rule_2_expected_resources}
-    &{rule_3} =    Set Variable    ${rhodsdashboard_clusterrole_rules}[2]
-    @{rule_3_expected_verbs}=    Create List    get    list    watch
-    @{rule_3_expected_apigroups}=    Create List    operators.coreos.com
-    @{rule_3_expected_resources}=    Create List    clusterserviceversions    subscriptions
-    Verify rhods-dashboard ClusterRole Rule    ${rule_3}    ${rule_3_expected_verbs}    ${rule_3_expected_apigroups}    ${rule_3_expected_resources}
-    &{rule_4} =    Set Variable    ${rhodsdashboard_clusterrole_rules}[3]
-    @{rule_4_expected_verbs}=    Create List    get
-    @{rule_4_expected_apigroups}=    Create List    ${EMPTY}    image.openshift.io
-    @{rule_4_expected_resources}=    Create List    imagestreams/layers
-    Verify rhods-dashboard ClusterRole Rule    ${rule_4}    ${rule_4_expected_verbs}    ${rule_4_expected_apigroups}    ${rule_4_expected_resources}
-    &{rule_5} =    Set Variable    ${rhodsdashboard_clusterrole_rules}[4]
-    @{rule_5_expected_verbs}=    Create List    create    delete    get    list    patch    update    watch
-    @{rule_5_expected_apigroups}=    Create List    ${EMPTY}
-    @{rule_5_expected_resources}=    Create List    configmaps    persistentvolumeclaims    secrets
-    Verify rhods-dashboard ClusterRole Rule    ${rule_5}    ${rule_5_expected_verbs}    ${rule_5_expected_apigroups}    ${rule_5_expected_resources}
-    &{rule_6} =    Set Variable    ${rhodsdashboard_clusterrole_rules}[5]
-    @{rule_6_expected_verbs}=    Create List    get    list    watch
-    @{rule_6_expected_apigroups}=    Create List    route.openshift.io
-    @{rule_6_expected_resources}=    Create List    routes
-    Verify rhods-dashboard ClusterRole Rule    ${rule_6}    ${rule_6_expected_verbs}    ${rule_6_expected_apigroups}    ${rule_6_expected_resources}
-    &{rule_7} =    Set Variable    ${rhodsdashboard_clusterrole_rules}[6]
-    @{rule_7_expected_verbs}=    Create List    get    list    watch
-    @{rule_7_expected_apigroups}=    Create List    console.openshift.io
-    @{rule_7_expected_resources}=    Create List    consolelinks
-    Verify rhods-dashboard ClusterRole Rule    ${rule_7}    ${rule_7_expected_verbs}    ${rule_7_expected_apigroups}    ${rule_7_expected_resources}
-    &{rule_8} =    Set Variable    ${rhodsdashboard_clusterrole_rules}[7]
-    @{rule_8_expected_verbs}=    Create List    get    list    watch
-    @{rule_8_expected_apigroups}=    Create List    operator.openshift.io
-    @{rule_8_expected_resources}=    Create List    consoles
-    Verify rhods-dashboard ClusterRole Rule    ${rule_8}    ${rule_8_expected_verbs}    ${rule_8_expected_apigroups}    ${rule_8_expected_resources}
-    &{rule_9} =    Set Variable    ${rhodsdashboard_clusterrole_rules}[8]
-    @{rule_9_expected_verbs}=    Create List    get    watch    list
-    @{rule_9_expected_apigroups}=    Create List    ${EMPTY}    integreatly.org
-    @{rule_9_expected_resources}=    Create List    rhmis
-    Verify rhods-dashboard ClusterRole Rule    ${rule_9}    ${rule_9_expected_verbs}   ${rule_9_expected_apigroups}    ${rule_9_expected_resources}
-    &{rule_10} =    Set Variable    ${rhodsdashboard_clusterrole_rules}[9]
-    @{rule_10_expected_verbs}=    Create List    get    list    watch
-    @{rule_10_expected_apigroups}=    Create List    user.openshift.io
-    @{rule_10_expected_resources}=    Create List    groups
-    Verify rhods-dashboard ClusterRole Rule    ${rule_10}    ${rule_10_expected_verbs}   ${rule_10_expected_apigroups}    ${rule_10_expected_resources}
-    &{rule_11} =    Set Variable    ${rhodsdashboard_clusterrole_rules}[10]
-    @{rule_11_expected_verbs}=    Create List    get    list    watch
-    @{rule_11_expected_apigroups}=    Create List    user.openshift.io
-    @{rule_11_expected_resources}=    Create List    users
-    Verify rhods-dashboard ClusterRole Rule    ${rule_11}    ${rule_11_expected_verbs}   ${rule_11_expected_apigroups}    ${rule_11_expected_resources}
-    &{rule_12} =    Set Variable    ${rhodsdashboard_clusterrole_rules}[11]
-    @{rule_12_expected_verbs}=    Create List    get    list    watch
-    @{rule_12_expected_apigroups}=    Create List    ${EMPTY}
-    @{rule_12_expected_resources}=    Create List    pods    serviceaccounts    services    namespaces
-    Verify rhods-dashboard ClusterRole Rule    ${rule_12}    ${rule_12_expected_verbs}    ${rule_12_expected_apigroups}    ${rule_12_expected_resources}
-    &{rule_13} =    Set Variable    ${rhodsdashboard_clusterrole_rules}[12]
-    @{rule_13_expected_verbs}=    Create List    get    list    watch    create    update    patch    delete
-    @{rule_13_expected_apigroups}=    Create List    rbac.authorization.k8s.io
-    @{rule_13_expected_resources}=    Create List    rolebindings    clusterrolebindings    roles
-    Verify rhods-dashboard ClusterRole Rule    ${rule_13}    ${rule_13_expected_verbs}    ${rule_13_expected_apigroups}    ${rule_13_expected_resources}
-    &{rule_14} =    Set Variable    ${rhodsdashboard_clusterrole_rules}[13]
-    @{rule_14_expected_verbs}=    Create List    get    list    watch
-    @{rule_14_expected_apigroups}=    Create List    ${EMPTY}    events.k8s.io
-    @{rule_14_expected_resources}=    Create List    events
-    Verify rhods-dashboard ClusterRole Rule    ${rule_14}    ${rule_14_expected_verbs}    ${rule_14_expected_apigroups}    ${rule_14_expected_resources}
-    &{rule_15} =    Set Variable    ${rhodsdashboard_clusterrole_rules}[14]
-    @{rule_15_expected_verbs}=    Create List    get    list    watch    create    update    patch    delete
-    @{rule_15_expected_apigroups}=    Create List    kubeflow.org
-    @{rule_15_expected_resources}=    Create List    notebooks
-    Verify rhods-dashboard ClusterRole Rule    ${rule_15}    ${rule_15_expected_verbs}    ${rule_15_expected_apigroups}    ${rule_15_expected_resources}
+    @{actual_rules}=    Set Variable    ${rhodsdashboard_clusterrole_info.rules}
+    @{expected_rules}=    Get Expected rhods-dashboard ClusterRole Rules
+    @{actual_canonical}=    Canonicalize ClusterRole Rules    ${actual_rules}
+    @{expected_canonical}=    Canonicalize ClusterRole Rules    ${expected_rules}
+    ${missing_rules}=    Evaluate    sorted(set($expected_canonical) - set($actual_canonical))
+    ${unexpected_rules}=    Evaluate    sorted(set($actual_canonical) - set($expected_canonical))
+    Run Keyword And Continue On Failure    Should Be Empty    ${missing_rules}
+    ...    msg=Expected rhods-dashboard ClusterRole rules missing from the live role: ${missing_rules}
+    Run Keyword And Continue On Failure    Should Be Empty    ${unexpected_rules}
+    ...    msg=Unexpected rhods-dashboard ClusterRole rules present in the live role: ${unexpected_rules}
+
 
 *** Keywords ***
 Set Expected Replicas Based On Version
@@ -182,18 +121,32 @@ Verify Dashboard Deployment
     ${containerNames} =    Create List    rhods-dashboard    oauth-proxy
     Verify Deployment    ${dashboard}    ${EXP_DASHBOARD_REPLICAS}    2    ${containerNames}
 
-Verify rhods-dashboard ClusterRole Rule
-    [Documentation]    Verifies rhods-dashboard ClusterRole rules matches expected values
-    ...    Args:
-    ...        rule(dict): Dictionary containing the rule info
-    ...        rule_expected_apigroup(list): List containing the rule's expected apigroups
-    ...        rule_expected_resources(list): List containing the rule's expected resources
-    ...    Returns:
-    ...        None
-    [Arguments]    ${rule}   ${rule_expected_verbs}    ${rule_expected_apigroups}    ${rule_expected_resources}
-    Run Keyword And Continue On Failure    Lists Should Be Equal    ${rule.verbs}    ${rule_expected_verbs}
-    Run Keyword And Continue On Failure    Lists Should Be Equal    ${rule.apiGroups}    ${rule_expected_apigroups}
-    Run Keyword And Continue On Failure    Lists Should Be Equal    ${rule.resources}    ${rule_expected_resources}
+Get Expected rhods-dashboard ClusterRole Rules
+    [Documentation]    Loads the expected rhods-dashboard ClusterRole rules (a list of dictionaries
+    ...    with apiGroups, resources and verbs) from the data file. Ordering is irrelevant; the caller
+    ...    compares the rule sets order-insensitively.
+    ${rules_file}=    Set Variable    ${CURDIR}/../../../../Resources/Files/rhods-dashboard-clusterrole-rules.json
+    ${rules_json}=    Get File    ${rules_file}
+    ${expected_rules}=    Evaluate    json.loads($rules_json)    modules=json
+    RETURN    ${expected_rules}
+
+Canonicalize ClusterRole Rules
+    [Documentation]    Converts a list of ClusterRole rule dictionaries into a list of canonical
+    ...    strings (apiGroups, resources and verbs each sorted) so that the rules can be compared
+    ...    independently of ordering.
+    [Arguments]    ${rules}
+    @{canonical}=    Create List
+    FOR    ${rule}    IN    @{rules}
+        @{apigroups}=    Copy List    ${rule}[apiGroups]
+        @{resources}=    Copy List    ${rule}[resources]
+        @{verbs}=    Copy List    ${rule}[verbs]
+        Sort List    ${apigroups}
+        Sort List    ${resources}
+        Sort List    ${verbs}
+        ${key}=    Catenate    SEPARATOR=|    ${apigroups}    ${resources}    ${verbs}
+        Append To List    ${canonical}    ${key}
+    END
+    RETURN    @{canonical}
 
 Fetch rhods-dashboard ClusterRole Info
     [Documentation]    Fetches information of rhods-dashboard ClusterRole

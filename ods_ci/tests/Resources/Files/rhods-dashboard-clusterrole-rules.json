@@ -1,0 +1,311 @@
+[
+  {
+    "apiGroups": [
+      ""
+    ],
+    "resources": [
+      "endpoints"
+    ],
+    "verbs": [
+      "get"
+    ]
+  },
+  {
+    "apiGroups": [
+      ""
+    ],
+    "resources": [
+      "namespaces"
+    ],
+    "verbs": [
+      "patch"
+    ]
+  },
+  {
+    "apiGroups": [
+      ""
+    ],
+    "resources": [
+      "nodes"
+    ],
+    "verbs": [
+      "get",
+      "list"
+    ]
+  },
+  {
+    "apiGroups": [
+      ""
+    ],
+    "resources": [
+      "pods",
+      "serviceaccounts",
+      "services"
+    ],
+    "verbs": [
+      "get",
+      "list",
+      "watch"
+    ]
+  },
+  {
+    "apiGroups": [
+      "",
+      "config.openshift.io"
+    ],
+    "resources": [
+      "clusterversions"
+    ],
+    "verbs": [
+      "get",
+      "list",
+      "watch"
+    ]
+  },
+  {
+    "apiGroups": [
+      "",
+      "events.k8s.io"
+    ],
+    "resources": [
+      "events"
+    ],
+    "verbs": [
+      "get",
+      "list",
+      "watch"
+    ]
+  },
+  {
+    "apiGroups": [
+      "",
+      "image.openshift.io"
+    ],
+    "resources": [
+      "imagestreams/layers"
+    ],
+    "verbs": [
+      "get"
+    ]
+  },
+  {
+    "apiGroups": [
+      "",
+      "integreatly.org"
+    ],
+    "resources": [
+      "rhmis"
+    ],
+    "verbs": [
+      "get",
+      "list",
+      "watch"
+    ]
+  },
+  {
+    "apiGroups": [
+      "autoscaling.openshift.io",
+      "machine.openshift.io"
+    ],
+    "resources": [
+      "machineautoscalers",
+      "machinesets"
+    ],
+    "verbs": [
+      "get",
+      "list"
+    ]
+  },
+  {
+    "apiGroups": [
+      "console.openshift.io"
+    ],
+    "resources": [
+      "consolelinks"
+    ],
+    "verbs": [
+      "get",
+      "list",
+      "watch"
+    ]
+  },
+  {
+    "apiGroups": [
+      "datasciencecluster.opendatahub.io"
+    ],
+    "resources": [
+      "datascienceclusters"
+    ],
+    "verbs": [
+      "get",
+      "list",
+      "watch"
+    ]
+  },
+  {
+    "apiGroups": [
+      "dscinitialization.opendatahub.io"
+    ],
+    "resources": [
+      "dscinitializations"
+    ],
+    "verbs": [
+      "get",
+      "list",
+      "watch"
+    ]
+  },
+  {
+    "apiGroups": [
+      "kubeflow.org"
+    ],
+    "resources": [
+      "notebooks"
+    ],
+    "verbs": [
+      "create",
+      "delete",
+      "get",
+      "list",
+      "patch",
+      "update",
+      "watch"
+    ]
+  },
+  {
+    "apiGroups": [
+      "llamastack.io"
+    ],
+    "resources": [
+      "llamastackdistributions"
+    ],
+    "verbs": [
+      "get",
+      "list",
+      "watch"
+    ]
+  },
+  {
+    "apiGroups": [
+      "modelregistry.opendatahub.io"
+    ],
+    "resources": [
+      "modelregistries"
+    ],
+    "verbs": [
+      "create",
+      "delete",
+      "get",
+      "list",
+      "patch",
+      "update",
+      "watch"
+    ]
+  },
+  {
+    "apiGroups": [
+      "operator.openshift.io"
+    ],
+    "resources": [
+      "consoles"
+    ],
+    "verbs": [
+      "get",
+      "list",
+      "watch"
+    ]
+  },
+  {
+    "apiGroups": [
+      "operators.coreos.com"
+    ],
+    "resources": [
+      "clusterserviceversions",
+      "subscriptions"
+    ],
+    "verbs": [
+      "get",
+      "list",
+      "watch"
+    ]
+  },
+  {
+    "apiGroups": [
+      "rbac.authorization.k8s.io"
+    ],
+    "resources": [
+      "rolebindings",
+      "roles"
+    ],
+    "verbs": [
+      "create",
+      "delete",
+      "get",
+      "list",
+      "patch"
+    ]
+  },
+  {
+    "apiGroups": [
+      "route.openshift.io"
+    ],
+    "resources": [
+      "routes"
+    ],
+    "verbs": [
+      "get",
+      "list",
+      "watch"
+    ]
+  },
+  {
+    "apiGroups": [
+      "services.platform.opendatahub.io"
+    ],
+    "resources": [
+      "auths"
+    ],
+    "verbs": [
+      "get"
+    ]
+  },
+  {
+    "apiGroups": [
+      "serving.kserve.io"
+    ],
+    "resources": [
+      "inferenceservices"
+    ],
+    "verbs": [
+      "get",
+      "list",
+      "watch"
+    ]
+  },
+  {
+    "apiGroups": [
+      "user.openshift.io"
+    ],
+    "resources": [
+      "groups"
+    ],
+    "verbs": [
+      "get",
+      "list",
+      "watch"
+    ]
+  },
+  {
+    "apiGroups": [
+      "user.openshift.io"
+    ],
+    "resources": [
+      "users"
+    ],
+    "verbs": [
+      "get",
+      "list",
+      "watch"
+    ]
+  }
+]

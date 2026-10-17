@@ -42,13 +42,27 @@ Add GPU Node To Self-Managed AWS Cluster
     [Tags]    gpu_node_aws_self_managed_provision
     Login To Cluster
     Create GPU Node In Self Managed AWS Cluster
-    Install GPU Operator on Self Managed Cluster
+    Install GPU Operator On Self Managed Cluster
+
+Add GPU Node To Self-Managed GCP Cluster
+    [Documentation]    Add GPU node to self-managed GCP cluster. ``provision-gpu.sh`` tries other
+    ...                zones in the region if the first has no GPU capacity.
+    [Tags]    gpu_node_gcp_self_managed_provision
+    Login To Cluster
+    Create GPU Node In Self Managed GCP Cluster
+    Install GPU Operator On Self Managed Cluster
 
 Delete GPU Node From Self-Managed AWS Cluster
     [Documentation]    Delete GPU node from self-managed cluster
     [Tags]    gpu_node_aws_self_managed_deprovision
     Login To Cluster
-    Delete GPU Node In Self Managed AWS Cluster
+    Delete GPU Node Self Managed AWS Cluster
+
+Delete GPU Node From Self-Managed GCP Cluster
+    [Documentation]    Delete GPU node from self-managed GCP cluster
+    [Tags]    gpu_node_gcp_self_managed_deprovision
+    Login To Cluster
+    Delete GPU Node Self Managed GCP Cluster
 
 Disconnect Self-Managed Cluster
     [Documentation]    Disconnect a self-managed cluster

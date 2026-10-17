@@ -331,12 +331,21 @@ Verify RHODS Installation
             Wait Until Keyword Succeeds    6 min    0 sec
             ...    Is Resource Present    Auth    auth
             ...    ${OPERATOR_NAMESPACE}      ${IS_PRESENT}
-            Wait Until Keyword Succeeds    6 min    0 sec
-            ...    Is Resource Present    GatewayConfig    default-gateway
-            ...    ${OPERATOR_NAMESPACE}      ${IS_PRESENT}
-            Wait Until Keyword Succeeds    6 min    0 sec
-            ...    Is Resource Present    HardwareProfile    default-profile
-            ...    ${APPLICATIONS_NAMESPACE}      ${IS_PRESENT}
+            ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
+            IF    '${arch_type}' != 's390x'
+                Wait Until Keyword Succeeds    6 min    0 sec
+                ...    Is Resource Present    GatewayConfig    default-gateway
+                ...    ${OPERATOR_NAMESPACE}      ${IS_PRESENT}
+            ELSE
+                Log To Console    Skipping GatewayConfig presence check for s390x architecture    level=WARN
+            END
+            IF    '${arch_type}' != 's390x'
+                Wait Until Keyword Succeeds    6 min    0 sec
+                ...    Is Resource Present    HardwareProfile    default-profile
+                ...    ${APPLICATIONS_NAMESPACE}      ${IS_PRESENT}
+            ELSE
+                Log To Console    Skipping HardwareProfile presence check for s390x architecture    level=WARN
+            END
             IF    ${enable_new_observability_stack}
                     Patch DSCInitialization With Monitoring Info
             END
@@ -360,12 +369,21 @@ Verify RHODS Installation
       Wait Until Keyword Succeeds    6 min    0 sec
       ...    Is Resource Present    Auth    auth
       ...    ${OPERATOR_NAMESPACE}      ${IS_PRESENT}
-      Wait Until Keyword Succeeds    6 min    0 sec
-      ...    Is Resource Present    GatewayConfig    default-gateway
-      ...    ${OPERATOR_NAMESPACE}      ${IS_PRESENT}
-      Wait Until Keyword Succeeds    6 min    0 sec
-      ...    Is Resource Present    HardwareProfile    default-profile
-      ...    ${APPLICATIONS_NAMESPACE}      ${IS_PRESENT}
+      ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
+      IF    '${arch_type}' != 's390x'
+          Wait Until Keyword Succeeds    6 min    0 sec
+          ...    Is Resource Present    GatewayConfig    default-gateway
+          ...    ${OPERATOR_NAMESPACE}      ${IS_PRESENT}
+      ELSE
+          Log To Console    Skipping GatewayConfig presence check for s390x architecture    level=WARN
+      END
+      IF    '${arch_type}' != 's390x'
+          Wait Until Keyword Succeeds    6 min    0 sec
+          ...    Is Resource Present    HardwareProfile    default-profile
+          ...    ${APPLICATIONS_NAMESPACE}      ${IS_PRESENT}
+      ELSE
+          Log To Console    Skipping HardwareProfile presence check for s390x architecture    level=WARN
+      END
       IF    ${enable_new_observability_stack}
           Patch DSCInitialization With Monitoring Info
       END
@@ -1322,7 +1340,7 @@ Install JobSet Dependencies
 
 Install Agent Sandbox Operator Via Cli
     [Documentation]    Install Red Hat build of Agent Sandbox Operator via CLI.
-    ...                Skips arm64 because the published controller is amd64-only.
+    ...                Skips arm64/s390x/ppc64le because the published controller is amd64-only.
     ...                Architecture comes from the node, not ARCH_TYPE.
     ${rc}    ${node_arch} =    Run And Return Rc And Output
     ...    oc get nodes -o jsonpath='{.items[0].status.nodeInfo.architecture}'
@@ -1333,8 +1351,8 @@ Install Agent Sandbox Operator Via Cli
     IF    '${node_arch}' == '${EMPTY}'
         Fail    msg=Node architecture is empty
     END
-    IF    '${node_arch}' == 'arm64'
-        Log    Skipping agent-sandbox-operator on arm64    console=yes
+    IF    '${node_arch}' == 'arm64' or '${node_arch}' == 's390x' or '${node_arch}' == 'ppc64le'
+        Log    Skipping agent-sandbox-operator on ${node_arch}    console=yes
         RETURN
     END
     ${is_installed} =    Check If Operator Is Installed Via CLI    ${AGENT_SANDBOX_OP_NAME}

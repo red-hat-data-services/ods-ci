@@ -168,26 +168,27 @@ Validate Ray Removed State
     [Teardown]      Restore DSC Component State     ray     ${RAY_DEPLOYMENT_NAME}      ${RAY_LABEL_SELECTOR}       ${SAVED_MANAGEMENT_STATES.RAY}
 
 Validate Training Operator Managed State
-    [Documentation]    Validate that setting TrainingOperator to Managed is correctly rejected in 3.6+.
-    ...    TrainingOperator v1 is obsolete; the webhook must block enabling it.
+    [Documentation]    Validate that enabling TrainingOperator (v1) is rejected in 3.6+.
+    ...    TrainingOperator v1 is obsolete; the v2 DSC validating webhook must block setting it Managed.
+    ...    The attempt must target the v2 API — v3 has no trainingoperator field, so a v3 patch is
+    ...    silently pruned (unknown field) and never reaches the webhook. See RHOAIENG-101006.
     [Tags]
     ...    Operator
     ...    RHOAIENG-6627
     ...    RHOAIENG-84752
+    ...    RHOAIENG-101006
     ...    training-managed
     ...    Integration
     ...    Smoke
 
-    Set DSC Component Removed State And Wait For Completion
-    ...    trainingoperator
-    ...    ${TRAINING_DEPLOYMENT_NAME}
-    ...    ${TRAINING_LABEL_SELECTOR}
-    ${error}=    Run Keyword And Expect Error    *
-    ...    Set DSC Component Managed State And Wait For Completion
-    ...    trainingoperator
-    ...    ${TRAINING_DEPLOYMENT_NAME}
-    ...    ${TRAINING_LABEL_SELECTOR}
-    Should Contain    ${error}    TrainingOperator v1 is obsolete
+    ${cmd}=    Catenate    SEPARATOR=${SPACE}
+    ...    oc patch datasciencecluster.v2.datasciencecluster.opendatahub.io/${DSC_NAME}
+    ...    --type merge
+    ...    -p '{"spec":{"components":{"trainingoperator":{"managementState":"Managed"}}}}'
+    ${rc}    ${output}=    Run And Return Rc And Output    ${cmd}
+    Should Not Be Equal As Integers    ${rc}    0
+    ...    msg=Expected the v2 DSC webhook to reject enabling TrainingOperator v1, but it succeeded: ${output}
+    Should Contain    ${output}    TrainingOperator v1 is obsolete
 
     [Teardown]      Restore DSC Component State     trainingoperator        ${TRAINING_DEPLOYMENT_NAME}     ${TRAINING_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.TRAINING}
 

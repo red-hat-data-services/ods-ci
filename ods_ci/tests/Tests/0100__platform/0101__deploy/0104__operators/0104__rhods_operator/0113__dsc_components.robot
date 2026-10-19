@@ -169,7 +169,8 @@ Validate Ray Removed State
 
 Validate Training Operator Managed State
     [Documentation]    Validate that setting TrainingOperator to Managed is correctly rejected in 3.6+.
-    ...    TrainingOperator v1 is obsolete; the webhook must block enabling it.
+    ...    TrainingOperator v1 is obsolete; the DSC v2 validating webhook must block enabling it.
+    ...    On v3 storage, patch the v2 API (v3 schema has no trainingoperator field).
     [Tags]
     ...    Operator
     ...    RHOAIENG-6627
@@ -178,16 +179,7 @@ Validate Training Operator Managed State
     ...    Integration
     ...    Smoke
 
-    Set DSC Component Removed State And Wait For Completion
-    ...    trainingoperator
-    ...    ${TRAINING_DEPLOYMENT_NAME}
-    ...    ${TRAINING_LABEL_SELECTOR}
-    ${error}=    Run Keyword And Expect Error    *
-    ...    Set DSC Component Managed State And Wait For Completion
-    ...    trainingoperator
-    ...    ${TRAINING_DEPLOYMENT_NAME}
-    ...    ${TRAINING_LABEL_SELECTOR}
-    Should Contain    ${error}    TrainingOperator v1 is obsolete
+    Assert Training Operator Managed State Rejected
 
     [Teardown]      Restore DSC Component State     trainingoperator        ${TRAINING_DEPLOYMENT_NAME}     ${TRAINING_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.TRAINING}
 

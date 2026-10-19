@@ -1599,13 +1599,13 @@ Patch V2 DSC Component And Expect Rejection
     [Documentation]    PATCH a retired v2-only DSC component; expect apiserver/webhook denial (403 body).
     ...                Use when storage is v3 and unversioned oc patch drops unknown fields.
     [Arguments]    ${dsc_name}    ${component}    ${state}    ${expected_fragment}
-    ${rc}    ${api_server}=    Run And Return Rc And Output    oc whoami --show-server
+    ${rc}    ${api_server} =    Run And Return Rc And Output    oc whoami --show-server
     Should Be Equal As Integers    ${rc}    0    msg=Cannot read API server: ${api_server}
-    ${rc}    ${token}=    Run And Return Rc And Output    oc whoami -t
+    ${rc}    ${token} =    Run And Return Rc And Output    oc whoami -t
     Should Be Equal As Integers    ${rc}    0    msg=Cannot read OpenShift token
-    ${patch}=    Set Variable    {"spec":{"components":{"${component}":{"managementState":"${state}"}}}}
-    ${url}=    Set Variable    ${api_server}/apis/datasciencecluster.opendatahub.io/v2/datascienceclusters/${dsc_name}
-    ${result}=    Run Process    curl    -sk    -X    PATCH
+    ${patch} =    Set Variable    {"spec":{"components":{"${component}":{"managementState":"${state}"}}}}
+    ${url} =    Set Variable    ${api_server}/apis/datasciencecluster.opendatahub.io/v2/datascienceclusters/${dsc_name}
+    ${result} =    Run Process    curl    -sk    -X    PATCH
     ...    -H    Authorization: Bearer ${token}
     ...    -H    Content-Type: application/merge-patch+json
     ...    ${url}

@@ -70,7 +70,7 @@ Setting Pod Toleration Via UI
 Verify RHODS Accept Multiple Admin Groups And CRD Gets Updates
     [Documentation]    Verify that users can set multiple admin groups and
     ...    check OdhDashboardConfig CRD gets updated according to Admin UI
-    [Tags]      Upgrade     RHOAIENG-14306    Platform      RHOAIENG-19806
+    [Tags]      Upgrade     RHOAIENG-14306    Platform      RHOAIENG-19806    deprecatedTest
     [Setup]     Begin Web Test
     # robocop: disable
     Launch Dashboard And Check User Management Option Is Available For The User

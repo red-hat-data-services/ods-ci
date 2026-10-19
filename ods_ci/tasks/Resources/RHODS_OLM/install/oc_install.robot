@@ -1047,6 +1047,26 @@ Get DSC Component Path
     END
     RETURN    .spec.components.${component}.managementState
 
+Get DSC Component Patch
+    [Documentation]    Builds the merge-patch body to set a component's managementState, version-aware.
+    ...                Mirrors Get DSC Component Path: on v3, modelregistry->aiHub,
+    ...                feastoperator->data.featureStore, and dashboard->dashboard.standard.
+    ...                v2 keeps the flat component names. Needed because a flat
+    ...                .spec.components.${component}.managementState patch is silently ignored
+    ...                for these renamed components on a v3-served DSC (RHOAIENG-101062).
+    [Arguments]    ${component}    ${state}
+    ${api_version} =    Get Served DSC API Version
+    IF    '${api_version}' == 'v3'
+        IF    "${component}" == "modelregistry"
+            RETURN    {"spec":{"components":{"aiHub":{"managementState":"${state}"}}}}
+        ELSE IF    "${component}" == "feastoperator"
+            RETURN    {"spec":{"components":{"data":{"featureStore":{"managementState":"${state}"}}}}}
+        ELSE IF    "${component}" == "dashboard"
+            RETURN    {"spec":{"components":{"dashboard":{"standard":{"managementState":"${state}"}}}}}
+        END
+    END
+    RETURN    {"spec":{"components":{"${component}":{"managementState":"${state}"}}}}
+
 Is Component Enabled
     [Documentation]    Returns the enabled status of a single component (true/false).
     ...                Reads the DSC using the served CRD version. v3 maps modelregistry, feastoperator,
@@ -1580,7 +1600,10 @@ Create DSCI With Custom Namespaces
     Wait For DSCInitialization CustomResource To Be Ready
 
 Set Component State
-    [Documentation]    Set component state in Data Science Cluster (state should be Managed or Removed)
+    [Documentation]    Set component state in Data Science Cluster (state should be Managed or Removed).
+    ...                Uses the version-aware .spec.components path (see Get DSC Component Patch) so
+    ...                v3-served DSCs are patched correctly (e.g. dashboard->dashboard.standard);
+    ...                a flat patch is silently ignored for renamed components on v3 (RHOAIENG-101062).
     [Arguments]    ${component}    ${state}
     ${result} =    Run Process    oc get datascienceclusters.datasciencecluster.opendatahub.io -o name
     ...    shell=true    stderr=STDOUT
@@ -1588,7 +1611,8 @@ Set Component State
         FAIL    Can not find datasciencecluster
     END
     ${cluster_name} =    Set Variable    ${result.stdout}
-    ${result} =    Run Process    oc patch ${cluster_name} --type merge -p '{"spec":{"components":{"${component}":{"managementState":"${state}"}}}}'
+    ${patch} =    Get DSC Component Patch    ${component}    ${state}
+    ${result} =    Run Process    oc patch ${cluster_name} --type merge -p '${patch}'
     ...    shell=true    stderr=STDOUT
     IF    $result.rc != 0
         FAIL    Can not enable ${component}: ${result.stdout}

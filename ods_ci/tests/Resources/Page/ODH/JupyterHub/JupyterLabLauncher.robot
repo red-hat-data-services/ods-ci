@@ -1,6 +1,7 @@
 *** Settings ***
 Resource  ../../OCPDashboard/Pods/Pods.robot
 Resource  ./Icons.resource
+Resource  ../ODHDashboard/ODHDataScienceProject/Workbenches.resource
 
 Library  JupyterLibrary
 Library  jupyter-helper.py
@@ -239,24 +240,24 @@ Wait Until JupyterLab Is Loaded
 
 Clone Git Repository
   [Documentation]    Clones ${REPO_URL} into the workbench and asserts the repository directory
-  ...    actually appeared. One retry is attempted after removing any partial checkout.
+  ...    actually appeared. One retry is attempted, after removing any partial checkout.
   ...    Fails with an [ENV] message naming the repository and the JupyterLab error text.
-  [Arguments]  ${REPO_URL}
+  ...    Give ${workbench_title} and ${project_title} to let the retry clear a partial checkout
+  ...    first.
+  [Arguments]  ${REPO_URL}    ${workbench_title}=${NONE}    ${project_title}=${NONE}
   ${dir_name} =    Get Directory Name From Git Repo URL    ${REPO_URL}
   ${error} =    Attempt Git Clone And Return Error    ${REPO_URL}    ${dir_name}
-  IF    '${error}' != '${EMPTY}'
-      Log    First clone of ${REPO_URL} failed (${error}), removing any partial checkout and retrying
-      ...    level=WARN
-      ${current_user} =    Get Current User In JupyterLab
-      Run Keyword And Warn On Failure    Delete Folder In User Notebook
-      ...    admin_username=${OCP_ADMIN_USER.USERNAME}
-      ...    username=${current_user}
-      ...    folder=${dir_name}
+  IF    $error != ""
+      Log    First clone of ${REPO_URL} failed (${error}), retrying    level=WARN
+      IF    $workbench_title is not None and $project_title is not None
+          Run Keyword And Warn On Failure    Delete Folder In Workbench
+          ...    ${workbench_title}    ${project_title}    ${dir_name}
+      END
       ${error} =    Attempt Git Clone And Return Error    ${REPO_URL}    ${dir_name}
   END
   # Not mergeable with the block above: ${error} is reassigned by the retry, so this has to be a
   # fresh check on the new value rather than a continuation of the first one.
-  IF    '${error}' != '${EMPTY}'    # robocop: off=if-can-be-merged
+  IF    $error != ""    # robocop: off=if-can-be-merged
       Capture Page Screenshot
       Fail    [ENV] Could not clone "${REPO_URL}" into the workbench: ${error}
   END
@@ -271,19 +272,21 @@ Attempt Git Clone And Return Error
   Run Keyword And Warn On Failure    Wait Until Page Contains    Cloning...    timeout=5s
   # A broken clone is usually reported straight away, so check first
   ${err_msg} =    Get Git Clone Error If Displayed
-  IF    '${err_msg}' != '${EMPTY}'    RETURN    ${err_msg}
+  IF    $err_msg != ""    RETURN    ${err_msg}
   ${cloned} =    Run Keyword And Return Status
   ...    Verify File Present In The File Explorer    ${dir_name}    timeout=${timeout}
   IF    ${cloned}    RETURN    ${EMPTY}
   # If the clone doesn't work, check for an error one more time
   ${err_msg} =    Get Git Clone Error If Displayed
-  IF    '${err_msg}' != '${EMPTY}'    RETURN    ${err_msg}
+  IF    $err_msg != ""    RETURN    ${err_msg}
   RETURN    no error was reported but "${dir_name}" is not present in the file browser
 
 Clone Git Repository And Open
   [Documentation]  The ${NOTEBOOK_TO_RUN} argument should be of the form /path/relative/to/jlab/root.ipynb
-  [Arguments]  ${REPO_URL}  ${NOTEBOOK_TO_RUN}
-  Clone Git Repository  ${REPO_URL}
+  ...    ${workbench_title} and ${project_title} are passed through to Clone Git Repository so its
+  ...    retry can clear a partial checkout.
+  [Arguments]  ${REPO_URL}  ${NOTEBOOK_TO_RUN}    ${workbench_title}=${NONE}    ${project_title}=${NONE}
+  Clone Git Repository  ${REPO_URL}    ${workbench_title}    ${project_title}
   Sleep  15
   Open With JupyterLab Menu  File  Open from Path…
   Input Text  xpath=//input[@placeholder="/path/relative/to/jlab/root"]  ${NOTEBOOK_TO_RUN}
@@ -620,13 +623,11 @@ Get Directory Name From Git Repo URL
 
 Get Git Clone Error If Displayed
     [Documentation]    Returns the text of a "Failed to clone" notification, or an empty string
-    ...    when there is none. An empty return means no error appeared, but does not guaruntee
+    ...    when there is none. An empty return means no error appeared, but does not guarantee
     ...    clone success.
     ${displayed} =    Run Keyword And Return Status
     ...    Wait Until Page Contains    Failed to clone    timeout=5s
-    IF    not ${displayed}
-        RETURN    ${EMPTY}
-    END
+    IF    not ${displayed}    RETURN    ${EMPTY}
     ${err_msg} =    Get Git Clone Error Text
     RETURN    ${err_msg}
 

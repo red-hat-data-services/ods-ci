@@ -197,11 +197,32 @@ Get Pipeline Run Step Log
     RETURN    ${log_with_tags}
 
 Verify Pipeline Run Is Completed
-    [Documentation]    Open the Pipeline detail and wait for the Completed Status
+    [Documentation]    Opens the run detail, waits for the run to reach a terminal state, then
+    ...    asserts that state is Complete. Waits for Failed, Canceled, and Complete, so that a run
+    ...    which has already failed is reported right away.
+    ...    Passes ${project_title} and ${pipeline_name} to have the reason read back from the
+    ...    pipeline server attached to the failure, and the project state logged at that moment.
     [Arguments]    ${pipeline_run_name}    ${timeout}=10m
+    ...    ${project_title}=${NONE}    ${pipeline_name}=${NONE}
     Open Pipeline Run    ${pipeline_run_name}
-    Wait Until Page Contains Element    //span[@class='pf-v6-c-label__text' and text()='Complete']    timeout=${timeout}
+    ${label_xp}=    Set Variable    //span[@class='pf-v6-c-label__text']
+    Wait Until Page Contains Element
+    ...    ${label_xp}\[text()='Complete' or text()='Failed' or text()='Canceled']    timeout=${timeout}
+    ${state}=    Get Text    ${label_xp}\[text()='Complete' or text()='Failed' or text()='Canceled']
     Capture Page Screenshot
+    IF    $state != "Complete"
+        ${reason}=    Set Variable    no reason could be read back from the pipeline server
+        IF    $project_title is not None
+            ${summary}=    Get Pipeline Run Failure Summary    ${project_title}    ${pipeline_name}
+            IF    $summary != ""
+                ${reason}=    Set Variable    ${summary}
+            END
+            # Snapshot here rather than relying on the suite teardown copy, which is taken after
+            # any later image cases have run against the same project.
+            Log Pipeline Diagnostics    ${project_title}
+        END
+        Fail    Pipeline run "${pipeline_run_name}" reached terminal state "${state}": ${reason}
+    END
 
 # robocop: disable:line-too-long
 Get Pipeline Run Duplicate Parameters

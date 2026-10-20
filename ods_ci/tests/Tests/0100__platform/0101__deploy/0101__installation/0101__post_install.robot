@@ -114,7 +114,7 @@ Verify RHODS Dashboard Explore And Enabled Page Has No Message With No Component
     [Tags]  Tier3
     ...     ODS-1556
     [Setup]   Test Setup For Rhods Dashboard
-    Oc Patch    kind=ConfigMap      namespace=${APPLICATIONS_NAMESPACE}    name=odh-enabled-applications-config    src={"data":null}   # robocop: disable
+    Patch Enabled Applications Config    {"data": null}
     Delete Dashboard Pods And Wait Them To Be Back
     Reload Page
     Menu.Navigate To Page    Applications   Enabled
@@ -262,9 +262,21 @@ Test Setup For Rhods Dashboard
 
 Test Teardown For Configmap Changed On RHODS Dashboard
     [Documentation]    Test Teardown for Configmap changes on Rhods Dashboard
-    Oc Patch    kind=ConfigMap      namespace=${APPLICATIONS_NAMESPACE}    name=odh-enabled-applications-config    src={"data": {"jupyterhub": "true"}}   # robocop: disable
+    ...    Restores the odh-enabled-applications-config ConfigMap data deleted by the test.
+    Patch Enabled Applications Config    {"data": {"jupyterhub": "true"}}
     Delete Dashboard Pods And Wait Them To Be Back
     Close All Browsers
+
+Patch Enabled Applications Config
+    [Documentation]    Applies a JSON merge patch to the odh-enabled-applications-config
+    ...    ConfigMap in the applications namespace. The payload is written to a file
+    ...    first because the Oc Patch keyword accepts only a file path or URL as src,
+    ...    not an inline JSON string.
+    [Arguments]    ${patch_json}
+    ${patch_file} =    Set Variable    ${OUTPUT DIR}${/}odh-enabled-applications-config-patch.json
+    Create File    ${patch_file}    ${patch_json}
+    Oc Patch    kind=ConfigMap    namespace=${APPLICATIONS_NAMESPACE}
+    ...    name=odh-enabled-applications-config    src=${patch_file}
 
 Verify Errors In Jupyterhub Logs
     [Documentation]    Verifies that there are no errors related to Distutil Library in Jupyterhub Pod Logs

@@ -3,9 +3,19 @@ Documentation    This is a resource file for the DSC components.
 Resource  Menu.robot
 Resource  ../../OCP.resource
 Resource  ../../ODS.robot
+Resource  ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 
 
 *** Keywords ***
+Assert Training Operator Managed State Rejected
+    [Documentation]    Re-enabling Training Operator v1 must be rejected (DSC v2 validator).
+    ...                Always PATCH the v2 API; v3 storage ignores trainingoperator on unversioned oc patch.
+    Patch V2 DSC Component And Expect Rejection
+    ...    ${DSC_NAME}
+    ...    trainingoperator
+    ...    Managed
+    ...    TrainingOperator v1 is obsolete
+
 Set DSC Component Removed State And Wait For Completion
     [Documentation]    Set component management state to 'Removed', and wait for deployment and pod to be removed.
     [Arguments]    ${component}    ${deployment_name}    ${label_selector}

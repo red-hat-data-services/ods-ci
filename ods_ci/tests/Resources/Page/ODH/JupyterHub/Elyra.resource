@@ -14,6 +14,7 @@ ${ELYRA_DIALOG} =    //form[@class="elyra-dialog-form"]
 ${ELYRA_RUNTIME_PLATFORM} =    //select[@id="runtime_platform"]
 ${ELYRA_PIPELINE_NAME} =    //input[@id="pipeline_name"]
 ${ELYRA_RUNTIME_CONFIG} =    //select[@id="runtime_config"]
+${ELYRA_DIRTY_TAB_XP} =    xpath=//li[contains(@class,"lm-TabBar-tab") and contains(@class,"jp-mod-dirty")]
 
 
 *** Keywords ***
@@ -56,12 +57,18 @@ Close Properties Panel
     END
 
 Save Pipeline Changes
-    [Documentation]    Saves changes to the pipeline
+    [Documentation]    Saves the pipeline, then confirms it either reported a save or has no
+    ...    unsaved changes left. Checks the "Saving completed" notification and also verifies
+    ...    that the editor is no longer dirty. Both are checked because they cover different cases.
     Click Element    xpath=//div[contains(@class, 'save-action')]/button
-    # We can also check that `Saving started` text appears but it usually shows up for a very
-    # short amount of time so let's just check the `Saving completed` only.
-    # Wait Until Page Contains    Saving started
-    Wait Until Page Contains    Saving completed
+    ${notified}=    Run Keyword And Return Status
+    ...    Wait Until Page Contains    Saving completed    timeout=10s
+    IF    ${notified}    RETURN
+    ${clean}=    Run Keyword And Return Status
+    ...    Wait Until Page Does Not Contain Element    ${ELYRA_DIRTY_TAB_XP}    timeout=10s
+    IF    ${clean}    RETURN
+    Capture Page Screenshot
+    Fail    [TEST] Pipeline save did not complete: no "Saving completed" notification and the editor still has unsaved changes    # robocop: off=line-too-long
 
 Run Pipeline
     [Documentation]    Submits the pipeline for a run

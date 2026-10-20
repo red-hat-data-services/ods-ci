@@ -445,10 +445,11 @@ Verify Kale Pipeline Run Is Completed
     ${succeeded}=    Run Keyword And Return Status
     ...    Should Contain Any    ${status}    Succeeded    Complete    ignore_case=${TRUE}    values=${FALSE}
     IF    not ${succeeded}
-        ${reason}=    Get Pipeline Run Failure Summary    ${PRJ_TITLE}
-        IF    '${reason}' == '${EMPTY}'
+        ${reason}=    Get Pipeline Run Failure Summary    ${PRJ_TITLE}    ${pipeline_name}
+        IF    $reason == ""
             ${reason}=    Set Variable
-            ...    no reason could be read back from the pipeline server, see teardown diagnostics
+            ...    no reason could be read back from the pipeline server, see the diagnostics below
         END
+        Log Pipeline Diagnostics    ${PRJ_TITLE}
         Fail    Kale pipeline run "${pipeline_name}" reached terminal state "${status}": ${reason}
     END

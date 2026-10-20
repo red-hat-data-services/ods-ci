@@ -108,6 +108,7 @@ Verify Pipelines Integration With Kale Running Candies Pipeline Test     # roboc
         ${repo_url}=    Set Variable    ${repo_url}ods-ci-notebooks-main.git
     END
     Clone Git Repository And Open    ${repo_url}    ${KALE_NOTEBOOK_PATH}  # robocop: disable
+    ...    workbench_title=kale_${img}    project_title=${PRJ_TITLE}
     # Some images have Kale installed but its JupyterLab extension disabled by default
     Enable Kale Extension    notebook_path=${KALE_NOTEBOOK_PATH}
     ...    workbench_title=kale_${img}    project_title=${PRJ_TITLE}

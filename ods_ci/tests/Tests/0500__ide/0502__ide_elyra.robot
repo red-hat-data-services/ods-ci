@@ -103,6 +103,7 @@ Verify Pipelines Integration With Elyra Running Hello World Pipeline Test     # 
     END
     Clone Git Repository And Open    ${repo_url}
     ...    ods-ci-notebooks-main/notebooks/500__jupyterhub/pipelines/v2/elyra/disconnected/run-pipelines-on-data-science-pipelines/hello-generic-world.pipeline  # robocop: disable
+    ...    workbench_title=elyra_${img}    project_title=${PRJ_TITLE}
     Verify Hello World Pipeline Elements
     Set Runtime Image In All Nodes    runtime_image=${runtime_image}
     Run Pipeline    pipeline_name=${pipeline_name}
@@ -119,6 +120,7 @@ Verify Pipelines Integration With Elyra Running Hello World Pipeline Test     # 
     Select Pipeline Project By Name    ${PRJ_TITLE}
     Log    ${pipeline_run_name}
     Verify Pipeline Run Is Completed    ${pipeline_run_name}    timeout=5m
+    ...    project_title=${PRJ_TITLE}    pipeline_name=${pipeline_name}
     [Teardown]    Verify Pipelines Integration With Elyra Teardown    ${img}
 
 Verify Pipelines Integration With Elyra Teardown

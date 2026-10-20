@@ -37,13 +37,13 @@ items:
       - name: worker
         platform:
           gcp:
-            type: {{ worker_node_instance_type|default("n2-standard-8") }}
-        replicas: {{ worker_node_replicas|default("2") }}
+            type: {{ worker_node_instance_type|default("n2-standard-16") }}
+        replicas: {{ worker_node_replicas|default("3") }}
       controlPlane:
         name: master
         platform:
           gcp:
-            type: {{ master_node_instance_type|default("n2-standard-16") }}
+            type: {{ master_node_instance_type|default("n2-standard-8") }}
         replicas: {{ master_node_replicas|default("3") }}
       metadata:
         name: gcp-sno

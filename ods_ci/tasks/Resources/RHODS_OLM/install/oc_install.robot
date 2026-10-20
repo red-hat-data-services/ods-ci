@@ -1032,7 +1032,8 @@ Get DSC Component Path
     RETURN    .spec.components.${component}.managementState
 
 Get DSC Component Patch
-    [Documentation]    Builds the v3 merge-patch body to set a component's managementState.
+    [Documentation]    Builds a v3 merge patch to set or remove a component's managementState.
+    ...                An empty state removes the field when restoring the original DSC configuration.
     ...                Mirrors Get DSC Component Path: the v3 DSC reorg renamed
     ...                modelregistry->aiHub, feastoperator->data.featureStore,
     ...                dataregistry->data.dataRegistry, and dashboard->dashboard.standard.
@@ -1043,8 +1044,14 @@ Get DSC Component Patch
     IF    "${component}" == "modelregistry"
         RETURN    {"spec":{"components":{"aiHub":{"managementState":"${state}"}}}}
     ELSE IF    "${component}" == "feastoperator"
+        IF    "${state}" == "${EMPTY}"
+            RETURN    {"spec":{"components":{"data":{"featureStore":{"managementState":null}}}}}
+        END
         RETURN    {"spec":{"components":{"data":{"featureStore":{"managementState":"${state}"}}}}}
     ELSE IF    "${component}" == "dataregistry"
+        IF    "${state}" == "${EMPTY}"
+            RETURN    {"spec":{"components":{"data":{"dataRegistry":{"managementState":null}}}}}
+        END
         RETURN    {"spec":{"components":{"data":{"dataRegistry":{"managementState":"${state}"}}}}}
     ELSE IF    "${component}" == "dashboard"
         RETURN    {"spec":{"components":{"dashboard":{"standard":{"managementState":"${state}"}}}}}

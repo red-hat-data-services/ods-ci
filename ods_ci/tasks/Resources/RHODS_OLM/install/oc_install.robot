@@ -454,8 +454,9 @@ Verify RHODS Installation
     ...    label_selector=app.kubernetes.io/name=trainer
   END
 
+  ${dataregistry} =    Is Component Enabled    dataregistry    ${DSC_NAME}
   ${feastoperator} =    Is Component Enabled    feastoperator    ${DSC_NAME}
-  IF    "${feastoperator}" == "true"
+  IF    "${feastoperator}" == "true" or "${dataregistry}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app.kubernetes.io/part-of=feastoperator
   END
@@ -517,7 +518,6 @@ Verify RHODS Installation
     END
   END
 
-  ${dataregistry} =    Is Component Enabled    dataregistry    ${DSC_NAME}
   IF    "${dashboard}" == "true" or "${workbenches}" == "true" or "${aipipelines}" == "true" or "${kserve}" == "true" or "${kueue}" == "true" or "${ray}" == "true" or "${trustyai}" == "true" or "${modelregistry}" == "true" or "${sparkoperator}" == "true" or "${aigateway}" == "true" or "${batchgateway}" == "true" or "${mcplifecycleoperator}" == "true" or "${dataregistry}" == "true"    # robocop: disable
       Log To Console    Waiting for pod status in ${APPLICATIONS_NAMESPACE}
       Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=600

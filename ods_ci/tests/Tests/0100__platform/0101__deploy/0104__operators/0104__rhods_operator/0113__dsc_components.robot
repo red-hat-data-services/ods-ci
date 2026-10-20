@@ -986,7 +986,7 @@ Wait For Feast Operator Removal
 Set Feature Store Component State
     [Documentation]    Set or remove Feature Store managementState under components.data.
     [Arguments]    ${state}
-    ${result}=    Run Process    oc get datascienceclusters.datasciencecluster.opendatahub.io -o name
+    ${result}=    Run Process    oc get datascienceclusters.datasciencecluster.opendatahub.io ${DSC_NAME} -o name
     ...    shell=true    stderr=STDOUT
     IF    $result.stdout == ""
         FAIL    Can not find datasciencecluster

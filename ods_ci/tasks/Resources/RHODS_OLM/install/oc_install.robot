@@ -22,6 +22,7 @@ ${DSCI_NAME} =    default-dsci
 ...    workbenches
 ...    modelregistry
 ...    feastoperator
+...    dataregistry
 ...    ogx
 ...    mlflowoperator
 ...    modelsasservice
@@ -290,6 +291,10 @@ Get Helm Path For Component
     IF    "${component}" == "batchgateway"
         RETURN    components.aigateway.dsc.batchGateway.managementState
     END
+    # Data Registry is a capability nested under the Data module.
+    IF    "${component}" == "dataregistry"
+        RETURN    components.data.dsc.dataRegistry.managementState
+    END
 
     # Handling of standard component cases:
     ${is_known} =    Evaluate    "${component}" in ${COMPONENT_LIST}
@@ -512,7 +517,8 @@ Verify RHODS Installation
     END
   END
 
-  IF    "${dashboard}" == "true" or "${workbenches}" == "true" or "${aipipelines}" == "true" or "${kserve}" == "true" or "${kueue}" == "true" or "${ray}" == "true" or "${trustyai}" == "true" or "${modelregistry}" == "true" or "${sparkoperator}" == "true" or "${aigateway}" == "true" or "${batchgateway}" == "true" or "${mcplifecycleoperator}" == "true"    # robocop: disable
+  ${dataregistry} =    Is Component Enabled    dataregistry    ${DSC_NAME}
+  IF    "${dashboard}" == "true" or "${workbenches}" == "true" or "${aipipelines}" == "true" or "${kserve}" == "true" or "${kueue}" == "true" or "${ray}" == "true" or "${trustyai}" == "true" or "${modelregistry}" == "true" or "${sparkoperator}" == "true" or "${aigateway}" == "true" or "${batchgateway}" == "true" or "${mcplifecycleoperator}" == "true" or "${dataregistry}" == "true"    # robocop: disable
       Log To Console    Waiting for pod status in ${APPLICATIONS_NAMESPACE}
       Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=600
       Log  Verified Applications NS: ${APPLICATIONS_NAMESPACE}  console=yes
@@ -1012,12 +1018,14 @@ Nested Component Should Not Be Enabled
 Get DSC Component Path
     [Documentation]    Maps a suite component name to its v3 .spec.components jq/jsonpath (leading dot).
     ...                The v3 DSC reorg renamed modelregistry->aiHub, feastoperator->data.featureStore,
-    ...                and dashboard->dashboard.standard; all other components keep their flat name.
+    ...                dataregistry->data.dataRegistry, and dashboard->dashboard.standard.
     [Arguments]    ${component}
     IF    "${component}" == "modelregistry"
         RETURN    .spec.components.aiHub.managementState
     ELSE IF    "${component}" == "feastoperator"
         RETURN    .spec.components.data.featureStore.managementState
+    ELSE IF    "${component}" == "dataregistry"
+        RETURN    .spec.components.data.dataRegistry.managementState
     ELSE IF    "${component}" == "dashboard"
         RETURN    .spec.components.dashboard.standard.managementState
     END
@@ -1026,8 +1034,9 @@ Get DSC Component Path
 Get DSC Component Patch
     [Documentation]    Builds the v3 merge-patch body to set a component's managementState.
     ...                Mirrors Get DSC Component Path: the v3 DSC reorg renamed
-    ...                modelregistry->aiHub, feastoperator->data.featureStore, and
-    ...                dashboard->dashboard.standard; all other components keep their flat name.
+    ...                modelregistry->aiHub, feastoperator->data.featureStore,
+    ...                dataregistry->data.dataRegistry, and dashboard->dashboard.standard.
+    ...                All other components keep their flat name.
     ...                A flat .spec.components.${component}.managementState patch is silently
     ...                dropped for these renamed components on a v3-served DSC (RHOAIENG-101062).
     [Arguments]    ${component}    ${state}
@@ -1035,6 +1044,8 @@ Get DSC Component Patch
         RETURN    {"spec":{"components":{"aiHub":{"managementState":"${state}"}}}}
     ELSE IF    "${component}" == "feastoperator"
         RETURN    {"spec":{"components":{"data":{"featureStore":{"managementState":"${state}"}}}}}
+    ELSE IF    "${component}" == "dataregistry"
+        RETURN    {"spec":{"components":{"data":{"dataRegistry":{"managementState":"${state}"}}}}}
     ELSE IF    "${component}" == "dashboard"
         RETURN    {"spec":{"components":{"dashboard":{"standard":{"managementState":"${state}"}}}}}
     END
@@ -1043,7 +1054,7 @@ Get DSC Component Patch
 Is Component Enabled
     [Documentation]    Returns the enabled status of a single component (true/false).
     ...                Reads the DSC using the served CRD version. v3 maps modelregistry, feastoperator,
-    ...                and dashboard onto their reorganized paths. v2 reads the flat component names.
+    ...                dataregistry, and dashboard onto their reorganized paths. v2 reads flat component names.
     [Arguments]    ${component}    ${dsc_name}=${DSC_NAME}
     ${jq_path} =    Get DSC Component Path    ${component}
     ${return_code}    ${output} =    Run And Return Rc And Output    oc get datasciencecluster ${dsc_name} -o json | jq '${jq_path} // "Removed"'  #robocop:disable

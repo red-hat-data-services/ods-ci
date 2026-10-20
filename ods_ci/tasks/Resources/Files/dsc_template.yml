@@ -36,6 +36,8 @@ spec:
     data:
       featureStore:
         managementState: <feastoperator_value>
+      dataRegistry:
+        managementState: <dataregistry_value>
     ogx:
       managementState: <ogx_value>
     mlflowoperator:

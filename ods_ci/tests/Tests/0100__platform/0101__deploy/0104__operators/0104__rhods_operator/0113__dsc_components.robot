@@ -68,6 +68,7 @@ ${IS_NOT_PRESENT}                                           1
 ...                                                         TRUSTYAI=${EMPTY}
 ...                                                         WORKBENCHES=${EMPTY}
 ...                                                         FEASTOPERATOR=${EMPTY}
+...                                                         DATAREGISTRY=${EMPTY}
 ...                                                         OGX=${EMPTY}
 ...                                                         MLFLOWOPERATOR=${EMPTY}
 ...                                                         MODELSASSERVICE=${EMPTY}
@@ -497,6 +498,49 @@ Validate Feastoperator Removed State
 
     [Teardown]      Restore DSC Component State     feastoperator       ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}     ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.FEASTOPERATOR}
 
+Validate Data Registry Managed
+    [Documentation]    Validate Data Registry Managed state through the Feast module operator deployment.
+    [Tags]
+    ...    Operator
+    ...    RHOAIENG-84590
+    ...    dataregistry-managed
+    ...    Integration
+    ...    Smoke
+
+    [Setup]    Prepare Data Registry Component Test
+
+    Set DSC Component Managed State And Wait For Completion
+    ...    dataregistry
+    ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
+    Check That Image Pull Path Is Correct
+    ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${IMAGE_PULL_PATH}
+
+    [Teardown]    Restore Data Registry Component Test States
+    ...    ${SAVED_MANAGEMENT_STATES.DATAREGISTRY}
+    ...    ${SAVED_MANAGEMENT_STATES.FEASTOPERATOR}
+
+Validate Data Registry Removed
+    [Documentation]    Validate Data Registry Removed state when Data Registry is the only managed data capability.
+    [Tags]
+    ...    Operator
+    ...    Tier1
+    ...    RHOAIENG-84590
+    ...    dataregistry-removed
+    ...    Integration
+
+    [Setup]    Prepare Data Registry Removed State Test
+
+    Set DSC Component Removed State And Wait For Completion
+    ...    dataregistry
+    ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
+
+    [Teardown]    Restore Data Registry Component Test States
+    ...    ${SAVED_MANAGEMENT_STATES.DATAREGISTRY}
+    ...    ${SAVED_MANAGEMENT_STATES.FEASTOPERATOR}
+
 Validate Ogx Managed State
     [Documentation]    Validate that the DSC Ogx component Managed state creates the expected resources,
     ...    check that OGX deployment is created and pod is in Ready state
@@ -868,6 +912,8 @@ Suite Setup
     ${SAVED_MANAGEMENT_STATES.TRUSTYAI}=     Get DSC Component State    ${DSC_NAME}    trustyai    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.WORKBENCHES}=    Get DSC Component State    ${DSC_NAME}    workbenches    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.FEASTOPERATOR}=    Get DSC Component State    ${DSC_NAME}    feastoperator    ${OPERATOR_NS}
+    ${dataregistry_state}=    Get DSC Component State    ${DSC_NAME}    dataregistry    ${OPERATOR_NS}
+    Set To Dictionary    ${SAVED_MANAGEMENT_STATES}    DATAREGISTRY    ${dataregistry_state}
     ${SAVED_MANAGEMENT_STATES.OGX}=    Get DSC Component State    ${DSC_NAME}    ogx    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.MLFLOWOPERATOR}=    Get DSC Component State    ${DSC_NAME}    mlflowoperator    ${OPERATOR_NS}
     ${SAVED_MANAGEMENT_STATES.SPARKOPERATOR}=    Get DSC Component State    ${DSC_NAME}    sparkoperator
@@ -880,6 +926,87 @@ Suite Setup
     ...    ${DSC_NAME}    aigateway    modelsAsAService    ${OPERATOR_NS}
     Set Suite Variable    ${SAVED_MANAGEMENT_STATES}
     Append To List  ${CONTROLLERS_LIST}    ${DASHBOARD_DEPLOYMENT_NAME}
+
+Data Registry DSC Component Is Supported
+    [Documentation]    Check whether the served v3 DSC schema has the Data Registry component field.
+    ${schema_path}=    Catenate    SEPARATOR=
+    ...    {.spec.versions[?(@.name=="v3")].schema.openAPIV3Schema
+    ...    .properties.spec.properties.components.properties.data.properties.dataRegistry}
+    ${rc}    ${schema}=    Run And Return Rc And Output
+    ...    oc get crd datascienceclusters.datasciencecluster.opendatahub.io -o jsonpath='${schema_path}'
+    Should Be Equal As Integers    ${rc}    0    msg=Unable to inspect the DataScienceCluster v3 schema
+    ${supported}=    Run Keyword And Return Status    Should Not Be Empty    ${schema}
+    RETURN    ${supported}
+
+Require Data Registry DSC Component
+    [Documentation]    Skip the Data Registry integration test when the served DSC schema lacks its field.
+    ${supported}=    Data Registry DSC Component Is Supported
+    Skip If    not ${supported}    Data Registry is only available in DSC schemas that expose data.dataRegistry.
+
+Prepare Data Registry Component Test
+    [Documentation]    Isolate Data Registry from Feature Store before testing its Managed state.
+    Require Data Registry DSC Component
+    Set Feature Store Component State    Removed
+    Set Component State    dataregistry    Removed
+    Wait For Resources To Be Removed
+    ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
+
+Prepare Data Registry Removed State Test
+    [Documentation]    Create Data Registry resources after isolating the Feature Store, before removal.
+    Prepare Data Registry Component Test
+    Set DSC Component Managed State And Wait For Completion
+    ...    dataregistry
+    ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
+
+Restore Data Registry Component Test States
+    [Documentation]    Restore the original Data Registry and Feature Store states after the isolated test.
+    [Arguments]    ${dataregistry_state}    ${feastoperator_state}
+    ${supported}=    Data Registry DSC Component Is Supported
+    IF    not ${supported}    RETURN
+    ${dataregistry_state}=    Set Variable If
+    ...    '${dataregistry_state}' == '${EMPTY}'
+    ...    Removed
+    ...    ${dataregistry_state}
+    ${feastoperator_state}=    Set Variable If
+    ...    '${feastoperator_state}' == '${EMPTY}'
+    ...    Removed
+    ...    ${feastoperator_state}
+    Set Component State    dataregistry    ${dataregistry_state}
+    Set Feature Store Component State    ${feastoperator_state}
+    ${resources_enabled}=    Evaluate    '${dataregistry_state}' in ('Managed', 'Unmanaged') or
+    ...    '${feastoperator_state}' in ('Managed', 'Unmanaged')
+    IF    ${resources_enabled}    Wait For Feast Operator Resources    ELSE    Wait For Feast Operator Removal
+
+Wait For Feast Operator Resources
+    [Documentation]    Wait for the shared Feast module operator resources to return.
+    Wait For Resources To Be Available
+    ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
+
+Wait For Feast Operator Removal
+    [Documentation]    Wait for the shared Feast module operator resources to be removed.
+    Wait For Resources To Be Removed
+    ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
+
+Set Feature Store Component State
+    [Documentation]    Set the v3 Feature Store managementState under components.data.
+    [Arguments]    ${state}
+    ${result}=    Run Process    oc get datascienceclusters.datasciencecluster.opendatahub.io -o name
+    ...    shell=true    stderr=STDOUT
+    IF    $result.stdout == ""
+        FAIL    Can not find datasciencecluster
+    END
+    ${cluster_name}=    Set Variable    ${result.stdout}
+    ${patch}=    Set Variable    {"spec":{"components":{"data":{"featureStore":{"managementState":"${state}"}}}}}
+    ${result}=    Run Process    oc patch ${cluster_name} --type merge -p '${patch}'
+    ...    shell=true    stderr=STDOUT
+    IF    $result.rc != 0
+        FAIL    Can not set Feature Store state to ${state}: ${result.stdout}
+    END
+    Log To Console    Feature Store state was set to ${state}
 
 Restore Kueue Initial State
     [Documentation]    Keyword to restore the initial state of the Kueue component. If the restored state is Unmanaged

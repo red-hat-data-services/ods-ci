@@ -14,7 +14,7 @@ ${ELYRA_DIALOG} =    //form[@class="elyra-dialog-form"]
 ${ELYRA_RUNTIME_PLATFORM} =    //select[@id="runtime_platform"]
 ${ELYRA_PIPELINE_NAME} =    //input[@id="pipeline_name"]
 ${ELYRA_RUNTIME_CONFIG} =    //select[@id="runtime_config"]
-${ELYRA_DIRTY_TAB_XP} =    xpath=//li[contains(@class,"lm-TabBar-tab") and contains(@class,"jp-mod-dirty")]
+${ELYRA_DIRTY_TAB_XP} =    xpath=//li[contains(@class,"lm-TabBar-tab") and contains(@class,"lm-mod-current") and contains(@class,"jp-mod-dirty")]
 
 
 *** Keywords ***

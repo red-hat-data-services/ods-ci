@@ -14,7 +14,7 @@ ${ELYRA_DIALOG} =    //form[@class="elyra-dialog-form"]
 ${ELYRA_RUNTIME_PLATFORM} =    //select[@id="runtime_platform"]
 ${ELYRA_PIPELINE_NAME} =    //input[@id="pipeline_name"]
 ${ELYRA_RUNTIME_CONFIG} =    //select[@id="runtime_config"]
-${ELYRA_DIRTY_TAB_XP} =    xpath=//li[contains(@class,"lm-TabBar-tab") and contains(@class,"lm-mod-current") and contains(@class,"jp-mod-dirty")]
+${ELYRA_DIRTY_TAB_XP} =    xpath=//li[contains(@class,"lm-TabBar-tab") and contains(@class,"lm-mod-current") and contains(@class,"jp-mod-dirty")]    # robocop: off=line-too-long
 
 
 *** Keywords ***
@@ -61,10 +61,10 @@ Save Pipeline Changes
     ...    unsaved changes left. Checks the "Saving completed" notification and also verifies
     ...    that the editor is no longer dirty. Both are checked because they cover different cases.
     Click Element    xpath=//div[contains(@class, 'save-action')]/button
-    ${notified}=    Run Keyword And Return Status
+    ${notified} =    Run Keyword And Return Status
     ...    Wait Until Page Contains    Saving completed    timeout=10s
     IF    ${notified}    RETURN
-    ${clean}=    Run Keyword And Return Status
+    ${clean} =    Run Keyword And Return Status
     ...    Wait Until Page Does Not Contain Element    ${ELYRA_DIRTY_TAB_XP}    timeout=10s
     IF    ${clean}    RETURN
     Capture Page Screenshot

@@ -965,14 +965,6 @@ Restore Data Registry Component Test States
     [Arguments]    ${dataregistry_state}    ${feastoperator_state}
     ${supported}=    Data Registry DSC Component Is Supported
     IF    not ${supported}    RETURN
-    ${dataregistry_state}=    Set Variable If
-    ...    '${dataregistry_state}' == '${EMPTY}'
-    ...    Removed
-    ...    ${dataregistry_state}
-    ${feastoperator_state}=    Set Variable If
-    ...    '${feastoperator_state}' == '${EMPTY}'
-    ...    Removed
-    ...    ${feastoperator_state}
     Set Component State    dataregistry    ${dataregistry_state}
     Set Feature Store Component State    ${feastoperator_state}
     ${resources_enabled}=    Evaluate    '${dataregistry_state}' in ('Managed', 'Unmanaged') or
@@ -992,7 +984,7 @@ Wait For Feast Operator Removal
     ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
 
 Set Feature Store Component State
-    [Documentation]    Set the v3 Feature Store managementState under components.data.
+    [Documentation]    Set or remove Feature Store managementState under components.data.
     [Arguments]    ${state}
     ${result}=    Run Process    oc get datascienceclusters.datasciencecluster.opendatahub.io -o name
     ...    shell=true    stderr=STDOUT
@@ -1000,7 +992,11 @@ Set Feature Store Component State
         FAIL    Can not find datasciencecluster
     END
     ${cluster_name}=    Set Variable    ${result.stdout}
-    ${patch}=    Set Variable    {"spec":{"components":{"data":{"featureStore":{"managementState":"${state}"}}}}}
+    IF    "${state}" == "${EMPTY}"
+        ${patch}=    Set Variable    {"spec":{"components":{"data":{"featureStore":{"managementState":null}}}}}
+    ELSE
+        ${patch}=    Set Variable    {"spec":{"components":{"data":{"featureStore":{"managementState":"${state}"}}}}}
+    END
     ${result}=    Run Process    oc patch ${cluster_name} --type merge -p '${patch}'
     ...    shell=true    stderr=STDOUT
     IF    $result.rc != 0

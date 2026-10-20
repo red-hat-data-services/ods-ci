@@ -31,7 +31,9 @@ export KEYCLOAK_MGMT_CLIENT_SECRET=<MGMT_SECRET>
 
 import json
 import os
+import shlex
 import sys
+import typing
 from string import Template
 from typing import Literal
 
@@ -56,6 +58,126 @@ REGISTRATION_BODY_TEMPLATE = Template("""
 
 OCP_DEFAULT_SECRET_NAME = "openid-idp-client-secret"
 CLIENT_PROPERTIES_FILE_DEFAULT = "client.properties"
+
+
+class KeycloakClient(typing.TypedDict, total=False):
+    id: str
+    redirectUris: list[str]
+
+
+class Keycloak:
+    def __init__(self, admin_url: str, realm: str):
+        self.token_endpoint = f"{admin_url.rstrip('/')}/realms/{realm}/protocol/openid-connect/token"
+        self.clients_endpoint = f"{admin_url.rstrip('/')}/admin/realms/{realm}/clients"
+
+    def get_keycloak_admin_token(self, mgmt_client_id: str, mgmt_client_secret: str) -> tuple[str | None, int | None]:
+        """Obtain a bearer token for Keycloak Admin REST API using client credentials"""
+        data = {
+            "grant_type": "client_credentials",
+            "client_id": mgmt_client_id,
+            "client_secret": mgmt_client_secret,
+        }
+        try:
+            resp = requests.post(self.token_endpoint, data=data, timeout=30)
+            if resp.status_code != 200:
+                log.error(f"Failed to obtain Keycloak admin token: HTTP {resp.status_code} - {resp.text}")
+                return None, 1
+            access_token = resp.json().get("access_token")
+            if not access_token:
+                log.error("Access token not found in token endpoint response")
+                return None, 1
+            return access_token, None
+        except Exception as e:
+            log.error(f"Exception connecting to Keycloak token endpoint {self.token_endpoint}: {e}")
+            return None, 1
+
+    def get_clients(self, client_id: str, headers: dict | None = None) -> list[KeycloakClient]:
+        try:
+            query_resp = requests.get(
+                f"{self.clients_endpoint}", params={"clientId": client_id}, headers=headers, timeout=30
+            )
+            if query_resp.status_code != 200:
+                raise RuntimeError(
+                    f"Failed to query Keycloak client {client_id}: HTTP {query_resp.status_code} - {query_resp.text}"
+                )
+            existing_clients = query_resp.json()
+        except Exception as e:
+            raise RuntimeError(f"Exception querying Keycloak client {client_id}: {e}") from e
+
+        return existing_clients
+
+    def delete_client(self, client_id: str, client_uuid: str, headers: dict | None = None):
+        delete_resp = requests.delete(f"{self.clients_endpoint}/{client_uuid}", headers=headers, timeout=30)
+        if delete_resp.status_code not in (200, 204):
+            raise RuntimeError(
+                f"Failed to delete client {client_id} (UUID {client_uuid}): HTTP {delete_resp.status_code} - {delete_resp.text}"
+            )
+        return True
+
+    def update_client(
+        self, client_id: str, client_uuid: str, client_record: KeycloakClient, headers: dict | None = None
+    ):
+        put_resp = requests.put(
+            f"{self.clients_endpoint}/{client_uuid}", headers=headers, json=client_record, timeout=30
+        )
+        if put_resp.status_code not in (200, 204):
+            raise RuntimeError(f"Failed to update client {client_id}: HTTP {put_resp.status_code} - {put_resp.text}")
+
+    def create_client(self, client_id: str, redirect_uris: list[str], headers: dict | None = None):
+        client_uuid = None
+
+        client_payload = {
+            "clientId": client_id,
+            "name": f"OpenShift Cluster {client_id}",
+            "description": "Per-cluster SSO client created by ODS-CI",
+            "enabled": True,
+            "protocol": "openid-connect",
+            "publicClient": False,
+            "standardFlowEnabled": True,
+            "implicitFlowEnabled": False,
+            "directAccessGrantsEnabled": False,
+            "serviceAccountsEnabled": False,
+            "redirectUris": redirect_uris,
+        }
+        log.info(f"Creating new Keycloak client: {client_id}")
+        create_resp = requests.post(self.clients_endpoint, headers=headers, json=client_payload, timeout=30)
+        if create_resp.status_code == 201:
+            # Keycloak returns the URL of the created resource in Location header
+            location = create_resp.headers.get("Location")
+            if location:
+                client_uuid = location.rstrip("/").split("/")[-1]
+            else:
+                # Query back to get UUID
+                re_query = requests.get(
+                    self.clients_endpoint, params={"clientId": client_id}, headers=headers, timeout=30
+                )
+                if re_query.status_code == 200 and re_query.json():
+                    client_uuid = re_query.json()[0]["id"]
+        elif create_resp.status_code == 409:
+            log.info(f"Client {client_id} conflict (already created). Querying UUID...")
+            re_query = requests.get(self.clients_endpoint, params={"clientId": client_id}, headers=headers, timeout=30)
+            if re_query.status_code == 200 and re_query.json():
+                client_uuid = re_query.json()[0]["id"]
+        else:
+            raise RuntimeError(
+                f"Failed to create Keycloak client {client_id}: HTTP {create_resp.status_code} - {create_resp.text}"
+            )
+
+        return client_uuid
+
+    def get_client_secret(self, client_id: str, client_uuid: str, headers: dict | None = None):
+        secret_endpoint = f"{self.clients_endpoint}/{client_uuid}/client-secret"
+        secret_resp = requests.get(secret_endpoint, headers=headers, timeout=30)
+        if secret_resp.status_code != 200:
+            raise RuntimeError(
+                f"Failed to get client secret for {client_id}: HTTP {secret_resp.status_code} - {secret_resp.text}"
+            )
+
+        client_secret = secret_resp.json().get("value")
+        if not client_secret:
+            raise RuntimeError(f"Client secret empty in response for {client_id}")
+
+        return client_secret
 
 
 class OpenIdOps:
@@ -134,7 +256,7 @@ class OpenIdOps:
 
         patch_array = [{"op": "add", "path": "/spec/identityProviders/-", "value": patch_value}]
         patch_json = json.dumps(patch_array)
-        cmd = f"oc patch oauth cluster --type json -p '{patch_json}'"
+        cmd = f"oc patch oauth cluster --type json -p {shlex.quote(patch_json)}"
         result = execute_command(
             cmd,
             return_rc=True,
@@ -256,30 +378,6 @@ class OpenIdOps:
         log.info(f"Client {client_name} deleted successfully: {request.status_code}")
         return None
 
-    def _get_keycloak_admin_token(
-        self, admin_url: str, realm: str, mgmt_client_id: str, mgmt_client_secret: str
-    ) -> tuple[str | None, int | None]:
-        """Obtain a bearer token for Keycloak Admin REST API using client credentials"""
-        token_endpoint = f"{admin_url.rstrip('/')}/realms/{realm}/protocol/openid-connect/token"
-        data = {
-            "grant_type": "client_credentials",
-            "client_id": mgmt_client_id,
-            "client_secret": mgmt_client_secret,
-        }
-        try:
-            resp = requests.post(token_endpoint, data=data, timeout=30)
-            if resp.status_code != 200:
-                log.error(f"Failed to obtain Keycloak admin token: HTTP {resp.status_code} - {resp.text}")
-                return None, 1
-            access_token = resp.json().get("access_token")
-            if not access_token:
-                log.error("Access token not found in token endpoint response")
-                return None, 1
-            return access_token, None
-        except Exception as e:
-            log.error(f"Exception connecting to Keycloak token endpoint {token_endpoint}: {e}")
-            return None, 1
-
     def provision_keycloak_client(
         self,
         admin_url: str,
@@ -292,8 +390,9 @@ class OpenIdOps:
     ):
         """Provision a dedicated per-cluster confidential client in Keycloak via Admin REST API"""
         self.jenkins_props_file = jenkins_props_file
-        admin_url = admin_url.rstrip("/")
-        access_token, err = self._get_keycloak_admin_token(admin_url, realm, mgmt_client_id, mgmt_client_secret)
+
+        keycloak = Keycloak(admin_url=admin_url, realm=realm)
+        access_token, err = keycloak.get_keycloak_admin_token(mgmt_client_id, mgmt_client_secret)
         if err or not access_token:
             return 1
 
@@ -303,95 +402,37 @@ class OpenIdOps:
         }
 
         # 1. Check if client already exists
-        clients_endpoint = f"{admin_url}/admin/realms/{realm}/clients"
         try:
-            query_resp = requests.get(f"{clients_endpoint}?clientId={client_id}", headers=headers, timeout=30)
-            if query_resp.status_code != 200:
-                log.error(
-                    f"Failed to query Keycloak client {client_id}: HTTP {query_resp.status_code} - {query_resp.text}"
-                )
-                return 1
-            existing_clients = query_resp.json()
-        except Exception as e:
-            log.error(f"Exception querying Keycloak client {client_id}: {e}")
-            return 1
+            existing_clients = keycloak.get_clients(client_id=client_id, headers=headers)
 
-        client_uuid = None
-        if existing_clients and isinstance(existing_clients, list) and len(existing_clients) > 0:
-            client_record = existing_clients[0]
-            client_uuid = client_record["id"]
-            log.info(f"Client {client_id} already exists with UUID {client_uuid}. Updating redirect URIs...")
-            # Idempotently update redirect URIs if needed
-            uris = client_record.get("redirectUris", [])
-            if redirect_uri not in uris:
-                uris.append(redirect_uri)
-                client_record["redirectUris"] = uris
-                put_resp = requests.put(
-                    f"{clients_endpoint}/{client_uuid}", headers=headers, json=client_record, timeout=30
-                )
-                if put_resp.status_code not in (200, 204):
-                    log.error(f"Failed to update client {client_id}: HTTP {put_resp.status_code} - {put_resp.text}")
-                    return 1
-        else:
-            # 2. Create new client
-            client_payload = {
-                "clientId": client_id,
-                "name": f"OpenShift Cluster {client_id}",
-                "description": "Per-cluster SSO client created by ODS-CI",
-                "enabled": True,
-                "protocol": "openid-connect",
-                "publicClient": False,
-                "standardFlowEnabled": True,
-                "implicitFlowEnabled": False,
-                "directAccessGrantsEnabled": False,
-                "serviceAccountsEnabled": False,
-                "redirectUris": [redirect_uri],
-            }
-            log.info(f"Creating new Keycloak client: {client_id}")
-            create_resp = requests.post(clients_endpoint, headers=headers, json=client_payload, timeout=30)
-            if create_resp.status_code == 201:
-                # Keycloak returns the URL of the created resource in Location header
-                location = create_resp.headers.get("Location")
-                if location:
-                    client_uuid = location.rstrip("/").split("/")[-1]
-                else:
-                    # Query back to get UUID
-                    re_query = requests.get(f"{clients_endpoint}?clientId={client_id}", headers=headers, timeout=30)
-                    if re_query.status_code == 200 and re_query.json():
-                        client_uuid = re_query.json()[0]["id"]
-            elif create_resp.status_code == 409:
-                log.info(f"Client {client_id} conflict (already created). Querying UUID...")
-                re_query = requests.get(f"{clients_endpoint}?clientId={client_id}", headers=headers, timeout=30)
-                if re_query.status_code == 200 and re_query.json():
-                    client_uuid = re_query.json()[0]["id"]
+            if existing_clients and isinstance(existing_clients, list) and len(existing_clients) > 0:
+                client_record = existing_clients[0]
+                client_uuid = client_record["id"]
+                log.info(f"Client {client_id} already exists with UUID {client_uuid}. Updating redirect URIs...")
+                # Idempotently update redirect URIs if needed
+                uris = client_record.get("redirectUris", [])
+                if redirect_uri not in uris:
+                    uris.append(redirect_uri)
+                    client_record["redirectUris"] = uris
+                    keycloak.update_client(
+                        client_id=client_id, client_uuid=client_uuid, client_record=client_record, headers=headers
+                    )
             else:
-                log.error(
-                    f"Failed to create Keycloak client {client_id}: HTTP {create_resp.status_code} - {create_resp.text}"
-                )
+                client_uuid = keycloak.create_client(client_id=client_id, redirect_uris=[redirect_uri], headers=headers)
+
+            if not client_uuid:
+                log.error(f"Failed to resolve client UUID for {client_id}")
                 return 1
 
-        if not client_uuid:
-            log.error(f"Failed to resolve client UUID for {client_id}")
-            return 1
-
-        # 3. Retrieve client secret
-        secret_endpoint = f"{clients_endpoint}/{client_uuid}/client-secret"
-        secret_resp = requests.get(secret_endpoint, headers=headers, timeout=30)
-        if secret_resp.status_code != 200:
-            log.error(
-                f"Failed to get client secret for {client_id}: HTTP {secret_resp.status_code} - {secret_resp.text}"
-            )
-            return 1
-
-        client_secret = secret_resp.json().get("value")
-        if not client_secret:
-            log.error(f"Client secret empty in response for {client_id}")
+            client_secret = keycloak.get_client_secret(client_id=client_id, client_uuid=client_uuid, headers=headers)
+        except RuntimeError as e:
+            log.error(f"Keycloak operation failed: {e}")
             return 1
 
         self.client_name = client_id
         self.client_id = client_id
         self.client_secret = client_secret
-        self.issuer_url = f"{admin_url}/realms/{realm}"
+        self.issuer_url = f"{admin_url.rstrip('/')}/realms/{realm}"
         self.client_registration_token = ""
 
         write_err = self._write_jenkins_properties()
@@ -410,8 +451,9 @@ class OpenIdOps:
         mgmt_client_secret: str,
     ):
         """Delete a dedicated per-cluster client from Keycloak via Admin REST API"""
-        admin_url = admin_url.rstrip("/")
-        access_token, err = self._get_keycloak_admin_token(admin_url, realm, mgmt_client_id, mgmt_client_secret)
+        keycloak = Keycloak(admin_url=admin_url, realm=realm)
+
+        access_token, err = keycloak.get_keycloak_admin_token(mgmt_client_id, mgmt_client_secret)
         if err or not access_token:
             return 1
 
@@ -419,29 +461,17 @@ class OpenIdOps:
             "Authorization": f"Bearer {access_token}",
         }
 
-        clients_endpoint = f"{admin_url}/admin/realms/{realm}/clients"
         try:
-            query_resp = requests.get(f"{clients_endpoint}?clientId={client_id}", headers=headers, timeout=30)
-            if query_resp.status_code != 200:
-                log.error(
-                    f"Failed to query Keycloak client {client_id}: HTTP {query_resp.status_code} - {query_resp.text}"
-                )
-                return 1
-            existing_clients = query_resp.json()
-        except Exception as e:
-            log.error(f"Exception querying Keycloak client {client_id}: {e}")
-            return 1
+            existing_clients = keycloak.get_clients(client_id=client_id, headers=headers)
 
-        if not existing_clients:
-            log.info(f"Keycloak client {client_id} not found. Deletion considered successful (idempotent).")
-            return None
+            if not existing_clients:
+                log.info(f"Keycloak client {client_id} not found. Deletion considered successful (idempotent).")
+                return None
 
-        client_uuid = existing_clients[0]["id"]
-        delete_resp = requests.delete(f"{clients_endpoint}/{client_uuid}", headers=headers, timeout=30)
-        if delete_resp.status_code not in (200, 204):
-            log.error(
-                f"Failed to delete client {client_id} (UUID {client_uuid}): HTTP {delete_resp.status_code} - {delete_resp.text}"
-            )
+            client_uuid = existing_clients[0]["id"]
+            keycloak.delete_client(client_id=client_id, client_uuid=client_uuid, headers=headers)
+        except RuntimeError as e:
+            log.error(f"Keycloak operation failed: {e}")
             return 1
 
         log.info(f"Keycloak client {client_id} deleted successfully")

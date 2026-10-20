@@ -869,30 +869,12 @@ Apply DataScienceCluster CustomResource
         END
     END
 
-Get Served DSC API Version
-    [Documentation]    Return v3 when the installed DataScienceCluster CRD serves v3, otherwise v2.
-    ...                rhods-operator.3.6.0 serves v3. Builds such as rhods-operator.3.6.0-ea.2 serve v2
-    ...                only. Presence of aigateway.modelsAsAService is not a version check.
-    ...                Always reads the CRD so an in-suite operator upgrade that starts serving v3
-    ...                is picked up on the next DSC create/read.
-    ${rc}    ${versions} =    Run And Return Rc And Output
-    ...    oc get crd datascienceclusters.datasciencecluster.opendatahub.io -o jsonpath='{range .spec.versions[?(@.served==true)]}{.name}{" "}{end}'    #robocop:disable
-    Should Be Equal As Integers    ${rc}    0    msg=Cannot read served DataScienceCluster CRD versions: ${versions}
-    ${serves_v3} =    Evaluate    "v3" in """${versions}""".split()
-    ${version} =    Set Variable If    ${serves_v3}    v3    v2
-    Log To Console    DataScienceCluster served versions: ${versions}; selected ${version}
-    RETURN    ${version}
-
 Create DataScienceCluster CustomResource Using Test Variables
     [Documentation]
     [Arguments]    ${dsc_name}=${DSC_NAME}    ${dsc_template}=${DSC_TEMPLATE}
     ${file_path} =    Set Variable    tasks/Resources/Files/
     ${template_to_apply} =    Set Variable    ${dsc_template}
-    ${api_version} =    Get Served DSC API Version
-    IF    '${dsc_template}' == '${DSC_TEMPLATE}' and '${api_version}' != 'v3'
-        ${template_to_apply} =    Set Variable    dsc_template_v2.yml
-    END
-    Log To Console    Applying DataScienceCluster from ${template_to_apply} (served API ${api_version})
+    Log To Console    Applying DataScienceCluster from ${template_to_apply}
     Copy File    source=${file_path}${template_to_apply}    destination=${file_path}dsc_apply.yml
     Run    sed -i'' -e 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
     # Detect whether this cluster uses the 3.5+ MaaS DSC field (aigateway.modelsAsAService)
@@ -938,9 +920,6 @@ Create DataScienceCluster CustomResource Using Test Variables
     # Fill legacy placeholder with Removed when not on 3.4 or MaaS not Managed
     Run    sed -i'' -e 's/<modelsasservice_legacy_value>/Removed/' ${file_path}dsc_apply.yml
     @{components_to_fill} =    Copy List    ${COMPONENT_LIST}
-    IF    '${template_to_apply}' == 'dsc_template_v2.yml'
-        Append To List    ${components_to_fill}    trainingoperator    llamastackoperator
-    END
     FOR    ${cmp}    IN    @{components_to_fill}
             IF    $cmp not in $COMPONENTS
                 Run    sed -i'' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
@@ -1031,21 +1010,35 @@ Nested Component Should Not Be Enabled
     END
 
 Get DSC Component Path
-    [Documentation]    Maps a suite component name to its .spec.components jq/jsonpath (leading dot).
-    ...                When the CRD serves v3, modelregistry->aiHub, feastoperator->data.featureStore,
-    ...                and dashboard->dashboard.standard. v2 keeps the flat component names.
+    [Documentation]    Maps a suite component name to its v3 .spec.components jq/jsonpath (leading dot).
+    ...                The v3 DSC reorg renamed modelregistry->aiHub, feastoperator->data.featureStore,
+    ...                and dashboard->dashboard.standard; all other components keep their flat name.
     [Arguments]    ${component}
-    ${api_version} =    Get Served DSC API Version
-    IF    '${api_version}' == 'v3'
-        IF    "${component}" == "modelregistry"
-            RETURN    .spec.components.aiHub.managementState
-        ELSE IF    "${component}" == "feastoperator"
-            RETURN    .spec.components.data.featureStore.managementState
-        ELSE IF    "${component}" == "dashboard"
-            RETURN    .spec.components.dashboard.standard.managementState
-        END
+    IF    "${component}" == "modelregistry"
+        RETURN    .spec.components.aiHub.managementState
+    ELSE IF    "${component}" == "feastoperator"
+        RETURN    .spec.components.data.featureStore.managementState
+    ELSE IF    "${component}" == "dashboard"
+        RETURN    .spec.components.dashboard.standard.managementState
     END
     RETURN    .spec.components.${component}.managementState
+
+Get DSC Component Patch
+    [Documentation]    Builds the v3 merge-patch body to set a component's managementState.
+    ...                Mirrors Get DSC Component Path: the v3 DSC reorg renamed
+    ...                modelregistry->aiHub, feastoperator->data.featureStore, and
+    ...                dashboard->dashboard.standard; all other components keep their flat name.
+    ...                A flat .spec.components.${component}.managementState patch is silently
+    ...                dropped for these renamed components on a v3-served DSC (RHOAIENG-101062).
+    [Arguments]    ${component}    ${state}
+    IF    "${component}" == "modelregistry"
+        RETURN    {"spec":{"components":{"aiHub":{"managementState":"${state}"}}}}
+    ELSE IF    "${component}" == "feastoperator"
+        RETURN    {"spec":{"components":{"data":{"featureStore":{"managementState":"${state}"}}}}}
+    ELSE IF    "${component}" == "dashboard"
+        RETURN    {"spec":{"components":{"dashboard":{"standard":{"managementState":"${state}"}}}}}
+    END
+    RETURN    {"spec":{"components":{"${component}":{"managementState":"${state}"}}}}
 
 Is Component Enabled
     [Documentation]    Returns the enabled status of a single component (true/false).
@@ -1580,7 +1573,9 @@ Create DSCI With Custom Namespaces
     Wait For DSCInitialization CustomResource To Be Ready
 
 Set Component State
-    [Documentation]    Set component state in Data Science Cluster (state should be Managed or Removed)
+    [Documentation]    Set component state in Data Science Cluster (state should be Managed or Removed).
+    ...                Uses the v3-aware .spec.components path (see Get DSC Component Patch) so a flat
+    ...                patch is not silently dropped for renamed components on v3 (RHOAIENG-101062).
     [Arguments]    ${component}    ${state}
     ${result} =    Run Process    oc get datascienceclusters.datasciencecluster.opendatahub.io -o name
     ...    shell=true    stderr=STDOUT
@@ -1588,7 +1583,8 @@ Set Component State
         FAIL    Can not find datasciencecluster
     END
     ${cluster_name} =    Set Variable    ${result.stdout}
-    ${result} =    Run Process    oc patch ${cluster_name} --type merge -p '{"spec":{"components":{"${component}":{"managementState":"${state}"}}}}'
+    ${patch} =    Get DSC Component Patch    ${component}    ${state}
+    ${result} =    Run Process    oc patch ${cluster_name} --type merge -p '${patch}'
     ...    shell=true    stderr=STDOUT
     IF    $result.rc != 0
         FAIL    Can not enable ${component}: ${result.stdout}

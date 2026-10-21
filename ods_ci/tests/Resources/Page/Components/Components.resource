@@ -19,11 +19,21 @@ Assert Training Operator Managed State Rejected
 Set DSC Component Removed State And Wait For Completion
     [Documentation]    Set component management state to 'Removed', and wait for deployment and pod to be removed.
     [Arguments]    ${component}    ${deployment_name}    ${label_selector}
-    ...            ${namespace}=${APPLICATIONS_NS}     ${wait_for_completion}=True
+    ...    ${namespace}=${APPLICATIONS_NS}
+    ...    ${wait_for_completion}=True
+    ...    ${selected_dsc_name}=${EMPTY}
 
-    ${management_state}=    Get DSC Component State    ${DSC_NAME}    ${component}    ${OPERATOR_NS}
+    IF    "${selected_dsc_name}" == "${EMPTY}"
+        ${management_state}=    Get DSC Component State    ${DSC_NAME}    ${component}    ${OPERATOR_NS}
+    ELSE
+        ${management_state}=    Get DSC Component State    ${selected_dsc_name}    ${component}    ${OPERATOR_NS}
+    END
     IF    "${management_state}" != "Removed"
+        IF    "${selected_dsc_name}" == "${EMPTY}"
             Set Component State    ${component}    Removed
+        ELSE
+            Set Component State    ${component}    Removed    ${selected_dsc_name}
+        END
     END
 
     IF     ${wait_for_completion}
@@ -33,15 +43,25 @@ Set DSC Component Removed State And Wait For Completion
 Set DSC Component Managed State And Wait For Completion
     [Documentation]    Set component management state to 'Managed', and wait for deployment and pod to be available.
     [Arguments]    ${component}    ${deployment_name}    ${label_selector}
-    ...            ${namespace}=${APPLICATIONS_NS}      ${wait_for_completion}=True
+    ...    ${namespace}=${APPLICATIONS_NS}
+    ...    ${wait_for_completion}=True
+    ...    ${selected_dsc_name}=${EMPTY}
 
-    ${management_state}=    Get DSC Component State    ${DSC_NAME}    ${component}    ${OPERATOR_NS}
+    IF    "${selected_dsc_name}" == "${EMPTY}"
+        ${management_state}=    Get DSC Component State    ${DSC_NAME}    ${component}    ${OPERATOR_NS}
+    ELSE
+        ${management_state}=    Get DSC Component State    ${selected_dsc_name}    ${component}    ${OPERATOR_NS}
+    END
     IF    "${management_state}" != "Managed"
+        IF    "${selected_dsc_name}" == "${EMPTY}"
             Set Component State    ${component}    Managed
+        ELSE
+            Set Component State    ${component}    Managed    ${selected_dsc_name}
+        END
     END
 
     IF     ${wait_for_completion}
-            Wait For Resources To Be Available    ${deployment_name}    ${label_selector}
+            Wait For Resources To Be Available    ${deployment_name}    ${label_selector}    ${namespace}
     END
 
 Set DSC Component Unmanaged State And Wait For Completion

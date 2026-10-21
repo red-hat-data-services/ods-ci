@@ -291,7 +291,10 @@ Get Helm Path For Component
     IF    "${component}" == "batchgateway"
         RETURN    components.aigateway.dsc.batchGateway.managementState
     END
-    # Data Registry is a capability nested under the Data module.
+    # Feature Store and Data Registry are capabilities nested under the Data module.
+    IF    "${component}" == "feastoperator"
+        RETURN    components.data.dsc.featureStore.managementState
+    END
     IF    "${component}" == "dataregistry"
         RETURN    components.data.dsc.dataRegistry.managementState
     END
@@ -1594,9 +1597,14 @@ Set Component State
     [Documentation]    Set component state in Data Science Cluster (state should be Managed or Removed).
     ...                Uses the v3-aware .spec.components path (see Get DSC Component Patch) so a flat
     ...                patch is not silently dropped for renamed components on v3 (RHOAIENG-101062).
-    [Arguments]    ${component}    ${state}
-    ${result} =    Run Process    oc get datascienceclusters.datasciencecluster.opendatahub.io -o name
-    ...    shell=true    stderr=STDOUT
+    [Arguments]    ${component}    ${state}    ${dsc_name}=${EMPTY}
+    IF    "${dsc_name}" == "${EMPTY}"
+        ${result} =    Run Process    oc get datascienceclusters.datasciencecluster.opendatahub.io -o name
+        ...    shell=true    stderr=STDOUT
+    ELSE
+        ${result} =    Run Process    oc get datascienceclusters.datasciencecluster.opendatahub.io ${dsc_name} -o name
+        ...    shell=true    stderr=STDOUT
+    END
     IF    $result.stdout == ""
         FAIL    Can not find datasciencecluster
     END

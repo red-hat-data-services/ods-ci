@@ -498,14 +498,9 @@ Validate Feastoperator Removed State
 
     [Teardown]      Restore DSC Component State     feastoperator       ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}     ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.FEASTOPERATOR}
 
-Validate Data Registry Managed
+Validate DataRegistry Managed
     [Documentation]    Validate Data Registry Managed state through the Feast module operator deployment.
-    [Tags]
-    ...    Operator
-    ...    RHOAIENG-84590
-    ...    dataregistry-managed
-    ...    Integration
-    ...    Smoke
+    [Tags]    Operator    RHOAIENG-84590    dataregistry-managed    Integration    Smoke
 
     [Setup]    Prepare Data Registry Component Test
 
@@ -513,6 +508,7 @@ Validate Data Registry Managed
     ...    dataregistry
     ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
     ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
+    ...    selected_dsc_name=${DSC_NAME}
     Check That Image Pull Path Is Correct
     ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
     ...    ${IMAGE_PULL_PATH}
@@ -521,7 +517,7 @@ Validate Data Registry Managed
     ...    ${SAVED_MANAGEMENT_STATES.DATAREGISTRY}
     ...    ${SAVED_MANAGEMENT_STATES.FEASTOPERATOR}
 
-Validate Data Registry Removed
+Validate DataRegistry Removed
     [Documentation]    Validate Data Registry Removed state when Data Registry is the only managed data capability.
     [Tags]
     ...    Operator
@@ -536,6 +532,7 @@ Validate Data Registry Removed
     ...    dataregistry
     ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
     ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
+    ...    selected_dsc_name=${DSC_NAME}
 
     [Teardown]    Restore Data Registry Component Test States
     ...    ${SAVED_MANAGEMENT_STATES.DATAREGISTRY}
@@ -946,8 +943,8 @@ Require Data Registry DSC Component
 Prepare Data Registry Component Test
     [Documentation]    Isolate Data Registry from Feature Store before testing its Managed state.
     Require Data Registry DSC Component
-    Set Feature Store Component State    Removed
-    Set Component State    dataregistry    Removed
+    Set Component State    feastoperator    Removed    ${DSC_NAME}
+    Set Component State    dataregistry    Removed    ${DSC_NAME}
     Wait For Resources To Be Removed
     ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
     ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
@@ -959,50 +956,27 @@ Prepare Data Registry Removed State Test
     ...    dataregistry
     ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
     ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
+    ...    selected_dsc_name=${DSC_NAME}
 
 Restore Data Registry Component Test States
     [Documentation]    Restore the original Data Registry and Feature Store states after the isolated test.
     [Arguments]    ${dataregistry_state}    ${feastoperator_state}
     ${supported}=    Data Registry DSC Component Is Supported
     IF    not ${supported}    RETURN
-    Set Component State    dataregistry    ${dataregistry_state}
-    Set Feature Store Component State    ${feastoperator_state}
-    ${resources_enabled}=    Evaluate    '${dataregistry_state}' in ('Managed', 'Unmanaged') or
-    ...    '${feastoperator_state}' in ('Managed', 'Unmanaged')
-    IF    ${resources_enabled}    Wait For Feast Operator Resources    ELSE    Wait For Feast Operator Removal
-
-Wait For Feast Operator Resources
-    [Documentation]    Wait for the shared Feast module operator resources to return.
-    Wait For Resources To Be Available
-    ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
-    ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
-
-Wait For Feast Operator Removal
-    [Documentation]    Wait for the shared Feast module operator resources to be removed.
-    Wait For Resources To Be Removed
-    ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
-    ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
-
-Set Feature Store Component State
-    [Documentation]    Set or remove Feature Store managementState under components.data.
-    [Arguments]    ${state}
-    ${result}=    Run Process    oc get datascienceclusters.datasciencecluster.opendatahub.io ${DSC_NAME} -o name
-    ...    shell=true    stderr=STDOUT
-    IF    $result.stdout == ""
-        FAIL    Can not find datasciencecluster
-    END
-    ${cluster_name}=    Set Variable    ${result.stdout}
-    IF    "${state}" == "${EMPTY}"
-        ${patch}=    Set Variable    {"spec":{"components":{"data":{"featureStore":{"managementState":null}}}}}
+    Set Component State    dataregistry    ${dataregistry_state}    ${DSC_NAME}
+    Set Component State    feastoperator    ${feastoperator_state}    ${DSC_NAME}
+    ${dataregistry_enabled}=    Evaluate    '${dataregistry_state}' in ('Managed', 'Unmanaged')
+    ${feastoperator_enabled}=    Evaluate    '${feastoperator_state}' in ('Managed', 'Unmanaged')
+    ${resources_enabled}=    Evaluate    ${dataregistry_enabled} or ${feastoperator_enabled}
+    IF    ${resources_enabled}
+        Wait For Resources To Be Available
+        ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+        ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
     ELSE
-        ${patch}=    Set Variable    {"spec":{"components":{"data":{"featureStore":{"managementState":"${state}"}}}}}
+        Wait For Resources To Be Removed
+        ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+        ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
     END
-    ${result}=    Run Process    oc patch ${cluster_name} --type merge -p '${patch}'
-    ...    shell=true    stderr=STDOUT
-    IF    $result.rc != 0
-        FAIL    Can not set Feature Store state to ${state}: ${result.stdout}
-    END
-    Log To Console    Feature Store state was set to ${state}
 
 Restore Kueue Initial State
     [Documentation]    Keyword to restore the initial state of the Kueue component. If the restored state is Unmanaged

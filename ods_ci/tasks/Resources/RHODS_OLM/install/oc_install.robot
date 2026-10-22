@@ -1614,13 +1614,6 @@ Deploy NFS Provisioner
     Wait Until Keyword Succeeds    10x    30s
     ...    Patch NFS Storage Class Mount Options    storageclass_name=nfs
 
-Check If StorageClass Exists
-    [Documentation]    Checks if a StorageClass with the given name exists
-    [Arguments]    ${storageclass_name}
-    ${rc}    ${output}=    Run And Return Rc And Output
-    ...    oc get storageclass ${storageclass_name} -o name
-    RETURN    ${rc} == ${0}
-
 Patch NFS Storage Class Mount Options
     [Documentation]    Patch NFS StorageClass mount options to force NFSv3
     [Arguments]    ${storageclass_name}=nfs

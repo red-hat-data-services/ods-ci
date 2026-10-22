@@ -1617,7 +1617,7 @@ Deploy NFS Provisioner
 Patch NFS Storage Class Mount Options
     [Documentation]    Patch NFS StorageClass mount options to force NFSv3
     [Arguments]    ${storageclass_name}=nfs
-    ${rc}    ${output}=    Run And Return Rc And Output
+    ${rc}    ${output} =    Run And Return Rc And Output
     ...    oc patch storageclass ${storageclass_name} -p '{"mountOptions":["nfsvers=3"]}'
     Should Be Equal As Integers    ${rc}    0    msg=Failed to patch StorageClass ${storageclass_name}: ${output}
     Log    ${output}    console=yes
@@ -1626,19 +1626,20 @@ Verify NFS Storage Class
     [Documentation]    Verifies the NFS StorageClass can provision and bind a ReadWriteMany claim.
     ...                The verification PVC is deleted at the end of the keyword.
     [Arguments]    ${storageclass_name}=nfs    ${pvc_name}=nfs-storage-verify    ${pvc_size}=1Gi    ${timeout}=5m
-    ${rc}    ${output}=    Run And Return Rc And Output
+    ${rc}    ${output} =    Run And Return Rc And Output
     ...    oc delete pvc ${pvc_name} -n ${NFS_OP_NS} --ignore-not-found
     Should Be Equal As Integers    ${rc}    0    msg=Failed to clean up stale verification PVC: ${output}
     Set Test Variable    ${storageclass_name}
     Set Test Variable    ${pvc_name}
     Set Test Variable    ${pvc_size}
-    Create File From Template    ${RESOURCES_DIRPATH}/nfs_storage_verify_pvc_template.yaml    ${RESOURCES_DIRPATH}/nfs_storage_verify_pvc.yaml
-    ${rc}    ${output}=    Run And Return Rc And Output
+    Create File From Template    ${RESOURCES_DIRPATH}/nfs_storage_verify_pvc_template.yaml
+    ...    ${RESOURCES_DIRPATH}/nfs_storage_verify_pvc.yaml
+    ${rc}    ${output} =    Run And Return Rc And Output
     ...    oc apply -f ${RESOURCES_DIRPATH}/nfs_storage_verify_pvc.yaml -n ${NFS_OP_NS}
     Should Be Equal As Integers    ${rc}    0    msg=Failed to create verification PVC: ${output}
-    ${wait_rc}    ${wait_output}=    Run And Return Rc And Output
+    ${wait_rc}    ${wait_output} =    Run And Return Rc And Output
     ...    oc wait pvc ${pvc_name} -n ${NFS_OP_NS} --for=jsonpath='{.status.phase}'=Bound --timeout=${timeout}
-    ${rc}    ${delete_output}=    Run And Return Rc And Output
+    ${rc}    ${delete_output} =    Run And Return Rc And Output
     ...    oc delete pvc ${pvc_name} -n ${NFS_OP_NS} --ignore-not-found
     Should Be Equal As Integers    ${rc}    0    msg=Failed to delete verification PVC: ${delete_output}
     Should Be Equal As Integers    ${wait_rc}    0    msg=Verification PVC did not reach Bound state: ${wait_output}

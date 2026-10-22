@@ -1357,6 +1357,9 @@ Install RHOAI Dependencies With CLI
     Install Kueue Dependencies
     Install Leader Worker Set Operator Via Cli
     Install Connectivity Link Operator Via Cli
+    Install NFS Operator Via Cli
+    Deploy NFS Provisioner
+    Verify NFS Storage Class
     Install JobSet Dependencies
     ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
     IF    '${arch_type}' != 's390x'
@@ -1599,7 +1602,7 @@ Install NFS Operator Via Cli
 
 Deploy NFS Provisioner
     [Documentation]    Deploy a NFS instance, shared
-    [Arguments]    ${storage_size}    ${nfs_provisioner_name}
+    [Arguments]    ${storage_size}=100G    ${nfs_provisioner_name}=nfs-provisioner
     ${default_sc} =    Get Default Storage Class Name
     Set Test Variable    ${storage_class}    ${default_sc}
     Set Test Variable    ${storage_size}

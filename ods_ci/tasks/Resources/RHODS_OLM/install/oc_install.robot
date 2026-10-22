@@ -1487,6 +1487,9 @@ Install RHOAI Dependencies With CLI
     Install Kueue Dependencies
     Install Leader Worker Set Operator Via Cli
     Install Connectivity Link Operator Via Cli
+    Install NFS Operator Via Cli
+    Deploy NFS Provisioner
+    Verify NFS Storage Class
     Install JobSet Dependencies
     Install Agent Sandbox Operator Via Cli
     ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
@@ -1758,22 +1761,68 @@ Install NFS Operator Via Cli
 
 Deploy NFS Provisioner
     [Documentation]    Deploy a NFS instance, shared
-    [Arguments]    ${storage_size}    ${nfs_provisioner_name}
-    ${default_sc} =    Get Default Storage Class Name
-    Set Test Variable    ${storage_class}    ${default_sc}
-    Set Test Variable    ${storage_size}
-    Set Test Variable    ${nfs_provisioner_name}
-    Create File From Template    ${RESOURCES_DIRPATH}/nfsprovisioner_template.yaml    ${RESOURCES_DIRPATH}/nfsprovisioner_cr.yaml
-    ${rc}    ${output}=    Run And Return Rc And Output
-    ...    oc apply -f ${RESOURCES_DIRPATH}/nfsprovisioner_cr.yaml
-    Should Be Equal As Integers    ${rc}    0
-    Log    ${output}    console=yes
-    Wait For Pods To Be Ready    label_selector=nfsprovisioner_cr=${nfs_provisioner_name}
-    ...    namespace=${NFS_OP_NS}
+    ...                Skips deployment when the NFS StorageClass already exists:
+    ...                a pre-existing provisioner under a different CR name already
+    ...                provides the StorageClass and its pods carry a different
+    ...                nfsprovisioner_cr label, so a second deployment would never
+    ...                become ready. The mount options patch runs on both paths so a
+    ...                pre-existing StorageClass is also configured for NFSv3.
+    [Arguments]    ${storage_size}=100G    ${nfs_provisioner_name}=nfs-provisioner
     ${rc}    ${output} =    Run And Return Rc And Output
-    ...    oc patch storageclass nfs -p '{"mountOptions":["nfsvers=3"]}'
-    Should Be Equal As Integers    ${rc}    0
+    ...    oc get storageclass nfs -o name
+    IF    ${rc} != ${0}
+        ${default_sc} =    Get Default Storage Class Name
+        Set Test Variable    ${storage_class}    ${default_sc}
+        Set Test Variable    ${storage_size}
+        Set Test Variable    ${nfs_provisioner_name}
+        Create File From Template    ${RESOURCES_DIRPATH}/nfsprovisioner_template.yaml
+        ...    ${RESOURCES_DIRPATH}/nfsprovisioner_cr.yaml
+        ${rc}    ${output} =    Run And Return Rc And Output
+        ...    oc apply -f ${RESOURCES_DIRPATH}/nfsprovisioner_cr.yaml
+        Should Be Equal As Integers    ${rc}    0    msg=Failed to apply NFS provisioner CR: ${output}
+        Log    ${output}    console=yes
+        Wait For Pods To Be Ready    label_selector=nfsprovisioner_cr=${nfs_provisioner_name}
+        ...    namespace=${NFS_OP_NS}
+    ELSE
+        Log To Console    message=NFS StorageClass nfs already exists, skipping NFS provisioner deployment
+    END
+    Wait Until Keyword Succeeds    10x    30s
+    ...    Patch NFS Storage Class Mount Options    storageclass_name=nfs
+
+Patch NFS Storage Class Mount Options
+    [Documentation]    Patch NFS StorageClass mount options to force NFSv3
+    [Arguments]    ${storageclass_name}=nfs
+    ${rc}    ${output} =    Run And Return Rc And Output
+    ...    oc patch storageclass ${storageclass_name} -p '{"mountOptions":["nfsvers=3"]}'
+    Should Be Equal As Integers    ${rc}    0    msg=Failed to patch StorageClass ${storageclass_name}: ${output}
     Log    ${output}    console=yes
+
+Verify NFS Storage Class
+    [Documentation]    Verifies the NFS StorageClass can provision and bind a ReadWriteMany claim.
+    ...                Uses a run-specific PVC name so concurrent invocations do not
+    ...                interfere; stale verification PVCs from earlier runs are
+    ...                removed by label. The PVC is deleted at the end of the keyword.
+    [Arguments]    ${storageclass_name}=nfs    ${pvc_size}=1Gi    ${timeout}=5m
+    ${epoch} =    Get Time    epoch
+    ${pvc_name} =    Set Variable    nfs-storage-verify-${epoch}
+    ${rc}    ${output} =    Run And Return Rc And Output
+    ...    oc delete pvc -l app=nfs-storage-verify -n ${NFS_OP_NS} --ignore-not-found
+    Should Be Equal As Integers    ${rc}    0    msg=Failed to clean up stale verification PVCs: ${output}
+    Set Test Variable    ${storageclass_name}
+    Set Test Variable    ${pvc_name}
+    Set Test Variable    ${pvc_size}
+    Create File From Template    ${RESOURCES_DIRPATH}/nfs_storage_verify_pvc_template.yaml
+    ...    ${RESOURCES_DIRPATH}/nfs_storage_verify_pvc.yaml
+    ${rc}    ${output} =    Run And Return Rc And Output
+    ...    oc apply -f ${RESOURCES_DIRPATH}/nfs_storage_verify_pvc.yaml -n ${NFS_OP_NS}
+    Should Be Equal As Integers    ${rc}    0    msg=Failed to create verification PVC: ${output}
+    ${wait_rc}    ${wait_output} =    Run And Return Rc And Output
+    ...    oc wait pvc ${pvc_name} -n ${NFS_OP_NS} --for=jsonpath='{.status.phase}'=Bound --timeout=${timeout}
+    ${rc}    ${delete_output} =    Run And Return Rc And Output
+    ...    oc delete pvc ${pvc_name} -n ${NFS_OP_NS} --ignore-not-found
+    Should Be Equal As Integers    ${rc}    0    msg=Failed to delete verification PVC: ${delete_output}
+    Should Be Equal As Integers    ${wait_rc}    0    msg=Verification PVC did not reach Bound state: ${wait_output}
+    Log    ${wait_output}    console=yes
 
 Configure Gateway API
     [Documentation]    Configure Gateway API for KServe inference traffic routing

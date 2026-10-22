@@ -8,6 +8,7 @@ Suite Setup       RHOSi Setup
 *** Variables ***
 ${STORAGE_SIZE}=    100G
 ${NFS_PROVISIONER_NAME}=    nfs-provisioner
+${NFS_STORAGE_CLASS_NAME}=    nfs
 
 
 *** Tasks ***
@@ -17,3 +18,4 @@ Install NFS Operator
     [Tags]    nfs-operator-deploy
     Install NFS Operator Via Cli
     Deploy NFS Provisioner    ${STORAGE_SIZE}    ${NFS_PROVISIONER_NAME}
+    Verify NFS Storage Class    storageclass_name=${NFS_STORAGE_CLASS_NAME}

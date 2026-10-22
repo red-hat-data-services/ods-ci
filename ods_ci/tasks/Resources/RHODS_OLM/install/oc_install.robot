@@ -1606,25 +1606,27 @@ Deploy NFS Provisioner
     ...                a pre-existing provisioner under a different CR name already
     ...                provides the StorageClass and its pods carry a different
     ...                nfsprovisioner_cr label, so a second deployment would never
-    ...                become ready.
+    ...                become ready. The mount options patch runs on both paths so a
+    ...                pre-existing StorageClass is also configured for NFSv3.
     [Arguments]    ${storage_size}=100G    ${nfs_provisioner_name}=nfs-provisioner
     ${rc}    ${output} =    Run And Return Rc And Output
     ...    oc get storageclass nfs -o name
-    IF    ${rc} == ${0}
-          Log To Console    message=NFS StorageClass nfs already exists, skipping NFS provisioner deployment
-          RETURN
+    IF    ${rc} != ${0}
+        ${default_sc} =    Get Default Storage Class Name
+        Set Test Variable    ${storage_class}    ${default_sc}
+        Set Test Variable    ${storage_size}
+        Set Test Variable    ${nfs_provisioner_name}
+        Create File From Template    ${RESOURCES_DIRPATH}/nfsprovisioner_template.yaml
+        ...    ${RESOURCES_DIRPATH}/nfsprovisioner_cr.yaml
+        ${rc}    ${output} =    Run And Return Rc And Output
+        ...    oc apply -f ${RESOURCES_DIRPATH}/nfsprovisioner_cr.yaml
+        Should Be Equal As Integers    ${rc}    0    msg=Failed to apply NFS provisioner CR: ${output}
+        Log    ${output}    console=yes
+        Wait For Pods To Be Ready    label_selector=nfsprovisioner_cr=${nfs_provisioner_name}
+        ...    namespace=${NFS_OP_NS}
+    ELSE
+        Log To Console    message=NFS StorageClass nfs already exists, skipping NFS provisioner deployment
     END
-    ${default_sc} =    Get Default Storage Class Name
-    Set Test Variable    ${storage_class}    ${default_sc}
-    Set Test Variable    ${storage_size}
-    Set Test Variable    ${nfs_provisioner_name}
-    Create File From Template    ${RESOURCES_DIRPATH}/nfsprovisioner_template.yaml    ${RESOURCES_DIRPATH}/nfsprovisioner_cr.yaml
-    ${rc}    ${output}=    Run And Return Rc And Output
-    ...    oc apply -f ${RESOURCES_DIRPATH}/nfsprovisioner_cr.yaml
-    Should Be Equal As Integers    ${rc}    0
-    Log    ${output}    console=yes
-    Wait For Pods To Be Ready    label_selector=nfsprovisioner_cr=${nfs_provisioner_name}
-    ...    namespace=${NFS_OP_NS}
     Wait Until Keyword Succeeds    10x    30s
     ...    Patch NFS Storage Class Mount Options    storageclass_name=nfs
 
@@ -1638,11 +1640,15 @@ Patch NFS Storage Class Mount Options
 
 Verify NFS Storage Class
     [Documentation]    Verifies the NFS StorageClass can provision and bind a ReadWriteMany claim.
-    ...                The verification PVC is deleted at the end of the keyword.
-    [Arguments]    ${storageclass_name}=nfs    ${pvc_name}=nfs-storage-verify    ${pvc_size}=1Gi    ${timeout}=5m
+    ...                Uses a run-specific PVC name so concurrent invocations do not
+    ...                interfere; stale verification PVCs from earlier runs are
+    ...                removed by label. The PVC is deleted at the end of the keyword.
+    [Arguments]    ${storageclass_name}=nfs    ${pvc_size}=1Gi    ${timeout}=5m
+    ${epoch} =    Get Time    epoch
+    ${pvc_name} =    Set Variable    nfs-storage-verify-${epoch}
     ${rc}    ${output} =    Run And Return Rc And Output
-    ...    oc delete pvc ${pvc_name} -n ${NFS_OP_NS} --ignore-not-found
-    Should Be Equal As Integers    ${rc}    0    msg=Failed to clean up stale verification PVC: ${output}
+    ...    oc delete pvc -l app=nfs-storage-verify -n ${NFS_OP_NS} --ignore-not-found
+    Should Be Equal As Integers    ${rc}    0    msg=Failed to clean up stale verification PVCs: ${output}
     Set Test Variable    ${storageclass_name}
     Set Test Variable    ${pvc_name}
     Set Test Variable    ${pvc_size}

@@ -2,6 +2,8 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: ${pvc_name}
+  labels:
+    app: nfs-storage-verify
 spec:
   accessModes:
     - ReadWriteMany

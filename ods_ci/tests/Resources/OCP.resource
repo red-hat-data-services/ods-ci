@@ -163,6 +163,36 @@ Wait For Deployment Replica To Be Ready
     ...    oc get deployment -l ${label_selector} -n ${namespace} -o json | jq -e '.status | .replicas == .readyReplicas'  #robocop: disable:line-too-long
     ...    print_to_log=${FALSE}
 
+Wait For Deployment Replica If Present
+    [Documentation]    Wait for a Deployment matching ${label_selector} only if one exists.
+    ...    Returns ${TRUE} when a matching Deployment was found and became ready, ${FALSE} if none exist.
+    [Arguments]    ${label_selector}    ${namespace}    ${timeout}=400s
+    ${rc}    ${name}=    Run And Return Rc And Output
+    ...    oc get deployment -l ${label_selector} -n ${namespace} -o jsonpath='{.items[*].metadata.name}'
+    # $name is the Python object so oc errors with quotes cannot break the IF.
+    # not $name is True for empty stdout; $EMPTY is not defined in RF evaluate.
+    IF    $rc != 0 or not $name
+        Log To Console    No Deployment with label "${label_selector}" in "${namespace}", skipping wait
+        RETURN    ${FALSE}
+    END
+    Wait For Deployment Replica To Be Ready    namespace=${namespace}
+    ...    label_selector=${label_selector}    timeout=${timeout}
+    RETURN    ${TRUE}
+
+Get Model Registry Controller Label Selector
+    [Documentation]    Return the control-plane selector for the Model Registry controller
+    ...    that is actually deployed (AI Hub in 3.6+, catalog overlay, or legacy operator).
+    [Arguments]    ${namespace}
+    FOR    ${selector}    IN
+    ...    control-plane=aihub-controller-manager
+    ...    control-plane=catalog-controller-manager
+    ...    control-plane=model-registry-operator
+        ${rc}    ${name}=    Run And Return Rc And Output
+        ...    oc get deployment -l ${selector} -n ${namespace} -o jsonpath='{.items[*].metadata.name}'
+        IF    $rc == 0 and $name    RETURN    ${selector}
+    END
+    Fail    msg=No Model Registry, AI Hub, or catalog controller Deployment was found in ${namespace}
+
 Wait For Pods To Succeed
     [Arguments]    ${label_selector}    ${namespace}    ${timeout}=300s    ${exp_replicas}=${NONE}
     Wait Until Keyword Succeeds    ${timeout}    3s

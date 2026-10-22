@@ -37,13 +37,13 @@ items:
       - name: worker
         platform:
           gcp:
-            type: {{ worker_node_instance_type|default("custom-8-32768") }}
-        replicas: {{ worker_node_replicas|default("2") }}
+            type: {{ worker_node_instance_type|default("n2-standard-16") }}
+        replicas: {{ worker_node_replicas|default("3") }}
       controlPlane:
         name: master
         platform:
           gcp:
-            type: {{ master_node_instance_type|default("custom-8-32768") }}
+            type: {{ master_node_instance_type|default("n2-standard-8") }}
         replicas: {{ master_node_replicas|default("3") }}
       metadata:
         name: gcp-sno
@@ -61,7 +61,7 @@ items:
       platform:
         gcp:
           projectID: {{ gcp_project_id }}
-          region: {{ gcp_region|default("us-central1") }}
+          region: {{ gcp_region|default("us-east1") }}
           userLabels:
             - key: team
               value: {{ team|default("unknown-team") }}

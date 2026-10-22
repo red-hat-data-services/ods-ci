@@ -53,7 +53,7 @@ Uninstall RHODS In OSD
   [Documentation]   UnInstall rhods on managed cluster using cli
   Clone OLM Install Repo
   ${return_code}    Run and Watch Command
-  ...    cd ${EXECDIR}/${OLM_DIR} && ./cleanup.sh -t addon -a "authorino serverless servicemesh servicemesh3 clusterobservability tempo opentelemetry kueue certmanager cma jobset connectivitylink leaderworkerset jobset"
+  ...    cd ${EXECDIR}/${OLM_DIR} && ./cleanup.sh -t addon -a "authorino serverless servicemesh servicemesh3 clusterobservability tempo opentelemetry kueue certmanager cma jobset connectivitylink leaderworkerset jobset agent-sandbox-operator"
   ...    timeout=30 min
   Should Be Equal As Integers  ${return_code}   0   msg=Error detected while un-installing ODH/RHOAI
 
@@ -75,7 +75,7 @@ RHODS Operator Should Be Uninstalled
 Uninstall RHODS In Self Managed Cluster Using CLI
   [Documentation]   UnInstall rhods on self-managed cluster using cli
   ${return_code}    Run and Watch Command
-  ...    cd ${EXECDIR}/${OLM_DIR} && ./cleanup.sh -t operator -a "authorino serverless servicemesh servicemesh3 clusterobservability tempo opentelemetry kueue certmanager cma connectivitylink leaderworkerset jobset"
+  ...    cd ${EXECDIR}/${OLM_DIR} && ./cleanup.sh -t operator -a "authorino serverless servicemesh servicemesh3 clusterobservability tempo opentelemetry kueue certmanager cma connectivitylink leaderworkerset jobset agent-sandbox-operator"
   ...    timeout=30 min
   Should Be Equal As Integers  ${return_code}   0   msg=Error detected while un-installing ODH/RHOAI
 

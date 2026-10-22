@@ -8,7 +8,6 @@ Resource            ../../Resources/OCP.resource
 Resource            ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboardResources.resource
-Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Resource            ../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource            ../../Resources/Page/ODH/AiApps/Anaconda.resource
@@ -143,6 +142,13 @@ Run Feast operator PostUpgrade Test Use Case
     [Setup]    Prepare Feast E2E Test Suite
     Run Feast Operator Upgrade Test    feastPostUpgrade
     [Teardown]    Teardown Feast E2E Test Suite
+
+Run feast modular operator post upgrade test
+    [Documentation]    Verify feast modular operator post upgrade test check
+    [Tags]  Upgrade    FeatureStoreUpgrade    FeatureStoreModularUpgrade
+    [Setup]    Prepare Feast Modular Operator E2E Test Suite
+    Run Feast Module Operator E2E Upgrade Test    post
+    [Teardown]    Teardown Feast Modular Operator E2E Test Suite
 
 
 *** Keywords ***

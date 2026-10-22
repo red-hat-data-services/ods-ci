@@ -27,22 +27,29 @@ Verify Model Registry Operator Installation
 *** Keywords ***
 Verify Model Registry Operator Deployment
     [Documentation]    Verifies the  deployment of the model registry operator in the Applications namespace
-    Wait For Pods Number  1
-    ...                   namespace=${MODEL_REGISTRY_NS}
-    ...                   label_selector=app.kubernetes.io/part-of=model-registry-operator
-    ...                   timeout=20
+    ${legacy_mr} =    Wait For Deployment Replica If Present    namespace=${MODEL_REGISTRY_NS}
+    ...    label_selector=control-plane=model-registry-operator    timeout=20s
+    ${aihub} =    Wait For Deployment Replica If Present    namespace=${MODEL_REGISTRY_NS}
+    ...    label_selector=control-plane=aihub-controller-manager    timeout=20s
+    ${catalog} =    Wait For Deployment Replica If Present    namespace=${MODEL_REGISTRY_NS}
+    ...    label_selector=control-plane=catalog-controller-manager    timeout=20s
+    IF    not ${legacy_mr} and not ${aihub} and not ${catalog}
+        Fail    msg=No Model Registry, AI Hub, or catalog controller Deployment was found
+    END
 
 Verify Model Registry ReplicaSets Info
     [Documentation]    Fetches and verifies information from Model Registry replicasets
+    ${selector} =    Get Model Registry Controller Label Selector    ${MODEL_REGISTRY_NS}
     @{model_registry_replicasets_info} =   Oc Get    kind=ReplicaSet    api_version=v1    namespace=${MODEL_REGISTRY_NS}
-    ...    label_selector=app.kubernetes.io/part-of=model-registry-operator
+    ...    label_selector=${selector}
     OpenShift Resource Field Value Should Be Equal As Strings    status.readyReplicas
     ...    1    @{model_registry_replicasets_info}
 
 Verify Model Registry Container Names
     [Documentation]  Verifies RHODS Model Registry deployment
+    ${selector} =    Get Model Registry Controller Label Selector    ${MODEL_REGISTRY_NS}
     @{model_registry} =  Oc Get    kind=Pod    namespace=${MODEL_REGISTRY_NS}    api_version=v1
-    ...    label_selector=app.kubernetes.io/part-of=model-registry-operator
+    ...    label_selector=${selector}
     ${containerNames} =    Create List     manager
     Verify Deployment    ${model_registry}    1    1    ${containerNames}
 

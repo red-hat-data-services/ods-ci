@@ -6,7 +6,6 @@ Resource            ../../Resources/RHOSi.resource
 Resource            ../../Resources/ODS.robot
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboardResources.resource
-Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Resource            ../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Resource            ../../Resources/Page/ODH/JupyterHub/JupyterLabLauncher.robot
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
@@ -83,6 +82,13 @@ Run Feast operator Preupgrade Test Use Case
     [Setup]    Prepare Feast E2E Test Suite
     Run Feast Operator Upgrade Test    feastPreUpgrade
     [Teardown]    Teardown Feast E2E Test Suite
+
+Run Feast Modular Operator Preupgrade test
+    [Documentation]    Verify feast modular operator pre upgrade test check
+    [Tags]  Upgrade    FeatureStoreUpgrade    FeatureStoreModularUpgrade
+    [Setup]    Prepare Feast Modular Operator E2E Test Suite
+    Run Feast Module Operator E2E Upgrade Test    pre
+    [Teardown]    Teardown Feast Modular Operator E2E Test Suite
 
 
 *** Keywords ***

@@ -17,13 +17,12 @@ ${DSCI_NAME} =    default-dsci
 ...    aigateway
 ...    kueue
 ...    ray
-...    trainingoperator
 ...    trainer
 ...    trustyai
 ...    workbenches
 ...    modelregistry
 ...    feastoperator
-...    llamastackoperator
+...    dataregistry
 ...    ogx
 ...    mlflowoperator
 ...    modelsasservice
@@ -58,13 +57,17 @@ ${TELEMETRY_CHANNEL_NAME}=  stable
 ${TELEMETRY_NS}=  openshift-opentelemetry-operator
 ${KUEUE_OP_NAME}=  kueue-operator
 ${KUEUE_SUB_NAME}=  kueue-operator
-${KUEUE_CHANNEL_NAME}=  stable-v1.3
+${KUEUE_CHANNEL_NAME}=  stable-v1.4
 ${KUEUE_NS}=  openshift-kueue-operator
 ${JOBSET_OP_NAME}=  job-set
 ${JOBSET_SUB_NAME}=  job-set
 ${JOBSET_CHANNEL_NAME}=  stable-v1.0
 ${JOBSET_NS}=  openshift-jobset-operator
 ${JOBSETOPERATOR_NAME}=  cluster
+${AGENT_SANDBOX_OP_NAME}=  agent-sandbox-operator
+${AGENT_SANDBOX_SUB_NAME}=  agent-sandbox-operator
+${AGENT_SANDBOX_CHANNEL_NAME}=  preview-0.9
+${AGENT_SANDBOX_NS}=  agent-sandbox-system
 ${CERT_MANAGER_OP_NAME}=  openshift-cert-manager-operator
 ${CERT_MANAGER_SUB_NAME}=  openshift-cert-manager-operator
 ${CERT_MANAGER_CHANNEL_NAME}=  stable-v1
@@ -288,6 +291,13 @@ Get Helm Path For Component
     IF    "${component}" == "batchgateway"
         RETURN    components.aigateway.dsc.batchGateway.managementState
     END
+    # Feature Store and Data Registry are capabilities nested under the Data module.
+    IF    "${component}" == "feastoperator"
+        RETURN    components.data.dsc.featureStore.managementState
+    END
+    IF    "${component}" == "dataregistry"
+        RETURN    components.data.dsc.dataRegistry.managementState
+    END
 
     # Handling of standard component cases:
     ${is_known} =    Evaluate    "${component}" in ${COMPONENT_LIST}
@@ -417,7 +427,7 @@ Verify RHODS Installation
   ${ray} =     Is Component Enabled     ray    ${DSC_NAME}
   IF    "${ray}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/part-of=ray
+    ...    label_selector=app.kubernetes.io/name=kuberay
   END
 
   ${trustyai} =    Is Component Enabled    trustyai    ${DSC_NAME}
@@ -428,14 +438,17 @@ Verify RHODS Installation
 
   ${modelregistry} =    Is Component Enabled    modelregistry    ${DSC_NAME}
   IF    "${modelregistry}" == "true"
-    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/part-of=model-registry-operator    timeout=400s
-  END
-
-  ${trainingoperator} =    Is Component Enabled    trainingoperator    ${DSC_NAME}
-  IF    "${trainingoperator}" == "true"
-    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/part-of=trainingoperator
+    # 3.6+ deploys AI Hub (and catalog on some overlays) instead of model-registry-operator.
+    # Wait for whichever controllers the operator actually created.
+    ${legacy_mr} =    Wait For Deployment Replica If Present    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=control-plane=model-registry-operator    timeout=400s
+    ${aihub} =    Wait For Deployment Replica If Present    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=control-plane=aihub-controller-manager    timeout=400s
+    ${catalog} =    Wait For Deployment Replica If Present    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=control-plane=catalog-controller-manager    timeout=400s
+    IF    not ${legacy_mr} and not ${aihub} and not ${catalog}
+        Fail    msg=modelregistry is Managed but no MR/AIHub/catalog controller Deployment was found
+    END
   END
 
   ${trainer} =     Is Component Enabled    trainer    ${DSC_NAME}
@@ -444,8 +457,9 @@ Verify RHODS Installation
     ...    label_selector=app.kubernetes.io/name=trainer
   END
 
+  ${dataregistry} =    Is Component Enabled    dataregistry    ${DSC_NAME}
   ${feastoperator} =    Is Component Enabled    feastoperator    ${DSC_NAME}
-  IF    "${feastoperator}" == "true"
+  IF    "${feastoperator}" == "true" or "${dataregistry}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app.kubernetes.io/part-of=feastoperator
   END
@@ -507,7 +521,7 @@ Verify RHODS Installation
     END
   END
 
-  IF    "${dashboard}" == "true" or "${workbenches}" == "true" or "${aipipelines}" == "true" or "${kserve}" == "true" or "${kueue}" == "true" or "${ray}" == "true" or "${trustyai}" == "true" or "${modelregistry}" == "true" or "${trainingoperator}" == "true" or "${sparkoperator}" == "true" or "${aigateway}" == "true" or "${batchgateway}" == "true" or "${mcplifecycleoperator}" == "true"    # robocop: disable
+  IF    "${dashboard}" == "true" or "${workbenches}" == "true" or "${aipipelines}" == "true" or "${kserve}" == "true" or "${kueue}" == "true" or "${ray}" == "true" or "${trustyai}" == "true" or "${modelregistry}" == "true" or "${sparkoperator}" == "true" or "${aigateway}" == "true" or "${batchgateway}" == "true" or "${mcplifecycleoperator}" == "true" or "${dataregistry}" == "true"    # robocop: disable
       Log To Console    Waiting for pod status in ${APPLICATIONS_NAMESPACE}
       Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=600
       Log  Verified Applications NS: ${APPLICATIONS_NAMESPACE}  console=yes
@@ -868,28 +882,54 @@ Create DataScienceCluster CustomResource Using Test Variables
     [Documentation]
     [Arguments]    ${dsc_name}=${DSC_NAME}    ${dsc_template}=${DSC_TEMPLATE}
     ${file_path} =    Set Variable    tasks/Resources/Files/
-    Copy File    source=${file_path}${dsc_template}    destination=${file_path}dsc_apply.yml
+    ${template_to_apply} =    Set Variable    ${dsc_template}
+    Log To Console    Applying DataScienceCluster from ${template_to_apply}
+    Copy File    source=${file_path}${template_to_apply}    destination=${file_path}dsc_apply.yml
     Run    sed -i'' -e 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
-    # modelsAsAService requires parent aigateway Managed (operator #3723).
-    # Force aigateway=Managed whenever modelsasservice is Managed, even if callers
-    # explicitly set aigateway=Removed (invalid combo that left MaaS Managed alone).
+    # Detect whether this cluster uses the 3.5+ MaaS DSC field (aigateway.modelsAsAService)
+    # or the legacy 3.4 field (kserve.modelsAsService). Check the installed CRD schema
+    # directly — this works for both ODH and RHOAI and is version-string-independent.
+    # In 3.5+, MaaS moved from kserve.modelsAsService → aigateway.modelsAsAService (operator #3723).
+    # On 3.4.x clusters, aigateway.* fields are unknown and silently dropped by the API server.
+    # Use the storage version to avoid hardcoding version index.
+    # Empty output on non-zero rc → legacy path; non-zero exit treated as unknown (safe default).
+    ${_crd_jsonpath} =    Catenate    SEPARATOR=
+    ...    {.spec.versions[?(@.storage==true)].schema.openAPIV3Schema
+    ...    .properties.spec.properties.components
+    ...    .properties.aigateway.properties.modelsAsAService}
+    ${_crd_rc}    ${_aigateway_in_schema} =    Run And Return Rc And Output
+    ...    oc get crd datascienceclusters.datasciencecluster.opendatahub.io -o jsonpath='${_crd_jsonpath}' 2>/dev/null    #robocop:disable
+    ${_is_pre_35} =    Evaluate    ${_crd_rc} == 0 and '${_aigateway_in_schema}' == ''
+    ${_aigateway_present} =    Evaluate    not ${_is_pre_35}
+    Log To Console    DSC CRD rc=${_crd_rc} aigateway.modelsAsAService present: ${_aigateway_present}
     ${maas_configured} =    Run Keyword And Return Status
     ...    Dictionary Should Contain Key    ${COMPONENTS}    modelsasservice
     IF    ${maas_configured} and '${COMPONENTS.modelsasservice}' == 'Managed'
-        ${aigateway_present} =    Run Keyword And Return Status
-        ...    Dictionary Should Contain Key    ${COMPONENTS}    aigateway
-        ${aigateway_already_managed} =    Set Variable    ${FALSE}
-        IF    ${aigateway_present}
-            ${aigateway_already_managed} =    Evaluate    '${COMPONENTS.aigateway}' == 'Managed'
-        END
-        IF    not ${aigateway_already_managed}
-            Set To Dictionary    ${COMPONENTS}    aigateway=Managed
-            # Keep COMPONENTS visible to Apply DataScienceCluster verification/logging
-            Set Global Variable    ${COMPONENTS}    # robocop: disable:replace-set-variable-with-var
-            Log To Console    modelsasservice=Managed requires aigateway=Managed; updated COMPONENTS
+        IF    ${_is_pre_35}
+            # 3.4.x: populate kserve.modelsAsService (legacy field); aigateway section not understood.
+            Run    sed -i'' -e 's/<modelsasservice_legacy_value>/Managed/' ${file_path}dsc_apply.yml
+            Log To Console    3.4 cluster: using kserve.modelsAsService=Managed for MaaS
+        ELSE
+            # 3.5+: modelsAsAService requires parent aigateway Managed (operator #3723).
+            # Force aigateway=Managed when callers only set modelsasservice=Managed.
+            ${aigateway_present} =    Run Keyword And Return Status
+            ...    Dictionary Should Contain Key    ${COMPONENTS}    aigateway
+            ${aigateway_already_managed} =    Set Variable    ${FALSE}
+            IF    ${aigateway_present}
+                ${aigateway_already_managed} =    Evaluate    '${COMPONENTS.aigateway}' == 'Managed'
+            END
+            IF    not ${aigateway_already_managed}
+                Set To Dictionary    ${COMPONENTS}    aigateway=Managed
+                # Keep COMPONENTS visible to Apply DataScienceCluster verification/logging
+                Set Global Variable    ${COMPONENTS}    # robocop: disable:replace-set-variable-with-var
+                Log To Console    modelsasservice=Managed requires aigateway=Managed; updated COMPONENTS
+            END
         END
     END
-    FOR    ${cmp}    IN    @{COMPONENT_LIST}
+    # Fill legacy placeholder with Removed when not on 3.4 or MaaS not Managed
+    Run    sed -i'' -e 's/<modelsasservice_legacy_value>/Removed/' ${file_path}dsc_apply.yml
+    @{components_to_fill} =    Copy List    ${COMPONENT_LIST}
+    FOR    ${cmp}    IN    @{components_to_fill}
             IF    $cmp not in $COMPONENTS
                 Run    sed -i'' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
             ELSE IF    '${COMPONENTS.${cmp}}' == 'Managed'
@@ -978,10 +1018,56 @@ Nested Component Should Not Be Enabled
         IF    '${status}' == 'false'    BREAK
     END
 
+Get DSC Component Path
+    [Documentation]    Maps a suite component name to its v3 .spec.components jq/jsonpath (leading dot).
+    ...                The v3 DSC reorg renamed modelregistry->aiHub, feastoperator->data.featureStore,
+    ...                dataregistry->data.dataRegistry, and dashboard->dashboard.standard.
+    [Arguments]    ${component}
+    IF    "${component}" == "modelregistry"
+        RETURN    .spec.components.aiHub.managementState
+    ELSE IF    "${component}" == "feastoperator"
+        RETURN    .spec.components.data.featureStore.managementState
+    ELSE IF    "${component}" == "dataregistry"
+        RETURN    .spec.components.data.dataRegistry.managementState
+    ELSE IF    "${component}" == "dashboard"
+        RETURN    .spec.components.dashboard.standard.managementState
+    END
+    RETURN    .spec.components.${component}.managementState
+
+Get DSC Component Patch
+    [Documentation]    Builds a v3 merge patch to set or remove a component's managementState.
+    ...                An empty state removes the field when restoring the original DSC configuration.
+    ...                Mirrors Get DSC Component Path: the v3 DSC reorg renamed
+    ...                modelregistry->aiHub, feastoperator->data.featureStore,
+    ...                dataregistry->data.dataRegistry, and dashboard->dashboard.standard.
+    ...                All other components keep their flat name.
+    ...                A flat .spec.components.${component}.managementState patch is silently
+    ...                dropped for these renamed components on a v3-served DSC (RHOAIENG-101062).
+    [Arguments]    ${component}    ${state}
+    IF    "${component}" == "modelregistry"
+        RETURN    {"spec":{"components":{"aiHub":{"managementState":"${state}"}}}}
+    ELSE IF    "${component}" == "feastoperator"
+        IF    "${state}" == "${EMPTY}"
+            RETURN    {"spec":{"components":{"data":{"featureStore":{"managementState":null}}}}}
+        END
+        RETURN    {"spec":{"components":{"data":{"featureStore":{"managementState":"${state}"}}}}}
+    ELSE IF    "${component}" == "dataregistry"
+        IF    "${state}" == "${EMPTY}"
+            RETURN    {"spec":{"components":{"data":{"dataRegistry":{"managementState":null}}}}}
+        END
+        RETURN    {"spec":{"components":{"data":{"dataRegistry":{"managementState":"${state}"}}}}}
+    ELSE IF    "${component}" == "dashboard"
+        RETURN    {"spec":{"components":{"dashboard":{"standard":{"managementState":"${state}"}}}}}
+    END
+    RETURN    {"spec":{"components":{"${component}":{"managementState":"${state}"}}}}
+
 Is Component Enabled
-    [Documentation]    Returns the enabled status of a single component (true/false)
+    [Documentation]    Returns the enabled status of a single component (true/false).
+    ...                Reads the DSC using the served CRD version. v3 maps modelregistry, feastoperator,
+    ...                dataregistry, and dashboard onto their reorganized paths. v2 reads flat component names.
     [Arguments]    ${component}    ${dsc_name}=${DSC_NAME}
-    ${return_code}    ${output} =    Run And Return Rc And Output    oc get datasciencecluster ${dsc_name} -o json | jq '.spec.components.${component}.managementState // "Removed"'  #robocop:disable
+    ${jq_path} =    Get DSC Component Path    ${component}
+    ${return_code}    ${output} =    Run And Return Rc And Output    oc get datasciencecluster ${dsc_name} -o json | jq '${jq_path} // "Removed"'  #robocop:disable
     Log    ${output}
     Should Be Equal As Integers  ${return_code}  0  msg=Error detected while getting component status
     ${n_output} =    Evaluate    '${output}' == ''
@@ -996,7 +1082,9 @@ Is Component Enabled
     END
 
 Is Nested Component Enabled
-    [Documentation]    Returns the enabled status of a nested component (true/false)
+    [Documentation]    Returns the enabled status of a nested component (true/false).
+    ...                Nested MaaS components live under aigateway (modelsAsAService, batchGateway)
+    ...                on both the v2 and v3 DataScienceCluster schemas.
     [Arguments]    ${parent_component}    ${nested_component}    ${dsc_name}=${DSC_NAME}
     ${return_code}    ${output} =    Run And Return Rc And Output    oc get datasciencecluster ${dsc_name} -o json | jq '.spec.components.${parent_component}.${nested_component}.managementState // "Removed"'  #robocop:disable
     Log    ${output}
@@ -1246,6 +1334,48 @@ Install JobSet Dependencies
     Install JobSet Operator Via Cli
     Create JobSetOperator CR
 
+Install Agent Sandbox Operator Via Cli
+    [Documentation]    Install Red Hat build of Agent Sandbox Operator via CLI.
+    ...                Skips arm64 because the published controller is amd64-only.
+    ...                Architecture comes from the node, not ARCH_TYPE.
+    ${rc}    ${node_arch} =    Run And Return Rc And Output
+    ...    oc get nodes -o jsonpath='{.items[0].status.nodeInfo.architecture}'
+    IF    ${rc} != 0
+        Fail    msg=Failed to read node architecture: ${node_arch}
+    END
+    ${node_arch} =    Strip String    ${node_arch}
+    IF    '${node_arch}' == '${EMPTY}'
+        Fail    msg=Node architecture is empty
+    END
+    IF    '${node_arch}' == 'arm64'
+        Log    Skipping agent-sandbox-operator on arm64    console=yes
+        RETURN
+    END
+    ${is_installed} =    Check If Operator Is Installed Via CLI    ${AGENT_SANDBOX_OP_NAME}
+    IF    ${is_installed}
+        Log To Console    message=Agent Sandbox Operator is already installed
+    ELSE
+        ${rc}    ${out} =    Run And Return Rc And Output
+        ...    oc create namespace ${AGENT_SANDBOX_NS} --dry-run=client -o yaml | oc apply -f -
+        Should Be Equal As Integers    ${rc}    ${0}    msg=Failed to create namespace ${AGENT_SANDBOX_NS}: ${out}
+        Install ISV Operator From OperatorHub Via CLI    operator_name=${AGENT_SANDBOX_OP_NAME}
+        ...    namespace=${AGENT_SANDBOX_NS}
+        ...    subscription_name=${AGENT_SANDBOX_SUB_NAME}
+        ...    catalog_source_name=redhat-operators
+        ...    operator_group_name=${AGENT_SANDBOX_NS}
+        ...    operator_group_ns=${AGENT_SANDBOX_NS}
+        ...    operator_group_target_ns=${NONE}
+        ...    channel=${AGENT_SANDBOX_CHANNEL_NAME}
+        ...    approval=Automatic
+        Wait Until Operator Subscription Last Condition Is
+        ...    type=CatalogSourcesUnhealthy    status=False
+        ...    reason=AllCatalogSourcesHealthy    subscription_name=${AGENT_SANDBOX_SUB_NAME}
+        ...    namespace=${AGENT_SANDBOX_NS}
+        ...    retry=150
+        Wait For Pods To Be Ready    label_selector=app=agent-sandbox-controller
+        ...    namespace=${AGENT_SANDBOX_NS}
+    END
+
 Install Cluster Observability Operator Via Cli
     [Documentation]    Install Cluster Observability Operator Via CLI
     ${is_installed} =   Check If Operator Is Installed Via CLI   ${CLUSTER_OBS_OP_NAME}
@@ -1361,6 +1491,7 @@ Install RHOAI Dependencies With CLI
     Deploy NFS Provisioner
     Verify NFS Storage Class
     Install JobSet Dependencies
+    Install Agent Sandbox Operator Via Cli
     ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
     IF    '${arch_type}' != 's390x'
         Configure MaaS Database
@@ -1466,20 +1597,47 @@ Create DSCI With Custom Namespaces
     Wait For DSCInitialization CustomResource To Be Ready
 
 Set Component State
-    [Documentation]    Set component state in Data Science Cluster (state should be Managed or Removed)
-    [Arguments]    ${component}    ${state}
-    ${result} =    Run Process    oc get datascienceclusters.datasciencecluster.opendatahub.io -o name
-    ...    shell=true    stderr=STDOUT
+    [Documentation]    Set component state in Data Science Cluster (state should be Managed or Removed).
+    ...                Uses the v3-aware .spec.components path (see Get DSC Component Patch) so a flat
+    ...                patch is not silently dropped for renamed components on v3 (RHOAIENG-101062).
+    [Arguments]    ${component}    ${state}    ${dsc_name}=${EMPTY}
+    IF    "${dsc_name}" == "${EMPTY}"
+        ${result} =    Run Process    oc get datascienceclusters.datasciencecluster.opendatahub.io -o name
+        ...    shell=true    stderr=STDOUT
+    ELSE
+        ${result} =    Run Process    oc get datascienceclusters.datasciencecluster.opendatahub.io ${dsc_name} -o name
+        ...    shell=true    stderr=STDOUT
+    END
     IF    $result.stdout == ""
         FAIL    Can not find datasciencecluster
     END
     ${cluster_name} =    Set Variable    ${result.stdout}
-    ${result} =    Run Process    oc patch ${cluster_name} --type merge -p '{"spec":{"components":{"${component}":{"managementState":"${state}"}}}}'
+    ${patch} =    Get DSC Component Patch    ${component}    ${state}
+    ${result} =    Run Process    oc patch ${cluster_name} --type merge -p '${patch}'
     ...    shell=true    stderr=STDOUT
     IF    $result.rc != 0
         FAIL    Can not enable ${component}: ${result.stdout}
     END
     Log To Console    Component ${component} state was set to ${state}
+
+Patch V2 DSC Component And Expect Rejection
+    [Documentation]    PATCH a retired v2-only DSC component; expect apiserver/webhook denial (403 body).
+    ...                Use when storage is v3 and unversioned oc patch drops unknown fields.
+    [Arguments]    ${dsc_name}    ${component}    ${state}    ${expected_fragment}
+    ${rc}    ${api_server} =    Run And Return Rc And Output    oc whoami --show-server
+    Should Be Equal As Integers    ${rc}    0    msg=Cannot read API server: ${api_server}
+    ${rc}    ${token} =    Run And Return Rc And Output    oc whoami -t
+    Should Be Equal As Integers    ${rc}    0    msg=Cannot read OpenShift token
+    ${patch} =    Set Variable    {"spec":{"components":{"${component}":{"managementState":"${state}"}}}}
+    ${url} =    Set Variable    ${api_server}/apis/datasciencecluster.opendatahub.io/v2/datascienceclusters/${dsc_name}
+    ${result} =    Run Process    curl    -sk    -X    PATCH
+    ...    -H    Authorization: Bearer ${token}
+    ...    -H    Content-Type: application/merge-patch+json
+    ...    ${url}
+    ...    -d    ${patch}
+    ...    stderr=STDOUT
+    Should Contain    ${result.stdout}    ${expected_fragment}
+    Should Contain    ${result.stdout}    Failure
 
 Set Nested Component State
     [Documentation]    Set nested component state in Data Science Cluster (e.g., aigateway.modelsAsAService).
@@ -1515,8 +1673,9 @@ Get DSC Component State
     [Documentation]    Get component management state
     [Arguments]    ${dsc}    ${component}    ${namespace}
 
+    ${path} =    Get DSC Component Path    ${component}
     ${rc}   ${state}=    Run And Return Rc And Output
-    ...    oc get DataScienceCluster/${dsc} -n ${namespace} -o 'jsonpath={.spec.components.${component}.managementState}'
+    ...    oc get datasciencecluster/${dsc} -n ${namespace} -o 'jsonpath={${path}}'
     Should Be Equal    "${rc}"    "0"    msg=${state}
     Log To Console    Component ${component} state ${state}
 
@@ -1527,7 +1686,7 @@ Get DSC Nested Component State
     [Arguments]    ${dsc}    ${parent_component}    ${nested_component}    ${namespace}
 
     ${rc}   ${state}=    Run And Return Rc And Output
-    ...    oc get DataScienceCluster/${dsc} -n ${namespace} -o 'jsonpath={.spec.components.${parent_component}.${nested_component}.managementState}'
+    ...    oc get datasciencecluster/${dsc} -n ${namespace} -o 'jsonpath={.spec.components.${parent_component}.${nested_component}.managementState}'
     Should Be Equal    "${rc}"    "0"    msg=${state}
     Log To Console    Nested component ${parent_component}.${nested_component} state ${state}
 

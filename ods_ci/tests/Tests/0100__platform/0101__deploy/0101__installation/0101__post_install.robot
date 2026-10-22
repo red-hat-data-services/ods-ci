@@ -80,7 +80,6 @@ Verify That CUDA Build Chain Succeeds
 Verify That "Usage Data Collection" Is Enabled By Default
     [Documentation]    Verify that "Usage Data Collection" is enabled by default when installing ODS
     [Tags]    Tier1
-    ...       Sanity
     ...       ODS-1234
 
     ${version_check} =    Is RHODS Version Greater Or Equal Than    1.8.0
@@ -95,7 +94,6 @@ Verify That "Usage Data Collection" Is Enabled By Default
 Verify Tracking Key Used For "Usage Data Collection"
     [Documentation]    Verify that "Usage Data Collection" is enabled by default when installing ODS
     [Tags]    Tier1
-    ...       Sanity
     ...       ODS-1235
 
     ODS.Verify "Usage Data Collection" Key
@@ -133,7 +131,7 @@ Verify RHODS Display Name and Version
     [Tags]    Smoke
     ...       Tier1
     ...       ODS-1862
-    IF  "${PRODUCT}" == "${None}" or "${PRODUCT}" == "RHODS"
+    IF  "${PRODUCT}" == "${None}" or "${PRODUCT}" == "RHODS" or "${UPDATE_CHANNEL}" == "odh-stable"
         ${CSV_DISPLAY} =    Set Variable     Red Hat OpenShift AI
     ELSE
         ${CSV_DISPLAY} =    Set Variable     Open Data Hub Operator
@@ -209,7 +207,7 @@ Verify DSC Contains Correct Component Versions  # robocop: disable:too-long-test
     END
     Common.Clone Git Repository  ${RHODS_OPERATOR_GIT_REPO}  rhoai-${rhods_operator_branch}  ${RHODS_OPERATOR_GIT_DIR}
     ${component_versions} =  Run
-    ...    oc get dsc default-dsc -o json | jq '.status.components'
+    ...    oc get dsc default-dsc -o json | jq '.status.components | with_entries(select(.value.releases != null)) | map_values(.releases |= map(select(.name != "platform")))'   # filter out components without releases and remove "platform" key
     ${component_versions_json} =    Evaluate     json.loads("""${component_versions}""")    json
     ${components} =  List Directories In Directory    ${RHODS_OPERATOR_GIT_DIR}/prefetched-manifests
     FOR  ${c}  IN  @{components}
@@ -232,7 +230,13 @@ Verify DSC Contains Correct Component Versions  # robocop: disable:too-long-test
             END
             ${component_metadata_content} =  Get File  ${component_metadata_file}
             ${component_metadata} =    Evaluate     yaml.safe_load("""${component_metadata_content}""")    yaml
-            Lists Should Be Equal    ${component_versions_json}[${cmp}][releases]   ${component_metadata}[releases]
+            ${dsc_releases} =    Set Variable    ${component_versions_json}[${cmp}][releases]
+            ${repo_releases} =    Set Variable    ${component_metadata}[releases]
+            ${component_versions_releases} =    Evaluate
+            ...    [dict(r, version=r["version"].removeprefix("v")) for r in $dsc_releases]
+            ${component_metadata_releases} =    Evaluate
+            ...    [dict(r, version=r["version"].removeprefix("v")) for r in $repo_releases]
+            Lists Should Be Equal    ${component_versions_releases}   ${component_metadata_releases}
             ...    msg=Component versions in DSC don't match component metadata in repo
         ELSE
             Log  ${c} does not provide component_metadata.yaml

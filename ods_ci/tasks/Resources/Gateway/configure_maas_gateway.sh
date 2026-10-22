@@ -49,13 +49,6 @@ metadata:
 spec:
   gatewayClassName: ${GW_CLASS_NAME}
   listeners:
-    - name: http
-      hostname: "maas.${CLUSTER_DOMAIN}"
-      port: 80
-      protocol: HTTP
-      allowedRoutes:
-        namespaces:
-          from: All
     - name: https
       hostname: "maas.${CLUSTER_DOMAIN}"
       port: 443

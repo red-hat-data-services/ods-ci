@@ -3,17 +3,37 @@ Documentation    This is a resource file for the DSC components.
 Resource  Menu.robot
 Resource  ../../OCP.resource
 Resource  ../../ODS.robot
+Resource  ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 
 
 *** Keywords ***
+Assert Training Operator Managed State Rejected
+    [Documentation]    Re-enabling Training Operator v1 must be rejected (DSC v2 validator).
+    ...                Always PATCH the v2 API; v3 storage ignores trainingoperator on unversioned oc patch.
+    Patch V2 DSC Component And Expect Rejection
+    ...    ${DSC_NAME}
+    ...    trainingoperator
+    ...    Managed
+    ...    TrainingOperator v1 is obsolete
+
 Set DSC Component Removed State And Wait For Completion
     [Documentation]    Set component management state to 'Removed', and wait for deployment and pod to be removed.
     [Arguments]    ${component}    ${deployment_name}    ${label_selector}
-    ...            ${namespace}=${APPLICATIONS_NS}     ${wait_for_completion}=True
+    ...    ${namespace}=${APPLICATIONS_NS}
+    ...    ${wait_for_completion}=True
+    ...    ${selected_dsc_name}=${EMPTY}
 
-    ${management_state}=    Get DSC Component State    ${DSC_NAME}    ${component}    ${OPERATOR_NS}
+    IF    "${selected_dsc_name}" == "${EMPTY}"
+        ${management_state}=    Get DSC Component State    ${DSC_NAME}    ${component}    ${OPERATOR_NS}
+    ELSE
+        ${management_state}=    Get DSC Component State    ${selected_dsc_name}    ${component}    ${OPERATOR_NS}
+    END
     IF    "${management_state}" != "Removed"
+        IF    "${selected_dsc_name}" == "${EMPTY}"
             Set Component State    ${component}    Removed
+        ELSE
+            Set Component State    ${component}    Removed    ${selected_dsc_name}
+        END
     END
 
     IF     ${wait_for_completion}
@@ -23,15 +43,25 @@ Set DSC Component Removed State And Wait For Completion
 Set DSC Component Managed State And Wait For Completion
     [Documentation]    Set component management state to 'Managed', and wait for deployment and pod to be available.
     [Arguments]    ${component}    ${deployment_name}    ${label_selector}
-    ...            ${namespace}=${APPLICATIONS_NS}      ${wait_for_completion}=True
+    ...    ${namespace}=${APPLICATIONS_NS}
+    ...    ${wait_for_completion}=True
+    ...    ${selected_dsc_name}=${EMPTY}
 
-    ${management_state}=    Get DSC Component State    ${DSC_NAME}    ${component}    ${OPERATOR_NS}
+    IF    "${selected_dsc_name}" == "${EMPTY}"
+        ${management_state}=    Get DSC Component State    ${DSC_NAME}    ${component}    ${OPERATOR_NS}
+    ELSE
+        ${management_state}=    Get DSC Component State    ${selected_dsc_name}    ${component}    ${OPERATOR_NS}
+    END
     IF    "${management_state}" != "Managed"
+        IF    "${selected_dsc_name}" == "${EMPTY}"
             Set Component State    ${component}    Managed
+        ELSE
+            Set Component State    ${component}    Managed    ${selected_dsc_name}
+        END
     END
 
     IF     ${wait_for_completion}
-            Wait For Resources To Be Available    ${deployment_name}    ${label_selector}
+            Wait For Resources To Be Available    ${deployment_name}    ${label_selector}    ${namespace}
     END
 
 Set DSC Component Unmanaged State And Wait For Completion
@@ -210,8 +240,11 @@ Check Model Registry Namespace
     [Documentation]    Check that DSC modelregistry.registriesNamespace is correct for ODH/RHOAI
     ...    Validate that namespace exists.
 
+    # Read the current v3 field path: the operator serves v3, where modelregistry.registriesNamespace
+    # was renamed to aiHub.instancesNamespace. Reading the old v2 path on the v3 object returns ""
+    # (jsonpath on a missing field exits 0). See RHOAIENG-99541 / RHOAIENG-99717.
     ${rc}   ${namespace}=    Run And Return Rc And Output
-    ...    oc get DataScienceCluster/${DSC_NAME} -n ${OPERATOR_NS} -o "jsonpath={".spec.components.modelregistry.registriesNamespace"}"
+    ...    oc get DataScienceCluster/${DSC_NAME} -n ${OPERATOR_NS} -o "jsonpath={".spec.components.aiHub.instancesNamespace"}"
     Should Be Equal As Integers    ${rc}    0    msg=${namespace}
 
     Should Be Equal    ${namespace}    ${MODEL_REGISTRY_NAMESPACE}    msg=Model Registry Namespace: Actual "${namespace}" Expected: "${MODEL_REGISTRY_NAMESPACE}"

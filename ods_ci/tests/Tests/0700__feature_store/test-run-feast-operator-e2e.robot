@@ -18,7 +18,7 @@ ${FEAST_INSTANCE_NAME}=  test-image-reference
 *** Test Cases ***
 Run runTestDeploySimpleCRFunc test
     [Documentation]    Run Go E2E test: runTestDeploySimpleCRFunc
-    [Tags]  Tier1
+    [Tags]  Smoke
     ...     FeatureStore
     ...     RHOAIENG-14799
     Run Feast Operator E2E Test    TesDefaultFeastCR    e2e

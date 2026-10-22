@@ -64,7 +64,8 @@ Create Workbench
     ...             ${data_connection}=${NONE}
     Open Data Science Project Details Page       project_title=${prj_title}    tab_id=workbenches
     Wait Until Element Is Enabled    ${WORKBENCH_CREATE_BTN_XP}
-    Click Element    ${WORKBENCH_CREATE_BTN_XP}
+    # Retry: the project details page can re-render between finding the button and clicking it
+    Retry To Click Element    ${WORKBENCH_CREATE_BTN_XP}
     Wait Until Page Contains Element    ${WORKBENCH_NAME_INPUT_XP}
     Run Keyword And Continue On Failure     Element Should Be Disabled    ${WORKBENCH_CREATE_BTN_2_XP}
     Input Text    ${WORKBENCH_NAME_INPUT_XP}    ${workbench_title}
@@ -194,7 +195,10 @@ Select Workbench Image
     [Documentation]    Selects a Jupyter image in the workbench creation page
     [Arguments]     ${image_name}    ${version}=default
     Click Element    //a[@href="#name-and-description"]
-    Wait Until Page Contains Element    ${WORKBENCH_IMAGE_MENU_BTN_XP}
+    # ImageStreams are fetched asynchronously; the dashboard renders a Skeleton until they
+    # load, so workbench-image-stream-selection is not in the DOM yet (default wait is 5s).
+    Wait Until Page Contains Element    ${WORKBENCH_IMAGE_MENU_BTN_XP}    timeout=15s
+    Wait Until Element Is Enabled    ${WORKBENCH_IMAGE_MENU_BTN_XP}    timeout=10s
     Click Element    ${WORKBENCH_IMAGE_MENU_BTN_XP}
     Wait Until Page Contains Element    ${WORKBENCH_IMAGE_ITEM_BTN_XP}\[text()="${image_name}"]    timeout=10s
     Click Element    ${WORKBENCH_IMAGE_ITEM_BTN_XP}\[text()="${image_name}"]

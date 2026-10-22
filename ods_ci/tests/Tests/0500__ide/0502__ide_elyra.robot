@@ -9,8 +9,6 @@ Resource         ../../Resources/Page/OCPDashboard/Builds/Builds.robot
 Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Workbenches.resource
 Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Storages.resource
-Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
-Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Pipelines.resource
 Resource         ../../Resources/CLI/DataSciencePipelines/DataSciencePipelinesBackend.resource
 Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipelines.resource
 Library          Screenshot
@@ -33,7 +31,6 @@ ${PV_NAME} =    ods-ci-pv-elyra
 ${PV_DESCRIPTION} =    ods-ci-pv-elyra is a PV created to test Elyra in workbenches
 ${PV_SIZE} =    2
 ${ENVS_LIST} =    ${NONE}
-${DC_NAME} =    elyra-s3
 
 
 *** Test Cases ***
@@ -62,7 +59,7 @@ Verify Pipelines Integration With Elyra When Using Standard Data Science Based I
 
 *** Keywords ***
 Elyra Pipelines Suite Setup    # robocop: off=too-many-calls-in-keyword
-    [Documentation]    Suite Setup
+    [Documentation]    Suite Setup. The project and the pipeline server are created from the CLI.
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
     Set Suite Variable    ${USERNAME}    ${TEST_USER_3.USERNAME}
@@ -72,11 +69,9 @@ Elyra Pipelines Suite Setup    # robocop: off=too-many-calls-in-keyword
     ...    description=${PRJ_DESCRIPTION}    randomize_name=${TRUE}    as_user=${USERNAME}
     Set Suite Variable    ${PRJ_TITLE}            ${project_name_complete}
     Set Suite Variable    ${PROJECT_TO_DELETE}    ${project_name_complete}
-    Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_NAME}
-    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
-    ...            aws_bucket_name=ods-ci-ds-pipelines
-    Pipelines.Create Pipeline Server    dc_name=${DC_NAME}
-    ...    project_title=${PRJ_TITLE}
+    Create Pipeline Server From CLI    project_title=${PRJ_TITLE}
+    ...    aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
+    ...    aws_bucket_name=ods-ci-ds-pipelines
     DataSciencePipelinesBackend.Wait Until Pipeline Server Is Deployed    namespace=${PRJ_TITLE}
     Sleep    15s    reason=Wait until pipeline server is detected by dashboard
 
@@ -96,8 +91,14 @@ Verify Pipelines Integration With Elyra Running Hello World Pipeline Test     # 
     ...                 envs=${ENVS_LIST}
     Start Workbench     workbench_title=elyra_${img}    timeout=${workbench_timeout}
     Launch And Access Workbench    workbench_title=elyra_${img}
-    Clone Git Repository And Open    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main
-    ...    ods-ci-notebooks-main/notebooks/500__jupyterhub/pipelines/v2/elyra/run-pipelines-on-data-science-pipelines/hello-generic-world.pipeline  # robocop: disable
+    ${repo_url}=    Get Variable Value    ${GIT_HTTPS_URL}    ${EMPTY}
+    IF    '${repo_url}' == '${EMPTY}'
+        ${repo_url}=    Set Variable    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main
+    ELSE
+        ${repo_url}=    Set Variable    ${repo_url}ods-ci-notebooks-main.git
+    END
+    Clone Git Repository And Open    ${repo_url}
+    ...    ods-ci-notebooks-main/notebooks/500__jupyterhub/pipelines/v2/elyra/disconnected/run-pipelines-on-data-science-pipelines/hello-generic-world.pipeline  # robocop: disable
     Verify Hello World Pipeline Elements
     Set Runtime Image In All Nodes    runtime_image=${runtime_image}
     Run Pipeline    pipeline_name=${pipeline_name}

@@ -9,8 +9,6 @@ Resource         ../../Resources/Page/OCPDashboard/Builds/Builds.robot
 Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Workbenches.resource
 Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Storages.resource
-Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
-Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Pipelines.resource
 Resource         ../../Resources/CLI/DataSciencePipelines/DataSciencePipelinesBackend.resource
 Resource         ../../Resources/Page/ODH/ODHDashboard/ODHDataSciencePipelines.resource
 Library          Screenshot
@@ -23,7 +21,6 @@ Suite Teardown   Kale Pipelines Suite Teardown
 
 
 *** Variables ***
-${NOTEBOOKS_REPO_URL} =    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main
 ${KALE_NOTEBOOK_PATH} =    ods-ci-notebooks-main/notebooks/500__jupyterhub/pipelines/v2/kale/candies_sharing.ipynb
 ${PRJ_TITLE} =    kale-test
 ${PRJ_DESCRIPTION} =    testing Kale pipeline functionality
@@ -31,7 +28,6 @@ ${PV_NAME} =    ods-ci-pv-kale
 ${PV_DESCRIPTION} =    ods-ci-pv-kale is a PV created to test Kale in workbenches
 ${PV_SIZE} =    2
 ${ENVS_LIST} =    ${NONE}
-${DC_NAME} =    kale-s3
 
 
 *** Test Cases ***
@@ -61,7 +57,7 @@ Verify Pipelines Integration With Kale When Using Standard Data Science Based Im
 
 *** Keywords ***
 Kale Pipelines Suite Setup    # robocop: off=too-many-calls-in-keyword
-    [Documentation]    Suite Setup — mirrors Elyra (CLI project create + pipeline server)
+    [Documentation]    Suite Setup. The project and the pipeline server are created from the CLI.
     Set Library Search Order    SeleniumLibrary
     RHOSi Setup
     Set Suite Variable    ${USERNAME}    ${TEST_USER_3.USERNAME}
@@ -72,11 +68,9 @@ Kale Pipelines Suite Setup    # robocop: off=too-many-calls-in-keyword
     Set Suite Variable    ${PRJ_TITLE}            ${project_name_complete}
     Set Suite Variable    ${PROJECT_TO_DELETE}    ${project_name_complete}
     Ensure Kale Project Can Pull Red Hat Images    ${PRJ_TITLE}
-    Create S3 Data Connection    project_title=${PRJ_TITLE}    dc_name=${DC_NAME}
-    ...            aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
-    ...            aws_bucket_name=ods-ci-ds-pipelines
-    Pipelines.Create Pipeline Server    dc_name=${DC_NAME}
-    ...    project_title=${PRJ_TITLE}
+    Create Pipeline Server From CLI    project_title=${PRJ_TITLE}
+    ...    aws_access_key=${S3.AWS_ACCESS_KEY_ID}    aws_secret_access=${S3.AWS_SECRET_ACCESS_KEY}
+    ...    aws_bucket_name=ods-ci-ds-pipelines
     # Optional: set KALE_PATCH_PIPELINE_IMAGES=${TRUE} plus PIPELINE_*_IMAGE vars to override DSPA images.
     ${patch_pipeline_images}=    Get Variable Value    ${KALE_PATCH_PIPELINE_IMAGES}    ${FALSE}
     IF    ${patch_pipeline_images}
@@ -94,24 +88,22 @@ Verify Pipelines Integration With Kale Running Candies Pipeline Test     # roboc
     [Documentation]    Creates and starts a workbench using ${img}, opens the candies_sharing Kale sample notebook,
     ...    compiles and runs the pipeline, then verifies the run completes in the dashboard
     [Arguments]    ${img}    ${pipeline_name}    ${workbench_timeout}=600s
-    ${skip_workbench_version_check}=    Get Variable Value    ${SKIP_WORKBENCH_VERSION_CHECK}    ${FALSE}
-    ${kale_workbench_image_version}=    Get Variable Value    ${KALE_WORKBENCH_IMAGE_VERSION}    ${NONE}
-    # SKIP_WORKBENCH_VERSION_CHECK=${TRUE} skips the default/previous version dropdown assert
-    # (needed when the UI only lists a single tag, e.g. latest-only clusters).
-    ${workbench_image_version}=    Set Variable If    ${skip_workbench_version_check}    ${NONE}    default
-    Create Kale Workbench    workbench_title=kale_${img}    workbench_description=Kale test
+    # version=${NONE} skips the image version dropdown check; not in scope for a pipelines test
+    Create Workbench    workbench_title=kale_${img}    workbench_description=Kale test
     ...                 prj_title=${PRJ_TITLE}    image_name=${img}    hardware_profile=default-profile
-    ...                 storage=Persistent  pv_existent=${FALSE}    version=${workbench_image_version}
+    ...                 version=${NONE}
+    ...                 storage=Persistent  pv_existent=${FALSE}
     ...                 pv_name=${PV_NAME}_${img}  pv_description=${PV_DESCRIPTION}  pv_size=${PV_SIZE}
     ...                 envs=${ENVS_LIST}
-    # Patch before Start so the first pull uses the Kale tag (UI version picker may not list it).
-    IF    '${kale_workbench_image_version}' != '${NONE}'
-        Patch Workbench Notebook Image Tag Via CLI    workbench_title=kale_${img}
-        ...    project_title=${PRJ_TITLE}    image_tag=${kale_workbench_image_version}
-    END
     Start Workbench     workbench_title=kale_${img}    timeout=${workbench_timeout}
     ${dashboard_window}=    Launch And Access Workbench    workbench_title=kale_${img}
-    Clone Git Repository And Open    ${NOTEBOOKS_REPO_URL}    ${KALE_NOTEBOOK_PATH}  # robocop: disable
+    ${repo_url}=    Get Variable Value    ${GIT_HTTPS_URL}    ${EMPTY}
+    IF    '${repo_url}' == '${EMPTY}'
+        ${repo_url}=    Set Variable    https://github.com/redhat-rhods-qe/ods-ci-notebooks-main
+    ELSE
+        ${repo_url}=    Set Variable    ${repo_url}ods-ci-notebooks-main.git
+    END
+    Clone Git Repository And Open    ${repo_url}    ${KALE_NOTEBOOK_PATH}  # robocop: disable
     # Some images have Kale installed but its JupyterLab extension disabled by default
     Enable Kale Extension    notebook_path=${KALE_NOTEBOOK_PATH}
     ...    workbench_title=kale_${img}    project_title=${PRJ_TITLE}
@@ -133,4 +125,6 @@ Verify Pipelines Integration With Kale Teardown
     Close All Browsers
     Launch Data Science Project Main Page
     Open Data Science Project Details Page       project_title=${PRJ_TITLE}    tab_id=workbenches
-    Stop Workbench    workbench_title=kale_${img}
+    # Warn only: an early test failure can leave the workbench missing or never started, and the
+    # suite teardown deletes the whole project anyway. A hard failure here would mask the real one.
+    Run Keyword And Warn On Failure    Stop Workbench    workbench_title=kale_${img}

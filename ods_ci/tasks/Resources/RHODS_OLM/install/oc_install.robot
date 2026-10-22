@@ -1602,7 +1602,18 @@ Install NFS Operator Via Cli
 
 Deploy NFS Provisioner
     [Documentation]    Deploy a NFS instance, shared
+    ...                Skips deployment when the NFS StorageClass already exists:
+    ...                a pre-existing provisioner under a different CR name already
+    ...                provides the StorageClass and its pods carry a different
+    ...                nfsprovisioner_cr label, so a second deployment would never
+    ...                become ready.
     [Arguments]    ${storage_size}=100G    ${nfs_provisioner_name}=nfs-provisioner
+    ${rc}    ${output} =    Run And Return Rc And Output
+    ...    oc get storageclass nfs -o name
+    IF    ${rc} == ${0}
+          Log To Console    message=NFS StorageClass nfs already exists, skipping NFS provisioner deployment
+          RETURN
+    END
     ${default_sc} =    Get Default Storage Class Name
     Set Test Variable    ${storage_class}    ${default_sc}
     Set Test Variable    ${storage_size}

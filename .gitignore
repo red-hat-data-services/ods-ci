@@ -21,5 +21,6 @@ infrastructure_configuration.yaml
 log/
 text-generation-inference/
 .cursor/
-Agents.mdods_ci/tasks/Resources/Files/nfs_storage_verify_pvc.yaml
+Agents.md
+ods_ci/tasks/Resources/Files/nfs_storage_verify_pvc.yaml
 ods_ci/tasks/Resources/Files/nfsprovisioner_cr.yaml

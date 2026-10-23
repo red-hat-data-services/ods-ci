@@ -77,7 +77,6 @@ ${CONNECTIVITY_LINK_SUB_NAME}=  rhcl-operator
 ${CONNECTIVITY_LINK_CHANNEL_NAME}=  stable-1.5
 ${CONNECTIVITY_LINK_STARTING_CSV}=  ${CONNECTIVITY_LINK_OP_NAME}.v1.5.0
 ${CONNECTIVITY_LINK_NS}=  kuadrant-system
-${AUTHORINO_CSV_NAME}=  Authorino Operator
 ${RHODS_CSV_DISPLAY}=    Red Hat OpenShift AI
 ${ODH_CSV_DISPLAY}=    Open Data Hub Operator
 ${DEFAULT_OPERATOR_NAMESPACE_RHOAI}=    redhat-ods-operator
@@ -1212,9 +1211,6 @@ Install Connectivity Link Operator Via Cli
              ...    retry=150
         # Wait for rhcl-operator to be ready
         Wait Until Csv Is Ready    display_name=${CONNECTIVITY_LINK_OP_NAME}
-             ...    operators_namespace=${CONNECTIVITY_LINK_NS}    timeout=5m
-        # Wait for authorino-operator to be ready (installed by rhcl-operator as OLM dependency)
-        Wait Until Csv Is Ready    display_name=${AUTHORINO_CSV_NAME}
              ...    operators_namespace=${CONNECTIVITY_LINK_NS}    timeout=5m
         # Skip configure_connectivity_link_operator.sh for s390x architecture
         ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64

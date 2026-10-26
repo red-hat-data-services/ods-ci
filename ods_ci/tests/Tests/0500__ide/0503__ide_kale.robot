@@ -80,7 +80,11 @@ Kale Pipelines Suite Setup    # robocop: off=too-many-calls-in-keyword
     Sleep    15s    reason=Wait until pipeline server is detected by dashboard
 
 Kale Pipelines Suite Teardown
-    [Documentation]    Closes the browser and deletes the test project
+    [Documentation]    If anything in the suite fails, this collects pipeline diagnostics,
+    ...    and then it closes the browser and deletes the test project.
+    IF    '${SUITE_STATUS}' == 'FAIL'
+        Log Pipeline Diagnostics    ${PRJ_TITLE}
+    END
     Delete Project Via CLI By Display Name    displayed_name=${PROJECT_TO_DELETE}
     Close All Browsers
 
@@ -104,6 +108,7 @@ Verify Pipelines Integration With Kale Running Candies Pipeline Test     # roboc
         ${repo_url}=    Set Variable    ${repo_url}ods-ci-notebooks-main.git
     END
     Clone Git Repository And Open    ${repo_url}    ${KALE_NOTEBOOK_PATH}  # robocop: disable
+    ...    workbench_title=kale_${img}    project_title=${PRJ_TITLE}
     # Some images have Kale installed but its JupyterLab extension disabled by default
     Enable Kale Extension    notebook_path=${KALE_NOTEBOOK_PATH}
     ...    workbench_title=kale_${img}    project_title=${PRJ_TITLE}

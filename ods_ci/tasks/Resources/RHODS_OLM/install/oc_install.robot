@@ -460,7 +460,7 @@ Verify RHODS Installation
   ${feastoperator} =    Is Component Enabled    feastoperator    ${DSC_NAME}
   IF    "${feastoperator}" == "true" or "${dataregistry}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/part-of=feastoperator
+    ...    label_selector=app.kubernetes.io/name=opendatahub-feast-operator
   END
 
   ${ogx} =     Is Component Enabled    ogx    ${DSC_NAME}

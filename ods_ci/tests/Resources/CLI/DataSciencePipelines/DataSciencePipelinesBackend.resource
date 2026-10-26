@@ -157,6 +157,69 @@ Wait Until Pipeline Server Is Deleted
         Sleep  1s
     END
 
+Get Pipeline Server Status
+    [Documentation]    Returns two things. The first is the status of the DSPA Ready condition
+    ...    ("True", False", "Unknown", or empty string), which is an empty string when the DSPA
+    ...    could not be read at all. The second is a comma-separated "Type=Status" list of the
+    ...    conditions that are not True, nonempty only when the server is not Ready.
+    ...    Only the aggregate Ready condition says whether the server is usable. Note that components
+    ...    can be purposely set to False on a healthy DSPA.
+    [Arguments]    ${namespace}
+    ${ready}=    Run    oc get dspa dspa -n ${namespace} -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}' 2>/dev/null    # robocop: off=line-too-long
+    ${ready}=    Set Variable    ${ready.strip()}
+    IF    $ready == "" or $ready == "True"    RETURN    ${ready}    ${EMPTY}
+    ${conditions}=    Run    oc get dspa dspa -n ${namespace} -o jsonpath='{range .status.conditions[?(@.status!="True")]}{.type}={.status}{"\\n"}{end}' 2>/dev/null | grep -v '^$' | paste -sd, -    # robocop: off=line-too-long
+    RETURN    ${ready}    ${conditions.strip()}
+
+Get Failed Workflow Nodes
+    [Documentation]    Returns the failed nodes of the Argo workflow belonging to ${pipeline_name},
+    ...    as a comma separated "name(type)" list. Returns an empty string when that workflow has
+    ...    no failed node, or cannot be found.
+    [Arguments]    ${namespace}    ${pipeline_name}
+    ${workflow}=    Run    oc get workflows.argoproj.io -n ${namespace} --sort-by=.metadata.creationTimestamp -o name 2>/dev/null | grep -- '/${pipeline_name}-' | tail -1    # robocop: off=line-too-long
+    ${workflow}=    Set Variable    ${workflow.strip().rpartition("/")[2]}
+    IF    $workflow == ""    RETURN    ${EMPTY}
+    ${out}=    Run    oc get workflows.argoproj.io ${workflow} -n ${namespace} -o jsonpath='{range .status.nodes.*}{.phase}|{.type}|{.displayName}{"\\n"}{end}' 2>/dev/null | awk -F'|' -v wf=${workflow} '($1=="Failed" || $1=="Error") && $3!=wf {printf "%s%s(%s)", s, $3, $2; s=", "}'    # robocop: off=line-too-long
+    RETURN    ${out.strip()}
+
+Get Pipeline Run Failure Summary
+    [Documentation]    Oneline return explaining why a run did not succeed, for use in the
+    ...    failure message itself. The TFA sign-off bot copies that message into the Jira issue.
+    ...    Returns an empty string when nothing conclusive was found.
+    ...    Built only from the two getters above, so it inherits their bounded output.
+    ...    Adding unbounded output could cause it to leak to JIRA.
+    [Arguments]    ${namespace}    ${pipeline_name}
+    ${ready}    ${conditions}=    Get Pipeline Server Status    ${namespace}
+    IF    $ready != "" and $ready != "True"
+        RETURN    pipeline server was not ready (${conditions})
+    END
+    ${nodes}=    Get Failed Workflow Nodes    ${namespace}    ${pipeline_name}
+    IF    $nodes != ""    RETURN    run failed at ${nodes}
+    RETURN    ${EMPTY}
+
+Log Pipeline Diagnostics
+    [Documentation]    Writes pipeline server, workflow, pod and event state to the log, to narrow
+    ...    down where a failed run broke. To protect cluster information, only bounded values are printed - 
+    ...    free text is not.
+    [Arguments]    ${namespace}
+    Run Keyword And Warn On Failure    Collect Pipeline Diagnostics    ${namespace}
+
+Collect Pipeline Diagnostics
+    [Documentation]    Body of Log Pipeline Diagnostics, split out so the wrapper can swallow
+    ...    failures while this stays readable.
+    ...    Prints only bounded values, drawn from a fixed vocabulary: condition types, statuses and reasons, 
+    ...    Kubernetes state reasons, exit codes, phases, and names of objects the test created.Free text from
+    ...    failing components is not printed because it could leak cluster config information.
+    [Arguments]    ${namespace}
+    ${conditions}=    Run    oc get dspa dspa -n ${namespace} -o jsonpath='{range .status.conditions[*]}{.type}={.status} ({.reason}){"\\n"}{end}' 2>/dev/null    # robocop: off=line-too-long
+    Log    Pipeline server (DSPA) conditions (type=status, reason):\n${conditions}    console=True
+    ${steps}=    Run    oc get workflows.argoproj.io -n ${namespace} -o jsonpath='{range .items[*]}{range .status.nodes.*}{.displayName}{"="}{.phase}{"\\n"}{end}{end}' 2>/dev/null | grep -v '=Succeeded$' | grep -v '^$'    # robocop: off=line-too-long
+    Log    Workflow steps that did not succeed:\n${steps}    console=True
+    ${pods}=    Run    oc get pods -n ${namespace} --no-headers -o custom-columns=NAME:.metadata.name,PHASE:.status.phase,TERMINATED:.status.containerStatuses[*].state.terminated.reason,EXIT:.status.containerStatuses[*].state.terminated.exitCode,WAITING:.status.containerStatuses[*].state.waiting.reason 2>/dev/null    # robocop: off=line-too-long
+    Log    Pod states (name, phase, terminated reason, exit code, waiting reason):\n${pods}    console=True
+    ${events}=    Run    oc get events -n ${namespace} --field-selector type=Warning --sort-by=.lastTimestamp --no-headers -o custom-columns=REASON:.reason,OBJECT:.involvedObject.name,COUNT:.count 2>/dev/null | tail -20    # robocop: off=line-too-long
+    Log    Recent warning events (reason, object, count):\n${events}    console=True
+
 # robocop: disable:line-too-long
 Create Pipelines ConfigMap With Custom Pip Index Url And Trusted Host
     [Documentation]     Creates a Configmap (ds-pipeline-custom-env-vars) in the project,

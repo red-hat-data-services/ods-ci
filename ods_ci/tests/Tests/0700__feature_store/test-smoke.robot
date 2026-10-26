@@ -16,7 +16,8 @@ Feature Store Smoke Test
 
     # Verify feature store operator deployment available
     Log To Console    Waiting for Feature store operator deployment to be available
-    ${result} =    Run Process    oc wait --for\=condition\=Available --timeout\=300s -n ${APPLICATIONS_NAMESPACE} deployment/opendatahub-feast-operator
+    ${result} =    Run Process
+    ...    oc wait --for\=condition\=Available --timeout\=300s -n ${APPLICATIONS_NAMESPACE} deployment/opendatahub-feast-operator
     ...    shell=true    stderr=STDOUT
     Log To Console    ${result.stdout}
     IF    ${result.rc} != 0

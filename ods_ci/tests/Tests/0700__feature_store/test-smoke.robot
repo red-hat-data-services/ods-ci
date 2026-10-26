@@ -16,22 +16,22 @@ Feature Store Smoke Test
 
     # Verify feature store operator deployment available
     Log To Console    Waiting for Feature store operator deployment to be available
-    ${result} =    Run Process    oc wait --for\=condition\=Available --timeout\=300s -n ${APPLICATIONS_NAMESPACE} deployment/feast-operator-controller-manager
+    ${result} =    Run Process    oc wait --for\=condition\=Available --timeout\=300s -n ${APPLICATIONS_NAMESPACE} deployment/opendatahub-feast-operator
     ...    shell=true    stderr=STDOUT
     Log To Console    ${result.stdout}
     IF    ${result.rc} != 0
-        FAIL    Timeout waiting for deployment/feast-operator-controller-manager to be available in ${APPLICATIONS_NAMESPACE}
+        FAIL    Timeout waiting for deployment/opendatahub-feast-operator to be available in ${APPLICATIONS_NAMESPACE}
     END
-    Log To Console    feast-operator-controller-manager deployment is available
+    Log To Console    opendatahub-feast-operator deployment is available
 
     # Verify feature store oeprator metrics service exists
-    ${result} =    Run Process    oc get service -n ${APPLICATIONS_NAMESPACE} feast-operator-controller-manager-metrics-service
+    ${result} =    Run Process    oc get service -n ${APPLICATIONS_NAMESPACE} opendatahub-feast-operator-metrics-service
     ...    shell=true    stderr=STDOUT
     Log To Console    ${result.stdout}
     IF    ${result.rc} != 0
-        FAIL    Can not find feast-operator-controller-manager-metrics-service in ${APPLICATIONS_NAMESPACE}
+        FAIL    Can not find opendatahub-feast-operator-metrics-service in ${APPLICATIONS_NAMESPACE}
     END
-    Log To Console    feast-operator-controller-manager-metrics-service exists
+    Log To Console    opendatahub-feast-operator-metrics-service exists
 
     #  Verify feature store operator container image referrence
-    Verify container images    feast-operator-controller-manager    manager    odh-feast-operator
+    Verify container images    opendatahub-feast-operator    manager    odh-feast-operator

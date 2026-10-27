@@ -22,6 +22,7 @@ ${DSCI_NAME} =    default-dsci
 ...    workbenches
 ...    modelregistry
 ...    feastoperator
+...    dataregistry
 ...    ogx
 ...    mlflowoperator
 ...    modelsasservice
@@ -73,10 +74,9 @@ ${CERT_MANAGER_CHANNEL_NAME}=  stable-v1
 ${CERT_MANAGER_NS}=  cert-manager-operator
 ${CONNECTIVITY_LINK_OP_NAME}=  rhcl-operator
 ${CONNECTIVITY_LINK_SUB_NAME}=  rhcl-operator
-${CONNECTIVITY_LINK_CHANNEL_NAME}=  stable
-${CONNECTIVITY_LINK_STARTING_CSV}=  ${CONNECTIVITY_LINK_OP_NAME}.v1.4.2
+${CONNECTIVITY_LINK_CHANNEL_NAME}=  stable-1.5
+${CONNECTIVITY_LINK_STARTING_CSV}=  ${CONNECTIVITY_LINK_OP_NAME}.v1.5.0
 ${CONNECTIVITY_LINK_NS}=  kuadrant-system
-${AUTHORINO_CSV_NAME}=  Authorino Operator
 ${RHODS_CSV_DISPLAY}=    Red Hat OpenShift AI
 ${ODH_CSV_DISPLAY}=    Open Data Hub Operator
 ${DEFAULT_OPERATOR_NAMESPACE_RHOAI}=    redhat-ods-operator
@@ -290,6 +290,13 @@ Get Helm Path For Component
     IF    "${component}" == "batchgateway"
         RETURN    components.aigateway.dsc.batchGateway.managementState
     END
+    # Feature Store and Data Registry are capabilities nested under the Data module.
+    IF    "${component}" == "feastoperator"
+        RETURN    components.data.dsc.featureStore.managementState
+    END
+    IF    "${component}" == "dataregistry"
+        RETURN    components.data.dsc.dataRegistry.managementState
+    END
 
     # Handling of standard component cases:
     ${is_known} =    Evaluate    "${component}" in ${COMPONENT_LIST}
@@ -467,8 +474,9 @@ Verify RHODS Installation
     ...    label_selector=app.kubernetes.io/name=trainer
   END
 
+  ${dataregistry} =    Is Component Enabled    dataregistry    ${DSC_NAME}
   ${feastoperator} =    Is Component Enabled    feastoperator    ${DSC_NAME}
-  IF    "${feastoperator}" == "true"
+  IF    "${feastoperator}" == "true" or "${dataregistry}" == "true"
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
     ...    label_selector=app.kubernetes.io/part-of=feastoperator
   END
@@ -530,7 +538,7 @@ Verify RHODS Installation
     END
   END
 
-  IF    "${dashboard}" == "true" or "${workbenches}" == "true" or "${aipipelines}" == "true" or "${kserve}" == "true" or "${kueue}" == "true" or "${ray}" == "true" or "${trustyai}" == "true" or "${modelregistry}" == "true" or "${sparkoperator}" == "true" or "${aigateway}" == "true" or "${batchgateway}" == "true" or "${mcplifecycleoperator}" == "true"    # robocop: disable
+  IF    "${dashboard}" == "true" or "${workbenches}" == "true" or "${aipipelines}" == "true" or "${kserve}" == "true" or "${kueue}" == "true" or "${ray}" == "true" or "${trustyai}" == "true" or "${modelregistry}" == "true" or "${sparkoperator}" == "true" or "${aigateway}" == "true" or "${batchgateway}" == "true" or "${mcplifecycleoperator}" == "true" or "${dataregistry}" == "true"    # robocop: disable
       Log To Console    Waiting for pod status in ${APPLICATIONS_NAMESPACE}
       Wait For Pods Status  namespace=${APPLICATIONS_NAMESPACE}  timeout=600
       Log  Verified Applications NS: ${APPLICATIONS_NAMESPACE}  console=yes
@@ -887,30 +895,12 @@ Apply DataScienceCluster CustomResource
         END
     END
 
-Get Served DSC API Version
-    [Documentation]    Return v3 when the installed DataScienceCluster CRD serves v3, otherwise v2.
-    ...                rhods-operator.3.6.0 serves v3. Builds such as rhods-operator.3.6.0-ea.2 serve v2
-    ...                only. Presence of aigateway.modelsAsAService is not a version check.
-    ...                Always reads the CRD so an in-suite operator upgrade that starts serving v3
-    ...                is picked up on the next DSC create/read.
-    ${rc}    ${versions} =    Run And Return Rc And Output
-    ...    oc get crd datascienceclusters.datasciencecluster.opendatahub.io -o jsonpath='{range .spec.versions[?(@.served==true)]}{.name}{" "}{end}'    #robocop:disable
-    Should Be Equal As Integers    ${rc}    0    msg=Cannot read served DataScienceCluster CRD versions: ${versions}
-    ${serves_v3} =    Evaluate    "v3" in """${versions}""".split()
-    ${version} =    Set Variable If    ${serves_v3}    v3    v2
-    Log To Console    DataScienceCluster served versions: ${versions}; selected ${version}
-    RETURN    ${version}
-
 Create DataScienceCluster CustomResource Using Test Variables
     [Documentation]
     [Arguments]    ${dsc_name}=${DSC_NAME}    ${dsc_template}=${DSC_TEMPLATE}
     ${file_path} =    Set Variable    tasks/Resources/Files/
     ${template_to_apply} =    Set Variable    ${dsc_template}
-    ${api_version} =    Get Served DSC API Version
-    IF    '${dsc_template}' == '${DSC_TEMPLATE}' and '${api_version}' != 'v3'
-        ${template_to_apply} =    Set Variable    dsc_template_v2.yml
-    END
-    Log To Console    Applying DataScienceCluster from ${template_to_apply} (served API ${api_version})
+    Log To Console    Applying DataScienceCluster from ${template_to_apply}
     Copy File    source=${file_path}${template_to_apply}    destination=${file_path}dsc_apply.yml
     Run    sed -i'' -e 's/<dsc_name>/${dsc_name}/' ${file_path}dsc_apply.yml
     # Detect whether this cluster uses the 3.5+ MaaS DSC field (aigateway.modelsAsAService)
@@ -956,9 +946,6 @@ Create DataScienceCluster CustomResource Using Test Variables
     # Fill legacy placeholder with Removed when not on 3.4 or MaaS not Managed
     Run    sed -i'' -e 's/<modelsasservice_legacy_value>/Removed/' ${file_path}dsc_apply.yml
     @{components_to_fill} =    Copy List    ${COMPONENT_LIST}
-    IF    '${template_to_apply}' == 'dsc_template_v2.yml'
-        Append To List    ${components_to_fill}    trainingoperator    llamastackoperator
-    END
     FOR    ${cmp}    IN    @{components_to_fill}
             IF    $cmp not in $COMPONENTS
                 Run    sed -i'' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
@@ -1049,26 +1036,52 @@ Nested Component Should Not Be Enabled
     END
 
 Get DSC Component Path
-    [Documentation]    Maps a suite component name to its .spec.components jq/jsonpath (leading dot).
-    ...                When the CRD serves v3, modelregistry->aiHub, feastoperator->data.featureStore,
-    ...                and dashboard->dashboard.standard. v2 keeps the flat component names.
+    [Documentation]    Maps a suite component name to its v3 .spec.components jq/jsonpath (leading dot).
+    ...                The v3 DSC reorg renamed modelregistry->aiHub, feastoperator->data.featureStore,
+    ...                dataregistry->data.dataRegistry, and dashboard->dashboard.standard.
     [Arguments]    ${component}
-    ${api_version} =    Get Served DSC API Version
-    IF    '${api_version}' == 'v3'
-        IF    "${component}" == "modelregistry"
-            RETURN    .spec.components.aiHub.managementState
-        ELSE IF    "${component}" == "feastoperator"
-            RETURN    .spec.components.data.featureStore.managementState
-        ELSE IF    "${component}" == "dashboard"
-            RETURN    .spec.components.dashboard.standard.managementState
-        END
+    IF    "${component}" == "modelregistry"
+        RETURN    .spec.components.aiHub.managementState
+    ELSE IF    "${component}" == "feastoperator"
+        RETURN    .spec.components.data.featureStore.managementState
+    ELSE IF    "${component}" == "dataregistry"
+        RETURN    .spec.components.data.dataRegistry.managementState
+    ELSE IF    "${component}" == "dashboard"
+        RETURN    .spec.components.dashboard.standard.managementState
     END
     RETURN    .spec.components.${component}.managementState
+
+Get DSC Component Patch
+    [Documentation]    Builds a v3 merge patch to set or remove a component's managementState.
+    ...                An empty state removes the field when restoring the original DSC configuration.
+    ...                Mirrors Get DSC Component Path: the v3 DSC reorg renamed
+    ...                modelregistry->aiHub, feastoperator->data.featureStore,
+    ...                dataregistry->data.dataRegistry, and dashboard->dashboard.standard.
+    ...                All other components keep their flat name.
+    ...                A flat .spec.components.${component}.managementState patch is silently
+    ...                dropped for these renamed components on a v3-served DSC (RHOAIENG-101062).
+    [Arguments]    ${component}    ${state}
+    IF    "${component}" == "modelregistry"
+        RETURN    {"spec":{"components":{"aiHub":{"managementState":"${state}"}}}}
+    ELSE IF    "${component}" == "feastoperator"
+        IF    "${state}" == "${EMPTY}"
+            RETURN    {"spec":{"components":{"data":{"featureStore":{"managementState":null}}}}}
+        END
+        RETURN    {"spec":{"components":{"data":{"featureStore":{"managementState":"${state}"}}}}}
+    ELSE IF    "${component}" == "dataregistry"
+        IF    "${state}" == "${EMPTY}"
+            RETURN    {"spec":{"components":{"data":{"dataRegistry":{"managementState":null}}}}}
+        END
+        RETURN    {"spec":{"components":{"data":{"dataRegistry":{"managementState":"${state}"}}}}}
+    ELSE IF    "${component}" == "dashboard"
+        RETURN    {"spec":{"components":{"dashboard":{"standard":{"managementState":"${state}"}}}}}
+    END
+    RETURN    {"spec":{"components":{"${component}":{"managementState":"${state}"}}}}
 
 Is Component Enabled
     [Documentation]    Returns the enabled status of a single component (true/false).
     ...                Reads the DSC using the served CRD version. v3 maps modelregistry, feastoperator,
-    ...                and dashboard onto their reorganized paths. v2 reads the flat component names.
+    ...                dataregistry, and dashboard onto their reorganized paths. v2 reads flat component names.
     [Arguments]    ${component}    ${dsc_name}=${DSC_NAME}
     ${jq_path} =    Get DSC Component Path    ${component}
     ${return_code}    ${output} =    Run And Return Rc And Output    oc get datasciencecluster ${dsc_name} -o json | jq '${jq_path} // "Removed"'  #robocop:disable
@@ -1216,9 +1229,6 @@ Install Connectivity Link Operator Via Cli
              ...    retry=150
         # Wait for rhcl-operator to be ready
         Wait Until Csv Is Ready    display_name=${CONNECTIVITY_LINK_OP_NAME}
-             ...    operators_namespace=${CONNECTIVITY_LINK_NS}    timeout=5m
-        # Wait for authorino-operator to be ready (installed by rhcl-operator as OLM dependency)
-        Wait Until Csv Is Ready    display_name=${AUTHORINO_CSV_NAME}
              ...    operators_namespace=${CONNECTIVITY_LINK_NS}    timeout=5m
         # Skip configure_connectivity_link_operator.sh for s390x architecture
         ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
@@ -1491,6 +1501,9 @@ Install RHOAI Dependencies With CLI
     Install Kueue Dependencies
     Install Leader Worker Set Operator Via Cli
     Install Connectivity Link Operator Via Cli
+    Install NFS Operator Via Cli
+    Deploy NFS Provisioner
+    Verify NFS Storage Class
     Install JobSet Dependencies
     Install Agent Sandbox Operator Via Cli
     ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
@@ -1598,20 +1611,47 @@ Create DSCI With Custom Namespaces
     Wait For DSCInitialization CustomResource To Be Ready
 
 Set Component State
-    [Documentation]    Set component state in Data Science Cluster (state should be Managed or Removed)
-    [Arguments]    ${component}    ${state}
-    ${result} =    Run Process    oc get datascienceclusters.datasciencecluster.opendatahub.io -o name
-    ...    shell=true    stderr=STDOUT
+    [Documentation]    Set component state in Data Science Cluster (state should be Managed or Removed).
+    ...                Uses the v3-aware .spec.components path (see Get DSC Component Patch) so a flat
+    ...                patch is not silently dropped for renamed components on v3 (RHOAIENG-101062).
+    [Arguments]    ${component}    ${state}    ${dsc_name}=${EMPTY}
+    IF    "${dsc_name}" == "${EMPTY}"
+        ${result} =    Run Process    oc get datascienceclusters.datasciencecluster.opendatahub.io -o name
+        ...    shell=true    stderr=STDOUT
+    ELSE
+        ${result} =    Run Process    oc get datascienceclusters.datasciencecluster.opendatahub.io ${dsc_name} -o name
+        ...    shell=true    stderr=STDOUT
+    END
     IF    $result.stdout == ""
         FAIL    Can not find datasciencecluster
     END
     ${cluster_name} =    Set Variable    ${result.stdout}
-    ${result} =    Run Process    oc patch ${cluster_name} --type merge -p '{"spec":{"components":{"${component}":{"managementState":"${state}"}}}}'
+    ${patch} =    Get DSC Component Patch    ${component}    ${state}
+    ${result} =    Run Process    oc patch ${cluster_name} --type merge -p '${patch}'
     ...    shell=true    stderr=STDOUT
     IF    $result.rc != 0
         FAIL    Can not enable ${component}: ${result.stdout}
     END
     Log To Console    Component ${component} state was set to ${state}
+
+Patch V2 DSC Component And Expect Rejection
+    [Documentation]    PATCH a retired v2-only DSC component; expect apiserver/webhook denial (403 body).
+    ...                Use when storage is v3 and unversioned oc patch drops unknown fields.
+    [Arguments]    ${dsc_name}    ${component}    ${state}    ${expected_fragment}
+    ${rc}    ${api_server} =    Run And Return Rc And Output    oc whoami --show-server
+    Should Be Equal As Integers    ${rc}    0    msg=Cannot read API server: ${api_server}
+    ${rc}    ${token} =    Run And Return Rc And Output    oc whoami -t
+    Should Be Equal As Integers    ${rc}    0    msg=Cannot read OpenShift token
+    ${patch} =    Set Variable    {"spec":{"components":{"${component}":{"managementState":"${state}"}}}}
+    ${url} =    Set Variable    ${api_server}/apis/datasciencecluster.opendatahub.io/v2/datascienceclusters/${dsc_name}
+    ${result} =    Run Process    curl    -sk    -X    PATCH
+    ...    -H    Authorization: Bearer ${token}
+    ...    -H    Content-Type: application/merge-patch+json
+    ...    ${url}
+    ...    -d    ${patch}
+    ...    stderr=STDOUT
+    Should Contain    ${result.stdout}    ${expected_fragment}
+    Should Contain    ${result.stdout}    Failure
 
 Set Nested Component State
     [Documentation]    Set nested component state in Data Science Cluster (e.g., aigateway.modelsAsAService).
@@ -1735,22 +1775,68 @@ Install NFS Operator Via Cli
 
 Deploy NFS Provisioner
     [Documentation]    Deploy a NFS instance, shared
-    [Arguments]    ${storage_size}    ${nfs_provisioner_name}
-    ${default_sc} =    Get Default Storage Class Name
-    Set Test Variable    ${storage_class}    ${default_sc}
-    Set Test Variable    ${storage_size}
-    Set Test Variable    ${nfs_provisioner_name}
-    Create File From Template    ${RESOURCES_DIRPATH}/nfsprovisioner_template.yaml    ${RESOURCES_DIRPATH}/nfsprovisioner_cr.yaml
-    ${rc}    ${output}=    Run And Return Rc And Output
-    ...    oc apply -f ${RESOURCES_DIRPATH}/nfsprovisioner_cr.yaml
-    Should Be Equal As Integers    ${rc}    0
-    Log    ${output}    console=yes
-    Wait For Pods To Be Ready    label_selector=nfsprovisioner_cr=${nfs_provisioner_name}
-    ...    namespace=${NFS_OP_NS}
+    ...                Skips deployment when the NFS StorageClass already exists:
+    ...                a pre-existing provisioner under a different CR name already
+    ...                provides the StorageClass and its pods carry a different
+    ...                nfsprovisioner_cr label, so a second deployment would never
+    ...                become ready. The mount options patch runs on both paths so a
+    ...                pre-existing StorageClass is also configured for NFSv3.
+    [Arguments]    ${storage_size}=100G    ${nfs_provisioner_name}=nfs-provisioner
     ${rc}    ${output} =    Run And Return Rc And Output
-    ...    oc patch storageclass nfs -p '{"mountOptions":["nfsvers=3"]}'
-    Should Be Equal As Integers    ${rc}    0
+    ...    oc get storageclass nfs -o name
+    IF    ${rc} != ${0}
+        ${default_sc} =    Get Default Storage Class Name
+        Set Test Variable    ${storage_class}    ${default_sc}
+        Set Test Variable    ${storage_size}
+        Set Test Variable    ${nfs_provisioner_name}
+        Create File From Template    ${RESOURCES_DIRPATH}/nfsprovisioner_template.yaml
+        ...    ${RESOURCES_DIRPATH}/nfsprovisioner_cr.yaml
+        ${rc}    ${output} =    Run And Return Rc And Output
+        ...    oc apply -f ${RESOURCES_DIRPATH}/nfsprovisioner_cr.yaml
+        Should Be Equal As Integers    ${rc}    0    msg=Failed to apply NFS provisioner CR: ${output}
+        Log    ${output}    console=yes
+        Wait For Pods To Be Ready    label_selector=nfsprovisioner_cr=${nfs_provisioner_name}
+        ...    namespace=${NFS_OP_NS}
+    ELSE
+        Log To Console    message=NFS StorageClass nfs already exists, skipping NFS provisioner deployment
+    END
+    Wait Until Keyword Succeeds    10x    30s
+    ...    Patch NFS Storage Class Mount Options    storageclass_name=nfs
+
+Patch NFS Storage Class Mount Options
+    [Documentation]    Patch NFS StorageClass mount options to force NFSv3
+    [Arguments]    ${storageclass_name}=nfs
+    ${rc}    ${output} =    Run And Return Rc And Output
+    ...    oc patch storageclass ${storageclass_name} -p '{"mountOptions":["nfsvers=3"]}'
+    Should Be Equal As Integers    ${rc}    0    msg=Failed to patch StorageClass ${storageclass_name}: ${output}
     Log    ${output}    console=yes
+
+Verify NFS Storage Class
+    [Documentation]    Verifies the NFS StorageClass can provision and bind a ReadWriteMany claim.
+    ...                Uses a run-specific PVC name so concurrent invocations do not
+    ...                interfere; stale verification PVCs from earlier runs are
+    ...                removed by label. The PVC is deleted at the end of the keyword.
+    [Arguments]    ${storageclass_name}=nfs    ${pvc_size}=1Gi    ${timeout}=5m
+    ${epoch} =    Get Time    epoch
+    ${pvc_name} =    Set Variable    nfs-storage-verify-${epoch}
+    ${rc}    ${output} =    Run And Return Rc And Output
+    ...    oc delete pvc -l app=nfs-storage-verify -n ${NFS_OP_NS} --ignore-not-found
+    Should Be Equal As Integers    ${rc}    0    msg=Failed to clean up stale verification PVCs: ${output}
+    Set Test Variable    ${storageclass_name}
+    Set Test Variable    ${pvc_name}
+    Set Test Variable    ${pvc_size}
+    Create File From Template    ${RESOURCES_DIRPATH}/nfs_storage_verify_pvc_template.yaml
+    ...    ${RESOURCES_DIRPATH}/nfs_storage_verify_pvc.yaml
+    ${rc}    ${output} =    Run And Return Rc And Output
+    ...    oc apply -f ${RESOURCES_DIRPATH}/nfs_storage_verify_pvc.yaml -n ${NFS_OP_NS}
+    Should Be Equal As Integers    ${rc}    0    msg=Failed to create verification PVC: ${output}
+    ${wait_rc}    ${wait_output} =    Run And Return Rc And Output
+    ...    oc wait pvc ${pvc_name} -n ${NFS_OP_NS} --for=jsonpath='{.status.phase}'=Bound --timeout=${timeout}
+    ${rc}    ${delete_output} =    Run And Return Rc And Output
+    ...    oc delete pvc ${pvc_name} -n ${NFS_OP_NS} --ignore-not-found
+    Should Be Equal As Integers    ${rc}    0    msg=Failed to delete verification PVC: ${delete_output}
+    Should Be Equal As Integers    ${wait_rc}    0    msg=Verification PVC did not reach Bound state: ${wait_output}
+    Log    ${wait_output}    console=yes
 
 Configure Gateway API
     [Documentation]    Configure Gateway API for KServe inference traffic routing

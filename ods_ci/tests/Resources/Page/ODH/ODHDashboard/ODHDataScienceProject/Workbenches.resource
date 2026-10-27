@@ -606,6 +606,18 @@ Get Workbench Pod
     ${pod_info}=    Oc Get    kind=Pod  name=${cr_name}-0  api_version=v1  namespace=${ns_name}
     RETURN    ${ns_name}    ${cr_name}    ${pod_info}
 
+Delete Folder In Workbench
+    [Documentation]    Deletes /opt/app-root/src/${folder} from the pod of a workbench created in
+    ...    a Data Science Project.
+    ...    Separate from Delete Folder In User Notebook, which execs jupyter-nb-<user>-0 in
+    ...    ${NOTEBOOKS_NAMESPACE}. That naming only holds for a workbench spawned from the
+    ...    JupyterHub app, so it never matches a project workbench, which is ${cr_name}-0 in the
+    ...    project's own namespace.
+    [Arguments]    ${workbench_title}    ${project_title}    ${folder}
+    IF    $folder == ""    Fail    Delete Folder In Workbench was given no folder name
+    ${ns_name}    ${cr_name}    ${_}=    Get Workbench Pod    ${workbench_title}    ${project_title}
+    Run And Verify Command    oc exec ${cr_name}-0 -n ${ns_name} -- rm -rf /opt/app-root/src/${folder}
+
  Upload File In The Workbench
     [Documentation]    Uploads the working files inside the workbench PVC
     [Arguments]    ${workbench_title}    ${workbench_namespace}    ${filepath}

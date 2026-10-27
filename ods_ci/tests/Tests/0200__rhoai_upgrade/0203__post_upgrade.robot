@@ -8,7 +8,6 @@ Resource            ../../Resources/OCP.resource
 Resource            ../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboard.resource
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDashboardResources.resource
-Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/DataConnections.resource
 Resource            ../../Resources/Page/ODH/JupyterHub/HighAvailability.robot
 Resource            ../../Resources/Page/ODH/ODHDashboard/ODHDataScienceProject/Projects.resource
 Resource            ../../Resources/Page/ODH/AiApps/Anaconda.resource

@@ -442,5 +442,14 @@ Verify Kale Pipeline Run Is Completed
     ...    timeout=${timeout}
     ${status}=    Get Text    ${run_row}//td[@data-label="Status"]
     Capture Page Screenshot
-    Should Contain Any    ${status}    Succeeded    Complete    ignore_case=${TRUE}    values=${FALSE}
-    ...    msg=Kale pipeline run "${pipeline_name}" reached terminal state "${status}" instead of succeeding
+    ${succeeded}=    Run Keyword And Return Status
+    ...    Should Contain Any    ${status}    Succeeded    Complete    ignore_case=${TRUE}    values=${FALSE}
+    IF    not ${succeeded}
+        ${reason}=    Get Pipeline Run Failure Summary    ${PRJ_TITLE}    ${pipeline_name}
+        IF    $reason == ""
+            ${reason}=    Set Variable
+            ...    no reason could be read back from the pipeline server, see the diagnostics below
+        END
+        Log Pipeline Diagnostics    ${PRJ_TITLE}
+        Fail    Kale pipeline run "${pipeline_name}" reached terminal state "${status}": ${reason}
+    END

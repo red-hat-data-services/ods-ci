@@ -118,15 +118,18 @@ Verify That Alert Manager Image Is A CPaaS Built Image
     ...    registry.redhat.io/openshift4/ose-prometheus-alertmanager
 
 Verify Oath-Proxy Image Is A CPaaS Built Image
-    [Documentation]    Verifies the image used for oauth-proxy
+    [Documentation]    Verifies the image used for the dashboard auth proxy sidecar is a CPaaS built image.
+    ...    As of RHOAI 3.4 the dashboard no longer runs an "oauth-proxy" sidecar: under the
+    ...    Gateway-based auth model it runs a "kube-rbac-proxy" container instead. The former
+    ...    lookup for a container named "oauth-proxy" returned an empty image URL. See RHOAIENG-102054.
     [Tags]      Sanity
     ...         Tier1
     ...         ODS-666
     Wait For Pods To Be Ready    label_selector=app=${DASHBOARD_APP_NAME}
     ...    namespace=${APPLICATIONS_NAMESPACE}    timeout=60s
     ${pod} =    Find First Pod By Name  namespace=${APPLICATIONS_NAMESPACE}   pod_regex=${DASHBOARD_APP_NAME}-
-    Container Image Url Should Contain      ${APPLICATIONS_NAMESPACE}     ${pod}      oauth-proxy
-    ...     registry.redhat.io/openshift4/ose-oauth-proxy
+    Container Image Url Should Contain      ${APPLICATIONS_NAMESPACE}     ${pod}      kube-rbac-proxy
+    ...     registry.redhat.io/rhoai/odh-kube-auth-proxy
 
 Verify That CUDA Build Chain Succeeds
     [Documentation]    Check Cuda builds are complete. Verify CUDA (minimal-gpu),

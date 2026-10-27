@@ -75,7 +75,7 @@ Verify Oath-Proxy Image Is A CPaaS Built Image
     ...    namespace=${APPLICATIONS_NAMESPACE}    timeout=60s
     ${pod} =    Find First Pod By Name  namespace=${APPLICATIONS_NAMESPACE}   pod_regex=${DASHBOARD_APP_NAME}-
     Container Image Url Should Contain      ${APPLICATIONS_NAMESPACE}     ${pod}      kube-rbac-proxy
-    ...     registry.redhat.io/rhoai/odh-kube-auth-proxy
+    ...     registry.redhat.io/rhoai/odh-kube-auth-proxy-rhel9
 
 Verify That CUDA Build Chain Succeeds
     [Documentation]    Check Cuda builds are complete. Verify CUDA (minimal-gpu),

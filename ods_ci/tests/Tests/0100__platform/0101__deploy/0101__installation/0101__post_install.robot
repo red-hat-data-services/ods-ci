@@ -62,6 +62,21 @@ Verify GPU Operator Deployment  # robocop: disable
     Verify DaemonSet Status  label=app=nvidia-node-status-exporter  dsname=nvidia-node-status-exporter
     Verify DaemonSet Status  label=app=nvidia-operator-validator  dsname=nvidia-operator-validator
 
+Verify Oath-Proxy Image Is A CPaaS Built Image
+    [Documentation]    Verifies the image used for the dashboard auth proxy sidecar is a CPaaS built image.
+    ...    The dashboard no longer runs an "oauth-proxy" sidecar: under the Gateway-based auth model
+    ...    it runs a "kube-rbac-proxy" container instead. This test was removed in #2926 as part of a
+    ...    monitoring-stack cleanup, but the dashboard auth-proxy image check is still relevant and is
+    ...    restored here pointing at the current container/image. See RHOAIENG-102054.
+    [Tags]      Sanity
+    ...         Tier1
+    ...         ODS-666
+    Wait For Pods To Be Ready    label_selector=app=${DASHBOARD_APP_NAME}
+    ...    namespace=${APPLICATIONS_NAMESPACE}    timeout=60s
+    ${pod} =    Find First Pod By Name  namespace=${APPLICATIONS_NAMESPACE}   pod_regex=${DASHBOARD_APP_NAME}-
+    Container Image Url Should Contain      ${APPLICATIONS_NAMESPACE}     ${pod}      kube-rbac-proxy
+    ...     registry.redhat.io/rhoai/odh-kube-auth-proxy
+
 Verify That CUDA Build Chain Succeeds
     [Documentation]    Check Cuda builds are complete. Verify CUDA (minimal-gpu),
     ...    Pytorch and Tensorflow can be spawned successfully

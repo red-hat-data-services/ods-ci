@@ -13,8 +13,8 @@ Test Tags           ExcludeOnODH
 ${FEAST_MCP_CR_FILE}=           tests/Resources/Page/FeatureStore/feature_store_mcp_cr.yaml
 ${PRJ_TITLE}=                   test-ns-feast-mcp
 ${FEAST_INSTANCE_NAME}=         test-mcp-server
-# Set to True by "Create Feast Instance". Defined here so the teardown works
-# even when the instance was never created.
+# Set to True once the test creates the project. The teardown deletes the
+# Feast instance and the project only when it is True.
 ${FEAST_INSTANCES_CREATED}=     False
 
 
@@ -28,6 +28,7 @@ Verify Feast MCP Server Deployment
     Feast CRD Should Have MCP Server Field
     Log To Console    Creating Data Science Project ${PRJ_TITLE}
     Create Data Science Project From CLI    ${PRJ_TITLE}    as_user=${OCP_ADMIN_USER.USERNAME}
+    Set Test Variable    ${FEAST_INSTANCES_CREATED}    True
     Create Feast Instance    ${PRJ_TITLE}    ${FEAST_INSTANCE_NAME}    ${FEAST_MCP_CR_FILE}
     Log To Console    Waiting for Feast instance ${FEAST_INSTANCE_NAME} pods to be ready
     Wait For Pods To Be Ready    feast.dev/name=${FEAST_INSTANCE_NAME}    ${PRJ_TITLE}

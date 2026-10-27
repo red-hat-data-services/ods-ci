@@ -148,13 +148,17 @@ Create Feast Instance
     END
 
 Delete Feast Instance And Project
-    [Documentation]    Create Simple Feature store instance
+    [Documentation]    Delete the Feast instance and its project. Skip the cleanup when the test
+    ...    failed before it created them (FEAST_INSTANCES_CREATED is not True)
     [Arguments]   ${namespace}    ${feast_instance_name}
     Log To Console    Delete Feast Instance and Project
-    IF    ${FEAST_INSTANCES_CREATED} == True    Run Keywords
-    ...    Log To Console    Deleting Feast Instance : ${feast_instance_name}    AND
-    ...    Run    oc delete FeatureStore ${feast_instance_name} -n ${namespace}
-    Run    oc delete project ${namespace}
+    IF    ${FEAST_INSTANCES_CREATED} == True
+        Log To Console    Deleting Feast Instance : ${feast_instance_name}
+        Run    oc delete FeatureStore ${feast_instance_name} -n ${namespace}
+        Run    oc delete project ${namespace}
+    ELSE
+        Log To Console    Feast instance and project ${namespace} were not created, nothing to delete
+    END
 
 Get Feature Server Image Reference
     [Documentation]    Get Feature server image reference

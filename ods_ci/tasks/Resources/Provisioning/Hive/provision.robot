@@ -170,6 +170,16 @@ Watch Hive Install Log
     END
     Sleep   10s    reason=Let's wait some seconds before proceeding with next checks
 
+Cluster Web Console URL Should Be Set
+    [Documentation]    Fails unless ClusterDeployment status.webConsoleURL is populated.
+    [Arguments]    ${namespace}    ${cd_name}
+    ${web_access} =    Run Process
+    ...    oc -n ${namespace} get cd ${cd_name} -o json | jq -r --exit-status '.status.webConsoleURL | select(type\=\="string" and length > 0)'    # robocop: disable:line-too-long
+    ...    shell=yes
+    Should Be Equal As Integers    ${web_access.rc}    ${0}
+    Should Not Be Empty    ${web_access.stdout}
+    RETURN    ${web_access}
+
 Wait For Cluster To Be Ready
     IF    ${use_cluster_pool}
         ${pool_namespace} =    Get Cluster Pool Namespace    ${pool_name}
@@ -188,9 +198,6 @@ Wait For Cluster To Be Ready
     ${provision_status} =    Run Process
     ...    oc -n ${pool_namespace} wait --for\=condition\=ProvisionFailed\=False cd ${clusterdeployment_name} --timeout\=15m    # robocop: disable:line-too-long
     ...    shell=yes
-    ${web_access} =    Run Process
-    ...    oc -n ${pool_namespace} get cd ${clusterdeployment_name} -o json | jq -r '.status.webConsoleURL' --exit-status    # robocop: disable:line-too-long
-    ...    shell=yes
     IF    ${use_cluster_pool}
         ${custer_status} =    Run Process
         ...    oc -n ${hive_namespace} wait --for\=condition\=ClusterRunning\=True clusterclaim ${claim_name} --timeout\=15m    shell=yes    # robocop: disable:line-too-long
@@ -204,7 +211,11 @@ Wait For Cluster To Be Ready
         ${custer_status} =    Run Process
         ...	oc -n ${hive_namespace} get clusterclaim ${claim_name} -o json | jq '.status.conditions[] | select(.type\=\="ClusterRunning" and (.reason\=\="Resuming" or .reason\=\="Running"))' --exit-status    shell=yes    # robocop: disable:line-too-long
     END
-    IF    ${provision_status.rc} != 0 or ${web_access.rc} != 0 or ${custer_status.rc} != 0
+    # Hive can take a short time after install/claim to populate status.webConsoleURL.
+    ${web_ready} =    Run Keyword And Return Status
+    ...    Wait Until Keyword Succeeds    5 min    10 s
+    ...    Cluster Web Console URL Should Be Set    ${pool_namespace}    ${clusterdeployment_name}
+    IF    ${provision_status.rc} or ${custer_status.rc} or not ${web_ready}
         ${provision_status} =    Run Process    oc -n ${pool_namespace} get cd ${clusterdeployment_name} -o json    shell=yes    # robocop: disable:line-too-long
         ${custer_status} =    Run Process    oc -n ${hive_namespace} get clusterclaim ${claim_name} -o json    shell=yes
         Log    Cluster '${cluster_name}' deployment had errors, see: ${\n}${provision_status.stdout}${\n}${custer_status.stdout}    level=ERROR    # robocop: disable:line-too-long
@@ -212,6 +223,7 @@ Wait For Cluster To Be Ready
         ...    console=True
         FAIL    Cluster '${cluster_name}' provisioning failed. Please look into the logs for more details.
     END
+    ${web_access} =    Cluster Web Console URL Should Be Set    ${pool_namespace}    ${clusterdeployment_name}
     Log    Cluster '${cluster_name}' install completed and accessible at: ${web_access.stdout}     console=True
 
 Save Cluster Credentials

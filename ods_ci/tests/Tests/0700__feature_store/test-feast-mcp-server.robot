@@ -24,6 +24,7 @@ Verify Feast MCP Server Deployment
     ...    succeeds: the pods are ready, the McpServer condition is True and the MCP server container is ready
     [Tags]    Tier1
     ...       FeatureStore
+    ...       RHOAIENG-101800
     Feast CRD Should Have MCP Server Field
     Log To Console    Creating Data Science Project ${PRJ_TITLE}
     Create Data Science Project From CLI    ${PRJ_TITLE}    as_user=${OCP_ADMIN_USER.USERNAME}

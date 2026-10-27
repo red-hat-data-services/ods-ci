@@ -1483,12 +1483,17 @@ Install RHOAI Dependencies With CLI
     Install Kueue Dependencies
     Install Leader Worker Set Operator Via Cli
     Install Connectivity Link Operator Via Cli
-    Install NFS Operator Via Cli
-    Deploy NFS Provisioner
-    Verify NFS Storage Class
+    ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
+    IF    '${arch_type}' != 's390x'
+        Install NFS Operator Via Cli
+        Deploy NFS Provisioner
+        Verify NFS Storage Class
+    ELSE
+        Log    Skipping NFS Operator installation for s390x architecture (operator image is amd64-only)
+        ...    console=yes
+    END
     Install JobSet Dependencies
     Install Agent Sandbox Operator Via Cli
-    ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
     IF    '${arch_type}' != 's390x'
         Configure MaaS Database
         Configure MaaS Gateway API

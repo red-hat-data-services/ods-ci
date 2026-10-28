@@ -18,8 +18,6 @@ Resource            ../../Resources/Common.robot
 Resource            ../../Resources/Page/OCPDashboard/Pods/Pods.robot
 Resource            ../../Resources/Page/OCPDashboard/Builds/Builds.robot
 Resource            ../../Resources/Page/HybridCloudConsole/OCM.robot
-Resource            ../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
-Resource            ../../Resources/Page/DistributedWorkloads/WorkloadMetricsUI.resource
 Resource            ../../Resources/CLI/MustGather/MustGather.resource
 Resource            ../../Resources/CLI/DataSciencePipelines/DataSciencePipelinesUpgradeTesting.resource
 Resource            ../../Resources/Page/FeatureStore/FeatureStore.resource
@@ -31,7 +29,6 @@ Test Tags           PostUpgrade
 
 *** Variables ***
 ${S_SIZE}                   25
-${DW_PROJECT_CREATED}       False
 ${UPGRADE_NS}    upgrade
 ${UPGRADE_CONFIG_MAP}    upgrade-config-map
 ${USERGROUPS_CONFIG_MAP}    usergroups-config-map
@@ -154,65 +151,6 @@ Verify POD Status
     Log     Verified ${MONITORING_NAMESPACE}        console=yes
     Oc Get      kind=Namespace      field_selector=metadata.name=${NOTEBOOKS_NAMESPACE}
     Log     "Verified rhods-notebook"
-
-Verify Ray Cluster Exists And Monitor Workload Metrics By Submitting Ray Job After Upgrade
-    # robocop: off=too-long-test-case
-    # robocop: off=too-many-calls-in-test-case
-    [Documentation]    check the Ray Cluster exists , submit ray job and    verify resource usage after upgrade
-    [Tags]      deprecatedTest    WorkloadOrchestration
-    [Setup]     Prepare Codeflare-SDK Test Setup
-    ${PRJ_UPGRADE}      Set Variable        test-ns-rayupgrade
-    ${LOCAL_QUEUE}      Set Variable        local-queue-mnist
-    ${JOB_NAME}     Set Variable        mnist
-    Run Codeflare-SDK Test
-    ...    upgrade
-    ...    raycluster_sdk_upgrade_test.py::TestMnistJobSubmit
-    ...    3.11
-    ...    ${RAY_CUDA_IMAGE_3.11}
-    ...    ${CODEFLARE-SDK-RELEASE-TAG}
-    Set Global Variable     ${DW_PROJECT_CREATED}       True        # robocop: disable:replace-set-variable-with-var
-    Set Library Search Order        SeleniumLibrary
-    RHOSi Setup
-    Launch Dashboard
-    ...    ${TEST_USER.USERNAME}
-    ...    ${TEST_USER.PASSWORD}
-    ...    ${TEST_USER.AUTH_TYPE}
-    ...    ${ODH_DASHBOARD_URL}
-    ...    ${BROWSER.NAME}
-    ...    ${BROWSER.OPTIONS}
-    Open Distributed Workload Metrics Home Page
-    Select Distributed Workload Project By Name     ${PRJ_UPGRADE}
-    Select Refresh Interval     15 seconds
-    Click Button    ${PROJECT_METRICS_TAB_XP}
-    Wait Until Element Is Visible
-    ...    ${DISTRIBUITED_WORKLOAD_RESOURCE_METRICS_TITLE_XP}
-    ...    timeout=20
-    Wait Until Element Is Visible       xpath=//*[text()="Running"]     timeout=30
-
-    ${cpu_requested}        Get CPU Requested       ${PRJ_UPGRADE}          ${LOCAL_QUEUE}
-    ${memory_requested}     Get Memory Requested    ${PRJ_UPGRADE}          ${LOCAL_QUEUE}          RayCluster
-    Check Requested Resources Chart                 ${PRJ_UPGRADE}          ${cpu_requested}        ${memory_requested}
-    Check Requested Resources
-    ...    ${PRJ_UPGRADE}
-    ...    ${CPU_SHARED_QUOTA}
-    ...    ${MEMEORY_SHARED_QUOTA}
-    ...    ${cpu_requested}
-    ...    ${memory_requested}
-    ...    RayCluster
-
-    Click Button    ${WORKLOAD_STATUS_TAB_XP}
-    Check Distributed Workload Resource Metrics Status      ${JOB_NAME}     Running
-    Check Distributed Worklaod Status Overview      ${JOB_NAME}     Running
-    ...     All pods reached readiness and the workload is running
-
-    Click Button    ${PROJECT_METRICS_TAB_XP}
-    Check Distributed Workload Resource Metrics Chart       ${PRJ_UPGRADE}      ${cpu_requested}
-    ...     ${memory_requested}     RayCluster      ${JOB_NAME}
-
-    [Teardown]      Run Keywords        Cleanup Codeflare-SDK Setup     AND
-    ...     Codeflare Upgrade Tests Teardown        ${PRJ_UPGRADE}      ${DW_PROJECT_CREATED}
-
-
 
 Verify that the must-gather image provides RHODS logs and info
     [Documentation]    Tests the must-gather image for ODH/RHOAI after upgrading

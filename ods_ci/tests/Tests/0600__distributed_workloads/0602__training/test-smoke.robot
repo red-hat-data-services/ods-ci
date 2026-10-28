@@ -4,7 +4,6 @@ Library           Process
 Resource          ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 Resource          ../../../Resources/Page/DistributedWorkloads/DistributedWorkloads.resource
 Suite Setup       RHOSi Setup
-Suite Teardown    RHOSi Teardown
 
 
 *** Test Cases ***

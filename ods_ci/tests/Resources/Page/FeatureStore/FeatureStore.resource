@@ -16,6 +16,7 @@ ${FEAST_NOTEBOOK_VERSION}                0.66.0
 ${FEAST-MODULE-OPERATOR_REPO_URL}        %{FEAST-MODULE-OPERATOR_REPO_URL=https://github.com/opendatahub-io/feast-module-operator.git}
 ${FEAST_PLATFORM_VERSION}                3.6.0
 ${DSC_NAME}                              default-dsc
+${FEAST_MCP_CONTAINER_NAME}              mcpserver
 
 
 *** Keywords ***
@@ -147,13 +148,17 @@ Create Feast Instance
     END
 
 Delete Feast Instance And Project
-    [Documentation]    Create Simple Feature store instance
+    [Documentation]    Delete the Feast instance and its project. Skip the cleanup when the test
+    ...    failed before it created them (FEAST_INSTANCES_CREATED is not True)
     [Arguments]   ${namespace}    ${feast_instance_name}
     Log To Console    Delete Feast Instance and Project
-    IF    ${FEAST_INSTANCES_CREATED} == True    Run Keywords
-    ...    Log To Console    Deleting Feast Instance : ${feast_instance_name}    AND
-    ...    Run    oc delete FeatureStore ${feast_instance_name} -n ${namespace}
-    Run    oc delete project ${namespace}
+    IF    ${FEAST_INSTANCES_CREATED} == True
+        Log To Console    Deleting Feast Instance : ${feast_instance_name}
+        Run    oc delete FeatureStore ${feast_instance_name} -n ${namespace}
+        Run    oc delete project ${namespace}
+    ELSE
+        Log To Console    Feast instance and project ${namespace} were not created, nothing to delete
+    END
 
 Get Feature Server Image Reference
     [Documentation]    Get Feature server image reference
@@ -221,3 +226,35 @@ Run Feast Module Operator E2E Upgrade Test
     IF    ${result.rc} != 0
         FAIL    Running feast modular operator ${TEST_TYPE} upgrade test failed
     END
+
+Feast CRD Should Have MCP Server Field
+    [Documentation]    Check that the FeatureStore CRD exists and has the spec.services.mcpServer field
+    ${rc}    ${out}=    Run And Return Rc And Output    oc get crd featurestores.feast.dev
+    Should Be Equal As Integers    ${rc}    0    msg=FeatureStore CRD not found: ${out}
+    ${jsonpath}=    Catenate    SEPARATOR=
+    ...    {.spec.versions[?(@.name=="v1")].schema.openAPIV3Schema
+    ...    .properties.spec.properties.services.properties.mcpServer.type}
+    ${rc}    ${out}=    Run And Return Rc And Output
+    ...    oc get crd featurestores.feast.dev -o jsonpath='${jsonpath}'
+    Should Be Equal As Integers    ${rc}    0    msg=${out}
+    Should Be Equal As Strings    ${out}    object
+    ...    msg=FeatureStore CRD has no spec.services.mcpServer field, the installed operator has no MCP server support
+
+Feast MCP Server Condition Should Be True
+    [Documentation]    Check that the McpServer condition of the FeatureStore is True
+    [Arguments]    ${namespace}    ${feast_instance_name}
+    ${command}=    Catenate    oc get featurestore ${feast_instance_name} -n ${namespace}
+    ...    -o jsonpath='{.status.conditions[?(@.type=="McpServer")].status}'
+    ${rc}    ${status}=    Run And Return Rc And Output    ${command}
+    Should Be Equal As Integers    ${rc}    0    msg=${status}
+    Should Be Equal As Strings    ${status}    True    msg=McpServer condition is not True
+
+Feast MCP Server Container Should Be Ready
+    [Documentation]    Check that the Feast pod has a ready MCP server container
+    [Arguments]    ${namespace}    ${feast_instance_name}
+    ${jsonpath}=    Catenate    SEPARATOR=
+    ...    {.items[*].status.containerStatuses[?(@.name=="${FEAST_MCP_CONTAINER_NAME}")].ready}
+    ${rc}    ${ready}=    Run And Return Rc And Output
+    ...    oc get pods -l feast.dev/name=${feast_instance_name} -n ${namespace} -o jsonpath='${jsonpath}'
+    Should Be Equal As Integers    ${rc}    0    msg=${ready}
+    Should Be Equal As Strings    ${ready}    true    msg=MCP server container is missing or not ready

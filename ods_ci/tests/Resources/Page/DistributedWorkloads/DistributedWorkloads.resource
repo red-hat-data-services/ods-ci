@@ -7,18 +7,6 @@ Resource          ../../../../tasks/Resources/RHODS_OLM/install/oc_install.robot
 
 *** Variables ***
 ${DISTRIBUTED_WORKLOADS_RELEASE_ASSETS}  https://github.com/opendatahub-io/distributed-workloads/releases/latest/download
-# Corresponds to quay.io/modh/ray:2.52.1-py312-cu128
-${RAY_CUDA_IMAGE_3.12}                   quay.io/modh/ray@sha256:6b135421b6e756593a58b4df6664f82fc4b55237ca81475f2867518f15fe6d84
-# Corresponds to quay.io/modh/ray:2.52.1-py311-cu121
-${RAY_CUDA_IMAGE_3.11}                   quay.io/modh/ray@sha256:595b3acd10244e33fca1ed5469dccb08df66f470df55ae196f80e56edf35ad5a
-# Corresponds to quay.io/rhoai/ray:2.35.0-py311-cu121-torch24-fa26
-${RAY_TORCH_CUDA_IMAGE_3.11}             quay.io/rhoai/ray@sha256:5077f9bb230dfa88f34089fecdfcdaa8abc6964716a8a8325c7f9dcdf11bbbb3
-# Corresponds to quay.io/modh/ray:2.52.1-py312-rocm62
-${RAY_ROCM_IMAGE_3.12}                   quay.io/modh/ray@sha256:900c35ec2fe4279b958e044c781a179c8cfe0c584e8af16e253814dba01816e6
-# Corresponds to quay.io/modh/ray:2.52.1-py311-rocm61
-${RAY_ROCM_IMAGE_3.11}                   quay.io/modh/ray@sha256:28a8745be454b0e881ce6c200599ddfcb3366b707a5b53cfa73087d599555158
-# Corresponds to quay.io/rhoai/ray:2.35.0-py311-rocm61-torch24-fa26
-${RAY_TORCH_ROCM_IMAGE_3.11}             quay.io/rhoai/ray@sha256:b0e129cd2f4cdea7ad7a7859031357ffd9915410551f94fbcb942af2198cdf78
 # Corresponds to quay.io/modh/ray:2.55.1-py312-cu129-th081
 ${RAY_TRAINING_HUB_IMAGE}                quay.io/modh/ray@sha256:f63a015302758f805e5332605669b886e4d7ac60ec929413a2ffc19a904211c6
 # Corresponds to quay.io/modh/training:py311-cuda121-torch241
@@ -184,35 +172,6 @@ Generate User Token
     Should Be Equal As Integers    ${rc}    ${0}
     Remove File    ${temp_kubeconfig}
     RETURN    ${out}
-
-Run DistributedWorkloads ODH Test
-    [Documentation]    Run DistributedWorkloads ODH Test
-    [Arguments]    ${TEST_NAME}    ${DW_RAY_IMAGE}    ${NOTEBOOK_IMAGE}
-    Log To Console    "Running test: ${TEST_NAME}"
-    ${result} =    Run Process    ./${ODH_BINARY_NAME} -test.run ${TEST_NAME}
-    ...    shell=true
-    ...    stderr=STDOUT
-    ...    env:TEST_TIMEOUT_SHORT=5m
-    ...    env:TEST_TIMEOUT_MEDIUM=10m
-    ...    env:TEST_TIMEOUT_LONG=20m
-    ...    env:TEST_OUTPUT_DIR=%{WORKSPACE}/distributed-workloads-odh-logs
-    ...    env:TEST_RAY_IMAGE=${DW_RAY_IMAGE}
-    ...    env:ODH_NAMESPACE=${APPLICATIONS_NAMESPACE}
-    ...    env:NOTEBOOK_USER_NAME=${NOTEBOOK_USER_NAME}
-    ...    env:NOTEBOOK_USER_TOKEN=${NOTEBOOK_USER_TOKEN}
-    ...    env:NOTEBOOK_IMAGE=${NOTEBOOK_IMAGE}
-    ...    env:AWS_DEFAULT_ENDPOINT=${AWS_DEFAULT_ENDPOINT}
-    ...    env:AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-    ...    env:AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-    ...    env:AWS_STORAGE_BUCKET=${AWS_STORAGE_BUCKET}
-    ...    env:AWS_STORAGE_BUCKET_MNIST_DIR=${AWS_STORAGE_BUCKET_MNIST_DIR}
-    ...    env:PIP_INDEX_URL=${PIP_INDEX_URL}
-    ...    env:PIP_TRUSTED_HOST=${PIP_TRUSTED_HOST}
-    Log To Console    ${result.stdout}
-    Check missing Go test    ${result.stdout}
-    IF    ${result.rc} != 0
-        FAIL    ${TEST_NAME} failed
-    END
 
 Run DistributedWorkloads Training Hub ODH Test
     [Documentation]    Run DistributedWorkloads Training Hub ODH Test

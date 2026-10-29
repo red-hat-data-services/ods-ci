@@ -100,7 +100,8 @@ ${RESOURCES_DIRPATH}=    tasks/Resources/Files
 ${OLM_INSTALL_GIT_REPO}=      ${EMPTY}
 ${OLM_INSTALL_GIT_REPO_BRANCH}=    main
 ${OLM_DIR}=                     rhodsolm
-@{SUPPORTED_TEST_ENV}=          AWS   AWS_DIS   GCP   GCP_DIS   PSI   PSI_DIS   ROSA   IBM_CLOUD   CRC    AZURE	ROSA_HCP
+@{SUPPORTED_TEST_ENV}=          AWS   AWS_DIS   GCP   GCP_DIS   PSI   PSI_DIS   ROSA   IBM_CLOUD   IBM_MAPT
+...                             CRC   AZURE   ROSA_HCP
 ${install_plan_approval}=       Manual
 ${GITOPS_DEFAULT_REPO_BRANCH}=    main
 ${GITOPS_DEFAULT_REPO}=    ${EMPTY}
@@ -115,6 +116,8 @@ Install RHODS
   ...    ${rhoai_version}=${EMPTY}    ${is_upgrade}=False
   Log    Start installing RHOAI with:\n\- cluster type: ${cluster_type}\n\- image_url: ${image_url}\n\- update_channel: ${UPDATE_CHANNEL}    console=yes    #robocop:disable
   Log    \- rhoai_version: ${rhoai_version}\n\- is_upgrade: ${is_upgrade}\n\- install_plan_approval: ${install_plan_approval}\n\- CATALOG_SOURCE: ${CATALOG_SOURCE}   console=yes    #robocop:disable
+  ${is_mapt_test_env} =    Evaluate    $TEST_ENV.endswith("_MAPT")
+  IF    ${is_mapt_test_env}    Enable Cluster Monitoring For MAPT Environment
   # Save original cluster type for future purpose
   Set Suite Variable    ${ORIGINAL_CLUSTER_TYPE}    ${cluster_type}
   Log    Saved original cluster type: "${ORIGINAL_CLUSTER_TYPE}"  console=yes
@@ -206,6 +209,13 @@ Install RHODS
   IF  "${is_upgrade}" == "False"
       Add StartingCSV To Subscription
   END
+
+Enable Cluster Monitoring For MAPT Environment
+  [Documentation]    Enables cluster monitoring before RHOAI installation on MAPT test environments.
+  ${rc}    ${output} =    Run And Return Rc And Output
+  ...    bash ${EXECDIR}/tasks/Resources/RHODS_OLM/install/enable-monitoring.sh
+  Log    ${output}    console=yes
+  Should Be Equal As Integers    ${rc}    ${0}    msg=Failed to enable cluster monitoring
 
 Add StartingCSV To Subscription
     [Documentation]    Retrieves current RHOAI version from subscription status and add

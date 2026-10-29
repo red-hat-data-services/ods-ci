@@ -11,6 +11,8 @@ Get Must-Gather Logs
     [Documentation]    Runs the must-gather image and obtains the ODH/RHOAI logs
     ${output}=    Run process    tests/Resources/CLI/MustGather/get-must-gather-logs.sh
     ...                          shell=yes
+    ...                          timeout=16 minutes
+    ...                          on_timeout=kill
     ...                          env:OPERATOR_NAMESPACE=${OPERATOR_NAMESPACE}
     ...                          env:APPLICATIONS_NAMESPACE=${APPLICATIONS_NAMESPACE}
     ${disk_usage_err}=    Grep File    must-gather-results.txt    Disk usage exceeds the volume percentage
@@ -35,4 +37,5 @@ Verify Logs For ${namespace}
 
 Cleanup Must-Gather Logs
     [Documentation]    Deletes the folder with the must-gather logs
+    ${must_gather_dir}=    Get Variable Value    ${must_gather_dir}    ${EMPTY}
     Run Keyword If      "${must_gather_dir}" != "${EMPTY}"      Remove Directory   ${must_gather_dir}    recursive=True

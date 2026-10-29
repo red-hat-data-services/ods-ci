@@ -16,6 +16,7 @@ Verify that the must-gather image provides RHODS logs and info
     ...      MustGather
     ...      ExcludeOnODH
     ...      ExcludeOnDisconnected
+    [Timeout]    20 minutes
     Get Must-Gather Logs
     Verify Logs For ${APPLICATIONS_NAMESPACE}
     IF  "${PRODUCT}" == "RHODS"

@@ -486,37 +486,38 @@ Set Subscription Update Channel
     END
 
 Set Catalog Source Image
-    [Documentation]    Updates the image endpoint of a catalog source.
+    [Documentation]    Creates or updates a catalog source with the given image.
+    ...                If the catalog source doesn't exist, it is created. If it exists, the image is patched.
     ...                Example: Set Catalog Source Image    quay.io/rhoai/rhoai-fbc-fragment:latest    openshift-marketplace    rhoai-catalog-dev
     [Arguments]    ${new_image_url}    ${namespace}=openshift-marketplace    ${cs_name}=rhoai-catalog-dev
     Log    Setting catalog source image to ${new_image_url} in namespace ${namespace}    console=yes
-    ${old_image}=    Get Resource Attribute    ${namespace}    CatalogSource    ${cs_name}    .spec.image
-    Log    Current catalog source image: ${old_image}    console=yes
-    Log    Patching catalog source ${cs_name} in namespace ${namespace} to set image=${new_image_url}    console=yes
-    ${patch_status}=    Run And Return Rc
-    ...    oc patch catalogsource ${cs_name} -n ${namespace} --type merge --patch '{"spec": {"image": "${new_image_url}"}}'
-    IF    ${patch_status} == 0
-        Log    Successfully updated catalog source image for ${cs_name}    console=yes
-        ${current_image}=    Get Resource Attribute    ${namespace}    CatalogSource    ${cs_name}    .spec.image
-        Log    Verified: Current catalog source image is ${current_image}    console=yes
-        Should Be Equal As Strings    ${current_image}    ${new_image_url}    msg=Catalog source image verification failed
-        Log    Waiting for catalog source pod to restart and become ready    console=yes
-        ${rc}=    Run And Return Rc
-        ...    oc wait pod -n ${namespace} -l olm.catalogSource=${cs_name} --for=delete --timeout=120s
-        IF    ${rc} == 0
-            Log    Old catalog source pod deleted    console=yes
-        ELSE
-            Log    Old catalog source pod may already be deleted or timeout reached    console=yes    level=WARN
-        END
-        ${rc}=    Run And Return Rc
-        ...    oc wait pod -n ${namespace} -l olm.catalogSource=${cs_name} --for=condition=Ready --timeout=300s
-        IF    ${rc} == 0
-            Log    New catalog source pod is ready    console=yes
-        ELSE
-            Log    Catalog source pod did not become ready within timeout, but continuing    console=yes    level=WARN
+    ${exists_rc}=    Run And Return Rc    oc get catalogsource ${cs_name} -n ${namespace}
+    IF    ${exists_rc} != 0
+        Log    Catalog source ${cs_name} does not exist, creating it    console=yes
+        ${apply_rc}    ${apply_out}=    Run And Return Rc And Output
+        ...    oc apply -f - <<< '{"apiVersion":"operators.coreos.com/v1alpha1","kind":"CatalogSource","metadata":{"name":"${cs_name}","namespace":"${namespace}"},"spec":{"displayName":"RHOAI Catalog Dev","image":"${new_image_url}","publisher":"Red Hat","sourceType":"grpc","updateStrategy":{"registryPoll":{"interval":"15m"}}}}'    #robocop:disable
+        Log    ${apply_out}    console=yes
+        IF    ${apply_rc} != 0
+            FAIL    Failed to create catalog source ${cs_name}: ${apply_out}
         END
     ELSE
-        FAIL    Failed to update catalog source image for ${cs_name} in namespace ${namespace}
+        Log    Catalog source ${cs_name} exists, updating image    console=yes
+        ${patch_status}=    Run And Return Rc
+        ...    oc patch catalogsource ${cs_name} -n ${namespace} --type merge --patch '{"spec": {"image": "${new_image_url}"}}'
+        IF    ${patch_status} != 0
+            FAIL    Failed to update catalog source image for ${cs_name} in namespace ${namespace}
+        END
+    END
+    ${current_image}=    Get Resource Attribute    ${namespace}    CatalogSource    ${cs_name}    .spec.image
+    Log    Verified: Current catalog source image is ${current_image}    console=yes
+    Should Be Equal As Strings    ${current_image}    ${new_image_url}    msg=Catalog source image verification failed
+    Log    Waiting for catalog source pod to become ready    console=yes
+    ${rc}=    Run And Return Rc
+    ...    oc wait pod -n ${namespace} -l olm.catalogSource=${cs_name} --for=condition=Ready --timeout=300s
+    IF    ${rc} == 0
+        Log    Catalog source pod is ready    console=yes
+    ELSE
+        Log    Catalog source pod did not become ready within timeout, but continuing    console=yes    level=WARN
     END
 
 Wait For Namespace To Be Active

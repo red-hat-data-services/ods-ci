@@ -1334,6 +1334,7 @@ Install Agent Sandbox Operator Via Cli
     [Documentation]    Install Red Hat build of Agent Sandbox Operator via CLI.
     ...                Skips arm64 because the published controller is amd64-only.
     ...                Architecture comes from the node, not ARCH_TYPE.
+    ...                Skips, with a warning, when the operator is not published in OperatorHub yet.
     ${rc}    ${node_arch} =    Run And Return Rc And Output
     ...    oc get nodes -o jsonpath='{.items[0].status.nodeInfo.architecture}'
     IF    ${rc} != 0
@@ -1351,6 +1352,13 @@ Install Agent Sandbox Operator Via Cli
     IF    ${is_installed}
         Log To Console    message=Agent Sandbox Operator is already installed
     ELSE
+        ${is_available} =    Check If Operator Is Available In OperatorHub Via CLI
+        ...    operator_name=${AGENT_SANDBOX_OP_NAME}    catalog_source_name=redhat-operators
+        IF    not ${is_available}
+            Log    Agent Sandbox Operator not found in OperatorHub (redhat-operators catalog), skipping it
+            ...    level=WARN    console=yes
+            RETURN
+        END
         ${rc}    ${out} =    Run And Return Rc And Output
         ...    oc create namespace ${AGENT_SANDBOX_NS} --dry-run=client -o yaml | oc apply -f -
         Should Be Equal As Integers    ${rc}    ${0}    msg=Failed to create namespace ${AGENT_SANDBOX_NS}: ${out}

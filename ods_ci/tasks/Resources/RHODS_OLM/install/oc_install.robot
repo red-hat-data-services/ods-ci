@@ -1758,19 +1758,20 @@ Install NFS Operator Via Cli
 Deploy NFS Provisioner
     [Documentation]    Deploy a NFS instance, shared
     ...                Skips deployment only when the NFS StorageClass already exists
-    ...                AND the existing provisioner is healthy (at least one ready pod
-    ...                labelled app=nfs-provisioner, a label the operator sets for
-    ...                every NFSProvisioner CR regardless of its name). Cluster
-    ...                cleanup jobs do not remove the NFS provisioner, so a leftover
-    ...                broken provisioner from a previous run must be removed and
+    ...                AND a provisioner that provides it is healthy (see the
+    ...                Nfs Provisioner Is Healthy keyword). Cluster cleanup jobs do
+    ...                not remove the NFS provisioner, so a leftover broken
+    ...                provisioner from a previous run must be removed and
     ...                redeployed, otherwise verification PVCs would never bind.
     ...                The mount options patch runs on all paths so a pre-existing
     ...                StorageClass is also configured for NFSv3.
     [Arguments]    ${storage_size}=100G    ${nfs_provisioner_name}=nfs-provisioner
+    Set Test Variable    ${STORAGE_SIZE}    ${storage_size}
+    Set Test Variable    ${NFS_PROVISIONER_NAME}    ${nfs_provisioner_name}
     ${rc}    ${output} =    Run And Return Rc And Output
     ...    oc get storageclass nfs -o name
     IF    ${rc} != ${0}
-        Deploy Fresh NFS Provisioner    storage_size=${storage_size}    nfs_provisioner_name=${nfs_provisioner_name}
+        Deploy Fresh NFS Provisioner
     ELSE
         ${is_healthy} =    Nfs Provisioner Is Healthy
         IF    ${is_healthy}
@@ -1778,7 +1779,7 @@ Deploy NFS Provisioner
         ELSE
             Log To Console    message=NFS StorageClass nfs exists but provisioner is unhealthy, redeploying
             Remove Stale NFS Provisioner
-            Deploy Fresh NFS Provisioner    storage_size=${storage_size}    nfs_provisioner_name=${nfs_provisioner_name}
+            Deploy Fresh NFS Provisioner
         END
     END
     Wait Until Keyword Succeeds    10x    30s
@@ -1786,52 +1787,110 @@ Deploy NFS Provisioner
 
 Deploy Fresh NFS Provisioner
     [Documentation]    Applies the NFSProvisioner CR rendered from the template and
-    ...                waits for the provisioner pods to become ready.
-    [Arguments]    ${storage_size}    ${nfs_provisioner_name}
+    ...                waits for the provisioner pods to become ready. Reads its
+    ...                input from the test variables set by Deploy NFS Provisioner.
     ${default_sc} =    Get Default Storage Class Name
-    Set Test Variable    ${storage_class}    ${default_sc}
-    Set Test Variable    ${storage_size}
-    Set Test Variable    ${nfs_provisioner_name}
+    Set Test Variable    ${STORAGE_CLASS}    ${default_sc}
     Create File From Template    ${RESOURCES_DIRPATH}/nfsprovisioner_template.yaml
     ...    ${RESOURCES_DIRPATH}/nfsprovisioner_cr.yaml
     ${rc}    ${output} =    Run And Return Rc And Output
     ...    oc apply -f ${RESOURCES_DIRPATH}/nfsprovisioner_cr.yaml
     Should Be Equal As Integers    ${rc}    0    msg=Failed to apply NFS provisioner CR: ${output}
     Log    ${output}    console=yes
-    Wait For Pods To Be Ready    label_selector=nfsprovisioner_cr=${nfs_provisioner_name}
+    Wait For Pods To Be Ready    label_selector=nfsprovisioner_cr=${NFS_PROVISIONER_NAME}
     ...    namespace=${NFS_OP_NS}
 
 Nfs Provisioner Is Healthy
-    [Documentation]    Returns TRUE when at least one pod managed by the NFS provisioner
-    ...                operator is ready. The operator sets label app=nfs-provisioner on
-    ...                every NFSProvisioner CR it reconciles, so this check works even
-    ...                when the pre-existing CR has a different name than our template.
-    ${rc}    ${output} =    Run And Return Rc And Output
-    ...    oc wait --for=condition=ready=true pod -l app=nfs-provisioner -n ${NFS_OP_NS} --timeout=60s
-    IF    ${rc} != ${0}
-        Log To Console    message=NFS provisioner pods are not ready: ${output}
-        RETURN    ${FALSE}
+    [Documentation]    Returns TRUE when at least one pod of an NFSProvisioner CR
+    ...                that provides the nfs StorageClass becomes ready within the
+    ...                deadline. Pods are re-listed on every iteration so a pod that
+    ...                becomes ready late is still detected, and the check keeps
+    ...                polling while the provisioner has no pods yet (its pod may
+    ...                still be created or restarting) instead of failing early.
+    ...                Readiness is probed with a non-blocking oc wait under one
+    ...                shared deadline instead of per-pod timeouts, so a single
+    ...                stuck pod cannot consume the whole check.
+    WHILE    True    limit=90 seconds    on_limit=pass
+        ${pods} =    Get Nfs Provisioner Pods
+        IF    not ${pods}
+            Log To Console    message=No NFS provisioner pods found yet, retrying
+        ELSE
+            FOR    ${pod}    IN    @{pods}
+                ${pod_name}    ${pod_namespace} =    Set Variable    ${pod}
+                ${rc} =    Run And Return Rc
+                ...    oc wait pod ${pod_name} -n ${pod_namespace} --for=condition=Ready --timeout=0
+                IF    ${rc} == ${0}    RETURN    ${TRUE}
+            END
+        END
+        Sleep    5s
     END
-    RETURN    ${TRUE}
+    Log To Console    message=NFS provisioner pods not ready in 90 seconds
+    RETURN    ${FALSE}
+
+Get Nfs Provisioner Pods
+    [Documentation]    Returns pods managed by NFSProvisioner CRs that provide the
+    ...                nfs StorageClass (spec.scForNFS == nfs), as (name, namespace)
+    ...                pairs. The operator labels each CR's pods with
+    ...                nfsprovisioner_cr=<cr-name>, so pods from unrelated
+    ...                NFSProvisioner CRs are excluded. Returns an empty list when
+    ...                no matching CR or pod exists.
+    ${nfs_crs} =    Get Nfs Provisioner CRs
+    ${pods} =    Create List
+    FOR    ${cr}    IN    @{nfs_crs}
+        ${cr_name}    ${cr_namespace} =    Set Variable    ${cr}
+        ${rc}    ${output} =    Run And Return Rc And Output
+        ...    oc get pod -l nfsprovisioner_cr=${cr_name} -n ${cr_namespace} -o name
+        Should Be Equal As Integers    ${rc}    0    msg=Failed to list pods of NFSProvisioner CR ${cr_name}: ${output}
+        ${cr_pods} =    Evaluate
+        ...    [[p.split("/")[-1], """${cr_namespace}"""] for p in """${output}""".splitlines() if p.strip()]
+        Append To List    ${pods}    @{cr_pods}
+    END
+    RETURN    ${pods}
+
+Get Nfs Provisioner CRs
+    [Documentation]    Returns the NFSProvisioner CRs that provide the nfs
+    ...                StorageClass (spec.scForNFS == nfs), as (name, namespace)
+    ...                pairs. Returns an empty list when no matching CR exists.
+    ${rc}    ${output} =    Run And Return Rc And Output
+    ...    oc get nfsprovisioner -A -o custom-columns=NAME:.metadata.name,NS:.metadata.namespace --no-headers
+    Should Be Equal As Integers    ${rc}    0    msg=Failed to list NFSProvisioner CRs: ${output}
+    ${crs} =    Evaluate    [tuple(line.split()) for line in """${output}""".splitlines() if line.strip()]
+    ${nfs_crs} =    Create List
+    FOR    ${cr}    IN    @{crs}
+        ${cr_name}    ${cr_namespace} =    Set Variable    ${cr}
+        ${rc}    ${sc} =    Run And Return Rc And Output
+        ...    oc get nfsprovisioner ${cr_name} -n ${cr_namespace} -o jsonpath={.spec.scForNFS}
+        Should Be Equal As Integers    ${rc}    0    msg=Failed to get NFSProvisioner CR ${cr_name}: ${sc}
+        IF    '${sc}'.strip() == 'nfs'    Append To List    ${nfs_crs}    ${cr}
+    END
+    RETURN    ${nfs_crs}
 
 Remove Stale NFS Provisioner
-    [Documentation]    Removes a stale NFS provisioner (all NFSProvisioner CRs, their
-    ...                pods and the leftover StorageClass) so a fresh provisioner can
-    ...                be deployed from the template.
-    ${rc}    ${output} =    Run And Return Rc And Output
-    ...    oc delete nfsprovisioner --all --all-namespaces --ignore-not-found
-    Should Be Equal As Integers    ${rc}    0    msg=Failed to delete NFSProvisioner CRs: ${output}
-    Wait Until Keyword Succeeds    10x    30s    Nfs Provisioner Pods Are Removed
+    [Documentation]    Removes the stale NFS provisioner (NFSProvisioner CRs that
+    ...                provide the nfs StorageClass, their pods and the leftover
+    ...                StorageClass) so a fresh provisioner can be deployed from the
+    ...                template. NFSProvisioner CRs serving other StorageClasses are
+    ...                left untouched.
+    ${nfs_crs} =    Get Nfs Provisioner CRs
+    FOR    ${cr}    IN    @{nfs_crs}
+        ${cr_name}    ${cr_namespace} =    Set Variable    ${cr}
+        ${rc}    ${output} =    Run And Return Rc And Output
+        ...    oc delete nfsprovisioner ${cr_name} -n ${cr_namespace} --ignore-not-found
+        Should Be Equal As Integers    ${rc}    0    msg=Failed to delete NFSProvisioner CR ${cr_name}: ${output}
+        Wait Until Keyword Succeeds    10x    30s    Nfs Provisioner Pods Are Removed
+        ...    cr_name=${cr_name}    cr_namespace=${cr_namespace}
+    END
     ${rc}    ${output} =    Run And Return Rc And Output
     ...    oc delete storageclass nfs --ignore-not-found
     Should Be Equal As Integers    ${rc}    0    msg=Failed to delete StorageClass nfs: ${output}
 
 Nfs Provisioner Pods Are Removed
-    [Documentation]    Fails while pods labelled app=nfs-provisioner still exist.
+    [Documentation]    Fails while pods of the given NFSProvisioner CR still exist.
+    [Arguments]    ${cr_name}    ${cr_namespace}
     ${rc}    ${output} =    Run And Return Rc And Output
-    ...    oc get pod -l app=nfs-provisioner -A -o name
-    Should Be Equal As Integers    ${rc}    0    msg=Failed to list NFS provisioner pods: ${output}
-    Should Be Empty    ${output.strip()}    msg=NFS provisioner pods still present: ${output}
+    ...    oc get pod -l nfsprovisioner_cr=${cr_name} -n ${cr_namespace} -o name
+    Should Be Equal As Integers    ${rc}    0    msg=Failed to list pods of NFSProvisioner CR ${cr_name}: ${output}
+    Should Be Empty    ${output.strip()}    msg=NFS provisioner pods of CR ${cr_name} still present: ${output}
 
 Patch NFS Storage Class Mount Options
     [Documentation]    Patch NFS StorageClass mount options to force NFSv3
@@ -1862,27 +1921,24 @@ Verify NFS Storage Class
     Should Be Equal As Integers    ${rc}    0    msg=Failed to create verification PVC: ${output}
     ${wait_rc}    ${wait_output} =    Run And Return Rc And Output
     ...    oc wait pvc ${pvc_name} -n ${NFS_OP_NS} --for=jsonpath='{.status.phase}'=Bound --timeout=${timeout}
+    IF    ${wait_rc} != ${0}
+        Log NFS Storage Diagnostics    pvc_name=${pvc_name}
+    END
     ${rc}    ${delete_output} =    Run And Return Rc And Output
     ...    oc delete pvc ${pvc_name} -n ${NFS_OP_NS} --ignore-not-found
     Should Be Equal As Integers    ${rc}    0    msg=Failed to delete verification PVC: ${delete_output}
-    IF    ${wait_rc} != ${0}
-        Log NFS Storage Diagnostics    pvc_name=${pvc_name}
-        Should Be Equal As Integers    ${wait_rc}    0    msg=Verification PVC did not reach Bound state: ${wait_output}
-    END
+    Should Be Equal As Integers    ${wait_rc}    0    msg=Verification PVC did not reach Bound state: ${wait_output}
     Log    ${wait_output}    console=yes
 
 Log NFS Storage Diagnostics
     [Documentation]    Logs PVC details and events plus NFS provisioner pod status to
     ...                help diagnose why the verification PVC did not bind.
     [Arguments]    ${pvc_name}
-    ${rc}    ${output} =    Run And Return Rc And Output
-    ...    oc describe pvc ${pvc_name} -n ${NFS_OP_NS}
+    ${output} =    Run    oc describe pvc ${pvc_name} -n ${NFS_OP_NS}
     Log    ${output}    console=yes
-    ${rc}    ${output} =    Run And Return Rc And Output
-    ...    oc get events -n ${NFS_OP_NS} --sort-by=.lastTimestamp
+    ${output} =    Run    oc get events -n ${NFS_OP_NS} --sort-by=.lastTimestamp
     Log    ${output}    console=yes
-    ${rc}    ${output} =    Run And Return Rc And Output
-    ...    oc get pods -l app=nfs-provisioner -n ${NFS_OP_NS} -o wide
+    ${output} =    Run    oc get pods -l app=nfs-provisioner -n ${NFS_OP_NS} -o wide
     Log    ${output}    console=yes
 
 Configure Gateway API

@@ -199,9 +199,9 @@ Check If Operator Is Available In OperatorHub Via CLI
     Should Be Equal As Integers    ${rc}    ${0}
     ...    msg=Failed to list PackageManifests in namespace ${cs_namespace}: ${out}
     IF    "${catalog_source_name}" == "${EMPTY}"
-        ${pattern}=    Set Variable    (?m)^${operator_name}[ ]+
+        ${pattern}=    Set Variable    (?m)^${operator_name}${SPACE}+
     ELSE
-        ${pattern}=    Set Variable    (?m)^${operator_name}[ ]+${catalog_source_name}[ ]*$
+        ${pattern}=    Set Variable    (?m)^${operator_name}${SPACE}+${catalog_source_name}${SPACE}*$
     END
     ${status}=    Run Keyword And Return Status    Should Match Regexp    ${out}    ${pattern}
     IF    ${status}

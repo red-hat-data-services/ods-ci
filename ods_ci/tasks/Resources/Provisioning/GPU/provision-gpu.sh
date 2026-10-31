@@ -49,6 +49,76 @@ KUSTOMIZE_PATH="$PWD/tasks/Resources/Provisioning/Hive/GPU"
 MACHINESET_PATH="$KUSTOMIZE_PATH/base/source-machineset.yaml"
 PROVIDER_OVERLAY_DIR=$KUSTOMIZE_PATH/overlays/$PROVIDER
 MACHINE_WAIT_TIMEOUT=10m
+
+# On GCP, if the first zone has no GPU capacity, try other zones in the same region (from
+# worker MachineSets, or common zone suffixes). Copies matching worker networkInterfaces.
+retry_gpu_machineset_other_gcp_zones() {
+  local ms=$1
+  local replicas=$2
+  local wait_timeout=$3
+  local current_zone
+  current_zone=$(oc get machinesets.machine.openshift.io -n openshift-machine-api "$ms" -o jsonpath='{.spec.template.spec.providerSpec.value.zone}')
+  local region="${current_zone%-*}"
+
+  ZONE_CANDIDATES=()
+  while IFS= read -r line; do
+    [[ -n "$line" ]] && ZONE_CANDIDATES+=("$line")
+  done < <(oc get machinesets.machine.openshift.io -n openshift-machine-api -o json | jq -r --arg ms "$ms" --arg cz "$current_zone" --arg reg "$region" '
+    [.items[] | select(.metadata.name != $ms)
+     | select((.spec.template.metadata.labels["machine.openshift.io/cluster-api-machine-type"] // "") == "worker")
+     | .spec.template.spec.providerSpec.value.zone // empty | select(. != "")
+     | select(startswith($reg + "-"))
+     | select(. != $cz)]
+    | unique | .[]')
+
+  if [[ ${#ZONE_CANDIDATES[@]} -eq 0 ]]; then
+    local suf z
+    for suf in b c f d a; do
+      z="${region}-${suf}"
+      [[ "$z" == "$current_zone" ]] && continue
+      ZONE_CANDIDATES+=("$z")
+    done
+  fi
+
+  local z worker_ms patchfile
+  for z in "${ZONE_CANDIDATES[@]}"; do
+    echo "GPU wait failed in $current_zone; retrying zone $z"
+    oc scale machinesets.machine.openshift.io "$ms" -n openshift-machine-api --replicas=0
+    if ! oc wait --timeout="$wait_timeout" --for=jsonpath='{.status.replicas}'=0 machinesets.machine.openshift.io "$ms" -n openshift-machine-api; then
+      echo "GPU MachineSet $ms did not scale down to 0 replicas within $wait_timeout; aborting zone retries to avoid patching while Machines are still terminating"
+      return 1
+    fi
+
+    worker_ms=$(oc get machinesets.machine.openshift.io -n openshift-machine-api -o json | jq -r --arg z "$z" --arg gpu "$ms" '
+      [.items[] | select(.metadata.name != $gpu)
+       | select((.spec.template.spec.providerSpec.value.zone // "") == $z)
+       | select((.spec.template.metadata.labels["machine.openshift.io/cluster-api-machine-type"] // "") == "worker")]
+      | if length > 0 then .[0].metadata.name else empty end')
+
+    if [[ -n "$worker_ms" ]]; then
+      patchfile=$(mktemp)
+      oc get machinesets.machine.openshift.io -n openshift-machine-api "$worker_ms" -o json | jq --arg z "$z" '
+        [
+          {"op": "replace", "path": "/spec/template/spec/providerSpec/value/zone", "value": $z},
+          {"op": "replace", "path": "/spec/template/spec/providerSpec/value/networkInterfaces",
+           "value": .spec.template.spec.providerSpec.value.networkInterfaces}
+        ]' > "$patchfile"
+      oc patch machinesets.machine.openshift.io "$ms" -n openshift-machine-api --type=json -p "$(cat "$patchfile")"
+      rm -f "$patchfile"
+    else
+      oc patch machinesets.machine.openshift.io "$ms" -n openshift-machine-api --type=merge -p "{\"spec\":{\"template\":{\"spec\":{\"providerSpec\":{\"value\":{\"zone\":\"$z\"}}}}}}"
+    fi
+
+    oc scale machinesets.machine.openshift.io "$ms" -n openshift-machine-api --replicas="$replicas"
+    if oc wait --timeout="$wait_timeout" --for jsonpath='{.status.readyReplicas}'="$replicas" machinesets.machine.openshift.io "$ms" -n openshift-machine-api; then
+      echo "GPU nodes became ready in zone $z"
+      return 0
+    fi
+    current_zone="$z"
+  done
+  return 1
+}
+
 # Check if existing machineset GPU already exists
 EXISTING_GPU_MACHINESET="$(oc get machinesets.machine.openshift.io -n openshift-machine-api -o jsonpath="{.items[?(@.metadata.annotations['machine\.openshift\.io/GPU']>'0')].metadata.name}")"
 if [[ -n "$EXISTING_GPU_MACHINESET" ]] ; then
@@ -83,8 +153,10 @@ oc apply --kustomize $PROVIDER_OVERLAY_DIR
 oc patch machinesets.machine.openshift.io -n openshift-machine-api "$NEW_MACHINESET_NAME" -p '{"metadata":{"labels":{"gpu-machineset":"true"}}}' --type=merge
 # wait for the machine to be Ready
 echo "Waiting for GPU Node to be Ready"
-oc wait --timeout=$MACHINE_WAIT_TIMEOUT --for jsonpath='{.status.readyReplicas}'=$GPU_NODE_COUNT machinesets.machine.openshift.io $NEW_MACHINESET_NAME -n openshift-machine-api
- if [ $? -ne 0 ]; then
+if ! oc wait --timeout=$MACHINE_WAIT_TIMEOUT --for jsonpath='{.status.readyReplicas}'=$GPU_NODE_COUNT machinesets.machine.openshift.io $NEW_MACHINESET_NAME -n openshift-machine-api; then
+  if [[ "$PROVIDER" == "GCP" ]] && retry_gpu_machineset_other_gcp_zones "$NEW_MACHINESET_NAME" "$GPU_NODE_COUNT" "$MACHINE_WAIT_TIMEOUT"; then
+    exit 0
+  fi
   echo "Machine Set $NEW_MACHINESET_NAME does not have its Machines in Running status after $MACHINE_WAIT_TIMEOUT timeout"
   echo "Please check the cluster"
   exit 1

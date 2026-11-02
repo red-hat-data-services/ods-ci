@@ -18,9 +18,28 @@ Installing RHODS Operator
 
 RHODS Operator Should Be installed
   Verify RHODS Installation
-  ${version} =  Get RHODS Version
+  Configure MAPT Certificate Workaround
+  ${version} =  Get RHODS Version    True
   Set Global Variable  ${RHODS_VERSION}  ${version}
   Log  RHODS has been installed  console=yes
+
+Configure MAPT Certificate Workaround
+  [Documentation]    Configure MAPT ingress certificate trust for RHOAI GatewayConfig versions
+  IF    $TEST_ENV != "IBM_MAPT" or $PRODUCT not in ["RHOAI", "RHODS"]    RETURN
+  ${version} =    Get RHODS Version    True
+  ${supports_gateway_config} =
+  ...    Evaluate    int(str($version).split(".")[0].lstrip("v")) >= 3
+  IF    ${supports_gateway_config}
+      ${certificate_command} =    Catenate    SEPARATOR=${SPACE}
+      ...    bash ${EXECDIR}/tasks/Resources/RHODS_OLM/install/configure_mapt_certificates.sh
+      ...    "${APPLICATIONS_NAMESPACE}" "${DSCI_NAME}"
+      ${return_code}    ${output} =    Run And Return Rc And Output    ${certificate_command}
+      Log    ${output}    console=yes
+      Should Be Equal As Integers    ${return_code}    0
+      ...    msg=Failed to apply the IBM_MAPT certificate workaround
+  ELSE
+      Log    Skipping IBM_MAPT certificate workaround for RHOAI ${version}; GatewayConfig requires RHOAI 3.0 or later
+  END
 
 Install Teardown
   [Documentation]   Remove cloned git repository

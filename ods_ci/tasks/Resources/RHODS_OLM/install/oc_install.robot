@@ -57,7 +57,7 @@ ${TELEMETRY_CHANNEL_NAME}=  stable
 ${TELEMETRY_NS}=  openshift-opentelemetry-operator
 ${KUEUE_OP_NAME}=  kueue-operator
 ${KUEUE_SUB_NAME}=  kueue-operator
-${KUEUE_CHANNEL_NAME}=  stable-v1.4
+${KUEUE_CHANNEL_NAME}=  stable-v1.5
 ${KUEUE_NS}=  openshift-kueue-operator
 ${JOBSET_OP_NAME}=  job-set
 ${JOBSET_SUB_NAME}=  job-set
@@ -100,7 +100,8 @@ ${RESOURCES_DIRPATH}=    tasks/Resources/Files
 ${OLM_INSTALL_GIT_REPO}=      ${EMPTY}
 ${OLM_INSTALL_GIT_REPO_BRANCH}=    main
 ${OLM_DIR}=                     rhodsolm
-@{SUPPORTED_TEST_ENV}=          AWS   AWS_DIS   GCP   GCP_DIS   PSI   PSI_DIS   ROSA   IBM_CLOUD   CRC    AZURE	ROSA_HCP
+@{SUPPORTED_TEST_ENV}=          AWS   AWS_DIS   GCP   GCP_DIS   PSI   PSI_DIS   ROSA   IBM_CLOUD   IBM_MAPT
+...                             CRC   AZURE   ROSA_HCP
 ${install_plan_approval}=       Manual
 ${GITOPS_DEFAULT_REPO_BRANCH}=    main
 ${GITOPS_DEFAULT_REPO}=    ${EMPTY}
@@ -115,6 +116,8 @@ Install RHODS
   ...    ${rhoai_version}=${EMPTY}    ${is_upgrade}=False
   Log    Start installing RHOAI with:\n\- cluster type: ${cluster_type}\n\- image_url: ${image_url}\n\- update_channel: ${UPDATE_CHANNEL}    console=yes    #robocop:disable
   Log    \- rhoai_version: ${rhoai_version}\n\- is_upgrade: ${is_upgrade}\n\- install_plan_approval: ${install_plan_approval}\n\- CATALOG_SOURCE: ${CATALOG_SOURCE}   console=yes    #robocop:disable
+  ${is_mapt_test_env} =    Evaluate    $TEST_ENV.endswith("_MAPT")
+  IF    ${is_mapt_test_env}    Enable Cluster Monitoring For MAPT Environment
   # Save original cluster type for future purpose
   Set Suite Variable    ${ORIGINAL_CLUSTER_TYPE}    ${cluster_type}
   Log    Saved original cluster type: "${ORIGINAL_CLUSTER_TYPE}"  console=yes
@@ -206,6 +209,13 @@ Install RHODS
   IF  "${is_upgrade}" == "False"
       Add StartingCSV To Subscription
   END
+
+Enable Cluster Monitoring For MAPT Environment
+  [Documentation]    Enables cluster monitoring before RHOAI installation on MAPT test environments.
+  ${rc}    ${output} =    Run And Return Rc And Output
+  ...    bash ${EXECDIR}/tasks/Resources/RHODS_OLM/install/enable-monitoring.sh
+  Log    ${output}    console=yes
+  Should Be Equal As Integers    ${rc}    ${0}    msg=Failed to enable cluster monitoring
 
 Add StartingCSV To Subscription
     [Documentation]    Retrieves current RHOAI version from subscription status and add
@@ -1334,6 +1344,7 @@ Install Agent Sandbox Operator Via Cli
     [Documentation]    Install Red Hat build of Agent Sandbox Operator via CLI.
     ...                Skips non-amd64 nodes (arm64, s390x, ppc64le) because the published controller is amd64-only.
     ...                Architecture comes from the node, not ARCH_TYPE.
+    ...                Skips, with a warning, when the operator is not published in OperatorHub yet.
     ${rc}    ${node_arch} =    Run And Return Rc And Output
     ...    oc get nodes -o jsonpath='{.items[0].status.nodeInfo.architecture}'
     IF    ${rc} != 0
@@ -1351,6 +1362,13 @@ Install Agent Sandbox Operator Via Cli
     IF    ${is_installed}
         Log To Console    message=Agent Sandbox Operator is already installed
     ELSE
+        ${is_available} =    Check If Operator Is Available In OperatorHub Via CLI
+        ...    operator_name=${AGENT_SANDBOX_OP_NAME}    catalog_source_name=redhat-operators
+        IF    not ${is_available}
+            Log    Agent Sandbox Operator not found in OperatorHub (redhat-operators catalog), skipping it
+            ...    level=WARN    console=yes
+            RETURN
+        END
         ${rc}    ${out} =    Run And Return Rc And Output
         ...    oc create namespace ${AGENT_SANDBOX_NS} --dry-run=client -o yaml | oc apply -f -
         Should Be Equal As Integers    ${rc}    ${0}    msg=Failed to create namespace ${AGENT_SANDBOX_NS}: ${out}

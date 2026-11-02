@@ -1,0 +1,42 @@
+# FeatureStore with a standalone Feast MCP server (spec.services.mcpServer).
+# The MCP server runs as an extra container in the Feast pod and reaches the
+# online feature server and the registry REST API over localhost.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: $FEAST_PROJECT_NAME-mcp-config
+  namespace: $NAMESPACE
+data:
+  feast_mcp.yaml: |
+    server:
+      transport: http
+    features:
+      url: http://localhost:6566
+    registry:
+      url: http://localhost:6572
+    timeout: 30
+---
+apiVersion: feast.dev/v1
+kind: FeatureStore
+metadata:
+  name: $FEAST_PROJECT_NAME
+  namespace: $NAMESPACE
+spec:
+  feastProject: mcp_project
+  services:
+    onlineStore:
+      server:
+        # On OpenShift TLS is on by default. Turn it off so the MCP server
+        # can reach the feature server over plain HTTP on localhost.
+        tls:
+          disable: true
+    registry:
+      local:
+        server:
+          restAPI: true
+          tls:
+            disable: true
+    mcpServer:
+      config:
+        configMapRef:
+          name: $FEAST_PROJECT_NAME-mcp-config

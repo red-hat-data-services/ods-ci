@@ -9,6 +9,7 @@ Suite Setup       RHOSi Setup
 ${STORAGE_SIZE}=    100G
 ${NFS_PROVISIONER_NAME}=    nfs-provisioner
 ${NFS_STORAGE_CLASS_NAME}=    nfs
+${ARCH_TYPE}=    amd64
 
 
 *** Tasks ***
@@ -16,6 +17,11 @@ Install NFS Operator
     [Documentation]    Installs and configures the NFS Operator
     ...                https://github.com/Jooho/nfs-provisioner-operator/tree/main
     [Tags]    nfs-operator-deploy
-    Install NFS Operator Via Cli
-    Deploy NFS Provisioner    ${STORAGE_SIZE}    ${NFS_PROVISIONER_NAME}
-    Verify NFS Storage Class    storageclass_name=${NFS_STORAGE_CLASS_NAME}
+    IF    '${ARCH_TYPE}' not in ['s390x', 'ppc64le']
+        Install NFS Operator Via Cli
+        Deploy NFS Provisioner    ${STORAGE_SIZE}    ${NFS_PROVISIONER_NAME}
+        Verify NFS Storage Class    storageclass_name=${NFS_STORAGE_CLASS_NAME}
+    ELSE
+        Log    Skipping NFS Operator installation for ${ARCH_TYPE} architecture (operator image is amd64-only)
+        ...    console=yes
+    END

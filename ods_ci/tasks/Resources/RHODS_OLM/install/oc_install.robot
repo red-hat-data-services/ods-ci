@@ -1340,6 +1340,20 @@ Install JobSet Dependencies
     Install JobSet Operator Via Cli
     Create JobSetOperator CR
 
+Get Node Architecture
+    [Documentation]    Returns the CPU architecture of the cluster nodes (amd64, arm64, s390x, ppc64le).
+    ...                Read from the node, not from ARCH_TYPE.
+    ${rc}    ${node_arch} =    Run And Return Rc And Output
+    ...    oc get nodes -o jsonpath='{.items[0].status.nodeInfo.architecture}'
+    IF    ${rc} != 0
+        Fail    msg=Failed to read node architecture: ${node_arch}
+    END
+    ${node_arch} =    Strip String    ${node_arch}
+    IF    '${node_arch}' == '${EMPTY}'
+        Fail    msg=Node architecture is empty
+    END
+    RETURN    ${node_arch}
+
 Install Agent Sandbox Operator Via Cli
     [Documentation]    Install Red Hat build of Agent Sandbox Operator via CLI.
     ...                Skips non-amd64 nodes (arm64, s390x, ppc64le) because the published controller is amd64-only.
@@ -1501,17 +1515,18 @@ Install RHOAI Dependencies With CLI
     Install Kueue Dependencies
     Install Leader Worker Set Operator Via Cli
     Install Connectivity Link Operator Via Cli
-    ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
-    IF    '${arch_type}' not in ['s390x', 'ppc64le']
+    ${node_arch} =    Get Node Architecture
+    IF    '${node_arch}' not in ['s390x', 'ppc64le']
         Install NFS Operator Via Cli
         Deploy NFS Provisioner
         Verify NFS Storage Class
     ELSE
-        Log    Skipping NFS Operator installation for s390x/ppc64le architecture (operator image is amd64-only)
+        Log    Skipping NFS Operator installation on ${node_arch} (operator image is amd64-only)
         ...    console=yes
     END
     Install JobSet Dependencies
     Install Agent Sandbox Operator Via Cli
+    ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
     IF    '${arch_type}' not in ['s390x', 'ppc64le']
         Configure MaaS Database
         Configure MaaS Gateway API

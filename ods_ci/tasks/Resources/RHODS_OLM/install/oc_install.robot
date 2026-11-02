@@ -1191,7 +1191,7 @@ Install Connectivity Link Operator Via Cli
     [Documentation]    Install Red Hat Connectivity Link Operator Via CLI
     ...                Installing in ${CONNECTIVITY_LINK_NS} namespace with operator group
     ...                ensures all resources are created in ${CONNECTIVITY_LINK_NS}.
-    ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
+    ${arch_type} =    Get Node Architecture
     IF    '${arch_type}' == 's390x' or '${arch_type}' == 'ppc64le'
         Log    Skipping Red Hat Connectivity Link Operator installation for s390x/ppc64le architecture    console=yes
         Log    Skipping Authorino Operator installation for s390x/ppc64le architecture    console=yes
@@ -1223,7 +1223,7 @@ Install Connectivity Link Operator Via Cli
         Wait Until Csv Is Ready    display_name=${CONNECTIVITY_LINK_OP_NAME}
              ...    operators_namespace=${CONNECTIVITY_LINK_NS}    timeout=5m
         # Skip configure_connectivity_link_operator.sh for s390x/ppc64le architecture
-        ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
+        ${arch_type} =    Get Node Architecture
         IF    '${arch_type}' not in ['s390x', 'ppc64le']
             ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/configure_connectivity_link_operator.sh
             Log    ${output}    console=yes
@@ -1526,7 +1526,7 @@ Install RHOAI Dependencies With CLI
     END
     Install JobSet Dependencies
     Install Agent Sandbox Operator Via Cli
-    ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
+    ${arch_type} =    Get Node Architecture
     IF    '${arch_type}' not in ['s390x', 'ppc64le']
         Configure MaaS Database
         Configure MaaS Gateway API
@@ -1918,9 +1918,9 @@ Patch DSC With Model Cache Config
 
 Configure MaaS Gateway API
     [Documentation]    Configure Gateway API for MaaS traffic routing
-    ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
-    IF    '${arch_type}' == 'ppc64le'
-        Log    Skipping MaaS Gateway API installation for ppc64le architecture    console=yes
+    ${arch_type} =    Get Node Architecture
+    IF    '${arch_type}' in ['s390x', 'ppc64le']
+        Log    Skipping MaaS Gateway API installation for ${arch_type} architecture    console=yes
         RETURN
     END
     Log To Console    Configuring Gateway API for MaaS
@@ -1931,9 +1931,9 @@ Configure MaaS Gateway API
 
 Configure MaaS Database
     [Documentation]    Provision PostgreSQL and maas-db-config secret required by maas-api
-    ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
-    IF    '${arch_type}' == 'ppc64le'
-        Log    Skipping MaaS Database installation for ppc64le architecture    console=yes
+    ${arch_type} =    Get Node Architecture
+    IF    '${arch_type}' in ['s390x', 'ppc64le']
+        Log    Skipping MaaS Database installation for ${arch_type} architecture    console=yes
         RETURN
     END
     Log To Console    Provisioning MaaS PostgreSQL prerequisites

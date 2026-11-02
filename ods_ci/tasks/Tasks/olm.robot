@@ -22,6 +22,6 @@ Install NFS Operator
         Deploy NFS Provisioner    ${STORAGE_SIZE}    ${NFS_PROVISIONER_NAME}
         Verify NFS Storage Class    storageclass_name=${NFS_STORAGE_CLASS_NAME}
     ELSE
-        Log    Skipping NFS Operator installation for ${ARCH_TYPE} architecture (operator image is amd64-only)
+        Log    Skipping NFS Operator installation for ${ARCH_TYPE} architecture (operator images are only available for amd64/arm64)
         ...    console=yes
     END

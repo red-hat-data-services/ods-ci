@@ -184,3 +184,28 @@ Check If Operator Is Installed Via CLI
     ELSE
            RETURN  False
     END
+
+Check If Operator Is Available In OperatorHub Via CLI
+    [Documentation]    Checks if the given operator is published in OperatorHub, i.e. a PackageManifest
+    ...                exists for it, and returns the status. Optionally the search can be restricted
+    ...                to the PackageManifests served by a given catalog source.
+    ...                Fails if the PackageManifests cannot be listed, so a cluster or API error
+    ...                is not reported as 'operator not available'.
+    [Arguments]    ${operator_name}    ${catalog_source_name}=${EMPTY}    ${cs_namespace}=openshift-marketplace
+    ${cmd}=    Catenate
+    ...    oc get packagemanifests.packages.operators.coreos.com -n ${cs_namespace}
+    ...    -o custom-columns="NAME:.metadata.name,CATALOG:.status.catalogSource" --no-headers
+    ${rc}    ${out}=    Run And Return Rc And Output    ${cmd}
+    Should Be Equal As Integers    ${rc}    ${0}
+    ...    msg=Failed to list PackageManifests in namespace ${cs_namespace}: ${out}
+    IF    "${catalog_source_name}" == "${EMPTY}"
+        ${pattern}=    Set Variable    (?m)^${operator_name}${SPACE}+
+    ELSE
+        ${pattern}=    Set Variable    (?m)^${operator_name}${SPACE}+${catalog_source_name}${SPACE}*$
+    END
+    ${status}=    Run Keyword And Return Status    Should Match Regexp    ${out}    ${pattern}
+    IF    ${status}
+           RETURN    True
+    ELSE
+           RETURN    False
+    END

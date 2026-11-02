@@ -1222,9 +1222,9 @@ Install Connectivity Link Operator Via Cli
         # Wait for rhcl-operator to be ready
         Wait Until Csv Is Ready    display_name=${CONNECTIVITY_LINK_OP_NAME}
              ...    operators_namespace=${CONNECTIVITY_LINK_NS}    timeout=5m
-        # Skip configure_connectivity_link_operator.sh for s390x architecture
+        # Skip configure_connectivity_link_operator.sh for s390x/ppc64le architecture
         ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
-        IF    '${arch_type}' != 's390x'
+        IF    '${arch_type}' not in ['s390x', 'ppc64le']
             ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/configure_connectivity_link_operator.sh
             Log    ${output}    console=yes
             IF    ${rc} != ${0}
@@ -1234,8 +1234,8 @@ Install Connectivity Link Operator Via Cli
             END
             Configure Authorino
         ELSE
-            Log    Skipping configure_connectivity_link_operator.sh for s390x architecture    console=yes
-            Log    Skipping Authorino configuration for s390x architecture    console=yes
+            Log    Skipping configure_connectivity_link_operator.sh for s390x/ppc64le architecture    console=yes
+            Log    Skipping Authorino configuration for s390x/ppc64le architecture    console=yes
         END
     END
 
@@ -1502,17 +1502,17 @@ Install RHOAI Dependencies With CLI
     Install Leader Worker Set Operator Via Cli
     Install Connectivity Link Operator Via Cli
     ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
-    IF    '${arch_type}' != 's390x'
+    IF    '${arch_type}' not in ['s390x', 'ppc64le']
         Install NFS Operator Via Cli
         Deploy NFS Provisioner
         Verify NFS Storage Class
     ELSE
-        Log    Skipping NFS Operator installation for s390x architecture (operator image is amd64-only)
+        Log    Skipping NFS Operator installation for s390x/ppc64le architecture (operator image is amd64-only)
         ...    console=yes
     END
     Install JobSet Dependencies
     Install Agent Sandbox Operator Via Cli
-    IF    '${arch_type}' != 's390x'
+    IF    '${arch_type}' not in ['s390x', 'ppc64le']
         Configure MaaS Database
         Configure MaaS Gateway API
     END

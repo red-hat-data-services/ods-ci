@@ -1341,33 +1341,30 @@ Install JobSet Dependencies
     Create JobSetOperator CR
 
 Get Node Architecture
-    [Documentation]    Returns the CPU architecture of the cluster nodes (amd64, arm64, s390x, ppc64le).
-    ...                Read from the node, not from ARCH_TYPE.
-    ${rc}    ${node_arch} =    Run And Return Rc And Output
-    ...    oc get nodes -o jsonpath='{.items[0].status.nodeInfo.architecture}'
+    [Documentation]    Returns the CPU architecture of the cluster worker nodes (amd64, arm64, s390x, ppc64le).
+    ...                Read from the worker nodes, not from ARCH_TYPE and not from the control plane.
+    ...                Fails if the worker nodes have different architectures.
+    ${rc}    ${archs} =    Run And Return Rc And Output
+    ...    oc get nodes -l node-role.kubernetes.io/worker= -o jsonpath='{.items[*].status.nodeInfo.architecture}'
     IF    ${rc} != 0
-        Fail    msg=Failed to read node architecture: ${node_arch}
+        Fail    msg=Failed to read worker node architecture: ${archs}
     END
-    ${node_arch} =    Strip String    ${node_arch}
-    IF    '${node_arch}' == '${EMPTY}'
-        Fail    msg=Node architecture is empty
+    ${unique_archs} =    Evaluate    sorted(set("""${archs}""".split()))
+    IF    not ${unique_archs}
+        Fail    msg=No worker nodes found, unable to determine node architecture
     END
-    RETURN    ${node_arch}
+    ${arch_count} =    Get Length    ${unique_archs}
+    IF    ${arch_count} > 1
+        Fail    msg=Worker nodes have mixed architectures: ${unique_archs}
+    END
+    RETURN    ${unique_archs}[0]
 
 Install Agent Sandbox Operator Via Cli
     [Documentation]    Install Red Hat build of Agent Sandbox Operator via CLI.
     ...                Skips non-amd64 nodes (arm64, s390x, ppc64le) because the published controller is amd64-only.
     ...                Architecture comes from the node, not ARCH_TYPE.
     ...                Skips, with a warning, when the operator is not published in OperatorHub yet.
-    ${rc}    ${node_arch} =    Run And Return Rc And Output
-    ...    oc get nodes -o jsonpath='{.items[0].status.nodeInfo.architecture}'
-    IF    ${rc} != 0
-        Fail    msg=Failed to read node architecture: ${node_arch}
-    END
-    ${node_arch} =    Strip String    ${node_arch}
-    IF    '${node_arch}' == '${EMPTY}'
-        Fail    msg=Node architecture is empty
-    END
+    ${node_arch} =    Get Node Architecture
     IF    '${node_arch}' != 'amd64'
         Log    Skipping agent-sandbox-operator on ${node_arch} (controller image is amd64-only)    console=yes
         RETURN

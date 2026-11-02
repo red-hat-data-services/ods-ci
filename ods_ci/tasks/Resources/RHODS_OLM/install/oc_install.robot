@@ -1521,7 +1521,7 @@ Install RHOAI Dependencies With CLI
         Deploy NFS Provisioner
         Verify NFS Storage Class
     ELSE
-        Log    Skipping NFS Operator installation on ${node_arch} (operator image is amd64-only)
+        Log    Skipping NFS Operator installation on ${node_arch} (operator images are only available for amd64/arm64)
         ...    console=yes
     END
     Install JobSet Dependencies

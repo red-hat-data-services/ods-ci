@@ -176,12 +176,14 @@ Wait Until Page Contains A String In List
 Get RHODS Version
     [Documentation]    Return RHODS/ODH operator version number.
     ...    Will fetch version only if $RHODS_VERSION was not already set, or $force_fetch is True.
+    ...    'tail -1' is required: during an upgrade the old and new CSVs coexist, so the query
+    ...    returns two lines. A multi-line value breaks the IF condition below on the next call.
     [Arguments]    ${force_fetch}=False
     IF  "${RHODS_VERSION}" == "${None}" or "${force_fetch}"=="True"
         IF  "${PRODUCT}" == "${None}" or "${PRODUCT}" == "RHODS"
-            ${RHODS_VERSION}=  Run  oc get csv -n ${OPERATOR_NAMESPACE} | grep "rhods-operator" | awk -F ' {2,}' '{print $3}'
+            ${RHODS_VERSION}=  Run  oc get csv -n ${OPERATOR_NAMESPACE} | grep "rhods-operator" | awk -F ' {2,}' '{print $3}' | tail -1
         ELSE
-            ${RHODS_VERSION}=  Run  oc get csv -n ${OPERATOR_NAMESPACE} | grep "opendatahub" | awk -F ' {2,}' '{print $3}'
+            ${RHODS_VERSION}=  Run  oc get csv -n ${OPERATOR_NAMESPACE} | grep "opendatahub" | awk -F ' {2,}' '{print $3}' | tail -1
         END
     END
     Log    Product:${PRODUCT} Version:${RHODS_VERSION}    console=yes

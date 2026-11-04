@@ -145,7 +145,7 @@ Install RHODS
               Oc Apply   kind=List   src=${destination_file}
               Remove File    ${destination_file}
           ELSE
-              Set Subscription Update Channel    ${OPERATOR_NAMESPACE}    ${UPDATE_CHANNEL}    ${OPERATOR_SUBSCRIPTION_NAME}
+              Set Subscription Update Channel    ${OPERATOR_NAMESPACE}    ${UPDATE_CHANNEL}    ${OPERATOR_SUBSCRIPTION_NAME}    ${OPERATOR_NAME}
           END
           Wait For Installplan And Approve It    ${OPERATOR_NAMESPACE}    ${OPERATOR_NAME}    ${OPERATOR_SUBSCRIPTION_NAME}    ${rhoai_version}    #robocop:disable
       ELSE
@@ -403,7 +403,7 @@ Upgrade RHODS In Self Managed Cluster Using CLI
   Log    Update channel: ${UPDATE_CHANNEL}    console=yes
   Log    Using subscription name: ${subscription_name} (operator package: ${OPERATOR_NAME})    console=yes
   Set Subscription Install Plan Approval    ${OPERATOR_NAMESPACE}    Manual    ${subscription_name}
-  Set Subscription Update Channel    ${OPERATOR_NAMESPACE}    ${UPDATE_CHANNEL}    ${subscription_name}
+  Set Subscription Update Channel    ${OPERATOR_NAMESPACE}    ${UPDATE_CHANNEL}    ${subscription_name}    ${OPERATOR_NAME}
   IF    "${image_url}" != "${EMPTY}"
       Set Catalog Source Image    ${image_url}    cs_name=${CATALOG_SOURCE}
       Update Subscription Source    ${OPERATOR_NAMESPACE}    ${subscription_name}    ${CATALOG_SOURCE}
@@ -463,14 +463,21 @@ Get Current Installplan Info
   RETURN    ${ip_csv}    ${ip_name}    ${ip_approved}
 
 Wait For Target CSV
-  [Documentation]   Waits for the target CSV to reach Succeeded state.
+  [Documentation]   Waits for OLM to create the target CSV, then for it to reach Succeeded state.
+  ...              The creation wait is required: the install plan is approved immediately before
+  ...              this keyword runs, so the CSV does not exist yet. 'oc wait' against a named
+  ...              resource that is absent returns NotFound right away instead of waiting for it.
   [Arguments]    ${namespace}    ${operator_name}    ${target_version}
   ${target_csv} =    Set Variable    ${operator_name}.${target_version}
+  Log    Waiting for target CSV ${target_csv} to be created    console=yes
+  Wait Until Keyword Succeeds    10 min    15 s
+  ...    Is Resource Present    csv    ${target_csv}    ${namespace}    ${IS_PRESENT}
   Log    Waiting for target CSV ${target_csv} to succeed    console=yes
   ${rc} =    Run And Return Rc
   ...    oc wait --timeout=600s --for jsonpath='{.status.phase}'=Succeeded csv -n ${namespace} ${target_csv}
   IF    ${rc} != 0
-      FAIL    Target CSV ${target_csv} did not reach Succeeded state
+      ${phase} =    Run    oc get csv ${target_csv} -n ${namespace} -o jsonpath='{.status.phase}'
+      FAIL    Target CSV ${target_csv} did not reach Succeeded state (last phase: ${phase})
   END
   Log    Upgrade to ${target_csv} completed successfully    console=yes
 

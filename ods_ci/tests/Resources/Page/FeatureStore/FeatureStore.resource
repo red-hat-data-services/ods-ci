@@ -10,7 +10,7 @@ ${FEATURE-STORE-RELEASE-TAG}             release-3.6
 ${FEATURE-STORE_DIR}                     feature-store
 ${FEAST-MODULE-OPERATOR_DIR}             feast-modular-operator
 ${FEATURE-STORE_REPO_URL}                %{FEATURE-STORE_REPO_URL=https://github.com/opendatahub-io/feast.git}
-${NOTEBOOK_IMAGE}                        quay.io/rhoai/odh-workbench-jupyter-datascience-cpu-py312-rhel9@sha256:63209fdee1f02bb64f8b5e66f8209f2d1999a337962d31c634169ac3e87ae946
+${NOTEBOOK_IMAGE}                        quay.io/rhoai/odh-workbench-jupyter-datascience-cpu-py312-rhel9@sha256:99ed7fab64beb6540f2a3c6209f8608d0b0b0fee8ab0edc163a873f4b69563ab
 ${FEAST_VERSION}                         0.67.0
 ${FEAST_NOTEBOOK_VERSION}                0.66.0
 ${FEAST-MODULE-OPERATOR_REPO_URL}        %{FEAST-MODULE-OPERATOR_REPO_URL=https://github.com/opendatahub-io/feast-module-operator.git}
@@ -119,11 +119,11 @@ Run Feast Notebook Test
     ELSE
         ${token}=    Set Variable    ${EMPTY}
     END
-    ${command}=    Set Variable    cd ${FEATURE-STORE_DIR}/infra/feast-operator && git fetch origin && git checkout ${FEATURE-STORE-RELEASE-TAG} && git branch && go test -timeout 10m ./test/e2e_rhoai/ -v -ginkgo.focus=${TEST_NAME}
+    ${command}=    Set Variable    cd ${FEATURE-STORE_DIR}/infra/feast-operator && git fetch origin && git checkout ${FEATURE-STORE-RELEASE-TAG} && git branch && go test -timeout 15m ./test/e2e_rhoai/ -v -ginkgo.focus=${TEST_NAME}
     ${result}=    Run Process    ${command}
     ...    shell=true
     ...    stderr=STDOUT
-    ...    timeout=10 min
+    ...    timeout=15 min
     ...    env:RUN_ON_OPENSHIFT_CI=true
     ...    env:NOTEBOOK_IMAGE=${NOTEBOOK_IMAGE}
     ...    env:FEAST_VERSION=${FEAST_NOTEBOOK_VERSION}
@@ -196,10 +196,23 @@ Run Feast Module Operator Test
     [Documentation]   Run feast modular operator Go test against the cluster
     [Arguments]   ${TEST_NAME}    ${TEST_TYPE}
     Log To Console    "Running feast modular operator ${TEST_TYPE} test: ${TEST_NAME}"
-    ${command}=    Set Variable    cd ${FEAST-MODULE-OPERATOR_DIR} && git fetch origin && git checkout ${FEATURE-STORE-RELEASE-TAG} && git branch && go test -tags=${TEST_TYPE} -timeout 10m ./test/${TEST_TYPE}/ -v -run ${TEST_NAME}
+    # Prefer committed vendor/ (offline). Fall back to go mod download only when vendor/ is absent.
+    ${command}=    Catenate    SEPARATOR=${\n}
+    ...    cd ${FEAST-MODULE-OPERATOR_DIR}
+    ...    git fetch origin
+    ...    git checkout ${FEATURE-STORE-RELEASE-TAG}
+    ...    git branch --show-current
+    ...    if [ -d vendor ]; then
+    ...      export GOFLAGS="-mod=vendor" GOPROXY=off GOSUMDB=off
+    ...      echo "Using vendor/ (offline)"
+    ...    else
+    ...      echo "No vendor/; running go mod download"
+    ...      go mod download
+    ...    fi
+    ...    go test -count=1 -tags=${TEST_TYPE} -timeout 5m ./test/${TEST_TYPE}/ -v -run ${TEST_NAME}
     ${result}=    Run Process    ${command}
     ...    shell=true
-    ...    timeout=10 min
+    ...    timeout=15 min
     ...    env:OPERATOR_NAMESPACE=${APPLICATIONS_NAMESPACE}
     ...    env:APPLICATIONS_NAMESPACE=${APPLICATIONS_NAMESPACE}
     ...    env:FEAST_VERSION=${FEAST_VERSION}

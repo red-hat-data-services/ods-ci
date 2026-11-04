@@ -145,7 +145,7 @@ Install RHODS
               Oc Apply   kind=List   src=${destination_file}
               Remove File    ${destination_file}
           ELSE
-              Set Subscription Update Channel    ${OPERATOR_NAMESPACE}    ${UPDATE_CHANNEL}    ${OPERATOR_SUBSCRIPTION_NAME}    ${OPERATOR_NAME}
+              Set Subscription Update Channel    ${OPERATOR_NAMESPACE}    ${UPDATE_CHANNEL}    ${OPERATOR_SUBSCRIPTION_NAME}    ${OPERATOR_NAME}    #robocop:disable
           END
           Wait For Installplan And Approve It    ${OPERATOR_NAMESPACE}    ${OPERATOR_NAME}    ${OPERATOR_SUBSCRIPTION_NAME}    ${rhoai_version}    #robocop:disable
       ELSE
@@ -403,7 +403,8 @@ Upgrade RHODS In Self Managed Cluster Using CLI
   Log    Update channel: ${UPDATE_CHANNEL}    console=yes
   Log    Using subscription name: ${subscription_name} (operator package: ${OPERATOR_NAME})    console=yes
   Set Subscription Install Plan Approval    ${OPERATOR_NAMESPACE}    Manual    ${subscription_name}
-  Set Subscription Update Channel    ${OPERATOR_NAMESPACE}    ${UPDATE_CHANNEL}    ${subscription_name}    ${OPERATOR_NAME}
+  Set Subscription Update Channel    ${OPERATOR_NAMESPACE}    ${UPDATE_CHANNEL}
+  ...    ${subscription_name}    ${OPERATOR_NAME}
   IF    "${image_url}" != "${EMPTY}"
       Set Catalog Source Image    ${image_url}    cs_name=${CATALOG_SOURCE}
       Update Subscription Source    ${OPERATOR_NAMESPACE}    ${subscription_name}    ${CATALOG_SOURCE}

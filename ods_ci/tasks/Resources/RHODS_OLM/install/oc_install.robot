@@ -1513,12 +1513,12 @@ Install RHOAI Dependencies With CLI
     Install Leader Worker Set Operator Via Cli
     Install Connectivity Link Operator Via Cli
     ${node_arch} =    Get Node Architecture
-    IF    '${node_arch}' not in ['s390x', 'ppc64le']
+    IF    '${node_arch}' not in ['arm64', 's390x', 'ppc64le']
         Install NFS Operator Via Cli
         Deploy NFS Provisioner
         Verify NFS Storage Class
     ELSE
-        Log    Skipping NFS Operator installation on ${node_arch} (operator images are only available for amd64/arm64)
+        Log    Skipping NFS Operator installation on ${node_arch} (operator image is only available for amd64)
         ...    console=yes
     END
     Install JobSet Dependencies

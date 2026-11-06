@@ -457,8 +457,11 @@ Verify RHODS Installation
 
   ${modelsasservice} =    Is Nested Component Enabled    kserve    modelsAsService    ${DSC_NAME}
   IF    "${modelsasservice}" == "true"
+    # Prefer control-plane=maas-controller (AGO manager.yaml). Do not use
+    # part-of=models-as-a-service: the maas-api-key-cleanup CronJob pods carry that same label
+    # and stay Ready=False/PodCompleted, which hangs the pod readiness wait until timeout.
     Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
-    ...    label_selector=app.kubernetes.io/part-of=models-as-a-service
+    ...    label_selector=control-plane=maas-controller
   END
 
   ${dashboard} =    Is Component Enabled    dashboard    ${DSC_NAME}

@@ -96,7 +96,7 @@ Test Onnx Model Via UI (OVMS on Kserve)
 Verify Multiple Projects With Same Model (OVMS on Kserve)
     [Documentation]    Test the deployment of multiple DS project with same openvino_ir model (kserve)
     [Tags]    Sanity
-    ...       ODS-2629    RHOAIENG-549
+    ...       ODS-2629    RHOAIENG-549    deprecatedTest
     Create Openvino Models For Kserve    server_name=${RUNTIME_NAME}    model_name=${MODEL_NAME}
     ...    project_name=${PRJ_TITLE}    num_projects=3
     [Teardown]    Run Keywords    Delete Project Via CLI By Display Name    displayed_name=ALL    AND

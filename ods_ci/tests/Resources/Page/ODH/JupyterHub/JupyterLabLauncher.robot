@@ -193,7 +193,7 @@ Clean Up User Notebook
 
   # Verify that ${admin_username}  is connected to the cluster
   ${oc_whoami} =  Run   oc whoami
-  IF    '${oc_whoami}' == '${admin_username}' or '${oc_whoami}' == '${SERVICE_ACCOUNT.FULL_NAME}'
+  IF    '${oc_whoami}' == '${admin_username}' or '${oc_whoami}' == 'kube:admin' or '${oc_whoami}' == '${SERVICE_ACCOUNT.FULL_NAME}'
       # Verify that the jupyter notebook pod is running
       ${notebook_pod_name} =   Get User Notebook Pod Name  ${username}
       OpenShiftLibrary.Search Pods    ${notebook_pod_name}  namespace=${NOTEBOOKS_NAMESPACE}
@@ -219,7 +219,7 @@ Delete Folder In User Notebook
 
   # Verify that ${admin_username}  is connected to the cluster
   ${oc_whoami} =  Run   oc whoami
-  IF    '${oc_whoami}' == '${admin_username}' or '${oc_whoami}' == '${SERVICE_ACCOUNT.FULL_NAME}'
+  IF    '${oc_whoami}' == '${admin_username}' or '${oc_whoami}' == 'kube:admin' or '${oc_whoami}' == '${SERVICE_ACCOUNT.FULL_NAME}'
       # Verify that the jupyter notebook pod is running
       ${notebook_pod_name} =   Get User Notebook Pod Name  ${username}
       OpenShiftLibrary.Search Pods    ${notebook_pod_name}  namespace=${NOTEBOOKS_NAMESPACE}

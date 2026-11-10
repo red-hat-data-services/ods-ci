@@ -21,7 +21,7 @@ ${URL_TEST_PIPELINE_RUN_YAML}=                 https://raw.githubusercontent.com
 Verify Admin Users Can Create And Run a Data Science Pipeline Using The Api
     [Documentation]    Creates, runs pipelines with admin user. Double check the pipeline result and clean
     ...    the pipeline resources.
-    [Tags]      Sanity    ODS-2083
+    [Tags]      Tier1    ODS-2083
     Skip If Test Enviroment Is ROSA-HCP    msg=Skipped due to automation bug on ROSA-HCP (tracked at RHOAIENG-16414)
     End To End Pipeline Workflow Via Api    ${OCP_ADMIN_USER.USERNAME}    ${OCP_ADMIN_USER.PASSWORD}    pipelinesapi1
     [Teardown]   Projects.Delete Project Via CLI By Display Name    pipelinesapi1
@@ -48,7 +48,7 @@ Verify Ods Users Can Do Http Request That Must Be Redirected to Https
 
 Verify DSPO Operator Reconciliation Retry
     [Documentation]    Verify DSPO Operator is able to recover from missing components during the initialization
-    [Tags]      Sanity    ODS-2477
+    [Tags]      Tier1    ODS-2477
 
     ${local_project_name} =    Set Variable    dsp-reconciliation-test
     Projects.Create Data Science Project From CLI    name=${local_project_name}    as_user=${OCP_ADMIN_USER.USERNAME}

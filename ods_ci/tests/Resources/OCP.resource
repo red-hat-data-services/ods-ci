@@ -429,8 +429,11 @@ Set Subscription Install Plan Approval
 Set Subscription Update Channel
     [Documentation]    Changes the update channel of a subscription.
     ...                Waits for old CSV to be deleted and new CSV to become ready after patching.
-    ...                Example: Set Subscription Update Channel    redhat-ods-operator    fast-3.x    rhods-operator
-    [Arguments]    ${namespace}    ${channel}    ${sub_name}
+    ...                ${operator_name} is the operator *package* name (e.g. rhods-operator), which can
+    ...                differ from the Subscription CR name (e.g. rhoai-operator-dev). It is needed to
+    ...                build the OLM CSV label, which is operators.coreos.com/<package>.<namespace>.
+    ...                Example: Set Subscription Update Channel    redhat-ods-operator    fast-3.x    rhods-operator    rhods-operator
+    [Arguments]    ${namespace}    ${channel}    ${sub_name}    ${operator_name}=${sub_name}
     Log    Setting subscription update channel to ${channel} in namespace ${namespace}    console=yes
     ${rc}    ${old_csv_name}=    Run And Return Rc And Output
     ...    oc get subscription ${sub_name} -n ${namespace} -o jsonpath='{.status.currentCSV}' 2>/dev/null
@@ -460,7 +463,7 @@ Set Subscription Update Channel
         END
         Log    Waiting for new CSV to become ready    console=yes
         ${ready_rc}=    Run And Return Rc
-        ...    oc wait csv -n ${namespace} -l operators.coreos.com/${sub_name} --for=jsonpath='{.status.phase}'=Succeeded --timeout=300s
+        ...    oc wait csv -n ${namespace} -l operators.coreos.com/${operator_name}.${namespace} --for=jsonpath='{.status.phase}'=Succeeded --timeout=300s
         IF    ${ready_rc} == 0
             Log    New CSV is ready and succeeded    console=yes
         ELSE

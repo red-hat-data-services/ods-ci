@@ -61,7 +61,7 @@ Verify Users Can Create And Run A Pipeline That Uses Custom Python Packages To I
 Verify Upload Download In Data Science Pipelines Using The kfp Python Package
     [Documentation]    Creates, runs pipelines with regular user. Double check the pipeline result and clean
     ...    the pipeline resources.
-    [Tags]    Sanity    ODS-2683
+    [Tags]    Tier1    ODS-2683
     Skip If Test Enviroment Is ROSA-HCP    msg=Skipped due to automation bug on ROSA-HCP (tracked at RHOAIENG-16414)
     ${upload_download_dict}=    Create Dictionary    mlpipeline_minio_artifact_secret=value    bucket_name=value
     End To End Pipeline Workflow Using Kfp

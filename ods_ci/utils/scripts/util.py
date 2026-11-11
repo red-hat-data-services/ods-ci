@@ -55,7 +55,7 @@ def read_yaml(filename):
 
 
 def execute_command(
-    cmd: str,
+    cmd: str | list[str],
     print_stdout: bool = True,
     return_rc: bool = False,
     timeout: int = 50,
@@ -64,7 +64,7 @@ def execute_command(
     Executes command on the local node and streams output.
 
     Args:
-        cmd: command to run
+        cmd: command string to run through a shell, or argument list to run directly.
         print_stdout: whether to print output lines
         return_rc: if True, return (rc, output). Otherwise return output only.
         timeout: max seconds to wait for process when return_rc=True.
@@ -77,7 +77,7 @@ def execute_command(
     try:
         with subprocess.Popen(
             cmd,
-            shell=True,
+            shell=isinstance(cmd, str),
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             universal_newlines=True,
@@ -144,7 +144,16 @@ def oc_login(ocp_api_url="", username="", password="", kubeconfig_path="", timeo
         log.error("Missing API URL / IDP credentials for cluster login")
         sys.exit(1)
 
-    cmd = f"oc login -u {username} -p {password} {ocp_api_url} --insecure-skip-tls-verify=true"
+    cmd = [
+        "oc",
+        "login",
+        "-u",
+        username,
+        "-p",
+        password,
+        ocp_api_url,
+        "--insecure-skip-tls-verify=true",
+    ]
     count = 0
     chk_flag = 0
     while count <= timeout:

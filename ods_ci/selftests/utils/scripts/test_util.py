@@ -86,11 +86,11 @@ class TestExecuteCommand(unittest.TestCase):
         assert util.execute_command("echo hello world", print_stdout=False) == "hello world\n"
 
     def test_list_cmd_single_list_item(self):
-        assert util.execute_command(["echo hello world"], print_stdout=False) == "hello world\n"
+        assert util.execute_command(["echo hello world"], print_stdout=False) is None
 
     def test_list_cmd_multiple_list_items(self):
-        # this is surprising, but it's what subprocess.Popen does
-        assert util.execute_command(["echo", "hello", "world"], print_stdout=False) == "\n"
+        # List arguments are executed directly, without shell parsing.
+        assert util.execute_command(["echo", "hello", "world"], print_stdout=False) == "hello world\n"
 
     def test_multiple_output_lines(self):
         python = sys.executable

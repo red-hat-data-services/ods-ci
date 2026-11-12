@@ -21,7 +21,7 @@ ${SAVE_BUTTON}=    //button[contains(., "Save changes")]
 Add OpenShift Groups To Data Science Administrators
     [Documentation]  Add OpenShift Groups to Data Science administrators From RHODS Dashboard
     [Arguments]     @{admin_groups}
-    Click Button   ${ADMIN_GROUPS_SECTION}//button[@aria-label="Select the OpenShift groups that contain all Data Science administrators."]
+    Click Button   ${ADMIN_GROUPS_SECTION}//button[contains(@aria-label, "Select the groups that contain all")]
     FOR    ${group}    IN    @{admin_groups}
         ${present}=    Run Keyword And Return Status    Element Should Be Visible
         ...    ${ADMIN_GROUPS_SECTION}//div[@data-testid="group-setting-select"]//ul//*[text()="${group}"]
@@ -34,7 +34,7 @@ Add OpenShift Groups To Data Science Administrators
 Add OpenShift Groups To Data Science User Groups
     [Documentation]  Add OpenShift Groups to Data Science User From RHODS Dashboard
     [Arguments]     @{user_groups}
-    Click Button   ${USER_GROUPS_SECTION}//button[@aria-label="Select the OpenShift groups that contain all Data Science users."]
+    Click Button   ${USER_GROUPS_SECTION}//button[contains(@aria-label, "Select the groups that contain all")]
     FOR    ${group}    IN    @{user_groups}
         ${present}=    Run Keyword And Return Status    Element Should Be Visible
         ...      ${USER_GROUPS_SECTION}//div[@data-testid="group-setting-select"]//ul//*[text()="${group}"]
@@ -54,7 +54,7 @@ Launch Dashboard And Check User Management Option Is Available For The User
     IF    ${settings_should_be}
         # Wait up to 2 minutes as a workaround for bug RHOAIENG-11116
         Menu.Navigate To Page    Settings    User management    timeout=2m
-        Wait Until Element Is Visible    //button[@aria-label="Select the OpenShift groups that contain all Data Science administrators."]    timeout=10s
+        Wait Until Element Is Visible    ${ADMIN_GROUPS_SECTION}//button[contains(@aria-label, "Select the groups that contain all")]    timeout=10s
     ELSE
         Verify Cluster Settings Is Not Available
     END

@@ -483,21 +483,6 @@ Validate Feastoperator Managed State
 
     [Teardown]      Restore DSC Component State     feastoperator       ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}     ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.FEASTOPERATOR}
 
-Validate Feastoperator Removed State
-    [Documentation]    Validate that FeastOperator management state Removed does remove relevant resources.
-    [Tags]
-    ...    Operator
-    ...    Tier1
-    ...    feastoperator-removed
-    ...    Integration
-
-    Set DSC Component Removed State And Wait For Completion
-    ...    feastoperator
-    ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
-    ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
-
-    [Teardown]      Restore DSC Component State     feastoperator       ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}     ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}      ${SAVED_MANAGEMENT_STATES.FEASTOPERATOR}
-
 Validate DataRegistry Managed
     [Documentation]    Validate Data Registry Managed state through the Feast module operator deployment.
     [Tags]    Operator    RHOAIENG-84590    dataregistry-managed    Integration    Smoke

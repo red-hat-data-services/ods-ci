@@ -1191,7 +1191,7 @@ Install Connectivity Link Operator Via Cli
     [Documentation]    Install Red Hat Connectivity Link Operator Via CLI
     ...                Installing in ${CONNECTIVITY_LINK_NS} namespace with operator group
     ...                ensures all resources are created in ${CONNECTIVITY_LINK_NS}.
-    ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
+    ${arch_type} =    Get Node Architecture
     IF    '${arch_type}' == 's390x' or '${arch_type}' == 'ppc64le'
         Log    Skipping Red Hat Connectivity Link Operator installation for s390x/ppc64le architecture    console=yes
         Log    Skipping Authorino Operator installation for s390x/ppc64le architecture    console=yes
@@ -1222,9 +1222,9 @@ Install Connectivity Link Operator Via Cli
         # Wait for rhcl-operator to be ready
         Wait Until Csv Is Ready    display_name=${CONNECTIVITY_LINK_OP_NAME}
              ...    operators_namespace=${CONNECTIVITY_LINK_NS}    timeout=5m
-        # Skip configure_connectivity_link_operator.sh for s390x architecture
-        ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
-        IF    '${arch_type}' != 's390x'
+        # Skip configure_connectivity_link_operator.sh for s390x/ppc64le architecture
+        ${arch_type} =    Get Node Architecture
+        IF    '${arch_type}' not in ['s390x', 'ppc64le']
             ${rc}    ${output} =    Run And Return Rc And Output    sh tasks/Resources/RHODS_OLM/install/configure_connectivity_link_operator.sh
             Log    ${output}    console=yes
             IF    ${rc} != ${0}
@@ -1234,8 +1234,8 @@ Install Connectivity Link Operator Via Cli
             END
             Configure Authorino
         ELSE
-            Log    Skipping configure_connectivity_link_operator.sh for s390x architecture    console=yes
-            Log    Skipping Authorino configuration for s390x architecture    console=yes
+            Log    Skipping configure_connectivity_link_operator.sh for s390x/ppc64le architecture    console=yes
+            Log    Skipping Authorino configuration for s390x/ppc64le architecture    console=yes
         END
     END
 
@@ -1340,22 +1340,33 @@ Install JobSet Dependencies
     Install JobSet Operator Via Cli
     Create JobSetOperator CR
 
+Get Node Architecture
+    [Documentation]    Returns the CPU architecture of the cluster worker nodes (amd64, arm64, s390x, ppc64le).
+    ...                Read from the worker nodes, not from ARCH_TYPE and not from the control plane.
+    ...                Fails if the worker nodes have different architectures.
+    ${rc}    ${archs} =    Run And Return Rc And Output
+    ...    oc get nodes -l node-role.kubernetes.io/worker= -o jsonpath='{.items[*].status.nodeInfo.architecture}'
+    IF    ${rc} != 0
+        Fail    msg=Failed to read worker node architecture: ${archs}
+    END
+    ${unique_archs} =    Evaluate    sorted(set("""${archs}""".split()))
+    IF    not ${unique_archs}
+        Fail    msg=No worker nodes found, unable to determine node architecture
+    END
+    ${arch_count} =    Get Length    ${unique_archs}
+    IF    ${arch_count} > 1
+        Fail    msg=Worker nodes have mixed architectures: ${unique_archs}
+    END
+    RETURN    ${unique_archs}[0]
+
 Install Agent Sandbox Operator Via Cli
     [Documentation]    Install Red Hat build of Agent Sandbox Operator via CLI.
-    ...                Skips arm64 because the published controller is amd64-only.
+    ...                Skips non-amd64 nodes (arm64, s390x, ppc64le) because the published controller is amd64-only.
     ...                Architecture comes from the node, not ARCH_TYPE.
     ...                Skips, with a warning, when the operator is not published in OperatorHub yet.
-    ${rc}    ${node_arch} =    Run And Return Rc And Output
-    ...    oc get nodes -o jsonpath='{.items[0].status.nodeInfo.architecture}'
-    IF    ${rc} != 0
-        Fail    msg=Failed to read node architecture: ${node_arch}
-    END
-    ${node_arch} =    Strip String    ${node_arch}
-    IF    '${node_arch}' == '${EMPTY}'
-        Fail    msg=Node architecture is empty
-    END
-    IF    '${node_arch}' == 'arm64'
-        Log    Skipping agent-sandbox-operator on arm64    console=yes
+    ${node_arch} =    Get Node Architecture
+    IF    '${node_arch}' != 'amd64'
+        Log    Skipping agent-sandbox-operator on ${node_arch} (controller image is amd64-only)    console=yes
         RETURN
     END
     ${is_installed} =    Check If Operator Is Installed Via CLI    ${AGENT_SANDBOX_OP_NAME}
@@ -1501,13 +1512,19 @@ Install RHOAI Dependencies With CLI
     Install Kueue Dependencies
     Install Leader Worker Set Operator Via Cli
     Install Connectivity Link Operator Via Cli
-    Install NFS Operator Via Cli
-    Deploy NFS Provisioner
-    Verify NFS Storage Class
+    ${node_arch} =    Get Node Architecture
+    IF    '${node_arch}' not in ['arm64', 's390x', 'ppc64le']
+        Install NFS Operator Via Cli
+        Deploy NFS Provisioner
+        Verify NFS Storage Class
+    ELSE
+        Log    Skipping NFS Operator installation on ${node_arch} (operator image is only available for amd64)
+        ...    console=yes
+    END
     Install JobSet Dependencies
     Install Agent Sandbox Operator Via Cli
-    ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
-    IF    '${arch_type}' != 's390x'
+    ${arch_type} =    Get Node Architecture
+    IF    '${arch_type}' not in ['s390x', 'ppc64le']
         Configure MaaS Database
         Configure MaaS Gateway API
     END
@@ -2019,9 +2036,9 @@ Patch DSC With Model Cache Config
 
 Configure MaaS Gateway API
     [Documentation]    Configure Gateway API for MaaS traffic routing
-    ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
-    IF    '${arch_type}' == 'ppc64le'
-        Log    Skipping MaaS Gateway API installation for ppc64le architecture    console=yes
+    ${arch_type} =    Get Node Architecture
+    IF    '${arch_type}' in ['s390x', 'ppc64le']
+        Log    Skipping MaaS Gateway API installation for ${arch_type} architecture    console=yes
         RETURN
     END
     Log To Console    Configuring Gateway API for MaaS
@@ -2032,9 +2049,9 @@ Configure MaaS Gateway API
 
 Configure MaaS Database
     [Documentation]    Provision PostgreSQL and maas-db-config secret required by maas-api
-    ${arch_type} =    Get Variable Value    ${ARCH_TYPE}    amd64
-    IF    '${arch_type}' == 'ppc64le'
-        Log    Skipping MaaS Database installation for ppc64le architecture    console=yes
+    ${arch_type} =    Get Node Architecture
+    IF    '${arch_type}' in ['s390x', 'ppc64le']
+        Log    Skipping MaaS Database installation for ${arch_type} architecture    console=yes
         RETURN
     END
     Log To Console    Provisioning MaaS PostgreSQL prerequisites

@@ -425,9 +425,17 @@ Set Exact Groups In Section
     ...    msg=Exact groups mismatch: wanted ${desired_groups}, got ${final_names}
 
 Add Group In Section
-    [Documentation]    Add a single group via 3.5+ UI. Cancels gracefully on duplicate.
+    [Documentation]    Add a single group via 3.5+ UI. Skips if already present.
     [Arguments]    ${section}    ${group}
+    @{existing}=    Get Group Names In Section    ${section}
+    ${already}=    Run Keyword And Return Status    Should Contain    ${existing}    ${group}
+    IF    ${already}    RETURN
     Click Button    ${section}//button[@data-testid="add-group-button"]
+    Select And Save Group In Section    ${section}    ${group}
+
+Select And Save Group In Section
+    [Documentation]    Type, select, and save a group in an open 3.5+ add-group form.
+    [Arguments]    ${section}    ${group}
     Wait Until Element Is Visible    ${section}//input[@role="combobox"]    timeout=10s
     Input Text    ${section}//input[@role="combobox"]    ${group}
     ${option_xp}=    Set Variable
@@ -435,15 +443,9 @@ Add Group In Section
     Wait Until Element Is Visible    ${option_xp}    timeout=10s
     Click Element    ${option_xp}
     ${save_btn}=    Set Variable    ${section}//button[@data-testid="save-new-group-button"]
-    ${is_duplicate}=    Run Keyword And Return Status
-    ...    Wait Until Page Contains Element    ${section}//*[@data-testid="duplicate-group-error"]    timeout=2s
-    IF    ${is_duplicate}
-        Click Element    ${section}//button[@aria-label="Cancel add group"]
-    ELSE
-        Wait Until Element Is Enabled    ${save_btn}    timeout=5s
-        Click Button    ${save_btn}
-        Wait Until Element Is Not Visible    ${save_btn}    timeout=10s
-    END
+    Wait Until Element Is Enabled    ${save_btn}    timeout=5s
+    Click Button    ${save_btn}
+    Wait Until Element Is Not Visible    ${save_btn}    timeout=10s
 
 Remove Group From Section
     [Documentation]    Remove a named group via 3.5+ remove button and confirmation modal.

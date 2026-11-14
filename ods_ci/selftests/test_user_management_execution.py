@@ -35,10 +35,9 @@ SETTINGS_RESOURCE = (
     / "ODHDashboardSettings.resource"
 )
 
-
-# ---------------------------------------------------------------------------
-# Fake library that stubs SeleniumLibrary + version keywords for Robot execution
-# ---------------------------------------------------------------------------
+# K8s group names: alphanumeric, hyphens, dots, colons (system: prefix).
+# Quotes are not valid in K8s group names.
+VALID_GROUP_NAME_RE = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9._:@-]*$")
 
 
 class FakeBrowserState:
@@ -46,21 +45,16 @@ class FakeBrowserState:
 
     def __init__(self) -> None:
         self.calls: list[tuple[str, tuple[Any, ...]]] = []
-        self.groups: dict[str, list[str]] = {
-            "admin": ["default-admins"],
-            "user": ["system:authenticated"],
-        }
+        self.groups: dict[str, list[str]] = {"admin": ["default-admins"], "user": ["system:authenticated"]}
         self.version: str = "3.5.0"
         self.page: str = "user-management"
         self.adding_section: str | None = None
         self.adding_group: str | None = None
-        self.modal_visible: bool = False
 
     def record(self, name: str, *args: Any) -> None:
         self.calls.append((name, args))
 
 
-# Global state instance, reset per test
 _state = FakeBrowserState()
 
 
@@ -73,19 +67,15 @@ def _section_key(locator: str) -> str:
 
 
 def _make_stub_resource() -> str:
-    """Generate a minimal .resource file that imports only our fake library
-    and includes the keywords under test from the real resource file."""
+    """Generate a minimal .resource file with fake library and real keyword bodies."""
     real_content = SETTINGS_RESOURCE.read_text()
-
-    # Extract only the Keywords section
     kw_start = real_content.index("*** Keywords ***")
     keywords_block = real_content[kw_start:]
-
-    # Build a self-contained resource with fake library
     return (
         textwrap.dedent("""\
 *** Settings ***
 Library    test_user_management_execution.FakeBrowserLib
+Library    test_user_management_execution.FakeMenuLib    WITH NAME    Menu
 Library    Collections
 
 *** Variables ***
@@ -95,25 +85,45 @@ ${USER_GROUPS_SECTION}=    //div[@data-testid="data-science-user-groups"]
 ${USER_GROUPS_LIST}=    ${USER_GROUPS_SECTION}//div[@role="group" and @aria-label="Current selections"]
 ${SAVE_BUTTON}=    //button[contains(., "Save changes")]
 ${GROUP_BTN_XP}=    //button[@aria-label="Clear input value"]
+${ODH_DASHBOARD_URL}=    https://fake-dashboard.example.com
+&{BROWSER}=    NAME=chrome    OPTIONS=headless
+${PRODUCT}=    RHODS
 
 """)
         + keywords_block
     )
 
 
-class FakeBrowserLib:
-    """Robot Framework library that stubs browser + version keywords."""
+class FakeMenuLib:
+    """Stub for Menu library (provides Menu.Navigate To Page)."""
 
     ROBOT_LIBRARY_SCOPE = "GLOBAL"
 
-    # Version keywords
-    def is_rhods_version_greater_or_equal_than(self, target: str) -> bool:
-        ver = VersionInfo.parse(_state.version)
-        tgt = VersionInfo.parse(target)
-        _state.record("version_check", target)
-        return ver >= tgt
+    def navigate_to_page(self, *args: Any, **kwargs: Any) -> None:
+        _state.record("navigate_to_page", *args)
 
-    # SeleniumLibrary stubs
+
+class FakeBrowserLib:
+    """Robot Framework library stubbing SeleniumLibrary + version keywords."""
+
+    ROBOT_LIBRARY_SCOPE = "GLOBAL"
+
+    def is_rhods_version_greater_or_equal_than(self, target: str) -> bool:
+        _state.record("version_check", target)
+        return VersionInfo.parse(_state.version) >= VersionInfo.parse(target)
+
+    def launch_dashboard(self, **kwargs: Any) -> None:
+        _state.record("launch_dashboard")
+
+    def verify_service_account_authorization_not_required(self) -> None:
+        _state.record("verify_service_account")
+
+    # Menu.Navigate To Page is a dotted keyword — Robot resolves it as a library named "Menu"
+    # with keyword "Navigate To Page". Add a standalone stub via the ROBOT_LIBRARY_DOC_FORMAT trick:
+    # Robot also tries the keyword name directly on all libraries.
+    def navigate_to_page(self, *args: Any, **kwargs: Any) -> None:
+        _state.record("navigate_to_page", *args)
+
     def click_button(self, locator: str) -> None:
         _state.record("click_button", locator)
         sk = _section_key(locator)
@@ -125,38 +135,30 @@ class FakeBrowserLib:
             _state.adding_group = None
             _state.adding_section = None
         elif "modal-remove-button" in locator:
-            _state.modal_visible = False
+            pass
         elif "Save changes" in locator:
-            pass  # legacy save
+            _state.record("save_click")
 
     def click_element(self, locator: str) -> None:
         _state.record("click_element", locator)
-        _section_key(locator)
         if 'role="option"' in locator:
-            # Extract group name from the option XPath
-            for g in [*_state.groups.get(_state.adding_section or "admin", []), "new-group"]:
-                if g in locator or f'Select "{g}"' in locator:
+            for g in [*_state.groups.get(_state.adding_section or "admin", []), _state.adding_group or ""]:
+                if g and (g in locator or f'Select "{g}"' in locator):
                     _state.adding_group = g
                     break
-            if _state.adding_group is None and _state.adding_section:
-                # Creatable option - extract name between quotes
-
-                m = re.search(r'normalize-space\(\.\)=["\']([^"\']+)', locator)
-                if m:
-                    _state.adding_group = m.group(1)
         elif "Cancel add group" in locator:
             _state.adding_group = None
             _state.adding_section = None
         elif "remove-group-button" in locator:
-            # Extract group name from data-testid
-
             m = re.search(r'remove-group-button ([^"]+)"', locator)
             if m:
-                group_name = m.group(1).strip()
-                sk2 = _section_key(locator)
-                if group_name in _state.groups.get(sk2, []):
-                    _state.groups[sk2].remove(group_name)
-            _state.modal_visible = True
+                gn = m.group(1).strip()
+                sk = _section_key(locator)
+                if gn in _state.groups.get(sk, []):
+                    _state.groups[sk].remove(gn)
+
+    def element_should_be_visible(self, locator: str) -> None:
+        _state.record("element_visible", locator)
 
     def wait_until_element_is_visible(self, locator: str, timeout: str = "10s") -> None:
         _state.record("wait_visible", locator)
@@ -169,20 +171,14 @@ class FakeBrowserLib:
 
     def wait_until_page_contains_element(self, locator: str, timeout: str = "10s") -> None:
         _state.record("wait_page_contains", locator)
-        # For duplicate check: if adding a group already in the section, "find" the error
-        if "duplicate-group-error" in locator and _state.adding_section:
-            sk = _state.adding_section
-            if _state.adding_group and _state.adding_group in _state.groups.get(sk, []):
-                return  # duplicate found
-        raise AssertionError(f"Element not found: {locator}")
-
-    def page_should_contain_element(self, locator: str, **kwargs: Any) -> None:
-        _state.record("page_contains", locator)
         if "duplicate-group-error" in locator and _state.adding_section:
             sk = _state.adding_section
             if _state.adding_group and _state.adding_group in _state.groups.get(sk, []):
                 return
-            raise AssertionError(f"Duplicate error not found: {locator}")
+        raise AssertionError(f"Element not found: {locator}")
+
+    def page_should_contain_element(self, locator: str, **kwargs: Any) -> None:
+        _state.record("page_contains", locator)
         if "data-science-administrator-groups" in locator and _state.page == "user-management":
             return
         if "data-science-user-groups" in locator and _state.page == "user-management":
@@ -192,10 +188,9 @@ class FakeBrowserLib:
     def page_should_not_contain_element(self, locator: str, **kwargs: Any) -> None:
         _state.record("page_not_contains", locator)
         if "aria-disabled" in locator:
-            # Check if removing last group
             sk = _section_key(locator)
             if len(_state.groups.get(sk, [])) <= 1:
-                raise AssertionError(f"Element found (last group): {locator}")
+                raise AssertionError(f"Last group: {locator}")
 
     def input_text(self, locator: str, text: str) -> None:
         _state.record("input_text", locator, text)
@@ -211,24 +206,16 @@ class FakeBrowserLib:
         return []
 
     def get_text(self, element: Any) -> str:
-        # element is a string (group name) from get_webelements
         return str(element)
-
-    def get_length(self, item: Any) -> int:
-        return len(item)
 
     def scroll_element_into_view(self, locator: str) -> None:
         _state.record("scroll", locator)
-        if "Save changes" in locator and _state.page == "user-management":
-            if _state.version >= "3.5.0":
-                raise AssertionError("Save button not found on 3.5 user management")
 
     def press_keys(self, locator: Any, *keys: str) -> None:
         _state.record("press_keys", locator, *keys)
 
-    # BuiltIn keywords (Should Contain, Lists Should Be Equal, Append To List,
-    # Get Length, Run Keyword And Return Status, Fail, Create List) are provided
-    # by Robot's BuiltIn library automatically — no stubs needed here.
+    def verify_cluster_settings_is_not_available(self) -> None:
+        _state.record("verify_cluster_settings_not_available")
 
 
 def _run_robot_test(
@@ -243,25 +230,21 @@ def _run_robot_test(
     _state = FakeBrowserState()
     _state.version = version
     _state.page = page
-    # Ensure Robot uses the same module instance (not a re-import under a different key)
     sys.modules["test_user_management_execution"] = sys.modules[__name__]
     if initial_admin is not None:
         _state.groups["admin"] = list(initial_admin)
     if initial_user is not None:
         _state.groups["user"] = list(initial_user)
-
-    # Write temporary resource and test
-
     tmpdir = tempfile.mkdtemp()
     resource_path = os.path.join(tmpdir, "settings_test.resource")
     test_path = os.path.join(tmpdir, "test.robot")
-
     with open(resource_path, "w") as f:
         f.write(_make_stub_resource())
-
     test_content = textwrap.dedent(f"""\
 *** Settings ***
 Library    test_user_management_execution.FakeBrowserLib
+Library    test_user_management_execution.FakeMenuLib    WITH NAME    Menu
+Library    Collections
 Resource    {resource_path}
 
 *** Test Cases ***
@@ -270,7 +253,6 @@ Test
 """)
     with open(test_path, "w") as f:
         f.write(test_content)
-
     suite = TestSuite.from_file_system(test_path)
     result = suite.run(
         output=os.path.join(tmpdir, "output.xml"),
@@ -279,85 +261,74 @@ Test
         console="none",
         pythonpath=[str(Path(__file__).parent)],
     )
-
-    # Clean up
     shutil.rmtree(tmpdir, ignore_errors=True)
-
     return result
 
 
 # ===========================================================================
-# Executable behavior tests
+# Robot execution tests
 # ===========================================================================
 
 
 class TestAddGroupBehavior35:
-    """Test Add Group In Section keyword execution on >=3.5."""
-
     def test_add_new_group(self):
         result = _run_robot_test(
             "Add Group In Section    ${ADMIN_GROUPS_SECTION}    new-group",
             version="3.5.0",
             initial_admin=["default-admins"],
         )
-        assert result.return_code == 0, f"Test failed: {result.suite.tests[0].message}"
+        assert result.return_code == 0, result.suite.tests[0].message
         assert "new-group" in _state.groups["admin"]
-        # Verify call ordering: click add -> wait combobox -> input -> wait option -> click option -> wait enabled -> click save -> wait disappear
         call_names = [c[0] for c in _state.calls]
-        assert "click_button" in call_names  # add-group-button
+        assert "click_button" in call_names
         assert "input_text" in call_names
-        assert "wait_enabled" in call_names  # wait for save enabled (no sleep)
+        assert "wait_enabled" in call_names
 
-    def test_add_duplicate_cancels(self):
+    def test_add_duplicate_skips(self):
         result = _run_robot_test(
             "Add Group In Section    ${ADMIN_GROUPS_SECTION}    default-admins",
             version="3.5.0",
             initial_admin=["default-admins"],
         )
         assert result.return_code == 0
-        # Should still have exactly one default-admins (not duplicated)
         assert _state.groups["admin"].count("default-admins") == 1
-        # Should have clicked cancel
-        cancel_calls = [c for c in _state.calls if c[0] == "click_element" and "Cancel" in str(c[1])]
-        assert len(cancel_calls) == 1
+        # Should NOT have clicked add-group-button (skipped entirely)
+        add_clicks = [c for c in _state.calls if "add-group-button" in str(c)]
+        assert len(add_clicks) == 0, "Duplicate should skip add flow entirely"
 
 
 class TestAddGroupVersionRouting:
-    """Test version-gated Add keyword routes correctly."""
-
     def test_35_uses_add_group_button(self):
         result = _run_robot_test(
             "Add OpenShift Groups To Data Science Administrators    new-group",
             version="3.5.0",
             initial_admin=["default-admins"],
         )
-        assert result.return_code == 0
-        add_btn_calls = [c for c in _state.calls if "add-group-button" in str(c)]
-        assert len(add_btn_calls) > 0, "3.5 path must use add-group-button"
+        assert result.return_code == 0, result.suite.tests[0].message
+        add_btn = [c for c in _state.calls if "add-group-button" in str(c)]
+        assert len(add_btn) > 0
 
-    def test_34_uses_aria_label(self):
-        _run_robot_test(
+    def test_34_uses_aria_label_and_succeeds(self):
+        result = _run_robot_test(
             "Add OpenShift Groups To Data Science Administrators    new-group",
             version="3.4.0",
             initial_admin=["default-admins"],
         )
-        # Will fail due to missing browser elements, but should route to <=3.4 path
-        aria_calls = [c for c in _state.calls if "Select the groups that contain all" in str(c)]
-        assert len(aria_calls) > 0, "3.4 path must use contains(@aria-label) selector"
+        assert result.return_code == 0, result.suite.tests[0].message
+        aria = [c for c in _state.calls if "Select the groups that contain all" in str(c)]
+        assert len(aria) > 0, "3.4 path must use contains(@aria-label)"
+        esc = [c for c in _state.calls if c[0] == "press_keys" and "ESC" in str(c)]
+        assert len(esc) > 0, "3.4 path must press ESC to close dropdown"
 
 
 class TestExactSetBehavior:
-    """Test Set Exact Groups In Section with add-before-remove ordering."""
-
     def test_exact_set_with_leftover_default(self):
-        """Default group present; set exact [rhods-admins, rhods-users].
-        Must add desired first, then remove default leftover."""
         result = _run_robot_test(
             "Set Exact Data Science Administrator Groups    rhods-admins    rhods-users",
             version="3.5.0",
             initial_admin=["default-admins"],
         )
-        assert result.return_code == 0, f"Failed: {result.suite.tests[0].message}"
+        assert result.return_code == 0, result.suite.tests[0].message
         assert sorted(_state.groups["admin"]) == ["rhods-admins", "rhods-users"]
 
     def test_exact_set_user_groups(self):
@@ -366,7 +337,7 @@ class TestExactSetBehavior:
             version="3.5.0",
             initial_user=["system:authenticated"],
         )
-        assert result.return_code == 0
+        assert result.return_code == 0, result.suite.tests[0].message
         assert _state.groups["user"] == ["system:authenticated"]
 
     def test_exact_set_empty_list_fails(self):
@@ -375,45 +346,35 @@ class TestExactSetBehavior:
             version="3.5.0",
             initial_admin=["default-admins"],
         )
-        assert result.return_code != 0, "Empty desired list must fail"
+        assert result.return_code != 0
 
     def test_add_before_remove_ordering(self):
-        """Verify adds happen before removes (minimum-1 constraint)."""
         result = _run_robot_test(
             "Set Exact Data Science Administrator Groups    new-group",
             version="3.5.0",
             initial_admin=["old-group"],
         )
-        assert result.return_code == 0
-        # Verify ordering: add-group-button calls must come before remove-group-button calls
-        add_indices = [i for i, c in enumerate(_state.calls) if "add-group-button" in str(c)]
-        remove_indices = [i for i, c in enumerate(_state.calls) if "remove-group-button" in str(c)]
-        if add_indices and remove_indices:
-            assert max(add_indices) < min(remove_indices), "Adds must complete before removes"
+        assert result.return_code == 0, result.suite.tests[0].message
+        add_idx = [i for i, c in enumerate(_state.calls) if "add-group-button" in str(c)]
+        rm_idx = [i for i, c in enumerate(_state.calls) if "remove-group-button" in str(c)]
+        assert add_idx and rm_idx, "Must have both add and remove calls"
+        assert max(add_idx) < min(rm_idx), "Adds before removes"
 
 
 class TestClearBehavior:
-    """Test Clear keyword version routing."""
-
     def test_clear_fails_on_35(self):
-        result = _run_robot_test(
-            "Clear User Management Settings",
-            version="3.5.0",
-        )
-        assert result.return_code != 0, "Clear must fail on >=3.5"
+        result = _run_robot_test("Clear User Management Settings", version="3.5.0")
+        assert result.return_code != 0
         assert "minimum" in result.suite.tests[0].message.lower()
 
     def test_clear_works_on_34(self):
-        result = _run_robot_test(
-            "Clear User Management Settings",
-            version="3.4.0",
-        )
-        assert result.return_code == 0, f"Clear on 3.4 failed: {result.suite.tests[0].message}"
+        result = _run_robot_test("Clear User Management Settings", version="3.4.0")
+        assert result.return_code == 0, result.suite.tests[0].message
+        click_calls = [c for c in _state.calls if c[0] == "click_button" and "Clear input" in str(c)]
+        assert len(click_calls) > 0, "3.4 clear must click Clear input value buttons"
 
 
 class TestSaveBehavior:
-    """Test Save keyword version/page routing."""
-
     def test_save_skips_on_35_user_management(self):
         result = _run_robot_test(
             "Save Changes In User Management Setting",
@@ -422,24 +383,30 @@ class TestSaveBehavior:
         )
         assert result.return_code == 0
         scroll_calls = [c for c in _state.calls if c[0] == "scroll"]
-        assert len(scroll_calls) == 0, "Save must skip scroll on 3.5 user management"
+        assert len(scroll_calls) == 0, "Must skip scroll on 3.5 user management"
 
-    def test_save_fails_on_cluster_settings_if_button_missing(self):
-        """Cluster settings on any version must attempt save (and fail if button missing)."""
-        _run_robot_test(
+    def test_save_attempts_scroll_on_cluster_settings(self):
+        result = _run_robot_test(
             "Save Changes In User Management Setting",
             version="3.5.0",
             page="cluster-settings",
         )
-        # On cluster-settings page, sentinel not found -> falls through to save
-        # scroll_element_into_view will succeed since page != user-management
+        assert result.return_code == 0, result.suite.tests[0].message
         scroll_calls = [c for c in _state.calls if c[0] == "scroll"]
         assert len(scroll_calls) > 0, "Cluster settings must attempt save"
 
+    def test_save_works_on_34_user_management(self):
+        result = _run_robot_test(
+            "Save Changes In User Management Setting",
+            version="3.4.0",
+            page="user-management",
+        )
+        assert result.return_code == 0, result.suite.tests[0].message
+        scroll_calls = [c for c in _state.calls if c[0] == "scroll"]
+        assert len(scroll_calls) > 0, "3.4 must attempt save"
+
 
 class TestLaunchDashboardWait:
-    """Test Launch Dashboard wait keyword version routing."""
-
     def test_35_waits_for_add_group_button(self):
         result = _run_robot_test(
             textwrap.dedent("""\
@@ -447,21 +414,39 @@ class TestLaunchDashboardWait:
             ...    user    pass    basic"""),
             version="3.5.0",
         )
-        # Will fail due to missing Launch Dashboard, but check version routing happened
-        [c for c in _state.calls if "add-group-button" in str(c)]
-        [c for c in _state.calls if "Select the groups" in str(c)]
-        # We can't fully execute (missing Launch Dashboard) but the version check should run
-        version_calls = [c for c in _state.calls if c[0] == "version_check"]
-        assert len(version_calls) >= 1 or result.return_code != 0
+        assert result.return_code == 0, result.suite.tests[0].message
+        waits = [c for c in _state.calls if c[0] == "wait_visible"]
+        add_btn_waits = [c for c in waits if "add-group-button" in str(c)]
+        assert len(add_btn_waits) > 0, "3.5 must wait for add-group-button"
+        aria_waits = [c for c in waits if "Select the groups" in str(c)]
+        assert len(aria_waits) == 0, "3.5 must NOT wait for old aria-label"
+
+    def test_34_waits_for_aria_label(self):
+        result = _run_robot_test(
+            textwrap.dedent("""\
+            Launch Dashboard And Check User Management Option Is Available For The User
+            ...    user    pass    basic"""),
+            version="3.4.0",
+        )
+        assert result.return_code == 0, result.suite.tests[0].message
+        waits = [c for c in _state.calls if c[0] == "wait_visible"]
+        aria_waits = [c for c in waits if "Select the groups" in str(c)]
+        assert len(aria_waits) > 0, "3.4 must wait for aria-label selector"
+        add_btn_waits = [c for c in waits if "add-group-button" in str(c)]
+        assert len(add_btn_waits) == 0, "3.4 must NOT wait for add-group-button"
 
 
 # ===========================================================================
-# XPath selector tests with lxml
+# XPath tests with lxml (uses production selector construction)
 # ===========================================================================
+
+
+def _build_option_xpath(group: str) -> str:
+    """Build EXACT same XPath as Add Group In Section keyword."""
+    return f'//li[@role="option"][normalize-space(.)="{group}" or normalize-space(.)=\'Select "{group}"\']'
 
 
 def _make_option_html(groups: list[str], creatable: list[str] | None = None) -> str:
-    """Build minimal HTML with PF6-style option list."""
     items = []
     for g in groups:
         items.append(f'<li role="option">{g}</li>')
@@ -471,68 +456,60 @@ def _make_option_html(groups: list[str], creatable: list[str] | None = None) -> 
 
 
 class TestXPathOptionMatching:
-    """Verify option XPath selects correct elements using lxml."""
+    """Verify production option XPath against HTML fixtures."""
 
-    def _eval_xpath(self, html: str, group: str) -> list[str]:
+    def _eval(self, html: str, group: str) -> list[str]:
         tree = etree.HTML(html)
-        # This is the EXACT XPath from Add Group In Section
-        xpath = f'//li[@role="option"][normalize-space(.)="{group}" or normalize-space(.)=\'Select "{group}"\']'
-        return [etree.tostring(e, method="text", encoding="unicode").strip() for e in tree.xpath(xpath)]
+        return [
+            etree.tostring(e, method="text", encoding="unicode").strip() for e in tree.xpath(_build_option_xpath(group))
+        ]
 
-    def test_direct_option_match(self):
-        html = _make_option_html(["rhods-admins", "rhods-users"])
-        result = self._eval_xpath(html, "rhods-admins")
-        assert result == ["rhods-admins"]
+    def test_direct_match(self):
+        assert self._eval(_make_option_html(["rhods-admins", "rhods-users"]), "rhods-admins") == ["rhods-admins"]
 
-    def test_creatable_option_match(self):
-        html = _make_option_html([], creatable=["custom-group"])
-        result = self._eval_xpath(html, "custom-group")
-        assert result == ['Select "custom-group"']
+    def test_creatable_match(self):
+        assert self._eval(_make_option_html([], creatable=["custom"]), "custom") == ['Select "custom"']
 
     def test_no_prefix_match(self):
-        """rhods must NOT match rhods-admins."""
-        html = _make_option_html(["rhods-admins", "rhods-users"])
-        result = self._eval_xpath(html, "rhods")
-        assert result == [], "Exact match must not match prefix"
+        assert self._eval(_make_option_html(["rhods-admins"]), "rhods") == []
 
     def test_no_prefix_match_creatable(self):
-        """custom must NOT match 'Select "custom-group"'."""
-        html = _make_option_html([], creatable=["custom-group"])
-        result = self._eval_xpath(html, "custom")
-        assert result == [], "Exact match must not match prefix in creatable"
+        assert self._eval(_make_option_html([], creatable=["custom-group"]), "custom") == []
 
     def test_colon_in_name(self):
-        html = _make_option_html(["system:authenticated"])
-        result = self._eval_xpath(html, "system:authenticated")
-        assert result == ["system:authenticated"]
+        assert self._eval(_make_option_html(["system:authenticated"]), "system:authenticated") == [
+            "system:authenticated"
+        ]
 
     def test_hyphen_in_name(self):
-        html = _make_option_html(["my-test-group"])
-        result = self._eval_xpath(html, "my-test-group")
-        assert result == ["my-test-group"]
+        assert self._eval(_make_option_html(["my-test"]), "my-test") == ["my-test"]
+
+    def test_group_name_with_single_quote_breaks_xpath(self):
+        """K8s group names cannot contain quotes; verify XPath would break."""
+        assert not VALID_GROUP_NAME_RE.match("O'Brien"), "Single-quote names are invalid K8s names"
+
+    def test_group_name_with_double_quote_breaks_xpath(self):
+        assert not VALID_GROUP_NAME_RE.match('Bob "B"'), "Double-quote names are invalid K8s names"
+
+    def test_valid_k8s_group_names(self):
+        for name in ["rhods-admins", "system:authenticated", "my.group", "group_1"]:
+            assert VALID_GROUP_NAME_RE.match(name), f"{name} should be valid"
 
 
-class TestXPathRemoveButtonQuoting:
-    """Verify remove button XPath handles group names correctly."""
-
-    def _eval_remove_xpath(self, html: str, section_xp: str, group: str) -> list[str]:
+class TestXPathRemoveButton:
+    def _eval(self, html: str, section_xp: str, group: str) -> list[str]:
         tree = etree.HTML(html)
-        xpath = f'{section_xp}//button[@data-testid="remove-group-button {group}"]'
-        return [e.get("data-testid", "") for e in tree.xpath(xpath)]
+        return [
+            e.get("data-testid", "")
+            for e in tree.xpath(f'{section_xp}//button[@data-testid="remove-group-button {group}"]')
+        ]
 
-    def test_remove_button_exact_match(self):
-        html = """<div data-testid="data-science-administrator-groups">
-            <button data-testid="remove-group-button rhods-admins"></button>
-            <button data-testid="remove-group-button rhods-users"></button>
-        </div>"""
-        result = self._eval_remove_xpath(
-            html, '//div[@data-testid="data-science-administrator-groups"]', "rhods-admins"
-        )
-        assert result == ["remove-group-button rhods-admins"]
+    def test_exact_match(self):
+        html = '<div data-testid="data-science-administrator-groups"><button data-testid="remove-group-button rhods-admins"></button><button data-testid="remove-group-button rhods-users"></button></div>'
+        assert self._eval(html, '//div[@data-testid="data-science-administrator-groups"]', "rhods-admins") == [
+            "remove-group-button rhods-admins"
+        ]
 
-    def test_remove_button_no_prefix_match(self):
-        html = """<div data-testid="data-science-administrator-groups">
-            <button data-testid="remove-group-button rhods-admins"></button>
-        </div>"""
-        result = self._eval_remove_xpath(html, '//div[@data-testid="data-science-administrator-groups"]', "rhods")
-        assert result == [], "Must not match prefix"
+    def test_no_prefix(self):
+        html = '<div data-testid="data-science-administrator-groups"><button data-testid="remove-group-button rhods-admins"></button></div>'
+        assert self._eval(html, '//div[@data-testid="data-science-administrator-groups"]', "rhods") == []

@@ -135,8 +135,6 @@ class TestSelectorConsistency:
         'role="combobox"',
         'role="option"',
         'data-testid="save-new-group-button"',
-        'data-testid="duplicate-group-error"',
-        'aria-label="Cancel add group"',
         'data-testid="remove-group-button',
         'data-testid="remove-group-modal"',
         'data-testid="modal-remove-button"',

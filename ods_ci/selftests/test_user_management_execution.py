@@ -17,6 +17,7 @@ import tempfile
 import textwrap
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
+from xml.sax.saxutils import escape as _html_escape
 
 from lxml import etree
 from robot.api import TestSuite
@@ -34,10 +35,6 @@ SETTINGS_RESOURCE = (
     / "ODHDashboard"
     / "ODHDashboardSettings.resource"
 )
-
-# K8s group names: alphanumeric, hyphens, dots, colons (system: prefix).
-# Quotes are not valid in K8s group names.
-VALID_GROUP_NAME_RE = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9._:@-]*$")
 
 
 class FakeBrowserState:
@@ -150,7 +147,7 @@ class FakeBrowserLib:
             _state.adding_group = None
             _state.adding_section = None
         elif "remove-group-button" in locator:
-            m = re.search(r'remove-group-button ([^"]+)"', locator)
+            m = re.search(r"remove-group-button ([^'\"]+)", locator)
             if m:
                 gn = m.group(1).strip()
                 sk = _section_key(locator)
@@ -441,9 +438,36 @@ class TestLaunchDashboardWait:
 # ===========================================================================
 
 
+def _xpath_literal(s: str) -> str:
+    """Build an XPath string literal with proper quote escaping.
+
+    Mirrors the Build XPath Literal keyword in ODHDashboardSettings.resource.
+    """
+    if "'" not in s:
+        return f"'{s}'"
+    if '"' not in s:
+        return f'"{s}"'
+    # Contains both quote types: split on apostrophes and use concat()
+    parts: list[str] = []
+    for i, chunk in enumerate(s.split("'")):
+        if i > 0:
+            parts.append("\"'\"")
+        if chunk:
+            parts.append(f"'{chunk}'")
+    return "concat(" + ",".join(parts) + ")"
+
+
 def _build_option_xpath(group: str) -> str:
-    """Build EXACT same XPath as Add Group In Section keyword."""
-    return f'//li[@role="option"][normalize-space(.)="{group}" or normalize-space(.)=\'Select "{group}"\']'
+    """Build EXACT same XPath as Select And Save Group In Section keyword."""
+    name_lit = _xpath_literal(group)
+    select_lit = _xpath_literal(f'Select "{group}"')
+    return f'//li[@role="option"][normalize-space(.)={name_lit} or normalize-space(.)={select_lit}]'
+
+
+def _build_remove_xpath(section_xp: str, group: str) -> str:
+    """Build EXACT same XPath as Remove Group From Section keyword."""
+    testid_lit = _xpath_literal(f"remove-group-button {group}")
+    return f"{section_xp}//button[@data-testid={testid_lit}]"
 
 
 def _make_option_html(groups: list[str], creatable: list[str] | None = None) -> str:
@@ -453,6 +477,27 @@ def _make_option_html(groups: list[str], creatable: list[str] | None = None) -> 
     for g in creatable or []:
         items.append(f'<li role="option">Select &quot;{g}&quot;</li>')
     return f"<div><ul>{chr(10).join(items)}</ul></div>"
+
+
+class TestXPathLiteral:
+    """Verify _xpath_literal produces correct XPath string literals."""
+
+    def test_no_quotes(self):
+        assert _xpath_literal("hello") == "'hello'"
+
+    def test_apostrophe_only(self):
+        assert _xpath_literal("O'Brien") == '"O\'Brien"'
+
+    def test_double_quote_only(self):
+        assert _xpath_literal('say"hi"') == "'say\"hi\"'"
+
+    def test_both_quotes(self):
+        result = _xpath_literal("it's\"fine\"")
+        assert result.startswith("concat(")
+        # Verify round-trip via lxml
+        tree = etree.HTML("<p>it's\"fine\"</p>")
+        matches = tree.xpath(f"//p[normalize-space(.)={result}]")
+        assert len(matches) == 1
 
 
 class TestXPathOptionMatching:
@@ -484,32 +529,48 @@ class TestXPathOptionMatching:
     def test_hyphen_in_name(self):
         assert self._eval(_make_option_html(["my-test"]), "my-test") == ["my-test"]
 
-    def test_group_name_with_single_quote_breaks_xpath(self):
-        """K8s group names cannot contain quotes; verify XPath would break."""
-        assert not VALID_GROUP_NAME_RE.match("O'Brien"), "Single-quote names are invalid K8s names"
+    def test_apostrophe_in_name(self):
+        """Group names with apostrophes must match via XPath escaping."""
+        assert self._eval(_make_option_html(["O'Brien"]), "O'Brien") == ["O'Brien"]
 
-    def test_group_name_with_double_quote_breaks_xpath(self):
-        assert not VALID_GROUP_NAME_RE.match('Bob "B"'), "Double-quote names are invalid K8s names"
+    def test_apostrophe_in_creatable(self):
+        result = self._eval(_make_option_html([], creatable=["O'Brien"]), "O'Brien")
+        assert result == ['Select "O\'Brien"']
 
-    def test_valid_k8s_group_names(self):
-        for name in ["rhods-admins", "system:authenticated", "my.group", "group_1"]:
-            assert VALID_GROUP_NAME_RE.match(name), f"{name} should be valid"
+    def test_double_quote_in_name(self):
+        assert self._eval(_make_option_html(['say"hi"']), 'say"hi"') == ['say"hi"']
+
+    def test_both_quotes_in_name(self):
+        name = "it's\"fine\""
+        assert self._eval(_make_option_html([name]), name) == [name]
 
 
 class TestXPathRemoveButton:
+    SECTION_XP = '//div[@data-testid="data-science-administrator-groups"]'
+
     def _eval(self, html: str, section_xp: str, group: str) -> list[str]:
         tree = etree.HTML(html)
-        return [
-            e.get("data-testid", "")
-            for e in tree.xpath(f'{section_xp}//button[@data-testid="remove-group-button {group}"]')
-        ]
+        xpath = _build_remove_xpath(section_xp, group)
+        return [e.get("data-testid", "") for e in tree.xpath(xpath)]
 
     def test_exact_match(self):
         html = '<div data-testid="data-science-administrator-groups"><button data-testid="remove-group-button rhods-admins"></button><button data-testid="remove-group-button rhods-users"></button></div>'
-        assert self._eval(html, '//div[@data-testid="data-science-administrator-groups"]', "rhods-admins") == [
-            "remove-group-button rhods-admins"
-        ]
+        assert self._eval(html, self.SECTION_XP, "rhods-admins") == ["remove-group-button rhods-admins"]
 
     def test_no_prefix(self):
         html = '<div data-testid="data-science-administrator-groups"><button data-testid="remove-group-button rhods-admins"></button></div>'
-        assert self._eval(html, '//div[@data-testid="data-science-administrator-groups"]', "rhods") == []
+        assert self._eval(html, self.SECTION_XP, "rhods") == []
+
+    def test_apostrophe_in_name(self):
+        html = "<div data-testid=\"data-science-administrator-groups\"><button data-testid=\"remove-group-button O'Brien\"></button></div>"
+        assert self._eval(html, self.SECTION_XP, "O'Brien") == ["remove-group-button O'Brien"]
+
+    def test_double_quote_in_name(self):
+        html = '<div data-testid="data-science-administrator-groups"><button data-testid="remove-group-button say&quot;hi&quot;"></button></div>'
+        assert self._eval(html, self.SECTION_XP, 'say"hi"') == ['remove-group-button say"hi"']
+
+    def test_both_quotes_in_name(self):
+        name = "it's\"fine\""
+        attr_val = _html_escape(f"remove-group-button {name}", {'"': "&quot;"})
+        html = f'<div data-testid="data-science-administrator-groups"><button data-testid="{attr_val}"></button></div>'
+        assert self._eval(html, self.SECTION_XP, name) == [f"remove-group-button {name}"]

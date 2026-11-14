@@ -1,4 +1,5 @@
 *** Settings ***
+Library         Collections
 Library         OpenShiftLibrary
 Resource        ../../LoginPage.robot
 Resource        ../../ODH/JupyterHub/LoginJupyterHub.robot
@@ -80,7 +81,7 @@ Launch Dashboard And Check User Management Option Is Available For The User
             ...    ${ADMIN_GROUPS_SECTION}//button[@data-testid="add-group-button"]    timeout=10s
         ELSE
             Wait Until Element Is Visible
-            ...    //button[contains(@aria-label, "Select the groups that contain all")]    timeout=10s
+            ...    ${ADMIN_GROUPS_SECTION}//button[contains(@aria-label, "Select the groups that contain all")]    timeout=10s
         END
     ELSE
         Verify Cluster Settings Is Not Available
@@ -435,27 +436,40 @@ Add Group In Section
 
 Select And Save Group In Section
     [Documentation]    Type, select, and save a group in an open 3.5+ add-group form.
+    ...    Uses Build XPath Literal for safe XPath construction with arbitrary group names.
     [Arguments]    ${section}    ${group}
     Wait Until Element Is Visible    ${section}//input[@role="combobox"]    timeout=10s
     Input Text    ${section}//input[@role="combobox"]    ${group}
+    # Build XPath-safe option selector handling quotes in group names
+    ${name_lit}=    Build XPath Literal    ${group}
+    ${select_text}=    Evaluate    'Select "' + $group + '"'
+    ${select_lit}=    Build XPath Literal    ${select_text}
     ${option_xp}=    Set Variable
-    ...    //li[@role="option"][normalize-space(.)="${group}" or normalize-space(.)='Select "${group}"']    # robocop: disable: line-too-long
+    ...    //li[@role="option"][normalize-space(.)=${name_lit} or normalize-space(.)=${select_lit}]
     Wait Until Element Is Visible    ${option_xp}    timeout=10s
     Click Element    ${option_xp}
     ${save_btn}=    Set Variable    ${section}//button[@data-testid="save-new-group-button"]
+    # Wait for button to be actionable: PF6 isDisabled→HTML disabled; isAriaDisabled→aria-disabled
     Wait Until Element Is Enabled    ${save_btn}    timeout=5s
+    Wait Until Element Is Visible    ${save_btn}\[not(@aria-disabled="true")]    timeout=5s
     Click Button    ${save_btn}
     Wait Until Element Is Not Visible    ${save_btn}    timeout=10s
 
 Remove Group From Section
     [Documentation]    Remove a named group via 3.5+ remove button and confirmation modal.
-    ...    Fails if the group is the last remaining one (aria-disabled).
+    ...    Fails if the group is the last remaining one (aria-disabled or HTML disabled).
+    ...    Uses Build XPath Literal for safe XPath construction with arbitrary group names.
     [Arguments]    ${section}    ${group}
-    ${btn_xp}=    Set Variable    ${section}//button[@data-testid="remove-group-button ${group}"]
-    ${btn_disabled_xp}=    Set Variable    ${btn_xp}\[@aria-disabled="true"]
+    ${testid_val}=    Evaluate    "remove-group-button " + $group
+    ${testid_lit}=    Build XPath Literal    ${testid_val}
+    ${btn_xp}=    Set Variable    ${section}//button[@data-testid=${testid_lit}]
+    ${btn_disabled_xp}=    Evaluate    $btn_xp + '[@aria-disabled="true"]'
     Wait Until Element Is Visible    ${btn_xp}    timeout=10s
+    # Fail immediately if button is aria-disabled (last group, minimum 1 required)
     Page Should Not Contain Element    ${btn_disabled_xp}
     ...    msg=Cannot remove '${group}': last group in section (minimum 1 required)
+    # Wait until button is enabled (handles isSaving/isRemoving race)
+    Wait Until Element Is Enabled    ${btn_xp}    timeout=5s
     Click Element    ${btn_xp}
     Wait Until Element Is Visible    //div[@data-testid="remove-group-modal"]    timeout=10s
     Click Button    //button[@data-testid="modal-remove-button"]
@@ -472,3 +486,36 @@ Get Group Names In Section
         Append To List    ${names}    ${text}
     END
     RETURN    @{names}
+
+Build XPath Literal
+    [Documentation]    Return an XPath string literal for an arbitrary value.
+    ...    Wraps in single quotes if no apostrophes, double quotes if no
+    ...    double quotes, or uses concat() when both quote types are present.
+    ...    Used by Select And Save and Remove Group keywords for safe XPath construction.
+    [Arguments]    ${value}
+    ${has_apos}=    Evaluate    "'" in $value
+    IF    not ${has_apos}
+        ${result}=    Evaluate    "'" + $value + "'"
+        RETURN    ${result}
+    END
+    ${has_quot}=    Evaluate    '"' in $value
+    IF    not ${has_quot}
+        ${result}=    Evaluate    '"' + $value + '"'
+        RETURN    ${result}
+    END
+    # Value contains both quote types: split on apostrophes and use concat()
+    @{chunks}=    Evaluate    $value.split("'")
+    @{parts}=    Create List
+    FOR    ${idx}    ${chunk}    IN ENUMERATE    @{chunks}
+        IF    ${idx} > 0
+            Append To List    ${parts}    "'"
+        END
+        ${has_content}=    Evaluate    len($chunk) > 0
+        IF    ${has_content}
+            ${wrapped}=    Evaluate    "'" + $chunk + "'"
+            Append To List    ${parts}    ${wrapped}
+        END
+    END
+    ${joined}=    Evaluate    ",".join($parts)
+    ${result}=    Set Variable    concat(${joined})
+    RETURN    ${result}

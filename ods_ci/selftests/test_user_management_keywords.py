@@ -135,7 +135,7 @@ class TestSelectorConsistency:
         'role="combobox"',
         'role="option"',
         'data-testid="save-new-group-button"',
-        'data-testid="remove-group-button',
+        "remove-group-button",  # Used in Evaluate to build data-testid via Build XPath Literal
         'data-testid="remove-group-modal"',
         'data-testid="modal-remove-button"',
     ]
@@ -257,6 +257,11 @@ class TestRemoveGroupDocumentsConstraint:
         body = _keyword_body_text(kw)
         assert "aria-disabled" in body, "Remove must check aria-disabled for last-group constraint"
 
+    def test_remove_waits_for_enabled(self, settings_model):
+        kw = _get_keyword(settings_model, "Remove Group From Section")
+        body = _keyword_body_text(kw)
+        assert "Wait Until Element Is Enabled" in body, "Remove must wait for HTML enabled (isSaving/isRemoving)"
+
     def test_remove_waits_for_modal(self, settings_model):
         kw = _get_keyword(settings_model, "Remove Group From Section")
         body = _keyword_body_text(kw)
@@ -273,6 +278,38 @@ class TestEmptyDesiredGroupsFails:
         body = _keyword_body_text(kw)
         assert "Get Length" in body or "count" in body.lower(), "Set Exact Groups must check length of desired list"
         assert "Fail" in body, "Must Fail on empty desired list"
+
+
+class TestBuildXPathLiteralExists:
+    """Build XPath Literal keyword must exist for safe XPath construction."""
+
+    def test_keyword_exists(self, settings_model):
+        kw = _get_keyword(settings_model, "Build XPath Literal")
+        assert kw is not None, "Build XPath Literal keyword must exist"
+
+    def test_select_and_save_uses_it(self, settings_model):
+        kw = _get_keyword(settings_model, "Select And Save Group In Section")
+        body = _keyword_body_text(kw)
+        assert "Build XPath Literal" in body, "Must use Build XPath Literal for XPath safety"
+
+    def test_remove_uses_it(self, settings_model):
+        kw = _get_keyword(settings_model, "Remove Group From Section")
+        body = _keyword_body_text(kw)
+        assert "Build XPath Literal" in body, "Must use Build XPath Literal for XPath safety"
+
+
+class TestSelectAndSaveChecksEnabled:
+    """Select And Save must check both HTML disabled and aria-disabled."""
+
+    def test_checks_aria_disabled(self, settings_model):
+        kw = _get_keyword(settings_model, "Select And Save Group In Section")
+        body = _keyword_body_text(kw)
+        assert "aria-disabled" in body, "Save must check aria-disabled for PF6 compatibility"
+
+    def test_waits_for_enabled(self, settings_model):
+        kw = _get_keyword(settings_model, "Select And Save Group In Section")
+        body = _keyword_body_text(kw)
+        assert "Wait Until Element Is Enabled" in body, "Must wait for HTML enabled"
 
 
 class TestOptionXPathExactMatch:

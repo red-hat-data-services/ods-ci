@@ -49,7 +49,7 @@ Verify RHODS Accept Multiple Admin Groups And CRD Gets Updates
     # Set exact groups: on >=3.5 uses table-based add/remove (auto-saves per action);
     # on <=3.4 uses legacy clear + multi-select add + explicit save.
     ${is_35}=    Is RHODS Version Greater Or Equal Than    3.5.0
-    IF    ${is_35}==True
+    IF    ${is_35}
         Set Exact Data Science Administrator Groups    rhods-admins    rhods-users
         Set Exact Data Science User Groups    system:authenticated
     ELSE

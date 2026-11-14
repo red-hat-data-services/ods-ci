@@ -25,7 +25,7 @@ Add OpenShift Groups To Data Science Administrators
     ...    This keyword is additive: it adds groups without removing existing ones.
     [Arguments]     @{admin_groups}
     ${is_35}=    Is RHODS Version Greater Or Equal Than    3.5.0
-    IF    ${is_35}==True
+    IF    ${is_35}
         FOR    ${group}    IN    @{admin_groups}
             Add Group In Section    ${ADMIN_GROUPS_SECTION}    ${group}
         END
@@ -48,7 +48,7 @@ Add OpenShift Groups To Data Science User Groups
     ...    This keyword is additive: it adds groups without removing existing ones.
     [Arguments]     @{user_groups}
     ${is_35}=    Is RHODS Version Greater Or Equal Than    3.5.0
-    IF    ${is_35}==True
+    IF    ${is_35}
         FOR    ${group}    IN    @{user_groups}
             Add Group In Section    ${USER_GROUPS_SECTION}    ${group}
         END
@@ -75,7 +75,7 @@ Launch Dashboard And Check User Management Option Is Available For The User
         # Wait up to 2 minutes as a workaround for bug RHOAIENG-11116
         Menu.Navigate To Page    Settings    User management    timeout=2m
         ${is_35}=    Is RHODS Version Greater Or Equal Than    3.5.0
-        IF    ${is_35}==True
+        IF    ${is_35}
             Wait Until Element Is Visible
             ...    ${ADMIN_GROUPS_SECTION}//button[@data-testid="add-group-button"]    timeout=10s
         ELSE
@@ -119,7 +119,7 @@ Save Changes In User Management Setting
     ${is_35}=    Is RHODS Version Greater Or Equal Than    3.5.0
     ${on_user_mgmt}=    Run Keyword And Return Status
     ...    Page Should Contain Element    ${ADMIN_GROUPS_SECTION}
-    IF    ${is_35}==True and ${on_user_mgmt}==True    RETURN
+    IF    ${is_35} and ${on_user_mgmt}    RETURN
     Scroll Element Into View    ${SAVE_BUTTON}
     ${button_enabled}=    Run Keyword And Return Status
     ...    Wait Until Element Is Enabled    ${SAVE_BUTTON}
@@ -148,10 +148,8 @@ Clear User Management Settings
     ...    table-based UI enforces a minimum of 1 group per section, making full clear
     ...    impossible. Use 'Set Exact Data Science Administrator/User Groups' instead.
     ${is_35}=    Is RHODS Version Greater Or Equal Than    3.5.0
-    IF    ${is_35}==True
-        Fail    msg=Clear User Management Settings is not supported on RHOAI >=3.5 (minimum 1
-        ...    group per section). Use 'Set Exact Data Science Administrator Groups' and
-        ...    'Set Exact Data Science User Groups' to set exact groups instead.
+    IF    ${is_35}
+        Fail    Clear is not supported on >=3.5 (minimum 1 group per section). Use Set Exact Data Science Administrator/User Groups.    # robocop: disable: line-too-long
     END
     @{remove_users_list}=    Get Webelements    ${GROUP_BTN_XP}
     FOR    ${user}    IN    @{remove_users_list}
@@ -391,45 +389,29 @@ Set RHODS Users Group To Inexistent Group
     Should Be Equal    ${status}  ${true_status}
     Element Should Be Enabled    ${MULTI_MODEL_SERVING_CHECK_BOX}
 
-# ============================================================================
-# RHOAI 3.5+ User Management helpers
-# Selectors verified against red-hat-data-services/odh-dashboard rhoai-3.5
-# branch (GroupSettingsSection.tsx, TypeaheadSelect.tsx, userManagement.ts).
-# ============================================================================
+# RHOAI 3.5+ User Management helpers (odh-dashboard rhoai-3.5 verified selectors)
 
 Set Exact Data Science Administrator Groups
-    [Documentation]    Ensure the User Management administrator section contains exactly the
-    ...    specified groups. Adds desired groups first (so the minimum-1 constraint is never
-    ...    violated), then removes any extra groups, and asserts the final set.
-    ...    Each add/remove auto-saves on RHOAI >=3.5.
+    [Documentation]    Set exact administrator groups. Adds desired first, removes extras, asserts.
     [Arguments]    @{desired_groups}
     Set Exact Groups In Section    ${ADMIN_GROUPS_SECTION}    @{desired_groups}
 
 Set Exact Data Science User Groups
-    [Documentation]    Ensure the User Management user section contains exactly the
-    ...    specified groups. Adds desired groups first, then removes extras, and asserts.
-    ...    Each add/remove auto-saves on RHOAI >=3.5.
+    [Documentation]    Set exact user groups. Adds desired first, removes extras, asserts.
     [Arguments]    @{desired_groups}
     Set Exact Groups In Section    ${USER_GROUPS_SECTION}    @{desired_groups}
 
 Set Exact Groups In Section
     [Documentation]    Ensure a 3.5+ section contains exactly the specified groups.
-    ...    Phase 1: add all desired groups (duplicates are handled gracefully).
-    ...    Phase 2: snapshot current group names as strings, remove any not in the desired list.
-    ...    Phase 3: assert the final set matches.
-    ...    The 3.5 UI enforces a minimum of 1 group per section; adding first guarantees
-    ...    there is always at least one group present when removing extras.
+    ...    Adds desired groups first (minimum-1 constraint), then removes extras, then asserts.
     [Arguments]    ${section}    @{desired_groups}
-    # Guard: empty desired list would violate minimum-1 constraint; fail before mutating
     ${count}=    Get Length    ${desired_groups}
     IF    ${count} == 0
-        Fail    msg=Cannot set exact groups: desired list is empty (RHOAI 3.5 requires minimum 1 group per section)
+        Fail    msg=Cannot set exact groups: desired list is empty (minimum 1 group per section)
     END
-    # Phase 1: Add all desired groups
     FOR    ${group}    IN    @{desired_groups}
         Add Group In Section    ${section}    ${group}
     END
-    # Phase 2: Snapshot current names as strings (not WebElements) and remove unwanted
     @{current_names}=    Get Group Names In Section    ${section}
     FOR    ${name}    IN    @{current_names}
         ${keep}=    Run Keyword And Return Status
@@ -438,69 +420,48 @@ Set Exact Groups In Section
             Remove Group From Section    ${section}    ${name}
         END
     END
-    # Phase 3: Assert convergence — final set must match desired
     @{final_names}=    Get Group Names In Section    ${section}
     Lists Should Be Equal    ${final_names}    ${desired_groups}    ignore_order=${TRUE}
-    ...    msg=Section groups after set-exact do not match desired: wanted ${desired_groups}, got ${final_names}
+    ...    msg=Exact groups mismatch: wanted ${desired_groups}, got ${final_names}
 
 Add Group In Section
-    [Documentation]    Add a single group via the 3.5+ table-based add-group flow.
-    ...    Handles duplicates by detecting the duplicate-group-error indicator and canceling.
-    ...    Selectors (red-hat-data-services/odh-dashboard rhoai-3.5):
-    ...    - add-group-button: GroupSettingsSection.tsx:284
-    ...    - input[role=combobox]: TypeaheadSelect.tsx (PF6 TextInputGroupMain)
-    ...    - li[role=option]: PF6 SelectOption (inline, not portaled)
-    ...    - Creatable option text: 'Select "name"' (RoleBindingPermissionsNameInput.tsx:67)
-    ...    - save-new-group-button: GroupSettingsSection.tsx:192
-    ...    - duplicate-group-error: GroupSettingsSection.tsx:183
-    ...    - Cancel add group: GroupSettingsSection.tsx:204
+    [Documentation]    Add a single group via 3.5+ UI. Cancels gracefully on duplicate.
     [Arguments]    ${section}    ${group}
     Click Button    ${section}//button[@data-testid="add-group-button"]
     Wait Until Element Is Visible    ${section}//input[@role="combobox"]    timeout=10s
     Input Text    ${section}//input[@role="combobox"]    ${group}
-    # Match direct option (exact name) or creatable option (exact 'Select "name"')
     ${option_xp}=    Set Variable
     ...    //li[@role="option"][normalize-space(.)="${group}" or normalize-space(.)='Select "${group}"']    # robocop: disable: line-too-long
     Wait Until Element Is Visible    ${option_xp}    timeout=10s
     Click Element    ${option_xp}
-    Sleep    0.5s
-    # Check for duplicate indicator (data-testid="duplicate-group-error")
+    ${save_btn}=    Set Variable    ${section}//button[@data-testid="save-new-group-button"]
     ${is_duplicate}=    Run Keyword And Return Status
-    ...    Page Should Contain Element    ${section}//*[@data-testid="duplicate-group-error"]
+    ...    Wait Until Page Contains Element    ${section}//*[@data-testid="duplicate-group-error"]    timeout=2s
     IF    ${is_duplicate}
         Click Element    ${section}//button[@aria-label="Cancel add group"]
     ELSE
-        ${save_btn}=    Set Variable    ${section}//button[@data-testid="save-new-group-button"]
+        Wait Until Element Is Enabled    ${save_btn}    timeout=5s
         Click Button    ${save_btn}
-        # Wait for the inline form row to disappear (API round-trip completes)
         Wait Until Element Is Not Visible    ${save_btn}    timeout=10s
     END
 
 Remove Group From Section
-    [Documentation]    Remove a named group from a 3.5+ section via the remove button and
-    ...    confirmation modal. Fails if the group is the last remaining one.
-    ...    Selectors (red-hat-data-services/odh-dashboard rhoai-3.5):
-    ...    - remove-group-button: GroupSettingsSection.tsx:247/258 (data-testid includes name)
-    ...    - Last-group button has isAriaDisabled -> aria-disabled="true" (line 251)
-    ...    - remove-group-modal: GroupSettingsSection.tsx:306
-    ...    - modal-remove-button: GroupSettingsSection.tsx:317
+    [Documentation]    Remove a named group via 3.5+ remove button and confirmation modal.
+    ...    Fails if the group is the last remaining one (aria-disabled).
     [Arguments]    ${section}    ${group}
     ${btn_xp}=    Set Variable    ${section}//button[@data-testid="remove-group-button ${group}"]
+    ${btn_disabled_xp}=    Set Variable    ${btn_xp}\[@aria-disabled="true"]
     Wait Until Element Is Visible    ${btn_xp}    timeout=10s
-    # Fail explicitly if the button is aria-disabled (last-group constraint)
-    Page Should Not Contain Element    ${btn_xp}[@aria-disabled="true"]
-    ...    msg=Cannot remove '${group}': it is the last group in the section (minimum 1 required by RHOAI 3.5)
+    Page Should Not Contain Element    ${btn_disabled_xp}
+    ...    msg=Cannot remove '${group}': last group in section (minimum 1 required)
     Click Element    ${btn_xp}
     Wait Until Element Is Visible    //div[@data-testid="remove-group-modal"]    timeout=10s
     Click Button    //button[@data-testid="modal-remove-button"]
     Wait Until Element Is Not Visible    //div[@data-testid="remove-group-modal"]    timeout=10s
-    # Verify the row is actually gone (API round-trip complete)
     Wait Until Element Is Not Visible    ${btn_xp}    timeout=10s
 
 Get Group Names In Section
-    [Documentation]    Return group names currently shown in a 3.5+ section table as a list
-    ...    of strings. Reads td[data-label="Name"]//p which only matches data rows, not the
-    ...    add-group inline form (GroupSettingsSection.tsx:222-223).
+    [Documentation]    Return group name strings from a 3.5+ section table.
     [Arguments]    ${section}
     @{name_elements}=    Get WebElements    ${section}//td[@data-label="Name"]//p
     VAR    @{names}    @{EMPTY}

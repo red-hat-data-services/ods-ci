@@ -420,6 +420,11 @@ Set Exact Groups In Section
     ...    The 3.5 UI enforces a minimum of 1 group per section; adding first guarantees
     ...    there is always at least one group present when removing extras.
     [Arguments]    ${section}    @{desired_groups}
+    # Guard: empty desired list would violate minimum-1 constraint; fail before mutating
+    ${count}=    Get Length    ${desired_groups}
+    IF    ${count} == 0
+        Fail    msg=Cannot set exact groups: desired list is empty (RHOAI 3.5 requires minimum 1 group per section)
+    END
     # Phase 1: Add all desired groups
     FOR    ${group}    IN    @{desired_groups}
         Add Group In Section    ${section}    ${group}
@@ -453,9 +458,9 @@ Add Group In Section
     Click Button    ${section}//button[@data-testid="add-group-button"]
     Wait Until Element Is Visible    ${section}//input[@role="combobox"]    timeout=10s
     Input Text    ${section}//input[@role="combobox"]    ${group}
-    # Match direct option or creatable "Select ..." option
+    # Match direct option (exact name) or creatable option (exact 'Select "name"')
     ${option_xp}=    Set Variable
-    ...    //li[@role="option"][normalize-space(.)="${group}" or starts-with(normalize-space(.), 'Select "${group}"')]    # robocop: disable: line-too-long
+    ...    //li[@role="option"][normalize-space(.)="${group}" or normalize-space(.)='Select "${group}"']    # robocop: disable: line-too-long
     Wait Until Element Is Visible    ${option_xp}    timeout=10s
     Click Element    ${option_xp}
     Sleep    0.5s
@@ -498,7 +503,7 @@ Get Group Names In Section
     ...    add-group inline form (GroupSettingsSection.tsx:222-223).
     [Arguments]    ${section}
     @{name_elements}=    Get WebElements    ${section}//td[@data-label="Name"]//p
-    @{names}=    Create List
+    VAR    @{names}    @{EMPTY}
     FOR    ${elem}    IN    @{name_elements}
         ${text}=    Get Text    ${elem}
         Append To List    ${names}    ${text}

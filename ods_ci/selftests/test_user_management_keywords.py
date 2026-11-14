@@ -6,8 +6,8 @@ without requiring a browser or cluster. These are static parse-time checks.
 Related to RHOAIENG-102838: fix group management selectors for RHOAI 3.5.
 """
 
-import re
 from pathlib import Path
+from typing import ClassVar
 
 import pytest
 from robot.api import get_model
@@ -23,11 +23,7 @@ SETTINGS_RESOURCE = (
 )
 
 PRE_UPGRADE_ROBOT = (
-    Path(__file__).resolve().parents[1]
-    / "tests"
-    / "Tests"
-    / "0200__rhoai_upgrade"
-    / "0201__pre_upgrade.robot"
+    Path(__file__).resolve().parents[1] / "tests" / "Tests" / "0200__rhoai_upgrade" / "0201__pre_upgrade.robot"
 )
 
 
@@ -83,7 +79,7 @@ class TestResourceFileParsesCleanly:
 class TestVersionGatedKeywords:
     """Keywords that interact with the User Management UI must have version gating."""
 
-    VERSION_GATED_KEYWORDS = [
+    VERSION_GATED_KEYWORDS: ClassVar[list[str]] = [
         "Add OpenShift Groups To Data Science Administrators",
         "Add OpenShift Groups To Data Science User Groups",
         "Launch Dashboard And Check User Management Option Is Available For The User",
@@ -134,7 +130,7 @@ class TestSelectorConsistency:
 
     # These data-testid values are verified in red-hat-data-services/odh-dashboard
     # rhoai-3.5 branch (GroupSettingsSection.tsx, TypeaheadSelect.tsx)
-    EXPECTED_SELECTORS_35 = [
+    EXPECTED_SELECTORS_35: ClassVar[list[str]] = [
         'data-testid="add-group-button"',
         'role="combobox"',
         'role="option"',
@@ -147,7 +143,7 @@ class TestSelectorConsistency:
     ]
 
     # These selectors are for <=3.4 compatibility (PR3160-compatible)
-    EXPECTED_SELECTORS_34 = [
+    EXPECTED_SELECTORS_34: ClassVar[list[str]] = [
         'contains(@aria-label, "Select the groups that contain all")',
         'data-testid="group-setting-select"',
         'data-testid="select-multi-typeahead-',
@@ -170,13 +166,11 @@ class TestSelectorConsistency:
         """The old exact aria-label match must not appear (replaced by contains())."""
         content = SETTINGS_RESOURCE.read_text()
         assert (
-            '@aria-label="Select the OpenShift groups that contain all Data Science administrators."'
-            not in content
+            '@aria-label="Select the OpenShift groups that contain all Data Science administrators."' not in content
         ), "Old literal aria-label for administrators must be replaced"
-        assert (
-            '@aria-label="Select the OpenShift groups that contain all Data Science users."'
-            not in content
-        ), "Old literal aria-label for users must be replaced"
+        assert '@aria-label="Select the OpenShift groups that contain all Data Science users."' not in content, (
+            "Old literal aria-label for users must be replaced"
+        )
 
 
 class TestSectionVariablesPreserved:
@@ -221,9 +215,7 @@ class TestSaveKeywordPreservesClusterSettings:
         """Save must detect >=3.5 User Management by section sentinel, not by missing button."""
         kw = _get_keyword(settings_model, "Save Changes In User Management Setting")
         body = _keyword_body_text(kw)
-        assert "ADMIN_GROUPS_SECTION" in body, (
-            "Save must use section sentinel to detect User Management page"
-        )
+        assert "ADMIN_GROUPS_SECTION" in body, "Save must use section sentinel to detect User Management page"
         assert "3.5.0" in body, "Save must check version"
 
 
@@ -238,12 +230,8 @@ class TestPreUpgradeUsesExactSetKeywords:
 
     def test_pre_upgrade_preserves_legacy_path(self, pre_upgrade_model):
         content = PRE_UPGRADE_ROBOT.read_text()
-        assert "Clear User Management Settings" in content, (
-            "Legacy <=3.4 path must still call Clear"
-        )
-        assert "Save Changes In User Management Setting" in content, (
-            "Legacy <=3.4 path must still call Save"
-        )
+        assert "Clear User Management Settings" in content, "Legacy <=3.4 path must still call Clear"
+        assert "Save Changes In User Management Setting" in content, "Legacy <=3.4 path must still call Save"
 
     def test_pre_upgrade_preserves_configmap(self, pre_upgrade_model):
         content = PRE_UPGRADE_ROBOT.read_text()
@@ -259,9 +247,7 @@ class TestSetExactGroupsAssertsFinalState:
         kw = _get_keyword(settings_model, "Set Exact Groups In Section")
         assert kw is not None
         body = _keyword_body_text(kw)
-        assert "Lists Should Be Equal" in body, (
-            "Set Exact Groups must assert final group list matches desired"
-        )
+        assert "Lists Should Be Equal" in body, "Set Exact Groups must assert final group list matches desired"
 
 
 class TestRemoveGroupDocumentsConstraint:
@@ -271,12 +257,33 @@ class TestRemoveGroupDocumentsConstraint:
         kw = _get_keyword(settings_model, "Remove Group From Section")
         assert kw is not None
         body = _keyword_body_text(kw)
-        assert "aria-disabled" in body, (
-            "Remove must check aria-disabled for last-group constraint"
-        )
+        assert "aria-disabled" in body, "Remove must check aria-disabled for last-group constraint"
 
     def test_remove_waits_for_modal(self, settings_model):
         kw = _get_keyword(settings_model, "Remove Group From Section")
         body = _keyword_body_text(kw)
         assert "remove-group-modal" in body
         assert "modal-remove-button" in body
+
+
+class TestEmptyDesiredGroupsFails:
+    """Empty desired list must fail before mutating anything."""
+
+    def test_set_exact_guards_empty_list(self, settings_model):
+        kw = _get_keyword(settings_model, "Set Exact Groups In Section")
+        assert kw is not None
+        body = _keyword_body_text(kw)
+        assert "Get Length" in body or "count" in body.lower(), "Set Exact Groups must check length of desired list"
+        assert "Fail" in body, "Must Fail on empty desired list"
+
+
+class TestOptionXPathExactMatch:
+    """Option XPath must use exact match, not starts-with."""
+
+    def test_no_starts_with_in_option_xpath(self, settings_model):
+        """starts-with could match a similarly-prefixed group name."""
+        content = SETTINGS_RESOURCE.read_text()
+        # The option XPath should NOT use starts-with for creatable option matching
+        assert "starts-with(normalize-space(.), 'Select" not in content, (
+            "Option XPath must use exact match, not starts-with, to avoid matching similarly-prefixed group names"
+        )

@@ -9,6 +9,7 @@ Related to RHOAIENG-102838.
 
 from __future__ import annotations
 
+import logging
 import os
 import re
 import shutil
@@ -41,6 +42,9 @@ class FakeBrowserState:
     """Shared mutable state for the fake browser library."""
 
     def __init__(self) -> None:
+        self.reset()
+
+    def reset(self) -> None:
         self.calls: list[tuple[str, tuple[Any, ...]]] = []
         self.groups: dict[str, list[str]] = {"admin": ["default-admins"], "user": ["system:authenticated"]}
         self.version: str = "3.5.0"
@@ -223,8 +227,7 @@ def _run_robot_test(
     initial_user: list[str] | None = None,
 ) -> Result:
     """Execute Robot keywords in an isolated test with fake browser."""
-    global _state  # ruff: ignore[global-statement]
-    _state = FakeBrowserState()
+    _state.reset()
     _state.version = version
     _state.page = page
     sys.modules["test_user_management_execution"] = sys.modules[__name__]
@@ -251,13 +254,21 @@ Test
     with open(test_path, "w") as f:
         f.write(test_content)
     suite = TestSuite.from_file_system(test_path)
-    result = suite.run(
-        output=os.path.join(tmpdir, "output.xml"),
-        log=None,
-        report=None,
-        console="none",
-        pythonpath=[str(Path(__file__).parent)],
-    )
+    # Save and restore root logger state — Robot's suite.run() modifies it,
+    # which would break capture_logging doctest in test_util.py
+    saved_log_level = logging.root.level
+    saved_log_handlers = logging.root.handlers[:]
+    try:
+        result = suite.run(
+            output=os.path.join(tmpdir, "output.xml"),
+            log=None,
+            report=None,
+            console="none",
+            pythonpath=[str(Path(__file__).parent)],
+        )
+    finally:
+        logging.root.level = saved_log_level
+        logging.root.handlers = saved_log_handlers
     shutil.rmtree(tmpdir, ignore_errors=True)
     return result
 
@@ -451,7 +462,7 @@ def _xpath_literal(s: str) -> str:
     parts: list[str] = []
     for i, chunk in enumerate(s.split("'")):
         if i > 0:
-            parts.append("\"'\"")
+            parts.append('"\'"')
         if chunk:
             parts.append(f"'{chunk}'")
     return "concat(" + ",".join(parts) + ")"
@@ -492,10 +503,10 @@ class TestXPathLiteral:
         assert _xpath_literal('say"hi"') == "'say\"hi\"'"
 
     def test_both_quotes(self):
-        result = _xpath_literal("it's\"fine\"")
+        result = _xpath_literal('it\'s"fine"')
         assert result.startswith("concat(")
         # Verify round-trip via lxml
-        tree = etree.HTML("<p>it's\"fine\"</p>")
+        tree = etree.HTML('<p>it\'s"fine"</p>')
         matches = tree.xpath(f"//p[normalize-space(.)={result}]")
         assert len(matches) == 1
 
@@ -541,7 +552,7 @@ class TestXPathOptionMatching:
         assert self._eval(_make_option_html(['say"hi"']), 'say"hi"') == ['say"hi"']
 
     def test_both_quotes_in_name(self):
-        name = "it's\"fine\""
+        name = 'it\'s"fine"'
         assert self._eval(_make_option_html([name]), name) == [name]
 
 
@@ -562,7 +573,7 @@ class TestXPathRemoveButton:
         assert self._eval(html, self.SECTION_XP, "rhods") == []
 
     def test_apostrophe_in_name(self):
-        html = "<div data-testid=\"data-science-administrator-groups\"><button data-testid=\"remove-group-button O'Brien\"></button></div>"
+        html = '<div data-testid="data-science-administrator-groups"><button data-testid="remove-group-button O\'Brien"></button></div>'
         assert self._eval(html, self.SECTION_XP, "O'Brien") == ["remove-group-button O'Brien"]
 
     def test_double_quote_in_name(self):
@@ -570,7 +581,7 @@ class TestXPathRemoveButton:
         assert self._eval(html, self.SECTION_XP, 'say"hi"') == ['remove-group-button say"hi"']
 
     def test_both_quotes_in_name(self):
-        name = "it's\"fine\""
+        name = 'it\'s"fine"'
         attr_val = _html_escape(f"remove-group-button {name}", {'"': "&quot;"})
         html = f'<div data-testid="data-science-administrator-groups"><button data-testid="{attr_val}"></button></div>'
         assert self._eval(html, self.SECTION_XP, name) == [f"remove-group-button {name}"]

@@ -480,7 +480,7 @@ Get Group Names In Section
     [Documentation]    Return group name strings from a 3.5+ section table.
     [Arguments]    ${section}
     @{name_elements}=    Get WebElements    ${section}//td[@data-label="Name"]//p
-    VAR    @{names}    @{EMPTY}
+    @{names}=    Create List
     FOR    ${elem}    IN    @{name_elements}
         ${text}=    Get Text    ${elem}
         Append To List    ${names}    ${text}

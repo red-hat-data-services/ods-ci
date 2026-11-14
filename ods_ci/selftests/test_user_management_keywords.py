@@ -92,9 +92,9 @@ class TestVersionGatedKeywords:
         kw = _get_keyword(settings_model, keyword_name)
         assert kw is not None, f"Keyword '{keyword_name}' not found"
         body = _keyword_body_text(kw)
-        assert "Is RHODS Version Greater Or Equal Than" in body or "3.5.0" in body, (
-            f"Keyword '{keyword_name}' must contain a version check for 3.5.0"
-        )
+        assert (
+            "Is RHODS Version Greater Or Equal Than" in body or "3.5.0" in body
+        ), f"Keyword '{keyword_name}' must contain a version check for 3.5.0"
 
 
 class TestNewHelperKeywordsExist:
@@ -166,9 +166,9 @@ class TestSelectorConsistency:
         assert (
             '@aria-label="Select the OpenShift groups that contain all Data Science administrators."' not in content
         ), "Old literal aria-label for administrators must be replaced"
-        assert '@aria-label="Select the OpenShift groups that contain all Data Science users."' not in content, (
-            "Old literal aria-label for users must be replaced"
-        )
+        assert (
+            '@aria-label="Select the OpenShift groups that contain all Data Science users."' not in content
+        ), "Old literal aria-label for users must be replaced"
 
 
 class TestSectionVariablesPreserved:
@@ -195,9 +195,9 @@ class TestClearKeywordSafety:
         assert kw is not None
         body = _keyword_body_text(kw)
         assert "Fail" in body, "Clear must call Fail on >=3.5, not silently succeed"
-        assert "minimum 1" in body.lower() or "minimum" in body.lower(), (
-            "Clear failure message should mention the minimum group constraint"
-        )
+        assert (
+            "minimum 1" in body.lower() or "minimum" in body.lower()
+        ), "Clear failure message should mention the minimum group constraint"
 
 
 class TestSaveKeywordPreservesClusterSettings:
@@ -319,6 +319,6 @@ class TestOptionXPathExactMatch:
         """starts-with could match a similarly-prefixed group name."""
         content = SETTINGS_RESOURCE.read_text()
         # The option XPath should NOT use starts-with for creatable option matching
-        assert "starts-with(normalize-space(.), 'Select" not in content, (
-            "Option XPath must use exact match, not starts-with, to avoid matching similarly-prefixed group names"
-        )
+        assert (
+            "starts-with(normalize-space(.), 'Select" not in content
+        ), "Option XPath must use exact match, not starts-with, to avoid matching similarly-prefixed group names"

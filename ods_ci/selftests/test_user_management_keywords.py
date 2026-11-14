@@ -281,21 +281,29 @@ class TestEmptyDesiredGroupsFails:
 
 
 class TestBuildXPathLiteralExists:
-    """Build XPath Literal keyword must exist for safe XPath construction."""
+    """Build XPath Literal and helper keywords must exist for safe XPath construction."""
 
     def test_keyword_exists(self, settings_model):
         kw = _get_keyword(settings_model, "Build XPath Literal")
         assert kw is not None, "Build XPath Literal keyword must exist"
 
-    def test_select_and_save_uses_it(self, settings_model):
+    def test_option_xpath_helper_exists(self, settings_model):
+        kw = _get_keyword(settings_model, "Build Option XPath")
+        assert kw is not None, "Build Option XPath helper must exist"
+
+    def test_remove_xpath_helper_exists(self, settings_model):
+        kw = _get_keyword(settings_model, "Build Remove Button XPath")
+        assert kw is not None, "Build Remove Button XPath helper must exist"
+
+    def test_select_and_save_uses_xpath_helper(self, settings_model):
         kw = _get_keyword(settings_model, "Select And Save Group In Section")
         body = _keyword_body_text(kw)
-        assert "Build XPath Literal" in body, "Must use Build XPath Literal for XPath safety"
+        assert "Build Option XPath" in body, "Must use Build Option XPath for XPath safety"
 
-    def test_remove_uses_it(self, settings_model):
+    def test_remove_uses_xpath_helper(self, settings_model):
         kw = _get_keyword(settings_model, "Remove Group From Section")
         body = _keyword_body_text(kw)
-        assert "Build XPath Literal" in body, "Must use Build XPath Literal for XPath safety"
+        assert "Build Remove Button XPath" in body, "Must use Build Remove Button XPath for XPath safety"
 
 
 class TestSelectAndSaveChecksEnabled:

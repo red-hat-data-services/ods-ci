@@ -487,7 +487,7 @@ Validate DataRegistry Managed
     [Documentation]    Validate Data Registry Managed state through the Feast module operator deployment.
     [Tags]    Operator    RHOAIENG-84590    dataregistry-managed    Integration    Smoke
 
-    [Setup]    Prepare Data Registry Component Test
+    [Setup]    Prepare Data Component Test
 
     Set DSC Component Managed State And Wait For Completion
     ...    dataregistry
@@ -498,28 +498,53 @@ Validate DataRegistry Managed
     ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
     ...    ${IMAGE_PULL_PATH}
 
-    [Teardown]    Restore Data Registry Component Test States
+    [Teardown]    Restore Data Component Test States
     ...    ${SAVED_MANAGEMENT_STATES.DATAREGISTRY}
     ...    ${SAVED_MANAGEMENT_STATES.FEASTOPERATOR}
 
-Validate DataRegistry Removed
-    [Documentation]    Validate Data Registry Removed state when Data Registry is the only managed data capability.
+Validate Data Removed State
+    [Documentation]    Validate that data.featureStore and data.dataRegistry share one module operand,
+    ...    and that the operand only goes away once the last capability holding it up is Removed.
+    ...    Both capabilities are exercised as the one that keeps the module Managed, so a teardown that
+    ...    only reacts to one of them is caught.
     [Tags]
     ...    Operator
     ...    Tier1
     ...    RHOAIENG-84590
+    ...    RHOAIENG-103219
+    ...    RHOAIENG-103220
+    ...    data-removed
     ...    dataregistry-removed
+    ...    feastoperator-removed
     ...    Integration
 
-    [Setup]    Prepare Data Registry Removed State Test
+    [Setup]    Prepare Data Component Test
 
+    # Data Registry is the last Managed capability: its removal must tear the operand down.
+    Set DSC Component Managed State And Wait For Completion
+    ...    dataregistry
+    ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
+    ...    selected_dsc_name=${DSC_NAME}
     Set DSC Component Removed State And Wait For Completion
     ...    dataregistry
     ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
     ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
     ...    selected_dsc_name=${DSC_NAME}
 
-    [Teardown]    Restore Data Registry Component Test States
+    # Feature Store is the last Managed capability: its removal must tear the operand down as well.
+    Set DSC Component Managed State And Wait For Completion
+    ...    feastoperator
+    ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
+    ...    selected_dsc_name=${DSC_NAME}
+    Set DSC Component Removed State And Wait For Completion
+    ...    feastoperator
+    ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
+    ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
+    ...    selected_dsc_name=${DSC_NAME}
+
+    [Teardown]    Restore Data Component Test States
     ...    ${SAVED_MANAGEMENT_STATES.DATAREGISTRY}
     ...    ${SAVED_MANAGEMENT_STATES.FEASTOPERATOR}
 
@@ -925,8 +950,9 @@ Require Data Registry DSC Component
     ${supported}=    Data Registry DSC Component Is Supported
     Skip If    not ${supported}    Data Registry is only available in DSC schemas that expose data.dataRegistry.
 
-Prepare Data Registry Component Test
-    [Documentation]    Isolate Data Registry from Feature Store before testing its Managed state.
+Prepare Data Component Test
+    [Documentation]    Isolate the data module by removing both of its capabilities, so the tests that
+    ...    follow enable exactly one capability at a time.
     Require Data Registry DSC Component
     Set Component State    feastoperator    Removed    ${DSC_NAME}
     Set Component State    dataregistry    Removed    ${DSC_NAME}
@@ -934,16 +960,7 @@ Prepare Data Registry Component Test
     ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
     ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
 
-Prepare Data Registry Removed State Test
-    [Documentation]    Create Data Registry resources after isolating the Feature Store, before removal.
-    Prepare Data Registry Component Test
-    Set DSC Component Managed State And Wait For Completion
-    ...    dataregistry
-    ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_DEPLOYMENT_NAME}
-    ...    ${FEASTOPERATOR_CONTROLLER_MANAGER_LABEL_SELECTOR}
-    ...    selected_dsc_name=${DSC_NAME}
-
-Restore Data Registry Component Test States
+Restore Data Component Test States
     [Documentation]    Restore the original Data Registry and Feature Store states after the isolated test.
     [Arguments]    ${dataregistry_state}    ${feastoperator_state}
     ${supported}=    Data Registry DSC Component Is Supported

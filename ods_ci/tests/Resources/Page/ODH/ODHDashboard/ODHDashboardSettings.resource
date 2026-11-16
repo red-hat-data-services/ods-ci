@@ -1,4 +1,5 @@
 *** Settings ***
+Library         Collections
 Library         OpenShiftLibrary
 Resource        ../../LoginPage.robot
 Resource        ../../ODH/JupyterHub/LoginJupyterHub.robot
@@ -19,30 +20,50 @@ ${SAVE_BUTTON}=    //button[contains(., "Save changes")]
 
 *** Keywords ***
 Add OpenShift Groups To Data Science Administrators
-    [Documentation]  Add OpenShift Groups to Data Science administrators From RHODS Dashboard
+    [Documentation]  Add OpenShift Groups to Data Science administrators From RHODS Dashboard.
+    ...    On >=3.5 uses data-testid selectors for the table-based UI; on <=3.4 uses
+    ...    multi-select dropdown with PR3160-compatible partial aria-label match.
+    ...    This keyword is additive: it adds groups without removing existing ones.
     [Arguments]     @{admin_groups}
-    Click Button   ${ADMIN_GROUPS_SECTION}//button[@aria-label="Select the OpenShift groups that contain all Data Science administrators."]
-    FOR    ${group}    IN    @{admin_groups}
-        ${present}=    Run Keyword And Return Status    Element Should Be Visible
-        ...    ${ADMIN_GROUPS_SECTION}//div[@data-testid="group-setting-select"]//ul//*[text()="${group}"]
-        IF    not ${present}
-            Click Element       //li[@data-testid="select-multi-typeahead-${group}"]/button
+    ${is_35}=    Is RHODS Version Greater Or Equal Than    3.5.0
+    IF    ${is_35}
+        FOR    ${group}    IN    @{admin_groups}
+            Add Group In Section    ${ADMIN_GROUPS_SECTION}    ${group}
         END
+    ELSE
+        Click Button    ${ADMIN_GROUPS_SECTION}//button[contains(@aria-label, "Select the groups that contain all")]
+        FOR    ${group}    IN    @{admin_groups}
+            ${present}=    Run Keyword And Return Status    Element Should Be Visible
+            ...    ${ADMIN_GROUPS_SECTION}//div[@data-testid="group-setting-select"]//ul//*[text()="${group}"]
+            IF    not ${present}
+                Click Element    //li[@data-testid="select-multi-typeahead-${group}"]/button
+            END
+        END
+        Press Keys    None    ESC
     END
-    Press Keys    None    ESC
 
 Add OpenShift Groups To Data Science User Groups
-    [Documentation]  Add OpenShift Groups to Data Science User From RHODS Dashboard
+    [Documentation]  Add OpenShift Groups to Data Science User From RHODS Dashboard.
+    ...    On >=3.5 uses data-testid selectors for the table-based UI; on <=3.4 uses
+    ...    multi-select dropdown with PR3160-compatible partial aria-label match.
+    ...    This keyword is additive: it adds groups without removing existing ones.
     [Arguments]     @{user_groups}
-    Click Button   ${USER_GROUPS_SECTION}//button[@aria-label="Select the OpenShift groups that contain all Data Science users."]
-    FOR    ${group}    IN    @{user_groups}
-        ${present}=    Run Keyword And Return Status    Element Should Be Visible
-        ...      ${USER_GROUPS_SECTION}//div[@data-testid="group-setting-select"]//ul//*[text()="${group}"]
-        IF    not ${present}
-            Click Element       //li[@data-testid="select-multi-typeahead-${group}"]/button
+    ${is_35}=    Is RHODS Version Greater Or Equal Than    3.5.0
+    IF    ${is_35}
+        FOR    ${group}    IN    @{user_groups}
+            Add Group In Section    ${USER_GROUPS_SECTION}    ${group}
         END
+    ELSE
+        Click Button    ${USER_GROUPS_SECTION}//button[contains(@aria-label, "Select the groups that contain all")]
+        FOR    ${group}    IN    @{user_groups}
+            ${present}=    Run Keyword And Return Status    Element Should Be Visible
+            ...    ${USER_GROUPS_SECTION}//div[@data-testid="group-setting-select"]//ul//*[text()="${group}"]
+            IF    not ${present}
+                Click Element    //li[@data-testid="select-multi-typeahead-${group}"]/button
+            END
+        END
+        Press Keys    None    ESC
     END
-    Press Keys    None    ESC
 
 Launch Dashboard And Check User Management Option Is Available For The User
     [Documentation]  Login To Dashboard And Check User Management Option Availablity.
@@ -54,7 +75,14 @@ Launch Dashboard And Check User Management Option Is Available For The User
     IF    ${settings_should_be}
         # Wait up to 2 minutes as a workaround for bug RHOAIENG-11116
         Menu.Navigate To Page    Settings    User management    timeout=2m
-        Wait Until Element Is Visible    //button[@aria-label="Select the OpenShift groups that contain all Data Science administrators."]    timeout=10s
+        ${is_35}=    Is RHODS Version Greater Or Equal Than    3.5.0
+        IF    ${is_35}
+            Wait Until Element Is Visible
+            ...    ${ADMIN_GROUPS_SECTION}//button[@data-testid="add-group-button"]    timeout=10s
+        ELSE
+            Wait Until Element Is Visible
+            ...    ${ADMIN_GROUPS_SECTION}//button[contains(@aria-label, "Select the groups that contain all")]    timeout=10s
+        END
     ELSE
         Verify Cluster Settings Is Not Available
     END
@@ -82,12 +110,20 @@ Remove OpenShift Groups From Data Science Administrator Groups
     Press Keys    None    ESC
 
 Save Changes In User Management Setting
-    [Documentation]  Save User Management Settings In Dashboard
+    [Documentation]  Save User Management Settings In Dashboard. On RHOAI >=3.5 the
+    ...    User Management page auto-saves each change; this keyword returns early when
+    ...    on that page. On <=3.4 or Cluster settings the Save button is clicked as before.
     [Arguments]    ${timeout}=3s
     Press Keys    None    ESC
+    # On >=3.5 User Management page there is no Save button (changes auto-save per action).
+    # Detect by version AND the User Management section sentinel element.
+    ${is_35}=    Is RHODS Version Greater Or Equal Than    3.5.0
+    ${on_user_mgmt}=    Run Keyword And Return Status
+    ...    Page Should Contain Element    ${ADMIN_GROUPS_SECTION}
+    IF    ${is_35} and ${on_user_mgmt}    RETURN
     Scroll Element Into View    ${SAVE_BUTTON}
     ${button_enabled}=    Run Keyword And Return Status
-    ...    Wait Until Element Is Enabled   ${SAVE_BUTTON}
+    ...    Wait Until Element Is Enabled    ${SAVE_BUTTON}
     IF    ${button_enabled}
         Click Button    ${SAVE_BUTTON}
     END
@@ -109,10 +145,16 @@ AllowedGroups In OdhDashboardConfig CRD Should Be
     Lists Should Be Equal    ${UIallowedGroupList}  ${allowedGroupsList}    ignore_order=True
 
 Clear User Management Settings
-    [Documentation]  Clear all groups from User Management Settings
-    @{remove_users_list}  Get Webelements  ${GROUP_BTN_XP}
-    FOR  ${user}   IN   @{remove_users_list}
-        Click Button  ${GROUP_BTN_XP}
+    [Documentation]  Clear all groups from User Management Settings. On RHOAI >=3.5 the
+    ...    table-based UI enforces a minimum of 1 group per section, making full clear
+    ...    impossible. Use 'Set Exact Data Science Administrator/User Groups' instead.
+    ${is_35}=    Is RHODS Version Greater Or Equal Than    3.5.0
+    IF    ${is_35}
+        Fail    Clear is not supported on >=3.5 (minimum 1 group per section). Use Set Exact Data Science Administrator/User Groups.    # robocop: disable: line-too-long
+    END
+    @{remove_users_list}=    Get Webelements    ${GROUP_BTN_XP}
+    FOR    ${user}    IN    @{remove_users_list}
+        Click Button    ${GROUP_BTN_XP}
     END
 
 Set Pod Toleration Via UI
@@ -347,3 +389,109 @@ Set RHODS Users Group To Inexistent Group
     ${true_status}=  BuiltIn.Convert To Boolean    True
     Should Be Equal    ${status}  ${true_status}
     Element Should Be Enabled    ${MULTI_MODEL_SERVING_CHECK_BOX}
+
+# RHOAI 3.5+ User Management helpers (odh-dashboard rhoai-3.5 verified selectors)
+
+Set Exact Data Science Administrator Groups
+    [Documentation]    Set exact administrator groups. Adds desired first, removes extras, asserts.
+    [Arguments]    @{desired_groups}
+    Set Exact Groups In Section    ${ADMIN_GROUPS_SECTION}    @{desired_groups}
+
+Set Exact Data Science User Groups
+    [Documentation]    Set exact user groups. Adds desired first, removes extras, asserts.
+    [Arguments]    @{desired_groups}
+    Set Exact Groups In Section    ${USER_GROUPS_SECTION}    @{desired_groups}
+
+Set Exact Groups In Section
+    [Documentation]    Ensure a 3.5+ section contains exactly the specified groups.
+    ...    Adds desired groups first (minimum-1 constraint), then removes extras, then asserts.
+    [Arguments]    ${section}    @{desired_groups}
+    ${count}=    Get Length    ${desired_groups}
+    IF    ${count} == 0
+        Fail    msg=Cannot set exact groups: desired list is empty (minimum 1 group per section)
+    END
+    FOR    ${group}    IN    @{desired_groups}
+        Add Group In Section    ${section}    ${group}
+    END
+    @{current_names}=    Get Group Names In Section    ${section}
+    FOR    ${name}    IN    @{current_names}
+        ${keep}=    Run Keyword And Return Status
+        ...    Should Contain    ${desired_groups}    ${name}
+        IF    not ${keep}
+            Remove Group From Section    ${section}    ${name}
+        END
+    END
+    @{final_names}=    Get Group Names In Section    ${section}
+    Lists Should Be Equal    ${final_names}    ${desired_groups}    ignore_order=${TRUE}
+    ...    msg=Exact groups mismatch: wanted ${desired_groups}, got ${final_names}
+
+Add Group In Section
+    [Documentation]    Add a single group via 3.5+ UI. Skips if already present.
+    [Arguments]    ${section}    ${group}
+    @{existing}=    Get Group Names In Section    ${section}
+    ${already}=    Run Keyword And Return Status    Should Contain    ${existing}    ${group}
+    IF    ${already}    RETURN
+    Click Button    ${section}//button[@data-testid="add-group-button"]
+    Select And Save Group In Section    ${section}    ${group}
+
+Select And Save Group In Section
+    [Documentation]    Type, select, and save a group in an open 3.5+ add-group form.
+    [Arguments]    ${section}    ${group}
+    Wait Until Element Is Visible    ${section}//input[@role="combobox"]    timeout=10s
+    Input Text    ${section}//input[@role="combobox"]    ${group}
+    ${option_xp}=    Build Option XPath    ${group}
+    Wait Until Element Is Visible    ${option_xp}    timeout=10s
+    Click Element    ${option_xp}
+    ${save_btn}=    Set Variable    ${section}//button[@data-testid="save-new-group-button"]
+    Wait Until Element Is Enabled    ${save_btn}    timeout=5s
+    Wait Until Element Is Visible    ${save_btn}\[not(@aria-disabled="true")]    timeout=5s
+    Click Button    ${save_btn}
+    Wait Until Element Is Not Visible    ${save_btn}    timeout=10s
+
+Remove Group From Section
+    [Documentation]    Remove a named group via 3.5+ remove button and confirmation modal.
+    ...    Fails if the group is the last remaining one (aria-disabled or HTML disabled).
+    [Arguments]    ${section}    ${group}
+    ${btn_xp}=    Build Remove Button XPath    ${section}    ${group}
+    ${btn_disabled_xp}=    Evaluate    $btn_xp + '[@aria-disabled="true"]'
+    Wait Until Element Is Visible    ${btn_xp}    timeout=10s
+    Page Should Not Contain Element    ${btn_disabled_xp}
+    ...    msg=Cannot remove '${group}': last group in section (minimum 1 required)
+    Wait Until Element Is Enabled    ${btn_xp}    timeout=5s
+    Click Element    ${btn_xp}
+    Wait Until Element Is Visible    //div[@data-testid="remove-group-modal"]    timeout=10s
+    Click Button    //button[@data-testid="modal-remove-button"]
+    Wait Until Element Is Not Visible    //div[@data-testid="remove-group-modal"]    timeout=10s
+    Wait Until Element Is Not Visible    ${btn_xp}    timeout=10s
+
+Get Group Names In Section
+    [Documentation]    Return group name strings from a 3.5+ section table.
+    [Arguments]    ${section}
+    @{name_elements}=    Get WebElements    ${section}//td[@data-label="Name"]//p
+    @{names}=    Create List
+    FOR    ${elem}    IN    @{name_elements}
+        ${text}=    Get Text    ${elem}
+        Append To List    ${names}    ${text}
+    END
+    RETURN    @{names}
+
+Build Option XPath
+    [Documentation]    Build XPath for selecting a group option in TypeaheadSelect.
+    [Arguments]    ${group}
+    ${name_lit}=    Build XPath Literal    ${group}
+    ${select_text}=    Evaluate    'Select "' + $group + '"'
+    ${select_lit}=    Build XPath Literal    ${select_text}
+    RETURN    //li[@role="option"][normalize-space(.)=${name_lit} or normalize-space(.)=${select_lit}]
+
+Build Remove Button XPath
+    [Documentation]    Build XPath for a group's remove button with escaped data-testid.
+    [Arguments]    ${section}    ${group}
+    ${testid_val}=    Evaluate    "remove-group-button " + $group
+    ${testid_lit}=    Build XPath Literal    ${testid_val}
+    RETURN    ${section}//button[@data-testid=${testid_lit}]
+
+Build XPath Literal
+    [Documentation]    Return an XPath string literal with proper quote escaping.
+    [Arguments]    ${value}
+    ${result}=    Evaluate    "'" + $value + "'" if "'" not in $value else '"' + $value + '"' if '"' not in $value else "concat(" + ",".join(x for i, p in enumerate($value.split("'")) for x in (['"' + chr(39) + '"'] if i else []) + (["'" + p + "'"] if p else [])) + ")"    # robocop: disable=line-too-long
+    RETURN    ${result}

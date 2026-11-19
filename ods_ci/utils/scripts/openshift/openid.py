@@ -41,7 +41,7 @@ import click
 import requests
 
 from ods_ci.utils.scripts.logger import log
-from ods_ci.utils.scripts.util import execute_command
+from ods_ci.utils.scripts.util import execute_command, redact_text
 
 REGISTRATION_BODY_TEMPLATE = Template("""
     {
@@ -201,7 +201,9 @@ class OpenIdOps:
         """Write client details to a properties file for Jenkins to read"""
         if self.jenkins_props_file:
             try:
-                with open(self.jenkins_props_file, "w") as f:
+                fd = os.open(self.jenkins_props_file, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+                with os.fdopen(fd, "w") as f:
+                    os.fchmod(f.fileno(), 0o600)
                     f.write(f"CLIENT_NAME={self.client_name}\n")
                     f.write(f"CLIENT_ID={self.client_id}\n")
                     f.write(f"CLIENT_SECRET={self.client_secret}\n")
@@ -325,7 +327,10 @@ class OpenIdOps:
         }
         request = requests.get(f"{update_endpoint}", headers=headers)
         if request.status_code != 200:
-            log.error(f"Failed to GET current client info for {client_name}: {request.status_code} {request.text}")
+            log.error(
+                f"Failed to GET current client info for {client_name}: "
+                f"{request.status_code} {redact_text(request.text)}"
+            )
             return 1
         current_client_info = request.json()
         current_uris = current_client_info["redirect_uris"]
@@ -352,7 +357,8 @@ class OpenIdOps:
         update_request = requests.put(f"{update_endpoint}", headers=headers, json=updated_client_info)
         if update_request.status_code != 200:
             log.error(
-                f"Failed to {operation} redirect URIs to client {client_name}: {update_request.status_code} {update_request.text}"
+                f"Failed to {operation} redirect URIs to client {client_name}: "
+                f"{update_request.status_code} {redact_text(update_request.text)}"
             )
             return 1
         log.info(
@@ -373,7 +379,7 @@ class OpenIdOps:
         }
         request = requests.delete(f"{deletion_endpoint}", headers=headers)
         if request.status_code != 204:
-            log.error(f"Failed to delete client {client_name}: {request.status_code} {request.text}")
+            log.error(f"Failed to delete client {client_name}: {request.status_code} {redact_text(request.text)}")
             return 1
         log.info(f"Client {client_name} deleted successfully: {request.status_code}")
         return None

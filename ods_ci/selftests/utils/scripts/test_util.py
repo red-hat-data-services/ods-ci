@@ -92,6 +92,12 @@ class TestExecuteCommand(unittest.TestCase):
         # List arguments are executed directly, without shell parsing.
         assert util.execute_command(["echo", "hello", "world"], print_stdout=False) == "hello world\n"
 
+    def test_list_cmd_special_characters_executed_verbatim(self):
+        # Commit 92ecba28 passes oc login arguments directly so passwords with
+        # shell metacharacters are not interpreted. Redaction must not alter that.
+        password = "k#D7)10%9R?Ig9Bp"
+        assert util.execute_command(["printf", "%s", password], print_stdout=False) == password
+
     def test_multiple_output_lines(self):
         python = sys.executable
         assert util.execute_command(f"""{python} -c 'print("a\\n"*13, end="")'""", print_stdout=False) == "a\n" * 13
@@ -103,3 +109,65 @@ class TestExecuteCommand(unittest.TestCase):
             util.execute_command(f"""{python} -c 'print(("a" * 40 + "\\n")*1_000_000, end="")'""", print_stdout=False)
             == ("a" * 40 + "\n") * 1_000_000
         )
+
+
+class TestRedactCommand(unittest.TestCase):
+    def test_list_password_flag(self):
+        cmd = ["oc", "login", "-u", "kubeadmin", "-p", "s3cr3t!", "https://api.example:6443"]
+        redacted = util.redact_command(cmd)
+        assert redacted == ["oc", "login", "-u", "kubeadmin", "-p", util.REDACTED, "https://api.example:6443"]
+        assert cmd[5] == "s3cr3t!"  # the original command is left untouched
+
+    def test_string_password_flag(self):
+        redacted = util.redact_command("oc login -u kubeadmin --password s3cr3t! https://api.example:6443")
+        assert "s3cr3t!" not in redacted
+        assert "kubeadmin" in redacted
+
+    def test_from_literal_secret(self):
+        redacted = util.redact_command(
+            "oc create secret generic openid-idp-client-secret --from-literal=clientSecret=abc123 -n openshift-config"
+        )
+        assert "abc123" not in redacted
+        assert "--from-literal=clientSecret=*****" in redacted
+
+    def test_quoted_from_literal_value(self):
+        redacted = util.redact_command('cmd --from-literal=AWS_SECRET_ACCESS_KEY="top secret"')
+        assert "top secret" not in redacted
+
+    def test_url_credentials(self):
+        redacted = util.redact_command("git clone https://user:token@github.com/org/repo.git")
+        assert "https://user:*****@github.com/org/repo.git" in redacted
+        assert "token@" not in redacted
+
+    def test_execute_command_logs_redacted(self):
+        with capture_logging(logging.INFO, formatter=logging.Formatter("%(message)s")) as string_io:
+            util.execute_command(["echo", "-p", "s3cr3t!"], print_stdout=False)
+        log_output = string_io.getvalue()
+        assert "CMD:" in log_output
+        assert "s3cr3t!" not in log_output
+
+    def test_json_response_body(self):
+        body = '{"client_id": "abc", "client_secret": "s3cr3t", "registration_access_token": "JWT123"}'
+        redacted = util.redact_text(body)
+        assert "s3cr3t" not in redacted
+        assert "JWT123" not in redacted
+        assert '"client_id": "abc"' in redacted
+
+    def test_quoted_assignment_with_spaces(self):
+        redacted = util.redact_command('curl -d "password=alpha beta" https://auth/token')
+        assert "alpha" not in redacted
+        assert "beta" not in redacted
+
+    def test_argv_assignment_with_spaces(self):
+        redacted = util.redact_command(
+            ["oc", "create", "secret", "generic", "x", "--from-literal=clientSecret=alpha beta"]
+        )
+        assert "alpha" not in " ".join(redacted)
+        assert "beta" not in " ".join(redacted)
+
+    def test_json_escaped_quote(self):
+        body = '{"client_secret":"abc\\"def","status":"keep"}'
+        redacted = util.redact_text(body)
+        assert "abc" not in redacted
+        assert "def" not in redacted
+        assert "keep" in redacted

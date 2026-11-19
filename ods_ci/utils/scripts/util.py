@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -54,6 +55,84 @@ def read_yaml(filename):
         return None
 
 
+REDACTED = "*****"
+
+# Command-line flags whose following argument is a credential.
+_SENSITIVE_FLAGS = {
+    "-p",
+    "--password",
+    "--token",
+    "--client-secret",
+    "--secret",
+    "--api-key",
+    "--apikey",
+}
+
+_SENSITIVE_KEY = r"[\w.-]*(?:password|passwd|pwd|secret|token|api[_-]?key|access[_-]?key|credential)[\w.-]*"
+_VALUE = r"'[^']*'|\"[^\"]*\"|[^\s'\"]+"
+
+_KEY_VALUE_RE = re.compile(rf"(?i)\b({_SENSITIVE_KEY})=({_VALUE})")
+_JSON_KEY_VALUE_RE = re.compile(rf'(?i)("(?:{_SENSITIVE_KEY})"\s*:\s*")((?:\\.|[^"\\])*)(")')
+_SENSITIVE_ASSIGNMENT_RE = re.compile(rf"(?i)({_SENSITIVE_KEY})=.*$")
+_FLAG_ASSIGN_RE = re.compile(r"(?i)^(--password|--token|--client-secret|--secret|--api-key|--apikey|-p)=.*$")
+_FLAG_VALUE_RE = re.compile(
+    rf"(?i)(?<![\w-])(--password|--token|--client-secret|--secret|--api-key|--apikey|-p)(\s+|=)({_VALUE})",
+)
+_URL_USERINFO_RE = re.compile(r"(://[^/:@\s]+:)[^@\s/]+@")
+
+
+def redact_text(text: str) -> str:
+    """Mask credentials in free-form text such as command output or API responses."""
+    text = _URL_USERINFO_RE.sub(rf"\1{REDACTED}@", text)
+    text = _KEY_VALUE_RE.sub(rf"\1={REDACTED}", text)
+    text = _JSON_KEY_VALUE_RE.sub(rf"\1{REDACTED}\3", text)
+    return _FLAG_VALUE_RE.sub(rf"\1\2{REDACTED}", text)
+
+
+def _redact_token(token: str) -> str:
+    """Mask credentials in a single shell token or argv element."""
+    token = _URL_USERINFO_RE.sub(rf"\1{REDACTED}@", token)
+    token = _JSON_KEY_VALUE_RE.sub(rf"\1{REDACTED}\3", token)
+    token = _SENSITIVE_ASSIGNMENT_RE.sub(rf"\1={REDACTED}", token)
+    return _FLAG_ASSIGN_RE.sub(rf"\1={REDACTED}", token)
+
+
+def _redact_tokens(tokens: list[str]) -> list[str]:
+    redacted = list(tokens)
+    mask_next = False
+    for idx, part in enumerate(redacted):
+        if mask_next:
+            redacted[idx] = REDACTED
+            mask_next = False
+        elif part in _SENSITIVE_FLAGS:
+            mask_next = True
+        else:
+            redacted[idx] = _redact_token(str(part))
+    return redacted
+
+
+def redact_command(cmd: str | list[str]) -> str | list[str]:
+    """Return a copy of cmd with credentials masked, safe for logging.
+
+    Commands are tokenized so that a credential containing whitespace is masked in full,
+    whether it is passed as one quoted shell argument (``curl -d "password=alpha beta"``)
+    or as a single argv element (``--from-literal=clientSecret=alpha beta``). Sensitive
+    flags followed by a value (``oc login -p <password>``) and credentials embedded in
+    URLs (``https://user:password@host``) are also masked.
+    """
+    if isinstance(cmd, list | tuple):
+        return _redact_tokens(list(cmd))
+    if isinstance(cmd, str):
+        try:
+            tokens = shlex.split(cmd)
+        except ValueError:
+            return redact_text(cmd)
+        if tokens:
+            return shlex.join(_redact_tokens(tokens))
+        return cmd
+    return cmd
+
+
 def execute_command(
     cmd: str | list[str],
     print_stdout: bool = True,
@@ -73,7 +152,7 @@ def execute_command(
         - output (str)                      when return_rc=False  (default)
         - rc (int|None), output (str|None)  when return_rc=True
     """
-    log.info(f"CMD: {cmd}")
+    log.info(f"CMD: {redact_command(cmd)}")
     try:
         with subprocess.Popen(
             cmd,
@@ -103,7 +182,7 @@ def execute_command(
         return "".join(output)
 
     except Exception as e:
-        log.exception(f"Starting subprocess '{cmd}' failed", exc_info=e)
+        log.exception(f"Starting subprocess '{redact_command(cmd)}' failed", exc_info=e)
         if return_rc:
             return None, None
         return None

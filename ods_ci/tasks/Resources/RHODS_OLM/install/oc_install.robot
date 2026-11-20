@@ -20,6 +20,7 @@ ${DSCI_NAME} =    default-dsci
 ...    trainer
 ...    trustyai
 ...    workbenches
+...    workbenchesv2
 ...    modelregistry
 ...    feastoperator
 ...    dataregistry
@@ -31,7 +32,9 @@ ${DSCI_NAME} =    default-dsci
 ...    mcplifecycleoperator
 # MaaS moved from kserve.modelsAsService to aigateway.modelsAsAService (ODH operator #3723)
 &{NESTED_COMPONENT_TO_PARENT_COMPONENT}=    modelsasservice=aigateway    batchgateway=aigateway
+...    workbenchesv2=workbenches
 &{COMPONENT_TO_COMPONENT_NAME_IN_DSC}=    modelsasservice=modelsAsAService    batchgateway=batchGateway
+...    workbenchesv2=workbenchesV2
 ${LWS_OP_NAME}=    leader-worker-set
 ${LWS_OP_NS}=    openshift-lws-operator
 ${LWS_SUB_NAME}=    leader-worker-set
@@ -266,11 +269,20 @@ Parse Component Names For Helm Install
         ${component} =    Strip String    ${parts}[0]
         ${state} =    Strip String    ${parts}[1]
 
-        @{valid_states} =    Create List    Managed    Removed    Unmanaged
-        ${is_valid} =    Evaluate    "${state}" in ${valid_states}
-        IF    not ${is_valid}
-            Log To Console    WARNING: Invalid state '${state}' for component '${component}', skipping
-            CONTINUE
+        # workbenches.workbenchesV2.managementState is Managed or Removed. An omitted value
+        # stays null in the Helm chart so the profile default (Removed) is used.
+        IF    "${component}" == "workbenchesv2"
+            ${v2_ok} =    Evaluate    "${state}" in ("Managed", "Removed")
+            IF    not ${v2_ok}
+                Fail    workbenches.workbenchesV2.managementState must be Managed or Removed, got: ${state}
+            END
+        ELSE
+            @{valid_states} =    Create List    Managed    Removed    Unmanaged
+            ${is_valid} =    Evaluate    "${state}" in ${valid_states}
+            IF    not ${is_valid}
+                Log To Console    WARNING: Invalid state '${state}' for component '${component}', skipping
+                CONTINUE
+            END
         END
 
         # For Helm install method, convert each parsed key-value pair to the expected Helm chart path
@@ -306,6 +318,11 @@ Get Helm Path For Component
     END
     IF    "${component}" == "dataregistry"
         RETURN    components.data.dsc.dataRegistry.managementState
+    END
+    # workbenchesV2 is nested under workbenches. Leave the Helm value unset when
+    # workbenchesv2 is absent from COMPONENT_NAMES so the chart default applies.
+    IF    "${component}" == "workbenchesv2"
+        RETURN    components.workbenches.dsc.workbenchesV2.managementState
     END
 
     # Handling of standard component cases:
@@ -406,6 +423,12 @@ Verify RHODS Installation
     ...    label_selector=app=odh-notebook-controller
     Oc Get  kind=Namespace  field_selector=metadata.name=${NOTEBOOKS_NAMESPACE}
     Log  Verified Notebooks NS: ${NOTEBOOKS_NAMESPACE}
+  END
+
+  ${workbenchesv2} =    Is Nested Component Enabled    workbenches    workbenchesV2    ${DSC_NAME}
+  IF    "${workbenchesv2}" == "true"
+    Wait For Deployment Replica To Be Ready    namespace=${APPLICATIONS_NAMESPACE}
+    ...    label_selector=app=workspaces-controller
   END
 
   ${aipipelines} =    Is Component Enabled    aipipelines    ${DSC_NAME}
@@ -939,6 +962,8 @@ Create DataScienceCluster CustomResource Using Test Variables
     Run    sed -i'' -e 's/<modelsasservice_legacy_value>/Removed/' ${file_path}dsc_apply.yml
     @{components_to_fill} =    Copy List    ${COMPONENT_LIST}
     FOR    ${cmp}    IN    @{components_to_fill}
+            # Optional nested field. Apply Workbenches V2 To DSC Yaml writes it only when set.
+            IF    '${cmp}' == 'workbenchesv2'    CONTINUE
             IF    $cmp not in $COMPONENTS
                 Run    sed -i'' -e 's/<${cmp}_value>/Removed/' ${file_path}dsc_apply.yml
             ELSE IF    '${COMPONENTS.${cmp}}' == 'Managed'
@@ -957,8 +982,37 @@ Create DataScienceCluster CustomResource Using Test Variables
                 Run    sed -i'' -e 's/<workbenches_namespace>/${NOTEBOOKS_NAMESPACE}/' ${file_path}dsc_apply.yml
             END
     END
+    Apply Workbenches V2 To DSC Yaml    ${file_path}dsc_apply.yml
     Add Model Cache Config To DSC Yaml    ${file_path}dsc_apply.yml
 
+Apply Workbenches V2 To DSC Yaml
+    [Documentation]    Sets workbenches.workbenchesV2.managementState from COMPONENTS.workbenchesv2.
+    ...                Accepted values are Managed and Removed. When that key is absent, the block
+    ...                stays out of the DSC and the operator default (Removed) applies.
+    [Arguments]    ${dsc_yaml_path}
+    ${configured} =    Evaluate    "workbenchesv2" in $COMPONENTS
+    IF    not ${configured}    RETURN
+    ${state} =    Set Variable    ${COMPONENTS.workbenchesv2}
+    ${v2_ok} =    Evaluate    "${state}" in ("Managed", "Removed")
+    IF    not ${v2_ok}
+        Fail    workbenches.workbenchesV2.managementState must be Managed or Removed, got: ${state}
+    END
+    ${supported} =    DSC CRD Supports Workbenches V2
+    IF    not ${supported}
+        Fail    COMPONENTS.workbenchesv2=${state} but this DSC CRD has no workbenches.workbenchesV2 field
+    END
+    Log To Console    Setting workbenches.workbenchesV2.managementState=${state}
+    ${rc}    ${output} =    Run And Return Rc And Output
+    ...    yq -i '.spec.components.workbenches.workbenchesV2.managementState = "${state}"' ${dsc_yaml_path}
+    Should Be Equal As Integers    ${rc}    0    msg=Failed to set workbenchesV2 managementState: ${output}
+
+DSC CRD Supports Workbenches V2
+    [Documentation]    Returns True when the served DataScienceCluster CRD exposes
+    ...                spec.components.workbenches.workbenchesV2.managementState.
+    ${rc}    ${_} =    Run And Return Rc And Output
+    ...    oc explain datasciencecluster.spec.components.workbenches.workbenchesV2.managementState
+    ${supported} =    Evaluate    ${rc} == 0
+    RETURN    ${supported}
 
 Wait For DataScienceCluster CustomResource To Be Ready
   [Documentation]   Wait for DataScienceCluster CustomResource To Be Ready
@@ -1031,6 +1085,7 @@ Get DSC Component Path
     [Documentation]    Maps a suite component name to its v3 .spec.components jq/jsonpath (leading dot).
     ...                The v3 DSC reorg renamed modelregistry->aiHub, feastoperator->data.featureStore,
     ...                dataregistry->data.dataRegistry, and dashboard->dashboard.standard.
+    ...                workbenchesv2 is workbenches.workbenchesV2.
     [Arguments]    ${component}
     IF    "${component}" == "modelregistry"
         RETURN    .spec.components.aiHub.managementState
@@ -1040,6 +1095,8 @@ Get DSC Component Path
         RETURN    .spec.components.data.dataRegistry.managementState
     ELSE IF    "${component}" == "dashboard"
         RETURN    .spec.components.dashboard.standard.managementState
+    ELSE IF    "${component}" == "workbenchesv2"
+        RETURN    .spec.components.workbenches.workbenchesV2.managementState
     END
     RETURN    .spec.components.${component}.managementState
 
@@ -1049,6 +1106,7 @@ Get DSC Component Patch
     ...                Mirrors Get DSC Component Path: the v3 DSC reorg renamed
     ...                modelregistry->aiHub, feastoperator->data.featureStore,
     ...                dataregistry->data.dataRegistry, and dashboard->dashboard.standard.
+    ...                workbenchesv2 is workbenches.workbenchesV2. An empty state clears that field.
     ...                All other components keep their flat name.
     ...                A flat .spec.components.${component}.managementState patch is silently
     ...                dropped for these renamed components on a v3-served DSC (RHOAIENG-101062).
@@ -1067,6 +1125,13 @@ Get DSC Component Patch
         RETURN    {"spec":{"components":{"data":{"dataRegistry":{"managementState":"${state}"}}}}}
     ELSE IF    "${component}" == "dashboard"
         RETURN    {"spec":{"components":{"dashboard":{"standard":{"managementState":"${state}"}}}}}
+    ELSE IF    "${component}" == "workbenchesv2"
+        IF    "${state}" == "${EMPTY}"
+            RETURN
+            ...    {"spec":{"components":{"workbenches":{"workbenchesV2":{"managementState":null}}}}}
+        END
+        RETURN
+        ...    {"spec":{"components":{"workbenches":{"workbenchesV2":{"managementState":"${state}"}}}}}
     END
     RETURN    {"spec":{"components":{"${component}":{"managementState":"${state}"}}}}
 

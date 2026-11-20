@@ -73,6 +73,8 @@ COMPONENTS:
   aipipelines: Managed
   ray: Managed
   workbenches: Managed
+  # Optional. Omit to leave workbenches.workbenchesV2 unset (operator default: Removed).
+  # workbenchesv2: Managed
   kserve: Managed
   trustyai: Managed
   kueue: Managed

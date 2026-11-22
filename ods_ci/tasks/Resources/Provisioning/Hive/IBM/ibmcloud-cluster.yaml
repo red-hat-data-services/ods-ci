@@ -4,7 +4,7 @@ items:
 - apiVersion: v1
   kind: Secret
   metadata:
-    name: ibmcloud-sno-install-config
+    name: ${infrastructure_configurations}[hive_cluster_name]-install-config
     namespace: ${infrastructure_configurations}[hive_claim_ns]
   type: Opaque
   stringData:
@@ -50,7 +50,7 @@ items:
 - apiVersion: v1
   kind: Secret
   metadata:
-    name: ibmcloud-creds
+    name: ${infrastructure_configurations}[hive_cluster_name]-ibmcloud-creds
     namespace: ${infrastructure_configurations}[hive_claim_ns]
   type: Opaque
   stringData:
@@ -67,12 +67,12 @@ items:
       ibmcloud:
         region: ${infrastructure_configurations}[ibmcloud_region]
         credentialsSecretRef:
-          name: ibmcloud-creds
+          name: ${infrastructure_configurations}[hive_cluster_name]-ibmcloud-creds
     provisioning:
       imageSetRef:
         name: ${infrastructure_configurations}[image_set]
       installConfigSecretRef:
-        name: ibmcloud-sno-install-config
+        name: ${infrastructure_configurations}[hive_cluster_name]-install-config
       manifestsSecretRef:
         name: ${infrastructure_configurations}[hive_cluster_name]-manifests
       installerEnv:

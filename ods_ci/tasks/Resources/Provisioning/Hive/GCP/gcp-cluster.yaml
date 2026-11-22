@@ -15,9 +15,10 @@ items:
         discardLocalSsdOnHibernate: true
         region: {{ gcp_region|default("us-central1") }}
         credentialsSecretRef:
-          name: gcp-creds
+          name: {{ hive_cluster_name|default("rhodsgcp") }}-gcp-creds
     installConfigSecretTemplateRef:
-      name: gcp-sno-install-config
+      # Per-cluster name avoids concurrent-job races in shared hive_claim_ns
+      name: {{ hive_cluster_name|default("rhodsgcp") }}-install-config
     installerEnv:
       - name: OPENSHIFT_INSTALL_SKIP_HOSTCRYPT_VALIDATION
         value: 'true'
@@ -26,7 +27,7 @@ items:
 - apiVersion: v1
   kind: Secret
   metadata:
-    name: gcp-sno-install-config
+    name: {{ hive_cluster_name|default("rhodsgcp") }}-install-config
     namespace: {{ hive_claim_ns }}
   type: Opaque
   stringData:
@@ -70,7 +71,7 @@ items:
 - apiVersion: v1
   kind: Secret
   metadata:
-    name: gcp-creds
+    name: {{ hive_cluster_name|default("rhodsgcp") }}-gcp-creds
     namespace: {{ hive_claim_ns }}
   type: Opaque
   stringData:

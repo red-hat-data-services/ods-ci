@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 'Download artifact'
-        uses: actions/github-script@v3.1.0
+        uses: actions/github-script@v9.0.0
         with:
           script: |
             var artifacts = await github.actions.listWorkflowRunArtifacts({
@@ -37,7 +37,7 @@ jobs:
 
       - name: 'Get PR Number'
         id: fetch_pr
-        uses: actions/github-script@v6
+        uses: actions/github-script@v9
         with:
           script: |
             var fs = require('fs');

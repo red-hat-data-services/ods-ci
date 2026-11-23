@@ -11,6 +11,7 @@ set -e
 #   $2 PROVIDER       - Cloud provider (AWS/GCP/AZURE/IBM) (default: AWS)
 #   $3 GPU_NODE_COUNT - Number of GPU nodes (default: 1)
 #   $4 GPU_COUNT      - GPUs per node (for GCP nvidia-* only) (default: 1)
+#   GPU_AVAILABILITY_ZONE - Optional zone override for the GPU MachineSet
 #
 # Parameter Logic:
 #   For GCP nvidia-* flavors: $3=GPU_NODE_COUNT, $4=GPU_COUNT
@@ -42,6 +43,7 @@ echo "Instance Type/GPU Flavor: $INSTANCE_TYPE"
 echo "Provider: $PROVIDER"
 echo "GPU Node Count: $GPU_NODE_COUNT"
 echo "GPU Count: $GPU_COUNT"
+echo "GPU Availability Zone: ${GPU_AVAILABILITY_ZONE:-inherited from source MachineSet}"
 
 echo "========================================"
 
@@ -64,6 +66,15 @@ oc get -o yaml -n openshift-machine-api $SOURCE_MACHINESET  > $MACHINESET_PATH
 OLD_MACHINESET_NAME=$(yq '.metadata.name' $MACHINESET_PATH )
 NEW_MACHINESET_NAME=${OLD_MACHINESET_NAME/worker/gpu}
 sed -i'' -e "s/$OLD_MACHINESET_NAME/$NEW_MACHINESET_NAME/g" $MACHINESET_PATH
+
+if [[ -n "${GPU_AVAILABILITY_ZONE:-}" ]]; then
+  if [[ ! "$GPU_AVAILABILITY_ZONE" =~ ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$ ]]; then
+    echo "Invalid GPU availability zone: $GPU_AVAILABILITY_ZONE"
+    exit 1
+  fi
+  GPU_AVAILABILITY_ZONE="$GPU_AVAILABILITY_ZONE" \
+    yq -i '.spec.template.spec.providerSpec.value.zone = strenv(GPU_AVAILABILITY_ZONE)' "$MACHINESET_PATH"
+fi
 
 if [[ "$PROVIDER" == "GCP" && "$INSTANCE_TYPE" == *"nvidia-"* ]] ; then
   # nvidia-* GPU attachment to n1 instance

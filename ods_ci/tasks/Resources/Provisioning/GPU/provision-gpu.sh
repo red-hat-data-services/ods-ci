@@ -67,11 +67,10 @@ OLD_MACHINESET_NAME=$(yq '.metadata.name' "$MACHINESET_PATH")
 NEW_MACHINESET_NAME=${OLD_MACHINESET_NAME/worker/gpu}
 sed -i'' -e "s/$OLD_MACHINESET_NAME/$NEW_MACHINESET_NAME/g" "$MACHINESET_PATH"
 
-if [[ -n "${GPU_AVAILABILITY_ZONE:-}" ]]; then
-  if [[ ! "$GPU_AVAILABILITY_ZONE" =~ ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$ ]]; then
-    echo "Invalid GPU availability zone: $GPU_AVAILABILITY_ZONE"
-    exit 1
-  fi
+if [[ -n "${GPU_AVAILABILITY_ZONE:-}" &&
+      ! "$GPU_AVAILABILITY_ZONE" =~ ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$ ]]; then
+  echo "Invalid GPU availability zone: $GPU_AVAILABILITY_ZONE"
+  exit 1
 fi
 
 if [[ "$PROVIDER" == "GCP" && "$INSTANCE_TYPE" == *"nvidia-"* ]] ; then

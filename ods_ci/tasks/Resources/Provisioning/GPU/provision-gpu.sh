@@ -49,7 +49,7 @@ echo "========================================"
 
 KUSTOMIZE_PATH="$PWD/tasks/Resources/Provisioning/Hive/GPU"
 MACHINESET_PATH="$KUSTOMIZE_PATH/base/source-machineset.yaml"
-PROVIDER_OVERLAY_DIR=$KUSTOMIZE_PATH/overlays/$PROVIDER
+PROVIDER_OVERLAY_DIR="$KUSTOMIZE_PATH/overlays/$PROVIDER"
 MACHINE_WAIT_TIMEOUT=10m
 # Check if existing machineset GPU already exists
 EXISTING_GPU_MACHINESET="$(oc get machinesets.machine.openshift.io -n openshift-machine-api -o jsonpath="{.items[?(@.metadata.annotations['machine\.openshift\.io/GPU']>'0')].metadata.name}")"
@@ -60,20 +60,18 @@ fi
 
 # Select the first machineset as a template for the GPU machineset
 SOURCE_MACHINESET=$(oc get machinesets.machine.openshift.io -n openshift-machine-api -o name | head -n1)
-oc get -o yaml -n openshift-machine-api $SOURCE_MACHINESET  > $MACHINESET_PATH
+oc get -o yaml -n openshift-machine-api "$SOURCE_MACHINESET" > "$MACHINESET_PATH"
 
 # rename machine set in the template file
-OLD_MACHINESET_NAME=$(yq '.metadata.name' $MACHINESET_PATH )
+OLD_MACHINESET_NAME=$(yq '.metadata.name' "$MACHINESET_PATH")
 NEW_MACHINESET_NAME=${OLD_MACHINESET_NAME/worker/gpu}
-sed -i'' -e "s/$OLD_MACHINESET_NAME/$NEW_MACHINESET_NAME/g" $MACHINESET_PATH
+sed -i'' -e "s/$OLD_MACHINESET_NAME/$NEW_MACHINESET_NAME/g" "$MACHINESET_PATH"
 
 if [[ -n "${GPU_AVAILABILITY_ZONE:-}" ]]; then
   if [[ ! "$GPU_AVAILABILITY_ZONE" =~ ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$ ]]; then
     echo "Invalid GPU availability zone: $GPU_AVAILABILITY_ZONE"
     exit 1
   fi
-  GPU_AVAILABILITY_ZONE="$GPU_AVAILABILITY_ZONE" \
-    yq -i '.spec.template.spec.providerSpec.value.zone = strenv(GPU_AVAILABILITY_ZONE)' "$MACHINESET_PATH"
 fi
 
 if [[ "$PROVIDER" == "GCP" && "$INSTANCE_TYPE" == *"nvidia-"* ]] ; then
@@ -81,21 +79,33 @@ if [[ "$PROVIDER" == "GCP" && "$INSTANCE_TYPE" == *"nvidia-"* ]] ; then
   GPU_TYPE=$INSTANCE_TYPE
   INSTANCE_TYPE="n1-standard-4"
   PROVIDER_OVERLAY_DIR="$PROVIDER_OVERLAY_DIR/attach-gpu-to-n1"
-  sed -i'' -e "s/GPU_TYPE/$GPU_TYPE/g" $PROVIDER_OVERLAY_DIR/gpu.yaml
-  sed -i'' -e "s/GPU_COUNT/$GPU_COUNT/g" $PROVIDER_OVERLAY_DIR/gpu.yaml
+  sed -i'' -e "s/GPU_TYPE/$GPU_TYPE/g" "$PROVIDER_OVERLAY_DIR/gpu.yaml"
+  sed -i'' -e "s/GPU_COUNT/$GPU_COUNT/g" "$PROVIDER_OVERLAY_DIR/gpu.yaml"
 fi
 # set the desired node flavor and replica count in the kustomize overlay
-sed -i'' -e "s/INSTANCE_TYPE/$INSTANCE_TYPE/g" $PROVIDER_OVERLAY_DIR/gpu.yaml
-sed -i'' -e "s/GPU_NODE_COUNT/$GPU_NODE_COUNT/g" $PROVIDER_OVERLAY_DIR/gpu.yaml
+sed -i'' -e "s/INSTANCE_TYPE/$INSTANCE_TYPE/g" "$PROVIDER_OVERLAY_DIR/gpu.yaml"
+sed -i'' -e "s/GPU_NODE_COUNT/$GPU_NODE_COUNT/g" "$PROVIDER_OVERLAY_DIR/gpu.yaml"
 
 # create the new MachineSet using kustomize
-oc apply --kustomize $PROVIDER_OVERLAY_DIR
+if [[ -n "${GPU_AVAILABILITY_ZONE:-}" ]]; then
+  if [[ "$PROVIDER" == "AWS" ]]; then
+    ZONE_EXPRESSION='.spec.template.spec.providerSpec.value.placement.availabilityZone = strenv(GPU_AVAILABILITY_ZONE)'
+  else
+    ZONE_EXPRESSION='.spec.template.spec.providerSpec.value.zone = strenv(GPU_AVAILABILITY_ZONE)'
+  fi
+
+  # Apply the zone after rendering so provider overlays cannot remove it.
+  oc kustomize "$PROVIDER_OVERLAY_DIR" \
+    | GPU_AVAILABILITY_ZONE="$GPU_AVAILABILITY_ZONE" yq "$ZONE_EXPRESSION" \
+    | oc apply -f -
+else
+  oc apply --kustomize "$PROVIDER_OVERLAY_DIR"
+fi
 # Add GPU label to the new machine-set
 oc patch machinesets.machine.openshift.io -n openshift-machine-api "$NEW_MACHINESET_NAME" -p '{"metadata":{"labels":{"gpu-machineset":"true"}}}' --type=merge
 # wait for the machine to be Ready
 echo "Waiting for GPU Node to be Ready"
-oc wait --timeout=$MACHINE_WAIT_TIMEOUT --for jsonpath='{.status.readyReplicas}'=$GPU_NODE_COUNT machinesets.machine.openshift.io $NEW_MACHINESET_NAME -n openshift-machine-api
- if [ $? -ne 0 ]; then
+if ! oc wait --timeout="$MACHINE_WAIT_TIMEOUT" --for="jsonpath={.status.readyReplicas}=$GPU_NODE_COUNT" machinesets.machine.openshift.io "$NEW_MACHINESET_NAME" -n openshift-machine-api; then
   echo "Machine Set $NEW_MACHINESET_NAME does not have its Machines in Running status after $MACHINE_WAIT_TIMEOUT timeout"
   echo "Please check the cluster"
   exit 1

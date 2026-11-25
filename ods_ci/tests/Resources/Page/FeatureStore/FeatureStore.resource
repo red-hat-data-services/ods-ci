@@ -10,9 +10,9 @@ ${FEATURE-STORE-RELEASE-TAG}             release-3.6
 ${FEATURE-STORE_DIR}                     feature-store
 ${FEAST-MODULE-OPERATOR_DIR}             feast-modular-operator
 ${FEATURE-STORE_REPO_URL}                %{FEATURE-STORE_REPO_URL=https://github.com/opendatahub-io/feast.git}
-${NOTEBOOK_IMAGE}                        quay.io/rhoai/odh-workbench-jupyter-datascience-cpu-py312-rhel9@sha256:99ed7fab64beb6540f2a3c6209f8608d0b0b0fee8ab0edc163a873f4b69563ab
+${NOTEBOOK_IMAGE}                        quay.io/rhoai/odh-workbench-jupyter-datascience-cpu-py312-rhel9@sha256:b8bf8aaaf63f71c3fa19b3827fd16bc8506b81a5ee5f279e6b4358092021c9e6
 ${FEAST_VERSION}                         0.67.0
-${FEAST_NOTEBOOK_VERSION}                0.66.0
+${FEAST_NOTEBOOK_VERSION}                0.67.0+rhaiv.1
 ${FEAST-MODULE-OPERATOR_REPO_URL}        %{FEAST-MODULE-OPERATOR_REPO_URL=https://github.com/opendatahub-io/feast-module-operator.git}
 ${FEAST_PLATFORM_VERSION}                3.6.0
 ${DSC_NAME}                              default-dsc

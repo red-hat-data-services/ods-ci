@@ -27,6 +27,8 @@ spec:
       managementState: <trainer_value>
     trustyai:
       managementState: <trustyai_value>
+    # workbenchesV2 is added only when COMPONENTS.workbenchesv2 is Managed or Removed.
+    # Omitting it keeps the operator default.
     workbenches:
       managementState: <workbenches_value>
       workbenchNamespace: <workbenches_namespace>

@@ -28,18 +28,46 @@ declare -A images=(
     ["4.22"]="registry.redhat.io\/openshift4\/ose-node-feature-discovery-rhel9@sha256:c16c62f136039eaf535ef4e3f6e3a5cc278fa49538e82f8a37bff89f641c2596"
 
 )
-if [ "${images[$xyVersion]}" ]; then
-    imageUrl="${images[$xyVersion]}"
-    echo "Using image SHA for $xyVersion: $imageUrl"
+majorVersion="${ocpVersionSplit[0]}"
+
+# Render into a temporary copy so the checked-out template is never mutated.
+# This ensures repeated runs and version changes always start from the
+# original template, and 5+ correctly omits the image even if a prior
+# 4.x run (or committed manifest) already baked in a digest.
+NFD_RENDERED=$(mktemp "${NFD_INSTANCE%.yaml}.XXXXXX")
+trap 'rm -f "$NFD_RENDERED"' EXIT
+cp "$NFD_INSTANCE" "$NFD_RENDERED"
+
+if [[ "$majorVersion" == "4" ]]; then
+    if [ "${images[$xyVersion]}" ]; then
+        imageUrl="${images[$xyVersion]}"
+        echo "Using image SHA for $xyVersion: $imageUrl"
+    else
+        imageUrl="${images["4.17"]}"
+        echo "WARNING: I don't know the sha for $xyVersion. Re-using default 4.17 $imageUrl. It might not work!"
+    fi
+    # Replace the entire image: line (handles both <imageUrl> placeholder
+    # and pre-rendered digests from legacy manifests)
+    sed -i'' -e "s/^\([[:space:]]*\)image:.*/\1image: $imageUrl/" "$NFD_RENDERED"
+elif [[ "$majorVersion" -ge 5 ]] 2>/dev/null; then
+    echo "OCP $xyVersion detected (major version >= 5)."
+    echo "Omitting spec.operand.image to let the NFD operator use its managed default."
+    # Remove image line entirely (handles both <imageUrl> placeholder and
+    # pre-rendered digests). The NFD operator selects its own operand image
+    # via the NODE_FEATURE_DISCOVERY_IMAGE env var when spec.operand.image
+    # is empty.
+    # See: openshift/cluster-nfd-operator getOperandImage() in
+    # internal/controllers/nodefeaturediscovery_reconciler.go
+    sed -i'' -e '/^[[:space:]]*image:/d' "$NFD_RENDERED"
 else
-    imageUrl="${images["4.17"]}"
-    echo "WARNING: I don't know the sha for $xyVersion. Re-using default 4.17 $imageUrl. It might not work!"
+    echo "ERROR: Unsupported OCP major version '$majorVersion' (detected: $ocpVersion)."
+    echo "Only OCP 4.x (with pinned image digests) and OCP 5+ (operator-managed image) are supported."
+    exit 1
 fi
-sed -i'' -e "s/<imageUrl>/$imageUrl/g" "$NFD_INSTANCE"
 
 # temporary sleep until latest oc binary is available and --for=create is supported
 sleep 10s
-oc apply -f "$NFD_INSTANCE"
+oc apply -f "$NFD_RENDERED"
 
 echo "Configuring SR-IOV Operator"
 oc apply -f "$NFD_INSTALL_DIR/sriov_network_node_policy.yaml"

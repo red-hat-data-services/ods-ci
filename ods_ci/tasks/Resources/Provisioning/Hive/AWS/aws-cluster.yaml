@@ -14,9 +14,12 @@ items:
       aws:
         region: {{ aws_region|default("us-east-1") }}
         credentialsSecretRef:
-          name: aws-creds
+          # Per-cluster name avoids races when concurrent jobs share hive_claim_ns
+          name: {{ hive_cluster_name|default("rhodsaws") }}-aws-creds
     installConfigSecretTemplateRef:
-      name: aws-sno-install-config
+      # Per-cluster name: shared aws-sno-install-config caused InstallConfigValidationFailed
+      # (install config region does not match cluster deployment region) under concurrent provision.
+      name: {{ hive_cluster_name|default("rhodsaws") }}-install-config
     installerEnv:
       - name: OPENSHIFT_INSTALL_SKIP_HOSTCRYPT_VALIDATION
         value: 'true'
@@ -25,7 +28,7 @@ items:
 - apiVersion: v1
   kind: Secret
   metadata:
-    name: aws-sno-install-config
+    name: {{ hive_cluster_name|default("rhodsaws") }}-install-config
     namespace: {{ hive_claim_ns }}
   type: Opaque
   stringData:
@@ -69,7 +72,7 @@ items:
 - apiVersion: v1
   kind: Secret
   metadata:
-    name: aws-creds
+    name: {{ hive_cluster_name|default("rhodsaws") }}-aws-creds
     namespace: {{ hive_claim_ns }}
   type: Opaque
   stringData:

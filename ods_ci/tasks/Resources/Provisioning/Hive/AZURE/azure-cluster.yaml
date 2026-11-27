@@ -16,9 +16,10 @@ items:
         cloudName: AzurePublicCloud
         region: {{ azure_region|default("eastus") }}
         credentialsSecretRef:
-          name: azure-creds
+          name: {{ hive_cluster_name|default("rhodsazure") }}-azure-creds
     installConfigSecretTemplateRef:
-      name: azure-sno-install-config
+      # Per-cluster name avoids concurrent-job races in shared hive_claim_ns
+      name: {{ hive_cluster_name|default("rhodsazure") }}-install-config
     installerEnv:
       - name: OPENSHIFT_INSTALL_SKIP_HOSTCRYPT_VALIDATION
         value: 'true'
@@ -27,7 +28,7 @@ items:
 - apiVersion: v1
   kind: Secret
   metadata:
-    name: azure-sno-install-config
+    name: {{ hive_cluster_name|default("rhodsazure") }}-install-config
     namespace: {{ hive_claim_ns }}
   type: Opaque
   stringData:
@@ -74,7 +75,7 @@ items:
 - apiVersion: v1
   kind: Secret
   metadata:
-    name: azure-creds
+    name: {{ hive_cluster_name|default("rhodsazure") }}-azure-creds
     namespace: {{ hive_claim_ns }}
   type: Opaque
   stringData:

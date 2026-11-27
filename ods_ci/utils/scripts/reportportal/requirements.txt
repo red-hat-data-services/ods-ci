@@ -1,2 +1,7 @@
-click>=8.0.0
-requests>=2.28.0
+# The Jenkins VM agent runs python3 < 3.10. Keep all runtime deps pinned to
+# versions that still support it:
+# - click 8.2+ uses match/case syntax (Python >= 3.10)
+# - urllib3 2.x evaluates PEP 604 unions (bytes | str) at runtime (Python >= 3.10)
+click>=8.0.0,<8.2
+requests>=2.28.0,<2.33
+urllib3>=1.26.0,<2

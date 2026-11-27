@@ -21,7 +21,7 @@ ${SAVE_BUTTON}=    //button[contains(., "Save changes")]
 Add OpenShift Groups To Data Science Administrators
     [Documentation]  Add OpenShift Groups to Data Science administrators From RHODS Dashboard
     [Arguments]     @{admin_groups}
-    Click Button   ${ADMIN_GROUPS_SECTION}//button[@aria-label="Select the OpenShift groups that contain all Data Science administrators."]
+    Click Button   ${ADMIN_GROUPS_SECTION}//button[@data-testid="add-group-button"]
     FOR    ${group}    IN    @{admin_groups}
         ${present}=    Run Keyword And Return Status    Element Should Be Visible
         ...    ${ADMIN_GROUPS_SECTION}//div[@data-testid="group-setting-select"]//ul//*[text()="${group}"]
